@@ -1,0 +1,454 @@
+/*
+ *  JMule - Java file sharing client
+ *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *
+ *  Any parts of this program derived from other projects, or contributed
+ *  by third-party developers are copyrighted by their respective authors.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
+package org.jmule.core.impl;
+
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
+import org.apache.commons.io.FileUtils;
+import org.jmule.core.JMRawData;
+import org.jmule.core.JMThread;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreComponent;
+import org.jmule.core.JMuleCoreException;
+import org.jmule.core.JMuleCoreLifecycleListener;
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.downloadmanager.DownloadManager;
+import org.jmule.core.downloadmanager.DownloadManagerFactory;
+import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.edonkey.ServerManagerException;
+import org.jmule.core.edonkey.ServerManagerFactory;
+import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.net.JMConnectionWaiter;
+import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.peermanager.PeerManagerFactory;
+import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.sharingmanager.SharingManagerFactory;
+import org.jmule.core.speedmanager.SpeedManager;
+import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerFactory;
+
+/**
+ * 
+ * @author javajox
+ * @author binary256
+ * @version $$Revision: 1.1 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:16 $$
+ */
+public class JMuleCoreImpl implements JMuleCore {
+	
+	private static JMuleCoreImpl instance = null;
+	
+	private DebugThread debugThread ;
+	
+	private JMConnectionWaiter connectionWaiter;
+	
+	private List<JMuleCoreLifecycleListener> lifecycle_listeners = new LinkedList<JMuleCoreLifecycleListener>();
+	
+	// the first run flag is true when certain conditions have been met
+	private boolean first_run = false; 
+	
+	private JMRawData core_params;
+	
+	private JMuleCoreImpl() {
+		// when the JMule core is created we must exactly know if this is the first start up
+	}
+	
+	private JMuleCoreImpl(JMRawData coreParams) {
+		
+		this.core_params = coreParams;
+	}
+	
+	public static JMuleCore create() throws JMuleCoreException {
+		
+		if (instance != null)
+			
+			throw new JMuleCoreException("JMule core already instantiated");
+		
+			instance = new JMuleCoreImpl();
+			
+		return instance;
+	}
+	
+	public static JMuleCore create(JMRawData coreParams) throws JMuleCoreException {
+		
+		if(instance != null)
+			
+			throw new JMuleCoreException("JMule core already instantiated");
+		
+		    instance = new JMuleCoreImpl(coreParams);
+		    
+		return instance;
+	}
+	
+	public static JMuleCore getSingleton() throws JMuleCoreException {
+		
+		if (instance == null)
+			
+			throw new JMuleCoreException("JMule core is not instantiated");
+		
+		return instance;
+	}
+	
+	
+	public void start() {
+		
+		System.out.println("Core starting process");
+		long start_time = System.currentTimeMillis();
+		
+		ConfigurationManager configuration_manager = ConfigurationManagerFactory.getInstance();
+		
+		configuration_manager.initialize();
+		
+		configuration_manager.start();
+		
+		if (new File(ConfigurationManager.CONFIG_FILE).exists()){
+			
+			firstRun();
+			
+			configuration_manager.save();
+			
+		}
+
+		Logger log = Logger.getLogger("org.jmule");
+		
+		/**Setup logger*/
+		
+		log.setLevel(Level.ALL);//Log all events
+		
+		try {
+			FileHandler fileHandler = new FileHandler(ConfigurationManager.LOGS_DIR+File.separator+"JMule%u.log",(int)ConfigurationManager.LOG_FILE_SIZE,ConfigurationManager.LOG_FILES_NUMBER);
+			
+			fileHandler.setFormatter(new SimpleFormatter());
+			
+			log.addHandler(fileHandler);
+			
+		} catch (Throwable e) {
+			
+			e.printStackTrace();
+		}
+		
+		// notifies that the config manager has been started
+		notifyComponentStarted(configuration_manager);
+		
+		SharingManager sharingManager = SharingManagerFactory.getInstance();
+		
+		sharingManager.initialize();
+		
+		sharingManager.start();
+		
+		sharingManager.loadCompletedFiles();
+		
+		sharingManager.loadPartialFiles();
+		
+		// notifies that the sharing manager has been started
+		notifyComponentStarted(sharingManager);
+		
+		UploadManagerFactory.getInstance().initialize();
+		
+		UploadManagerFactory.getInstance().start();
+		
+		// notifies that the upload manager has been started
+		notifyComponentStarted(UploadManagerFactory.getInstance());
+		
+		SpeedManager.getInstance().initialize();
+		
+		SpeedManager.getInstance().start();
+		
+		// notifies that the speed manager has been started
+		notifyComponentStarted(UploadManagerFactory.getInstance());
+		
+		PeerManagerFactory.getInstance().initialize();
+		
+		PeerManagerFactory.getInstance().start();
+		
+		// notifies that the peer manager has been started
+		notifyComponentStarted(PeerManagerFactory.getInstance());
+		
+		
+		connectionWaiter = JMConnectionWaiter.getInstance();
+		
+		connectionWaiter.start();
+		
+		configuration_manager.addConfigurationListener(connectionWaiter);
+		
+		DownloadManagerFactory.getInstance().initialize();
+		// notifies that the download manager has been started
+		notifyComponentStarted(DownloadManagerFactory.getInstance());
+		
+		ServerManager servers_manager = ServerManagerFactory.getInstance();
+		
+		servers_manager.initialize();
+			
+		try {
+			
+			servers_manager.loadServerList();
+			
+		} catch (ServerManagerException e) {
+		} 
+				
+		// notifies that the download manager has been started
+		notifyComponentStarted(servers_manager);
+		
+		servers_manager.startUDPQuery();
+		
+		//IPFilter.getInstance();
+		
+		/** Enable Debug thread!**/	
+		debugThread = new DebugThread();
+		
+		Runtime.getRuntime().addShutdownHook( new JMThread("Shutdown Hook") {
+			
+		    public void JMRun() {
+		    	
+		    	try {
+		    	
+				   JMuleCoreImpl.this.stop();
+				
+		    	} catch(Throwable t) {
+		    		
+		    	}
+				
+		     }
+		 });
+		
+		System.out.println("Total start up time = " + ( System.currentTimeMillis() - start_time ) );
+	}
+	
+	public boolean isStarted() {
+		
+		return instance != null;
+		
+	}
+	
+	public boolean isFirstRun() {
+		
+		return first_run;
+	}
+
+	public void stop() throws JMuleCoreException {
+		
+		System.out.println("Core stopping process");
+		long stop_time = System.currentTimeMillis();
+		logEvent("Stop jMule");
+		
+		connectionWaiter.stop();
+		
+		Server server = ServerManagerFactory.getInstance().getConnectedServer();
+		
+		if (server!=null)
+			
+			server.disconnect();
+		
+		
+		ServerManagerFactory.getInstance().shutdown();
+		
+		// notifies that the server manager has been stopped
+		notifyComponentStopped(ServerManagerFactory.getInstance());
+		
+		PeerManagerFactory.getInstance().shutdown();
+		
+		// notifies that the peer manager has been stopped
+		notifyComponentStopped(PeerManagerFactory.getInstance());
+		
+		DownloadManagerFactory.getInstance().shutdown();
+		
+		// notifies that the download manager has been stopped
+		notifyComponentStopped(DownloadManagerFactory.getInstance());
+		
+		UploadManagerFactory.getInstance().shutdown();
+		
+		// notifies that the upload manager has been stopped
+		notifyComponentStopped(UploadManagerFactory.getInstance());
+		
+		SharingManagerFactory.getInstance().shutdown();
+		
+		// notifies that the sharing manager has been stopped
+		notifyComponentStopped(SharingManagerFactory.getInstance());
+		
+		debugThread.JMStop();
+		
+		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
+		System.exit( 0 );
+	}
+	
+	private void firstRun() {
+		
+		createDirs();
+		
+		ConfigurationManagerFactory.getInstance().save();
+		
+		//UIInstance = UIManager.getInstance().createSwing().startFirstRunWizard();
+	}
+	
+	private void createDirs() {
+		
+		/**Log dir**/
+		
+		try {
+			
+			FileUtils.forceMkdir(new File(ConfigurationManager.LOGS_DIR));
+			
+			FileUtils.forceMkdir(new File(ConfigurationManager.INCOMING_DIR));
+			
+			FileUtils.forceMkdir(new File(ConfigurationManager.SETTINGS_DIR));
+			
+			FileUtils.forceMkdir(new File(ConfigurationManager.TEMP_DIR));
+			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void logEvent(String event) {
+		//Check aspect
+	}
+	
+	public DownloadManager getDownloadManager() {
+		
+		return DownloadManagerFactory.getInstance();
+		
+	}
+	
+	public UploadManager getUploadManager() {
+		
+		return UploadManagerFactory.getInstance();
+		
+	}
+	
+	public ServerManager getServersManager() {
+		
+		return ServerManagerFactory.getInstance();
+		
+	}
+	
+	public PeerManager getPeerManager() {
+		
+		return PeerManagerFactory.getInstance();
+	}
+	
+	public SharingManager getSharingManager() {
+		
+		return SharingManagerFactory.getInstance();
+		
+	}
+	
+	public SpeedManager getSpeedManager() {
+		
+		return SpeedManager.getInstance();
+		
+	}
+	
+	public JMConnectionWaiter getTCPConnectionListener() {
+		
+		return connectionWaiter;
+		
+	}
+	
+	public ConfigurationManager getConfigurationManager() {
+		
+		return ConfigurationManagerFactory.getInstance();
+		
+	}
+
+	private class DebugThread extends Thread {
+		
+		private boolean stop = false;
+		
+		public DebugThread() {
+			
+			super("JMule Debug thread");
+			
+			start();
+			
+		}
+		
+		public void run() {
+		
+			while(!stop){
+			
+				logEvent("Debug thread");
+			
+				try {
+				synchronized(this) {
+						Thread.sleep(9000);
+				}
+				
+				} catch (InterruptedException e) {
+				
+					e.printStackTrace();
+				
+					}
+			}
+		}
+		
+		public void JMStop() {
+			stop = true;
+			
+			synchronized(this) {
+				
+				this.notify();
+				
+			}
+		}
+		
+	}
+	
+	private void notifyComponentStarted(JMuleCoreComponent manager) {
+		
+		for(JMuleCoreLifecycleListener listener : lifecycle_listeners) {
+			
+			 listener.componentStarted( manager );
+		}
+		
+	}
+	
+	private void notifyComponentStopped(JMuleCoreComponent manager) {
+		
+		for(JMuleCoreLifecycleListener listener : lifecycle_listeners) {
+			
+			listener.componentStopped( manager );
+		}
+		
+	}
+
+	public void addLifecycleListener(
+			JMuleCoreLifecycleListener lifeCycleListener) {
+		
+		lifecycle_listeners.add( lifeCycleListener );
+	}
+
+	public void removeLifecycleListener(
+			JMuleCoreLifecycleListener lifeCycleListener) {
+		
+		lifecycle_listeners.remove( lifeCycleListener );
+	}
+
+	
+}
