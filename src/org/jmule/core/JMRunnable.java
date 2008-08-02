@@ -23,10 +23,10 @@
 package org.jmule.core;
 
 /**
- * 
+ * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:22 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:26 $$
  */
 public abstract class JMRunnable implements Runnable {
 

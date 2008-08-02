@@ -25,11 +25,11 @@ package org.jmule.core;
 import org.jmule.core.impl.JMuleCoreImpl;
 
 /**
- * 
+ * Created on 04-27-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:24 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:26 $$
  */
 public class JMuleCoreFactory {
 	

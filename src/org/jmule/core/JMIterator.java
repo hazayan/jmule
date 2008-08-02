@@ -25,11 +25,11 @@ package org.jmule.core;
 import java.util.Iterator;
 
 /**
- * 
+ * Created on 07-06-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:20 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:27 $$
  */
 public class JMIterator<T> implements Iterator<T>  {
 

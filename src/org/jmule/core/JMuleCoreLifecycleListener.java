@@ -24,10 +24,10 @@
 package org.jmule.core;
 
 /**
- * 
+ * Created on 07-13-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:20 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:27 $$
  */
 public interface JMuleCoreLifecycleListener {
 

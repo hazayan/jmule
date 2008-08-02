@@ -32,11 +32,11 @@ import org.jmule.core.speedmanager.SpeedManager;
 import org.jmule.core.uploadmanager.UploadManager;
 
 /**
- * 
+ * Created on 04-27-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:22 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:26 $$
  */
 public interface JMuleCore {
 
