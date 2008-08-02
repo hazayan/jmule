@@ -30,10 +30,10 @@ import java.util.LinkedList;
 import org.jmule.core.edonkey.impl.Peer;
 
 /**
- * 
+ * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:07 $$
  */
 public class FileRequestList extends Hashtable<Peer,FragmentList>{
 	

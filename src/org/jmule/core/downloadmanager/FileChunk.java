@@ -25,10 +25,10 @@ package org.jmule.core.downloadmanager;
 import java.nio.ByteBuffer;
 
 /**
- * 
+ * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:52 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:10 $$
  */
 public class FileChunk {
 	

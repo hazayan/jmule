@@ -36,11 +36,11 @@ import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharingManagerFactory;
 
 /**
- * 
+ * Created on 07-08-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:10 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 

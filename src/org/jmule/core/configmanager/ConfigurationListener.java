@@ -26,10 +26,10 @@ import java.io.File;
 import java.util.List;
 
 /**
- * 
+ * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:36 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:12 $$
  */
 public interface ConfigurationListener {
 

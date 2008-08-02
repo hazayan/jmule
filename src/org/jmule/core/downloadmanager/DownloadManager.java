@@ -33,11 +33,11 @@ import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.sharingmanager.PartialFile;
 
 /**
- * 
+ * Created on 04-27-2008
  * @author javajox
  * @author binary
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:53 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:09 $$
  */
 public interface DownloadManager extends JMuleManager {
 	

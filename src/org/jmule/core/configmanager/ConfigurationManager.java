@@ -29,10 +29,10 @@ import org.jmule.core.JMuleManager;
 import org.jmule.core.edonkey.impl.UserHash;
 
 /**
- * 
+ * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:36 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:11 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 

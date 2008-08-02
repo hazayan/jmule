@@ -25,10 +25,10 @@ package org.jmule.core.downloadmanager;
 import org.jmule.core.JMException;
 
 /**
- * 
+ * Created on 05-01-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:53 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:09 $$
  */
 public class DownloadException extends JMException {
 

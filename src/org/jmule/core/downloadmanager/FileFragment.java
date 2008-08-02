@@ -26,10 +26,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- * 
+ * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:09 $$
  */
 public class FileFragment {
 	private long start;

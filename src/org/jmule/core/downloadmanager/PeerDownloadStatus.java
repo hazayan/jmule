@@ -36,10 +36,10 @@ import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.Packet;
 
 /**
- * 
+ * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:53 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:08 $$
  */
 public class PeerDownloadStatus {
 	
