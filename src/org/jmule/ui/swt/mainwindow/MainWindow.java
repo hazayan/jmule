@@ -56,8 +56,8 @@ import org.jmule.ui.swt.maintabs.transfers.TransfersTab;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:51 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 15:05:23 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -89,7 +89,7 @@ public class MainWindow implements JMuleUIComponent {
 		
             	shell = new Shell(display);
             	
-				SWTServerListWrapper.createListener(_core.getServersManager());
+				SWTServerListWrapper.createListener(_core.getServerManager());
 				            	
             	Utils.centreWindow(shell);
             	
@@ -187,11 +187,8 @@ public class MainWindow implements JMuleUIComponent {
 
 	public void getCoreComponents() {
 		
-		try {
 			_core = JMuleCoreFactory.getSingleton();
-		} catch (JMuleCoreException e) {
-			e.printStackTrace();
-		}
+
 	}
 
 }

@@ -39,8 +39,8 @@ import org.jmule.core.edonkey.impl.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:44 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 15:06:25 $$
  */
 public class JMConnectionWaiter implements ConfigurationListener{
 	
@@ -69,14 +69,9 @@ public class JMConnectionWaiter implements ConfigurationListener{
 	}
 	
 	private JMConnectionWaiter() {
-		
-		try {
 			
 			_core = JMuleCoreFactory.getSingleton();
 			
-		} catch (JMuleCoreException e) {
-			
-		}
 	}
 	
 
@@ -151,7 +146,7 @@ public class JMConnectionWaiter implements ConfigurationListener{
 	
 	private void addNewPeer(JMuleSocketChannel channel) {
 		
-		Peer peer = new Peer(channel,_core.getServersManager().getConnectedServer());//Create new peer
+		Peer peer = new Peer(channel,_core.getServerManager().getConnectedServer());//Create new peer
 		
 	}
 	
