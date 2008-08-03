@@ -2,10 +2,8 @@
  *  JMule - Java file sharing client
  *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
  *
- *  Any parts of this program derived from the Apache Commons, 
- *  Phex, Zeus-jscl, AspectJ or JDIC project, or contributed 
- *  by third-party developers are copyrighted by their
- *  respective authors.
+ *  Any parts of this program derived from other projects, or contributed
+ *  by third-party developers are copyrighted by their respective authors.
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -36,8 +34,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:38:27 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -304,53 +302,6 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
 			
 		}
-		
-	}
-	
-	public static void main(String... agrs) {
-		
-		ConfigurationManagerImp config_manager = new ConfigurationManagerImp();
-		
-		config_manager.initialize();
-		
-		config_manager.start();
-		
-		System.out.println("JMule Configuration : ");
-		
-		System.out.println("Download Bandwidth : "+config_manager.getDownloadBandwidth());
-		
-		System.out.println("Download limit : "+config_manager.getDownloadLimit());
-		
-		System.out.println("Nick Name : "+config_manager.getNickName());
-		
-		System.out.println("TCP : "+config_manager.getTCP());
-		
-		System.out.println("UDP : "+config_manager.getUDP());
-		
-		System.out.println("Upload Bandwidth : "+config_manager.getUploadBandwidth());
-		
-		System.out.println("Upload Limit : "+config_manager.getUploadLimit());
-		
-		System.out.println("User hash : "+config_manager.getUserHash());
-		
-		System.out.println("Shared folders : ");
-		
-		List<File> shared_folders = config_manager.getSharedFolders();
-		
-		if (shared_folders == null)
-			
-			System.out.println("  No shared folders");
-		else {
-			for(File file : shared_folders) {
-			
-				System.out.println(file.getAbsolutePath());
-			
-			} 
-		}
-		
-		config_manager.setNickName(ConfigurationManager.NICK_NAME);
-		
-		config_manager.shutdown();
 		
 	}
 
