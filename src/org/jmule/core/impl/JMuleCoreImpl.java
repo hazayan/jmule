@@ -55,11 +55,11 @@ import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerFactory;
 
 /**
- * 
+ * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:16 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:41:52 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -117,24 +117,73 @@ public class JMuleCoreImpl implements JMuleCore {
 	}
 	
 	
-	public void start() {
+	public void start() throws JMuleCoreException {
 		
-		System.out.println("Core starting process");
+		System.out.println("Core starting process initiated");
+		
 		long start_time = System.currentTimeMillis();
+		
+		File[] main_dirs = new File[4];
+		
+		File incoming_dir = new File( ConfigurationManager.INCOMING_DIR );
+		
+		main_dirs[0] = incoming_dir; 
+		
+		File temp_dir = new File( ConfigurationManager.TEMP_DIR );
+		
+		main_dirs[1] = temp_dir;
+		
+		File logs_dir = new File( ConfigurationManager.LOGS_DIR );
+		
+		main_dirs[2] = logs_dir;
+		
+		File settings_dir = new File( ConfigurationManager.SETTINGS_DIR );
+		
+		main_dirs[3] = settings_dir;
+		
+		for(File file : main_dirs) {
+
+		    if( !file.exists()  ) {
+				
+		      try {
+		    	
+		    	  file.mkdir();
+			   
+		      }catch(Throwable cause) {
+		    	  
+		    	  throw new JMuleCoreException( cause );
+		    	  
+		      }
+			      
+		    }
+			
+		    if( !file.isDirectory() ) throw new JMuleCoreException("The file " + incoming_dir + " is not a directory");
+		
+		}
+		
+		File config_file = new File(ConfigurationManager.CONFIG_FILE);
+		
+		if( !config_file.exists() ) {
+			
+			first_run = true;
+			
+			try {
+			
+				config_file.createNewFile();
+			
+			} catch( Throwable cause ) {
+				
+				throw new JMuleCoreException( cause );
+				
+			}
+			
+		}
 		
 		ConfigurationManager configuration_manager = ConfigurationManagerFactory.getInstance();
 		
 		configuration_manager.initialize();
 		
 		configuration_manager.start();
-		
-		if (new File(ConfigurationManager.CONFIG_FILE).exists()){
-			
-			firstRun();
-			
-			configuration_manager.save();
-			
-		}
 
 		Logger log = Logger.getLogger("org.jmule");
 		
@@ -254,8 +303,10 @@ public class JMuleCoreImpl implements JMuleCore {
 
 	public void stop() throws JMuleCoreException {
 		
-		System.out.println("Core stopping process");
+		System.out.println("Core stopping process initiated");
+		
 		long stop_time = System.currentTimeMillis();
+		
 		logEvent("Stop jMule");
 		
 		connectionWaiter.stop();
@@ -292,39 +343,17 @@ public class JMuleCoreImpl implements JMuleCore {
 		// notifies that the sharing manager has been stopped
 		notifyComponentStopped(SharingManagerFactory.getInstance());
 		
+		ConfigurationManagerFactory.getInstance().shutdown();
+		
+		notifyComponentStopped(ConfigurationManagerFactory.getInstance());
+		
 		debugThread.JMStop();
 		
 		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
+		
 		System.exit( 0 );
 	}
 	
-	private void firstRun() {
-		
-		createDirs();
-		
-		ConfigurationManagerFactory.getInstance().save();
-		
-		//UIInstance = UIManager.getInstance().createSwing().startFirstRunWizard();
-	}
-	
-	private void createDirs() {
-		
-		/**Log dir**/
-		
-		try {
-			
-			FileUtils.forceMkdir(new File(ConfigurationManager.LOGS_DIR));
-			
-			FileUtils.forceMkdir(new File(ConfigurationManager.INCOMING_DIR));
-			
-			FileUtils.forceMkdir(new File(ConfigurationManager.SETTINGS_DIR));
-			
-			FileUtils.forceMkdir(new File(ConfigurationManager.TEMP_DIR));
-			
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public void logEvent(String event) {
 		//Check aspect
