@@ -35,15 +35,15 @@ import org.jmule.core.uploadmanager.UploadManager;
  * Created on 04-27-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:26 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:39:09 $$
  */
 public interface JMuleCore {
 
 	/**
 	 * Start the system
 	 */
-	public void start();
+	public void start() throws JMuleCoreException;
 	
 	/**
 	 * Stop the system
