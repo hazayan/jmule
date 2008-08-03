@@ -23,10 +23,10 @@
 package org.jmule.core.edonkey;
 
 /**
- * 
+ * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:52 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:53:47 $$
  */
 public class E2DKConstants {
 

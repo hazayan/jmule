@@ -28,10 +28,10 @@ import org.jmule.core.JMuleManager;
 import org.jmule.core.edonkey.impl.Server;
 
 /**
- * 
+ * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:52 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:53:47 $$
  */
 public interface ServerManager extends JMuleManager {
 
