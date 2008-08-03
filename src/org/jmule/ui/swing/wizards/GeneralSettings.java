@@ -31,10 +31,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 /**
- * 
+ * Created on 07-19-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:07 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:33:43 $$
  */
 public class GeneralSettings extends WizardPanel {
 
@@ -216,7 +216,7 @@ public class GeneralSettings extends WizardPanel {
     
     public boolean isUDPEnabled() {
     	
-    	return disable_udp_port.isSelected();
+    	return !disable_udp_port.isSelected();
     }
     
 
