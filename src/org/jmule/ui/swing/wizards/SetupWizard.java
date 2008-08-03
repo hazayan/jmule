@@ -44,8 +44,8 @@ import org.jmule.ui.swing.SwingUtils;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:12 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:35:21 $$
  */
 public class SetupWizard extends JDialog {
 	
@@ -163,6 +163,8 @@ public class SetupWizard extends JDialog {
 					_config.setDownloadBandwidth( nbs.getDownloadBandwidth() );
 				 
 					_config.setUploadBandwidth( nbs.getUploadBandwidth() );
+					
+					_config.save();
 				 
 					CommonUIPreferences.getSingleton().setUIType( ((UIChooser)stage5).getChosenUI() );
 				 
