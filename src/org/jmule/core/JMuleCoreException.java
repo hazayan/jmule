@@ -25,13 +25,21 @@ package org.jmule.core;
 /**
  * Created on 04-27-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:27 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:40:26 $$
  */
 public class JMuleCoreException extends JMException {
 
-	public JMuleCoreException(String str) {
-		super(str);
+	public JMuleCoreException( String str ) {
+		
+		super( str );
+		
+	}
+	
+	public JMuleCoreException( Throwable cause ) {
+		
+		super( cause );
+		
 	}
 	
 }
