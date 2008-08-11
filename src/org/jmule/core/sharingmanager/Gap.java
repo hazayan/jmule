@@ -25,10 +25,10 @@ package org.jmule.core.sharingmanager;
 /**
  * 
  * @author pola
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:07 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/11 15:20:39 $$
  */
-public class Gap {
+public class Gap implements Cloneable {
 
 	long start;
 	long end;
