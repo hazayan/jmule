@@ -40,8 +40,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:45 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/11 14:56:40 $$
  */
 public abstract class JMConnection{
 	
@@ -89,6 +89,9 @@ public abstract class JMConnection{
 		remoteAddress = (InetSocketAddress) useConnection.getSocket().getRemoteSocketAddress();
 		
 		connectionStatus = TCP_SOCKET_CONNECTED;
+		
+		connectionStats.stopSpeedCounter();
+		connectionStats.startSpeedCounter();
 		
 	}
 	
@@ -449,7 +452,6 @@ public abstract class JMConnection{
 					if (packet!=null) {
 						
 						bSneded = remoteConnection.write(packet);
-						
 						connectionStats.addSendBytes(bSneded);
 						
 						connectionStats.reportActivity();
@@ -501,17 +503,16 @@ public abstract class JMConnection{
 			Packet packet;//Incoming Packet
 						
 			while (!stop) {
-				
+
 				packetHeader.clear();
 				
 				packetHeader.position(0);
 						
 				try {
 					
-					remoteConnection.read(packetHeader,false);
+					remoteConnection.read(packetHeader,true);
 					
 				}catch(Throwable e) {
-					
 					if (e instanceof JMEndOfStreamException) {
 						
 						try {
