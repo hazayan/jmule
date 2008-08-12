@@ -23,49 +23,89 @@
 package org.jmule.core.searchmanager;
 
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.List;
+
+import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.edonkey.ServerManagerFactory;
+import org.jmule.core.edonkey.impl.Server;
 
 /**
- * 
+ * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:06 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:20:15 $$
  */
 public class SearchManagerImpl implements SearchManager {
 
-	LinkedList<SearchResultList> search_result;
-	ConcurrentLinkedQueue<SearchRequest> search_request_queue;
+	List<SearchResult> search_result_list = new LinkedList<SearchResult>();
+	List<SearchRequest> search_request_list = new LinkedList<SearchRequest>();
+	ServerManager server_manager = ServerManagerFactory.getInstance();
+	List<SearchResultListener> search_result_listeners = new LinkedList<SearchResultListener>();
 	
-	public void initialize() {
-		search_result = new LinkedList<SearchResultList>(); 
-		search_request_queue = new ConcurrentLinkedQueue<SearchRequest>(); 
+	public synchronized void addResult(SearchResult searchResult) {
+		search_request_list.remove(searchResult.getSearchRequest());
+        search_result_list.add(searchResult);
+        
+        searchArrived(searchResult);
+        SearchRequest search_request;
+        if(!search_request_list.isEmpty()) {
+          search_request = ((LinkedList<SearchRequest>)search_request_list).removeLast();	
+          Server server = server_manager.getConnectedServer();
+          server.searchFiles(search_request);
+        }
+
 	}
-	
-	public void add(SearchResultList searchResultList) {
-		search_result.addLast(searchResultList);
-	}
-	
-	public void remove(SearchResultList searchResultList) {
-		search_result.remove(searchResultList);
-	}
-	
-	public void search(String searchString) {
-		//Server connected_server = ServerList.getInstance().getConnectedServer();
-		//connected_server.searchFiles(searchString);
-		search_request_queue.offer(new SearchRequest(searchString));
-	}
-	
-	public void search(SearchRequest searchRequest) {
-		search_request_queue.offer(searchRequest);
+
+	public synchronized void removeResult(SearchResult searchResult) {
+		search_result_list.remove(searchResult);		
 	}
 	
 
+	public synchronized void removeSearch(SearchRequest searchRequest) {
+		search_request_list.remove(searchRequest);
+	}
+
+	public void search(String searchString) {
+		SearchRequest search_request = new SearchRequest(searchString);
+		search(search_request);
+	}
+
+	public synchronized void search(SearchRequest searchRequest) {
+		((LinkedList<SearchRequest>)search_request_list).addFirst(searchRequest);
+		if (search_request_list.size()==1) {
+			Server server = server_manager.getConnectedServer();
+	        server.searchFiles(searchRequest);
+		}
+		
+	}
+
+	public void addSeachResultListener(SearchResultListener searchResultListener) {
+		search_result_listeners.add(searchResultListener);
+	}
+	
+	private void searchArrived(SearchResult search_result) {
+		
+		for(SearchResultListener listener : search_result_listeners) {
+			
+			listener.resultArrived(search_result);
+			
+		}
+		
+	}
+	
+	public void initialize() {
+		
+		
+	}
+
 	public void shutdown() {
+		
 		
 	}
 
 	public void start() {
-
+		
+		
 	}
 
 }

@@ -23,54 +23,14 @@
 package org.jmule.core.searchmanager;
 
 import java.util.LinkedList;
-import java.util.List;
-
-import org.jmule.core.edonkey.impl.Server;
 
 /**
  *
  * Created on Aug 9, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/08/12 07:20:15 $
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: javajox $ on $Date: 2008/08/12 07:20:14 $
  */
-public class SearchResult {
+public class SearchResultItemList extends LinkedList<SearchResultItem> {
 
-	SearchResultItemList searchResultItemList;
-	SearchRequest searchRequest;
-	Server server;
-	
-	public SearchResult(SearchResultItemList searchResultItemList, SearchRequest searchRequest, Server server) {
-	     
-		 this.searchResultItemList = searchResultItemList;
-		 this.searchRequest = searchRequest;
-		 this.server = server;
-		
-	}
-	
-	public SearchResultItemList getSearchResultItemList() {
-		return searchResultItemList;
-	}
-
-	public void setSearchResultItemList(SearchResultItemList searchResultItemList) {
-		this.searchResultItemList = searchResultItemList;
-	}
-
-
-	public SearchRequest getSearchRequest() {
-		return searchRequest;
-	}
-
-	public void setSearchRequest(SearchRequest searchRequest) {
-		this.searchRequest = searchRequest;
-	}
-
-	public Server getServer() {
-		return server;
-	}
-
-	public void setServer(Server server) {
-		this.server = server;
-	}
-	
 }

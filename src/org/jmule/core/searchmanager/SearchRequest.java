@@ -23,15 +23,14 @@
 package org.jmule.core.searchmanager;
 
 /**
- * 
+ * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:08 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:20:14 $$
  */
 public class SearchRequest {
 
 	private SearchQuery searchQuery;
-	private boolean cancelled = false;
 
 	/**
 	 * Constructs a new search request
@@ -69,22 +68,6 @@ public class SearchRequest {
 	 */
 	public void setSearchQuery(SearchQuery searchQuery) {
 		this.searchQuery = searchQuery;
-	}
-
-	/**
-	 * Tells if this search request is cancelled
-	 * @return true if this search request is cancelled, false otherwise
-	 */
-	public boolean isCancelled() {
-		return cancelled;
-	}
-
-	/**
-	 * Sets the state of this search request
-	 * @param cancelled the state of this search request, true if the request must be cancelled, false otherwise
-	 */
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
 	}
 	
 }
