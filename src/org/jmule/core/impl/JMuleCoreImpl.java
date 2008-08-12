@@ -30,7 +30,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMRawData;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
@@ -42,12 +41,13 @@ import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerFactory;
 import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.net.JMConnectionWaiter;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.peermanager.PeerManagerFactory;
+import org.jmule.core.searchmanager.SearchManager;
+import org.jmule.core.searchmanager.SearchManagerFactory;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.sharingmanager.SharingManagerFactory;
 import org.jmule.core.speedmanager.SpeedManager;
@@ -58,8 +58,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:41:52 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:11:25 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -259,7 +259,9 @@ public class JMuleCoreImpl implements JMuleCore {
 			
 			servers_manager.loadServerList();
 			
-		} catch (ServerManagerException e) {
+		} catch (Throwable t) {
+			
+			t.printStackTrace();
 		} 
 				
 		// notifies that the download manager has been started
@@ -267,7 +269,11 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		servers_manager.startUDPQuery();
 		
-		//IPFilter.getInstance();
+		SearchManager search_manager = SearchManagerFactory.getInstance();
+		
+		search_manager.initialize();
+		
+		notifyComponentStarted(search_manager);
 		
 		/** Enable Debug thread!**/	
 		debugThread = new DebugThread();
@@ -317,6 +323,11 @@ public class JMuleCoreImpl implements JMuleCore {
 			
 			server.disconnect();
 		
+		SearchManager search_manager = SearchManagerFactory.getInstance();
+		
+		search_manager.shutdown();
+		
+		notifyComponentStopped(search_manager);
 		
 		ServerManagerFactory.getInstance().shutdown();
 		
@@ -371,7 +382,7 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 	}
 	
-	public ServerManager getServersManager() {
+	public ServerManager getServerManager() {
 		
 		return ServerManagerFactory.getInstance();
 		
@@ -403,6 +414,12 @@ public class JMuleCoreImpl implements JMuleCore {
 	public ConfigurationManager getConfigurationManager() {
 		
 		return ConfigurationManagerFactory.getInstance();
+		
+	}
+	
+	public SearchManager getSearchManager() {
+		
+		return SearchManagerFactory.getInstance();
 		
 	}
 
