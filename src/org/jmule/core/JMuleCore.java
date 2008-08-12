@@ -27,16 +27,17 @@ import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.net.JMConnectionWaiter;
 import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.speedmanager.SpeedManager;
 import org.jmule.core.uploadmanager.UploadManager;
 
 /**
- * Created on 04-27-2008
+ * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:39:09 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:03:07 $$
  */
 public interface JMuleCore {
 
@@ -64,13 +65,15 @@ public interface JMuleCore {
 	
 	public PeerManager getPeerManager();
 	
-	public ServerManager getServersManager();
+	public ServerManager getServerManager();
 	
 	public SharingManager getSharingManager();
 	
 	public SpeedManager getSpeedManager();
 	
 	public ConfigurationManager getConfigurationManager();
+	
+	public SearchManager getSearchManager();
 	
 	public boolean isFirstRun();
 	
