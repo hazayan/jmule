@@ -31,16 +31,16 @@ import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
-import org.jmule.core.searchmanager.SearchResult;
+import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharingManagerFactory;
 
 /**
- * Created on 07-08-2008
+ * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:10 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:00:53 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -57,7 +57,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 	}
 	
-	public void addDownload(SearchResult searchResult) {
+	public void addDownload(SearchResultItem searchResult) {
 		
 		DownloadSession download_session = new DownloadSession(searchResult);
 		

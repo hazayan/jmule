@@ -69,7 +69,7 @@ import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.peermanager.PeerSessionList;
-import org.jmule.core.searchmanager.SearchResult;
+import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.PartialFile;
@@ -79,10 +79,10 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.util.Convert;
 
 /**
- * Created on 04-27-2008
+ * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:08 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:00:53 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -111,7 +111,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	private PeersMonitor peers_monitor;
 	
-	public DownloadSession(SearchResult searchResult) {
+	public DownloadSession(SearchResultItem searchResult) {
 		
 		try {
 			

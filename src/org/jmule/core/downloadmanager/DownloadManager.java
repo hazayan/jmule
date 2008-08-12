@@ -29,15 +29,15 @@ import org.jmule.core.JMuleManager;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
-import org.jmule.core.searchmanager.SearchResult;
+import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.PartialFile;
 
 /**
- * Created on 04-27-2008
+ * Created on 2008-Apr-20
  * @author javajox
  * @author binary
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:09 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:00:53 $$
  */
 public interface DownloadManager extends JMuleManager {
 	
@@ -45,7 +45,7 @@ public interface DownloadManager extends JMuleManager {
 	 * Add download based on the search result.
 	 * @param searchResult 
 	 */
-	public void addDownload(SearchResult searchResult);
+	public void addDownload(SearchResultItem searchResult);
 	
 	/**
 	 * Add download based on the ed2k file link.
