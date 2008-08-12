@@ -65,18 +65,18 @@ import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMFloodException;
 import org.jmule.core.net.JMuleSocketChannel;
-import org.jmule.core.searchmanager.SearchResult;
-import org.jmule.core.searchmanager.SearchResultList;
+import org.jmule.core.searchmanager.SearchResultItem;
+import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.util.Convert;
 import org.jmule.util.Misc;
 
 /**
- * 
+ * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:44 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:06:33 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -249,11 +249,11 @@ public class StandardPacket extends AbstractPacket implements Packet {
 	}
 	
 	
-	public SearchResultList getSearchResults() throws PacketException {
+	public SearchResultItemList getSearchResults() throws PacketException {
 		if (this.getCommand()!=PACKET_SRVSEARCHRESULT){
 			throw new PacketException("No SRVSEARCHRESULT Packet "+this);
 		}
-		SearchResultList searchResults = new SearchResultList();
+		SearchResultItemList searchResults = new SearchResultItemList();
 		dataPacket.position(6);
 		int resultCount = dataPacket.getInt();
 		for(int i = 0;i<resultCount;i++) {
@@ -265,7 +265,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			
 			short clientPort = dataPacket.getShort();
 			
-			SearchResult result = new SearchResult(new FileHash(fileHash), new ClientID(clientID),clientPort); 
+			SearchResultItem result = new SearchResultItem(new FileHash(fileHash), new ClientID(clientID),clientPort); 
 			
 			int tagCount = dataPacket.getInt();
 			

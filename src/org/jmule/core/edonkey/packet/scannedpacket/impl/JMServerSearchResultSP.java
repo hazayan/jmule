@@ -25,21 +25,21 @@ package org.jmule.core.edonkey.packet.scannedpacket.impl;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVSEARCHRESULT;
 
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.searchmanager.SearchResultList;
+import org.jmule.core.searchmanager.SearchResultItemList;
 
 /**
- * 
+ * Created on 2008-Apr-27
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:37 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:09:29 $$
  */
 public class JMServerSearchResultSP implements ScannedPacket {
 
-	private SearchResultList searchResultList;
+	private SearchResultItemList searchResultItemList;
 	
-	public JMServerSearchResultSP(SearchResultList searchResultList) {
+	public JMServerSearchResultSP(SearchResultItemList searchResultList) {
 		
-		this.searchResultList = searchResultList;
+		this.searchResultItemList = searchResultList;
 		
     }
 	
@@ -47,8 +47,8 @@ public class JMServerSearchResultSP implements ScannedPacket {
 		return PACKET_SRVSEARCHRESULT;
 	}
 
-	public SearchResultList getSearchResultList() {
-		return searchResultList;
+	public SearchResultItemList getSearchResultItemList() {
+		return searchResultItemList;
 	}
 
 }
