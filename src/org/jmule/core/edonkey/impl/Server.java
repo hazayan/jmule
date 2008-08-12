@@ -29,16 +29,18 @@ import static org.jmule.core.edonkey.E2DKConstants.SL_HARDFILES;
 import static org.jmule.core.edonkey.E2DKConstants.SL_PING;
 import static org.jmule.core.edonkey.E2DKConstants.SL_SERVERNAME;
 import static org.jmule.core.edonkey.E2DKConstants.SL_SOFTFILES;
-import static org.jmule.core.edonkey.E2DKConstants.SL_USERS;
 import static org.jmule.core.edonkey.E2DKConstants.SL_SRVMAXUSERS;
+import static org.jmule.core.edonkey.E2DKConstants.SL_USERS;
 import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
-import static org.jmule.core.edonkey.E2DKConstants.SL_MAXUSERS;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMThread;
@@ -69,14 +71,17 @@ import org.jmule.core.net.PacketScanner;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.searchmanager.SearchManagerFactory;
+import org.jmule.core.searchmanager.SearchRequest;
+import org.jmule.core.searchmanager.SearchResult;
+import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.util.Convert;
 
 /**
- * 
+ * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:35 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 06:54:06 $$
  */
 public class Server extends JMConnection {
 	
@@ -90,10 +95,11 @@ public class Server extends JMConnection {
 
 	private ProcessPacketsThread processPacketsThread = null;
 
-	private String lastSearchQuery = "";
-
-	private boolean allowSearch = false;
-
+	private volatile SearchRequest lastSearchQuery;
+	
+	private volatile SearchRequest nextSearchQuery;
+	
+	private volatile boolean allowSearch = false;
 
 	private ProcessUDPPacketsThread processUDPPacketsThread = null;
 	
@@ -107,23 +113,28 @@ public class Server extends JMConnection {
 
 	private long last_udp_response = System.currentTimeMillis();
 	
+	private TimerTask search_task;
+	
+	private Timer search_timer = new Timer();
 	
 	private List<ServerListener> server_listeners = new CopyOnWriteArrayList<ServerListener>();
 	
 	public Server() {
+		
 		super();
+
 	}
 
 	public Server(String IPAddress, int port) {
 
 		super(IPAddress, port);
-		
+
 	}
 	
 	public Server(ED2KServerLink serverLink) {
 		
 		super(serverLink.getServerAddress(),serverLink.getServerPort());
-		
+
 	}
 
 	public Server(String IPAddress, int port, TagList tagList) {
@@ -131,7 +142,7 @@ public class Server extends JMConnection {
 		super(IPAddress, port);
 
 		this.tagList = tagList;
-		
+	
 	}
 
 	public void start() {
@@ -151,8 +162,10 @@ public class Server extends JMConnection {
 			processUDPPacketsThread.start();
 			
 			udpQueryThread = new udpQueryThread();
-
+			
+			
 		} catch (Throwable e) {
+			
 			e.printStackTrace();
 		}
 	}
@@ -167,6 +180,58 @@ public class Server extends JMConnection {
 
 	}
 
+	private void startSearchTask() {
+		
+		search_task = new TimerTask() {
+
+			int failed_count = 0;
+			
+			public void run() {
+				
+				if (failed_count == 5) {
+					
+					search_task = null;
+					
+					this.cancel();
+					
+					return;
+				}
+				
+				if (!allowSearch) {
+					
+					return;
+					
+				}
+				
+				if (nextSearchQuery==null) {
+					
+					failed_count++;
+					
+					return ;
+				}
+				
+				failed_count = 0;
+				
+				Packet searchQueryPacket = PacketFactory.getSearchPacket(nextSearchQuery.getSearchQuery().getQuery());
+				
+				lastSearchQuery = nextSearchQuery;
+
+				nextSearchQuery = null;
+				
+				sendPacket(searchQueryPacket);
+			}};
+		
+		search_timer.purge();
+			
+		search_timer.scheduleAtFixedRate(search_task, new Date(System.currentTimeMillis()),10000);
+		
+	}
+	
+	private void stopSearchTask() {
+		
+		search_timer.cancel();
+	}
+	
 	public ED2KServerLink getServerLink() {
 		
 		return new ED2KServerLink(getAddress(),getPort());
@@ -191,8 +256,6 @@ public class Server extends JMConnection {
 		
 	}
 
-	
-
 	protected void processPackets() {
 		
 		if ((processPacketsThread == null) || (!processPacketsThread.isAlive())) {
@@ -211,11 +274,11 @@ public class Server extends JMConnection {
 		
 	}
 
-	
-
 	public void disconnect() {
 		
 		this.allowSearch = false;
+		
+		stopSearchTask();
 		
 		super.disconnect();
 		
@@ -234,20 +297,13 @@ public class Server extends JMConnection {
 		
 	}
 
-	public void searchFiles(String searchQuery) {
+	public void searchFiles(SearchRequest searchQuery) {
 		
-		Packet searchQueryPacket = PacketFactory.getSearchPacket(searchQuery);
+		nextSearchQuery = searchQuery;
 		
-		if (!this.allowSearch) {
+		if (search_task==null)
 			
-			return;
-			
-		}
-		
-		this.lastSearchQuery = searchQuery;
-		
-		sendPacket(searchQueryPacket);
-
+			startSearchTask();
 	}
 
 
@@ -330,13 +386,14 @@ public class Server extends JMConnection {
 		if (packet instanceof JMServerSearchResultSP) {
 			
 			JMServerSearchResultSP scannedPacket = (JMServerSearchResultSP) packet;
-			
-			// scannedPacket.getSearchResultList()
-			// SearchResultsList.getInstance().addSearchResults(this.
-			// lastSearchQuery, scannedPacket);
+
 			SearchManager search_manager = SearchManagerFactory.getInstance();
 			
-			search_manager.add(scannedPacket.getSearchResultList());
+			SearchResultItemList search_result_item_list = scannedPacket.getSearchResultItemList();
+			
+			SearchResult search_result = new SearchResult(search_result_item_list,lastSearchQuery,this);
+			
+			search_manager.addResult(search_result);
 			
 			this.allowSearch = true;
 			
@@ -421,7 +478,6 @@ public class Server extends JMConnection {
 		
 		sendPacket(PacketFactory.getServerLoginPacket(userHash, ConfigurationManagerFactory.getInstance().getTCP(), 
 				ConfigurationManagerFactory.getInstance().getNickName()));
-		
 	}
 
 	protected void onDisconnect() {
@@ -442,8 +498,6 @@ public class Server extends JMConnection {
 		
 	}
 
-
-	// Server Tags
 	private void setName(String newName) {
 		
 		Tag tag = new StandardTag(TAG_TYPE_STRING, SL_SERVERNAME);
@@ -459,10 +513,15 @@ public class Server extends JMConnection {
 	public String getName() {
 		
 		try {
+			
 			String result = tagList.getStringTag(SL_SERVERNAME);
+			
 			result = result.trim();
+			
 			if (result.length()!=0)
+				
 				return result;
+			
 			return getAddress();
 			
 		} catch (TagException e) {
@@ -569,14 +628,19 @@ public class Server extends JMConnection {
 	}
 
 	public String getVersion() {
+		
 		try {
+			
 			long version = tagList.getDWORDTag(SL_VERSION);
 			
 			long major = version >> 16;
+			
 			long minor = version & 0xFFFF;
 			
 			return major+"."+minor;
+			
 		} catch (TagException e) {
+			
 			return "";
 		}
 	}
@@ -596,6 +660,7 @@ public class Server extends JMConnection {
 	}
 	
 	public long getMaxUsers() {
+		
 		try {
 			
 			return Convert.intToLong(tagList.getDWORDTag(SL_SRVMAXUSERS));
@@ -655,7 +720,6 @@ public class Server extends JMConnection {
 		
 		tagList.addTag(tag);
 		
-		
 	}
 	
 	private class udpQueryThread extends JMThread {
@@ -673,6 +737,7 @@ public class Server extends JMConnection {
 		public void run() {
 			
 			Random random = new Random();
+			
 			while (!stop) {
 
 				try {
@@ -692,13 +757,16 @@ public class Server extends JMConnection {
 
 					
 					Thread.sleep(ConfigurationManager.SERVER_UDP_QUERY_INTERVAL);
+					
 				} catch (InterruptedException e) {
 				}
 			}
 		}
 		
 		public void JMStop() {
+			
 			stop = true;
+			
 			this.interrupt();
 		}
 	}
@@ -736,9 +804,6 @@ public class Server extends JMConnection {
 
 			}
 		}
-		
-		
-
 	}
 	
 	private class ProcessUDPPacketsThread extends JMThread {
@@ -756,6 +821,7 @@ public class Server extends JMConnection {
 			while(!stop) {
 				
 				if (!udp_connection.hasIncomingPackets()) {
+					
 					synchronized(this) {
 						
 						try {
@@ -763,6 +829,7 @@ public class Server extends JMConnection {
 							this.sleep(2000);
 							
 						} catch (Throwable e) {
+							
 							e.printStackTrace();
 						}
 						
@@ -829,10 +896,12 @@ public class Server extends JMConnection {
 	}
 	
 	public int hashCode() {
+		
 		return (getAddress()+" : "+getPort()).hashCode(); 
 	}
 	
 	public int getAddressAsInt() {
+		
 		return Convert.IPtoInt( Convert.stringIPToArray( getAddress() ) );
 	}
 	
