@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 08:05:19 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -44,6 +44,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       CONFIG_FILE     				=     SETTINGS_DIR + File.separator + "jmule.properties";
 	public static final String       KNOWN_MET         				=     SETTINGS_DIR + File.separator + "known.met";
 	public static final String       SERVER_MET         			=     SETTINGS_DIR + File.separator + "server.met";
+	public static final String       GEOIP_DAT                      =     SETTINGS_DIR + File.separator + "geoip.dat";
 	
 	public static final String       NICK_NAME       				=     "http://jmule.net";
 	
