@@ -45,8 +45,8 @@ import org.jmule.core.edonkey.metfile.ServerMetException;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/13 11:28:58 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/13 11:43:24 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -84,6 +84,9 @@ public class ServerManagerImpl implements ServerManager {
 	}
 	
 	public void addServer(Server server) {
+		
+		if (server_list.contains(server)) return ;
+		
 		server_list.add(server);
 		
 		// notify all listeners that a new server has been added to the server list
@@ -137,6 +140,12 @@ public class ServerManagerImpl implements ServerManager {
 	}
 
 	public void clearServerList() {
+		
+		Server connected_server = getConnectedServer();
+		
+		if (connected_server != null)
+			
+			connected_server.disconnect();
 		
 		server_list.clear();
 		
