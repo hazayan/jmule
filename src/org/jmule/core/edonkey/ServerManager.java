@@ -30,8 +30,8 @@ import org.jmule.core.edonkey.impl.Server;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:53:47 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/13 11:28:57 $$
  */
 public interface ServerManager extends JMuleManager {
 
@@ -70,6 +70,8 @@ public interface ServerManager extends JMuleManager {
 	 * @throws ServerManagerException if the server is not present in the list or the server can't be reached
 	 */
 	public void connect(Server server) throws ServerManagerException;
+	
+	public void startAutoConnect() throws ServerManagerException;
 	
 	/** 
 	 * Stop connecting to servers.

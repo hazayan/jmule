@@ -23,14 +23,19 @@
 package org.jmule.core.edonkey.impl;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.edonkey.AutoConnectDoesNotSucceedException;
+import org.jmule.core.edonkey.ServerListIsNullException;
 import org.jmule.core.edonkey.ServerListListener;
 import org.jmule.core.edonkey.ServerListener;
+import org.jmule.core.edonkey.ServerListenerAdapter;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.metfile.ServerMet;
@@ -40,8 +45,8 @@ import org.jmule.core.edonkey.metfile.ServerMetException;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:32 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/13 11:28:58 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -54,16 +59,27 @@ public class ServerManagerImpl implements ServerManager {
 	
 	private boolean auto_connect = false;
 	
-	private boolean in_auto_connect_listener = false;
-	
-	private AutoConnectServerListener listener;
-	
 	private ServerMet server_met;
 	
+	private Comparator compare_servers_by_ping = new Comparator() {
+
+		public int compare(Object object1, Object object2) {
+
+			if( ((Server)object1).getPing() < ((Server)object2).getPing() ) {
+				
+				return -1;
+				
+			} else if( ((Server)object1).getPing() > ((Server)object2).getPing() ) {
+				
+				return +1;
+				
+			}
+			
+			return 0;
+		}
+	};
+	
 	public ServerManagerImpl() {
-		
-		listener = new AutoConnectServerListener();
-		
 		
 	}
 	
@@ -155,57 +171,93 @@ public class ServerManagerImpl implements ServerManager {
 	
 	public void connect() throws ServerManagerException {
 		
-		if (getConnectedServer()!=null)
-			 getConnectedServer().disconnect();
-		
-		for(ServerListListener s : server_list_listeners) {
-			
-			s.autoConnectStarted();
-			
-		}
-		
-		auto_connect = true;
-				
-		removeServerListener(listener);
-		
-		addServerListener(listener);
-		
-		checked_servers.clear();
-		
-		Server nextServer = getNextServer();
-		
-		System.out.println("Try autoconnect to "+nextServer);
-		
-		if (nextServer!=null)
-			nextServer.connect();
-		else
-			auto_connect = false;
-
+		startAutoConnect();
 	}
 	
-	private Server getNextServer() {
+	public void startAutoConnect() throws ServerManagerException {
 		
-		Server server = null;
+		if( auto_connect ) throw new ServerManagerException("The auto connect process is already running");
+	    
+		if( server_list.isEmpty() ) throw new ServerListIsNullException();
 		
-		for(Server check_server : server_list) {
-						
-			if (checked_servers.contains(check_server)){
+		Server connected_server = getConnectedServer();
+		
+		if( connected_server != null ) { // maybe should throw an exception
+			
+			connected_server.disconnect();
+		}
+		
+	    for(ServerListListener listener : server_list_listeners) {
+	    	
+	    	listener.autoConnectStarted();
+	    }
+		
+		List<Server> candidate_servers = new LinkedList<Server>();
+		
+		for(Server server : server_list) {
+			
+			if( !server.isDown() ) candidate_servers.add(server);
+			
+			// for testing only
+			if( !server.isDown() ) System.out.println("---"+server.getPing());
+		}
+		
+		while( !candidate_servers.isEmpty() ) {
+			
+			Object min_ping_server = Collections.min(candidate_servers, compare_servers_by_ping);
+			
+			if( ((Server)min_ping_server).isDown() ) {
+				
+				candidate_servers.remove(min_ping_server);
 				
 				continue;
 			}
 			
-			if (server==null) { server = check_server; continue; }
+			/// for testing only
 			
-			if (check_server.getPing()<server.getPing())
+			((Server)min_ping_server).addServerListener(new ServerListenerAdapter() {
+				public void connected(Server server) {
+                     System.out.println("Connected to " + server);
+				}
 				
-				server = check_server;
+				 public void isconnecting(Server server) {
+					 System.out.println("Is connecting to " + server);
+				 }
+				 
+				 public void disconnected(Server server) {
+					 System.out.println("Disconnected from " + server);
+				 }
+			});
 			
+            ((Server)min_ping_server).connect();
+			
+            try {
+            	
+              Thread.currentThread().sleep(10000);
+              
+            }catch(Throwable t) {
+            	t.printStackTrace();
+            }
+            
+            if( ((Server)min_ping_server).isConnected() ) {
+            	
+        	    for(ServerListListener listener : server_list_listeners) {
+        	    	
+        	    	listener.autoConnectStopped();
+        	    }
+            	
+            	return;
+            	
+            } else {
+            	
+            	((Server)min_ping_server).disconnect();
+            	
+            	candidate_servers.remove(min_ping_server);
+            }
 		}
 		
-		if (server!=null)
-			checked_servers.add(server);
+		if( candidate_servers.isEmpty() ) throw new AutoConnectDoesNotSucceedException();
 		
-		return server;
 	}
 	
 	public void stopAutoConnect() {
@@ -394,55 +446,6 @@ public class ServerManagerImpl implements ServerManager {
       	      server.addServerListener(serverListener);
       	  
           }
-		
-	}
-
-	private class AutoConnectServerListener implements ServerListener {
-
-		public void connected(Server server) {
-			System.out.println("AutoConnect :: connected "+server);
-			System.out.println("Connected to server "+server);
-			if (auto_connect) {
-				auto_connect = false;
-				in_auto_connect_listener = false;
-				removeServerListener(this);
-			} else {
-				in_auto_connect_listener = false;
-				//emoveServerListener(this);
-				server.disconnect();
-			}
-			
-		}
-
-		public void disconnected(Server server) {
-			System.out.println("AutoConnect :: disconnected "+server);
-			if (auto_connect) {
-				in_auto_connect_listener = true;
-				Server nextServer = getNextServer();
-				System.out.println("Try autoconnect to next server "+nextServer);
-				if (nextServer==null) {
-					auto_connect = false;
-					in_auto_connect_listener = false;
-					removeServerListener(this);
-					return;
-				}
-				
-				nextServer.connect();
-			} else {
-				in_auto_connect_listener = false;
-				removeServerListener(this);
-			}
-			
-			
-		}
-
-		public void isconnecting(Server server) {
-			
-		}
-
-		public void serverMessage(Server server, String message) {
-			
-		}
 		
 	}
 		

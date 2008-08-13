@@ -22,28 +22,17 @@
  */
 package org.jmule.core.edonkey;
 
-import org.jmule.core.JMException;
-
 /**
- * Created on 2008-Jul-06
+ *
+ * Created on Aug 12, 2008
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/13 11:28:58 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: javajox $ on $Date: 2008/08/13 11:28:56 $
  */
-public class ServerManagerException extends JMException {
+public class ServerListIsNullException extends ServerManagerException {
 
-	  public ServerManagerException() {
-		  
-	  }
-	
-	  public ServerManagerException(String str) {
-		  
-		  super(str);
-	  }
-	  
-	  public ServerManagerException(Throwable cause) {
-		  
-		  super(cause);
-	  }
-	
+	public ServerListIsNullException() {
+
+	}
+
 }
