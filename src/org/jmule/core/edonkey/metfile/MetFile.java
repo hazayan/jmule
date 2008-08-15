@@ -29,16 +29,17 @@ import java.nio.channels.FileChannel;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:29 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:37:32 $$
  */
 public abstract class MetFile {
 
 	protected FileChannel fileChannel;
-	
+	protected File file;
 	public MetFile(String fileName) {
 		try {
-			fileChannel = new RandomAccessFile(new File(fileName),"rws").getChannel();
+			file = new File(fileName);
+			fileChannel = new RandomAccessFile(file,"rws").getChannel();
 		}catch(Throwable t) {
 			fileChannel = null;
 		} 
@@ -46,6 +47,7 @@ public abstract class MetFile {
 	
 	public MetFile(File file) {
 		try {
+			this.file = file;
 			fileChannel = new RandomAccessFile(file,"rws").getChannel();
 		}catch(Throwable t) {
 			fileChannel = null;

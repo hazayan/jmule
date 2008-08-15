@@ -25,7 +25,9 @@ package org.jmule.core.edonkey.metfile;
 import static org.jmule.core.edonkey.E2DKConstants.SERVERLIST_VERSION;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
@@ -93,8 +95,8 @@ import org.jmule.util.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:27 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:37:32 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -144,7 +146,10 @@ public class ServerMet extends MetFile {
 	}
 	
 	public void store() throws ServerMetException {
-		try {	
+		try {
+			fileChannel.close();
+			file.delete();
+			fileChannel = new RandomAccessFile(file,"rws").getChannel();
 			fileChannel.position(0);
 			ByteBuffer data;
 		
@@ -153,10 +158,16 @@ public class ServerMet extends MetFile {
 			data.position(0);
 			fileChannel.write(data);
 				
-			setServersCount(serverList.size());
+			long count = 0;
+			
+			for(Server server : serverList) 
+				if (server.isStatic()) count++;
+			
+			setServersCount(count);
 		
 			for(Server server : serverList) 
-				writeServer(server);
+				if (server.isStatic())
+					writeServer(server);
 		
 		}
 	
@@ -232,6 +243,7 @@ public class ServerMet extends MetFile {
 			tagList.addTag(Misc.loadStandardTag(fileChannel));
 		
 		Server server = new Server(remonteAddress,remontePort,tagList);
+		server.setStatic(true);
 		return server;
 		
 	}
