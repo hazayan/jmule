@@ -32,8 +32,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:57 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:50:41 $$
  */
 public class TagList extends Hashtable<MetaTag,Tag>{
 	private int tagsSize=0;
@@ -72,6 +72,18 @@ public class TagList extends Hashtable<MetaTag,Tag>{
 	public void addTag(Tag tag){
 		super.put(tag.getMetaTag(), tag);
 		tagsSize+=tag.getSize();
+	}
+
+	public void addTag(TagList tagList,boolean overwrite) {
+		for(Tag tag : tagList.getTags()) {
+			if (hasTag(tag.getMetaTag())&&(overwrite)) {
+				removeTag(tag.getMetaTag());
+				addTag(tag);
+			}
+			if (!hasTag(tag.getMetaTag()))
+				addTag(tag);
+				
+		}
 	}
 	
 	public void removeTag(byte[] metaTag) {
