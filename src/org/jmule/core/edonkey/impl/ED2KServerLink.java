@@ -22,17 +22,17 @@
  */
 package org.jmule.core.edonkey.impl;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.jmule.core.JMException;
 
 /**
  * ED2K server link
  * ed2k://|server|IP|PORT|/
  * @author binary
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:34 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 10:06:36 $$
  */
 public class ED2KServerLink {
 
@@ -48,7 +48,7 @@ public class ED2KServerLink {
 		
 	}
 	
-	public ED2KServerLink(String link) throws JMException {
+	public ED2KServerLink(String link){
 		Pattern s;
 		
 		Matcher m;
@@ -58,13 +58,45 @@ public class ED2KServerLink {
 		m = s.matcher(link);
 		
 		if (m.matches()) {
-			
 			server_address = m.group(1);
 			server_port = Integer.valueOf(m.group(2)).intValue();
-		}else throw new JMException();
+		}
 	}
 	
-	public String getStringLink() {
+	public static boolean isValidLink(String link) {
+		Pattern s;
+		
+		Matcher m;
+		
+		s = Pattern.compile("ed2k:\\/\\/\\|server\\|([0-9]{1,3}+.[0-9]{1,3}+.[0-9]{1,3}+.[0-9]{1,3}+)\\|([0-65535]*)\\|\\/");
+		
+		m = s.matcher(link);
+		
+		return m.matches();
+	}
+	
+	public static List<ED2KServerLink> extractLinks(String rawData) {
+		
+		Pattern s = Pattern.compile("ed2k:\\/\\/\\|server\\|([0-9]{1,3}+.[0-9]{1,3}+.[0-9]{1,3}+.[0-9]{1,3}+)\\|([0-65535]*)\\|\\/");
+		
+		Matcher m = s.matcher(rawData);
+		
+		List<ED2KServerLink> links = new LinkedList<ED2KServerLink>();
+		
+		while(m.find()) {
+			
+			String server_address = m.group(1);
+			
+			int server_port = Integer.valueOf(m.group(2)).intValue();
+			
+			links.add(new ED2KServerLink(server_address,server_port));
+			
+		}
+		
+		return links;
+	}
+	
+	public String getAsString() {
 		return "ed2k://|server|" + server_address + "|" + server_port + "|/";
 	}
 	
@@ -83,12 +115,14 @@ public class ED2KServerLink {
 	public static void main(String... args) {
 		
 		ED2KServerLink link;
-		try {
-			link = new ED2KServerLink("ed2k://|server|207.44.222.51|4242|/");
-			System.out.println("Link : "+link.getServerAddress()+" : "+link.getServerPort());
-		} catch (JMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		link = new ED2KServerLink("ed2k://|server|207.44.222.51|4242|/");
+		System.out.println("Link : "+link.getServerAddress()+" : "+link.getServerPort());
+		
+		String text = "dwhkgshked2k://|server|207.44.222.51|4242|/sdasded2k://|server|207.44.222.51|4242|/ed2k://|server|207.44.222.51|4242|/";
+		List<ED2KServerLink> list = ED2KServerLink.extractLinks(text);
+		
+		for(ED2KServerLink l : list) {
+			System.out.println(l+"");
 		}
 		
 	}
