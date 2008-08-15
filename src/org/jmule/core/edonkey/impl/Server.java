@@ -80,8 +80,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 06:54:06 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:37:54 $$
  */
 public class Server extends JMConnection {
 	
@@ -119,6 +119,8 @@ public class Server extends JMConnection {
 	
 	private List<ServerListener> server_listeners = new CopyOnWriteArrayList<ServerListener>();
 	
+	private boolean isStatic = false;
+
 	public Server() {
 		
 		super();
@@ -178,6 +180,8 @@ public class Server extends JMConnection {
 
 		udp_connection.stopUDPOutcomingThread();
 
+		processUDPPacketsThread.JMStop();
+		
 	}
 
 	private void startSearchTask() {
@@ -445,15 +449,7 @@ public class Server extends JMConnection {
 		if (packet instanceof JMServerUDPNewDescSP) {
 			
 			JMServerUDPNewDescSP scannedPacket = (JMServerUDPNewDescSP) packet;
-			for(Tag tag : scannedPacket.getTagList().values()) {
-				
-				if (tagList.hasTag(tag.getMetaTag()))
-					
-					tagList.removeTag(tag.getMetaTag());
-				
-				tagList.addTag(tag);
-				
-			}
+			tagList.addTag(scannedPacket.getTagList(), true);
 			
 		}
 	}
@@ -710,16 +706,12 @@ public class Server extends JMConnection {
 		
 	}
 	
-	private void setMaxUsers(long maxUsers) {
-		
-		Tag tag = new StandardTag(TAG_TYPE_DWORD, SL_SRVMAXUSERS);
-		
-		tag.insertDWORD(Convert.longToInt(maxUsers));
-		
-		tagList.removeTag(SL_FILES);
-		
-		tagList.addTag(tag);
-		
+	public boolean isStatic() {
+		return isStatic;
+	}
+
+	public void setStatic(boolean isStatic) {
+		this.isStatic = isStatic;
 	}
 	
 	private class udpQueryThread extends JMThread {
@@ -829,8 +821,6 @@ public class Server extends JMConnection {
 							this.sleep(2000);
 							
 						} catch (Throwable e) {
-							
-							e.printStackTrace();
 						}
 						
 						if (stop) return;
