@@ -27,8 +27,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 07:52:47 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:44:15 $$
  */
 public interface JMTransferSession {
 
@@ -37,4 +37,6 @@ public interface JMTransferSession {
 	   public FileHash getFileHash();
 	   
 	   public long getFileSize();
+	   
+	   public int getPeersCount();
 }
