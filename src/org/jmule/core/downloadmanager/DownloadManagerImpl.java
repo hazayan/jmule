@@ -22,9 +22,11 @@
  */
 package org.jmule.core.downloadmanager;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMIterable;
@@ -34,13 +36,15 @@ import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharingManagerFactory;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
 /**
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:00:53 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:48:11 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -139,12 +143,36 @@ public class DownloadManagerImpl implements DownloadManager {
 	}
 	
 	public void initialize() {
-
-		
+  		Set<String> types = new HashSet<String>();
+		types.add(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES);
+		types.add(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT);
+		types.add(JMuleCoreStats.ST_NET_PEERS_DOWNLOAD_COUNT);
+		JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+			public void updateStats(Set<String> types, Map<String, Object> values) {
+	             if(types.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES)) {
+	            	 long total_downloaded_bytes = 0;
+	            	 for(DownloadSession session : session_list.values()) {
+	            		 total_downloaded_bytes+=session.getTransferredBytes();
+	            	 }
+	            	 values.put(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES, total_downloaded_bytes);
+	             }
+	             if(types.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT)) {
+	            	 values.put(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT, session_list.size());
+	             }
+	             if (types.contains(JMuleCoreStats.ST_NET_PEERS_DOWNLOAD_COUNT)) {
+	            	 int download_peers_count = 0;
+	            	 for(DownloadSession session : session_list.values()) {
+	            		 download_peers_count+=session.getPeersCount();
+	            	 }
+	            	 values.put(JMuleCoreStats.ST_NET_PEERS_DOWNLOAD_COUNT, download_peers_count);
+	             }
+			}
+		});	
 	}
 
 	public void shutdown() {
-
+		for(DownloadSession download_session : session_list.values())
+			download_session.stopDownload();
 		
 	}
 
