@@ -22,12 +22,19 @@
  */
 package org.jmule.core.session;
 
+import org.jmule.core.edonkey.impl.FileHash;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:21 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 07:52:47 $$
  */
 public interface JMTransferSession {
 
+	   public long getTransferredBytes();
+	   
+	   public FileHash getFileHash();
+	   
+	   public long getFileSize();
 }
