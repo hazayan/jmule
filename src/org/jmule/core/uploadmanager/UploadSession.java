@@ -45,8 +45,8 @@ import org.jmule.core.sharingmanager.SharedFile;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 07:55:45 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:59:05 $$
  */
 public class UploadSession implements JMTransferSession {
 	
@@ -283,6 +283,10 @@ public class UploadSession implements JMTransferSession {
 	public long getFileSize() {
 		
 		return sharedFile.length();
+	}
+
+	public int getPeersCount() {
+		return uploadQueue.size();
 	}
 	
 }
