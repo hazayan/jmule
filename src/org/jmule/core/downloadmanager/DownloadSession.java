@@ -81,8 +81,8 @@ import org.jmule.util.Convert;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:00:53 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 07:56:42 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -722,10 +722,15 @@ public class DownloadSession implements JMTransferSession {
 		
 	}
 	
-	public long getDownloadedSize() {
+	public long getTransferredBytes() {
 		
-		return this.sharedFile.getDownloadedSize();
+		return this.sharedFile.getDownloadedBytes();
 		
+	}
+	
+	public long getFileSize() {
+		
+		return this.sharedFile.length();
 	}
 	
 	
