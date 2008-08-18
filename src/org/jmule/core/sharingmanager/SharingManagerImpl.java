@@ -22,38 +22,34 @@
  */
 package org.jmule.core.sharingmanager;
 
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.channels.FileChannel;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMIterable;
-import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.metfile.KnownMet;
 import org.jmule.core.edonkey.metfile.KnownMetEntity;
 import org.jmule.core.edonkey.metfile.PartMet;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:05 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:55:17 $$
  */
 public class SharingManagerImpl implements SharingManager {
 
@@ -65,6 +61,44 @@ public class SharingManagerImpl implements SharingManager {
 	
 	public void initialize() {
 	     sharedFiles = new Hashtable<FileHash,SharedFile>();
+	     
+	     Set<String> types = new HashSet<String>();
+	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT);
+	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_COUNT);
+	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_COUNT);
+	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES);
+	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES);
+	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_BYTES);
+	     
+	     JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+			public void updateStats(Set<String> types,Map<String, Object> values) {
+				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT))
+					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT, sharedFiles.size());
+				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_COUNT)) 
+					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_COUNT, getPartialFiles().size());
+				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_COUNT)) 
+					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_COUNT, getCompletedFiles().size());
+				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES)) { 
+					long total_bytes = 0;
+					for(SharedFile shared_file : sharedFiles.values())
+						total_bytes += shared_file.length();
+					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES, total_bytes);
+				}
+				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES)) { 
+					long total_bytes = 0;
+					for(PartialFile shared_file : getPartialFiles())
+						total_bytes += shared_file.length();
+					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES, total_bytes);
+				}
+				
+				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_BYTES)) { 
+					long total_bytes = 0;
+					for(CompletedFile shared_file : getCompletedFiles())
+						total_bytes += shared_file.length();
+					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_BYTES, total_bytes);
+				}
+			}
+	     });
 	}
 	
 	public void start() {
@@ -339,6 +373,16 @@ public class SharingManagerImpl implements SharingManager {
 		return file_list;
 	}
 	
+	public List<CompletedFile> getCompletedFiles() {
+		List<CompletedFile> file_list = new LinkedList<CompletedFile>();
+		
+		for(SharedFile file : sharedFiles.values())
+			if (file instanceof CompletedFile)
+					file_list.add((CompletedFile) file);
+		
+		return file_list;
+	}
+	
 	/**
 	 * Write the all meta-info about files from completed files hash table in known.met
 	 */
@@ -377,54 +421,5 @@ public class SharingManagerImpl implements SharingManager {
 			
 		}
 		
-	}
-	
-	public static void main(String... args) {
-		try {
-			final JMuleCore core = JMuleCoreFactory.create();
-			core.start();
-			
-			core.getSharingManager().loadCompletedFiles();
-			
-			JFrame jf = new JFrame();
-			jf.setSize(200,300);
-			jf.setLayout(new GridLayout(1,3));
-			JButton button = new JButton("S t a r t !!!");
-			jf.add(button);
-			JButton button2 = new JButton("Stop");
-			jf.add(button2);
-			JButton button3 = new JButton("Get percent");
-			jf.add(button3);
-			
-			button.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					for(SharedFile f : core.getSharingManager().getSharedFiles()) {
-						
-						 System.out.println("file : " + f + " fh = " + f.getFileHash());
-						
-					}
-				}  
-			});
-            // ----------------------------------------------------------
-			button2.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					core.getSharingManager().stopLoadingCompletedFiles();
-				}  
-			});
-			// ----------------------------------------------------------
-			button3.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					System.out.println( core.getSharingManager().getCurrentHashingFile() );
-					System.out.println( core.getSharingManager().getCurrentHashingFilePercent() );
-				}  
-			});
-			
-			
-			jf.setVisible(true);
-
-			
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
 	}
 }
