@@ -81,8 +81,8 @@ import org.jmule.util.Convert;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 07:56:42 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:49:03 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -733,6 +733,12 @@ public class DownloadSession implements JMTransferSession {
 		return this.sharedFile.length();
 	}
 	
+	public int getPeersCount() {
+		
+		return peer_list.size();
+		
+	}
+	
 	
 	private void activateUnusedPeers() {
 		
@@ -916,6 +922,5 @@ public class DownloadSession implements JMTransferSession {
 			}
 		}
 		
-	}
-	
+	}	
 }
