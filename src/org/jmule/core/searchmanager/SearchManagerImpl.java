@@ -22,18 +22,23 @@
  */
 package org.jmule.core.searchmanager;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:20:15 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:52:40 $$
  */
 public class SearchManagerImpl implements SearchManager {
 
@@ -41,6 +46,8 @@ public class SearchManagerImpl implements SearchManager {
 	List<SearchRequest> search_request_list = new LinkedList<SearchRequest>();
 	ServerManager server_manager = ServerManagerFactory.getInstance();
 	List<SearchResultListener> search_result_listeners = new LinkedList<SearchResultListener>();
+
+	private long searches_count = 0;
 	
 	public synchronized void addResult(SearchResult searchResult) {
 		search_request_list.remove(searchResult.getSearchRequest());
@@ -67,7 +74,7 @@ public class SearchManagerImpl implements SearchManager {
 
 	public void search(String searchString) {
 		SearchRequest search_request = new SearchRequest(searchString);
-		search(search_request);
+		search(search_request);		
 	}
 
 	public synchronized void search(SearchRequest searchRequest) {
@@ -76,7 +83,7 @@ public class SearchManagerImpl implements SearchManager {
 			Server server = server_manager.getConnectedServer();
 	        server.searchFiles(searchRequest);
 		}
-		
+		searches_count++;
 	}
 
 	public void addSeachResultListener(SearchResultListener searchResultListener) {
@@ -94,8 +101,15 @@ public class SearchManagerImpl implements SearchManager {
 	}
 	
 	public void initialize() {
-		
-		
+		Set<String> types = new HashSet<String>();
+		types.add(JMuleCoreStats.SEARCHES_COUNT);
+		JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+			public void updateStats(Set<String> types,Map<String, Object> values) {
+				if (types.contains(JMuleCoreStats.SEARCHES_COUNT)) {
+					values.put(JMuleCoreStats.SEARCHES_COUNT, searches_count);
+				}
+			}
+		});
 	}
 
 	public void shutdown() {

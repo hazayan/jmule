@@ -22,9 +22,11 @@
  */
 package org.jmule.core.peermanager;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -34,13 +36,15 @@ import org.jmule.core.downloadmanager.DownloadManagerFactory;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:35 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:51:40 $$
  */
 public class PeerManagerImpl implements PeerManager {
 
@@ -141,7 +145,16 @@ public class PeerManagerImpl implements PeerManager {
 	
 	
 	public void initialize() {
-      //TODO create our own binary file format (.jmule) 
+      //TODO create our own binary file format (.jmule)
+	   Set<String> types = new HashSet<String>();	
+	   types.add(JMuleCoreStats.ST_NET_PEERS_COUNT);
+	   JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+		public void updateStats(Set<String> types, Map<String, Object> values) {
+			if (types.contains(JMuleCoreStats.ST_NET_PEERS_COUNT)) {
+				values.put(JMuleCoreStats.ST_NET_PEERS_COUNT, peer_list.size());
+			}
+		}
+	   });
 	}
 
 	public void shutdown() {

@@ -25,8 +25,11 @@ package org.jmule.core.edonkey.impl;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
@@ -40,13 +43,15 @@ import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.metfile.ServerMet;
 import org.jmule.core.edonkey.metfile.ServerMetException;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:37:55 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:51:04 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -354,6 +359,31 @@ public class ServerManagerImpl implements ServerManager {
 		} catch (ServerMetException e) {
 		}
 		
+		Set<String> types = new HashSet<String>();
+		types.add(JMuleCoreStats.ST_NET_SERVERS_COUNT);
+		types.add(JMuleCoreStats.ST_NET_SERVERS_DEAD_COUNT);
+		types.add(JMuleCoreStats.ST_NET_SERVERS_ALIVE_COUNT);
+		
+		JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+			public void updateStats(Set<String> types,Map<String, Object> values) {
+				if (types.contains(JMuleCoreStats.ST_NET_SERVERS_COUNT)) {
+					values.put(JMuleCoreStats.ST_NET_SERVERS_COUNT, getServersCount());
+				}
+				if (types.contains(JMuleCoreStats.ST_NET_SERVERS_DEAD_COUNT)) {
+					int dead_servers_count = 0;
+					for(Server server : server_list)
+						if (server.isDown())  dead_servers_count++;
+					values.put(JMuleCoreStats.ST_NET_SERVERS_DEAD_COUNT, dead_servers_count);
+				}
+				if (types.contains(JMuleCoreStats.ST_NET_SERVERS_ALIVE_COUNT)) {
+					int alive_servers_count = 0;
+					for(Server server : server_list)
+						if (!server.isDown())  alive_servers_count++;
+					values.put(JMuleCoreStats.ST_NET_SERVERS_ALIVE_COUNT, alive_servers_count);
+				}
+				
+			}
+		});
 	}
 
 	public void shutdown() {
