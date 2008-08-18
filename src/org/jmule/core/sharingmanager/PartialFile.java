@@ -45,8 +45,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:01 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:57:31 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -478,7 +478,7 @@ public class PartialFile extends SharedFile {
 		
 	}	
 	
-	public long getDownloadedSize() {
+	public long getDownloadedBytes() {
 		
 		return length() - partFile.getGapList().byteCount();
 		
@@ -486,7 +486,7 @@ public class PartialFile extends SharedFile {
 	
 	public double getPercentCompleted() {
 		
-		return (double)(getDownloadedSize()*100)/(double)length();
+		return (double)(getDownloadedBytes()*100)/(double)length();
 		
 	}
 	
