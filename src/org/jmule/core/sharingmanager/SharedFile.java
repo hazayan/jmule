@@ -22,6 +22,22 @@
  */
 package org.jmule.core.sharingmanager;
 
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ARC;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_AUDIO;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_DOC;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_IMAGE;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ISO;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_PROGRAM;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_UNKNOWN;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_VIDEO;
+import static org.jmule.core.edonkey.E2DKConstants.archive_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.audio_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.doc_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.image_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.iso_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.program_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.video_extensions;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,7 +46,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.io.FileUtils;
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.FileChunk;
+import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.impl.TagList;
@@ -41,8 +59,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:03 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 16:53:03 $$
  */
 public abstract class SharedFile {
 	
@@ -57,7 +75,7 @@ public abstract class SharedFile {
 			try {
 				fileChannel = new RandomAccessFile(file,"rws").getChannel();
 			} catch (FileNotFoundException e) {
-				throw new SharedFileException("Can't open shared file "+file);
+				e.printStackTrace();
 			}
 			
 		ByteBuffer data = Misc.getByteBuffer(chunkData.getChunkEnd()-chunkData.getChunkBegin());
@@ -72,14 +90,46 @@ public abstract class SharedFile {
 		return new FileChunk(chunkData.getChunkBegin(),chunkData.getChunkEnd(),data);
 	}
 	
+	public String getAbsolutePath() {
+		return file.getAbsolutePath();
+	}
+	
 	public void delete() {
-		
 		FileUtils.deleteQuietly(file);
 		
 	}
 	
 	public String getSharingName() {
 		return file.getName();
+	}
+	
+	public byte[] getMimeType() {
+		String file_name = getSharingName();
+		
+		String extension = Misc.getFileExtension(file_name);
+		extension = extension.toLowerCase();
+		if (audio_extensions.contains(extension))
+			return TAG_FILE_TYPE_AUDIO;
+		
+		if (video_extensions.contains(extension))
+			return TAG_FILE_TYPE_VIDEO;
+		
+		if (image_extensions.contains(extension))
+			return TAG_FILE_TYPE_IMAGE;
+		
+		if (doc_extensions.contains(extension))
+			return TAG_FILE_TYPE_DOC;
+		
+		if (program_extensions.contains(extension))
+			return TAG_FILE_TYPE_PROGRAM;
+		
+		if (archive_extensions.contains(extension))
+			return TAG_FILE_TYPE_ARC;
+		
+		if (iso_extensions.contains(extension))
+			return TAG_FILE_TYPE_ISO;
+		
+		return TAG_FILE_TYPE_UNKNOWN;
 	}
 	
 	public int hashCode() {
@@ -134,7 +184,9 @@ public abstract class SharedFile {
 		this.tagList = newTagList;		
 	}
 	
-	
+	public ED2KFileLink getED2KLink() {
+		return new ED2KFileLink(getSharingName(),length(),getFileHash());
+	}
 	
 	public void closeFile() {
 		
