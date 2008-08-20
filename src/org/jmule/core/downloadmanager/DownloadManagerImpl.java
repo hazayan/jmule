@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:48:11 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:47:21 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -54,10 +54,7 @@ public class DownloadManagerImpl implements DownloadManager {
 	
 	public DownloadManagerImpl() {
 		
-		List<PartialFile> file_list = SharingManagerFactory.getInstance().getPartialFiles();
 	
-		for(PartialFile file : file_list)
-			addDownload(file);
 		
 	}
 	
@@ -69,7 +66,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadAdded(searchResult.getFileHash());
+			listener.downloadAdded(download_session);
 		
 	}
 
@@ -81,7 +78,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadAdded(fileLink.getFileHash());
+			listener.downloadAdded(download_session);
 		
 
 	}
@@ -94,7 +91,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadAdded(partialFile.getFileHash());
+			listener.downloadAdded(download_session);
 		
 	}
 	
@@ -106,33 +103,39 @@ public class DownloadManagerImpl implements DownloadManager {
 
 	public void removeDownload(FileHash fileHash) {
 		
-		getDownload(fileHash).cancelDownload();
+		DownloadSession download_session = getDownload(fileHash);
+		
+		download_session.cancelDownload();
 		
 		session_list.remove(fileHash);
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadRemoved(fileHash);
+			listener.downloadRemoved(download_session);
 		
 	}
 
 	public void startDownload(FileHash fileHash) {
 		
-		session_list.get(fileHash).startDownload();
+		DownloadSession download_session = session_list.get(fileHash);
+		
+		download_session.startDownload();
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadStarted(fileHash);
+			listener.downloadStarted(download_session);
 		
 	}
 
 	public void stopDownload(FileHash fileHash) {
 	
-		session_list.get(fileHash).stopDownload();
+		DownloadSession download_session = session_list.get(fileHash);
+		
+		download_session.stopDownload();
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadStopped(fileHash);
+			listener.downloadStopped(download_session);
 		
 	}
 
@@ -143,6 +146,12 @@ public class DownloadManagerImpl implements DownloadManager {
 	}
 	
 	public void initialize() {
+		List<PartialFile> file_list = SharingManagerFactory.getInstance().getPartialFiles();
+		
+		for(PartialFile file : file_list)
+			addDownload(file);
+		
+
   		Set<String> types = new HashSet<String>();
 		types.add(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES);
 		types.add(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT);
@@ -168,6 +177,7 @@ public class DownloadManagerImpl implements DownloadManager {
 	             }
 			}
 		});	
+
 	}
 
 	public void shutdown() {
