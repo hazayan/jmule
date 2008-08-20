@@ -22,21 +22,39 @@
  */
 package org.jmule.core.searchmanager;
 
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ARC;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_AUDIO;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_DOC;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_IMAGE;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ISO;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_PROGRAM;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_UNKNOWN;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_VIDEO;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_AVIABILITY;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_COMPLETESRC;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NAME;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_SIZE;
+import static org.jmule.core.edonkey.E2DKConstants.archive_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.audio_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.doc_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.image_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.iso_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.program_extensions;
+import static org.jmule.core.edonkey.E2DKConstants.video_extensions;
 
 import org.jmule.core.edonkey.impl.ClientID;
+import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.tag.impl.TagException;
 import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.util.Convert;
+import org.jmule.util.Misc;
 
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:20:14 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:48:27 $$
  */
 public class SearchResultItem extends TagList {
 
@@ -44,18 +62,23 @@ public class SearchResultItem extends TagList {
 	private ClientID clientID;
 	private short clientPort;
 	
-	public String toString() {
-		String result="";
-		result+="Name : " + this.getFileName()+" Size : "+this.getFileSize();
-		return result;
-	}
-	
 	public SearchResultItem(FileHash fileHash, ClientID clientID, short clientPort) {
 		super();
 		this.fileHash = fileHash;
 		this.clientID = clientID;
 		this.clientPort = clientPort;
 	}
+	
+	public ED2KFileLink getAsED2KLink() {
+		return new ED2KFileLink(getFileName(),getFileSize(),getFileHash());
+	}
+	
+	public String toString() {
+		String result="";
+		result+="Name : " + this.getFileName()+" Size : "+this.getFileSize();
+		return result;
+	}
+	
 	
 	public String getFileName(){
 		try {
@@ -65,9 +88,9 @@ public class SearchResultItem extends TagList {
 		}
 	}
 	
-	public int getFileSize() {
+	public long getFileSize() {
 		try {
-			return super.getDWORDTag(TAG_NAME_SIZE);
+			return Convert.intToLong(super.getDWORDTag(TAG_NAME_SIZE));
 		} catch (TagException e) {
 			return 0;
 		}
@@ -87,6 +110,35 @@ public class SearchResultItem extends TagList {
 		} catch (TagException e) {
 			return 0;
 		}
+	}
+	
+	public byte[] getMimeType() {
+		String file_name = getFileName();
+		
+		String extension = Misc.getFileExtension(file_name);
+		extension = extension.toLowerCase();
+		if (audio_extensions.contains(extension))
+			return TAG_FILE_TYPE_AUDIO;
+		
+		if (video_extensions.contains(extension))
+			return TAG_FILE_TYPE_VIDEO;
+		
+		if (image_extensions.contains(extension))
+			return TAG_FILE_TYPE_IMAGE;
+		
+		if (doc_extensions.contains(extension))
+			return TAG_FILE_TYPE_DOC;
+		
+		if (program_extensions.contains(extension))
+			return TAG_FILE_TYPE_PROGRAM;
+		
+		if (archive_extensions.contains(extension))
+			return TAG_FILE_TYPE_ARC;
+		
+		if (iso_extensions.contains(extension))
+			return TAG_FILE_TYPE_ISO;
+		
+		return TAG_FILE_TYPE_UNKNOWN;
 	}
 
 	public FileHash getFileHash() {
