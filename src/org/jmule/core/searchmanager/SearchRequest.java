@@ -25,8 +25,8 @@ package org.jmule.core.searchmanager;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:20:14 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:49:58 $$
  */
 public class SearchRequest {
 
@@ -68,6 +68,17 @@ public class SearchRequest {
 	 */
 	public void setSearchQuery(SearchQuery searchQuery) {
 		this.searchQuery = searchQuery;
+	}
+	
+	public int hashCode() {
+		return searchQuery.getQuery().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		if (object == null) return false;
+		if (!(object instanceof SearchRequest)) return false;
+		SearchRequest query = (SearchRequest)object;
+		return query.getSearchQuery().getQuery().equals(searchQuery.getQuery());
 	}
 	
 }
