@@ -22,7 +22,6 @@
  */
 package org.jmule.core.net;
 
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKFAILED;
 import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
@@ -44,6 +43,7 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTTAKEN;
+import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKFAILED;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVFOUNDSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVIDCHANGE;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVMESSAGE;
@@ -81,6 +81,7 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotReleaseSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerCallbackFailed;
@@ -100,8 +101,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:46 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 16:45:17 $$
  */
 public class PacketScanner {
 	
@@ -282,16 +283,13 @@ public class PacketScanner {
 		}
 		
 		case OP_SLOTREQUEST : {
-			//System.out.println("Packet : "+Convert.byteToHex(packet.getCommand()));
-			//StandartPacket sPacket = (StandartPacket) packet;
 			scannedPacket = new JMPeerSlotRequestSP();
 			
 			break;
 		}
 		
 		case OP_SLOTRELEASE : {
-			StandardPacket sPacket = (StandardPacket) packet;
-			scannedPacket = new JMPeerSlotTakenSP();
+			scannedPacket = new JMPeerSlotReleaseSP();
 			break;
 		}
 		
