@@ -35,8 +35,8 @@ import java.util.regex.Pattern;
  * Created on Aug 17, 2008
  * @author javajox
  * @author binary256_
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/08/18 08:56:22 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/08/20 15:38:02 $
  */
 public class JMuleCoreStats {
 
@@ -65,6 +65,8 @@ public class JMuleCoreStats {
 	private static final String[] _ST_ALL = {
 		ST_NET_SESSION_DOWNLOAD_BYTES,
 		ST_NET_SESSION_UPLOAD_BYTES,
+		ST_NET_SESSION_DOWNLOAD_COUNT,
+		ST_NET_SESSION_UPLOAD_COUNT,
 		ST_NET_PEERS_COUNT,
 		ST_NET_PEERS_DOWNLOAD_COUNT,
 		ST_NET_PEERS_UPLOAD_COUNT,
@@ -76,7 +78,8 @@ public class JMuleCoreStats {
 		ST_DISK_SHARED_FILES_COMPLETE_COUNT,
 		ST_DISK_SHARED_FILES_BYTES,
 		ST_DISK_SHARED_FILES_PARTIAL_BYTES,
-		ST_DISK_SHARED_FILES_COMPLETE_BYTES
+		ST_DISK_SHARED_FILES_COMPLETE_BYTES,
+		SEARCHES_COUNT
 	};
 	
 	private static class Pair {
@@ -107,7 +110,7 @@ public class JMuleCoreStats {
 			for(String s : _ST_ALL) {	
 				
 				if ( pattern.matcher( s ).matches()){
-					
+
 					expanded.add( s );
 				}
 			}
