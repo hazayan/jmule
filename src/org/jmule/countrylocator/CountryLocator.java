@@ -35,11 +35,14 @@ import com.maxmind.geoip.LookupService;
  * Created on Aug 12, 2008
  * @author javajox
  * @author binary256_
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/08/12 08:05:19 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/08/20 15:53:20 $
  */
 public class CountryLocator {
 
+	public static int FLAG_WIDTH 	= 25;
+	public static int FLAG_HEIGHT	= 15;
+	
 	private static CountryLocator instance;
 	
 	private LookupService lookup_service;
@@ -59,8 +62,6 @@ public class CountryLocator {
 		} catch (IOException e) {
 			
 	        service_down = true;
-			
-			e.printStackTrace();
 		}
 		
 	}
@@ -120,4 +121,10 @@ public class CountryLocator {
 		
 		return service_down ? null : getCountry( inetAddress ).getCode();
 	}
+	
+	public boolean isServiceDown() {
+		return service_down;
+	}
+
+	
 }
