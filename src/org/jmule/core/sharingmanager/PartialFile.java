@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.FileChunk;
@@ -45,8 +46,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:57:31 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:41:32 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -54,9 +55,9 @@ public class PartialFile extends SharedFile {
 	
 	private String metFileName;
 	
-	private boolean hasHashSet = false;
-	
 	private boolean checkedParts[];
+	
+	private boolean hasHashSet = false;
 	
 	private PartMet partFile;
 	
@@ -74,19 +75,19 @@ public class PartialFile extends SharedFile {
 			throw new SharedFileException("Failed to open "+file);
 		}
 		
-		this.partFile=partFile;
-		
+		this.partFile = partFile;
+		this.tagList = partFile.getTagList();
 		tempFileName = tempDir + File.separator + partFile.getTempFileName();
 		
 		metFileName = tempDir + File.separator + partFile.getName();
-		
-		hasHashSet = true;
 		
 		hashSet = partFile.getFileHashSet();
 				
 		checkedParts = new boolean[Misc.getPartCount(length())];
 		
 		int partCount = Misc.getPartCount(length());
+		
+		hasHashSet = true;
 		
 		for(int i = 0;i < partCount;i++) {
 			
@@ -147,7 +148,11 @@ public class PartialFile extends SharedFile {
 		
 		partFile.setGapList(gapList);
 		
-		this.hashSet = new PartHashSet(fileHash);
+		if (hashSet==null) {
+			hasHashSet = false;
+			this.hashSet = new PartHashSet(fileHash);
+		} else 
+			hasHashSet = true;
 
 		checkedParts = new boolean[Misc.getPartCount(fileSize)];
 		
@@ -157,17 +162,9 @@ public class PartialFile extends SharedFile {
 			
 				checkedParts[i] = false;
 				
-		hasHashSet = false;
-		
-		if (hashSet == null)
-			return;
-		//Save .part.met file only with file part hashes
+		partFile.setFileHash(fileHash);
 		
 		partFile.setFileHashSet(hashSet);
-		
-		hasHashSet = true;
-		
-		this.hashSet = hashSet;
 		
 		try {
 			
@@ -183,8 +180,11 @@ public class PartialFile extends SharedFile {
 	public void setHashSet(PartHashSet newSet) {
 		
 		hasHashSet = true;
-		
-		this.hashSet = newSet;
+		int partCount = Misc.getPartCount(this.length());
+		hashSet.clear();
+		for(int i = 0;i<partCount;i++)
+			hashSet.add(newSet.get(i));
+			
 		
 		partFile.setFileHashSet(hashSet);
 		
@@ -213,6 +213,20 @@ public class PartialFile extends SharedFile {
 		
 		return this.partFile.getRealFileName();
 		
+	}
+	
+	public long getPartCount() {
+		long part_count = (long) Math.ceil((double)length() / (double)PARTSIZE);
+		if (length() % PARTSIZE!=0) part_count++;
+		return part_count;
+	}
+	
+	public long getAvailablePartCount() {
+		long part_count = 0;
+		for(int i = 0;i<checkedParts.length;i++)
+			if (checkedParts[i])
+				part_count++;
+		return part_count;
 	}
 
 	public synchronized void writeData(FileChunk fileChunk) throws SharedFileException {
@@ -267,10 +281,6 @@ public class PartialFile extends SharedFile {
 			
 			partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
 			
-			//Danger
-			
-			if (!hasHashSet) return ;
-			
 			try {
 				
 				this.partFile.writeFile();
@@ -292,10 +302,6 @@ public class PartialFile extends SharedFile {
 		
 	}
 
-	/** 
-	 * Add num bytes at end of file 
-	 * @param num
-	 */
 	private void addBytes(long bytes) {
 		
 		long blockCount = bytes / PARTSIZE;
@@ -327,9 +333,7 @@ public class PartialFile extends SharedFile {
 			fileChannel.write(block);
 			
 		} catch (IOException e) {
-			
-			// TODO Auto-generated catch block
-			
+						
 			e.printStackTrace();
 			
 		}
@@ -339,26 +343,33 @@ public class PartialFile extends SharedFile {
 	/**
 	 * @return true - file is ok !
 	 */
-	public boolean checkFullFileIntegrity() {
+	public synchronized boolean checkFullFileIntegrity() {
 		
 		if (!hasHashSet()) return false;
 		
 		PartHashSet fileHashSet = partFile.getFileHashSet();
 		
+		try {
+			fileChannel.force(true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		PartHashSet newSet = MD4FileHasher.calcHashSets(fileChannel);
-		
-		System.out.println("Old hash set : "+fileHashSet);
-		System.out.println("New hash set : "+newSet);
-		
-		if (newSet.size()!=fileHashSet.size()) return false;
+		System.out.println("File hash : " + fileHashSet+" ");
+		System.out.println("New set : "+newSet+"");
+		if (newSet.size()!=fileHashSet.size()) 
+			return false;
 		
 		for(int i = 0;i<fileHashSet.size();i++) {
 			
 			byte b[] = newSet.get(i);
 			
 			byte a[] = fileHashSet.get(i);
+				
 			
-			if (!compareArray(a,b)) {
+			
+			if (!Arrays.equals(a, b)) {
 				
 				long begin = PARTSIZE*i;
 				
@@ -421,17 +432,6 @@ public class PartialFile extends SharedFile {
 		return status;
 	}
 	
-	private boolean compareArray(byte[] a1, byte[] a2) {
-		
-		if (a1.length != a2.length) return false;
-	
-		for(int i = 0;i<a1.length;i++)
-			
-			if (a1[i] != a2[i]) return false;
-		
-		return true;
-		
-	}
 	
 	private boolean checkPartIntegrity(int partID) {
 		
@@ -446,17 +446,18 @@ public class PartialFile extends SharedFile {
 			fileChannel.position(start);
 			
 			int count = fileChannel.read(partData);
-			
+			partData.limit(count);
 			msgDigest.update(partData);
 			
 			ByteBuffer hashset = Misc.getByteBuffer(16);
 			
 			msgDigest.finalDigest(hashset);
-		
-			if (!compareArray(hashSet.get(partID),hashset.array()))
-				
-				return false;
 			
+			if (!Arrays.equals(hashSet.get(partID),hashset.array())) {
+				System.out.println(Convert.byteToHexString(hashSet.get(partID)));
+				System.out.println(Convert.byteToHexString(hashset.array()));
+				return false;
+			}
 			return true;
 			
 		} catch (IOException e) {
@@ -478,6 +479,14 @@ public class PartialFile extends SharedFile {
 		
 	}	
 	
+
+	public PartMet getPartMetFile() {
+		
+		return partFile;
+		
+	}
+	
+
 	public long getDownloadedBytes() {
 		
 		return length() - partFile.getGapList().byteCount();
@@ -509,6 +518,7 @@ public class PartialFile extends SharedFile {
 			
 			return Convert.intToLong(tagList.getDWORDTag(FT_FILESIZE));
 			
-		} catch (Throwable e) { return 0; }
+		} catch (Throwable e) {
+			return 0; }
 	}
 }
