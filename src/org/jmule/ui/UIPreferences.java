@@ -22,17 +22,561 @@
  */
 package org.jmule.ui;
 
+import java.util.prefs.Preferences;
+
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:54 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/21 17:17:58 $$
  */
-public interface UIPreferences {
+public class UIPreferences extends UIConstants {
 
-	public static final String UI_TYPE = "ui_type";
-	public static final String UI_ROOT = "/org/jmule/ui";
+
+	public static void storeDefaultPreferences(String particular_ui_root) {
+		
+		Preferences preferences = Preferences.systemRoot();
+		
+		try {
+			 // sets the visibility of the columns
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) ).
+			 putBoolean( VISIBILITY,  getDefaultColumnVisibility( SERVER_LIST_NAME_COLUMN_ID ) );	
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_IP_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_DESCRIPTION_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_DESCRIPTION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_PING_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_PING_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_USERS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_USERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_MAX_USERS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_MAX_USERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_FILES_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_FILES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_SOFT_LIMIT_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_SOFT_LIMIT_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_HARD_LIMIT_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_HARD_LIMIT_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_VERSION_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_VERSION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SIZE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_PROGRESS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_PROGRESS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SOURCES_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_REMAINING_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_REMAINING_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_STATUS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_IP_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_PEER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_FILE_SIZE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_LIST_FILE_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_PEERS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_LIST_PEERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_ETA_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_LIST_ETA_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_UPLOADED_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_LIST_UPLOADED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_IP_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_PEER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_STATUS_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_PEER_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILENAME_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_FILENAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILESIZE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_FILESIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_AVAILABILITY_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_AVAILABILITY_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_COMPLETESRC_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_COMPLETESRC_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILE_TYPE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_FILE_TYPE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILE_ID_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_FILE_ID_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SHARED_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_SIZE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SHARED_LIST_FILE_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_TYPE_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SHARED_LIST_FILE_TYPE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_ID_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SHARED_LIST_FILE_ID_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_COMPLETED_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SHARED_LIST_COMPLETED_COLUMN_ID ) );
+
+			 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+			 
+			// sets the default width of the columns
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) ).
+			 putInt(WIDTH,  getDefaultColumnWidth( SERVER_LIST_NAME_COLUMN_ID ) );	
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_IP_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_DESCRIPTION_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_DESCRIPTION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_PING_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_PING_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_USERS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_USERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_MAX_USERS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_MAX_USERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_FILES_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_FILES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_SOFT_LIMIT_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_SOFT_LIMIT_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_HARD_LIMIT_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_HARD_LIMIT_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_VERSION_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_VERSION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SIZE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_PROGRESS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_PROGRESS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SOURCES_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_REMAINING_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_REMAINING_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_STATUS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_IP_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_PEER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_FILE_SIZE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_LIST_FILE_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_PEERS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_LIST_PEERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_ETA_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_LIST_ETA_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_UPLOADED_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_LIST_UPLOADED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_IP_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_PEER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_STATUS_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_PEER_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILENAME_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_FILENAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILESIZE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_FILESIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_AVAILABILITY_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_AVAILABILITY_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_COMPLETESRC_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_COMPLETESRC_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILE_TYPE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_FILE_TYPE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILE_ID_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_FILE_ID_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SHARED_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_SIZE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SHARED_LIST_FILE_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_TYPE_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SHARED_LIST_FILE_TYPE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_ID_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SHARED_LIST_FILE_ID_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_COMPLETED_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SHARED_LIST_COMPLETED_COLUMN_ID ) );
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+			 
+			// sets the default order of the columns
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) ).
+			 putInt(ORDER,  getDefaultColumnOrder( SERVER_LIST_NAME_COLUMN_ID ) );	
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_IP_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_DESCRIPTION_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_DESCRIPTION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_PING_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_PING_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_USERS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_USERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_MAX_USERS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_MAX_USERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_FILES_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_FILES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_SOFT_LIMIT_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_SOFT_LIMIT_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_HARD_LIMIT_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_HARD_LIMIT_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_VERSION_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_VERSION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SIZE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_PROGRESS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_PROGRESS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SOURCES_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_REMAINING_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_REMAINING_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_STATUS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_IP_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_PEER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_FILE_SIZE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_LIST_FILE_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_PEERS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_LIST_PEERS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_ETA_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_LIST_ETA_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_LIST_UPLOADED_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_LIST_UPLOADED_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_IP_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_PEER_LIST_IP_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_STATUS_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_PEER_LIST_STATUS_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILENAME_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_FILENAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILESIZE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_FILESIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_AVAILABILITY_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_AVAILABILITY_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_COMPLETESRC_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_COMPLETESRC_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILE_TYPE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_FILE_TYPE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILE_ID_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_FILE_ID_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_NAME_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SHARED_LIST_FILE_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_SIZE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SHARED_LIST_FILE_SIZE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_TYPE_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SHARED_LIST_FILE_TYPE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_FILE_ID_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SHARED_LIST_FILE_ID_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_COMPLETED_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SHARED_LIST_COMPLETED_COLUMN_ID ) );
+			
+		}catch(Throwable t) {
+			t.printStackTrace();
+		}
+		
+	}
 	
-	public String getUIType();
-	public void setUIType(String type);
 }
