@@ -22,31 +22,409 @@
  */
 package org.jmule.ui;
 
+
+import java.util.HashMap;
+
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Map;
+
 
 /**
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/19 19:45:37 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/21 13:07:33 $$
  */
+
 public class UIConstants {
 	
-	// Columns ID
-	public static final int SERVER_NAME_ID          =   100;
-	public static final int SERVER_IP_ID            =   200;
-	public static final int SERVER_DESCRIPTION_ID   =   300;
-	public static final int SERVER_PING_ID          =   400;
-	public static final int SERVER_USERS_ID         =   500;
-	public static final int SERVER_MAX_USERS_ID     =   600;
-	public static final int SERVER_FILES_ID         =   700;
-	public static final int SERVER_SOFT_LIMIT_ID    =   800;
-	public static final int SERVER_HARD_LIMIT_ID    =   900;
-	public static final int SERVER_VERSION_ID   	=   1000;
+	public static final String UI_ROOT = "/org/jmule/ui";
 	
+	public static final String VISIBILITY        =       "VISIBILITY";
+	public static final String ORDER             =       "ORDER";
+	public static final String WIDTH             =       "WIDTH";
+	public static final String TABLE_COLUMN_PATH =       "/tables/columns";
+	
+	public static final int TOOL_BAR_ID                         = 1;
+	public static final int STATUS_BAR_ID                       = 2;
+
+	// Columns ID
+
+	// server list
+	public static final int SERVER_LIST_NAME_COLUMN_ID          =   100;
+	public static final int SERVER_LIST_IP_COLUMN_ID            =   200;
+	public static final int SERVER_LIST_DESCRIPTION_COLUMN_ID   =   300;
+	public static final int SERVER_LIST_PING_COLUMN_ID          =   400;
+	public static final int SERVER_LIST_USERS_COLUMN_ID         =   500;
+	public static final int SERVER_LIST_MAX_USERS_COLUMN_ID     =   600;
+	public static final int SERVER_LIST_FILES_COLUMN_ID         =   700;
+	public static final int SERVER_LIST_SOFT_LIMIT_COLUMN_ID    =   800;
+	public static final int SERVER_LIST_HARD_LIMIT_COLUMN_ID    =   900;
+	public static final int SERVER_LIST_VERSION_COLUMN_ID   	=   1000;
+	
+	// downloads
+	public static final int DOWNLOAD_LIST_FILE_NAME_COLUMN_ID         = 1100; 
+	public static final int DOWNLOAD_LIST_SIZE_COLUMN_ID              = 1200;
+	public static final int DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID       = 1300;
+	public static final int DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID    = 1400;
+	public static final int DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID      = 1500;
+	public static final int DOWNLOAD_LIST_PROGRESS_COLUMN_ID          = 1600;
+	public static final int DOWNLOAD_LIST_SOURCES_COLUMN_ID           = 1700;
+	public static final int DOWNLOAD_LIST_REMAINING_COLUMN_ID         = 1800;
+	public static final int DOWNLOAD_LIST_STATUS_COLUMN_ID            = 1900;
+	
+	public static final int DOWNLOAD_PEER_LIST_IP_COLUMN_ID           = 2000;
+	public static final int DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID       = 2100;
+	public static final int DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID     = 2200;
+	public static final int DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID     = 2300;
+	
+	// uploads
+	public static final int UPLOAD_LIST_FILE_NAME_COLUMN_ID           = 2400;
+	public static final int UPLOAD_LIST_FILE_SIZE_COLUMN_ID           = 2500;
+	public static final int UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID        = 2600;
+	public static final int UPLOAD_LIST_PEERS_COLUMN_ID               = 2700;
+	public static final int UPLOAD_LIST_ETA_COLUMN_ID                 = 2800;
+	public static final int UPLOAD_LIST_UPLOADED_COLUMN_ID            = 2900;
+	
+	public static final int UPLOAD_PEER_LIST_IP_COLUMN_ID             = 3000;
+	public static final int UPLOAD_PEER_LIST_STATUS_COLUMN_ID         = 3100;
+	public static final int UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID       = 3200;
+	public static final int UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID       = 3300;
+	
+	// search
+	public static final int SEARCH_FILENAME_COLUMN_ID                 = 3400;
+	public static final int SEARCH_FILESIZE_COLUMN_ID                 = 3500;
+	public static final int SEARCH_AVAILABILITY_COLUMN_ID             = 3600;
+	public static final int SEARCH_COMPLETESRC_COLUMN_ID              = 3700;
+	public static final int SEARCH_FILE_TYPE_COLUMN_ID                = 3800;
+	public static final int SEARCH_FILE_ID_COLUMN_ID                  = 3900;
+	
+	// shared
+	public static final int SHARED_LIST_FILE_NAME_COLUMN_ID           = 4000;
+	public static final int SHARED_LIST_FILE_SIZE_COLUMN_ID           = 4100;
+	public static final int SHARED_LIST_FILE_TYPE_COLUMN_ID           = 4200;
+	public static final int SHARED_LIST_FILE_ID_COLUMN_ID             = 4300;
+	public static final int SHARED_LIST_COMPLETED_COLUMN_ID           = 4400;
+	
+	// Column UI nodes
+	public static final String SERVER_LIST_NAME_NODE                     = "/server_list_name_column";
+	public static final String SERVER_LIST_IP_NODE                       = "/server_list_ip_column";
+	public static final String SERVER_LIST_DESCRIPTION_NODE              = "/server_list_description_column";
+	public static final String SERVER_LIST_PING_NODE                     = "/server_list_ping_column";
+	public static final String SERVER_LIST_USERS_NODE                    = "/server_list_user_column";
+	public static final String SERVER_LIST_MAX_USERS_NODE                = "/server_list_max_user_column";
+	public static final String SERVER_LIST_FILES_NODE                    = "/server_list_files_column";
+	public static final String SERVER_LIST_SOFT_LIMIT_NODE               = "/server_list_soft_limit_column";
+	public static final String SERVER_LIST_HARD_LIMIT_NODE               = "/server_list_hard_limit_column";
+	public static final String SERVER_LIST_VERSION_NODE                  = "/server_list_version_column";
+	
+	public static final String DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE       = "/download_list_file_name_column";
+	public static final String DOWNLOAD_LIST_SIZE_COLUMN_NODE            = "/download_list_size_column";
+	public static final String DOWNLOAD_LIST_TRANSFERRED_COLUMN_NODE     = "/download_list_transferred_column";
+	public static final String DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_NODE  = "/download_list_download_speed_column";
+	public static final String DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_NODE    = "/download_list_upload_speed_column";
+	public static final String DOWNLOAD_LIST_PROGRESS_COLUMN_NODE        = "/download_list_progress_column";
+	public static final String DOWNLOAD_LIST_SOURCES_COLUMN_NODE         = "/download_list_sources_column";
+	public static final String DOWNLOAD_LIST_REMAINING_COLUMN_NODE       = "/download_remaining_column";
+	public static final String DOWNLOAD_LIST_STATUS_COLUMN_NODE          = "/download_list_status_column";
+	
+	public static final String DOWNLOAD_PEER_LIST_IP_COLUMN_NODE         = "/download_peer_list_ip_column";
+	public static final String DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE     = "/download_peer_list_status_column";
+	public static final String DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_NODE   = "/download_peer_list_nickname_column";
+	public static final String DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE   = "/download_peer_list_software_column";
+	
+	public static final String UPLOAD_LIST_FILENAME_COLUMN_NODE          = "/upload_list_filename_column";
+	public static final String UPLOAD_LIST_FILESIZE_COLUMN_NODE          = "/upload_list_filesize_column";
+	public static final String UPLOAD_LIST_UPLOADSPEED_COLUMN_NODE       = "/upload_list_uploadspeed_column";
+	public static final String UPLOAD_LIST_PEERS_COLUMN_NODE             = "/upload_list_peers_column";
+	public static final String UPLOAD_LIST_ETA_COLUMN_NODE               = "/upload_list_eta_column";
+	public static final String UPLOAD_LIST_UPLOADED_COLUMN_NODE          = "/upload_list_uploaded_column";
+	
+	public static final String UPLOAD_PEER_LIST_IP_COLUMN_NODE           = "/upload_peer_list_ip_column";
+	public static final String UPLOAD_PEER_LIST_STATUS_COLUMN_NODE       = "/upload_peer_list_status_column";
+	public static final String UPLOAD_PEER_LIST_NICKNAME_COLUMN_NODE     = "/upload_peer_list_nickname_column";
+	public static final String UPLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE     = "/upload_peer_list_software_column";
+	
+	public static final String SEARCH_FILENAME_COLUMN_NODE               = "/search_filename_column";
+	public static final String SEARCH_FILESIZE_COLUMN_NODE               = "/search_filesize_column";
+	public static final String SEARCH_AVAILABILITY_COLUMN_NODE           = "/search_availability_column";
+	public static final String SEARCH_COMPLETESRC_COLUMN_NODE            = "/search_completsrc_column";
+	public static final String SEARCH_FILE_TYPE_COLUMN_NODE              = "/search_file_type_column";
+	public static final String SEARCH_FILE_ID_COLUMN_NODE                = "/search_file_id_column";
+	
+	public static final String SHARED_LIST_FILE_NAME_COLUMN_NODE         = "/shared_list_file_name_column";
+	public static final String SHARED_LIST_FILE_SIZE_COLUMN_NODE         = "/shared_list_file_size_column";
+	public static final String SHARED_LIST_FILE_TYPE_COLUMN_NODE         = "/shared_list_file_type_column";
+	public static final String SHARED_LIST_FILE_ID_COLUMN_NODE           = "/shared_list_file_id_column";
+	public static final String SHARED_LIST_COMPLETED_COLUMN_NODE         = "/shared_list_completed_column";
+	
+	public static final String TOOL_BAR_NODE                             = "/tool_bar";
+	public static final String STATUS_BAR_NODE                           = "/status_bar";
+	
+	private static final HashMap<String,Object> default_values = new HashMap<String,Object>();
+	
+	static {
+		// default table column's visibility
+		default_values.put(SERVER_LIST_NAME_COLUMN_ID + VISIBILITY,              true);
+		default_values.put(SERVER_LIST_IP_COLUMN_ID + VISIBILITY,                true);
+		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + VISIBILITY,       true);
+		default_values.put(SERVER_LIST_PING_COLUMN_ID + VISIBILITY,              true);
+		default_values.put(SERVER_LIST_USERS_COLUMN_ID + VISIBILITY,             true);
+		default_values.put(SERVER_LIST_MAX_USERS_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(SERVER_LIST_FILES_COLUMN_ID + VISIBILITY,             true);
+		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + VISIBILITY,        true);
+		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + VISIBILITY,        true);
+		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + VISIBILITY,           true);
+		
+		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + VISIBILITY,       true);
+		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + VISIBILITY,            true);
+		default_values.put(DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID + VISIBILITY,     true);
+		default_values.put(DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID + VISIBILITY,  true);
+		default_values.put(DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + VISIBILITY,    true);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_COLUMN_ID + VISIBILITY,        true);
+		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + VISIBILITY,       true);
+		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + VISIBILITY,          true);
+		
+		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + VISIBILITY,     true);
+		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + VISIBILITY,   true);
+		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + VISIBILITY,   true);
+		
+		default_values.put(UPLOAD_LIST_FILE_NAME_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(UPLOAD_LIST_FILE_SIZE_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + VISIBILITY,      true);
+		default_values.put(UPLOAD_LIST_PEERS_COLUMN_ID + VISIBILITY,             true);
+		default_values.put(UPLOAD_LIST_ETA_COLUMN_ID + VISIBILITY,               true);
+		default_values.put(UPLOAD_LIST_UPLOADED_COLUMN_ID + VISIBILITY,          true);
+		
+		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + VISIBILITY,           true);
+		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + VISIBILITY,       true);
+		default_values.put(UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID + VISIBILITY,     true);
+		default_values.put(UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + VISIBILITY,     true);
+		
+		default_values.put(SEARCH_FILENAME_COLUMN_ID + VISIBILITY,               true);
+		default_values.put(SEARCH_FILESIZE_COLUMN_ID + VISIBILITY,               true);
+		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + VISIBILITY,           true);
+		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + VISIBILITY,            true);
+		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + VISIBILITY,              true);
+		default_values.put(SEARCH_FILE_ID_COLUMN_ID + VISIBILITY,                true);
+		
+		default_values.put(SHARED_LIST_FILE_NAME_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(SHARED_LIST_FILE_SIZE_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(SHARED_LIST_FILE_TYPE_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(SHARED_LIST_FILE_ID_COLUMN_ID + VISIBILITY,           true);
+		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + VISIBILITY,         true);
+		
+		// default table column's order
+		default_values.put(SERVER_LIST_NAME_COLUMN_ID + ORDER,               1);
+		default_values.put(SERVER_LIST_IP_COLUMN_ID + ORDER,                 2);
+		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + ORDER,        3);
+		default_values.put(SERVER_LIST_PING_COLUMN_ID + ORDER,               4);
+		default_values.put(SERVER_LIST_USERS_COLUMN_ID + ORDER,              5);
+		default_values.put(SERVER_LIST_MAX_USERS_COLUMN_ID + ORDER,          6);
+		default_values.put(SERVER_LIST_FILES_COLUMN_ID + ORDER,              7);
+		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + ORDER,         8);
+		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + ORDER,         9);
+		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + ORDER,            10);
+		
+		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,        1);
+		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + ORDER,             2);
+		default_values.put(DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID + ORDER,      3);
+		default_values.put(DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID + ORDER,   4);
+		default_values.put(DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,     5);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_COLUMN_ID + ORDER,         6);
+		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + ORDER,          7);
+		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + ORDER,        8);
+		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + ORDER,           9);
+		
+		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,          1);
+		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,      2);
+		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + ORDER,    3);
+		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,    4);
+		
+		default_values.put(UPLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,          1);
+		default_values.put(UPLOAD_LIST_FILE_SIZE_COLUMN_ID + ORDER,          2);
+		default_values.put(UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,       3);
+		default_values.put(UPLOAD_LIST_PEERS_COLUMN_ID + ORDER,              4);
+		default_values.put(UPLOAD_LIST_ETA_COLUMN_ID + ORDER,                5);
+		default_values.put(UPLOAD_LIST_UPLOADED_COLUMN_ID + ORDER,           6);
+		
+		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,            1);
+		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,        2);
+		default_values.put(UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID + ORDER,      3);
+		default_values.put(UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,      4);
+		
+		default_values.put(SEARCH_FILENAME_COLUMN_ID + ORDER,                1);
+		default_values.put(SEARCH_FILESIZE_COLUMN_ID + ORDER,                2);
+		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + ORDER,            3);
+		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + ORDER,             4);
+		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + ORDER,               5);
+		default_values.put(SEARCH_FILE_ID_COLUMN_ID + ORDER,                 6);
+		
+		default_values.put(SHARED_LIST_FILE_NAME_COLUMN_ID + ORDER,          1);
+		default_values.put(SHARED_LIST_FILE_SIZE_COLUMN_ID + ORDER,          2);
+		default_values.put(SHARED_LIST_FILE_TYPE_COLUMN_ID + ORDER,          3);
+		default_values.put(SHARED_LIST_FILE_ID_COLUMN_ID + ORDER,            4);
+		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + ORDER,          5);
+		
+		default_values.put(SERVER_LIST_NAME_COLUMN_ID + WIDTH,              150);
+		default_values.put(SERVER_LIST_IP_COLUMN_ID + WIDTH,                40);
+		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + WIDTH,       150);
+		default_values.put(SERVER_LIST_PING_COLUMN_ID + WIDTH,              150);
+		default_values.put(SERVER_LIST_USERS_COLUMN_ID + WIDTH,             150);
+		default_values.put(SERVER_LIST_MAX_USERS_COLUMN_ID + WIDTH,         150);
+		default_values.put(SERVER_LIST_FILES_COLUMN_ID + WIDTH,             150);
+		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + WIDTH,        150);
+		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + WIDTH,        150);
+		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + WIDTH,           150);
+		
+		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + WIDTH,        100);
+		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + WIDTH,             50);
+		default_values.put(DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID + WIDTH,      100);
+		default_values.put(DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID + WIDTH,   100);
+		default_values.put(DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + WIDTH,     100);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_COLUMN_ID + WIDTH,         100);
+		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + WIDTH,          100);
+		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + WIDTH,        100);
+		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + WIDTH,           100);
+		
+		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + WIDTH,          150);
+		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + WIDTH,      150);
+		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + WIDTH,    100);
+		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + WIDTH,    100);
+		
+		default_values.put(UPLOAD_LIST_FILE_NAME_COLUMN_ID + WIDTH,          100);
+		default_values.put(UPLOAD_LIST_FILE_SIZE_COLUMN_ID + WIDTH,          100);
+		default_values.put(UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + WIDTH,       100);
+		default_values.put(UPLOAD_LIST_PEERS_COLUMN_ID + WIDTH,              100);
+		default_values.put(UPLOAD_LIST_ETA_COLUMN_ID + WIDTH,                100);
+		default_values.put(UPLOAD_LIST_UPLOADED_COLUMN_ID + WIDTH,           100);
+		
+		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + WIDTH,            150);
+		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + WIDTH,        150);
+		default_values.put(UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID + WIDTH,      100);
+		default_values.put(UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + WIDTH,      100);
+		
+		default_values.put(SEARCH_FILENAME_COLUMN_ID + WIDTH,                150);
+		default_values.put(SEARCH_FILESIZE_COLUMN_ID + WIDTH,                150);
+		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + WIDTH,            150);
+		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + WIDTH,             150);
+		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + WIDTH,               159);
+		default_values.put(SEARCH_FILE_ID_COLUMN_ID + WIDTH,                 150);
+		
+		default_values.put(SHARED_LIST_FILE_NAME_COLUMN_ID + WIDTH,          150);
+		default_values.put(SHARED_LIST_FILE_SIZE_COLUMN_ID + WIDTH,          150);
+		default_values.put(SHARED_LIST_FILE_TYPE_COLUMN_ID + WIDTH,          150);
+		default_values.put(SHARED_LIST_FILE_ID_COLUMN_ID + WIDTH,            150);
+		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + WIDTH,          150);
+		
+		default_values.put(TOOL_BAR_ID + VISIBILITY,                         true);
+		default_values.put(STATUS_BAR_ID + VISIBILITY,                       true);
+	}
+	
+	public static String getColumnNodeById(int ColumnID) {
+		
+		switch(ColumnID) {
+		
+		  	case SERVER_LIST_NAME_COLUMN_ID             :  return SERVER_LIST_NAME_NODE;
+		  	case SERVER_LIST_IP_COLUMN_ID               :  return SERVER_LIST_IP_NODE;
+		  	case SERVER_LIST_DESCRIPTION_COLUMN_ID      :  return SERVER_LIST_DESCRIPTION_NODE;
+		  	case SERVER_LIST_PING_COLUMN_ID             :  return SERVER_LIST_PING_NODE;
+		  	case SERVER_LIST_USERS_COLUMN_ID            :  return SERVER_LIST_USERS_NODE;
+		  	case SERVER_LIST_MAX_USERS_COLUMN_ID        :  return SERVER_LIST_MAX_USERS_NODE;
+		  	case SERVER_LIST_FILES_COLUMN_ID            :  return SERVER_LIST_FILES_NODE;
+		  	case SERVER_LIST_SOFT_LIMIT_COLUMN_ID       :  return SERVER_LIST_SOFT_LIMIT_NODE;
+		  	case SERVER_LIST_HARD_LIMIT_COLUMN_ID       :  return SERVER_LIST_HARD_LIMIT_NODE;
+		  	case SERVER_LIST_VERSION_COLUMN_ID          :  return SERVER_LIST_VERSION_NODE;
+		  	
+		  	case DOWNLOAD_LIST_FILE_NAME_COLUMN_ID      :  return DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_SIZE_COLUMN_ID           :  return DOWNLOAD_LIST_SIZE_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID    :  return DOWNLOAD_LIST_TRANSFERRED_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID :  return DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID   :  return DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_PROGRESS_COLUMN_ID       :  return DOWNLOAD_LIST_PROGRESS_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_SOURCES_COLUMN_ID        :  return DOWNLOAD_LIST_SOURCES_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_REMAINING_COLUMN_ID      :  return DOWNLOAD_LIST_REMAINING_COLUMN_NODE;	
+		  	case DOWNLOAD_LIST_STATUS_COLUMN_ID         :  return DOWNLOAD_LIST_STATUS_COLUMN_NODE;
+		  		
+		  	case DOWNLOAD_PEER_LIST_IP_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_IP_COLUMN_NODE;
+		  	case DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID    :  return DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE;
+		  	case DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID  :  return DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_NODE;
+		  	case DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID  :  return DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE;
+		  		
+		  	case UPLOAD_LIST_FILE_NAME_COLUMN_ID        :  return UPLOAD_LIST_FILENAME_COLUMN_NODE;
+		  	case UPLOAD_LIST_FILE_SIZE_COLUMN_ID        :  return UPLOAD_LIST_FILESIZE_COLUMN_NODE;
+		  	case UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID     :  return UPLOAD_LIST_UPLOADSPEED_COLUMN_NODE;
+		  	case UPLOAD_LIST_PEERS_COLUMN_ID            :  return UPLOAD_LIST_PEERS_COLUMN_NODE;
+		  	case UPLOAD_LIST_ETA_COLUMN_ID              :  return UPLOAD_LIST_ETA_COLUMN_NODE;
+		  	case UPLOAD_LIST_UPLOADED_COLUMN_ID         :  return UPLOAD_LIST_UPLOADED_COLUMN_NODE;
+		  		
+		  	case UPLOAD_PEER_LIST_IP_COLUMN_ID          :  return UPLOAD_PEER_LIST_IP_COLUMN_NODE;
+		  	case UPLOAD_PEER_LIST_STATUS_COLUMN_ID      :  return UPLOAD_PEER_LIST_STATUS_COLUMN_NODE;
+		  	case UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID    :  return UPLOAD_PEER_LIST_NICKNAME_COLUMN_NODE;
+		  	case UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID    :  return UPLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE;
+		  	
+		  	case SEARCH_FILENAME_COLUMN_ID              :  return SEARCH_FILENAME_COLUMN_NODE;
+		  	case SEARCH_FILESIZE_COLUMN_ID              :  return SEARCH_FILESIZE_COLUMN_NODE;
+		  	case SEARCH_AVAILABILITY_COLUMN_ID          :  return SEARCH_AVAILABILITY_COLUMN_NODE;
+		  	case SEARCH_COMPLETESRC_COLUMN_ID           :  return SEARCH_COMPLETESRC_COLUMN_NODE;
+		  	case SEARCH_FILE_TYPE_COLUMN_ID             :  return SEARCH_FILE_TYPE_COLUMN_NODE;
+		  	case SEARCH_FILE_ID_COLUMN_ID               :  return SEARCH_FILE_ID_COLUMN_NODE;
+		  		
+		  	case SHARED_LIST_FILE_NAME_COLUMN_ID        :  return SHARED_LIST_FILE_NAME_COLUMN_NODE;
+		  	case SHARED_LIST_FILE_SIZE_COLUMN_ID        :  return SHARED_LIST_FILE_SIZE_COLUMN_NODE;
+		  	case SHARED_LIST_FILE_TYPE_COLUMN_ID        :  return SHARED_LIST_FILE_TYPE_COLUMN_NODE;
+		  	case SHARED_LIST_FILE_ID_COLUMN_ID          :  return SHARED_LIST_FILE_ID_COLUMN_NODE;
+		  	case SHARED_LIST_COMPLETED_COLUMN_ID        :  return SHARED_LIST_COMPLETED_COLUMN_NODE;
+		  	 
+		}
+		
+		return "unknown column ID";
+	}
+	
+	public static String getToolBarNode() {
+		
+		return TOOL_BAR_NODE;
+	}
+	
+	public static String getStatusBarNode() {
+		
+		return STATUS_BAR_NODE;
+	}
+	
+	public static String getToolBarNodePath(String variablePath) {
+		
+		return UI_ROOT + variablePath + TOOL_BAR_NODE;
+	}
+	
+	public static String getStatusBarNodePath(String variablePath) {
+		
+		return UI_ROOT + variablePath + STATUS_BAR_NODE;
+	}
+	
+	public static String getColumnNodePath(String variablePath, int columnID) {
+		
+		return UI_ROOT + variablePath + getColumnNodeById(columnID);
+	}
+	
+	public static int getDefaultColumnOrder(int columnID) {
+		
+		return Integer.parseInt(default_values.get(columnID + ORDER).toString());
+	}
+	
+	public static boolean getDefaultColumnVisibility(int columnID) {
+		
+		return Boolean.parseBoolean(default_values.get(columnID + VISIBILITY).toString());
+	}
+	
+	public static int getDefaultColumnWidth(int columnID) {
+		
+		return Integer.parseInt(default_values.get(columnID + WIDTH).toString());
+	}
+
 	private static Map<String,String> icon_name_by_extension = new Hashtable<String,String>();
 
 	static {
@@ -99,8 +477,8 @@ public class UIConstants {
 		icon_name_by_extension.put("mov", "mimetypes/video.png");
 	}
 	
-	  public static final String INFINITY_STRING	= "\u221E"; // "oo";
-	  public static final int    INFINITY_AS_INT = 31536000; // seconds (365days)
+	public static final String INFINITY_STRING	= "\u221E"; // "oo";
+	public static final int    INFINITY_AS_INT = 31536000; // seconds (365days)
 	
 	public static InputStream getIconByExtension(String extension) {
 		extension = extension.toLowerCase();
@@ -110,4 +488,5 @@ public class UIConstants {
 		return UIImageRepository.getImageAsStream(image_path);
 	}
 	
+
 }
