@@ -34,8 +34,8 @@ import java.util.Map;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/22 08:19:25 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/22 08:42:31 $$
  */
 
 public class UIConstants {
@@ -54,6 +54,7 @@ public class UIConstants {
 
 	// server list
 	public static final int SERVER_LIST_NAME_COLUMN_ID          =   100;
+	public static final int SERVER_LIST_CC_COLUMN_ID            =   110;
 	public static final int SERVER_LIST_FLAG_COLUMN_ID          =   150;
 	public static final int SERVER_LIST_IP_COLUMN_ID            =   200;
 	public static final int SERVER_LIST_DESCRIPTION_COLUMN_ID   =   300;
@@ -64,6 +65,7 @@ public class UIConstants {
 	public static final int SERVER_LIST_SOFT_LIMIT_COLUMN_ID    =   800;
 	public static final int SERVER_LIST_HARD_LIMIT_COLUMN_ID    =   900;
 	public static final int SERVER_LIST_VERSION_COLUMN_ID   	=   1000;
+	public static final int SERVER_LIST_STATIC_COLUMN_ID        =   1010;
 	
 	// downloads
 	public static final int DOWNLOAD_LIST_FILE_NAME_COLUMN_ID         = 1100; 
@@ -111,6 +113,7 @@ public class UIConstants {
 	
 	// Column UI nodes
 	protected static final String SERVER_LIST_NAME_NODE                     = "/server_list_name_column";
+	protected static final String SERVER_LIST_CC_NODE                       = "/server_list_cc_column";
 	protected static final String SERVER_LIST_FLAG_NODE                     = "/server_list_flag_column";
 	protected static final String SERVER_LIST_IP_NODE                       = "/server_list_ip_column";
 	protected static final String SERVER_LIST_DESCRIPTION_NODE              = "/server_list_description_column";
@@ -121,6 +124,7 @@ public class UIConstants {
 	protected static final String SERVER_LIST_SOFT_LIMIT_NODE               = "/server_list_soft_limit_column";
 	protected static final String SERVER_LIST_HARD_LIMIT_NODE               = "/server_list_hard_limit_column";
 	protected static final String SERVER_LIST_VERSION_NODE                  = "/server_list_version_column";
+	protected static final String SERVER_LIST_STATIC_NODE                   = "/server_list_static_column";
 	
 	protected static final String DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE       = "/download_list_file_name_column";
 	protected static final String DOWNLOAD_LIST_SIZE_COLUMN_NODE            = "/download_list_size_column";
@@ -170,6 +174,7 @@ public class UIConstants {
 	static {
 		// default table column's visibility
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + VISIBILITY,              true);
+		default_values.put(SERVER_LIST_CC_COLUMN_ID + VISIBILITY,                true);
 		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + VISIBILITY,              true);
 		default_values.put(SERVER_LIST_IP_COLUMN_ID + VISIBILITY,                true);
 		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + VISIBILITY,       true);
@@ -180,6 +185,7 @@ public class UIConstants {
 		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + VISIBILITY,        true);
 		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + VISIBILITY,        true);
 		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + VISIBILITY,           true);
+		default_values.put(SERVER_LIST_STATIC_COLUMN_ID + VISIBILITY,            true);
 		
 		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + VISIBILITY,       true);
 		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + VISIBILITY,            true);
@@ -223,16 +229,18 @@ public class UIConstants {
 		
 		// default table column's order
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + ORDER,               1);
-		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + ORDER,               2);
-		default_values.put(SERVER_LIST_IP_COLUMN_ID + ORDER,                 3);
-		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + ORDER,        4);
-		default_values.put(SERVER_LIST_PING_COLUMN_ID + ORDER,               5);
-		default_values.put(SERVER_LIST_USERS_COLUMN_ID + ORDER,              6);
-		default_values.put(SERVER_LIST_MAX_USERS_COLUMN_ID + ORDER,          7);
-		default_values.put(SERVER_LIST_FILES_COLUMN_ID + ORDER,              8);
-		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + ORDER,         9);
-		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + ORDER,         10);
-		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + ORDER,            11);
+		default_values.put(SERVER_LIST_CC_COLUMN_ID + ORDER,                 2);
+        default_values.put(SERVER_LIST_FLAG_COLUMN_ID + ORDER,               3);
+		default_values.put(SERVER_LIST_IP_COLUMN_ID + ORDER,                 4);
+		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + ORDER,        5);
+		default_values.put(SERVER_LIST_PING_COLUMN_ID + ORDER,               6);
+		default_values.put(SERVER_LIST_USERS_COLUMN_ID + ORDER,              7);
+		default_values.put(SERVER_LIST_MAX_USERS_COLUMN_ID + ORDER,          8);
+		default_values.put(SERVER_LIST_FILES_COLUMN_ID + ORDER,              9);
+		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + ORDER,         10);
+		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + ORDER,         11);
+		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + ORDER,            12);
+		default_values.put(SERVER_LIST_STATIC_COLUMN_ID + ORDER,             13);
 		
 		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,        1);
 		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + ORDER,             2);
@@ -275,7 +283,8 @@ public class UIConstants {
 		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + ORDER,          5);
 		
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + WIDTH,              150);
-		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + WIDTH,                40);
+		default_values.put(SERVER_LIST_CC_COLUMN_ID + WIDTH,                 40);
+		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + WIDTH,               40);
 		default_values.put(SERVER_LIST_IP_COLUMN_ID + WIDTH,                150);
 		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + WIDTH,       150);
 		default_values.put(SERVER_LIST_PING_COLUMN_ID + WIDTH,              150);
@@ -285,6 +294,7 @@ public class UIConstants {
 		default_values.put(SERVER_LIST_SOFT_LIMIT_COLUMN_ID + WIDTH,        150);
 		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + WIDTH,        150);
 		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + WIDTH,           150);
+		default_values.put(SERVER_LIST_STATIC_COLUMN_ID + WIDTH,            40);
 		
 		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + WIDTH,        100);
 		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + WIDTH,             50);
@@ -335,6 +345,7 @@ public class UIConstants {
 		switch(ColumnID) {
 		
 		  	case SERVER_LIST_NAME_COLUMN_ID             :  return SERVER_LIST_NAME_NODE;
+		  	case SERVER_LIST_CC_COLUMN_ID               :  return SERVER_LIST_CC_NODE;
 		  	case SERVER_LIST_FLAG_COLUMN_ID				:  return SERVER_LIST_FLAG_NODE;
 		  	case SERVER_LIST_IP_COLUMN_ID               :  return SERVER_LIST_IP_NODE;
 		  	case SERVER_LIST_DESCRIPTION_COLUMN_ID      :  return SERVER_LIST_DESCRIPTION_NODE;
@@ -345,6 +356,7 @@ public class UIConstants {
 		  	case SERVER_LIST_SOFT_LIMIT_COLUMN_ID       :  return SERVER_LIST_SOFT_LIMIT_NODE;
 		  	case SERVER_LIST_HARD_LIMIT_COLUMN_ID       :  return SERVER_LIST_HARD_LIMIT_NODE;
 		  	case SERVER_LIST_VERSION_COLUMN_ID          :  return SERVER_LIST_VERSION_NODE;
+		  	case SERVER_LIST_STATIC_COLUMN_ID           :  return SERVER_LIST_STATIC_NODE;
 		  	
 		  	case DOWNLOAD_LIST_FILE_NAME_COLUMN_ID      :  return DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE;
 		  	case DOWNLOAD_LIST_SIZE_COLUMN_ID           :  return DOWNLOAD_LIST_SIZE_COLUMN_NODE;
@@ -449,7 +461,6 @@ public class UIConstants {
 		
 		icon_name_by_extension.put("mp3","mimetypes/audio.png");
 		icon_name_by_extension.put("wav","mimetypes/audio.png");
-		icon_name_by_extension.put("midi","mimetypes/audio.png");
 		icon_name_by_extension.put("midi","mimetypes/audio.png");
 		
 		icon_name_by_extension.put("iso","mimetypes/cd_image.png");

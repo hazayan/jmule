@@ -27,8 +27,8 @@ import java.util.prefs.Preferences;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/22 08:19:25 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/22 08:42:31 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -42,6 +42,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) ).
 			 putBoolean( VISIBILITY,  getDefaultColumnVisibility( SERVER_LIST_NAME_COLUMN_ID ) );	
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_CC_COLUMN_ID ) ).
+			 putBoolean( VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_CC_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_FLAG_COLUMN_ID ) ).
@@ -82,6 +86,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_VERSION_COLUMN_ID ) ).
 			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_VERSION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_STATIC_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_STATIC_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
@@ -227,6 +235,10 @@ public class UIPreferences extends UIConstants {
 			 putInt(WIDTH,  getDefaultColumnWidth( SERVER_LIST_NAME_COLUMN_ID ) );	
 			 
 			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_CC_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_CC_COLUMN_ID ) );
+			 
+			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_FLAG_COLUMN_ID ) ).
 			 putInt(WIDTH,  getDefaultColumnWidth( SERVER_LIST_FLAG_COLUMN_ID ) );	
 			 
@@ -265,6 +277,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_VERSION_COLUMN_ID ) ).
 			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_VERSION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_STATIC_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_STATIC_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
@@ -407,7 +423,11 @@ public class UIPreferences extends UIConstants {
 			// sets the default order of the columns
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) ).
-			 putInt(ORDER,  getDefaultColumnOrder( SERVER_LIST_NAME_COLUMN_ID ) );	
+			 putInt(ORDER,  getDefaultColumnOrder( SERVER_LIST_NAME_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_CC_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_CC_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_FLAG_COLUMN_ID ) ).
@@ -448,6 +468,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_VERSION_COLUMN_ID ) ).
 			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_VERSION_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_STATIC_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_STATIC_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
