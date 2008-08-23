@@ -28,8 +28,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:33 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/23 11:13:41 $$
  */
 public class FileHash {
 	
@@ -75,6 +75,10 @@ public class FileHash {
 		
 		return Convert.byteToHexString(fileHash);
 		
+	}
+	
+	public String getAsString() {
+		return Convert.byteToHexString(fileHash);
 	}
 	
 	public int hashCode() {
