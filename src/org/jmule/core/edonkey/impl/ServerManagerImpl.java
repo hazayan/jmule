@@ -50,8 +50,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:51:04 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/23 13:18:05 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -90,6 +90,24 @@ public class ServerManagerImpl implements ServerManager {
 	
 	public boolean isConnected() {
 		return getConnectedServer()!=null;
+	}
+	
+	public void importList(String fileName) throws ServerManagerException {
+		ServerMet server_met;
+		try {
+			server_met = new ServerMet(fileName);
+			server_met.load();
+			List<Server> new_server_list = server_met.getServerList();
+			for(Server server : new_server_list) {
+				server.setStatic(false);
+				addServer(server);
+			}
+			server_met.close();
+		} catch (Throwable e) {
+			throw new ServerManagerException(e);
+		}
+		
+		
 	}
 	
 	public void addServer(Server server) {
@@ -483,5 +501,7 @@ public class ServerManagerImpl implements ServerManager {
           }
 		
 	}
+
+
 		
 }

@@ -30,11 +30,20 @@ import org.jmule.core.edonkey.impl.Server;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/13 11:28:57 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/23 13:18:05 $$
  */
 public interface ServerManager extends JMuleManager {
 
+	public boolean isConnected();
+	
+	/**
+	 * Import servers from specified file
+	 * @param fileName file with servers
+	 * @throws ServerManagerException
+	 */
+	public void importList(String fileName) throws ServerManagerException;
+	
 	/**
 	 * Adds a new server to the server list
 	 * @param server the server that is added to the server list
