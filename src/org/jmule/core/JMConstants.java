@@ -22,11 +22,13 @@
  */
 package org.jmule.core;
 
+import java.util.StringTokenizer;
+
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:27 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/24 12:54:10 $$
  */
 public class JMConstants {
      
@@ -48,10 +50,6 @@ public class JMConstants {
 	  public static final String CURRENT_JMULE_VERSION     = IS_NIGHTLY_BUILD ? DEV_VERSION : ( JMULE_VERSION + ( IS_BETA ? " Beta" : "" ) );
 	  
 	  public static final String JMULE_FULL_NAME           = JMULE_NAME + " " + CURRENT_JMULE_VERSION; 
-	  
-		
-	  public final static int STATUS_STARTED = 0x01;
-	  public final static int STATUS_STOPPED = 0x02;
 	  
 	  public static final String  OSName = System.getProperty("os.name");
 	  public static final String  OSVersion = System.getProperty("os.version");
@@ -165,6 +163,64 @@ public class JMConstants {
 	  
 	  public static boolean isJMuleJavaVersion() {
 		  return isJavaVersionAtLeast( JMULE_JAVA_VERSION );
+	  }
+	  
+	  /**
+	   * compare two version strings of form n.n.n.n (e.g. 1.2.3.4)
+	   * @see org.gudy.azureus2.core3.util.Constants
+	   * @param version_1	
+	   * @param version_2
+	   * @return -ve -> version_1 lower, 0 = same, +ve -> version_1 higher
+	   */
+	  public static int compareVersions(String version_1, String version_2 ) {	
+	  	try{
+	  		if ( version_1.startsWith("." )){
+	  			version_1 = "0" + version_1;
+	  		}
+	  		if ( version_2.startsWith("." )){
+	  			version_2 = "0" + version_2;
+	  		}
+
+	  		version_1 = version_1.replaceAll("[^0-9.]", ".");
+	  		version_2 = version_2.replaceAll("[^0-9.]", ".");
+	  		
+	  		StringTokenizer	tok1 = new StringTokenizer(version_1,".");
+	  		StringTokenizer	tok2 = new StringTokenizer(version_2,".");
+	  		
+	  		while( true ){
+	  			if ( tok1.hasMoreTokens() && tok2.hasMoreTokens()){
+	  			
+	  				int	i1 = Integer.parseInt(tok1.nextToken());
+	  				int	i2 = Integer.parseInt(tok2.nextToken());
+	  			
+	  				if ( i1 != i2 ){
+	  					
+	  					return( i1 - i2 );
+	  				}
+	  			}else if ( tok1.hasMoreTokens()){
+	  				
+	  				int	i1 = Integer.parseInt(tok1.nextToken());
+
+	  				if ( i1 != 0 ){
+	  					
+	  					return( 1 );
+	  				}
+	  			}else if ( tok2.hasMoreTokens()){
+	  				
+	  				int	i2 = Integer.parseInt(tok2.nextToken());
+
+	  				if ( i2 != 0 ){
+	  					
+	  					return( -1 );
+	  				}
+	  			}else{
+	  				return( 0 );
+	  			}
+	  		}
+	  	}catch( Throwable e ){
+	  		
+	  		return( 0 );
+	  	}
 	  }
 
 }
