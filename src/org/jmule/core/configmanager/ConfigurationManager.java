@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 08:05:19 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/24 07:33:26 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -78,6 +78,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       DOWNLOAD_BANDWIDTH_KEY                =     "DownloadBandwidth";
 	public static final String       UPLOAD_BANDWIDTH_KEY                  =     "UploadBandwidth";
 	public static final String       SHARED_DIRECTORIES_KEY                =     "SharedDirectories";
+	
+	public static final String		 SERVER_LIST_UPDATE_ON_CONNECT_KEY	   =     "ServerListUpdateOnConnect";
 	// 
 	//public static final String       PEER_ACTIVITY_CHECK_TIME_KEY   	   =     "PeerActivityCheckTime";
 	//public static final String       SOURCES_QUERY_INTERVAL_KEY     	   =     "SourcesQueryInterval";
@@ -214,6 +216,31 @@ public interface ConfigurationManager extends JMuleManager {
      * @return upload bandwidth
      */
     public long getUploadBandwidth();
+    
+    
+    public int getIntParameter(String parameter, int defaultValue);
+    
+    public String getStringParameter(String parameter, String defaultValue);
+    
+    public float getFloatParameter(String parameter, float defaultValue);
+    
+    public double getDoubleParameter(String parameter, double defaultValue);
+    
+    public long getLongParameter(String parameter, long defaultValue);
+    
+    public boolean getBooleanParameter(String parameter, boolean defaultValue);
+    
+    public void setParameter(String parameter, int value);
+    
+    public void setParameter(String parameter,String value);
+    
+    public void setParameter(String parameter,float value);
+    
+    public void setParameter(double parameter,double value);
+    
+    public void setParameter(String parameter,long value);
+    
+    public void setParameter(String parameter,boolean value);
     
 	/**
 	 * Adds a configuration listener

@@ -34,8 +34,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:38:27 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/24 07:33:26 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -283,6 +283,90 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		return ( udp_enabled == null ) ? UDP_ENABLED : Boolean.parseBoolean(udp_enabled);
 	}
 	
+	public int getIntParameter(String parameter, int defaultValue) {
+		int result;
+		try {
+			result = Integer.parseInt(config_store.getProperty(parameter));
+		}catch(Exception e) {
+			return defaultValue;
+		}
+		return result;
+	}
+	
+	public float getFloatParameter(String parameter, float defaultValue) {
+		float result;
+		try {
+			result = Float.parseFloat(config_store.getProperty(parameter));
+		}catch(Exception e) {
+			return defaultValue;
+		}
+		return result;
+	}
+	
+	public double getDoubleParameter(String parameter, double defaultValue) {
+		double result;
+		try {
+			result = Double.parseDouble(config_store.getProperty(parameter));
+		}catch(Exception e) {
+			return defaultValue;
+		}
+		return result;
+	}
+
+	public long getLongParameter(String parameter, long defaultValue) {
+		long result;
+		try {
+			result = Long.parseLong(config_store.getProperty(parameter));
+		}catch(Exception e) {
+			return defaultValue;
+		}
+		return result;
+	}
+
+	public String getStringParameter(String parameter, String defaultValue) {
+		String result;
+		try {
+			result = config_store.getProperty(parameter);
+		}catch(Exception e) {
+			return defaultValue;
+		}
+		return result;
+	}
+	
+	public boolean getBooleanParameter(String parameter, boolean defaultValue) {
+		boolean result;
+		try {
+			result = Boolean.parseBoolean(config_store.getProperty(parameter));
+		}catch(Exception e) {
+			return defaultValue;
+		}
+		return result;
+	}
+
+	public void setParameter(String parameter, int value) {
+		config_store.put(parameter, value+"");
+	}
+
+	public void setParameter(String parameter, String value) {
+		config_store.put(parameter, value+"");
+	}
+
+	public void setParameter(String parameter, float value) {
+		config_store.put(parameter, value+"");
+	}
+
+	public void setParameter(String parameter, long value) {
+		config_store.put(parameter, value+"");
+	}
+
+	public void setParameter(String parameter, boolean value) {
+		config_store.put(parameter, value+"");
+	}
+	
+	public void setParameter(double parameter, double value) {
+		config_store.put(parameter, value+"");
+	}
+	
 	private void notifyPropertyChanged(String property, Object new_value) {
 		
 		for(ConfigurationListener listener : config_listeners) {
@@ -300,9 +384,15 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		   else if( property == UDP_ENABLED_KEY ) listener.isUDPEnabledChanged((Boolean)new_value);
 			    
 		   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
+			    
+		   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
+			    
+		   else if( property == UPLOAD_LIMIT_KEY) listener.uploadLimitChanged((Long)new_value);
 			
 		}
 		
 	}
+
+
 
 }
