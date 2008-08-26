@@ -25,13 +25,14 @@ package org.jmule.core.uploadmanager;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.impl.Peer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:47 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:28:53 $$
  */
 public class UploadQueue {
 	
@@ -40,7 +41,6 @@ public class UploadQueue {
 	public void addPeer(Peer peer) {
 		
 		peer_queue.offer(peer);
-		
 	}
 	
 	public Peer getLastPeer() {
@@ -87,16 +87,14 @@ public class UploadQueue {
 		
 	}
 	
-	public Peer remove() {
+	public Peer pool() {
 		
 		return peer_queue.poll();
 		
 	}
-	
-	public void add(Peer peer) {
-		
-		peer_queue.add(peer);
-		
+			
+	public JMIterable<Peer> getPeers() {
+		return new JMIterable<Peer>(peer_queue.iterator());
 	}
 	
 	public String toString() {
