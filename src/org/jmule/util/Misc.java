@@ -39,11 +39,13 @@ import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:24 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:37:34 $$
  */
 public class Misc {
-
+	
+	public static final int    INFINITY_AS_INT = 31536000;
+	
 	public static int compareAllObjects(Object object1, Object object2,String methodName,boolean order) {
 
 		Class cl = object1.getClass();
@@ -54,6 +56,7 @@ public class Misc {
 			result2 = m.invoke(object2, null);
 			
 			if (result1 instanceof String) {
+				
 				String name1 = (String)result1;
 				String name2 = (String)result2;
 				int result = name1.compareTo(name2);
@@ -87,12 +90,63 @@ public class Misc {
 					return reverse(result);
 			}
 			
+			if (result1 instanceof Float) {
+				float int1 = (Float)result1;
+				float int2 = (Float)result2;
+				int result = 0;
+				if (int1>int2) result = 1;
+				if (int1<int2) result = -1;
+				if (order)
+					return result;
+				else
+					return reverse(result);
+			}
+			
+			if (result1 instanceof Double) {
+				double int1 = (Double)result1;
+				double int2 = (Double)result2;
+				int result = 0;
+				if (int1>int2) result = 1;
+				if (int1<int2) result = -1;
+				if (order)
+					return result;
+				else
+					return reverse(result);
+			}
+
+			if (result1 instanceof Boolean) {
+				boolean b1 = (Boolean)result1;
+				boolean b2 = (Boolean)result2;
+				int result = 0;
+				if ((b1==true)&&(b2==false)) result = 1;
+				if ((b1==false)&&(b2==true)) result = -1;
+				
+				if (order)
+					return result;
+				else
+					return reverse(result);
+			}
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} 
 		
 		return 0;
+	}
+	
+	public static final String NO_EXTENSION = "no extension";
+	
+	public static String getFileExtension(String fileName) {
+		int id = fileName.length()-1;
+		while(id>0) { 
+			if (fileName.charAt(id)=='.') break;
+			id--;
+		}
+		String extension = NO_EXTENSION;
+		if (id!=0)
+			extension = fileName.substring(id+1, fileName.length());
+	
+		return extension;
 	}
 	
 	public static int reverse(int value) {
@@ -172,7 +226,6 @@ public class Misc {
 		}
 		
 		}
-		
 		return tag;
 	}
 	
@@ -180,7 +233,7 @@ public class Misc {
 	public static StandardTag loadStandardTag(ByteBuffer buffer){
 		
 		byte tagType = buffer.get();
-		short metaTagLength = buffer.getShort();
+		int metaTagLength = Convert.shortToInt(buffer.getShort());
 
 		byte[] data;
 		data = new byte[metaTagLength];
@@ -218,7 +271,7 @@ public class Misc {
 		if (fileSize<PARTSIZE) return 0;
 		
 		int partCount = (int)(fileSize/PARTSIZE);
-		//if (fileSize%PARTSIZE !=0) partCount;
+		if (fileSize%PARTSIZE !=0) partCount++;
 		return partCount;
 	}
 	
