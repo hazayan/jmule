@@ -29,8 +29,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:32 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:33:41 $$
  */
 public class UserHash {
 	
@@ -49,14 +49,12 @@ public class UserHash {
 		loadFromString(hash);
 	}
 	
-	public void genNewUserHash() {
-		
-		new Random().nextBytes( userHash );
-		
-		userHash[5] = 14;
-		
-		userHash[14] = 111;
-		
+	public static UserHash genNewUserHash() {
+		byte[] hash = new byte[16];
+		new Random().nextBytes( hash );
+		hash[5] = 14;
+		hash[14] = 111;
+		return new UserHash(hash);
 	}
 	
 	public byte[] getUserHash() {
