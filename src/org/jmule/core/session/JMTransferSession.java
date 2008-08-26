@@ -22,21 +22,82 @@
  */
 package org.jmule.core.session;
 
+import org.jmule.core.JMIterable;
+import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.sharingmanager.SharedFile;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:44:15 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:15:46 $$
  */
 public interface JMTransferSession {
 
-	   public long getTransferredBytes();
+	/**
+	 * Get shared file which session is assigned
+	 * @return shared file
+	 */
+	public SharedFile getSharedFile();
+	
+	/**
+	 * Get transfer speed
+	 * @return transfer speed
+	 */
+	public float getSpeed();
 	   
-	   public FileHash getFileHash();
+	/**
+	 * Get total bytes transfered in this session
+	 * @return transfered bytes
+	 */
+	public long getTransferredBytes();
 	   
-	   public long getFileSize();
+	/** 
+	 * Get File hash of file used by this session
+	 * @return file hash
+	 */
+	public FileHash getFileHash();
 	   
-	   public int getPeersCount();
+	/**
+	 * Get sharing name of file used by this session
+	 * @return sharing name
+	 */
+	public String getSharingName();
+	   
+	/**
+	 * Get file size of file used by this session
+	 * @return
+	 */
+	public long getFileSize();
+	   
+	/**
+	 * Get all peers used by this session
+	 */
+	public JMIterable<Peer> getPeers();
+
+	/**
+	 * Get peers count 
+	 */
+	public int getPeersCount();
+
+	/**
+	 * Check if session has peer
+	 * @param peer checked peer
+	 * @return true - session has peer, false - session don't have peer
+	 */
+	public boolean hasPeer(Peer peer);
+	   
+	/**
+	 * Get ED2K link of processed file 
+	 * @return ED2K link of file
+	 */
+	public ED2KFileLink getED2KLink();
+	   
+	/**
+	 * Get ETA : Estimated Time of Arrival
+	 * @return return ETA in seconds or infinity(31536000)
+	 */
+	public long getETA();
 }
