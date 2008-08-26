@@ -24,8 +24,6 @@ package org.jmule.core.edonkey.metfile;
 
 import static org.jmule.core.edonkey.E2DKConstants.SERVERLIST_VERSION;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -95,8 +93,8 @@ import org.jmule.util.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:37:32 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:34:57 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -114,6 +112,7 @@ public class ServerMet extends MetFile {
 		} catch (IOException e) {
 			throw new ServerMetException("Failed to move at position 0 in server.met");
 		}
+		
 		byte serverListFormat;
 		serverList = new LinkedList<Server>();
 		ByteBuffer data;
@@ -138,9 +137,9 @@ public class ServerMet extends MetFile {
 				serverList.add(server);
 			}
 			
-		 } catch(IOException ioe) {
+		 } catch(Throwable exception) {
 			 
-			 throw new ServerMetException("IOException : " + ioe);
+			 throw new ServerMetException("Unknown file format");
 			 
 		 }
 	}
