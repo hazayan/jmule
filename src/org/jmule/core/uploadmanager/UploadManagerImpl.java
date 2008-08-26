@@ -39,8 +39,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:58:07 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:31:06 $$
  */
 public class UploadManagerImpl implements UploadManager {
 
@@ -57,7 +57,7 @@ public class UploadManagerImpl implements UploadManager {
 		
 		for(UploadManagerListener listener : listener_list)
 			
-			listener.uploadAdded(fileHash);
+			listener.uploadAdded(upload_session);
 		
 	}
 	
@@ -69,11 +69,13 @@ public class UploadManagerImpl implements UploadManager {
 
 	public void removeUpload(FileHash fileHash) {
 	
+		UploadSession session = session_list.get(fileHash);
+		
 		session_list.remove(fileHash);
 		
 		for(UploadManagerListener listener : listener_list)
 			
-			listener.uploadRemoved(fileHash);
+			listener.uploadRemoved(session);
 		
 	}
 
