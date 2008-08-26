@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.JMIterable;
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
@@ -71,22 +72,27 @@ import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.session.JMTransferSession;
+import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.PartialFile;
+import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharedFileException;
 import org.jmule.core.sharingmanager.SharingManagerFactory;
 import org.jmule.core.uploadmanager.FileChunkRequest;
+import org.jmule.ui.UIConstants;
 import org.jmule.util.Convert;
+import org.jmule.util.Misc;
 
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:49:03 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:19:32 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
 	public final static int STATUS_STARTED = 0x01;
+	
 	public final static int STATUS_STOPPED = 0x02;
 	
 	private PartialFile sharedFile;
@@ -327,7 +333,7 @@ public class DownloadSession implements JMTransferSession {
 					
 			download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
 			
-			sender.sendPacket(PacketFactory.getUploadReuqestPacket(this.sharedFile.getFileHash()));
+			sender.sendPacket(PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash()));
 			
 			return ;
 		}
@@ -368,9 +374,9 @@ public class DownloadSession implements JMTransferSession {
 				return;
 			}
 			
-//			Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
+		//	Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
 			
-//			/sender.sendPacket(sendPacket);
+		//	sender.sendPacket(sendPacket);
 			
 //			download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
 			
@@ -385,8 +391,9 @@ public class DownloadSession implements JMTransferSession {
 			download_status_list.updatePeerHistory(sender,OP_HASHSETANSWER);
 			
 			PartHashSet partHashSet = sPacket.getPartHashSet();
-			
-			sharedFile.setHashSet(partHashSet);
+			if (!sharedFile.hasHashSet()) {
+				sharedFile.setHashSet(partHashSet);
+			}
 
 			if (this.sharedFile.getGapList().size()==0)
 				
@@ -434,7 +441,7 @@ public class DownloadSession implements JMTransferSession {
 				completeDownload();
 				
 				} else {
-					
+					// Re request download
 //					List<PeerDownloadStatus> status_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST);
 //					
 //					for(PeerDownloadStatus peer_status : status_list) {
@@ -479,20 +486,20 @@ public class DownloadSession implements JMTransferSession {
 			if (this.sharedFile.getGapList().size()==0)
 				
 				if (!sharedFile.hasHashSet()) {
+					//Request hash set
+//					Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
 					
-					Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
+//					sender.sendPacket(sendPacket);
 					
-					sender.sendPacket(sendPacket);
+//					List<PeerDownloadStatus> status_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST);
 					
-					List<PeerDownloadStatus> status_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST);
-					
-					for(PeerDownloadStatus peer_status : status_list) {
+//					for(PeerDownloadStatus peer_status : status_list) {
 						
-						peer_status.getPeer().sendPacket(PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash()));
+//						peer_status.getPeer().sendPacket(PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash()));
 						
-						peer_status.setPeerStatus(PeerDownloadStatus.UPLOAD_REQUEST);
+//						peer_status.setPeerStatus(PeerDownloadStatus.UPLOAD_REQUEST);
 						
-					}
+//					}
 					
 					return ;
 					
@@ -611,7 +618,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	private void fileChunkRequest(Peer peer) {
-		
+				
 		long blockSize = ConfigurationManagerFactory.getInstance().getDownloadBandwidth();
 				
 		if (blockSize > BLOCKSIZE)
@@ -623,12 +630,12 @@ public class DownloadSession implements JMTransferSession {
 		
 		int unused = 0;
 		
-		for(int i = 0;i<fragments.length;i++)
-			
+		for(int i = 0;i<fragments.length;i++) {
+			//System.out.println(fragments[i]);
 			if (((fragments[i].getChunkBegin()==fragments[i].getChunkEnd())&&(fragments[i].getChunkBegin()==0)))
 				
 				unused++;
-
+		}
 		if (unused==3){
 			
 			download_status_list.setPeerStatus(peer, PeerDownloadStatus.ACTIVE_UNUSED);
@@ -641,7 +648,7 @@ public class DownloadSession implements JMTransferSession {
 		
 		download_status_list.setPeerStatus(peer, PeerDownloadStatus.ACTIVE);
 		
-		Packet packet2 = PacketFactory.getPeerRequestFileParts(this.sharedFile.getFileHash(),
+		Packet packet2 = PacketFactory.getPeerRequestFileParts(sharedFile.getFileHash(),
 				new long[]{fragments[0].getChunkBegin(),fragments[1].getChunkBegin(),fragments[2].getChunkBegin(),
 				   fragments[0].getChunkEnd(),  fragments[1].getChunkEnd(),  fragments[2].getChunkEnd()} );
 		
@@ -650,7 +657,7 @@ public class DownloadSession implements JMTransferSession {
 		peer.sendPacket(packet2);
 	}
 	
-	public float getDownloadSpeed() {
+	public float getSpeed() {
 		
 		float downloadSpeed = 0;
 		
@@ -667,14 +674,41 @@ public class DownloadSession implements JMTransferSession {
 		
 	}
 
-	
-	public PartialFile getDownloadFile() {
+	public String getSharingName() {
 		
-		return this.sharedFile;
+		return sharedFile.getSharingName();
 		
 	}
-
-
+	
+	public GapList getGapList() {
+		
+		return this.sharedFile.getGapList();
+		
+	}
+	
+	public long getETA() {
+		float speed = getSpeed();
+		long time = 0;
+		if (speed!=0)
+			time = (long)((sharedFile.length() - getTransferredBytes())/speed);
+		else
+			time = Misc.INFINITY_AS_INT;
+		
+		return time;
+	}
+	
+	public boolean hasPeer(Peer peer) {
+		return peer_list.containsValue(peer);
+	}
+	
+	public PeerDownloadStatus getPeerDownloadStatus(Peer peer) {
+		return download_status_list.getDownloadStatus(peer);
+	}
+	
+	public JMIterable<Peer> getPeers() {
+		return new JMIterable<Peer>(peer_list.values().iterator());
+	}
+	
 	public String toString(){
 		
 		String str=" [ ";
@@ -693,6 +727,10 @@ public class DownloadSession implements JMTransferSession {
 		
 		return this.sessionStatus;
 		
+	}
+	
+	public boolean isStarted() {
+		return sessionStatus==STATUS_STARTED;
 	}
 	
 	private void setStatus(int newStatus) {
@@ -739,6 +777,40 @@ public class DownloadSession implements JMTransferSession {
 		
 	}
 	
+	public String getTempFileName() {
+		
+		return sharedFile.getFile().getAbsolutePath();
+		
+	}
+	
+	public String getMetFilePath() {
+		
+		return sharedFile.getPartMetFile().getAbsolutePath();
+		
+	}
+	
+	public long getPartCount() {
+		
+		return Misc.getPartCount(sharedFile.length());
+		
+	}
+	
+	public long getAvailablePartCount() {
+		
+		return sharedFile.getAvailablePartCount();
+		
+	}
+	
+	public ED2KFileLink getED2KLink() {
+		
+		return new ED2KFileLink(getSharingName(),getFileSize(),getFileHash());
+		
+	}
+	
+	public SharedFile getSharedFile() {
+		
+		return sharedFile;
+	}	
 	
 	private void activateUnusedPeers() {
 		
@@ -913,7 +985,7 @@ public class DownloadSession implements JMTransferSession {
 					
 				}
 				
-				activateUnusedPeers(); //Use for TESTING ONLY!
+			//	activateUnusedPeers(); //Use for TESTING ONLY!
 				
 				}
 				
@@ -922,5 +994,5 @@ public class DownloadSession implements JMTransferSession {
 			}
 		}
 		
-	}	
+	}
 }

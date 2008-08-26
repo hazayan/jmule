@@ -22,9 +22,11 @@
  */
 package org.jmule.core.uploadmanager;
 
+import org.jmule.core.JMIterable;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.FileChunk;
+import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.impl.EMulePacketFactory;
@@ -34,19 +36,21 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileHashSetRequest
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotReleaseSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotRequestSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
 import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.core.session.JMTransferSession;
+import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:59:05 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:18:41 $$
  */
 public class UploadSession implements JMTransferSession {
 	
@@ -63,13 +67,48 @@ public class UploadSession implements JMTransferSession {
 		sharedFile = sFile;
 		
 	}
-
+	
+	public boolean sharingCompleteFile() {
+		return sharedFile instanceof CompletedFile;
+	}
+	
+	public int getPeerPosition(Peer peer) {
+		return uploadQueue.getPeerQueueID(peer);
+	}
+	
+	public JMIterable<Peer> getPeers() {
+		return uploadQueue.getPeers();
+	}
+	
+	public boolean hasPeer(Peer peer) {
+		return uploadQueue.hasPeer(peer);
+	}
+	
+	
+	public String getSharingName() {
+		return sharedFile.getSharingName();
+	}
+	
+	public float getSpeed() {
+		Peer peer = uploadQueue.getLastPeer();
+		return peer.getUploadSpeed();
+	}
+		
+	public long getETA() {
+		float upload_speed = getSpeed();
+		if (upload_speed != 0)
+			return (long)(getFileSize()/upload_speed);
+		else 
+			return Misc.INFINITY_AS_INT;
+	}
+	
+	
 	public void processPacket(Peer sender, ScannedPacket packet,PeerSessionList listenItem) {
 		
 		if (!uploadQueue.hasPeer(sender))
 			
 			uploadQueue.addPeer(sender);
-		
+
 		if (packet instanceof JMPeerFileRequestSP) {
 			
 			sender.sendPacket(PacketFactory.getFileRequestAnswerPacket(sharedFile.getFileHash(), sharedFile.getSharingName()));
@@ -120,15 +159,17 @@ public class UploadSession implements JMTransferSession {
 			
 		}
 		
-		if (packet instanceof JMPeerSlotTakenSP) {
-			
+		if (packet instanceof JMPeerSlotReleaseSP) {
+
 			if (sender.equals(uploadQueue.getLastPeer()))
-				
-				removeLastPeer();
-			
+				removeLastPeer(true);
 			else
-				
 				uploadQueue.removePeer(sender);
+			if (uploadQueue.size()==0) {
+				
+				UploadManagerFactory.getInstance().removeUpload(this.sharedFile.getFileHash());
+				
+			}
 			
 			return ;
 			
@@ -197,17 +238,6 @@ public class UploadSession implements JMTransferSession {
 		}
 	}
 	
-	/**
-	 * Check if this item process fileHash
-	 * @param fileHash
-	 * @return true if hash match else false
-	 */
-	
-	public boolean processHash(FileHash fileHash){
-		
-		return (this.sharedFile.getFileHash().equals(fileHash));
-		
-	}
 	
 	public String toString() {
 		
@@ -245,11 +275,11 @@ public class UploadSession implements JMTransferSession {
 	
 	
 	
-	private void removeLastPeer(){
+	private void removeLastPeer(boolean totallyRemove){
 		
 		Peer rPeer = (Peer) this.uploadQueue.remove();
 		
-		if (rPeer!=null) {
+		if ((rPeer!=null)&&(!totallyRemove)) {
 			
 			//Add inactive peer in top of list
 			
@@ -272,21 +302,20 @@ public class UploadSession implements JMTransferSession {
 		return totalUploaded;
 	}
 
-	public float getUploadSpeed() {
-		Peer peer = uploadQueue.getLastPeer();
-		
-		if (peer==null) return 0;
-		return peer.getUploadSpeed();
-		
-	}
-
 	public long getFileSize() {
-		
 		return sharedFile.length();
 	}
 
 	public int getPeersCount() {
 		return uploadQueue.size();
+	}
+
+	public ED2KFileLink getED2KLink() {
+		return sharedFile.getED2KLink();
+	}
+
+	public SharedFile getSharedFile() {
+		return sharedFile;
 	}
 	
 }
