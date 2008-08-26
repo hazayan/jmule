@@ -22,13 +22,15 @@
  */
 package org.jmule.core.edonkey.impl;
 
+import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
-
+import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NICKNAME;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketChecker;
@@ -49,8 +51,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:36 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:32:13 $$
  */
 public class Peer extends JMConnection {
 	
@@ -81,8 +83,6 @@ public class Peer extends JMConnection {
 	private UserHash userHash = null;
 	
 	private TagList peerTags = new TagList();
-	
-	private String clientSoftware = " Unknow ";
 	
 	private boolean isConnected = false;
 	
@@ -199,9 +199,7 @@ public class Peer extends JMConnection {
 		if (clientID != null)
 			
 			result += " Client ID : "+clientID+" [ "+(isHighID() ? "HIGH ID" : "LOW ID")+" ] ";
-		
-		result +=" "+clientSoftware;
-				
+						
 		result += " Incoming : "+incoming_packet_queue.size();
 		result += " Outcomming : "+outgoing_packet_queue.size();
 		
@@ -217,6 +215,14 @@ public class Peer extends JMConnection {
 		
 		return clientID;
 		
+	}
+	
+	public String getNickName() {
+		try {
+			return peerTags.getStringTag(TAG_NAME_NICKNAME);
+		} catch (TagException e) {
+			return "";
+		}
 	}
 	
 	public PeerSessionList getSessionList() {
@@ -298,50 +304,10 @@ public class Peer extends JMConnection {
 		
 	}
 	
-	private void extractClientInfo(long ClientInfo) {
-		
-		int cSoft =(int) (ClientInfo & 0x00ffffff);
-		
-		cSoft=(cSoft>>17) & 0x7f;
-		
-		if (cSoft==0)	 this.clientSoftware="SO_EMULE";
-		
-		if (cSoft==2) 	 this.clientSoftware="SO_LXMULE";
-		
-		if (cSoft==3) 	 this.clientSoftware="SO_AMULE";
-		
-		if (cSoft==4) 	 this.clientSoftware="SO_SHAREAZA";
-		
-		if (cSoft==5)	 this.clientSoftware="SO_EMULE_PLUS";
-		
-		if (cSoft==6)	 this.clientSoftware="SO_HYDRANODE";
-		
-		if (cSoft==0x0A) this.clientSoftware="SO_NEW2_MLDONKEY";
-		
-		if (cSoft==0x14) this.clientSoftware="SO_LPHANT";
-		
-		if (cSoft==0x28) this.clientSoftware="SO_NEW2_SHAREAZA";
-		
-		if (cSoft==0x32) this.clientSoftware="SO_EDONKEYHYBRID";
-		
-		if (cSoft==0x33) this.clientSoftware="SO_EDONKEY";
-		
-		if (cSoft==0x34) this.clientSoftware="SO_MLDONKEY";
-		
-		if (cSoft==0x35) this.clientSoftware="SO_OLDEMULE";
-		
-		if (cSoft==0x98) this.clientSoftware="SO_NEW_MLDONKEY";
-		
-		if (cSoft==0xFF) this.clientSoftware="SO_COMPAT_UNK";
-		
-		clientSoftware+=" [0x"+Convert.intToHex(cSoft) +"]";
-	}
-	
 	/**
 	 * Process incoming packet from peer
 	 */
 	private void processPacket(ScannedPacket packet){
-		
 		if (packet instanceof JMPeerHelloSP) {
 			
 			connectTime = 0;
@@ -356,20 +322,6 @@ public class Peer extends JMConnection {
 			
 			if (autoadd_to_peermanager)
 				PeerManagerFactory.getInstance().addPeer(this);
-			
-			int software = 0xFF;
-			
-			try {
-				
-				software = this.peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
-			
-			} catch (TagException e) {
-				
-			}
-			
-			extractClientInfo(software);
-			
-			
 			Packet answerPacket;
 			
 			if (this.connectedServer == null)
@@ -432,16 +384,6 @@ public class Peer extends JMConnection {
 			
 			if (autoadd_to_peermanager)
 				PeerManagerFactory.getInstance().addPeer(this);
-
-			try {
-				
-				extractClientInfo(this.peerTags.getDWORDTag(TAG_NAME_CLIENTVER));
-				
-			} catch (Throwable e) {
-				
-				e.printStackTrace();
-				
-			}
 			
 			isConnected = true;
 			
@@ -552,12 +494,6 @@ public class Peer extends JMConnection {
 		
 	}
 	
-	public String getClientSoftware() {
-		
-		return this.clientSoftware;
-		
-	}
-	
 	public Server getConnectedServer() {
 		
 		return connectedServer;
@@ -581,4 +517,36 @@ public class Peer extends JMConnection {
 		return isConnected;
 		
 	}
+	
+	public int getClientSoftware() {
+		int clientInfo;
+		try {
+			
+			clientInfo = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
+		}catch(Throwable e) {
+			return E2DKConstants.SO_COMPAT_UNK;
+		}
+		
+		int cSoft =(int) (clientInfo & 0x00ffffff);
+		
+		cSoft=(cSoft>>17) & 0x7f;
+		
+		return cSoft;
+	}
+	
+	public String getVersion() {
+		return "";
+		// Not work
+		/*try {
+			long version = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
+			
+			long major = version >> 16;
+			long minor = version & 0xFFFF;
+			
+			return major+"."+minor;
+		} catch (TagException e) {
+			return "";
+		}*/
+	}
+	
 }
