@@ -38,8 +38,8 @@ import org.jmule.core.edonkey.packet.Packet;
 /**
  * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:08 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:21:32 $$
  */
 public class PeerDownloadStatus {
 	
@@ -61,6 +61,8 @@ public class PeerDownloadStatus {
 	
 	private int peerStatus;
 
+	private int queue_rank = 0;
+	
 	private Packet lastFilePartRequest;
 
 	private int resendCount = 0;
@@ -71,6 +73,10 @@ public class PeerDownloadStatus {
 
 	public void setResendCount(int resendCount) {
 		this.resendCount = resendCount;
+	}
+	
+	public int getQueueRank() {
+		return queue_rank;
 	}
 
 	public PeerDownloadStatus(Peer StatusPeer) {
@@ -145,13 +151,14 @@ public class PeerDownloadStatus {
 	}
 	
 	public void updatePeerHistory(int peerStatus) {
-		this.updatePeerHistory(peerStatus, 0);
+		this.updatePeerHistory(peerStatus, -1);
 	}
 	
 	
 	public void updatePeerHistory(int peerStatus, int rank) {
 		String result = "";
-		
+		if (rank!=-1)
+			queue_rank = rank;
 		lastUpdateTime = System.currentTimeMillis(); 
 		
 		switch(peerStatus) {
