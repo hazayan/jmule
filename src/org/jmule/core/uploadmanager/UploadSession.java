@@ -49,8 +49,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:18:41 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:45:18 $$
  */
 public class UploadSession implements JMTransferSession {
 	
@@ -277,7 +277,7 @@ public class UploadSession implements JMTransferSession {
 	
 	private void removeLastPeer(boolean totallyRemove){
 		
-		Peer rPeer = (Peer) this.uploadQueue.remove();
+		Peer rPeer = this.uploadQueue.pool();
 		
 		if ((rPeer!=null)&&(!totallyRemove)) {
 			
@@ -285,7 +285,7 @@ public class UploadSession implements JMTransferSession {
 			
 			if (this.uploadQueue.size()<ConfigurationManagerFactory.getInstance().UPLOAD_QUEUE_SIZE)
 				
-				this.uploadQueue.add(rPeer);
+				this.uploadQueue.addPeer(rPeer);
 		}
 		
 		//this.getLastPeer().sendPacket(EMulePacketFactory.getQueueRankingPacket(getPeerID(this.getLastPeer())));
