@@ -34,8 +34,8 @@ import org.jmule.util.Convert;
  * @author javajox
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/common/address/AddressUtils.java?view=log
  * @see phex.common.address.AddressUtils
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:42:35 $$
  */
 public class AddressUtils {
 	
@@ -166,6 +166,16 @@ public class AddressUtils {
     public static boolean isPortAvailable(int port) {
     	
        return !not_available_ports.contains(port);
+    }
+    
+    public static boolean isValidPort(String port) {
+    	try {
+    		int int_port = Integer.parseInt(port);
+    		
+    		return isPortAvailable(int_port);
+    	}catch(Exception e) {
+    		return false;
+    	}
     }
     
     public static boolean isValidIP(String address) {
