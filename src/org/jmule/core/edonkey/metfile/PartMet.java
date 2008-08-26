@@ -28,6 +28,7 @@ import static org.jmule.core.edonkey.E2DKConstants.FT_GAPEND;
 import static org.jmule.core.edonkey.E2DKConstants.FT_GAPSTART;
 import static org.jmule.core.edonkey.E2DKConstants.FT_TEMPFILE;
 import static org.jmule.core.edonkey.E2DKConstants.PARTFILE_VERSION;
+import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
@@ -94,15 +95,19 @@ import org.jmule.util.Misc;
  * </tbody>
  * </table>
  *
+ * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:30 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:25:45 $$
  */
 public class PartMet extends MetFile {
+	
+	public static final String PART_MET_FILE_EXTENTSION 		=  ".part.met";
 	
 	private byte partFileFormat;
 	private int modDate;
 	private TagList tagList = new TagList();
+	private FileHash fileHash;
 	private PartHashSet fileHashSet;
 	private GapList gapList;
 	private File part_file;
@@ -119,6 +124,12 @@ public class PartMet extends MetFile {
 		if (fileChannel == null)
 			throw new PartMetException("Failed to open "+fileName);
 		this.part_file = new File(fileName);
+	}
+	
+	public String getAbsolutePath() {
+		
+		return part_file.getAbsolutePath();
+		
 	}
 	
 	public void loadFile() throws PartMetException{
@@ -164,9 +175,11 @@ public class PartMet extends MetFile {
 			//Load Tags
 			this.tagList = new TagList();
 			for(int i = 0 ; i < tagCount; i++) {
-					tagList.addTag(Misc.loadStandardTag(fileChannel));
+				Tag tag = Misc.loadStandardTag(fileChannel);
+				tagList.addTag(tag);
 			}
 
+			
 			this.gapList = new GapList();
 
 			int count,found;
@@ -194,7 +207,7 @@ public class PartMet extends MetFile {
 					
 					if (found==0){ 
 						throw new PartMetException("Can't find end of gap in file partial file ");  
-							}
+					}
 					try {
 						gapList.addGap(Convert.intToLong(startTag.getDWORD()), Convert.intToLong(endTag.getDWORD()));
 					} catch (TagException e) {
@@ -231,23 +244,51 @@ public class PartMet extends MetFile {
 			data.position(0);
 			fileChannel.write(data);
 			
+			if (fileHash != null) {
 			data = Misc.getByteBuffer(16);
-			data.put(fileHashSet.getFileHash().getHash());
+			data.put(fileHash.getHash());
 			data.position(0);
 			fileChannel.write(data);
+			} else {
+				data = Misc.getByteBuffer(16);
+				data.position(0);
+				fileChannel.write(data);
+			}
 			
-			data = Misc.getByteBuffer(2);
-			data.putShort(Convert.intToShort(fileHashSet.size()));
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(16*fileHashSet.size());
-			
-			for(int i = 0; i <fileHashSet.size();i++)
-				data.put(fileHashSet.get(i));
-			
-			data.position(0);
-			fileChannel.write(data);
+			if (fileHashSet != null) {
+				data = Misc.getByteBuffer(2);
+				data.putShort(Convert.intToShort(fileHashSet.size()));
+				data.position(0);
+				fileChannel.write(data);
+				
+				data = Misc.getByteBuffer(16*fileHashSet.size());
+				
+				for(int i = 0; i <fileHashSet.size();i++)
+					data.put(fileHashSet.get(i));
+				
+				data.position(0);
+				fileChannel.write(data);
+			} else {
+				try {
+					long file_size = tagList.getDWORDTag(FT_FILESIZE);
+					int part_count = (int)(file_size / PARTSIZE);
+					if ((file_size % PARTSIZE) != 0)
+						part_count++;
+					data = Misc.getByteBuffer(2);
+					data.putShort(Convert.intToShort(part_count));
+					data.position(0);
+					fileChannel.write(data);
+					
+					data = Misc.getByteBuffer(16);
+					for(int i = 0;i<part_count;i++) {
+						data.position(0);
+						fileChannel.write(data);
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+				
+			}
 			
 			/**Count Gaps */
 			int gapCount=gapList.size();
@@ -378,26 +419,21 @@ public class PartMet extends MetFile {
 		return modDate;
 	}
 
-
 	public void setModDate(int modDate) {
 		this.modDate = modDate;
 	}
-
 
 	public TagList getTagList() {
 		return tagList;
 	}
 
-
 	public void setTagList(TagList tagList) {
 		this.tagList = tagList;
 	}
 	
-	
 	public GapList getGapList() {
 		return gapList;
 	}
-
 
 	public void setGapList(GapList gapList) {
 		this.gapList = gapList;
@@ -405,6 +441,14 @@ public class PartMet extends MetFile {
 	
 	public String getName() {
 		return part_file.getName();
+	}
+	
+	public FileHash getFileHash() {
+		return fileHash;
+	}
+
+	public void setFileHash(FileHash fileHash) {
+		this.fileHash = fileHash;
 	}
 	
 }
