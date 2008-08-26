@@ -30,8 +30,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:23 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:36:07 $$
  */
 public class Convert {
 
@@ -251,24 +251,5 @@ public class Convert {
 	public static JMuleBitSet byteToBitset(byte[] buffer){
 		return Convert.byteToBitset(buffer, 0, buffer.length);
 	}
-	
-	 public static String speedToString(float speed) {
-		 long n = (long)speed;
-		    if (n < 1024)
-		      return n + " B";
-		    if (n < 1024 * 1024)
-		      return (n / 1024) + "." + ((n % 1024) / 103) + " kB";
-		    if (n < 1024 * 1024 * 1024)
-		      return (n / (1024 * 1024))
-		        + "."
-		        + ((n % (1024 * 1024)) / (103 * 1024))
-		        + " MB";
-		    if (n < 1024l * 1024l * 1024l * 1024l)
-		      return (n / (1024l * 1024l * 1024l))
-		        + "."
-		        + ((n % (1024l * 1024l * 1024l)) / (103l * 1024l * 1024l))
-		        + " GB";
-		    return "A lot !!!";
-		  }
 	
 }
