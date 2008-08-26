@@ -22,11 +22,14 @@
  */
 package org.jmule.core.edonkey;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:53:47 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:30:17 $$
  */
 public class E2DKConstants {
 
@@ -41,6 +44,23 @@ public class E2DKConstants {
 	public final static int ServerSoftwareVersionMinor 	= 40;
 	public final static int ServerSoftwareVersionUpdate = 0x00;
 	public final static int ServerSoftwareVersion 		= ((ServerClientSoftware<<24) | (ServerSoftwareVersionMajor<<17) | (ServerSoftwareVersionMinor<<10) | (ServerSoftwareVersionUpdate<<7));
+	
+	public final static int SO_EMULE					= 0x00;
+	public final static int SO_LMULE					= 0x02;
+	public final static int SO_AMULE					= 0x03;
+	public final static int SO_SHAREAZA					= 0x04;
+	public final static int SO_EMULE_PLUS				= 0x05;
+	public final static int SO_HYDRANODE				= 0x06;
+	public final static int SO_NEW2_MLDONKEY			= 0x0A;
+	public final static int SO_LPHANT					= 0x14;
+	public final static int SO_NEW2_SHAREAZA			= 0x28;
+	public final static int SO_EDONKEYHYBRID			= 0x32;
+	public final static int SO_EDONKEY					= 0x33;
+	public final static int SO_MLDONKEY					= 0x34;
+	public final static int SO_OLDEMULE					= 0x35;
+	public final static int SO_JMULE					= 0xAA;
+	public final static int SO_NEW_MLDONKEY				= 0x98;
+	public final static int SO_COMPAT_UNK				= 0xFF;
 	
 	public final static int ProtocolVersion 			= 60;
 		
@@ -76,7 +96,7 @@ public class E2DKConstants {
 	public final static byte OP_PEERHELLOANSWER 		= (byte) 0x4C;
 	public final static byte OP_FILEREQUEST 			= (byte) 0x58;
 	public final static byte OP_FILESTATREQ 			= (byte) 0x4F;
-	public   final static byte OP_FILEREQANSNOFILE 		= (byte) 0x48;
+	public final static byte OP_FILEREQANSNOFILE 		= (byte) 0x48;
 	public final static byte OP_FILEREQANSWER 			= (byte) 0x59;
 	public final static byte OP_SLOTREQUEST 			= (byte) 0x54;
 	public final static byte OP_SLOTGIVEN 				= (byte) 0x55;
@@ -93,8 +113,8 @@ public class E2DKConstants {
 	public final static byte OP_EMULE_QUEUERANKING 		= (byte) 0x60;
 	public final static byte OP_EMULE_HELLO 			= (byte) 0x01;
 	public final static byte OP_EMULEHELLOANSWER 		= (byte) 0x02;
-	public final static byte OP_REQUESTSOURCES 			= (byte)0x81;
-	public final static byte OP_ANSWERSOURCES 			= (byte)0x82;
+	public final static byte OP_REQUESTSOURCES 			= (byte) 0x81;
+	public final static byte OP_ANSWERSOURCES 			= (byte) 0x82;
 	//UDP
 	//Server <-> Peer 
 	public final static byte OP_GLOBSERVRSTATREQ 		= (byte) 0x96;
@@ -113,10 +133,11 @@ public class E2DKConstants {
 	public final static byte TAG_TYPE_EXSTRING_SHORT_END = (byte) (TAG_TYPE_EXSTRING_SHORT_BEGIN + 15);
 	public final static byte TAG_TYPE_EXSTRING_LONG 	= (byte) 0x82; 
 	public final static byte TAG_TYPE_EXBYTE			= (byte) 0x89; 
-	public final static  byte TAG_TYPE_EXWORD 			= (byte) 0x88;
+	public final static byte TAG_TYPE_EXWORD 			= (byte) 0x88;
 	public final static byte TAG_TYPE_EXDWORD 			= (byte) 0x83;
 	// Meta tag Name
 	public final static byte[] TAG_NAME_NAME 			= new byte[]{0x01};
+	public final static byte[] TAG_NAME_NICKNAME		= new byte[]{0x01};
 	public final static byte[] TAG_NAME_PROTOCOLVERSION = new byte[]{0x11};
 	public final static byte[] TAG_NAME_CLIENTVER 		= new byte[]{(byte)0xFB};
 	public final static byte[] TAG_NAME_FLAGS 			= new byte[]{0x20};
@@ -130,10 +151,80 @@ public class E2DKConstants {
 	public final static byte CAP_UNICODE 				= (byte)0x0010;
 	public final static byte CAP_ZLIB 					= (byte)0x0001;
 		
+	// Search tags
 	public final static byte[] TAG_NAME_SIZE 			= new byte[]{0x02};
-	public final static byte[] TAG_NAME_TYPE 			= new byte[] {0x03};
+	public final static byte[] TAG_NAME_FILE_TYPE		= new byte[]{0x03};
 	public final static byte[] TAG_NAME_AVIABILITY 		= new byte[]{0x15};
 	public final static byte[] TAG_NAME_COMPLETESRC 	= new byte[]{0x30};
+	
+	public final static byte[] TAG_FILE_TYPE_AUDIO	 	= "Audio".getBytes();
+	public final static byte[] TAG_FILE_TYPE_VIDEO	 	= "Video".getBytes();
+	public final static byte[] TAG_FILE_TYPE_IMAGE	 	= "Image".getBytes();
+	public final static byte[] TAG_FILE_TYPE_DOC	 	= "Doc".getBytes();
+	public final static byte[] TAG_FILE_TYPE_PROGRAM 	= "Pro".getBytes();
+	public final static byte[] TAG_FILE_TYPE_ARC	 	= "Arc".getBytes();
+	public final static byte[] TAG_FILE_TYPE_ISO	 	= "Iso".getBytes();
+	public final static byte[] TAG_FILE_TYPE_UNKNOWN 	= "Unknown".getBytes(); // Internal usage
+	
+	public final static Set<String> audio_extensions	= new HashSet<String>(); 
+	public final static Set<String> video_extensions	= new HashSet<String>();
+	public final static Set<String> image_extensions	= new HashSet<String>();
+	public final static Set<String> doc_extensions		= new HashSet<String>();
+	public final static Set<String> program_extensions	= new HashSet<String>();
+	public final static Set<String> archive_extensions	= new HashSet<String>();
+	public final static Set<String> iso_extensions		= new HashSet<String>();
+	
+	static {
+		audio_extensions.add("mp3");
+		audio_extensions.add("mp4");
+		audio_extensions.add("wav");
+		audio_extensions.add("midi");
+		audio_extensions.add("ogg");
+		
+		video_extensions.add("avi");
+		video_extensions.add("mpg");
+		video_extensions.add("mpeg");
+		video_extensions.add("mkv");
+		video_extensions.add("wmv");
+		video_extensions.add("flv");
+		
+		image_extensions.add("png");
+		image_extensions.add("gif");
+		image_extensions.add("jpg");
+		image_extensions.add("jpeg");
+		image_extensions.add("bmp");
+		image_extensions.add("xcf");
+		
+		doc_extensions.add("odt");
+		doc_extensions.add("pdf");
+		doc_extensions.add("doc");
+		doc_extensions.add("docx");
+		doc_extensions.add("txt");
+		doc_extensions.add("wri");
+		doc_extensions.add("vor");
+		
+		program_extensions.add("sh");
+		program_extensions.add("class");
+		program_extensions.add("jar");
+		program_extensions.add("exe");
+		program_extensions.add("com");
+		program_extensions.add("bat");
+		program_extensions.add("cmd");
+		
+		archive_extensions.add("uue");
+		archive_extensions.add("bz2");
+		archive_extensions.add("tar");
+		archive_extensions.add("gz");
+		archive_extensions.add("zip");
+		archive_extensions.add("rar");
+		
+		iso_extensions.add("iso");
+		iso_extensions.add("nrg");
+		iso_extensions.add("mdf");
+	}
+	
+	
+	
 	// Search constants
 	public final static byte SEARCH_BYNAME 				= (byte) 0x01;
 	// Part files constants
