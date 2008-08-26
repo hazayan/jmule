@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:47:21 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:22:53 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -182,7 +182,8 @@ public class DownloadManagerImpl implements DownloadManager {
 
 	public void shutdown() {
 		for(DownloadSession download_session : session_list.values())
-			download_session.stopDownload();
+			if (download_session.isStarted())
+				download_session.stopDownload();
 		
 	}
 
