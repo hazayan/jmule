@@ -56,7 +56,7 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS2;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NAME;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_PROTOCOLVERSION;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_SIZE;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_TYPE;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_FILE_TYPE;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT_PEER;
 
@@ -82,8 +82,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:44 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:45:50 $$
  */
 public class PacketFactory {
 	
@@ -463,7 +463,7 @@ public class PacketFactory {
     	for( SharedFile sFile : fileList){
     		Tag tagFileName = TagFactory.getStringTag(sFile.getSharingName(), TAG_NAME_NAME);
     		Tag tagSize = TagFactory.getDWORDTag((int)sFile.length(), TAG_NAME_SIZE);
-    		Tag tagType = TagFactory.getDWORDTag(5, TAG_NAME_TYPE);
+    		Tag tagType = TagFactory.getDWORDTag(5, TAG_NAME_FILE_TYPE);
     		fileEntry[i] = ByteBuffer.allocate(16 + 4 + 2 + 4 + tagFileName.getSize() + tagSize.getSize()+tagType.getSize());
     		fileEntry[i].order(ByteOrder.LITTLE_ENDIAN);
     		enLen += fileEntry[i].limit();
