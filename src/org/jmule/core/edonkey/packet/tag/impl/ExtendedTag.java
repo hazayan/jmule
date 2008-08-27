@@ -33,6 +33,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagException;
 
 
 /**
@@ -125,23 +126,20 @@ import org.jmule.core.edonkey.packet.tag.Tag;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:58 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:53:02 $$
  */
 
 public class ExtendedTag extends AbstractTag implements Tag{
-
+	
 	/**
 	 * Extract extended eDonkeyTag from ByteBuffer value 
 	 */
-	public void extractTag(ByteBuffer data, int startPos) {
-		int initPos=data.position();
-		
+	public void extractTag(ByteBuffer data) {
+			
 		// byte tagType;
 		boolean tagIsOk=false;
-		
-		data.position(startPos);
-		
+				
 	    setType(data.get());
 
 	    // If Have long string >15
@@ -193,7 +191,7 @@ public class ExtendedTag extends AbstractTag implements Tag{
 	    	
 	    }
 	    
-	    // If have byte value
+	    // byte value
 	    if (getType() == TAG_TYPE_EXBYTE){
 	    	tagIsOk=true;
 	    	byte[] metaTagName = new byte[1];
@@ -208,7 +206,7 @@ public class ExtendedTag extends AbstractTag implements Tag{
 	    	tag.put(data.get());
 	    }
 	    
-	  // If have word value
+	  // word value
 	    if (getType() == TAG_TYPE_EXWORD){
 	    	tagIsOk=true;
 	    	byte[] metaTagName = new byte[1];
@@ -224,7 +222,7 @@ public class ExtendedTag extends AbstractTag implements Tag{
 	    	tag.putShort(data.getShort());
 	    }
 	    
-	  // If have dword value
+	  // dword value
 	    if (getType() == TAG_TYPE_EXDWORD){
 	    	tagIsOk=true;
 	    	byte[] metaTagName = new byte[1];
@@ -252,7 +250,6 @@ public class ExtendedTag extends AbstractTag implements Tag{
 //				e.printStackTrace();
 //			}	
 		}
-		data.position(initPos);
 
 	}
 
@@ -276,7 +273,8 @@ public class ExtendedTag extends AbstractTag implements Tag{
 			
 	    	return value.getInt(0);
 			}
-		if (getType()==TAG_TYPE_EXWORD){
+		
+		if (getType() == TAG_TYPE_EXWORD){
 			byte[] data=new byte[2];
 			int pos=tag.position();
 			
@@ -291,7 +289,7 @@ public class ExtendedTag extends AbstractTag implements Tag{
 			
 	    	return value.getInt(0);
 		}
-		if (getType()==TAG_TYPE_EXDWORD){
+		if (getType() == TAG_TYPE_EXDWORD){
 			byte[] data=new byte[4];
 			int pos=tag.position();
 			
@@ -314,7 +312,7 @@ public class ExtendedTag extends AbstractTag implements Tag{
 		return 0;
 	}
 
-	/**Get string TAG*/
+	
 	public String getString() throws TagException {
 		
 		if (getType()==TAG_TYPE_EXSTRING_LONG){

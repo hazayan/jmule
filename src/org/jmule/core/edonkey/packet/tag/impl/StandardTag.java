@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.util.Convert;
 
 /**
@@ -82,8 +83,8 @@ import org.jmule.util.Convert;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:59 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:53:02 $$
  */
 public class StandardTag extends AbstractTag implements Tag {
 
@@ -197,11 +198,4 @@ public class StandardTag extends AbstractTag implements Tag {
 		this.setType(tagType);
 	}
 	
-	/**Extract eDonkey Tag from ByteBuffer at startPos*/
-	public void extractTag(ByteBuffer data, int startPos) {
-		int initPos = data.position();
-		data.position(startPos);
-	    this.extractTag(data);
-		data.position(initPos);
-	}
 }

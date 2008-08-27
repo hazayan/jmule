@@ -25,14 +25,13 @@ package org.jmule.core.edonkey.packet.tag;
 import java.nio.ByteBuffer;
 
 import org.jmule.core.edonkey.packet.tag.impl.MetaTag;
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
 
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:22 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:52:47 $$
  */
 public interface Tag {
 	
@@ -59,7 +58,7 @@ public interface Tag {
 	public void  insertString(String stringData);
 	
 	public void insertDWORD(int dwordData);
-	
-	public void extractTag(ByteBuffer data, int startPos);
+		
+	public void extractTag(ByteBuffer data);
 	
 }
