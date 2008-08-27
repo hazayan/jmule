@@ -60,8 +60,9 @@ import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMFloodException;
 import org.jmule.core.net.JMuleSocketChannel;
@@ -75,8 +76,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:06:33 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:53:49 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -270,7 +271,8 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			int tagCount = dataPacket.getInt();
 			
 			for(int j=0;j<tagCount;j++) {
-				Tag tag = Misc.loadStandardTag(dataPacket);
+				//Tag tag = Misc.loadStandardTag(dataPacket);
+				Tag tag = TagReader.readTag(dataPacket);
 				result.addTag(tag);
 			}
 			searchResults.add(result);
