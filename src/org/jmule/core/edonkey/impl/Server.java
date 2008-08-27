@@ -44,14 +44,18 @@ import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMThread;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.ServerListener;
+import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.UDPPacket;
 import org.jmule.core.edonkey.packet.impl.PacketFactory;
 import org.jmule.core.edonkey.packet.impl.UDPPacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
+import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerFoundSourceSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerIDChangeSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerMessageSP;
@@ -66,7 +70,7 @@ import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.edonkey.packet.tag.impl.TagException;
 import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.net.JMConnection;
-import org.jmule.core.net.JMUDPConnection2;
+import org.jmule.core.net.JMUDPConnection;
 import org.jmule.core.net.PacketScanner;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.searchmanager.SearchManager;
@@ -80,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:37:54 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:46:43 $$
  */
 public class Server extends JMConnection {
 	
@@ -94,33 +98,33 @@ public class Server extends JMConnection {
 	private boolean isConnected = false;
 
 	private ProcessPacketsThread processPacketsThread = null;
-
-	private volatile SearchRequest lastSearchQuery;
 	
-	private volatile SearchRequest nextSearchQuery;
+	private boolean isStatic = false;
 	
-	private volatile boolean allowSearch = false;
-
-	private ProcessUDPPacketsThread processUDPPacketsThread = null;
-	
-	private udpQueryThread udpQueryThread = null;
-	
-	private JMUDPConnection2 udp_connection;
-
+	// UDP
 	private int challenge;
 
 	private long challenge_send_time;
 
 	private long last_udp_response = System.currentTimeMillis();
 	
+	private Random random = new Random(); // challenge generator
+	
+	// Search
+	
+	private volatile SearchRequest lastSearchQuery;
+	
+	private volatile SearchRequest nextSearchQuery;
+	
+	private volatile boolean allowSearch = false;
+	
 	private TimerTask search_task;
 	
-	private Timer search_timer = new Timer();
+	private Timer search_timer;
 	
+	// Listeners
 	private List<ServerListener> server_listeners = new CopyOnWriteArrayList<ServerListener>();
 	
-	private boolean isStatic = false;
-
 	public Server() {
 		
 		super();
@@ -149,38 +153,10 @@ public class Server extends JMConnection {
 
 	public void start() {
 
-		try {
-			
-			InetSocketAddress server_udp_address = new InetSocketAddress(getAddress(),SERVER_UDP_PORT);
-			
-			udp_connection = new JMUDPConnection2(server_udp_address);
-
-			udp_connection.startUDPIncomingThread();
-
-			udp_connection.startUDPOutcomingThread();
-
-			processUDPPacketsThread = new ProcessUDPPacketsThread();
-			
-			processUDPPacketsThread.start();
-			
-			udpQueryThread = new udpQueryThread();
-			
-			
-		} catch (Throwable e) {
-			
-			e.printStackTrace();
-		}
 	}
 
 	public void stop() {
 
-		udpQueryThread.JMStop();
-
-		udp_connection.stopUDPIncomingThread();
-
-		udp_connection.stopUDPOutcomingThread();
-
-		processUDPPacketsThread.JMStop();
 		
 	}
 
@@ -328,6 +304,10 @@ public class Server extends JMConnection {
 		
 	}
 	
+	public void processPacket(ScannedUDPPacket packet) {
+		processPacket((ScannedPacket)packet);
+	}
+	
 	private void processPacket(ScannedPacket packet) {
 		
 		if (packet instanceof JMServerIDChangeSP) {
@@ -340,7 +320,13 @@ public class Server extends JMConnection {
 			
 			isConnected = true;
 			
-			sendPacket(PacketFactory.getGetServerListPacket());
+			search_timer = new Timer();
+			
+			JMuleCore core = JMuleCoreFactory.getSingleton();
+			boolean update_server_list = core.getConfigurationManager().getBooleanParameter(
+										 ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, false);
+			if (update_server_list)
+				sendPacket(PacketFactory.getGetServerListPacket());
 			
 			notify_server_event(TCP_SOCKET_CONNECTED);
 			
@@ -383,7 +369,10 @@ public class Server extends JMConnection {
 		}
 		
 		if (packet instanceof JMServerServerListSP) {
-
+			ServerManager server_manager = JMuleCoreFactory.getSingleton().getServerManager();
+			JMServerServerListSP scanned_packet = (JMServerServerListSP) packet;
+			for(Server server : scanned_packet)
+				server_manager.addServer(server);
 			return ;
 		}
 
@@ -714,7 +703,41 @@ public class Server extends JMConnection {
 		this.isStatic = isStatic;
 	}
 	
-	private class udpQueryThread extends JMThread {
+	public int hashCode() {
+		
+		return (getAddress()+" : "+getPort()).hashCode(); 
+	}
+	
+	public int getAddressAsInt() {
+		
+		return Convert.IPtoInt( Convert.stringIPToArray( getAddress() ) );
+	}
+	
+	public boolean equals(Object object) {
+		
+		if (!(object instanceof Server)) return false;
+		
+		if (object.hashCode()!=this.hashCode()) return false;
+		
+		return true;
+	}
+	
+	
+	public void sendUDPDescRequest() {
+		InetSocketAddress udpAddress = new InetSocketAddress(getAddress(), SERVER_UDP_PORT);
+		UDPPacket packet = UDPPacketFactory.getUDPServerDescRequest(udpAddress);
+		JMUDPConnection.getInstance().sendPacket(packet);
+	}
+	
+	public void sendUDPStatusRequest() {
+		challenge = random.nextInt();
+		challenge_send_time = System.currentTimeMillis();
+		InetSocketAddress udpAddress = new InetSocketAddress(getAddress(), SERVER_UDP_PORT);
+		UDPPacket packet = UDPPacketFactory.getUDPStatusRequest(challenge, udpAddress);
+		JMUDPConnection.getInstance().sendPacket(packet);
+	}
+	
+/*	private class udpQueryThread extends JMThread {
 		
 		private boolean stop = false;
 		
@@ -734,15 +757,11 @@ public class Server extends JMConnection {
 
 				try {
 					
-					InetSocketAddress udpAddress = new InetSocketAddress(
-							getAddress(), SERVER_UDP_PORT);
-
-					udp_connection.sendPacket(UDPPacketFactory
-							.getUDPServerDescRequest(udpAddress));
-
-					challenge = random.nextInt();
 					
-					challenge_send_time = System.currentTimeMillis();
+
+					udp_connection.sendPacket();
+
+
 
 					udp_connection.sendPacket(UDPPacketFactory
 							.getUDPStatusRequest(challenge, udpAddress));
@@ -761,7 +780,7 @@ public class Server extends JMConnection {
 			
 			this.interrupt();
 		}
-	}
+	}*/
 
 	private class ProcessPacketsThread extends JMThread {
 		
@@ -798,6 +817,7 @@ public class Server extends JMConnection {
 		}
 	}
 	
+	/*
 	private class ProcessUDPPacketsThread extends JMThread {
 		
 		private boolean stop = false;
@@ -850,7 +870,7 @@ public class Server extends JMConnection {
 		}
 		
 		
-	}
+	} */
 	
 	private void notify_server_event(int socket_status) {
 		
@@ -883,25 +903,6 @@ public class Server extends JMConnection {
 		   }
 		}
 		
-	}
-	
-	public int hashCode() {
-		
-		return (getAddress()+" : "+getPort()).hashCode(); 
-	}
-	
-	public int getAddressAsInt() {
-		
-		return Convert.IPtoInt( Convert.stringIPToArray( getAddress() ) );
-	}
-	
-	public boolean equals(Object object) {
-		
-		if (!(object instanceof Server)) return false;
-		
-		if (object.hashCode()!=this.hashCode()) return false;
-		
-		return true;
 	}
 	
 	/**
