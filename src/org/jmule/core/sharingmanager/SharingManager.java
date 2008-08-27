@@ -22,6 +22,7 @@
  */
 package org.jmule.core.sharingmanager;
 
+import java.io.File;
 import java.util.List;
 
 import org.jmule.core.JMIterable;
@@ -31,8 +32,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:00 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:04:19 $$
  */
 public interface SharingManager extends JMuleManager {
 
@@ -124,12 +125,34 @@ public interface SharingManager extends JMuleManager {
 	public SharedFile getSharedFile(FileHash fileHash);
 	
 	/**
+	 * Get shared file by Java's file object.
+	 * @param file
+	 * @return
+	 */
+	public SharedFile getSharedFile(File file);
+	/**
 	 * Used by PacketFactory in offer files packet creation.
 	 * @return
 	 */
 	public JMIterable<SharedFile> getSharedFiles();
 
+	/**
+	 * Get all partial files
+	 * @return
+	 */
 	public List<PartialFile> getPartialFiles();
+	
+	/**
+	 * Get all completed files
+	 * @return 
+	 */
+	public List<CompletedFile> getCompletedFiles();
+	
+	/**
+	 * Remove shared file identified by file hash
+	 * @param fileHash file hash
+	 */
+	public void removeSharedFile(FileHash fileHash);
 	
 	public void addCompletedFileListener(CompletedFileListener listener);
 	
