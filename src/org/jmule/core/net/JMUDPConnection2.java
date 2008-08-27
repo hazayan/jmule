@@ -32,11 +32,11 @@ import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.edonkey.packet.UDPPacket;
 
 /**
- * 
+ * For testing only !
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:45 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:40:25 $$
  */
 public class JMUDPConnection2 {
 	
@@ -138,6 +138,9 @@ public class JMUDPConnection2 {
 		
 		public void JMStop() {
 			stop = true;
+			synchronized(this) {
+				interrupt();
+			}
 		}
 		
 	}
@@ -181,6 +184,9 @@ public class JMUDPConnection2 {
 		
 		public void JMStop() {
 			stop = true;
+			synchronized(this) {
+				interrupt();
+			}
 		}
 		
 	}
