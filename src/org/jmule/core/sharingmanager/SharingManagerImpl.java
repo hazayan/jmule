@@ -32,9 +32,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMIterable;
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -48,8 +50,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:55:17 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:05:25 $$
  */
 public class SharingManagerImpl implements SharingManager {
 
@@ -60,7 +62,8 @@ public class SharingManagerImpl implements SharingManager {
 	private List<CompletedFileListener> completed_file_listeners = new LinkedList<CompletedFileListener>();
 	
 	public void initialize() {
-	     sharedFiles = new Hashtable<FileHash,SharedFile>();
+	     sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
+
 	     
 	     Set<String> types = new HashSet<String>();
 	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT);
@@ -134,6 +137,9 @@ public class SharingManagerImpl implements SharingManager {
 		    		part_met.loadFile();
 		    		PartialFile partial_shared_file = new PartialFile(part_met);
 		    		sharedFiles.put(partial_shared_file.getFileHash(), partial_shared_file);
+		    		
+		    		JMuleCoreFactory.getSingleton().getDownloadManager().addDownload(partial_shared_file);
+		    		
 		    	}catch(Throwable t) { t.printStackTrace();}
 		    }
 		    isDone = true;
@@ -422,4 +428,19 @@ public class SharingManagerImpl implements SharingManager {
 		}
 		
 	}
+	public SharedFile getSharedFile(File file) {
+		for(SharedFile shared_file : sharedFiles.values()){
+			if (shared_file.getAbsolutePath().equals(file.getAbsolutePath()))
+				return shared_file;
+		}
+		
+		return null;
+	}
+
+	public void removeSharedFile(FileHash fileHash) {
+		SharedFile shared_file = sharedFiles.get(fileHash);
+		sharedFiles.remove(shared_file);
+		shared_file.delete();
+	}
+	
 }
