@@ -22,19 +22,25 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.packet.tag.impl.ExtendedTag;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
+import org.jmule.util.Misc;
 
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/27 16:52:21 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/08/27 17:03:04 $
  */
 public class TagReader {
 
@@ -58,6 +64,58 @@ public class TagReader {
 		
 		tag.extractTag(data);
 		
+		return tag;
+	}
+	
+	/**
+	 * Load 1 standard tag from file channel 
+	 * @param fileChannel
+	 * @return
+	 * @throws IOException
+	 */
+	public static StandardTag loadStandardTag(FileChannel fileChannel) throws IOException{
+		ByteBuffer data;
+		data = Misc.getByteBuffer(1);
+		fileChannel.read(data);
+		byte tagType = data.get(0);
+
+		data =  Misc.getByteBuffer(2);
+		fileChannel.read(data);
+		short metaTagLength = data.getShort(0);
+
+		data = Misc.getByteBuffer(metaTagLength);
+		fileChannel.read(data);
+
+		StandardTag tag = new StandardTag(tagType, data.array());
+		
+		switch (tagType) {
+		
+		case TAG_TYPE_STRING: {
+			data = Misc.getByteBuffer(2);
+			fileChannel.read(data);
+			short strLength = data.getShort(0);
+			
+			data = Misc.getByteBuffer(strLength);
+			fileChannel.read(data);
+			
+			tag.insertString(new String(data.array()));
+			
+			break;
+		}
+		
+		case TAG_TYPE_DWORD : {
+			data = Misc.getByteBuffer(4);
+			fileChannel.read(data);
+			tag.insertDWORD(data.getInt(0));
+			
+			break;
+		}
+		
+		default : {
+			break;
+		}
+		
+		}
 		return tag;
 	}
 	
