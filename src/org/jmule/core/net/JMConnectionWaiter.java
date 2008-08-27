@@ -30,19 +30,18 @@ import java.util.List;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.configmanager.ConfigurationListener;
+import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.Peer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 15:06:25 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:33:15 $$
  */
-public class JMConnectionWaiter implements ConfigurationListener{
+public class JMConnectionWaiter extends ConfigurationAdapter{
 	
 	public static final int TCP_LISTENER_OPENED = 0x01;
 	
@@ -201,39 +200,5 @@ public class JMConnectionWaiter implements ConfigurationListener{
 		restart();
 		
 	}
-
-	public void downloadLimitChanged(long limit) {
-		
-	}
-
-	public void maxConnectionsChanged(long count) {
-		
-	}
-
-	public void uploadLimitChanged(long limit) {
-	
-	}
-
-	public void downloadBandwidthChanged(long downloadBandwidth) {
-	
-	}
-
-	public void isUDPEnabledChanged(boolean enabled) {
-	
-	}
-
-	public void nickNameChanged(String nickName) {
-	
-	}
-
-	public void sharedDirectoriesChanged(List<File> sharedDirs) {
-
-	}
-
-	public void uploadBandwidthChanged(long uploadBandwidth) {
-
-	}
-	
-	
 
 }
