@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
@@ -97,8 +96,8 @@ import org.jmule.util.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:25:45 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:08:22 $$
  */
 public class PartMet extends MetFile {
 	
@@ -309,11 +308,9 @@ public class PartMet extends MetFile {
 			byte counter = 0x30;//Value hacked from eMule & aMule met.part files
 			byte metaTagBegin[] = FT_GAPSTART.clone();
 			byte metaTagEnd[] = FT_GAPEND.clone();
-			Collection gaps = this.gapList.getGaps();
 			
-			for(Object object : gaps){
-				Gap gap = (Gap)object;
-				
+			for(Gap gap : gapList.getGaps()){
+								
 				metaTagBegin[1] = counter;
 				Tag tagBegin = new StandardTag(TAG_TYPE_DWORD,metaTagBegin);
 				tagBegin.insertDWORD(Convert.longToInt(gap.getStart()));

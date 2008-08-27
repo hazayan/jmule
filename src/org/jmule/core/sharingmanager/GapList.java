@@ -22,20 +22,29 @@
  */
 package org.jmule.core.sharingmanager;
 
-import java.util.*;
+import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.jmule.core.JMIterable;
+import org.jmule.core.JMIterator;
 
 /**
  * 
  * @author pola
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:08 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:06:37 $$
  */
 public class GapList {
 
-	private ArrayList<Gap> gaps = new ArrayList<Gap>();
+	private List<Gap> gaps = new LinkedList<Gap>();
+	//private List<Gap> gaps = new CopyOnWriteArrayList<Gap>();
 	private long byteSize = 0;
 
 	static final Comparator gapComparator = new Comparator() {
@@ -78,8 +87,8 @@ public class GapList {
 	 * 
 	 * @return The gaps stored in the GapList.
 	 */
-	public Collection<Gap> getGaps() {
-		return gaps;
+	public JMIterable<Gap> getGaps() {
+		return new JMIterable<Gap>(new JMIterator<Gap>(gaps.iterator()));
 	}
 
 	/**
@@ -145,7 +154,7 @@ public class GapList {
 	 * Sorts the GapList
 	 */
 	public void sort() {
-		Collections.sort(this.gaps, gapComparator);
+		//Collections.sort(this.gaps, gapComparator);
 	}
 
 	/** Returns the first gap before a position.
@@ -336,11 +345,10 @@ public class GapList {
 	 * @param end
 	 * @return
 	 */
-	public Collection<Gap> getGapsFromSegment(long start,long end) {
-		LinkedList<Gap> gapList = new LinkedList<Gap>();
+	public List<Gap> getGapsFromSegment(long start,long end) {
+		List<Gap> gapList = new LinkedList<Gap>();
 		
-		for(int i = 0;i<this.gaps.size();i++) {
-			Gap g = this.gaps.get(i);
+		for(Gap g : gaps) {
 				
 			/** Start of gap is inside of Start:End **/
 			if ((g.getStart()>=start)&&(g.getStart()<=end)) {
@@ -349,7 +357,7 @@ public class GapList {
 					try {
 						Gap g1 = (Gap)g.clone();
 						if (g1.getStart()!=g1.getEnd())
-							gapList.addLast(g1);
+							gapList.add(g1);
 					} catch (CloneNotSupportedException e) {
 						continue;
 					}
@@ -358,7 +366,7 @@ public class GapList {
 				if ((g.getEnd()>end)) {
 					Gap g1 = new Gap(g.getStart(),end);
 					if (g1.getStart()!=g1.getEnd())
-					gapList.addLast(g1);
+					gapList.add(g1);
 					continue;
 				} 
 			}
@@ -368,11 +376,11 @@ public class GapList {
 				if ((g.getEnd()>=start)&&(g.getEnd()<=end)) {
 					Gap g1 = new Gap(start,g.getEnd());
 					if (g1.getStart()!=g1.getEnd())
-					gapList.addLast(g1);
+					gapList.add(g1);
 					continue;
 				}
 				if (g.getEnd()>end) {
-					gapList.addLast(new Gap(start,end));
+					gapList.add(new Gap(start,end));
 					continue;
 				}
 			}
