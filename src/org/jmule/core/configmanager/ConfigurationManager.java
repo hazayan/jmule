@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/24 07:33:26 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:44:23 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -61,12 +61,16 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 3;
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
 	// the network
-	public static final long          DOWNLOAD_BANDWIDTH             =     1024 * 10 * 256;
-	public static final long          UPLOAD_BANDWIDTH               =     1024 * 10 * 256;
-	public static final int           MAX_CONNECTIONS                =     500;
-	public static final long          DOWNLOAD_LIMIT     			=     1024 * 1024;
-	public static final long          UPLOAD_LIMIT       			=     1024 * 512;
+	public static final long          DOWNLOAD_BANDWIDTH            =     1024 * 10 * 256;
+	public static final long          UPLOAD_BANDWIDTH              =     1024 * 10 * 256;
+	public static final int           MAX_CONNECTIONS               =    500;
+	public static final long          DOWNLOAD_LIMIT     			=    1024 * 1024;
+	public static final long          UPLOAD_LIMIT       			=    1024 * 512;
+	
+	public static final long		  MAX_UDP_PACKET_SIZE			=    100*1024;
+	
 	public static final long          WRONG_PACKET_CHECK_INTERVAL	=     1000 * 5;
+	public static final long		  MAX_WRONG_PACKET_COUNT		=     50 ;
 	// data base keys
 	public static final String       NICK_NAME_KEY                         =     "NickName";
 	public static final String       TCP_PORT_KEY                          =     "TCPPort";
@@ -80,6 +84,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       SHARED_DIRECTORIES_KEY                =     "SharedDirectories";
 	
 	public static final String		 SERVER_LIST_UPDATE_ON_CONNECT_KEY	   =     "ServerListUpdateOnConnect";
+	
+	public static final String 		 CUSTOM_PARAMETER_KEY					   =     "CustomParameter";
 	// 
 	//public static final String       PEER_ACTIVITY_CHECK_TIME_KEY   	   =     "PeerActivityCheckTime";
 	//public static final String       SOURCES_QUERY_INTERVAL_KEY     	   =     "SourcesQueryInterval";
@@ -236,7 +242,7 @@ public interface ConfigurationManager extends JMuleManager {
     
     public void setParameter(String parameter,float value);
     
-    public void setParameter(double parameter,double value);
+    public void setParameter(String parameter,double value);
     
     public void setParameter(String parameter,long value);
     
@@ -248,9 +254,12 @@ public interface ConfigurationManager extends JMuleManager {
 	 */
 	public void addConfigurationListener(ConfigurationListener listener);
 	
+	public void addConfigurationListener(ConfigurationListener listener, String parameter);
+	
 	/**
 	 * Removes a configuration listener
 	 * @param listener the given configuration listener
 	 */
 	public void removeConfigurationListener(ConfigurationListener listener);
+	
 }
