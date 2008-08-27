@@ -26,15 +26,15 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_ANSWER;
 
 import java.net.InetSocketAddress;
 
-import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
+import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:35 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:23:35 $$
  */
-public class JMServerUDPDescSP implements ScannedPacket {
+public class JMServerUDPDescSP implements ScannedUDPPacket {
 
 	private String name;
 	private String description;
@@ -67,11 +67,11 @@ public class JMServerUDPDescSP implements ScannedPacket {
 		this.description = description;
 	}
 
-	public InetSocketAddress getSender() {
+	public InetSocketAddress getSenderAddress() {
 		return sender;
 	}
 
-	public void setSender(InetSocketAddress sender) {
+	public void setSenderAddress(InetSocketAddress sender) {
 		this.sender = sender;
 	}
 

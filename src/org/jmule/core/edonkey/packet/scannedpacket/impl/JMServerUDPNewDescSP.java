@@ -24,19 +24,23 @@ package org.jmule.core.edonkey.packet.scannedpacket.impl;
 
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_ANSWER;
 
+import java.net.InetSocketAddress;
+
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
+import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 import org.jmule.core.edonkey.packet.tag.impl.TagList;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:40 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:23:36 $$
  */
-public class JMServerUDPNewDescSP implements ScannedPacket  {
+public class JMServerUDPNewDescSP implements ScannedUDPPacket  {
 
 	private TagList tagList;
 	private int challenge;
+	private InetSocketAddress sender;
 	
 	public TagList getTagList() {
 		return tagList;
@@ -56,15 +60,24 @@ public class JMServerUDPNewDescSP implements ScannedPacket  {
 
 	
 	
-	public JMServerUDPNewDescSP(int challenge, TagList tagList) {
+	public JMServerUDPNewDescSP(int challenge, TagList tagList, InetSocketAddress sender) {
 		super();
 		this.challenge = challenge;
 		this.tagList = tagList;
+		this.sender = sender;
 	}
 
 	public int getPacketCommand() {
 	
 		return OP_SERVER_DESC_ANSWER;
+	}
+
+	public InetSocketAddress getSenderAddress() {
+		return sender;
+	}
+	
+	public void setSenderAddress(InetSocketAddress newAddress) {
+		sender = newAddress;
 	}
 
 }
