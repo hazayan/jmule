@@ -37,7 +37,7 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.edonkey.metfile.PartMetException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.utils.MD4;
 import org.jmule.core.utils.MD4FileHasher;
 import org.jmule.util.Convert;
@@ -46,10 +46,12 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:41:32 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:56 $$
  */
 public class PartialFile extends SharedFile {
+	
+	public static final String PART_FILE_EXTENSION = ".part";
 	
 	private String tempFileName;
 	
@@ -106,9 +108,9 @@ public class PartialFile extends SharedFile {
 		
 		String tempDir = ConfigurationManager.TEMP_DIR;
 		
-		tempFileName = tempDir + File.separator+fileName + ".part";
+		tempFileName = tempDir + File.separator+fileName + PART_FILE_EXTENSION;
 		
-		metFileName = tempDir + File.separator+fileName + ".part.met";
+		metFileName = tempDir + File.separator+fileName +  PartMet.PART_MET_FILE_EXTENTSION;
 		
 		file = new File(tempFileName);
 		

@@ -66,9 +66,9 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPDescSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPNewDescSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPStatusSP;
 import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.net.JMConnection;
 import org.jmule.core.net.JMUDPConnection;
 import org.jmule.core.net.PacketScanner;
@@ -84,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:46:43 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:55 $$
  */
 public class Server extends JMConnection {
 	

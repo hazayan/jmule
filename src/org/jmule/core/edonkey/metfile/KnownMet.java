@@ -36,7 +36,8 @@ import java.util.Hashtable;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.util.Convert;
@@ -100,8 +101,8 @@ import org.jmule.util.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:28 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
  */
 public class KnownMet extends MetFile {
 
@@ -161,7 +162,7 @@ public class KnownMet extends MetFile {
 			int tagCount = data.getInt(0);
 			TagList tagList = new TagList();
 			for(int i = 0;i<tagCount;i++) {
-				Tag tag = Misc.loadStandardTag(fileChannel);
+				Tag tag = TagReader.loadStandardTag(fileChannel);
 				tagList.addTag(tag);
 			}
 			known_met_entity.setTagList(tagList);

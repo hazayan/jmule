@@ -36,8 +36,8 @@ import org.jmule.core.sharingmanager.PartialFile;
  * Created on 2008-Apr-20
  * @author javajox
  * @author binary
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:00:53 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
  */
 public interface DownloadManager extends JMuleManager {
 	
@@ -65,6 +65,8 @@ public interface DownloadManager extends JMuleManager {
 	 * @return
 	 */
 	public DownloadSession getDownload(FileHash fileHash);
+	
+	public int getDownloadCount();
 	
 	public void startDownload(FileHash fileHash);
 	

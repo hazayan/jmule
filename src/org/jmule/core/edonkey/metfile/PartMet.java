@@ -40,9 +40,10 @@ import java.nio.ByteBuffer;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.util.Convert;
@@ -96,8 +97,8 @@ import org.jmule.util.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:08:22 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
  */
 public class PartMet extends MetFile {
 	
@@ -174,7 +175,7 @@ public class PartMet extends MetFile {
 			//Load Tags
 			this.tagList = new TagList();
 			for(int i = 0 ; i < tagCount; i++) {
-				Tag tag = Misc.loadStandardTag(fileChannel);
+				Tag tag = TagReader.loadStandardTag(fileChannel);
 				tagList.addTag(tag);
 			}
 

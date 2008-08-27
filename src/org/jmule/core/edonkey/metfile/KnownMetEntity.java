@@ -27,15 +27,15 @@ import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
 
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:28 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
  */
 public class KnownMetEntity {
 	private int date;

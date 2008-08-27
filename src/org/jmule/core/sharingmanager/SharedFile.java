@@ -51,7 +51,7 @@ import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.utils.MD4FileHasher;
 import org.jmule.util.Misc;
@@ -59,8 +59,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 16:53:03 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:55 $$
  */
 public abstract class SharedFile {
 	

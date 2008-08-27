@@ -39,8 +39,8 @@ import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerChatMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.net.JMConnection;
 import org.jmule.core.net.JMuleSocketChannel;
 import org.jmule.core.net.PacketScanner;
@@ -51,8 +51,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:32:13 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:55 $$
  */
 public class Peer extends JMConnection {
 	

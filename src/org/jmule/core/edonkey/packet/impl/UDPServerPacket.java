@@ -30,15 +30,16 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.jmule.core.edonkey.packet.UDPPacket;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.util.Convert;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:43 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
  */
 public class UDPServerPacket extends UDPAbstractPacket implements UDPPacket {
 	
@@ -212,7 +213,7 @@ public class UDPServerPacket extends UDPAbstractPacket implements UDPPacket {
 		int tagCount = dataPacket.getInt();
 		try {
 		for(int i = 0;i<tagCount;i++) 
-			tagList.addTag(Misc.loadStandardTag(dataPacket));
+			tagList.addTag(TagReader.readTag(dataPacket));
 		}catch(RuntimeException e) {
 			e.printStackTrace();
 		}

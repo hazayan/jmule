@@ -34,7 +34,8 @@ import java.util.List;
 
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.util.Convert;
 import org.jmule.util.Misc;
 
@@ -93,8 +94,8 @@ import org.jmule.util.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:34:57 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -239,7 +240,7 @@ public class ServerMet extends MetFile {
 						
 		//Load tags....
 		for(int j = 0; j<tagCount; j++)
-			tagList.addTag(Misc.loadStandardTag(fileChannel));
+			tagList.addTag(TagReader.loadStandardTag(fileChannel));
 		
 		Server server = new Server(remonteAddress,remontePort,tagList);
 		server.setStatic(true);

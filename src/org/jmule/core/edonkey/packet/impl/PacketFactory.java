@@ -72,7 +72,7 @@ import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.impl.TagFactory;
+import org.jmule.core.edonkey.packet.tag.TagFactory;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -82,8 +82,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:45:50 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
  */
 public class PacketFactory {
 	

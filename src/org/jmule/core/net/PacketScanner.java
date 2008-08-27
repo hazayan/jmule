@@ -95,15 +95,15 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerStatusSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPDescSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPNewDescSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPStatusSP;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:40:42 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
  */
 public class PacketScanner {
 	

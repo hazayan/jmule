@@ -45,16 +45,16 @@ import static org.jmule.core.edonkey.E2DKConstants.video_extensions;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.util.Convert;
 import org.jmule.util.Misc;
 
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:48:27 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:10:45 $$
  */
 public class SearchResultItem extends TagList {
 

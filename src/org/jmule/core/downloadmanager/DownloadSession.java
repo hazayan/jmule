@@ -66,8 +66,8 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusAnswerSP
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.core.searchmanager.SearchResultItem;
@@ -86,8 +86,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:19:32 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
