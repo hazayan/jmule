@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.edonkey.packet.tag.impl;
+package org.jmule.core.edonkey.packet.tag;
 
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXSTRING_LONG;
@@ -28,14 +28,14 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
 import java.nio.ByteBuffer;
 
-import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
  * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:58 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:51:15 $$
  */
 public class TagFactory {
 	/**
@@ -59,39 +59,6 @@ public class TagFactory {
 		Tag result=(Tag)new StandardTag(TAG_TYPE_DWORD,tagName);
 		result.insertDWORD(Data);
 		return result;
-	}
-	
-	/**
-	 * Determine tag type and load it from bytebuffer from fromPos
-	 * @param data input raw data
-	 * @param fromPos position to load
-	 * @return new edonkey tag
-	 */
-	public static Tag loadTag(ByteBuffer data, int fromPos){
-		int iPos=data.position();
-		
-		data.position(fromPos);
-		
-		byte tagType=data.get();
-		//Check if have extended tag
-		if (Convert.byteToInt(tagType) >= Convert.byteToInt(TAG_TYPE_EXSTRING_LONG)){
-			ExtendedTag eDonkeyTag = new ExtendedTag();
-			
-			eDonkeyTag.extractTag(data, fromPos);
-			
-			data.position(iPos);
-			return eDonkeyTag;
-		} else {
-			//try to load as standard tag
-			StandardTag eDonkeyTag = new StandardTag();
-			
-			eDonkeyTag.extractTag(data, fromPos);
-			data.position(iPos);
-			
-			return eDonkeyTag;
-		}
-		
-		
 	}
 
 }

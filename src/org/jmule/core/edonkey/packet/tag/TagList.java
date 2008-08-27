@@ -20,20 +20,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.edonkey.packet.tag.impl;
+package org.jmule.core.edonkey.packet.tag;
 
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.impl.MetaTag;
 import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 12:50:41 $$
+ * @version $$Revision: 1.1 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:51:15 $$
  */
 public class TagList extends Hashtable<MetaTag,Tag>{
 	private int tagsSize=0;

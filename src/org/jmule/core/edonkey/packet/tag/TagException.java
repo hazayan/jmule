@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.edonkey.packet.tag.impl;
+package org.jmule.core.edonkey.packet.tag;
 
 import org.jmule.core.JMException;
 
@@ -28,7 +28,7 @@ import org.jmule.core.JMException;
  * 
  * @author binary256
  * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:57 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:51:15 $$
  */
 public class TagException extends JMException {
 
