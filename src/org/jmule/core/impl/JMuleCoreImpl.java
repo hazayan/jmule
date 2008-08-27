@@ -44,6 +44,7 @@ import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.net.JMConnectionWaiter;
+import org.jmule.core.net.JMUDPConnection;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.searchmanager.SearchManager;
@@ -58,8 +59,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:11:25 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:32:07 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -68,6 +69,8 @@ public class JMuleCoreImpl implements JMuleCore {
 	private DebugThread debugThread ;
 	
 	private JMConnectionWaiter connectionWaiter;
+	
+	private JMUDPConnection udp_connection;
 	
 	private List<JMuleCoreLifecycleListener> lifecycle_listeners = new LinkedList<JMuleCoreLifecycleListener>();
 	
@@ -247,6 +250,21 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		configuration_manager.addConfigurationListener(connectionWaiter);
 		
+		udp_connection = JMUDPConnection.getInstance();
+		
+		try {
+			
+			udp_connection.open();
+			
+			configuration_manager.addConfigurationListener(udp_connection);
+
+			
+		} catch (Throwable t) {
+			
+			t.printStackTrace();
+		}
+		
+		
 		DownloadManagerFactory.getInstance().initialize();
 		// notifies that the download manager has been started
 		notifyComponentStarted(DownloadManagerFactory.getInstance());
@@ -263,7 +281,7 @@ public class JMuleCoreImpl implements JMuleCore {
 			
 			t.printStackTrace();
 		} 
-				
+		
 		// notifies that the download manager has been started
 		notifyComponentStarted(servers_manager);
 		
@@ -274,6 +292,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		search_manager.initialize();
 		
 		notifyComponentStarted(search_manager);
+		
+
 		
 		/** Enable Debug thread!**/	
 		debugThread = new DebugThread();
@@ -316,6 +336,14 @@ public class JMuleCoreImpl implements JMuleCore {
 		logEvent("Stop jMule");
 		
 		connectionWaiter.stop();
+		
+		try {
+			udp_connection.close();
+		} catch (Throwable t) {
+
+			t.printStackTrace();
+			
+		}
 		
 		Server server = ServerManagerFactory.getInstance().getConnectedServer();
 		
@@ -442,15 +470,8 @@ public class JMuleCoreImpl implements JMuleCore {
 				logEvent("Debug thread");
 			
 				try {
-				synchronized(this) {
-						Thread.sleep(9000);
-				}
-				
-				} catch (InterruptedException e) {
-				
-					e.printStackTrace();
-				
-					}
+					Thread.sleep(9000);			
+				} catch (InterruptedException e) {}
 			}
 		}
 		
@@ -459,7 +480,7 @@ public class JMuleCoreImpl implements JMuleCore {
 			
 			synchronized(this) {
 				
-				this.notify();
+				this.interrupt();
 				
 			}
 		}
