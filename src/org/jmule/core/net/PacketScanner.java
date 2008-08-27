@@ -67,6 +67,7 @@ import org.jmule.core.edonkey.packet.impl.StandardPacket;
 import org.jmule.core.edonkey.packet.impl.UDPPacketException;
 import org.jmule.core.edonkey.packet.impl.UDPServerPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
+import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerAcceptUploadRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerChatMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileHashSetAnswerSP;
@@ -101,8 +102,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 16:45:17 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:40:42 $$
  */
 public class PacketScanner {
 	
@@ -307,8 +308,9 @@ public class PacketScanner {
 
 	}
 	
-	public static ScannedPacket scanPacket(UDPPacket packet) {
-		ScannedPacket scannedPacket = null;
+	// Currently support only server udp packets
+	public static ScannedUDPPacket scanPacket(UDPPacket packet) {
+		ScannedUDPPacket scannedPacket = null;
 		
 		switch (packet.getCommand()) {
 		
@@ -319,7 +321,7 @@ public class PacketScanner {
 						sPacket.getUserCount(),sPacket.getFilesCount(),sPacket.getSoftLimit(),
 						sPacket.getHardLimit(),sPacket.getAddress());
 			}catch (UDPPacketException e) {
-					e.printStackTrace();
+					return null;
 			}
 			
 			break;
@@ -343,12 +345,10 @@ public class PacketScanner {
 				
 				try {
 					
-					scannedPacket = new JMServerUDPNewDescSP(sPacket.getDescPacketChallenge(),sPacket.getDescPacketTagList());
+					scannedPacket = new JMServerUDPNewDescSP(sPacket.getDescPacketChallenge(),sPacket.getDescPacketTagList(), packet.getAddress());
 					
 				} catch (UDPPacketException e) {
-					
-					e.printStackTrace();
-					
+					return null;
 				}
 			}
 			break;
