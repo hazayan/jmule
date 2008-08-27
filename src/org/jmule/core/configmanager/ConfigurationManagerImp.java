@@ -25,8 +25,11 @@ package org.jmule.core.configmanager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.jmule.core.edonkey.impl.UserHash;
@@ -34,14 +37,16 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/24 07:33:26 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:45:16 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
 	Properties config_store;
 	
 	List<ConfigurationListener> config_listeners = new LinkedList<ConfigurationListener>();
+	
+	Map<String,List<ConfigurationListener>> parameter_listeners = new Hashtable<String,List<ConfigurationListener>>();
 	
 	public void addConfigurationListener(ConfigurationListener listener) {
 
@@ -135,6 +140,10 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public void removeConfigurationListener(ConfigurationListener listener) {
 		
         config_listeners.remove( listener );
+        
+        for(List<ConfigurationListener> list : parameter_listeners.values())
+        	if (list.contains(listener)) 
+        		list.remove(listener);
 	}
 
 	public void save() {
@@ -345,6 +354,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 
 	public void setParameter(String parameter, int value) {
 		config_store.put(parameter, value+"");
+		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, String value) {
@@ -353,18 +363,29 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 
 	public void setParameter(String parameter, float value) {
 		config_store.put(parameter, value+"");
+		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, long value) {
 		config_store.put(parameter, value+"");
+		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, boolean value) {
 		config_store.put(parameter, value+"");
+		notifyCustomPropertyChanged(parameter,value);
 	}
 	
-	public void setParameter(double parameter, double value) {
+	public void setParameter(String parameter, double value) {
 		config_store.put(parameter, value+"");
+		notifyCustomPropertyChanged(parameter,value);
+	}
+
+	private void notifyCustomPropertyChanged(String key, Object new_value) {
+		List<ConfigurationListener> listener_list = parameter_listeners.get(key);
+		if (listener_list == null) return ;
+		for(ConfigurationListener listener : listener_list)
+			listener.parameterChanged(key, new_value);
 	}
 	
 	private void notifyPropertyChanged(String property, Object new_value) {
@@ -393,6 +414,13 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		
 	}
 
-
+	public void addConfigurationListener(ConfigurationListener listener, String parameter) {
+		List<ConfigurationListener> listeners_list = parameter_listeners.get(parameter);
+		if (listeners_list == null) {
+			listeners_list = new ArrayList<ConfigurationListener>();
+			parameter_listeners.put(parameter, listeners_list);
+		}
+		listeners_list.add(listener);
+	}	
 
 }
