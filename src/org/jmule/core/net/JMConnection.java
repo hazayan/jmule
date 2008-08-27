@@ -40,8 +40,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/11 14:56:40 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:38:28 $$
  */
 public abstract class JMConnection{
 	
@@ -576,10 +576,6 @@ public abstract class JMConnection{
 					
 					connectionStats.reportActivity();
 					
-					//Call owner to process new packet
-					
-					processPackets();
-
 				} catch (Throwable e) {
 					
 					e.printStackTrace();
@@ -692,7 +688,7 @@ public abstract class JMConnection{
 				
 				currentlyWrongPackets = 0;
 				
-				if (wrongPacketCount.getAverage()>=50) {
+				if ( wrongPacketCount.getAverage() >= ConfigurationManager.MAX_WRONG_PACKET_COUNT ) {
 					
 					ban();
 				}
