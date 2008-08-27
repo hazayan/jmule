@@ -25,96 +25,105 @@ package org.jmule.core.net;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.JMThread;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.edonkey.packet.UDPPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPDescSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPStatusSP;
+import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 import org.jmule.util.Average;
 
 /**
  * 
  * @author binary256
- * @deprecated
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:46 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:39:25 $$
  */
 public class JMUDPConnection {
 	
 	public static final int UDP_SOCKET_OPENED = 0x01;
 	public static final int UDP_SOCKET_CLOSED = 0x00;
 	
-	private static JMUDPConnection udpListener = null;
-	private int listenPort;
+	private JMuleCore _core;
+	
+	private static JMUDPConnection singleton = null;
+	
 	private DatagramChannel listenChannel;
 	private UDPListenThread udpListenThread;
 	
 	private Average wrongPacketCount = new Average(10);
 	private int currentlyWrongPackets = 0;
 	private WrongPacketCheckingThread wrongPacketChekingThread;
+		
+	private ConcurrentLinkedQueue<UDPPacket> sendQueue = new ConcurrentLinkedQueue<UDPPacket>();
+	private PacketSenderThread packetSenderThread;
+	
+	private ConcurrentLinkedQueue<ScannedUDPPacket> receiveQueue = new ConcurrentLinkedQueue<ScannedUDPPacket>();
+	
 	private PacketProcessorThread packetProcessorThread = new PacketProcessorThread();
 	
-	private LinkedList sendQueue = new LinkedList();
-	private PacketSenderThread packetSenderThread = new PacketSenderThread();
-	
-	private LinkedList receiveQueue;
 	private int connectionStatus = UDP_SOCKET_CLOSED;
 	
 	public static JMUDPConnection getInstance(){
-		if (udpListener == null)
-			 udpListener = new JMUDPConnection();
-		return udpListener;
+		if (singleton == null)
+			 singleton = new JMUDPConnection();
+		return singleton;
 	}
 	
 	private JMUDPConnection(){
-		receiveQueue = new LinkedList();
-	}
-	
-	private void processPacket(ScannedPacket packet) {
-		if (packet instanceof JMServerUDPDescSP ){
-			JMServerUDPDescSP sp = (JMServerUDPDescSP) packet;
-//			try {
-//				Server server ;
-	//			server = ServerList.getInstance().get(sp.getSender());
-//				server.addReceivedPacket(packet);
-//			} catch (ServerListException e) {
-//				e.printStackTrace();
-//			}
-			
-			return ;	
-			}
-					
-		if (packet instanceof JMServerUDPStatusSP) {
-			JMServerUDPStatusSP sp = (JMServerUDPStatusSP) packet;
-//			try {
-				
-//				Server server;
-			//	server = ServerList.getInstance().get(sp.getSender());
-//				server.addReceivedPacket(packet);
-//			} catch (ServerListException e) {
-//					e.printStackTrace();
-//			}
-		}
-	}
-	
-	public void open() {
-		try {
-		listenPort = ConfigurationManagerFactory.getInstance().getUDP();
-		listenChannel = DatagramChannel.open();
-		listenChannel.socket().bind(new InetSocketAddress(listenPort));
-		listenChannel.configureBlocking(true);
-		udpListenThread = new UDPListenThread();
-		udpListenThread.start();
-		wrongPacketChekingThread = new WrongPacketCheckingThread();
-		wrongPacketChekingThread.start();
+		_core = JMuleCoreFactory.getSingleton();
 		
-		connectionStatus = UDP_SOCKET_OPENED;
-		} catch (IOException e) {
-			e.printStackTrace();
+		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
+			public void UDPPortChanged(int udp) {
+				try {
+					reopen();
+				} catch (JMUDPConnectionException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			public void isUDPEnabledChanged(boolean enabled) {
+				try {
+					if (enabled)
+						open();
+					else
+						close();
+				} catch (JMUDPConnectionException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	public void open() throws JMUDPConnectionException {
+		try {
+			int listenPort = ConfigurationManagerFactory.getInstance().getUDP();
+			listenChannel = DatagramChannel.open();
+			listenChannel.socket().bind(new InetSocketAddress(listenPort));
+			listenChannel.configureBlocking(true);
+			
+			udpListenThread = new UDPListenThread();
+			udpListenThread.start();
+			
+			wrongPacketChekingThread = new WrongPacketCheckingThread();
+			wrongPacketChekingThread.start();
+			
+			packetProcessorThread = new PacketProcessorThread();
+			packetProcessorThread.start();
+			
+			packetSenderThread = new PacketSenderThread();
+			packetSenderThread.start();
+			
+			connectionStatus = UDP_SOCKET_OPENED;
+		} catch (Throwable t) {
+			throw new JMUDPConnectionException(t);
 		}
 	}
 	
@@ -122,126 +131,219 @@ public class JMUDPConnection {
 		return connectionStatus ==  UDP_SOCKET_OPENED;
 	}
 	
-	public void close() {		
+	public void close() throws JMUDPConnectionException {		
+		if (!isOpen()) return;
 		try {
-			if (wrongPacketChekingThread!=null) {
-				wrongPacketChekingThread.stop();
-			}
-			if (udpListenThread!=null)
-				udpListenThread.stop();
-			if (packetSenderThread!=null)
-				packetSenderThread.stop();
-			listenChannel.close();
 			connectionStatus = UDP_SOCKET_CLOSED;
-			
+			wrongPacketChekingThread.JMStop();
+			udpListenThread.JMStop();
+			packetSenderThread.JMStop();
+			packetProcessorThread.JMStop();
+			listenChannel.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new JMUDPConnectionException(e);
 		}
 	}
 	
-	public void reopen() {
+	public void reopen() throws JMUDPConnectionException {
 		if (isOpen())
 			close();
 		open();
 	}
+
+	private void addReceivedPacket(ScannedUDPPacket packet ){
+		receiveQueue.offer(packet);
+		if (packetProcessorThread.isSleeping()) 
+			packetProcessorThread.wakeUp();
+			
+	}
+	
+	// Send UDP packet code 
+	public void sendPacket(UDPPacket packet ) {
+		if (!isOpen()) return ;
+		sendQueue.offer(packet);
+		if (packetSenderThread.isSleeping())
+			packetSenderThread.wakeUp();
+			
+	}
+	
+	
+
+	
+	private void ban() {
+	}
+	
+	
 	
 	/** Packet listener **/
 	private class UDPListenThread extends JMThread {
+		
+		private volatile boolean stop = false;
+		
 		public UDPListenThread() {
-			super("UDP Listen Thread");
+			super("UDP packets listener");
 		}
 		
 		public void run() {
-			while(true){
+			while(!stop){
 				UDPPacket packet = PacketReader.readPacket(listenChannel);
-				if (packet!=null)
-					addReceivedPacket(PacketScanner.scanPacket(packet));
+				if (packet != null) {
+					ScannedUDPPacket scanned_packet = PacketScanner.scanPacket(packet);
+					// scanned_packet == null is is not supported or decoding was failed
+					if (scanned_packet != null)
+						addReceivedPacket(scanned_packet);
+					else
+						currentlyWrongPackets++;
+				}
 				else {
+					if (stop) return ;
 					if (!listenChannel.isConnected()) break;
 					currentlyWrongPackets++;
 				}
 			}
 		}
-	}
-	
-	private void addReceivedPacket(ScannedPacket packet ){
-		receiveQueue.addLast(packet);
-		if (!packetProcessorThread.isAlive())
-			packetProcessorThread = new PacketProcessorThread();
-	}
-	
-	private class PacketProcessorThread extends JMThread {
-		public PacketProcessorThread() {
-			super("UDP Packet processor");
-			start();
-		}
 		
-		public void run() {
-			if (!isOpen()) return;
-			while(receiveQueue.size()!=0) {
-				ScannedPacket packet = (ScannedPacket)receiveQueue.removeFirst();
-				processPacket(packet);
+		public void JMStop() {
+			stop = true;
+			synchronized(this) {
+				interrupt();
 			}
 		}
 	}
 	
 	
-	/** Send UDP packet code **/
-
 	
-	public void sendPacket(UDPPacket packet ) {
-		sendQueue.addLast(packet);
-		if (!packetSenderThread.isAlive())
-			packetSenderThread = new PacketSenderThread();
-	}
-	
-	private void ban() {
-		
-	}
-	
-	private class PacketSenderThread extends JMThread {
-		public PacketSenderThread() {
-			super("UDP packet sender thread");
-			start();
+	private class PacketProcessorThread extends JMThread {
+		private boolean stop = false;
+		private boolean sleeping = false;
+		private ServerManager server_manager = JMuleCoreFactory.getSingleton().getServerManager();
+		public PacketProcessorThread() {
+			super("UDP Packet processor");
 		}
 		
 		public void run() {
-			while(sendQueue.size()>0) {
-				UDPPacket packet ;
-				packet = (UDPPacket) sendQueue.getFirst();
-				sendQueue.removeFirst();
+			while(!stop) {
+				if (receiveQueue.size()==0) {
+					// no more packets, sleeping...
+					sleeping = true;
+					synchronized(this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e1) {} 
+					}
+					sleeping = false;
+					continue ;
+				}
+				ScannedUDPPacket packet = receiveQueue.poll();
+				// call server 
+				Server server = server_manager.getServer(packet.getSenderAddress());
+				if (server == null) continue ; // Packet from unknown source
+				server.processPacket(packet);
+			}
+		}
+		
+		public void JMStop() {
+			stop = true;
+			synchronized (this) {
+				this.interrupt();
+			}
+		}
+		
+		public boolean isSleeping() {
+			return sleeping;
+		}
+		
+		public void wakeUp() {
+			synchronized (this) {
+				notify();
+			}
+		}
+	}
+	
+
+	private class PacketSenderThread extends JMThread {
+		private boolean stop = false;
+		private boolean sleeping = false;
+		
+		public PacketSenderThread() {
+			super("UDP packet sender thread");
+		}
+		
+		public void run() {
+			while(!stop) {
+				if (sendQueue.size() == 0) {
+					// no more packets, sleeping...
+					sleeping = true;
+					synchronized(this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e1) {} 
+					}
+					sleeping = false;
+					continue ;
+				}
+				UDPPacket packet = sendQueue.poll();
 				InetSocketAddress destination = packet.getAddress();
 				try {
 					packet.getAsByteBuffer().position(0);
 					listenChannel.send(packet.getAsByteBuffer(), destination);
 				} catch (IOException e) {
-					e.printStackTrace();
-					if (!listenChannel.isConnected()) break;
-					e.printStackTrace();
+					if (stop) return;
+					if (!listenChannel.isConnected()) return;
 				}
+			}
+		}
+		
+		public void JMStop() {
+			stop = true;
+			synchronized (this) {
+				interrupt();
+			}
+		}
+		
+		public boolean isSleeping() {
+			return sleeping;
+		}
+		
+		public void wakeUp() {
+			synchronized (this) {
+				notify();
 			}
 		}
 		
 	}
 	
 	private class WrongPacketCheckingThread extends JMThread {
+		
+		private volatile boolean stop = false;
+		
 		public WrongPacketCheckingThread()  {
-			super("Wrong packet checking thread");
+			super("UDP Wrong packet checking thread");
 		}
+		
 		public void run() {
-			while(true) {
+			while(!stop) {
 				try {
-					this.sleep(5000);
+					Thread.sleep( ConfigurationManager.WRONG_PACKET_CHECK_INTERVAL );
 				} catch (InterruptedException e) {
-					e.printStackTrace();
-					return ;
+					if (stop)
+						return ;
+					else continue;
 				}
 				wrongPacketCount.add(currentlyWrongPackets);
 				currentlyWrongPackets = 0;
-				if (wrongPacketCount.getAverage()>=50) {
+				if ( wrongPacketCount.getAverage()>= ConfigurationManager.MAX_WRONG_PACKET_COUNT ) 
 					ban();
-				}
+				
 			}
+		}
+		
+		public void JMStop() {
+			stop = true;
+			synchronized(this) {
+				this.interrupt();
+			}
+			
 		}
 	}
 
