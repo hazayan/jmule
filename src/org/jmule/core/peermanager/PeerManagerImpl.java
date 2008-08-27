@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:51:40 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:50:38 $$
  */
 public class PeerManagerImpl implements PeerManager {
 
@@ -164,6 +164,8 @@ public class PeerManagerImpl implements PeerManager {
 			peer.disconnect();
 			
 		}
+		
+		peer_cleaner.JMStop();
 
 	}
 
@@ -255,8 +257,11 @@ public class PeerManagerImpl implements PeerManager {
 		public void JMStop() {
 			
 			stop = true;
-			
-			interrupt();
+			synchronized(this) {
+				
+				interrupt();
+				
+			}
 			
 		}
 
