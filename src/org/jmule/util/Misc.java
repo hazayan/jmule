@@ -39,8 +39,8 @@ import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:37:34 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:12:34 $$
  */
 public class Misc {
 	
@@ -175,95 +175,6 @@ public class Misc {
     
         srcChannel.close();
         dstChannel.close();
-	}
-	
-	/**
-	 * Load 1 standard tag from file channel 
-	 * @param fileChannel
-	 * @return
-	 * @throws IOException
-	 */
-	public static StandardTag loadStandardTag(FileChannel fileChannel) throws IOException{
-		ByteBuffer data;
-		data = Misc.getByteBuffer(1);
-		fileChannel.read(data);
-		byte tagType = data.get(0);
-
-		data =  Misc.getByteBuffer(2);
-		fileChannel.read(data);
-		short metaTagLength = data.getShort(0);
-
-		data = Misc.getByteBuffer(metaTagLength);
-		fileChannel.read(data);
-
-		StandardTag tag = new StandardTag(tagType, data.array());
-		
-		switch (tagType) {
-		
-		case TAG_TYPE_STRING: {
-			data = Misc.getByteBuffer(2);
-			fileChannel.read(data);
-			short strLength = data.getShort(0);
-			
-			data = Misc.getByteBuffer(strLength);
-			fileChannel.read(data);
-			
-			tag.insertString(new String(data.array()));
-			
-			break;
-		}
-		
-		case TAG_TYPE_DWORD : {
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			tag.insertDWORD(data.getInt(0));
-			
-			break;
-		}
-		
-		default : {
-			break;
-		}
-		
-		}
-		return tag;
-	}
-	
-	
-	public static StandardTag loadStandardTag(ByteBuffer buffer){
-		
-		byte tagType = buffer.get();
-		int metaTagLength = Convert.shortToInt(buffer.getShort());
-
-		byte[] data;
-		data = new byte[metaTagLength];
-		buffer.get(data);
-
-		StandardTag tag = new StandardTag(tagType, data);
-		
-		switch (tagType) {
-		
-		case TAG_TYPE_STRING: {
-			short strLength = buffer.getShort();
-			
-			data = new byte[strLength];
-			buffer.get(data);
-			tag.insertString(new String(data));
-			break;
-		}
-		
-		case TAG_TYPE_DWORD : {
-			tag.insertDWORD(buffer.getInt());
-			break;
-		}
-		
-		default : {
-			break;
-		}
-		
-		}
-		
-		return tag;
 	}
 	
 	public static int getPartCount(long fileSize) {
