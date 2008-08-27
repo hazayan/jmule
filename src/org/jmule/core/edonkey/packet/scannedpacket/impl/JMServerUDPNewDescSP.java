@@ -28,13 +28,13 @@ import java.net.InetSocketAddress;
 
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:23:36 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:03:28 $$
  */
 public class JMServerUDPNewDescSP implements ScannedUDPPacket  {
 

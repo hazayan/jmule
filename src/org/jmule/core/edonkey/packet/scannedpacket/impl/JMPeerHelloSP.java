@@ -29,13 +29,13 @@ import java.net.InetSocketAddress;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagList;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:40 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:03:28 $$
  */
 public class JMPeerHelloSP implements ScannedPacket {
 
