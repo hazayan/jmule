@@ -33,6 +33,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.packet.impl.EMuleCompressedPacket;
 import org.jmule.core.edonkey.packet.impl.EMuleExtendedTCPPacket;
 import org.jmule.core.edonkey.packet.impl.StandardPacket;
@@ -45,8 +46,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:48:20 $$
  */
 public class PacketReader {
 
@@ -81,17 +82,17 @@ public class PacketReader {
 	
 	public static UDPPacket readPacket(DatagramChannel channel) {
 		InetSocketAddress packetSender;
-		ByteBuffer data = Misc.getByteBuffer(100*1024); 
+		ByteBuffer data = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE); 
 		
 		try {
 			packetSender = (InetSocketAddress) channel.receive(data);
 			data.flip();
 			
-			if (data.get(0)==PROTO_EDONKEY_SERVER_UDP) 
+			if (data.get(0) == PROTO_EDONKEY_SERVER_UDP) 
 				return new UDPServerPacket(data,packetSender);
-			if (data.get(0)==PROTO_EDONKEY_PEER_UDP)
+			if (data.get(0) == PROTO_EDONKEY_PEER_UDP)
 				return new UDPPeerPacket(data,packetSender);
-		} catch (IOException e) {
+		} catch (Throwable t) {
 			return null;
 		}
 		
