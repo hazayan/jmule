@@ -38,10 +38,10 @@ import org.jmule.core.edonkey.impl.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:33:15 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:37:26 $$
  */
-public class JMConnectionWaiter extends ConfigurationAdapter{
+public class JMConnectionWaiter{
 	
 	public static final int TCP_LISTENER_OPENED = 0x01;
 	
@@ -71,6 +71,18 @@ public class JMConnectionWaiter extends ConfigurationAdapter{
 			
 			_core = JMuleCoreFactory.getSingleton();
 			
+			_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
+				public void TCPPortChanged(int port) {
+					
+					restart();
+					
+				}
+
+				public void UDPPortChanged(int port) {
+					restart();
+					
+				}
+			});
 	}
 	
 
@@ -188,17 +200,6 @@ public class JMConnectionWaiter extends ConfigurationAdapter{
 			}
 		}
 
-	}
-
-	public void TCPPortChanged(int port) {
-		
-		restart();
-		
-	}
-
-	public void UDPPortChanged(int port) {
-		restart();
-		
 	}
 
 }
