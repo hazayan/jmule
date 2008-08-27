@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
+import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.AutoConnectDoesNotSucceedException;
 import org.jmule.core.edonkey.ServerListIsNullException;
@@ -50,14 +51,18 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/23 13:18:05 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:47:15 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
 	private List<Server> server_list = new CopyOnWriteArrayList<Server>();
 	
 	private List<ServerListListener> server_list_listeners = new CopyOnWriteArrayList<ServerListListener>();
+	
+	// UDP query
+	
+	private ServersUDPQueryThread udp_query_thread;
 	
 	// Auto connect process
 	private List<Server> checked_servers = new LinkedList<Server>();
@@ -437,24 +442,18 @@ public class ServerManagerImpl implements ServerManager {
 
 	public void startUDPQuery() {
 		
-		for(Server server : server_list) {
-			
-			server.start();
-			
-		}
+		udp_query_thread = new ServersUDPQueryThread();
+		udp_query_thread.start();
 		
 	}
 
 
 	public void stopUDPQuery() {
 		
-		for(Server server : server_list) {
-			
-			server.stop();
-			
-		}
+		udp_query_thread.JMStop();
 		
 	}
+	
 
 
 	public boolean hasServer(Server server) {
@@ -470,11 +469,11 @@ public class ServerManagerImpl implements ServerManager {
 
 
 	public Server getServer(InetSocketAddress address) {
-		
+		String ip_address = address.getAddress().getHostAddress();
+		// can't compare by InetAddress : UDP packet is from another port(allways 4665) but same IP
 		for(Server checked_server : server_list) {
-			
-			if (checked_server.getInetAddress().equals(address)) return checked_server;
-			
+			if (checked_server.getAddress().equals(ip_address))
+					return checked_server;
 		}
 		
 		return null;
@@ -502,6 +501,35 @@ public class ServerManagerImpl implements ServerManager {
 		
 	}
 
+	
+	private class ServersUDPQueryThread extends JMThread {
+		
+		private boolean stop = false;
+		
+		public ServersUDPQueryThread() {
+			super("Servers UDP query thread");
+		}
+		
+		public void run() {
+			while(!stop) {
+				for(Server server : server_list ) { 
+					server.sendUDPDescRequest();
+					server.sendUDPStatusRequest();
+				}
+				try {
+					Thread.sleep(ConfigurationManager.SERVER_UDP_QUERY_INTERVAL);
+				} catch (InterruptedException e) {}
+			}
+		}
+		
+		public void JMStop() {
+			stop = true;
+			synchronized(this) {
+				this.interrupt();
+			}
+		}
+		
+	}
 
 		
 }
