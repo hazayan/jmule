@@ -29,8 +29,8 @@ import org.jmule.ui.localizer._;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:08:19 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/28 17:09:34 $$
  */
 public class JMConstants {
      
@@ -38,8 +38,9 @@ public class JMConstants {
 	  public static final String JMULE_FORUMS              = "http://forum.jmule.org/";
 	  public static final String JMULE_DOWNLOAD_PAGE	   = "http://jmule.org/?page=download";
 	  public static final String ONLINE_HELP_WEB_SITE      = "http://jmule.org/help";
+	  public static final String OPEN_SUPPORT              = "http://jmule.org/opensupport";
 	  public static final String SF_WEB_SITE               = "http://sourceforge.net/projects/jmule";
-	  public static final String SF_BUG_TRACKER			   = "http://sourceforge.net/tracker/?group_id=63021&atid=502603";
+	  public static final String JMULE_BUG_TRACKER		   = "http://jmule.net/tracker";
 	  
 	  public static final String[] JMULE_DOMAINS 		   = { "jmule.org", "jmule.net" };
 	  
