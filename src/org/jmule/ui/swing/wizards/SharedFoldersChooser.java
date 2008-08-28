@@ -45,8 +45,8 @@ import org.jmule.ui.swing.UISwingImageRepository;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:12 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/28 09:04:40 $$
  */
 public class SharedFoldersChooser extends WizardPanel {
 
@@ -95,28 +95,10 @@ public class SharedFoldersChooser extends WizardPanel {
         	public void actionPerformed(ActionEvent event) {
         		if(event.getActionCommand() == JFileChooser.APPROVE_SELECTION) {
         			current_chosen_folders = file_chooser.getSelectedFiles();
-        			// adds the new folders to the chosen_folders, also checks out if the folders 
-        			// don't already exist in the chosen_folders
-        			final List<File> already_existed_folders = new LinkedList<File>();
-        			for(File f1 : current_chosen_folders) {
-        				boolean must_be_added = true;
-        				for(File f2 : chosen_folders) {
-        				  try {	
-        				    if(FileUtils.isSubDirectory(f2, f1)) {
-        					    must_be_added = false;
-        					    break;
-        					       // we remove the folders from chosen_folders if the current
-        					       // chosen folder is the parent of some of the folders from chosen_folders
-        				    } else if( f1 != f2 && FileUtils.isSubDirectory(f1, f2) ) {
-        				    	chosen_folders.remove(f2);
-        				    	already_existed_folders.add( f2 );
-        				    }
-        				  } catch(Throwable t) { t.printStackTrace(); }
-        				}
-        				if( must_be_added ) chosen_folders.add( f1 );
-        				else already_existed_folders.add( f1 );
-        			}
-        			// end add and check for new folders
+        			LinkedList<File> newFolders = new LinkedList<File>();
+        			final List<File> already_existed_folders = FileUtils.extractNewFolders(current_chosen_folders, chosen_folders.getFoldersList(), newFolders);
+        			for(File file : newFolders)
+        				chosen_folders.add(file);
         			if(already_existed_folders.size() != 0) {
         			   ExistedFoldersDialog existed_folders_dialog = new ExistedFoldersDialog(parent, true, new AbstractListModel() {
         				   public int getSize() { 

@@ -24,12 +24,14 @@ package org.jmule.core.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:34 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/28 09:04:41 $$
  */
 public class FileUtils {
 
@@ -54,6 +56,29 @@ public class FileUtils {
             parentFile = parentFile.getParentFile();
         }
         return false;
+    }
+    
+    public static List<File> extractNewFolders(File[] current_chosen_folders, List<File> chosen_folders,List<File> mustAddFolders) {
+    	List<File> already_existed_folders = new LinkedList<File>();
+    	for(File f1 : current_chosen_folders) {
+			boolean must_be_added = true;
+			for(File f2 : chosen_folders) {
+			  try {	
+			    if(FileUtils.isSubDirectory(f2, f1)) {
+				    must_be_added = false;
+				    break;
+				       // we remove the folders from chosen_folders if the current
+				       // chosen folder is the parent of some of the folders from chosen_folders
+			    } else if( f1 != f2 && FileUtils.isSubDirectory(f1, f2) ) {
+			    	chosen_folders.remove(f2);
+			    	already_existed_folders.add( f2 );
+			    }
+			  } catch(Throwable t) { t.printStackTrace(); }
+			}
+			if( must_be_added ) mustAddFolders.add( f1 );
+			else already_existed_folders.add( f1 );
+		}
+    	return already_existed_folders;
     }
 	
 }
