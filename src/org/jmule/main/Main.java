@@ -32,8 +32,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 07-Nov-2007
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:35:49 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/08/29 17:52:09 $$
  */
 public class Main {
 
@@ -55,7 +55,7 @@ public class Main {
 			    		                                null, options, options[0]);
 		}
 		
-		if( choice == 0 ) {
+		if( choice == JOptionPane.YES_OPTION ) {
 
 			  try {
 			
@@ -72,7 +72,7 @@ public class Main {
 				
 				     t.printStackTrace();
 		      }
-		} else if( choice == 1 ) {
+		} else if( choice == JOptionPane.NO_OPTION ) {
 			
 			System.exit(0);
 			
