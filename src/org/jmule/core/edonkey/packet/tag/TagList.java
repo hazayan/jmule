@@ -23,8 +23,8 @@
 package org.jmule.core.edonkey.packet.tag;
 
 import java.util.Collection;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.edonkey.packet.tag.impl.MetaTag;
 import org.jmule.util.Convert;
@@ -32,10 +32,10 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:51:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/30 13:34:02 $$
  */
-public class TagList extends Hashtable<MetaTag,Tag>{
+public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 	private int tagsSize=0;
 	
 	public Collection<Tag> getTags() {
@@ -47,7 +47,7 @@ public class TagList extends Hashtable<MetaTag,Tag>{
 		
 		Collection<Tag> Tags = super.values();
 		for(Iterator<Tag> i = Tags.iterator();i.hasNext();)
-			Result += "[ "+i.next()+" ] ";
+			Result += "\n[ "+i.next()+" ] ";
 		Result+=" ] ";
 		return Result;
 	}
@@ -129,7 +129,7 @@ public class TagList extends Hashtable<MetaTag,Tag>{
 	}
 	
 	public Tag getRawTag(byte[] metaTagName){
-		return (Tag)super.get(new MetaTag(metaTagName));
+		return super.get(new MetaTag(metaTagName));
 	}
 	
 	/**
