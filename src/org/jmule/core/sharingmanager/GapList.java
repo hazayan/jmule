@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMIterator;
@@ -38,13 +39,13 @@ import org.jmule.core.JMIterator;
  * 
  * @author pola
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:06:37 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/30 13:31:14 $$
  */
 public class GapList {
 
-	private List<Gap> gaps = new LinkedList<Gap>();
-	//private List<Gap> gaps = new CopyOnWriteArrayList<Gap>();
+	//private List<Gap> gaps = new LinkedList<Gap>();
+	private List<Gap> gaps = new CopyOnWriteArrayList<Gap>();
 	private long byteSize = 0;
 
 	static final Comparator gapComparator = new Comparator() {
@@ -210,7 +211,7 @@ public class GapList {
 			for(Iterator<Gap> i = gaps.iterator(); i.hasNext();) {
 				currentGap = i.next();
 				if(currentGap.intersects(gap)) {
-					i.remove();
+					gaps.remove(currentGap);
 					byteSize -= currentGap.size();
 					if(currentGap.start <= gap.start)
 						gap.start = currentGap.start;
@@ -239,7 +240,8 @@ public class GapList {
 			currentGap = 	i.next();
 			if(currentGap.intersects(gap))
 				if(gap.covers(currentGap)) {
-					i.remove();
+					//i.remove();
+					gaps.remove(currentGap);
 					byteSize -= currentGap.size();
 				}
 				else if(currentGap.covers(gap)) {
@@ -250,7 +252,8 @@ public class GapList {
 						currentGap.end = gap.start;
 						byteSize += currentGap.size();					
 					} else {
-						i.remove();
+						//i.remove();
+						gaps.remove(currentGap);
 					}
 					break;
 				} else {
