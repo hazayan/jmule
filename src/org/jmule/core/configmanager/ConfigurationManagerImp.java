@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:45:16 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/01 18:42:01 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -182,6 +182,15 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 
 	public void setSharedFolders(List<File> sharedFolders) {
 		
+		// first remove old values
+		List<File> file_list = getSharedFolders();
+		
+		int key_count = file_list == null ? 0 : file_list.size();
+		
+		for (int i = 0;i< key_count ;i++)
+			
+			config_store.remove(SHARED_DIRECTORIES_KEY + i);
+		
 		for(int i = 0; i < sharedFolders.size(); i++) {
 			
 			config_store.setProperty(SHARED_DIRECTORIES_KEY + i, sharedFolders.get(i).toString());
@@ -203,7 +212,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 			
 		  try {	
 			  
-			file_name = config_store.getProperty("SharedDirectory" + i);
+			file_name = config_store.getProperty(SHARED_DIRECTORIES_KEY + i);
 			
 			if( file_name == null ) {
 				
