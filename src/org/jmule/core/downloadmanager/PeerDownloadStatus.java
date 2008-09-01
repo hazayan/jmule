@@ -31,6 +31,7 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTTAKEN;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.Packet;
@@ -38,8 +39,8 @@ import org.jmule.core.edonkey.packet.Packet;
 /**
  * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:21:32 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/01 18:54:44 $$
  */
 public class PeerDownloadStatus {
 	
@@ -55,7 +56,7 @@ public class PeerDownloadStatus {
 	
 	private Peer peer;
 	
-	private LinkedList statusList = new LinkedList();
+	private List<String> statusList = new LinkedList<String>();
 	
 	private long lastUpdateTime = 0;
 	
@@ -201,12 +202,16 @@ public class PeerDownloadStatus {
 					
 		
 		}
-		this.statusList.addLast(result);
+		this.statusList.add(result);
 		
 	}
 	
 	public Peer getPeer() {
 		return peer;
+	}
+	
+	public void setPeer(Peer peer) {
+		this.peer = peer;
 	}
 	
 	public Packet getLastFilePartRequest() {
