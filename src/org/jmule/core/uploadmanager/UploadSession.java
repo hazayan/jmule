@@ -22,15 +22,17 @@
  */
 package org.jmule.core.uploadmanager;
 
+import java.util.Queue;
+
 import org.jmule.core.JMIterable;
+import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
-import org.jmule.core.edonkey.packet.impl.EMulePacketFactory;
-import org.jmule.core.edonkey.packet.impl.PacketFactory;
+import org.jmule.core.edonkey.packet.EMulePacketFactory;
+import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileHashSetRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileRequestSP;
@@ -38,21 +40,25 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusRequestS
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotReleaseSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotRequestSP;
-import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.core.uploadmanager.UploadQueue.UploadQueueElement;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:45:18 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 16:00:48 $$
  */
 public class UploadSession implements JMTransferSession {
+	
+	private static final int QUEUE_CHECK_INTERVAL			=   1000;
+	
+	private static final int QUEUE_PEER_DISCONNECT_TIME     =   1000;
 	
 	private SharedFile sharedFile;
 
@@ -62,14 +68,58 @@ public class UploadSession implements JMTransferSession {
 		
 	private long totalUploaded = 0;
 	
+	private JMThread queue_cleaner;
+	
 	public UploadSession(SharedFile sFile){
 		
 		sharedFile = sFile;
 		
+		queue_cleaner = new JMThread() {
+			
+			private boolean stop = false;
+			
+			public void run() {
+				while(!stop) {
+					try {
+						Thread.sleep(QUEUE_CHECK_INTERVAL);
+					} catch (InterruptedException e) {
+						if (stop) return ;
+						continue;
+					}
+					Queue<UploadQueueElement> queue = uploadQueue.getQueue();
+					boolean first = true;
+					for(UploadQueueElement element : queue) {
+						if (first) { first = false; continue;}
+						if (!element.getPeer().isConnected()) continue;
+						long current_time = System.currentTimeMillis();
+						if (current_time - element.getTime() >= QUEUE_PEER_DISCONNECT_TIME) {
+							element.getPeer().disconnect();
+						}
+					}
+					
+				}
+			}
+			
+			public void JMStop() {
+				stop = true;
+				interrupt();
+			}	
+		};
+		
+		queue_cleaner.start();
+		
 	}
 	
 	public boolean sharingCompleteFile() {
-		return sharedFile instanceof CompletedFile;
+		boolean result = sharedFile instanceof CompletedFile;
+		
+		if (!result) {
+			PartialFile pFile = (PartialFile) sharedFile;
+			if ( pFile.getPercentCompleted() == 100d )
+				result = true;
+		}
+		
+		return result;
 	}
 	
 	public int getPeerPosition(Peer peer) {
@@ -91,6 +141,7 @@ public class UploadSession implements JMTransferSession {
 	
 	public float getSpeed() {
 		Peer peer = uploadQueue.getLastPeer();
+		if (peer==null) return 0;
 		return peer.getUploadSpeed();
 	}
 		
@@ -103,10 +154,9 @@ public class UploadSession implements JMTransferSession {
 	}
 	
 	
-	public void processPacket(Peer sender, ScannedPacket packet,PeerSessionList listenItem) {
+	public void processPacket(Peer sender, ScannedPacket packet) {
 		
 		if (!uploadQueue.hasPeer(sender))
-			
 			uploadQueue.addPeer(sender);
 
 		if (packet instanceof JMPeerFileRequestSP) {
@@ -178,8 +228,9 @@ public class UploadSession implements JMTransferSession {
 		if (packet instanceof JMPeerRequestFilePartSP) {
 			
 			JMPeerRequestFilePartSP sPacket = (JMPeerRequestFilePartSP)packet;
-		
-			if (!uploadQueue.getLastPeer().equals(sender)) {
+		    Peer last_peer = uploadQueue.getLastPeer();
+
+			if (! last_peer.equals(sender) ) {
 				
 				sender.sendPacket(EMulePacketFactory.getQueueRankingPacket(uploadQueue.getPeerQueueID(sender)));
 				
@@ -214,31 +265,34 @@ public class UploadSession implements JMTransferSession {
 	}
 	
 	public void onPeerConnected(Peer peer) {
-		
+		if (!uploadQueue.hasPeer(peer))
+			uploadQueue.addPeer(peer);
+		Peer last_peer = uploadQueue.getLastPeer();
+		if (last_peer == null) return;
+		if (last_peer.equals(peer)) { 
+			peer.sendPacket(PacketFactory.getAcceptUploadPacket(sharedFile.getFileHash()));
+			return ;
+		}
+			
 	}
 	
 	public void onPeerDisconnected(Peer peer) {
+		Peer last_peer = uploadQueue.getLastPeer();
+		if (last_peer != null) {
 		
-		this.uploadQueue.removePeer(peer);
-		
-		if (uploadQueue.size()==0) {
+			if(uploadQueue.getLastPeer().equals(peer)) {
 			
-			UploadManagerFactory.getInstance().removeUpload(this.sharedFile.getFileHash());
-			
+				removeLastPeer(true);
+				
+				if (uploadQueue.size()==0) {
+					
+					stopSesison();
+					
+				}
+			}
 		}
 	}
-	
-	public void reportInactivity(Peer peer, long time) {
 		
-		if (time>=ConfigurationManager.PEER_INACTIVITY_REMOVE_TIME) {
-			
-			uploadQueue.removePeer(peer);
-			peer.disconnect();
-			//PeerManagerFactory.getInstance().getPeerSessionList(peer).removeSession(this);
-		}
-	}
-	
-	
 	public String toString() {
 		
 		String str=" [ ";
@@ -272,21 +326,18 @@ public class UploadSession implements JMTransferSession {
 		return this.sharedFile.getFileHash();
 		
 	}	
-	
-	
-	
+
 	private void removeLastPeer(boolean totallyRemove){
-		
 		Peer rPeer = this.uploadQueue.pool();
-		
 		if ((rPeer!=null)&&(!totallyRemove)) {
 			
-			//Add inactive peer in top of list
+			//add peer at the end of queue
 			
-			if (this.uploadQueue.size()<ConfigurationManagerFactory.getInstance().UPLOAD_QUEUE_SIZE)
+			if (this.uploadQueue.size()<ConfigurationManager.UPLOAD_QUEUE_SIZE)
 				
 				this.uploadQueue.addPeer(rPeer);
-		}
+		} else
+			rPeer.getSessionList().removeSession(this);
 		
 		//this.getLastPeer().sendPacket(EMulePacketFactory.getQueueRankingPacket(getPeerID(this.getLastPeer())));
 		
@@ -294,7 +345,10 @@ public class UploadSession implements JMTransferSession {
 		
 		if (peer==null) return;
 		
-		peer.sendPacket(PacketFactory.getAcceptUploadPacket(sharedFile.getFileHash()));
+		if (peer.isConnected())
+			peer.sendPacket(PacketFactory.getAcceptUploadPacket(sharedFile.getFileHash()));
+		else
+			peer.connect();
 		
 	}
 
@@ -318,4 +372,19 @@ public class UploadSession implements JMTransferSession {
 		return sharedFile;
 	}
 	
+	public void setSharedFile(SharedFile newFile) {
+		sharedFile = newFile;
+	}
+	
+	
+	public void stopSesison() {
+		for(Peer peer : uploadQueue.getPeers()) {
+			peer.getSessionList().removeSession(this);
+			if (peer.isConnected()) peer.disconnect();
+		}
+		uploadQueue.clear();
+		
+		UploadManagerFactory.getInstance().removeUpload(sharedFile.getFileHash());
+		queue_cleaner.JMStop();
+	}
 }
