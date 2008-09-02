@@ -34,8 +34,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:45 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:33:57 $$
  */
 public class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -46,6 +46,9 @@ public class JMuleSocketChannel {
 		init();
 	}
 	
+	public SocketChannel getChannel() {
+		return channel;
+	}
 	
 	private void init() {
 		uploadController = SpeedManager.getInstance().getUploadController();
@@ -56,10 +59,10 @@ public class JMuleSocketChannel {
 		this.channel.close();
 	}
 	
-	public  int read(ByteBuffer dsts,boolean block) throws IOException,JMEndOfStreamException,InterruptedException{
+	public  int read(ByteBuffer dsts) throws IOException,JMEndOfStreamException,InterruptedException{
 		if (downloadController.getThrottlingRate()==0) {
 				dsts.position(0);
-				return this.read(dsts, dsts.capacity(),block);
+				return this.read(dsts, dsts.capacity());
 		}
 		int totalReaded = 0;
 		int cacheLimit = (int) Math.max(downloadController.getThrottlingRate(), dsts.capacity());
@@ -70,7 +73,7 @@ public class JMuleSocketChannel {
 			readCache.position(0);
 			readCache.limit(mustRead);
 			
-			read(readCache,mustRead,block);
+			read(readCache,mustRead);
 			int readedData = readCache.limit();
 			totalReaded += readedData;
 			downloadController.markBytesUsed(readedData);
@@ -80,25 +83,18 @@ public class JMuleSocketChannel {
 		return totalReaded;
 	}
 	
-	private int read(ByteBuffer dsts,int bytes,boolean block) throws IOException,JMEndOfStreamException, InterruptedException {
+	private int read(ByteBuffer dsts,int bytes) throws IOException,JMEndOfStreamException, InterruptedException {
 		ByteBuffer readCache = Misc.getByteBuffer(bytes);
 		int mustRead = bytes;
 		do {
 			readCache.limit(mustRead);
 			readCache.position(0);
-			channel.configureBlocking(true);
 			int readedData = 0;
-			do {
-				readedData = channel.read(readCache);
-				if ((block==false)&&(readedData==-1)) {
+
+			readedData = channel.read(readCache); // return -1 if socket is closed
+			if (readedData==-1) {
 					throw new JMEndOfStreamException();
 				}
-		
-				if (readedData==-1) {
-				Thread.sleep(1000);
-				}
-		
-			}while(readedData==-1);
 						
 			mustRead-=readedData;
 			readCache.limit(readedData);
