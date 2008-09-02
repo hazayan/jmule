@@ -22,6 +22,7 @@
  */
 package org.jmule.core.edonkey.impl;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import org.jmule.util.Convert;
@@ -29,8 +30,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:33:41 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:07:10 $$
  */
 public class UserHash {
 	
@@ -98,6 +99,17 @@ public class UserHash {
 		
 		userHash = data;
 		
+	}
+	
+	public int hashCode() {
+		return getAsString().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		if (object==null) return false;
+		if (!(object instanceof UserHash )) return false;
+		UserHash hash = (UserHash)object;
+		return Arrays.equals(userHash, hash.getUserHash());
 	}
 	
 }
