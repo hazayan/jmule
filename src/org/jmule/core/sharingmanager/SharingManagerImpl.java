@@ -45,13 +45,15 @@ import org.jmule.core.edonkey.metfile.KnownMetEntity;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
+import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadSession;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:05:25 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:52:57 $$
  */
 public class SharingManagerImpl implements SharingManager {
 
@@ -90,7 +92,7 @@ public class SharingManagerImpl implements SharingManager {
 				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES)) { 
 					long total_bytes = 0;
 					for(PartialFile shared_file : getPartialFiles())
-						total_bytes += shared_file.length();
+						total_bytes += shared_file.getDownloadedBytes();
 					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES, total_bytes);
 				}
 				
@@ -204,7 +206,10 @@ public class SharingManagerImpl implements SharingManager {
 		    			 files_needed_to_hash.add(f);
 		    		 } else {
 		    			 CompletedFile shared_completed_file = new CompletedFile(f);
-		    			 shared_completed_file.setHashSet(known_met_entity.getPartHashSet());
+		    			 try {
+							shared_completed_file.setHashSet(known_met_entity.getPartHashSet());
+						} catch (SharedFileException e) {
+						}
 		    			 shared_completed_file.setTagList(known_met_entity.getTagList());
 		    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
 		    		 }
@@ -323,18 +328,36 @@ public class SharingManagerImpl implements SharingManager {
 		File incoming_dir = new File(ConfigurationManager.INCOMING_DIR);
 		PartialFile shared_partial_file = getPartialFle(fileHash);
 		if( shared_partial_file == null ) throw new SharingManagerException("The file " + fileHash + "doesn't exists");
-		File file = new File(incoming_dir+"/"+ shared_partial_file.getSharingName());
+		shared_partial_file.deletePartialFile();
+		File file = new File(incoming_dir + File.separator + shared_partial_file.getSharingName());
+		UploadManager upload_manager = JMuleCoreFactory.getSingleton().getUploadManager();
 		try {
-			sharedFiles.remove(fileHash);
-			File completed_file = new File(ConfigurationManager.TEMP_DIR+"/"+ shared_partial_file.getSharingName());
-			
-			shared_partial_file.getFile().renameTo(completed_file);
-			FileUtils.moveFile(completed_file, file);
-			CompletedFile shared_completed_file = new CompletedFile(file);
-			shared_completed_file.setHashSet(shared_partial_file.getHashSet());
-			sharedFiles.put(fileHash, shared_completed_file);
+		
+			if (upload_manager.hasUpload(fileHash)) { 	// JMule is now uploading file need to synchronize moving
+				UploadSession upload_sessison = upload_manager.getUpload(fileHash);
+				synchronized(upload_sessison.getSharedFile()) {
+					File completed_temp_file = new File(ConfigurationManager.TEMP_DIR+"/"+ shared_partial_file.getSharingName());
+					shared_partial_file.getFile().renameTo(completed_temp_file);
+					FileUtils.moveFile(completed_temp_file, file);
+					CompletedFile shared_completed_file = new CompletedFile(file);
+					shared_completed_file.setHashSet(shared_partial_file.getHashSet());
+					sharedFiles.remove(fileHash);
+					sharedFiles.put(fileHash, shared_completed_file);
+					upload_sessison.setSharedFile(shared_completed_file);
+				}
+			} else {
+				sharedFiles.remove(fileHash);
+				File completed_temp_file = new File(ConfigurationManager.TEMP_DIR+"/"+ shared_partial_file.getSharingName());
+				
+				shared_partial_file.getFile().renameTo(completed_temp_file);
+				FileUtils.moveFile(completed_temp_file, file);
+				CompletedFile shared_completed_file = new CompletedFile(file);
+				shared_completed_file.setHashSet(shared_partial_file.getHashSet());
+				sharedFiles.put(fileHash, shared_completed_file);
+			}
 			writeMetadata();
 		} catch (Throwable e) {
+			e.printStackTrace();
 			throw new SharingManagerException( e );
 		}
 	}
