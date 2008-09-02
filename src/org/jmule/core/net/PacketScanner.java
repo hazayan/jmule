@@ -57,14 +57,14 @@ import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.edonkey.packet.EMulePacketException;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.UDPPacket;
+import org.jmule.core.edonkey.packet.UDPPacketException;
 import org.jmule.core.edonkey.packet.impl.EMuleCompressedPacket;
 import org.jmule.core.edonkey.packet.impl.EMuleExtendedTCPPacket;
-import org.jmule.core.edonkey.packet.impl.EMulePacketException;
 import org.jmule.core.edonkey.packet.impl.PacketException;
 import org.jmule.core.edonkey.packet.impl.StandardPacket;
-import org.jmule.core.edonkey.packet.impl.UDPPacketException;
 import org.jmule.core.edonkey.packet.impl.UDPServerPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
@@ -102,8 +102,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:36:45 $$
  */
 public class PacketScanner {
 	
@@ -173,23 +173,25 @@ public class PacketScanner {
 		/** Peer <-> Peer **/
 		case OP_PEERHELLO : {
 			StandardPacket sPacket = (StandardPacket) packet;
-			UserHash userHash = sPacket.getUserHash();
+			UserHash userHash = sPacket.getUserHashHelloPacket();
 			TagList tagList = sPacket.getPeerHelloTagList();
-			ClientID  clientID = sPacket.getPeerClientIDPeerPackets();
+			ClientID  clientID = sPacket.getPeerClientIDHelloPacket();
+			int tcpPort = sPacket.getTCPPortHelloPacket();
 			InetSocketAddress socketAddress = sPacket.getPeerHelloServerAddress();
 			
-			scannedPacket = new JMPeerHelloSP(userHash,tagList,clientID,socketAddress);
+			scannedPacket = new JMPeerHelloSP(userHash,tagList,clientID, tcpPort,socketAddress);
 			break;
 		}
 		
 		case OP_PEERHELLOANSWER : {
 			StandardPacket sPacket = (StandardPacket) packet;
 
-			UserHash userHash = sPacket.getUserHash();
+			UserHash userHash = sPacket.getUserHashHelloAnswerPacket();
 			TagList tagList = sPacket.getPeerHelloAnswerTagList();
-			ClientID  clientID = sPacket.getPeerClientIDPeerPackets();
+			ClientID  clientID = sPacket.getPeerClientIDHelloAnswerPacket();
+			int tcpPort = sPacket.getTCPPortHelloAnswerPacket();
 			InetSocketAddress socketAddress = sPacket.getPeerHelloAnswerServerAddress();
-			scannedPacket = new JMPeerHelloAnswerSP(userHash,tagList,clientID,socketAddress);
+			scannedPacket = new JMPeerHelloAnswerSP(userHash,tagList,clientID, tcpPort,socketAddress);
 			break;
 		}
 		
