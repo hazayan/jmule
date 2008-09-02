@@ -83,8 +83,8 @@ import org.jmule.util.Convert;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:53:02 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:22:55 $$
  */
 public class StandardTag extends AbstractTag implements Tag {
 
@@ -156,12 +156,12 @@ public class StandardTag extends AbstractTag implements Tag {
 
 	public void extractTag(ByteBuffer data){
 		byte tagType;
-	    tagType=data.get();
+	    tagType = data.get();
    	    short metaTagLength;
 		metaTagLength = data.getShort();
-		byte[] metaTagName = new byte[metaTagLength];
-		data.get(metaTagName);
-		this.metaTagName.setMetaTagName(metaTagName);
+		byte[] rawMetaTagName = new byte[metaTagLength];
+		data.get(rawMetaTagName);
+		this.metaTagName.setMetaTagName(rawMetaTagName);
 		switch (tagType) {
 		case TAG_TYPE_STRING: {
 			// Extract String tag
@@ -173,7 +173,7 @@ public class StandardTag extends AbstractTag implements Tag {
 			tag.put(tagType);
 			tag.putShort(metaTagLength);
 
-			tag.put(metaTagName);
+			tag.put(rawMetaTagName);
 			tag.putShort(strLength);
 
 			for (int i = 1; i <= strLength; i++)
@@ -189,7 +189,7 @@ public class StandardTag extends AbstractTag implements Tag {
 			tag.order(ByteOrder.LITTLE_ENDIAN);
 			tag.put(tagType);
 			tag.putShort(metaTagLength);
-			tag.put(metaTagName);
+			tag.put(rawMetaTagName);
 			tag.putInt(data.getInt());
 			break;
 		}
