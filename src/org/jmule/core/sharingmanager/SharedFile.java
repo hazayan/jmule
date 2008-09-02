@@ -46,7 +46,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.apache.commons.io.FileUtils;
-import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -59,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:55 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:50:09 $$
  */
 public abstract class SharedFile {
 	
@@ -172,7 +171,7 @@ public abstract class SharedFile {
 		return hashSet;
 	}
 
-	public void setHashSet(PartHashSet hashSet) {
+	public void setHashSet(PartHashSet hashSet) throws SharedFileException {
 		this.hashSet = hashSet;
 	}
 
