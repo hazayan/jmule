@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:38:05 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -109,7 +109,8 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		DownloadSession download_session = getDownload(fileHash);
 		
-		download_session.cancelDownload();
+		if (download_session.getPercentCompleted() != 100d)
+			download_session.cancelDownload();
 		
 		session_list.remove(fileHash);
 		
