@@ -34,23 +34,29 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:03:28 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:20:39 $$
  */
 public class JMPeerHelloAnswerSP implements ScannedPacket{
 
 	private UserHash userHash;
 	private TagList tagList;
 	private ClientID clientID;
+	private int tcpPort;
 	private InetSocketAddress serverAddress;
 	
 	public JMPeerHelloAnswerSP(UserHash userHash,
-			TagList tagList, ClientID clientID,InetSocketAddress serverAddress) {
+			TagList tagList, ClientID clientID, int tcpPort, InetSocketAddress serverAddress) {
 		
 		this.userHash = userHash;
 		this.tagList = tagList;
 		this.clientID = clientID;
+		this.tcpPort = tcpPort;
 		this.serverAddress = serverAddress;
+	}
+	
+	public int getTCPPort() {
+		return tcpPort;
 	}
 	
 	public int getPacketCommand() {
