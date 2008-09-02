@@ -22,11 +22,9 @@
  */
 package org.jmule.core.net;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
-import java.util.List;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
@@ -38,8 +36,8 @@ import org.jmule.core.edonkey.impl.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:37:26 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:29:40 $$
  */
 public class JMConnectionWaiter{
 	
@@ -78,10 +76,6 @@ public class JMConnectionWaiter{
 					
 				}
 
-				public void UDPPortChanged(int port) {
-					restart();
-					
-				}
 			});
 	}
 	
@@ -157,7 +151,7 @@ public class JMConnectionWaiter{
 	
 	private void addNewPeer(JMuleSocketChannel channel) {
 		
-		Peer peer = new Peer(channel,_core.getServerManager().getConnectedServer());//Create new peer
+		new Peer(channel,_core.getServerManager().getConnectedServer());//Create new peer
 		
 	}
 	
