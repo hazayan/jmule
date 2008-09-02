@@ -25,6 +25,7 @@ package org.jmule.core.net;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,8 +41,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:38:28 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:28:31 $$
  */
 public abstract class JMConnection{
 	
@@ -65,7 +66,7 @@ public abstract class JMConnection{
 	
 	private PacketSenderThread packetSenderThread = null;
 	
-	private InetSocketAddress remoteAddress;
+	protected InetSocketAddress remoteAddress;
 	
 	private ConnectionStats connectionStats = new ConnectionStats();
 	
@@ -75,7 +76,7 @@ public abstract class JMConnection{
 	
 	private WrongPacketCheckingThread wrongPacketChekingThread;
 	
-	private  boolean allowStopReciver = true;
+	private  boolean allowStopReceiver = true;
 	
 	protected Packet lastPacket;
 	
@@ -90,8 +91,11 @@ public abstract class JMConnection{
 		
 		connectionStatus = TCP_SOCKET_CONNECTED;
 		
-		connectionStats.stopSpeedCounter();
-		connectionStats.startSpeedCounter();
+		connectionStats.stopSpeedCounter(); 
+		connectionStats.startSpeedCounter(); 
+		
+		wrongPacketChekingThread = new WrongPacketCheckingThread();
+		wrongPacketChekingThread.start();
 		
 	}
 	
@@ -124,41 +128,36 @@ public abstract class JMConnection{
 	}
 		
 	public void disconnect() {
-		
-		if ((remoteConnection!=null)&&(remoteConnection.isOpen())){
-				
-			try {
-				remoteConnection.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-				
-				//remoteConnection.close();
 
+		try {
+			remoteConnection.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (getStatus() == TCP_SOCKET_CONNECTING)
+			stopConnecting();
+		
+		if (getStatus() == TCP_SOCKET_CONNECTED) {
+			if (allowStopReceiver) // receiver may self stop	
+				stopReceiver(); 
+		
+			stopSender();
+	
 			
-			if (wrongPacketChekingThread!=null)
-				
-				wrongPacketChekingThread.JMStop();
+			
+			wrongPacketChekingThread.JMStop();
 			
 			connectionStats.stopSpeedCounter();
-			
-			}
 		
-		stopConnecting();
-		
-		if (allowStopReciver)
-			
-			stopReceiver();
-		
-		
-		stopSender();
+		}
 		
 		setStatus(TCP_SOCKET_DISCONNECTED);
-		
+
 		onDisconnect();
 		
 	}
-
+	 
 	public int getStatus() {
 		
 		return connectionStatus;
@@ -272,7 +271,7 @@ public abstract class JMConnection{
 		
 		else {
 			
-			allowStopReciver = true;
+			allowStopReceiver = true;
 			
 			packetReceiverThread = new PacketReceiverThread();
 			
@@ -350,39 +349,12 @@ public abstract class JMConnection{
 		
 	}
 
-	
-	protected void setRemoteConnection(SocketChannel pRemoteConnection) {
-		
-		if (this.getStatus() != TCP_SOCKET_CONNECTED) {
-			
-			stopConnecting();
-			
-			stopReceiver();
-			
-			stopSender();
-			
-			disconnect();
-			
-		}
-		
-		remoteConnection=new JMuleSocketChannel(pRemoteConnection);
-		
-		setAddress(this.remoteConnection.getSocket().getInetAddress().getHostAddress(),this.remoteConnection.getSocket().getPort());
-		
-		startReceiver();
-		
-		startSender();
-		
-	}
-
 	protected abstract void processPackets();
 
 	protected abstract void onDisconnect();
 	
 	protected abstract void onConnect();
-	
-	protected abstract void reportInactivity(long time);
-	
+		
 	public float getDownloadSpeed() {
 		
 		return connectionStats.getDownloadSpeed();
@@ -392,20 +364,6 @@ public abstract class JMConnection{
 	public float getUploadSpeed() {
 		
 		return connectionStats.getUploadSpeed();
-		
-	}
-	
-	public int getActivity() {
-		
-		return connectionStats.getActivity();
-		
-	}
-	
-	public void addInactivityTime(long time) {
-		
-		connectionStats.addInactivityTime(time);
-		
-		reportInactivity(connectionStats.getInactivityTime());
 		
 	}
 	
@@ -437,8 +395,6 @@ public abstract class JMConnection{
 				if (outgoing_packet_queue.isEmpty())
 						return ;
 				
-				connectionStats.reportActivity();
-				
 				Packet EDPacket = getSendPacket();
 				
 				packet = EDPacket.getAsByteBuffer();
@@ -453,20 +409,18 @@ public abstract class JMConnection{
 						
 						bSneded = remoteConnection.write(packet);
 						connectionStats.addSendBytes(bSneded);
-						
-						connectionStats.reportActivity();
-						
+												
 					}
 										
 				} catch (Throwable e1) {
 					
-					e1.printStackTrace();
+					//e1.printStackTrace();
 					
 					if (stop) return ;
 					
-					if (!remoteConnection.isOpen())
+					//if (!remoteConnection.isOpen())
 						
-						disconnect();
+					//	disconnect();
 					
 				}
 
@@ -476,7 +430,6 @@ public abstract class JMConnection{
 		public void JMStop() {
 			
 			stop = true;
-			
 			interrupt();
 			
 		}
@@ -503,43 +456,32 @@ public abstract class JMConnection{
 			Packet packet;//Incoming Packet
 						
 			while (!stop) {
-
+								
 				packetHeader.clear();
 				
 				packetHeader.position(0);
 						
 				try {
 					
-					remoteConnection.read(packetHeader,true);
+					remoteConnection.read(packetHeader);
 					
 				}catch(Throwable e) {
 					if (e instanceof JMEndOfStreamException) {
-						
-						try {
-							
-							Thread.sleep(1000);
-							
-						} catch (InterruptedException e1) {
-
-							e1.printStackTrace();
-							
-						}
-						continue;
+						System.out.println(getAddress()+" : "+getPort());
+						disconnect();
+						return ;
 					}
 					
 					e.printStackTrace();
 					
 					if (stop) return;
 					
-					if (connectionStatus!=TCP_SOCKET_DISCONNECTED) {
-						
-						allowStopReciver = false;
-						
+					if (e instanceof ClosedChannelException) {
 						disconnect();
-						
+						return ;
 					}
-					disconnect();
-					return ;
+					
+					continue;
 				}
 				
 									
@@ -552,41 +494,38 @@ public abstract class JMConnection{
 					continue;
 					
 				}
-					
+
 				packet = PacketReader.getPacketByHeader(packetHeader);
 				
 				try {
 					
 					packet.readPacket(remoteConnection);
 					
-				} catch (Throwable e1) {
-					if (e1 instanceof JMFloodException) { 
+				} catch (Throwable t) {
+					
+					if (t instanceof JMEndOfStreamException) {
+						
+						disconnect();
+						return ;
+					}
+					
+					if (t instanceof JMFloodException) { 
 						ban();
 					}
-					e1.printStackTrace();
+					t.printStackTrace();
 					if (stop) return ;
-					
+					continue;
 				}
-				
 				connectionStats.addReceivedBytes(packet.getPacket().length);
 								
-				try {
+				addReceivedPacket(packet);
 
-					addReceivedPacket(packet);
-					
-					connectionStats.reportActivity();
-					
-				} catch (Throwable e) {
-					
-					e.printStackTrace();
-				} 
 			}
 		}
 		
 		public void JMStop() {
 			
 			stop = true;
-			
 			interrupt();
 			
 		}
@@ -652,7 +591,6 @@ public abstract class JMConnection{
 		public void JMStop() {
 			
 			stop = true;
-			
 			interrupt();
 			
 		}
@@ -681,7 +619,7 @@ public abstract class JMConnection{
 				} catch (InterruptedException e) {
 					
 					if (stop) return ;
-					
+					continue;
 				}
 				
 				wrongPacketCount.add(currentlyWrongPackets);
@@ -696,9 +634,9 @@ public abstract class JMConnection{
 		}
 		
 		public void JMStop() {
-		
+
 			stop = true;
-			
+		
 			interrupt();
 			
 		}
