@@ -51,8 +51,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:47:15 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:15:58 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -130,6 +130,34 @@ public class ServerManagerImpl implements ServerManager {
 	
 	}
 	
+	public void removeServer(List<Server> serverList) {
+		
+		for(Server server : serverList) {
+			
+			 if (server.isConnected()) server.disconnect();
+				
+	         server_list.remove(server);
+	         
+	         // notify all listeners that the given server has been removed from the server list
+	         for(ServerListListener s : server_list_listeners) {
+	        	 
+	        	 s.serverRemoved( server );
+	        	 
+	         }
+			
+		}
+		
+		try {
+			 
+			storeServerList();
+			
+		 } catch (ServerManagerException e) {
+			 
+			e.printStackTrace();
+			
+		 }
+		
+	}
 
 	public void removeServer(Server server) {
 		
@@ -353,7 +381,6 @@ public class ServerManagerImpl implements ServerManager {
 	}
 	
 	public void storeServerList() throws ServerManagerException {
-        
 		//TODO : modify the exception architecture
 		try {
 			
