@@ -30,9 +30,13 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.FileChunk;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.metfile.PartMet;
@@ -46,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:56 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:46:23 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -132,7 +136,6 @@ public class PartialFile extends SharedFile {
 			
 		}
 		
-		
 		partFile.setTagList(tagList);
 		
 		partFile.setFileSize(Convert.longToInt((fileSize)));
@@ -179,10 +182,13 @@ public class PartialFile extends SharedFile {
 
 	}
 		
-	public void setHashSet(PartHashSet newSet) {
+	public void setHashSet(PartHashSet newSet) throws SharedFileException  {
+		int partCount = Misc.getPartCount(this.length());
+		System.out.println("New hash set : \n"+newSet+"\n Part count : "+partCount+"\n Length : "+this.length());
+		if (newSet.size() < partCount)
+			throw new SharedFileException("Wrong hash set response");
 		
 		hasHashSet = true;
-		int partCount = Misc.getPartCount(this.length());
 		hashSet.clear();
 		for(int i = 0;i<partCount;i++)
 			hashSet.add(newSet.get(i));
@@ -198,9 +204,14 @@ public class PartialFile extends SharedFile {
 			
 		}
 	}
-
+	
 	public void deletePartialFile() {
 		partFile.delete();
+	}
+	
+	public void delete() {
+		deletePartialFile();
+		super.delete();
 	}
 	
 	public String toString() {
@@ -231,28 +242,29 @@ public class PartialFile extends SharedFile {
 		return part_count;
 	}
 
-	public synchronized void writeData(FileChunk fileChunk) throws SharedFileException {
+	public void writeData(FileChunk fileChunk) throws SharedFileException {
 		
-		if (fileChannel == null) {
-			
-			try {
+	//	writeChunk(fileChunk);
+	//	partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
+	
+		try { 
+			if (fileChannel == null) {
 				
-				fileChannel = new RandomAccessFile(file,"rws").getChannel();
-				fileChannel.force(true);
-			} catch (Throwable e) {
-				
-				throw new SharedFileException("Error on opening file");
+				try {
+					
+					fileChannel = new RandomAccessFile(file,"rws").getChannel();
+					//fileChannel.force(true);
+				} catch (Throwable e) {
+					
+					throw new SharedFileException("Error on opening file");
+					
+				}
 				
 			}
 			
-		}
-		
-		try {
-			
-			/** Check file limit and add more data if need **/
+			//** Check file limit and add more data if need **//*
 			
 			long toAdd = 0;
-			
 			if (fileChannel.size()<=fileChunk.getChunkStart()) {
 				
 				toAdd = fileChunk.getChunkStart() - fileChannel.size();
@@ -266,49 +278,41 @@ public class PartialFile extends SharedFile {
 				toAdd = fileChunk.getChunkEnd() - fileChannel.size();
 				
 			}
-			
 			if (toAdd != 0) {
-				
+				toAdd += E2DKConstants.PARTSIZE;
+				if (toAdd + fileChannel.size()>length()) {
+					toAdd = length() - fileChannel.size();
+				}
 				addBytes(toAdd);
 				
 			}
-			
 			fileChannel.position(fileChunk.getChunkStart());
 			
 			fileChunk.getChunkData().position(0);
 			
 			fileChannel.write(fileChunk.getChunkData());
-			
-			//next line moved in thread addDataToWrite()
-			
 			partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
-			
 			try {
 				
-				this.partFile.writeFile();
+				partFile.writeFile();
 				
 			} catch (PartMetException e) {
 				
 				throw new SharedFileException("Failed to save part.met file");
 				
 			}
-			
-			
 			checkFilePartsIntegrity();
-		
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-			
+		}catch(Throwable t) {
+			throw new SharedFileException("Failed to write data");
 		}
 		
 	}
 
 	private void addBytes(long bytes) {
+		long WRITE_BLOCK = 1024*1024*25;
+		long blockCount = bytes / WRITE_BLOCK;
 		
-		long blockCount = bytes / PARTSIZE;
-		
-		ByteBuffer block = Misc.getByteBuffer(PARTSIZE);
+		ByteBuffer block = Misc.getByteBuffer(WRITE_BLOCK);
 		
 		try {
 			
@@ -318,7 +322,7 @@ public class PartialFile extends SharedFile {
 			
 			for(long i = 0;i<blockCount;i++) {
 				
-				byteCount +=PARTSIZE;
+				byteCount +=WRITE_BLOCK;
 				
 				block.position(0);
 				
@@ -345,17 +349,11 @@ public class PartialFile extends SharedFile {
 	/**
 	 * @return true - file is ok !
 	 */
-	public synchronized boolean checkFullFileIntegrity() {
+	public boolean checkFullFileIntegrity() {
 		
 		if (!hasHashSet()) return false;
 		
 		PartHashSet fileHashSet = partFile.getFileHashSet();
-		
-		try {
-			fileChannel.force(true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
 		PartHashSet newSet = MD4FileHasher.calcHashSets(fileChannel);
 		System.out.println("File hash : " + fileHashSet+" ");
@@ -523,4 +521,99 @@ public class PartialFile extends SharedFile {
 		} catch (Throwable e) {
 			return 0; }
 	}
+	
+	public void closeFile() {
+		
+		if (write_thread != null)
+			if (write_thread.isAlive()) write_thread.JMStop();
+		
+		super.closeFile();
+	}
+	
+	
+	/*
+	 *  speed research
+	 */
+	private Queue<FileChunk> write_list = new ConcurrentLinkedQueue<FileChunk>();
+	
+	private WriteThread write_thread;
+	
+	private void writeChunk(FileChunk chunk) {
+		write_list.offer(chunk);
+		if (write_thread != null)
+			if (write_thread.isAlive()) return ;
+		write_thread = new WriteThread();
+		write_thread.start();
+	}
+	
+	private class WriteThread extends JMThread {
+		
+		private boolean stop = false;
+		
+		public void JMStop() {
+			stop = true;
+		}
+		
+		public WriteThread() {
+			super("File write thread");
+		}
+		
+		public void run() {
+			while(!stop) {
+				if (write_list.size() == 0) return ;
+				System.out.println("Before Size : " + write_list.size());
+				FileChunk chunk = write_list.poll();
+				System.out.println("After Size : " + write_list.size());
+				try {
+					
+					/** Check file limit and add more data if need **/
+					
+					long toAdd = 0;
+					
+					if (fileChannel.size()<=chunk.getChunkStart()) {
+						
+						toAdd = chunk.getChunkStart() - fileChannel.size();
+						
+						toAdd += chunk.getChunkData().capacity();
+						
+					} else
+						
+					if ((fileChannel.size()>chunk.getChunkStart())&&(fileChannel.size()<=chunk.getChunkEnd())) {
+						
+						toAdd = chunk.getChunkEnd() - fileChannel.size();
+						
+					}
+					System.out.println("A");
+					if (toAdd != 0) {
+						
+						addBytes(toAdd);
+						
+					}
+					System.out.println("B");
+					fileChannel.position(chunk.getChunkStart());
+					
+					chunk.getChunkData().position(0);
+					
+					fileChannel.write(chunk.getChunkData());
+					System.out.println("C");
+					try {
+						
+						partFile.writeFile();
+						
+					} catch (PartMetException e) {
+						
+						throw new SharedFileException("Failed to save part.met file");
+						
+					}
+					System.out.println("D");
+					checkFilePartsIntegrity();
+					
+				}catch(Throwable t) {
+					
+				}
+				
+			}
+		}
+	}
+	
 }
