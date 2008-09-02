@@ -22,14 +22,15 @@
  */
 package org.jmule.core.speedmanager;
 
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.JMuleManager;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.ConfigurationAdapter;
 
 /**
  *
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:49 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 18:08:57 $$
  */
 public class SpeedManager implements JMuleManager {
 	
@@ -49,32 +50,12 @@ public class SpeedManager implements JMuleManager {
 	}
 
 	private SpeedManager() {
-		
-		long uploadLimit = ConfigurationManagerFactory.getInstance().getUploadLimit();
-		
-		uploadController = BandwidthController.acquireBandwidthController("Upload bandwidth controller", uploadLimit);
-		
-		long downloadLimit = ConfigurationManagerFactory.getInstance().getDownloadLimit();
-		
-		downloadController = BandwidthController.acquireBandwidthController("Download bandwidth controller", downloadLimit);
-		
+			
 	}
 	
 	public void shutdown() {
 	}
 	
-	public void setUploadLimit(long newLimit){
-		
-		uploadController.setThrottlingRate(newLimit);
-		
-	}
-	
-	public void sedDownloadLimit(long newLimit){
-		
-		downloadController.setThrottlingRate(newLimit);
-		
-	}
-
 	public BandwidthController getUploadController() {
 		
 		return uploadController;
@@ -88,9 +69,29 @@ public class SpeedManager implements JMuleManager {
 	}
 
 	public void initialize() {
+		JMuleCoreFactory.getSingleton().getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
+
+			public void downloadLimitChanged(long downloadLimit) {
+				downloadController.setThrottlingRate(downloadLimit);
+			}
+			
+			public void uploadLimitChanged(long uploadLimit) {
+				uploadController.setThrottlingRate(uploadLimit);
+			}
+		});
 	}
 
 	public void start() {
+		
+		long uploadLimit = JMuleCoreFactory.getSingleton().getConfigurationManager().getUploadLimit();
+		
+		uploadController = BandwidthController.acquireBandwidthController("Upload bandwidth controller", uploadLimit);
+		
+		long downloadLimit = JMuleCoreFactory.getSingleton().getConfigurationManager().getDownloadLimit();
+		
+		downloadController = BandwidthController.acquireBandwidthController("Download bandwidth controller", downloadLimit);
+	
+		
 	}
 
 	

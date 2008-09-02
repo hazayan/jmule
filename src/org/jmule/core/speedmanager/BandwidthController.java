@@ -32,8 +32,8 @@ package org.jmule.core.speedmanager;
  * @author binary
  * @see phex.common.bandwidth
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/common/bandwidth/BandwidthController.java?view=log
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:49 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 18:08:57 $$
  */
 public class BandwidthController {
     private static final int ITERATION_PER_SECONDS = 5;//5
@@ -85,6 +85,7 @@ public class BandwidthController {
     {
         throttlingRate = bytesPerSecond;
         bytesPerIteration = (int) ((double) throttlingRate / (double) ITERATION_PER_SECONDS);
+        if (bytesPerIteration == 0) bytesPerIteration = 9999;
         bytesRemaining = Math.min( bytesRemaining, bytesPerIteration );
     }
     
