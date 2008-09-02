@@ -35,8 +35,8 @@ import org.jmule.core.edonkey.impl.Peer;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:37 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:38:04 $$
  */
 public interface PeerManager extends JMuleManager {
 
@@ -67,7 +67,8 @@ public interface PeerManager extends JMuleManager {
 	
 	public boolean hasPeer(ClientID clientID);
 	
-	public void makeKnownPeer(Peer peer) throws PeerManagerException;
+	
+	public void makeKnownPeer(Peer peer);
 	
 	public JMIterable<Peer> getPeers();
 	
