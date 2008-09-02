@@ -28,15 +28,15 @@ import java.util.Set;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 11:30:17 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:59:00 $$
  */
 public class E2DKConstants {
 
 	public final static int ClientSoftware 				= 0xAA;// JMule client identification!
 	public final static int SoftwareVersionMajor 		= 0x00;
-	public final static int SoftwareVersionMinor 		= 04;
-	public final static int SoftwareVersionUpdate 		= 0x04;
+	public final static int SoftwareVersionMinor 		= 40;
+	public final static int SoftwareVersionUpdate 		= 0x00;
 	public final static int SoftwareVersion 			= ((ClientSoftware<<24) | (SoftwareVersionMajor<<17) | (SoftwareVersionMinor<<10) | (SoftwareVersionUpdate<<7));
 	
 	public final static int ServerClientSoftware 		= 0xAA;
@@ -234,6 +234,7 @@ public class E2DKConstants {
 	public final static byte[] FT_FILESIZE 				= new byte[]{0x02};
 	public final static byte[] FT_GAPSTART 				= new byte[]{0x09,0};
 	public final static byte[] FT_GAPEND 				= new byte[] {0x0A,0};
+	public final static byte GAP_OFFSET 				= 0x30; //Value hacked from eMule & aMule met.part files
 	//Server list format
 	public final static byte SERVERLIST_VERSION 		= (byte)0xE0;
 	public final static byte[] SL_SERVERNAME 			= new byte[]{0x01};
