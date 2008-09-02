@@ -23,14 +23,14 @@
 package org.jmule.core.net;
 
 import org.jmule.core.JMThread;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.util.Average;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:47 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:27:10 $$
  */
 public class ConnectionStats {
 
@@ -38,8 +38,6 @@ public class ConnectionStats {
 	  private long totalSent = 0;
 	  private Average downloadSpeed = new Average(20);
 	  private Average uploadSpeed = new Average(20);
-	  private int activity = 0;
-	  private long inactivityTime = 0;
 	  private long startTime = 0;
 	  private SpeedUpdaterThread speedUpdaterThread;
 	  
@@ -55,27 +53,6 @@ public class ConnectionStats {
 	  public void stopSpeedCounter() {
 		  this.resetByteCount();
 		  speedUpdaterThread.mustStop();
-	  }
-	  
-	  public void reportActivity() {
-		  activity = 0;
-	  }
-	  
-	  public void reportInactivity() {
-		  activity = 1;
-		  this.inactivityTime = 0;
-	  }
-	  
-	  public int getActivity() {
-		  return this.activity;
-	  }
-	  
-	  public void addInactivityTime(long AddTime) {
-		  this.inactivityTime += AddTime;
-	  }
-	  
-	  public long getInactivityTime() {
-		  return this.inactivityTime;
 	  }
 
 	  
@@ -131,7 +108,7 @@ public class ConnectionStats {
 			long lastUploadTime = System.currentTimeMillis();
 			while(true) {
 				try {
-					this.join(ConfigurationManagerFactory.getInstance().SPEED_CHECK_INTERVAL);
+					this.join(ConfigurationManager.SPEED_CHECK_INTERVAL);
 					
 					/** Update download speed**/
 					long nowBytes = totalReceived;
