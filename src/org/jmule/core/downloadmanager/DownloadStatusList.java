@@ -24,28 +24,26 @@ package org.jmule.core.downloadmanager;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.Peer;
 
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:08 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:22:59 $$
  */
 public class DownloadStatusList {
 
-	private Map<ClientID,PeerDownloadStatus> peer_status_list = new ConcurrentHashMap<ClientID,PeerDownloadStatus>();
+	private List<PeerDownloadStatus> peer_status_list = new CopyOnWriteArrayList<PeerDownloadStatus>();
 	
 	
 	public List<PeerDownloadStatus> getPeersWithInactiveTime(long inactiveTime) {
 		
 		List<PeerDownloadStatus> peer_list = new LinkedList<PeerDownloadStatus>();
 		
-		for(PeerDownloadStatus peer_download_status : peer_status_list.values()) {
+		for(PeerDownloadStatus peer_download_status : peer_status_list) {
 			
 			if ((System.currentTimeMillis() - peer_download_status.getLastUpdateTime())>=inactiveTime) {
 				
@@ -63,7 +61,7 @@ public class DownloadStatusList {
 		
 		List<PeerDownloadStatus> peer_list = new LinkedList<PeerDownloadStatus>();
 		
-		for(PeerDownloadStatus peer_download_status : peer_status_list.values()) {
+		for(PeerDownloadStatus peer_download_status : peer_status_list) {
 			
 			if ((System.currentTimeMillis() - peer_download_status.getLastUpdateTime())>=inactiveTime) 
 				if (peer_download_status.getPeerStatus()==status) {
@@ -78,16 +76,18 @@ public class DownloadStatusList {
 		
 	}
 	
-	public List<PeerDownloadStatus> getPeersByStatus(int status) {
+	public List<PeerDownloadStatus> getPeersByStatus(int... status) {
 		
 		List<PeerDownloadStatus> peer_list = new LinkedList<PeerDownloadStatus>();
 		
-		for(PeerDownloadStatus peer_download_status : peer_status_list.values()) {
-			
-			if (peer_download_status.getPeerStatus()==status) {
-				
-				peer_list.add(peer_download_status);
-				
+		for(PeerDownloadStatus peer_download_status : peer_status_list) {
+			for(int peer_status : status) {
+				if (peer_download_status.getPeerStatus()==peer_status) {
+					
+					peer_list.add(peer_download_status);
+					
+					break;
+				}
 			}
 			
 		}
@@ -96,61 +96,76 @@ public class DownloadStatusList {
 		
 	}
 	
+	public void setPeer(Peer newPeer) {
+		if (!hasPeer(newPeer)) return ;
+		PeerDownloadStatus status = getDownloadStatus(newPeer);
+		status.setPeer(newPeer);
+		peer_status_list.add(status);
+	}
+	
 	public void addPeer(Peer peer) {
 		
 		PeerDownloadStatus peerStatus = new PeerDownloadStatus(peer);
 		
-		peer_status_list.put(peer.getID(), peerStatus);
+		peer_status_list.add(peerStatus);
 		
 	}
 	
 	public void setPeerStatus(Peer peer,int status) {
 		
-		PeerDownloadStatus download_status = peer_status_list.get(peer.getID());
-		
-		download_status.setPeerStatus(status);
+		PeerDownloadStatus download_status = getDownloadStatus(peer);
+		if (download_status != null)  // peer may be removed, don't register history for removed peers
+			download_status.setPeerStatus(status);
 		
 	}
 	
 	public boolean hasPeer(Peer peer) {
 		
-		return peer_status_list.containsKey(peer.getID());
+		for(PeerDownloadStatus status : peer_status_list)
+			if (status.getPeer().equals(peer)) return true;
 		
+		return false;
 	}
 	
 	public void removePeer(Peer peer) {
 		
-		peer_status_list.remove(peer.getID());
+		peer_status_list.remove(getDownloadStatus(peer));
 		
 	}
 	
 	public PeerDownloadStatus getDownloadStatus(Peer peer) {
 		
-		return peer_status_list.get(peer.getID());
-		
+		for(PeerDownloadStatus status : peer_status_list) {
+			if (status.getPeer().equals(peer)) return status;
+		}
+		return null;
 	}
 	
 	public void updatePeerHistory(Peer peer,int history_id) {
 		
-		PeerDownloadStatus download_status = peer_status_list.get(peer.getID());
-	
-		download_status.updatePeerHistory(history_id);
+		PeerDownloadStatus download_status = getDownloadStatus(peer);
+		if (download_status != null)  // peer may be removed, don't register history for removed peers
+			download_status.updatePeerHistory(history_id);
 		
 	}
 	
 	public void updatePeerHistory(Peer peer,int history_id, int rank) {
 		
-		PeerDownloadStatus download_status = peer_status_list.get(peer.getID());
-	
-		download_status.updatePeerHistory(history_id,rank);
+		PeerDownloadStatus download_status = getDownloadStatus(peer);
+		if (download_status != null)
+			download_status.updatePeerHistory(history_id,rank);
 		
+	}
+	
+	public void clear() {
+		peer_status_list.clear();
 	}
 	
 
 	public String toString() {
 		String result = "";
 	
-		for(PeerDownloadStatus download_status : peer_status_list.values()) {
+		for(PeerDownloadStatus download_status : peer_status_list) {
 			
 			result +=download_status + "\n";
 		}
