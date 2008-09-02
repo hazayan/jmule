@@ -37,6 +37,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.jmule.core.JMIterable;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -65,40 +67,40 @@ import org.jmule.util.Misc;
  *   <tr>
  *     <td>Last modification date</td>
  *     <td>4</td>
- *     <td></td>
+ *     <td>&nbsp;</td>
  *   </tr>
  *   <tr>
  *     <td>File hash</td>
  *     <td>16</td>
- *     <td></td>
+ *     <td>-</td>
  *   </tr>
  *   <tr>
  *     <td>Part count</td>
  *     <td>2</td>
- *     <td></td>
+ *     <td>-</td>
  *   </tr>
  *   <tr>
  *     <td>Parts hash</td>
  *     <td>&lt;Part count&gt;*16</td>
- *     <td></td>
+ *     <td>-</td>
  *   </tr>
  *   <tr>
  *     <td>Tag count</td>
  *     <td>4</td>
- *     <td></td>
+ *     <td>-</td>
  *   </tr>
  *   <tr>
  *     <td>Tag list</td>
  *     <td>Variable</td>
- *     <td></td>
+ *     <td>-</td>
  *   </tr>
  * </tbody>
  * </table>
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:17:44 $$
  */
 public class PartMet extends MetFile {
 	
@@ -153,7 +155,8 @@ public class PartMet extends MetFile {
 			//Load file hash
 			data = Misc.getByteBuffer(16);
 			fileChannel.read(data);
-			this.fileHashSet = new PartHashSet(new FileHash(data.array()));
+			fileHash = new FileHash(data.array());
+			this.fileHashSet = new PartHashSet(fileHash);
 			
 			//Read part count
 			data = Misc.getByteBuffer(2);
@@ -171,55 +174,32 @@ public class PartMet extends MetFile {
 			data = Misc.getByteBuffer(4);
 			fileChannel.read(data);
 			int tagCount = data.getInt(0);
-			
 			//Load Tags
 			this.tagList = new TagList();
 			for(int i = 0 ; i < tagCount; i++) {
 				Tag tag = TagReader.loadStandardTag(fileChannel);
 				tagList.addTag(tag);
 			}
-
-			
-			this.gapList = new GapList();
-
-			int count,found;
-			boolean ok;
-			Tag startTag,endTag;
-			do {
-			ok = false;
-			count = tagList.getTagCount();
-			
-			for(int j = 0; j < count; j++ ) {
-				if (tagList.getRawTag(j).getMetaTag().getRawMetaTagName()[0]==FT_GAPSTART[0]){
-					//Have start
-					ok=true;
-					startTag = tagList.getRawTag(j);
-					endTag = tagList.getRawTag(j);//
-					found=0;
-					for(int k = 0; k < count ;k++ ){
-						endTag = tagList.getRawTag(k);
-						if ((endTag.getMetaTag().getRawMetaTagName()[0]==FT_GAPEND[0])&&
-							(endTag.getMetaTag().getRawMetaTagName()[1]==startTag.getMetaTag().getRawMetaTagName()[1])){
-							found=1;
-							break;
-						}
-					}
-					
-					if (found==0){ 
-						throw new PartMetException("Can't find end of gap in file partial file ");  
-					}
-					try {
-						gapList.addGap(Convert.intToLong(startTag.getDWORD()), Convert.intToLong(endTag.getDWORD()));
-					} catch (TagException e) {
-						throw new PartMetException("Failed to extract gap positons form file ");
-					}
-					tagList.removeTag(startTag.getMetaTag());
-					tagList.removeTag(endTag.getMetaTag());
-					break;
+			gapList = new GapList();
+			byte tag_id = E2DKConstants.GAP_OFFSET;
+			Tag start_tag, end_tag;
+			while (true) {
+				start_tag = tagList.getRawTag(new byte[]{FT_GAPSTART[0],tag_id});
+				if (start_tag == null) break;
+				end_tag = tagList.getRawTag(new byte[]{FT_GAPEND[0],tag_id});
+				if (end_tag == null)
+					throw new PartMetException("Can't find end of gap in file partial file ");
+				tagList.removeTag(start_tag.getMetaTag());
+				tagList.removeTag(end_tag.getMetaTag());
+				try {
+					long begin = Convert.intToLong(start_tag.getDWORD());
+					long end = Convert.intToLong(end_tag.getDWORD());
+					gapList.addGap(begin,end );
+				} catch (TagException e) {
+					throw new PartMetException("Failed to extract gap positions form file ");
 				}
+				tag_id++;
 			}
-						
-			}while(ok);
 		} catch (FileNotFoundException e) {
 			throw new PartMetException("Failed to load PartFile ");
 		} catch (IOException e) {
@@ -306,11 +286,11 @@ public class PartMet extends MetFile {
 			fileChannel.write(data);
 			
 			/**Write Gap List*/
-			byte counter = 0x30;//Value hacked from eMule & aMule met.part files
+			byte counter = E2DKConstants.GAP_OFFSET;
 			byte metaTagBegin[] = FT_GAPSTART.clone();
 			byte metaTagEnd[] = FT_GAPEND.clone();
-			
-			for(Gap gap : gapList.getGaps()){
+			JMIterable<Gap> gap_list = gapList.getGaps();
+			for(Gap gap : gap_list){
 								
 				metaTagBegin[1] = counter;
 				Tag tagBegin = new StandardTag(TAG_TYPE_DWORD,metaTagBegin);
