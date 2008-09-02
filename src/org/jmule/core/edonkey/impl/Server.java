@@ -51,9 +51,9 @@ import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.ServerListener;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.packet.Packet;
+import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.UDPPacket;
-import org.jmule.core.edonkey.packet.impl.PacketFactory;
-import org.jmule.core.edonkey.packet.impl.UDPPacketFactory;
+import org.jmule.core.edonkey.packet.UDPPacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerFoundSourceSP;
@@ -84,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:55 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:11:21 $$
  */
 public class Server extends JMConnection {
 	
@@ -298,7 +298,7 @@ public class Server extends JMConnection {
 		
 	}
 
-	public void offerServerFiles() {
+	public void offerFiles() {
 		
 		super.sendPacket(PacketFactory.getOfferFilePacket(clientID));
 		
@@ -330,7 +330,7 @@ public class Server extends JMConnection {
 			
 			notify_server_event(TCP_SOCKET_CONNECTED);
 			
-			offerServerFiles();
+			offerFiles();
 			
 			return;
 			
@@ -405,6 +405,8 @@ public class Server extends JMConnection {
 
 		if (packet instanceof JMServerUDPStatusSP) {
 			
+			last_udp_response = System.currentTimeMillis();
+			
 			JMServerUDPStatusSP scannedPacket = (JMServerUDPStatusSP) packet;
 			
 			setNumFiles(scannedPacket.getFilesCount());
@@ -426,6 +428,8 @@ public class Server extends JMConnection {
 
 		if (packet instanceof JMServerUDPDescSP) {
 			
+			last_udp_response = System.currentTimeMillis();
+			
 			JMServerUDPDescSP scannedPacket = (JMServerUDPDescSP) packet;
 			
 			setName(scannedPacket.getName());
@@ -437,7 +441,10 @@ public class Server extends JMConnection {
 		
 		if (packet instanceof JMServerUDPNewDescSP) {
 			
+			last_udp_response = System.currentTimeMillis();
+			
 			JMServerUDPNewDescSP scannedPacket = (JMServerUDPNewDescSP) packet;
+			
 			tagList.addTag(scannedPacket.getTagList(), true);
 			
 		}
@@ -451,7 +458,7 @@ public class Server extends JMConnection {
 
 	public boolean isDown() {
 		
-		if (System.currentTimeMillis()-last_udp_response>ConfigurationManagerFactory.getInstance().SERVER_UDP_QUERY_INTERVAL*3)
+		if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_UDP_QUERY_INTERVAL * 3)
 			
 			return true;
 		
