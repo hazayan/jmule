@@ -84,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:11:21 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:14:40 $$
  */
 public class Server extends JMConnection {
 	
@@ -457,6 +457,8 @@ public class Server extends JMConnection {
 	}
 
 	public boolean isDown() {
+		
+		if (isConnected) return false;
 		
 		if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_UDP_QUERY_INTERVAL * 3)
 			
