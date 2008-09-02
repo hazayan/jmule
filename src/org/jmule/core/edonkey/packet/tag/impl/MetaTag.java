@@ -22,11 +22,13 @@
  */
 package org.jmule.core.edonkey.packet.tag.impl;
 
+import org.jmule.util.Convert;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:58 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:21:46 $$
  */
 public class MetaTag {
 
@@ -53,16 +55,17 @@ public class MetaTag {
 	}
 	
 	public int hashCode() {
-		int summ = 0;
-		for(int i = 0;i<this.metaTagName.length;i++)
-			summ+=this.metaTagName[i];
-		return summ;
+		return Convert.byteToHexString(metaTagName, " ").hashCode();
 	}
 	
 	public boolean equals(Object object){
 		if (object==null) return false;
 		if (!(object instanceof MetaTag)) return false;
 		return this.hashCode()==object.hashCode();
+	}
+	
+	public String toString() {
+		return Convert.byteToHexString(metaTagName, " ");
 	}
 	
 }
