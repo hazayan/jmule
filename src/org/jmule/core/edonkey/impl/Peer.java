@@ -22,19 +22,23 @@
  */
 package org.jmule.core.edonkey.impl;
 
-import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NICKNAME;
+
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketChecker;
-import org.jmule.core.edonkey.packet.impl.PacketFactory;
+import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerChatMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
@@ -46,34 +50,20 @@ import org.jmule.core.net.JMuleSocketChannel;
 import org.jmule.core.net.PacketScanner;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.peermanager.PeerSessionList;
-import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:11:55 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:13:56 $$
  */
 public class Peer extends JMConnection {
 	
-	/**Peer's search status*/
+	private static final int PEER_DISCONNECT_WAIT_TIME = 1000;
+	private static final int PEER_DISCONNECT_CHECK_WAIT_INTERVAL = 100;
 	
-	public static final int FILE_NOT_FOUND = 0;
-	
-	public static final int FILE_REQUESTING = 1;
-	
-	public static final int FILE_FOUND = 2;
-	
-	/**Upload status*/
-	
-	public static final int PEER_ACCEPT_UPLOAD_WAIT = 0;
-	
-	public static final int PEER_ACCEPT_UPLOAD = 1;
-	
-	private PacketProcessorThread processIncomingPackets = null;
-	
-	private int uploadStatus = PEER_ACCEPT_UPLOAD_WAIT;
-	
+	private PacketProcessorThread incomingPacketProcessor = null;
+		
 	private PeerSessionList sessionList = new PeerSessionList(this);
 	
 	private ClientID clientID = null;
@@ -86,26 +76,28 @@ public class Peer extends JMConnection {
 	
 	private boolean isConnected = false;
 	
-	private boolean unknownPeer = false;
+	private boolean unknownPeerID = true;
+	
+	private boolean banned = false;
 	
 	private Set<FileHash> peer_shared_files = new HashSet<FileHash>();
 	
-	private boolean autoadd_to_peermanager = true;
-	
 	private long connectTime = 0;
+	
+	private JMThread disconnect_waiting;
 
 	public Peer(JMuleSocketChannel remoteConnection,Server connectedServer) {
 		
 		super(remoteConnection);
 		
-		super.open();
+		PeerManagerFactory.getInstance().addUnknownPeer(this);
 		
 		this.connectedServer = connectedServer;
 		
-		unknownPeer = true;
+		unknownPeerID = true;
 		
-		PeerManagerFactory.getInstance().addUnknownPeer(this);
-		
+		super.open();
+				
 	}
 
 	public Peer(String remoteAddress, int remotePort,Server connectedServer) {
@@ -115,6 +107,8 @@ public class Peer extends JMConnection {
 		super.setAddress(remoteAddress, remotePort);
 		
 		this.connectedServer = connectedServer;
+		
+		PeerManagerFactory.getInstance().addUnknownPeer(this);
 		
 	}
 	
@@ -128,7 +122,9 @@ public class Peer extends JMConnection {
 		
 		this.connectedServer = connectedServer;
 		
-		PeerManagerFactory.getInstance().addPeer(this);
+		//PeerManagerFactory.getInstance().addPeer(this);
+		PeerManagerFactory.getInstance().addUnknownPeer(this);
+		
 	}
 	
 	public Peer(ClientID clientID,int remotePort,Server connectedServer,FileHash fileHash){
@@ -142,18 +138,18 @@ public class Peer extends JMConnection {
 		this.connectedServer = connectedServer;
 		
 		peer_shared_files.add(fileHash);
-		
-		autoadd_to_peermanager = false;
-		
-		sessionList = new PeerSessionList(this);
 
+	}
+	
+	public SocketChannel getConnection() {
+		return remoteConnection.getChannel();
 	}
 	
 	protected void processPackets() {
 		
-		if ((processIncomingPackets == null)||(!processIncomingPackets.isAlive()))
+		if ((incomingPacketProcessor == null)||(!incomingPacketProcessor.isAlive()))
 			
-			this.processIncomingPackets = new PacketProcessorThread();
+			this.incomingPacketProcessor = new PacketProcessorThread();
 		
 	}
 	
@@ -170,7 +166,7 @@ public class Peer extends JMConnection {
 		
 		} else {
 			
-			if (connectedServer == null) ;
+			if (connectedServer == null) disconnect();
 			
 			else {
 				
@@ -180,8 +176,10 @@ public class Peer extends JMConnection {
 	}
 	
 	public void disconnect() {
-		
-		super.disconnect();
+		try {
+			super.disconnect();
+		}catch(Throwable t) {
+		}
 		
 	}
 		
@@ -190,6 +188,8 @@ public class Peer extends JMConnection {
 		String result;
 		
 		result = super.toString();
+		
+		result += " "+getNickName()+" ";
 		
 		if (isConnected())
 			result+=" ED2K Connected ";
@@ -200,8 +200,11 @@ public class Peer extends JMConnection {
 			
 			result += " Client ID : "+clientID+" [ "+(isHighID() ? "HIGH ID" : "LOW ID")+" ] ";
 						
-		result += " Incoming : "+incoming_packet_queue.size();
-		result += " Outcomming : "+outgoing_packet_queue.size();
+		result += " Session count : " + sessionList.getSessionCount();
+		
+		result += "  "+ (isBanned() ? "Banned" : "Unbanned");
+		
+		result += "  " + userHash;
 		
 		return result;
 		
@@ -234,9 +237,18 @@ public class Peer extends JMConnection {
 	public void setSessionList(PeerSessionList sessionList ) {
 		
 		this.sessionList = sessionList;
-		
+		if (sessionList == null) return ; 
 		this.sessionList.setPeer(this);
 		
+	}
+	
+	public void reusePeer(Peer peer) {
+		setSessionList(peer.getSessionList());
+		peer.setSessionList(null);
+		if (peer.getUserHash() != null) {
+			userHash = peer.getUserHash();
+			peer.userHash = null;
+		}
 	}
 	
 	public boolean isHighID() {
@@ -248,11 +260,6 @@ public class Peer extends JMConnection {
 		
 	}
 
-	public int getUploadStatus() {
-		
-		return uploadStatus;
-		
-	}
 		
 	protected void onConnect() {
 		
@@ -278,29 +285,35 @@ public class Peer extends JMConnection {
 	}
 
 	protected void onDisconnect() {
+		if (disconnect_waiting!=null)
+			if (disconnect_waiting.isAlive()) return ; // Disconnect thread is already running
 		
-		sessionList.onDisconnect();
-		
-		PeerManagerFactory.getInstance().removePeer(this);
-		
-	}
-	
-	protected void reportInactivity(long time) {
-		
-		if (time % ConfigurationManagerFactory.getInstance().PEER_ACTIVITY_CHECH_INTERVAL>=3) {
-			
-			if (lastPacket!=null)
+		final Peer peer = this;
+		disconnect_waiting = new JMThread(new JMRunnable() {
+			public void JMRun() {
+				long start_time = System.currentTimeMillis();
 				
-				if (isConnected)
-					
-					super.sendPacket(lastPacket);
-
+				while(incoming_packet_queue.size()!=0) { // outgoing_queue can't be used, TCP connection already closed !
+					long current_time = System.currentTimeMillis();
+					if (current_time - start_time > PEER_DISCONNECT_WAIT_TIME) break; 
+					//Wait some time if have incoming packets to process
+					try {
+						Thread.sleep(PEER_DISCONNECT_CHECK_WAIT_INTERVAL);
+					} catch (InterruptedException e) {
+						break;
+					}
+				}
+				
+				isConnected = false;
+				
+				sessionList.onDisconnect();
 			
-			super.sendPacket(lastPacket);
-		}
+				PeerManagerFactory.getInstance().removePeer(peer);
+			}
+		});
 		
+		disconnect_waiting.start();
 		
-		sessionList.reportInactivity(time);
 		
 	}
 	
@@ -319,9 +332,35 @@ public class Peer extends JMConnection {
 			peerTags = sPacket.getTagList();
 			
 			clientID = sPacket.getClientID();
+						
+			int tcp_port = sPacket.getTCPPort();
 			
-			if (autoadd_to_peermanager)
-				PeerManagerFactory.getInstance().addPeer(this);
+			if (getPort() != tcp_port) 
+				remoteAddress = new InetSocketAddress(getAddress(),tcp_port);
+				
+			
+//			if (auto_add_on_connect)
+//				PeerManagerFactory.getInstance().addPeer(this);
+
+			isConnected = true;
+			
+			if (unknownPeerID) {
+				
+				try {
+					
+					PeerManagerFactory.getInstance().makeKnownPeer(this);
+					
+					unknownPeerID = false;
+					
+				} catch (Throwable e) {
+					// May be thrown exception when connecting to server
+					e.printStackTrace();
+				}
+				
+			}
+		
+			this.sessionList.onConnected();
+			
 			Packet answerPacket;
 			
 			if (this.connectedServer == null)
@@ -344,28 +383,6 @@ public class Peer extends JMConnection {
 			
 			super.sendPacket(answerPacket);
 			
-			isConnected = true;
-			
-			
-			
-			if (unknownPeer) {
-				
-				try {
-					
-					PeerManagerFactory.getInstance().makeKnownPeer(this);
-					
-					unknownPeer = false;
-					
-				} catch (Throwable e) {
-					
-					e.printStackTrace();
-					
-				}
-				
-			}
-		
-			this.sessionList.onConnected();
-			
 			return ;
 			
 		}
@@ -382,20 +399,25 @@ public class Peer extends JMConnection {
 			
 			clientID = sPacket.getClientID();
 			
-			if (autoadd_to_peermanager)
-				PeerManagerFactory.getInstance().addPeer(this);
+			int tcp_port = sPacket.getTCPPort();
+			
+			if (getPort() != tcp_port) 
+				remoteAddress = new InetSocketAddress(getAddress(),tcp_port);
+			
+//			if (auto_add_on_connect)
+//				PeerManagerFactory.getInstance().addPeer(this);
 			
 			isConnected = true;
 			
 			//Used when Peer was created using IP and Port
 		
-			if (unknownPeer) {
+			if (unknownPeerID) {
 				
 				try {
 					
 					PeerManagerFactory.getInstance().makeKnownPeer(this);
 					
-					unknownPeer = false;
+					unknownPeerID = false;
 					
 				} catch (Throwable e) {
 					
@@ -425,11 +447,11 @@ public class Peer extends JMConnection {
 	
 	public int hashCode() {
 		
-		//if (clientID == null)
+		if (userHash == null)
 		
-			return (getAddress() + this.getPort()).hashCode();
+			return getID().hashCode();
 		
-		//return clientID.hashCode();
+		return userHash.hashCode();
 		
 	}
 	
@@ -442,8 +464,18 @@ public class Peer extends JMConnection {
 		if (!(object instanceof Peer))
 			
 			return false;
+		Peer p = (Peer) object;
+		if ((p.getUserHash()!=null) && (userHash != null))
+			return p.getUserHash().equals(getUserHash());
+		ClientID id = p.getID();
+		ClientID id2 = getID();
+		if ((id == null) || (id2 == null)) return false;
+		byte[] b1 = id.getClientID();
+		byte[] b2 = id2.getClientID();
 		
-		return this.hashCode() == object.hashCode();
+	//	System.out.println("Compare : "+this +" \n"+p+"  "+Arrays.equals(b1, b2));
+		
+		return Arrays.equals(b1, b2);
 	}
 	
 	private class PacketProcessorThread extends JMThread {
@@ -516,6 +548,17 @@ public class Peer extends JMConnection {
 		
 		return isConnected;
 		
+	}
+	
+	public boolean isBanned() {
+		
+		return banned;
+		
+	}
+	
+	public void ban() {
+		banned = true;
+		super.ban();
 	}
 	
 	public int getClientSoftware() {
