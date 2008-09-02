@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
-import org.jmule.core.edonkey.packet.impl.PacketFactory;
+import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerAcceptUploadRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileHashSetAnswerSP;
@@ -42,6 +42,7 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
+import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharingManagerFactory;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerFactory;
@@ -50,15 +51,18 @@ import org.jmule.core.uploadmanager.UploadSession;
 
 /**
  * Class which manage sessions assigned to each peer.
- * @author binary
+ * Session remove policy : 
+ *  - sessions must self-remove from peer's session list if peer is no more need ;
+ *  
+ * @author binary256
  */ 
 public class PeerSessionList {
 	
 	private Peer peer = null;
 	
-	private Map<FileHash,DownloadSession> downloadList = new ConcurrentHashMap<FileHash,DownloadSession>();
+	private Map<FileHash,DownloadSession> download_session_list = new ConcurrentHashMap<FileHash,DownloadSession>();
 	
-	private Map<FileHash,UploadSession> uploadList = new ConcurrentHashMap<FileHash,UploadSession>();
+	private Map<FileHash,UploadSession> upload_session_list = new ConcurrentHashMap<FileHash,UploadSession>();
 	
 	
 	public PeerSessionList(Peer peer){
@@ -72,7 +76,7 @@ public class PeerSessionList {
 		
 		/** Notify Download List **/
 		
-		for(DownloadSession downloadSession : downloadList.values()) {
+		for(DownloadSession downloadSession : download_session_list.values()) {
 			
 			downloadSession.onPeerConnected(getPeer());
 			
@@ -80,7 +84,7 @@ public class PeerSessionList {
 		
 		/** Notify Upload List **/
 		
-		for(UploadSession uploadSession : uploadList.values()) {
+		for(UploadSession uploadSession : upload_session_list.values()) {
 			
 			uploadSession.onPeerConnected(getPeer());
 			
@@ -91,43 +95,27 @@ public class PeerSessionList {
 		
 		/** Notify Download List **/
 		
-		for(DownloadSession downloadSesion : downloadList.values())
+		for(DownloadSession downloadSesion : download_session_list.values())
 			
 			downloadSesion.onPeerDisconnected(getPeer());
-		
+				
 		/** Notify Upload List **/
 		
-		for(UploadSession uploadSession : uploadList.values())
+		for(UploadSession uploadSession : upload_session_list.values())
 			
 			uploadSession.onPeerDisconnected(getPeer());
 		
-		PeerManagerFactory.getInstance().removePeer(this.getPeer());
-		
 	}
-	
-	public void reportInactivity(long time) {
 		
-		/** Notify Donwload list **/
-		
-		for(DownloadSession downloadSession : downloadList.values())
-			
-			downloadSession.reportInactivity(getPeer(), time);
-		
-		for(UploadSession uploadSession : uploadList.values())
-			
-			uploadSession.reportInactivity(getPeer(),time);
-		
-	}
-	
 	private DownloadSession getDownloadSession(FileHash fileHash) {
 		
-		return downloadList.get(fileHash);
+		return download_session_list.get(fileHash);
 		
 	}
 		
 	private UploadSession getUploadSession(FileHash fileHash) {
 		
-		return uploadList.get(fileHash);
+		return upload_session_list.get(fileHash);
 		
 	}
 	
@@ -176,16 +164,15 @@ public class PeerSessionList {
 				fileHash = ((JMPeerFileNotFoundSP)packet).getFileHash();
 		
 			if ( fileHash == null ) {
-				
-				for(DownloadSession downloadSession : downloadList.values())
+				for(DownloadSession downloadSession : download_session_list.values())
 					
 					downloadSession.processPacket(this.getPeer(), packet, this);
 				
 			} else {
 				
 				DownloadSession downloadSession = getDownloadSession(fileHash);
-
-				downloadSession.processPacket(getPeer(), packet, this);
+				if (downloadSession!=null)
+					downloadSession.processPacket(getPeer(), packet, this);
 			}
 			
 		} else {
@@ -224,6 +211,9 @@ public class PeerSessionList {
 						return ;
 						
 					}
+					PartialFile shared_file = SharingManagerFactory.getInstance().getPartialFle(fileHash);
+					if (shared_file!=null)
+						if (shared_file.getAvailablePartCount()==0) return ;
 					
 					UploadManager upload_manager = UploadManagerFactory.getInstance();
 					
@@ -241,15 +231,15 @@ public class PeerSessionList {
 				
 				if (uploadSession != null)
 						
-					uploadSession.processPacket(this.getPeer(), packet, this);
+					uploadSession.processPacket(this.getPeer(), packet);
 			
 			}
 			
 			if ( fileHash == null ) {
 				
-				for(UploadSession uploadSession : uploadList.values()) {
+				for(UploadSession uploadSession : upload_session_list.values()) {
 					
-					uploadSession.processPacket(this.getPeer(), packet, this);
+					uploadSession.processPacket(this.getPeer(), packet);
 					
 				}
 				
@@ -262,13 +252,13 @@ public class PeerSessionList {
 	
 	public boolean hasDownloadSession(DownloadSession dSession){
 		
-		return downloadList.containsKey(dSession.getFileHash());
+		return download_session_list.containsKey(dSession.getFileHash());
 		
 	}
 	
 	public boolean hasDownloadSession(FileHash fileHash){
 		
-		return downloadList.containsKey(fileHash);
+		return download_session_list.containsKey(fileHash);
 		
 	}
 	
@@ -276,7 +266,7 @@ public class PeerSessionList {
 		
 		if (hasDownloadSession(dSession)) return false;
 		
-		downloadList.put(dSession.getFileHash(), dSession);
+		download_session_list.put(dSession.getFileHash(), dSession);
 		
 		return true;
 		
@@ -286,11 +276,11 @@ public class PeerSessionList {
 		
 		if (this.hasDownloadSession(dSession)) {
 			
-			this.downloadList.remove(dSession.getFileHash());
+			this.download_session_list.remove(dSession.getFileHash());
 			
-			if ((downloadList.size()==0)&&(uploadList.size()==0))
-				
-				peer.disconnect();
+			if ((download_session_list.size() == 0)&&(upload_session_list.size() == 0))
+				if (peer.isConnected())
+					peer.disconnect();
 			
 		}
 		
@@ -299,13 +289,13 @@ public class PeerSessionList {
 	/** Process Upload Sessions */
 	public boolean hasUploadSession(UploadSession uSession){
 		
-		return !(this.uploadList.get(uSession.getFileHash()) == null);
+		return !(this.upload_session_list.get(uSession.getFileHash()) == null);
 		
 	}
 	
 	public boolean hasUploadSession(FileHash fileHash){
 		
-		return !(this.uploadList.get(fileHash) == null);
+		return !(this.upload_session_list.get(fileHash) == null);
 		
 	}
 	
@@ -313,7 +303,7 @@ public class PeerSessionList {
 		
 		if (hasUploadSession(uploadSession)) return;
 		
-		this.uploadList.put(uploadSession.getFileHash(), uploadSession);
+		this.upload_session_list.put(uploadSession.getFileHash(), uploadSession);
 		
 	}
 	
@@ -321,9 +311,9 @@ public class PeerSessionList {
 		
 		if (hasUploadSession(uploadSession)){
 			
-			uploadList.remove(uploadSession.getFileHash());
+			upload_session_list.remove(uploadSession.getFileHash());
 			
-			if ((downloadList.size() == 0) && (uploadList.size() == 0))
+			if ((download_session_list.size() == 0) && (upload_session_list.size() == 0))
 				
 				peer.disconnect();
 		}
@@ -338,5 +328,17 @@ public class PeerSessionList {
 	public void setPeer(Peer peer){
 		
 		this.peer = peer;
+	}
+	
+	public int getDownloadSessionCount() {
+		return download_session_list.size();
+	}
+	
+	public int getUploadSessionCount() {
+		return upload_session_list.size();
+	}
+	
+	public int getSessionCount() {
+		return getDownloadSessionCount() + getUploadSessionCount();
 	}
 }
