@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
  * ed2k://|file|NAME|SIZE|MD4-HASH|h=HASH|/
  * ed2k://|file|NAME|SIZE|MD4-HASH|/|sources,<IP:Port>,<IP:Port>,...|/
  * @author binary
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 10:07:21 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:09:57 $$
  */
 public class ED2KFileLink {
 
@@ -117,7 +117,7 @@ public class ED2KFileLink {
 	
 	public String getAsString() {
 		
-		return "ed2k://file|"+fileName+"|"+fileSize+"|"+fileHash+"|/";
+		return "ed2k://|file|"+fileName+"|"+fileSize+"|"+fileHash+"|/";
 		
 	}
 	
@@ -135,7 +135,7 @@ public class ED2KFileLink {
 	
 	public String toString(){
 		
-		return "ed2k://file|"+fileName+"|"+fileSize+"|"+fileHash+"|/";
+		return "ed2k://|file|"+fileName+"|"+fileSize+"|"+fileHash+"|/";
 		
 	}
 	
