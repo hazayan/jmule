@@ -22,38 +22,49 @@
  */
 package org.jmule.core.uploadmanager;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.JMIterable;
+import org.jmule.core.JMIterator;
 import org.jmule.core.edonkey.impl.Peer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:28:53 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:56:00 $$
  */
 public class UploadQueue {
 	
-	private Queue<Peer> peer_queue = new ConcurrentLinkedQueue<Peer>();
+	private Queue<UploadQueueElement> upload_queue = new ConcurrentLinkedQueue<UploadQueueElement>();
 	
 	public void addPeer(Peer peer) {
-		
-		peer_queue.offer(peer);
+		upload_queue.offer(new UploadQueueElement(peer));
 	}
 	
 	public Peer getLastPeer() {
+		UploadQueueElement element = upload_queue.peek();
+		if (element == null) return null;
+		return element.getPeer();
 		
-		return peer_queue.peek();
-		
+	}
+	
+	public Queue<UploadQueueElement> getQueue() {
+		return upload_queue;
+	}
+	
+	public void clear() {
+		upload_queue.clear();
 	}
 	
 	public boolean hasPeer(Peer peer) {
 		
-		for(Peer peer2 : peer_queue)
+		for(UploadQueueElement queue_element : upload_queue)
 			
-			if (peer2.equals(peer))
+			if (queue_element.getPeer().equals(peer))
 				
 				return true;
 		
@@ -61,47 +72,56 @@ public class UploadQueue {
 		
 	}
 	
+	public void setPeer(Peer peer) {
+		for(UploadQueueElement queue_element : upload_queue)
+			if (queue_element.getPeer().equals(peer))
+				queue_element.setPeer(peer);
+	}
+	
 	public int getPeerQueueID(Peer peer) {
 		
 		int i = 0;
 		
-		for(Peer check_peer : peer_queue)
+		for(UploadQueueElement queue_element : upload_queue)
 			
-			if (peer.equals(check_peer))
+			if (queue_element.getPeer().equals(peer))
 				return i;
 			else 
 				i++;
 		
-		return 0;
+		return -1;
 	}
 	
 	public void removePeer(Peer peer) {
 		
-		peer_queue.remove(peer);
+		upload_queue.remove(peer);
 		
 	}
 	
 	public int size() {
 		
-		return peer_queue.size();
+		return upload_queue.size();
 		
 	}
 	
 	public Peer pool() {
 		
-		return peer_queue.poll();
+		return upload_queue.poll().getPeer();
 		
 	}
 			
 	public JMIterable<Peer> getPeers() {
-		return new JMIterable<Peer>(peer_queue.iterator());
+		List<Peer> list = new LinkedList<Peer>();
+		for(UploadQueueElement element : upload_queue)
+			list.add(element.getPeer());
+		return new JMIterable<Peer>(new JMIterator<Peer>(list.iterator()));
 	}
 	
 	public String toString() {
 		
 		String result="";
 		int id = 0;
-		for(Peer peer : peer_queue) {
+		for(Peer peer : getPeers()) {
 			
 			result += peer +" "+id+" \n";
 			id++;
@@ -110,4 +130,30 @@ public class UploadQueue {
 		return result;
 	}
 
+	public class UploadQueueElement {
+		
+		private Peer peer;
+		
+		private long addTime;
+		
+		public UploadQueueElement(Peer uploadPeer) {
+			peer = uploadPeer;
+			addTime = System.currentTimeMillis();
+		}
+		
+		public void setPeer(Peer peer) {
+			addTime = System.currentTimeMillis();
+			this.peer = peer;
+		}
+		
+		public Peer getPeer() {
+			return peer;
+		}
+		
+		public long getTime() {
+			return addTime;
+		}
+	}
+	
 }
+
