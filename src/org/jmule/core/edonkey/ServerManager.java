@@ -23,6 +23,7 @@
 package org.jmule.core.edonkey;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 import org.jmule.core.JMuleManager;
 import org.jmule.core.edonkey.impl.Server;
@@ -30,8 +31,8 @@ import org.jmule.core.edonkey.impl.Server;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/23 13:18:05 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:48:53 $$
  */
 public interface ServerManager extends JMuleManager {
 
@@ -49,6 +50,12 @@ public interface ServerManager extends JMuleManager {
 	 * @param server the server that is added to the server list
 	 */
 	public void addServer(Server server);
+
+	/**
+	 * Removes the given server form the server list
+	 * @param server the given server
+	 */
+	public void removeServer(List<Server> server);
 	
 	/**
 	 * Removes the given server form the server list
