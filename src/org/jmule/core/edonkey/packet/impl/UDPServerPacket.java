@@ -30,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.jmule.core.edonkey.packet.UDPPacket;
+import org.jmule.core.edonkey.packet.UDPPacketException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.util.Convert;
@@ -38,8 +39,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
  */
 public class UDPServerPacket extends UDPAbstractPacket implements UDPPacket {
 	

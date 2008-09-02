@@ -46,8 +46,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:48:20 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
  */
 public class PacketReader {
 
@@ -76,7 +76,7 @@ public class PacketReader {
 
 		public static ByteBuffer readBytes(JMuleSocketChannel channel,int length)throws IOException, JMEndOfStreamException, InterruptedException{
 			ByteBuffer buffer = Misc.getByteBuffer(length);
-			channel.read(buffer,true);
+			channel.read(buffer);
 			return buffer;
 		}
 	

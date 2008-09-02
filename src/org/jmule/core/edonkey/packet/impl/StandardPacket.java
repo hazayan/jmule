@@ -76,8 +76,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:53:49 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -227,11 +227,36 @@ public class StandardPacket extends AbstractPacket implements Packet {
 	/** 
 	 * Extract user Hash from packet 
 	 */
-	public UserHash getUserHash(){
+	public UserHash getUserHashHelloAnswerPacket(){
 		byte[] data = new byte[16];
 		dataPacket.position(1 + 4 + 1);
 		dataPacket.get(data);
 		return new UserHash(data);
+	}
+	
+	public int getTCPPortHelloAnswerPacket() {
+		int port;
+		dataPacket.position(1 + 4 + 1 + 16 + 4 );
+		port = Convert.shortToInt(dataPacket.getShort());
+		return port;
+	}
+	
+	
+	/** 
+	 * Extract user Hash from packet 
+	 */
+	public UserHash getUserHashHelloPacket(){
+		byte[] data = new byte[16];
+		dataPacket.position(1 + 4 + 1 + 1);
+		dataPacket.get(data);
+		return new UserHash(data);
+	}
+	
+	public int getTCPPortHelloPacket() {
+		int port;
+		dataPacket.position(1 + 4 + 1 + 1 + 16 + 4 );
+		port = Convert.shortToInt(dataPacket.getShort());
+		return port;
 	}
 	
 	/**
@@ -392,9 +417,9 @@ public class StandardPacket extends AbstractPacket implements Packet {
     /**
      * Extract ClientID from  packet 
      */
-    public ClientID getPeerClientID() throws PacketException {
+    public ClientID getPeerClientIDHelloPacket() throws PacketException {
     	byte clientID[] = new byte[4];
-    	dataPacket.position(1+4+1+16);
+    	dataPacket.position(1+4+1+1+16);
     	dataPacket.get(clientID);
     	return new ClientID(clientID);
     }
@@ -402,9 +427,9 @@ public class StandardPacket extends AbstractPacket implements Packet {
     /**
      * Extract ClientID from  packet 
      */
-    public ClientID getPeerClientIDPeerPackets() throws PacketException {
+    public ClientID getPeerClientIDHelloAnswerPacket() throws PacketException {
     	byte clientID[] = new byte[4];
-    	dataPacket.position(1+4+1+16+1);
+    	dataPacket.position(1+4+1+16);
     	dataPacket.get(clientID);
     	return new ClientID(clientID);
     }
@@ -611,7 +636,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
 		this.clear();
 		
 		ByteBuffer packetLength=Misc.getByteBuffer(4);		
-		connection.read(packetLength,true);
+		connection.read(packetLength);
 		
 		int pkLength = packetLength.getInt(0);
 		

@@ -42,8 +42,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:45 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
  */
 public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 	
@@ -176,7 +176,7 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		
 		ByteBuffer packetLength=Misc.getByteBuffer(4);
 
-		connection.read(packetLength,true);
+		connection.read(packetLength);
 		
 		int pkLength = packetLength.getInt(0)-1;		
 		
@@ -186,7 +186,7 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		
 		ByteBuffer packetCommand=Misc.getByteBuffer(1);
 		
-		connection.read(packetCommand,true);
+		connection.read(packetCommand);
 		
 		byte packetCmd=packetCommand.get(0);
 			

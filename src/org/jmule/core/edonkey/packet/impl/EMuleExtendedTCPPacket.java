@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.edonkey.packet.EMulePacketException;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.net.JMEndOfStreamException;
@@ -39,8 +40,8 @@ import org.jmule.core.net.JMuleSocketChannel;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:43 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
  */
 public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 
@@ -89,7 +90,7 @@ public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 		ByteBuffer packetLength=ByteBuffer.allocate(4);
 		packetLength.order(ByteOrder.LITTLE_ENDIAN);
 		
-		connection.read(packetLength,true);
+		connection.read(packetLength);
 		int pkLength = packetLength.getInt(0);
 		if (pkLength>ConfigurationManager.MAX_PACKET_SIZE) 
 			throw new JMFloodException("Packet length is too big, packet length : "+pkLength);
