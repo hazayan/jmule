@@ -39,8 +39,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:31:06 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 16:01:30 $$
  */
 public class UploadManagerImpl implements UploadManager {
 
@@ -130,6 +130,9 @@ public class UploadManagerImpl implements UploadManager {
 
 	public void shutdown() {
 	
+		for(UploadSession session : session_list.values())
+			session.stopSesison();
+		
 	}
 
 	public void start() {
