@@ -22,12 +22,14 @@
  */
 package org.jmule.core.uploadmanager;
 
+import org.jmule.core.edonkey.impl.FileHash;
+
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:29:41 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/04 14:31:53 $$
  */
 public interface UploadManagerListener {
 
@@ -35,12 +37,12 @@ public interface UploadManagerListener {
 	 * A has been upload added
 	 * @param fileHash
 	 */
-	public void uploadAdded(UploadSession session);
+	public void uploadAdded(FileHash fileHash);
 	
 	/**
 	 * Upload has been removed
 	 * @param fileHash
 	 */
-	public void uploadRemoved(UploadSession session); 
+	public void uploadRemoved(FileHash fileHash); 
 	
 }

@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:38:05 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/04 14:31:35 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -66,7 +66,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadAdded(download_session);
+			listener.downloadAdded(download_session.getFileHash());
 		
 	}
 
@@ -78,7 +78,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadAdded(download_session);
+			listener.downloadAdded(download_session.getFileHash());
 		
 
 	}
@@ -91,7 +91,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadAdded(download_session);
+			listener.downloadAdded(download_session.getFileHash());
 		
 	}
 	
@@ -116,7 +116,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadRemoved(download_session);
+			listener.downloadRemoved(download_session.getFileHash());
 		
 	}
 
@@ -128,7 +128,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadStarted(download_session);
+			listener.downloadStarted(download_session.getFileHash());
 		
 	}
 
@@ -140,7 +140,7 @@ public class DownloadManagerImpl implements DownloadManager {
 		
 		for(DownloadManagerListener listener : listener_list)
 			
-			listener.downloadStopped(download_session);
+			listener.downloadStopped(download_session.getFileHash());
 		
 	}
 
