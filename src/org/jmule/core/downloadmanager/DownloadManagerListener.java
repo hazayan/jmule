@@ -28,8 +28,8 @@ import org.jmule.core.edonkey.impl.FileHash;
  * Created on 07-10-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/20 15:46:50 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/04 14:26:08 $$
  */
 public interface DownloadManagerListener {
 
@@ -37,24 +37,24 @@ public interface DownloadManagerListener {
 	 * A new download added to the list.
 	 * @param fileHash
 	 */
-	public void downloadAdded(DownloadSession downloadSession);
+	public void downloadAdded(FileHash fileHash);
 	
 	/**
 	 * Download removed
 	 * @param fileHash
 	 */
-	public void downloadRemoved(DownloadSession downloadSession);
+	public void downloadRemoved(FileHash fileHash);
 	
 	/**
 	 * Download started
 	 * @param fileHash
 	 */
-	public void downloadStarted(DownloadSession downloadSession);
+	public void downloadStarted(FileHash fileHash);
 	
 	/** 
 	 * Download stopped
 	 * @param fileHash
 	 */
-	public void downloadStopped(DownloadSession downloadSession);
+	public void downloadStopped(FileHash fileHash);
 	
 }
