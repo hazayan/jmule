@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:13:56 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/05 16:25:26 $$
  */
 public class Peer extends JMConnection {
 	
@@ -179,6 +179,7 @@ public class Peer extends JMConnection {
 		try {
 			super.disconnect();
 		}catch(Throwable t) {
+			onDisconnect();
 		}
 		
 	}
@@ -237,8 +238,10 @@ public class Peer extends JMConnection {
 	public void setSessionList(PeerSessionList sessionList ) {
 		
 		this.sessionList = sessionList;
-		if (sessionList == null) return ; 
-		this.sessionList.setPeer(this);
+		if (sessionList == null) 
+			sessionList = new PeerSessionList(this);
+		else
+			sessionList.setPeer(this);
 		
 	}
 	
@@ -469,7 +472,7 @@ public class Peer extends JMConnection {
 			return p.getUserHash().equals(getUserHash());
 		ClientID id = p.getID();
 		ClientID id2 = getID();
-		if ((id == null) || (id2 == null)) return false;
+		if ((id == null) || (id2 == null)) return getAddress().equals(p.getAddress());
 		byte[] b1 = id.getClientID();
 		byte[] b2 = id2.getClientID();
 		
@@ -577,19 +580,26 @@ public class Peer extends JMConnection {
 		return cSoft;
 	}
 	
-	public String getVersion() {
-		return "";
-		// Not work
-		/*try {
-			long version = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
+	/**
+	 * Return client version
+	 * @return array with software version 1.2.3.4 => [1,2,3,4]
+	 */
+	public int[] getVersion() {
+		
+		int clientInfo;
+		try {
 			
-			long major = version >> 16;
-			long minor = version & 0xFFFF;
-			
-			return major+"."+minor;
-		} catch (TagException e) {
-			return "";
-		}*/
+			clientInfo = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
+		}catch(Throwable e) {
+			return new int[] {0,0,0,0};
+		}
+		int[] result = new int[4];
+		
+		result[0] = (clientInfo >> 17) & 0x7F;
+		result[1] = (clientInfo >> 10) & 0x7F;
+		result[2] = (clientInfo >> 7) & 0x07;
+		result[3] = clientInfo & 0x7F;
+		return result;
 	}
 	
 }
