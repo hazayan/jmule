@@ -29,12 +29,13 @@ import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
 
 /**
  * Created on Aug 9, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/26 19:39:17 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
 
@@ -57,7 +58,7 @@ public class PeerInfoFormatter {
 	private static final String SO_UNKNOWN			=  "Unknown";
 	
 	
-	private static Map client_software = new Hashtable();
+	private static Map<Integer,String> client_software = new Hashtable<Integer,String>();
 	
 	static {
 		client_software.put(E2DKConstants.SO_EMULE, SO_EMULE);
@@ -78,28 +79,30 @@ public class PeerInfoFormatter {
 		client_software.put(E2DKConstants.SO_COMPAT_UNK, SO_COMPAT_UNK);
 	}
 	
-	public static String peerSoftwareToString(Peer peer) {
+	public static String formatPeerSoftware(Peer peer) {
 		int software = peer.getClientSoftware();
 		String result = "";
 		result = (String)client_software.get(software);
 		if (result==null)
 			result = SO_UNKNOWN;
-		else 
-			result += " "+peer.getVersion();
+		int v[] = peer.getVersion();
+		String version = v[0]+"."+v[1]+"."+v[2]+"."+v[3];
+		result += " " + version;
 		return result;
 	}
 	
-	public static String peerStatusToString(PeerDownloadStatus status) {
+	public static String formatPeerStatus(PeerDownloadStatus status) {
+		if (status == null) return _._("downloadinfowindow.tab.peerlist.column.status.connecting");
 		switch (status.getPeerStatus()) {
-			case PeerDownloadStatus.DISCONNECTED : 		return Localizer._("downloadinfowindow.tab.peerlist.column.status.disconnected");  
-			case PeerDownloadStatus.CONNECTED : 		return Localizer._("downloadinfowindow.tab.peerlist.column.status.connected");
-			case PeerDownloadStatus.SLOTREQUEST :		return Localizer._("downloadinfowindow.tab.peerlist.column.status.slot_request");
-			case PeerDownloadStatus.ACTIVE : 			return Localizer._("downloadinfowindow.tab.peerlist.column.status.active");
-			case PeerDownloadStatus.ACTIVE_UNUSED : 	return Localizer._("downloadinfowindow.tab.peerlist.column.status.active_unued");
+			case PeerDownloadStatus.DISCONNECTED : 		return _._("downloadinfowindow.tab.peerlist.column.status.disconnected");  
+			case PeerDownloadStatus.CONNECTED : 		return _._("downloadinfowindow.tab.peerlist.column.status.connected");
+			case PeerDownloadStatus.SLOTREQUEST :		return _._("downloadinfowindow.tab.peerlist.column.status.slot_request");
+			case PeerDownloadStatus.ACTIVE : 			return _._("downloadinfowindow.tab.peerlist.column.status.active");
+			case PeerDownloadStatus.ACTIVE_UNUSED : 	return _._("downloadinfowindow.tab.peerlist.column.status.active_unued");
 			case PeerDownloadStatus.IN_QUEUE : 			return Localizer.getString("downloadinfowindow.tab.peerlist.column.status.in_queue",status.getQueueRank()+"");
-			case PeerDownloadStatus.INACTIVE : 			return Localizer._("downloadinfowindow.tab.peerlist.column.status.inactive");
-			case PeerDownloadStatus.UPLOAD_REQUEST :	return Localizer._("downloadinfowindow.tab.peerlist.column.status.upload_request");
-			case PeerDownloadStatus.HASHSET_REQUEST :	return Localizer._("downloadinfowindow.tab.peerlist.column.status.hashset_request");
+			case PeerDownloadStatus.INACTIVE : 			return _._("downloadinfowindow.tab.peerlist.column.status.inactive");
+			case PeerDownloadStatus.UPLOAD_REQUEST :	return _._("downloadinfowindow.tab.peerlist.column.status.upload_request");
+			case PeerDownloadStatus.HASHSET_REQUEST :	return _._("downloadinfowindow.tab.peerlist.column.status.hashset_request");
 		}
 		
 		return "";
