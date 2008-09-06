@@ -24,14 +24,15 @@ package org.jmule.ui.utils;
 
 import static org.jmule.core.edonkey.E2DKConstants.*;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import org.jmule.ui.localizer._;
 /**
  * Created on Aug 16, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/26 19:38:57 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/06 14:31:34 $
  */
 public class FileFormatter {
 
@@ -54,6 +55,12 @@ public class FileFormatter {
 		    return "A lot !!!";
 	}
 	
+	 private static DecimalFormat formatter = new DecimalFormat("0.00");
+	 
+	 public static String formatProgress(double progress) {
+		 return formatter.format(progress)+"%";
+	 }
+	 
 	public static final String NO_EXTENSION = "no extension";
 	
 	public static String getFileExtension(String fileName) {
