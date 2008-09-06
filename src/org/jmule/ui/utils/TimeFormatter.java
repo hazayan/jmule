@@ -88,7 +88,7 @@ public class TimeFormatter {
       return result;
     }
     
-    private static String twoDigits(int i) {
+    public static String twoDigits(int i) {
       return (i < 10) ? "0" + i : String.valueOf(i);
     }
     
