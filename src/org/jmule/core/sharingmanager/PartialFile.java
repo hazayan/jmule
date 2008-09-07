@@ -50,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:46:23 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 08:01:27 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -242,11 +242,13 @@ public class PartialFile extends SharedFile {
 		return part_count;
 	}
 
-	public void writeData(FileChunk fileChunk) throws SharedFileException {
-		
-	//	writeChunk(fileChunk);
-	//	partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
+	public boolean isCompleted() {
+		if (getPercentCompleted()== 100d) return true;
+		return false;
+	}
 	
+	public void writeData(FileChunk fileChunk) throws SharedFileException {
+
 		try { 
 			if (fileChannel == null) {
 				
@@ -527,6 +529,7 @@ public class PartialFile extends SharedFile {
 		if (write_thread != null)
 			if (write_thread.isAlive()) write_thread.JMStop();
 		
+		partFile.close();
 		super.closeFile();
 	}
 	
