@@ -23,6 +23,8 @@
 package org.jmule.ui.swt.tables;
 
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -51,12 +53,16 @@ import org.jmule.ui.swt.Utils;
  * @author parg<br>
  * @author TuxPaper (SWT.Virtual Stuff)
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:17 $$ 
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:27:43 $$ 
  */
-public class 
-BufferedTableRow
-{
+public class BufferedTableRow {
+	
+	private List<BufferedTableRowCustomControl> custom_control_list = new LinkedList<BufferedTableRowCustomControl>();
+	
+	public List<BufferedTableRowCustomControl> getControlList() {
+		return custom_control_list;
+	}
 	
 	private static final int VALUE_SIZE_INC	= 8;
 	
@@ -88,7 +94,7 @@ BufferedTableRow
 	public BufferedTableRow(Table _table)
 	{
 		table = _table;
-		item = null;
+		item = null;		
 	}
 	
 	public TableItem getTableItem() {
@@ -101,7 +107,12 @@ BufferedTableRow
 	 */
 	public void createSWTRow() {
 		item = new TableItem(table, SWT.NULL);
-		setAlternatingBGColor(true);
+		//setAlternatingBGColor(false);
+	}
+	
+	public void setSWTRow(TableItem item) {
+		this.item = item;
+		//setAlternatingBGColor(false);
 	}
 
 	public void createSWTRow(int index) {
@@ -113,12 +124,12 @@ BufferedTableRow
 //		if (Utils.TABLE_GRIDLINE_IS_ALTERNATING_COLOR)
 //			return;
 			
-		if ((table.getStyle() & SWT.VIRTUAL) != 0 && !bEvenIfNotVisible
-				&& !isVisible()) {
-			return;
-		} else if (item == null || item.isDisposed()) {
-			return;
-		}
+	//	if ((table.getStyle() & SWT.VIRTUAL) != 0 && !bEvenIfNotVisible
+	//			&& !isVisible()) {
+	//		return;
+	//	} else if (item == null || item.isDisposed()) {
+	//		return;
+	//	}
 
 		int index = table.indexOf(item);
 		if (index == -1) {
@@ -177,6 +188,11 @@ BufferedTableRow
 			
 		}
 		item = null;
+	}
+	
+	public Image getImage(int id) {
+		if (id >= image_values.length) return null;
+		return image_values[id];
 	}
 	
 	/**
@@ -249,7 +265,7 @@ BufferedTableRow
 					} catch (NullPointerException badSWT) {
 					}
 
-		   		setAlternatingBGColor(true);
+		   		//setAlternatingBGColor(false);
 		    	setIconSize(ptIconSize);
 					invalidate();
 				}
@@ -289,16 +305,8 @@ BufferedTableRow
 		return( item.getForeground());
 	}
 	
-	public void
-	setForeground(
-		Color	c )
-	{
-		if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
-			return;
+	public void setForeground(Color	c ){
 
-		if (foreground != null && foreground.equals(c))
-		  return;
-		
 		foreground = c;
 		
 		item.setForeground(foreground);
@@ -513,7 +521,7 @@ BufferedTableRow
 
   	if (newRow == item) {
   		if (newRow == null || newRow.getData("TableRow") == this) {
-     		setAlternatingBGColor(false);
+     		//setAlternatingBGColor(false);
   			return false;
   		}
   	}
