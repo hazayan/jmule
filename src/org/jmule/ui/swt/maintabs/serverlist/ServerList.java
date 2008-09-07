@@ -22,173 +22,316 @@
  */
 package org.jmule.ui.swt.maintabs.serverlist;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MenuDetectEvent;
-import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.jmule.core.JMException;
+import org.jmule.core.JMRunnable;
+import org.jmule.core.JMThread;
 import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.impl.ED2KServerLink;
 import org.jmule.core.edonkey.impl.Server;
-import org.jmule.ui.UIImageRepository;
+import org.jmule.countrylocator.CountryLocator;
+import org.jmule.ui.UICommon;
 import org.jmule.ui.localizer.Localizer;
-import org.jmule.ui.swt.GUIUpdater;
+import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
+import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
+import org.jmule.ui.swt.common.CountryFlagPainter;
+import org.jmule.ui.swt.mainwindow.MainWindow;
+import org.jmule.ui.swt.tables.BufferedTableRow;
 import org.jmule.ui.swt.tables.JMTable;
-import org.jmule.ui.swt.tables.TableStructureModificationListener;
+import org.jmule.ui.swt.tables.TableItemCountryFlag;
+import org.jmule.ui.utils.NumberFormatter;
 import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:12 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:44:28 $$
  */
-public class ServerList extends JMTable<Server> implements TableStructureModificationListener {
+public class ServerList extends JMTable<Server> implements Refreshable {
 	
 	private ServerManager servers_manager;
-	private Color server_down_color;
-	private Color server_connected_color;
-	private Color server_default_color;
-	private ServerListUpdater updater;
 	
-	private Image server_error = new Image(getDisplay(),UIImageRepository.getImageAsStream("server_error.png"));
-	private Image server_default = new Image(getDisplay(),UIImageRepository.getImageAsStream("server.png"));
-	private Image server_connected = new Image(getDisplay(),UIImageRepository.getImageAsStream("server_connected.png"));
+	private Color server_down_color      = new Color(getDisplay(),178,178,178);
+	private Color server_connected_color = new Color(getDisplay(),124,152,225);
+	private Color server_default_color   = new Color(getDisplay(),0,0,0);
+	
+	private Menu no_servers_menu;
+	private Menu no_selected_servers_menu;
+	private Menu selected_server_menu;
+	private Menu selected_multiple_servers_menu;
+	
+	private MenuItem selected_server_connect;
+	private MenuItem selected_server_disconnect;
+	private MenuItem no_selection_menu_disconnect;
+	private MenuItem server_disconnect_multiselect,server_connect_multiselect;
+	private MenuItem server_remove_all,server_remove_all_multiselect;
+	private MenuItem add_to_static_list,remove_from_static_list;
+	private MenuItem multisel_add_to_static_list,multisel_remove_from_static_list;
+	
+	private enum ServerListStatus { NO_SERVERS,NO_SERVERS_SELECTED_DISCONNECTED,NO_SERVERS_SELECTED_CONNECTED,SELECTED_DISCONNECTED_SERVER_NOT_CONNECTED,
+							 		  SELECTED_MULTIPLE_SERVERS_NOT_CONNECTED, SELECTED_CONNECTED_SERVER,
+							 		  SELECTED_MULTIPLE_SERVERS_WITH_ONE_CONNECTED,SELECTED_MULTIPLE_SERVERS_CONNECTED,
+							 		  SELECTED_DISCONNECTED_SERVER_CONNECTED }
 	
 	public ServerList(Composite composite, final ServerManager server_manager) {
-		super(composite,true);
+		super(composite);
 		
 		SWTServerListWrapper.getInstance().setServerList(this);
 		
-		server_down_color = new Color(getDisplay(),178,178,178);
-		server_connected_color = new Color(getDisplay(),25,81,225);
-		server_default_color = new Color(getDisplay(),0,0,0);
-		
 		this.servers_manager = server_manager;
 		int width;
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_NAME_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_NAME_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.name"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_NAME_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_NAME_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.name"), _._("mainwindow.serverlisttab.serverlist.column.name.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_IP_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_IP_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.address"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_CC_COLUMN_ID);
+		addColumn(SWT.CENTER, SWTConstants.SERVER_LIST_CC_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.country_code"), _._("mainwindow.serverlisttab.serverlist.column.country_code.desc"),width);
+		if (CountryLocator.getInstance().isServiceDown()) 
+			disableColumn(SWTConstants.SERVER_LIST_CC_COLUMN_ID);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.description"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_FLAG_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_FLAG_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.country"), _._("mainwindow.serverlisttab.serverlist.column.country.desc"),width);
+		if (CountryLocator.getInstance().isServiceDown()) 
+			disableColumn(SWTConstants.SERVER_LIST_FLAG_COLUMN_ID);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_PING_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_PING_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.ping"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_IP_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_IP_COLUMN_ID, Localizer._("mainwindow.serverlisttab.serverlist.column.address"), _._("mainwindow.serverlisttab.serverlist.column.address.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_USERS_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_USERS_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.users"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.description"), _._("mainwindow.serverlisttab.serverlist.column.description.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_MAX_USERS_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_MAX_USERS_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.max_users"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_PING_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_PING_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.ping"), _._("mainwindow.serverlisttab.serverlist.column.ping.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_FILES_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_FILES_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.files"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_USERS_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_USERS_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.users"), _._("mainwindow.serverlisttab.serverlist.column.users.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.soft_limit"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.max_users"), _._("mainwindow.serverlisttab.serverlist.column.maxusers.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.hard_limit"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_FILES_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.files"), _._("mainwindow.serverlisttab.serverlist.column.files.desc"),width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_SOFTWARE_COLUMN);
-		addColumn(SWTConstants.SERVER_LIST_SOFTWARE_COLUMN,Localizer._("mainwindow.serverlisttab.serverlist.column.software"),width);
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.soft_limit"), _._("mainwindow.serverlisttab.serverlist.column.soft_limit.desc"),width);
+		
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.hard_limit"), _._("mainwindow.serverlisttab.serverlist.column.hard_limit.desc"),width);
+		
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_VERSION_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_VERSION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.software"), _._("mainwindow.serverlisttab.serverlist.column.software.desc"),width);
+		
+		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_STATIC_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_STATIC_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.static"), _._("mainwindow.serverlisttab.serverlist.column.static.desc"),width);
 		
 		updateColumnOrder();
 		updateColumnVisibility();
-
-		final Menu single_select_popup_menu =  new Menu(this);
 		
-		final MenuItem server_connect_status = new MenuItem (single_select_popup_menu, SWT.PUSH);
-		server_connect_status.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.connect_to"));
-		server_connect_status.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("server_connect.png")));
-		server_connect_status.addSelectionListener(new SelectionAdapter() {
-			
+		final SWTServerListWrapper wrapper = SWTServerListWrapper.getInstance();
+		
+		// No servers
+		no_servers_menu = new Menu(this);
+		
+		MenuItem no_servers_server_add = new MenuItem (no_servers_menu, SWT.PUSH);
+		no_servers_server_add.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.add_server"));
+		no_servers_server_add.setImage(SWTImageRepository.getImage("server_add.png"));
+		no_servers_server_add.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				showServerAddWindow();
+			}
+		});
+		
+		new MenuItem (no_servers_menu, SWT.SEPARATOR);
+		
+		MenuItem no_server_paste_ed2k_links = new MenuItem (no_servers_menu, SWT.PUSH);
+		no_server_paste_ed2k_links.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.paste_ed2k_links"));
+		no_server_paste_ed2k_links.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
+		no_server_paste_ed2k_links.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				pasteED2KLinks();
+			}
+		});
+		
+		new MenuItem (no_servers_menu, SWT.SEPARATOR);
+		MenuItem no_server_column_setup = new MenuItem (no_servers_menu, SWT.PUSH);
+		no_server_column_setup.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
+		no_server_column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
+		no_server_column_setup.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				showColumnEditorWindow();
+			}
+		});
+		
+		no_selected_servers_menu = new Menu(this);
+		MenuItem no_selection_menu_add = new MenuItem(no_selected_servers_menu,SWT.PUSH);
+		no_selection_menu_add.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.add_server"));
+		no_selection_menu_add.setImage(SWTImageRepository.getImage("server_add.png"));
+		no_selection_menu_add.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				showServerAddWindow();
+			} 
+		});
+		
+		new MenuItem(no_selected_servers_menu,SWT.SEPARATOR);
+		
+		no_selection_menu_disconnect = new MenuItem(no_selected_servers_menu,SWT.PUSH);
+		no_selection_menu_disconnect.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.disconnect_from"));
+		no_selection_menu_disconnect.setImage(SWTImageRepository.getImage("server_disconnect.png"));
+		no_selection_menu_disconnect.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				wrapper.disconnect();
+			} 
+		});
+		
+		new MenuItem(no_selected_servers_menu,SWT.SEPARATOR);
+		
+		MenuItem no_selection_menu_remove_all = new MenuItem(no_selected_servers_menu,SWT.PUSH);
+		no_selection_menu_remove_all.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_all"));
+		no_selection_menu_remove_all.setImage(SWTImageRepository.getImage("remove_all.png"));
+		no_selection_menu_remove_all.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				clearServerList();
+			} 
+		});
+		
+		new MenuItem(no_selected_servers_menu,SWT.SEPARATOR);	
+		
+		MenuItem no_selection_menu_paste_ed2k = new MenuItem(no_selected_servers_menu,SWT.PUSH);
+		no_selection_menu_paste_ed2k.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.paste_ed2k_links"));
+		no_selection_menu_paste_ed2k.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
+		no_selection_menu_paste_ed2k.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				pasteED2KLinks();
+			} 
+		});
+		
+		new MenuItem(no_selected_servers_menu,SWT.SEPARATOR);
+		
+		MenuItem no_selection_menu_column_setup = new MenuItem(no_selected_servers_menu,SWT.PUSH);
+		no_selection_menu_column_setup.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
+		no_selection_menu_column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
+		no_selection_menu_column_setup.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				showColumnEditorWindow();
+			} 
+		});
+		
+		selected_server_menu =  new Menu(this);
+		
+		selected_server_connect = new MenuItem (selected_server_menu, SWT.PUSH);
+		selected_server_connect.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.connect_to"));
+		selected_server_connect.setImage(SWTImageRepository.getImage("server_connect.png"));
+		selected_server_connect.addSelectionListener(new SelectionAdapter() {
 		public void widgetSelected(final SelectionEvent e) {
 			Server selected_server = (Server) getSelectedObject();
-			if (selected_server!=null)
-				if (!selected_server.isConnected())
-					SWTServerListWrapper.getInstance().connectTo(selected_server);
-				else
-					selected_server.disconnect();
+			wrapper.connectTo(selected_server);
 		}} );
-		new MenuItem (single_select_popup_menu, SWT.SEPARATOR);
-		MenuItem server_add = new MenuItem (single_select_popup_menu, SWT.PUSH);
+		
+		selected_server_disconnect = new MenuItem (selected_server_menu, SWT.PUSH);
+		selected_server_disconnect.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.disconnect_from"));
+		selected_server_disconnect.setImage(SWTImageRepository.getImage("server_disconnect.png"));
+		selected_server_disconnect.addSelectionListener(new SelectionAdapter() {
+		public void widgetSelected(final SelectionEvent e) {
+			if (wrapper.isAutoconnecting())
+				wrapper.stopConnecting();
+			else
+				wrapper.disconnect();
+		}} );
+		
+		new MenuItem (selected_server_menu, SWT.SEPARATOR);
+		MenuItem server_add = new MenuItem (selected_server_menu, SWT.PUSH);
 		server_add.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.add_server"));
-		server_add.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("server_add.png")));
+		server_add.setImage(SWTImageRepository.getImage("server_add.png"));
 		server_add.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				showServerAddWindow();
 			}
 		});
-		final MenuItem server_remove = new MenuItem (single_select_popup_menu, SWT.PUSH);
+		final MenuItem server_remove = new MenuItem (selected_server_menu, SWT.PUSH);
 		server_remove.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_server"));
-		server_remove.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("server_delete.png")));
+		server_remove.setImage(SWTImageRepository.getImage("server_delete.png"));
 		server_remove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				Server selected_server = (Server)getSelectedObject();
-				if (selected_server == null) return ;
-				int result = Utils.showConfirmMessageBox(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.server_delete_confirm"));
-				if (result==SWT.YES)
-					SWTServerListWrapper.getInstance().removeServer(selected_server);
+				removeSelectedServers();
 			}
 		});
-		final MenuItem server_remove_all = new MenuItem (single_select_popup_menu, SWT.PUSH);
+		server_remove_all = new MenuItem (selected_server_menu, SWT.PUSH);
 		server_remove_all.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_all"));
-		server_remove_all.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("remove_all.png")));
+		server_remove_all.setImage(SWTImageRepository.getImage("remove_all.png"));
 		server_remove_all.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				if (getItems().length == 0) return ;
-				int returnvalue = Utils.showConfirmMessageBox(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.clear_confirm"));
-				if (returnvalue == SWT.YES) {
-					SWTServerListWrapper.getInstance().clearServerList();
-			} }
+				clearServerList();
+			}
 		});
-		new MenuItem (single_select_popup_menu, SWT.SEPARATOR);
-		final MenuItem server_copy_ed2k_link = new MenuItem (single_select_popup_menu, SWT.PUSH);
+		new MenuItem (selected_server_menu, SWT.SEPARATOR);
+		final MenuItem server_copy_ed2k_link = new MenuItem (selected_server_menu, SWT.PUSH);
 		server_copy_ed2k_link.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.copy_ed2k_link"));
-		server_copy_ed2k_link.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("ed2k_link.png")));
-		server_copy_ed2k_link.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-			public void widgetSelected(SelectionEvent arg0) {
-				Utils.setClipBoardText(getSelectedObject().getServerLink().getStringLink());
+		server_copy_ed2k_link.setImage(SWTImageRepository.getImage("ed2k_link.png"));
+		server_copy_ed2k_link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				copyED2KLinks();
 			}
 		});
 		
-		MenuItem server_paste_ed2k_links = new MenuItem (single_select_popup_menu, SWT.PUSH);
+		MenuItem server_paste_ed2k_links = new MenuItem (selected_server_menu, SWT.PUSH);
 		server_paste_ed2k_links.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.paste_ed2k_links"));
-		server_paste_ed2k_links.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("ed2k_link_paste.png")));
-		server_paste_ed2k_links.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-			public void widgetSelected(SelectionEvent arg0) {
-				List<ED2KServerLink> server_links = extractServerLinks(Utils.getClipboardText());
-				SWTServerListWrapper wrapper = SWTServerListWrapper.getInstance();
-				for(ED2KServerLink link : server_links) {
-					Server server = new Server(link);
-					wrapper.addServer(server);
-				}
+		server_paste_ed2k_links.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
+		server_paste_ed2k_links.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+					pasteED2KLinks();
 			}
 			
 		});
-		new MenuItem (single_select_popup_menu, SWT.SEPARATOR);
-		final MenuItem server_properties = new MenuItem (single_select_popup_menu, SWT.PUSH);
+		
+		new MenuItem (selected_server_menu, SWT.SEPARATOR);
+		
+		add_to_static_list = new MenuItem (selected_server_menu, SWT.PUSH);
+		add_to_static_list.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.add_to_static_list"));
+		add_to_static_list.setImage(SWTImageRepository.getImage("list_add.png"));
+		add_to_static_list.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				addToStaticList();
+			}
+			
+		});
+		
+		remove_from_static_list = new MenuItem (selected_server_menu, SWT.PUSH);
+		remove_from_static_list.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_from_static_list"));
+		remove_from_static_list.setImage(SWTImageRepository.getImage("list_remove.png"));
+		remove_from_static_list.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				removeFromStaticList();
+			}
+			
+		});
+		
+		new MenuItem (selected_server_menu, SWT.SEPARATOR);
+		MenuItem column_setup = new MenuItem (selected_server_menu, SWT.PUSH);
+		column_setup.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
+		column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
+		column_setup.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				showColumnEditorWindow();
+			}
+		});
+		
+		new MenuItem (selected_server_menu, SWT.SEPARATOR);
+		final MenuItem server_properties = new MenuItem (selected_server_menu, SWT.PUSH);
 		server_properties.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.server_properties"));
-		server_properties.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("server_properties.png")));
+		server_properties.setImage(SWTImageRepository.getImage("server_properties.png"));
 		server_properties.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				ServerPropertiesWindow properties_window = new ServerPropertiesWindow(getSelectedObject());
@@ -196,349 +339,504 @@ public class ServerList extends JMTable<Server> implements TableStructureModific
 				properties_window.initUIComponents();
 			}
 		});
-		new MenuItem (single_select_popup_menu, SWT.SEPARATOR);
-		MenuItem column_setup = new MenuItem (single_select_popup_menu, SWT.PUSH);
-		column_setup.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
-		column_setup.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("columns_setup.png")));
-		final TableStructureModificationListener listener = this;
-		column_setup.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-			public void widgetSelected(SelectionEvent arg0) {
-				showColumnEditorWindow(listener);
-			}
-		});
 		
 		// Multiple servers selected
-		final Menu multiple_select_popup_menu = new Menu (this);
+		selected_multiple_servers_menu = new Menu (this);
 				
-		MenuItem server_remove_selected = new MenuItem (multiple_select_popup_menu, SWT.PUSH);
+		MenuItem server_remove_selected = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
 		server_remove_selected.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_selected"));
-		server_remove_selected.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("server_delete.png")));
+		server_remove_selected.setImage(SWTImageRepository.getImage("server_delete.png"));
 		server_remove_selected.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				Server[] server_list = new Server[getSelectionCount()];
-				
-				for(int i = 0;i<getSelectionCount();i++){
-					server_list[i] = getSelectedObjects().get(i);
-				}
-				
-				removeServer(server_list);
+				removeSelectedServers();
 			}
 		});
 		
-		new MenuItem (multiple_select_popup_menu, SWT.SEPARATOR);
+		new MenuItem (selected_multiple_servers_menu, SWT.SEPARATOR);
 		
-		MenuItem server_remove_all_multiselect = new MenuItem (multiple_select_popup_menu, SWT.PUSH);
+		server_remove_all_multiselect = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
 		server_remove_all_multiselect.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_all"));
-		server_remove_all_multiselect.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("remove_all.png")));
-		server_remove_all_multiselect.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
-			public void widgetSelected(SelectionEvent arg0) {
-				if (getItems().length == 0) return ;
-				int returnvalue = Utils.showConfirmMessageBox(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.clear_confirm"));
-				if (returnvalue == SWT.YES) {
-					SWTServerListWrapper.getInstance().clearServerList();
-				}
-			}
-			
-		});
-		
-		new MenuItem (multiple_select_popup_menu, SWT.SEPARATOR);
-		
-		MenuItem server_copy_ed2k_links = new MenuItem (multiple_select_popup_menu, SWT.PUSH);
-		server_copy_ed2k_links.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.copy_ed2k_links"));
-		server_copy_ed2k_links.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("ed2k_link.png")));
-		server_copy_ed2k_links.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-			public void widgetSelected(SelectionEvent arg0) {
-				String str = "";
-				List<Server> selected_servers = getSelectedObjects();
-				for(Server server : selected_servers) {
-					str+=server.getServerLink().getStringLink()+"\n";
-				}
-				Utils.setClipBoardText(str);
-			}
-			
-		});
-		
-		new MenuItem (multiple_select_popup_menu, SWT.SEPARATOR);
-		
-		column_setup = new MenuItem (multiple_select_popup_menu, SWT.PUSH);
-		column_setup.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
-		column_setup.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("columns_setup.png")));
-		final TableStructureModificationListener table_listener = this;
-		column_setup.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
-			public void widgetSelected(SelectionEvent arg0) {
-				showColumnEditorWindow(table_listener);
-			}
-		});
-
-		// No servers
-		final Menu no_servers_menu = new Menu(this);
-		
-		MenuItem no_servers_server_add = new MenuItem (no_servers_menu, SWT.PUSH);
-		no_servers_server_add.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.add_server"));
-		no_servers_server_add.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("server_add.png")));
-		no_servers_server_add.addSelectionListener(new SelectionAdapter() {
+		server_remove_all_multiselect.setImage(SWTImageRepository.getImage("remove_all.png"));
+		server_remove_all_multiselect.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				showServerAddWindow();
+				clearServerList();
+			}
+			
+		});
+		new MenuItem (selected_multiple_servers_menu, SWT.SEPARATOR);
+		
+		server_connect_multiselect = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		server_connect_multiselect.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.connect"));
+		server_connect_multiselect.setImage(SWTImageRepository.getImage("server_connect.png"));
+		server_connect_multiselect.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				wrapper.startAutoConnect();
 			}
 		});
-		new MenuItem (no_servers_menu, SWT.SEPARATOR);
-		MenuItem no_server_paste_ed2k_links = new MenuItem (no_servers_menu, SWT.PUSH);
-		no_server_paste_ed2k_links.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.paste_ed2k_links"));
-		no_server_paste_ed2k_links.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("ed2k_link_paste.png")));
-		no_server_paste_ed2k_links.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-			public void widgetSelected(SelectionEvent arg0) {
-				List<ED2KServerLink> server_links = extractServerLinks(Utils.getClipboardText());
-				SWTServerListWrapper wrapper = SWTServerListWrapper.getInstance();
-				for(ED2KServerLink link : server_links) {
-					Server server = new Server(link);
-					wrapper.addServer(server);
-				}
+		
+		server_disconnect_multiselect = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		server_disconnect_multiselect.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.disconnect_from"));
+		server_disconnect_multiselect.setImage(SWTImageRepository.getImage("server_disconnect.png"));
+		server_disconnect_multiselect.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				if (wrapper.isAutoconnecting())
+					wrapper.stopConnecting();
+				else
+					wrapper.disconnect();
+			}
+		});
+		
+		new MenuItem (selected_multiple_servers_menu, SWT.SEPARATOR);
+		
+		MenuItem multi_select_menu_copy_ed2k_links = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		multi_select_menu_copy_ed2k_links.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.copy_ed2k_links"));
+		multi_select_menu_copy_ed2k_links.setImage(SWTImageRepository.getImage("ed2k_link.png"));
+		multi_select_menu_copy_ed2k_links.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				copyED2KLinks();
 			}
 			
 		});
 		
-		new MenuItem (no_servers_menu, SWT.SEPARATOR);
-		MenuItem no_server_column_setup = new MenuItem (no_servers_menu, SWT.PUSH);
-		no_server_column_setup.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
-		no_server_column_setup.setImage(new Image(getDisplay(),UIImageRepository.getImageAsStream("columns_setup.png")));
-		no_server_column_setup.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-			public void widgetSelected(SelectionEvent arg0) {
-				showColumnEditorWindow(listener);
+		MenuItem multi_select_menu_paste_ed2k_links = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		multi_select_menu_paste_ed2k_links.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.paste_ed2k_links"));
+		multi_select_menu_paste_ed2k_links.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
+		multi_select_menu_paste_ed2k_links.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				pasteED2KLinks();
 			}
 		});
 		
-		this.addMenuDetectListener(new MenuDetectListener() {
-			public void menuDetected(MenuDetectEvent arg0) {
-				if (getItemCount()==0) {
-					setMenu(no_servers_menu);
-					return ;
-				}
-				if (getSelectionCount()==1) {
-					Server server = getSelectedObject();
-					server_connect_status.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.connect_to"));
-					server_connect_status.setImage(new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("server_connect.png")));
-					if (server!=null) 
-						if (server.isConnected()) {
-							server_connect_status.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.disconnect_from"));
-							server_connect_status.setImage(new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("server_disconnect.png")));
-					}
-					setMenu(single_select_popup_menu);
-				}
-				else
-					setMenu(multiple_select_popup_menu);
+		new MenuItem (selected_multiple_servers_menu, SWT.SEPARATOR);
+		
+		multisel_add_to_static_list = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		multisel_add_to_static_list.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.add_to_static_list"));
+		multisel_add_to_static_list.setImage(SWTImageRepository.getImage("list_add.png"));
+		multisel_add_to_static_list.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				addToStaticList();
+			}
+			
+		});
+		
+		multisel_remove_from_static_list = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		multisel_remove_from_static_list.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.remove_from_static_list"));
+		multisel_remove_from_static_list.setImage(SWTImageRepository.getImage("list_remove.png"));
+		multisel_remove_from_static_list.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				removeFromStaticList();
+			}
+			
+		});
+		
+		new MenuItem (selected_multiple_servers_menu, SWT.SEPARATOR);
+		
+		column_setup = new MenuItem (selected_multiple_servers_menu, SWT.PUSH);
+		column_setup.setText (Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.column_setup"));
+		column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
+		column_setup.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				showColumnEditorWindow();
 			}
 		});
+		
+		new JMThread(new JMRunnable() {
+			Server x;
+			public void JMRun() {
+				for(Server server : server_manager.getServers()) {
+					x = server;
+					SWTThread.getDisplay().syncExec(new JMRunnable() {
+						public void JMRun() {
+							addServer(x);
+						}});
+				}
+		    }
+		}).start();;
+	    
+	}
+	
+	private ServerListStatus getSelectionStatus() {
+		
+		if ((getItems().length>0)&&(getSelectionCount()==0))
+			return ServerListStatus.NO_SERVERS_SELECTED_DISCONNECTED;
+			
+		if ((getSelectionCount()==1)&&(servers_manager.getConnectedServer()==null))
+			return ServerListStatus.SELECTED_DISCONNECTED_SERVER_NOT_CONNECTED; 
+
+		if ((getSelectionCount()==1)&&(!getSelectedObject().isConnected())&&(servers_manager.getConnectedServer()!=null))
+			return ServerListStatus.SELECTED_DISCONNECTED_SERVER_CONNECTED; 
 
 		
-//		this.addPaintListener(new PaintListener() {
-//			private long lastCall = System.currentTimeMillis();
-//			public void paintControl(PaintEvent arg0) {
-//				if ((System.currentTimeMillis() - lastCall)<500) return;
-//				lastCall = System.currentTimeMillis();
-//				System.out.println("Refresh");
-//				for(int i = 0;i<line_list.size();i++) {
-//					
-//					if (line_list.get(i).isVisible()) {
-//						updateLine(line_object_list.get(i));
-//					}
-//					
-//				}
-//			}
-//			
-//		});
+		if ((getSelectionCount()==1)&&(getSelectedObject().isConnected()))
+			return ServerListStatus.SELECTED_CONNECTED_SERVER;
 		
-		// Add servers
-	    for(Server server : server_manager.getServers()) {
-        		addServer(server);
-	    }
-	    
-	    updater = new ServerListUpdater();
+		if ((getSelectionCount()>1)&&(servers_manager.getConnectedServer()==null))
+			return ServerListStatus.SELECTED_MULTIPLE_SERVERS_NOT_CONNECTED;
+		
+		if (getSelectionCount()>1) {
+			
+			for(Server server : getSelectedObjects())
+				if (server.isConnected())
+					return ServerListStatus.SELECTED_MULTIPLE_SERVERS_WITH_ONE_CONNECTED;
+			
+			return ServerListStatus.SELECTED_MULTIPLE_SERVERS_CONNECTED;
+		}
+		
+		return ServerListStatus.NO_SERVERS;
 	}
+	
+	protected Menu getPopUpMenu() {
+		ServerListStatus status = getSelectionStatus();
+		
+		SWTServerListWrapper wrapper = SWTServerListWrapper.getInstance();
+		
+		Menu result;
+		
+		switch (status) {
+			
+		case NO_SERVERS_SELECTED_DISCONNECTED : {
+			no_selection_menu_disconnect.setEnabled(false);
+			result =  no_selected_servers_menu;
+			break;
+		}
+		case NO_SERVERS_SELECTED_CONNECTED : {
+			no_selection_menu_disconnect.setEnabled(true);
+			result = no_selected_servers_menu;
+			break;
+		}
+		case SELECTED_DISCONNECTED_SERVER_NOT_CONNECTED :  {
+			selected_server_connect.setEnabled(true);
+			selected_server_disconnect.setEnabled(false);
+			
+			result = selected_server_menu;
+			break;
+		}
+		case SELECTED_CONNECTED_SERVER : {
+			selected_server_connect.setEnabled(false);
+			selected_server_disconnect.setEnabled(true);
+			result = selected_server_menu;
+			break;
+		}
+		case SELECTED_DISCONNECTED_SERVER_CONNECTED : {
+			selected_server_connect.setEnabled(true);
+			selected_server_disconnect.setEnabled(true);
+			result = selected_server_menu;
+			break;
+		}
+		
+		case SELECTED_MULTIPLE_SERVERS_NOT_CONNECTED : {
+			server_connect_multiselect.setEnabled(true);
+			server_disconnect_multiselect.setEnabled(false);
+			
+			result = selected_multiple_servers_menu;
+			break;
+		}
+		
+		case SELECTED_MULTIPLE_SERVERS_CONNECTED : {
+			server_connect_multiselect.setEnabled(false);
+			server_disconnect_multiselect.setEnabled(true);
+			result = selected_multiple_servers_menu;
+			break;
+		}
+		
+		case SELECTED_MULTIPLE_SERVERS_WITH_ONE_CONNECTED : {
+			server_connect_multiselect.setEnabled(false);
+			server_disconnect_multiselect.setEnabled(true);
+			result = selected_multiple_servers_menu;
+			break;
+		}
+		default : result = no_servers_menu;
+		
+		}
+		
+		boolean contain_static = false, contain_non_static = false;
+		
+		for(Server server : getSelectedObjects())
+			if (server.isStatic()) 
+				contain_static = true;
+			else
+				contain_non_static = true;
+		
+		add_to_static_list.setEnabled(false);
+		remove_from_static_list.setEnabled(false);
+		multisel_add_to_static_list.setEnabled(false);
+		multisel_remove_from_static_list.setEnabled(false);
+		
+		if (contain_static) {
+			remove_from_static_list.setEnabled(true);
+			multisel_remove_from_static_list.setEnabled(true);
+		}
+		
+		if (contain_non_static) {
+			add_to_static_list.setEnabled(true);
+			multisel_add_to_static_list.setEnabled(true);
+		}
+		
+		if (wrapper.isAutoconnecting()) {
+			server_remove_all.setEnabled(false);
+			server_remove_all_multiselect.setEnabled(false);
+			selected_server_disconnect.setEnabled(true);
+			selected_server_disconnect.setImage(SWTImageRepository.getImage("auto_connect_cancel.png"));
+			selected_server_disconnect.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.cancel"));
+			
+			server_disconnect_multiselect.setEnabled(true);
+			server_disconnect_multiselect.setImage(SWTImageRepository.getImage("auto_connect_cancel.png"));
+			server_disconnect_multiselect.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.cancel"));
+		} else {
+			server_remove_all.setEnabled(true);
+			server_remove_all_multiselect.setEnabled(true);
+			selected_server_disconnect.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.disconnect_from"));
+			selected_server_disconnect.setImage(SWTImageRepository.getImage("server_disconnect.png"));
+			
+			server_disconnect_multiselect.setText(Localizer._("mainwindow.serverlisttab.serverlist.popupmenu.disconnect_from"));
+			server_disconnect_multiselect.setImage(SWTImageRepository.getImage("server_disconnect.png"));
+		}
+		return result;
+
+	}
+	
 
 	protected int compareObjects(Server object1, Server object2,
-			String columnID, boolean order) {
+			int columnID, boolean order) {
 		
-		if (columnID == SWTPreferences.SERVER_LIST_NAME_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_NAME_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getName", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_DESCRIPTION_COLUMN) {
+		if ((columnID == SWTConstants.SERVER_LIST_CC_COLUMN_ID)||(columnID == SWTConstants.SERVER_LIST_FLAG_COLUMN_ID)) {
+			String country1 = CountryLocator.getInstance().getCountryName(object1.getAddress());
+			String country2 = CountryLocator.getInstance().getCountryName(object1.getAddress());
+			int result = country1.compareTo(country2);
+			if (order)
+				return result;
+			else
+				return Misc.reverse(result);
+		}
+		
+		if (columnID == SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getDesc", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_IP_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_IP_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getAddressAsInt", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_PING_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_PING_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getPing", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_USERS_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_USERS_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getNumUsers", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_MAX_USERS_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getMaxUsers", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_FILES_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_FILES_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getNumFiles", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_SOFT_LIMIT_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getSoftLimit", order);
 		}
 	
-		if (columnID == SWTPreferences.SERVER_LIST_HARD_LIMIT_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getHardLimit", order);
 		}
 		
-		if (columnID == SWTPreferences.SERVER_LIST_SOFTWARE_COLUMN) {
+		if (columnID == SWTConstants.SERVER_LIST_VERSION_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getVersion", order);
+		}
+		
+		if (columnID == SWTConstants.SERVER_LIST_STATIC_COLUMN_ID) {
+			return Misc.compareAllObjects(object1, object2, "isStatic", order);
 		}
 		
 		return 0;
 	}
 
-
-
-	
-	public void tableStructureChanged() {
-		updateColumnOrder();
-		updateColumnVisibility();
-		//saveColumnSettings();
-		this.update();
-		this.redraw();
-	}
-	
-	private void removeServer(Server... servers) {
-		if (servers.length==0) return ;
-		int result = 0;
-		if (servers.length==1)
-			result = Utils.showConfirmMessageBox(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.server_delete_confirm"));
-		else
-			result = Utils.showConfirmMessageBox(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.servers_delete_confirm"));
-		if (result == SWT.YES) {
-			for(int i = 0;i<servers.length;i++){
-				SWTServerListWrapper.getInstance().removeServer(servers[i]);
-			}
-		}
-	}
-	
-	private List<ED2KServerLink> extractServerLinks(String links) {
-		List<ED2KServerLink> result = new LinkedList<ED2KServerLink>();
-		int i = 0;
-		String link = "";
-		while(i<links.length()){
-		
-			if (links.charAt(i)== '\n') {
+	private void addToStaticList() {
+		final List<Server> list = getSelectedObjects();
+		new JMThread(new JMRunnable() {
+			public void JMRun() {
+				for(Server server : list)
+					server.setStatic(true);
 				try {
-					ED2KServerLink server_link = new ED2KServerLink(link);
-					result.add(server_link);
-					link = "";
-				} catch (JMException e) {
-					break;
-				}
-			} else 
-				link += links.charAt(i);
-			i++;
-		}
-		
-		if (links.length()!=0) {
-			try {
-				ED2KServerLink server_link = new ED2KServerLink(link);
-				result.add(server_link);
-				link = "";
-			} catch (JMException e) {
-			}
-		}
-		return result;
+					servers_manager.storeServerList();
+				} catch (ServerManagerException e1) {
+					SWTThread.getDisplay().asyncExec(new JMRunnable() {
+						public void JMRun() {
+							Utils.showWarningMessage(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.server_list_store_error_title"), 
+									Localizer._("mainwindow.serverlisttab.serverlist.server_list_store_error"));
+							MainWindow.getLogger().error(Localizer._("mainwindow.logtab.error_serverlist_save_failed"));
+						}
+					});
+				}}}).start();
 	}
+	
+	private void removeFromStaticList() {
+		final List<Server> list = getSelectedObjects();
+		new JMThread(new JMRunnable() {
+			public void JMRun() {
+				
+				for(Server server : list)
+					server.setStatic(false);
+				try {
+					servers_manager.storeServerList();
+				} catch (ServerManagerException e1) {
+					SWTThread.getDisplay().asyncExec(new JMRunnable() {
+						public void JMRun() {
+							Utils.showWarningMessage(getShell(), Localizer._("mainwindow.serverlisttab.serverlist.server_list_store_error_title"), 
+									Localizer._("mainwindow.serverlisttab.serverlist.server_list_store_error"));
+							MainWindow.getLogger().error(Localizer._("mainwindow.logtab.error_serverlist_save_failed"));
+						}
+					});
+				}}}).start();
+	}
+	
+	private void removeSelectedServers() {
+		final List<Server> list = getSelectedObjects();
+		boolean result;
+		if ( list.size()== 1)
+			result = Utils.showConfirmMessage(getShell(),Localizer._("mainwindow.serverlisttab.serverlist.server_delete_confirm_title"), Localizer._("mainwindow.serverlisttab.serverlist.server_delete_confirm"));
+		else
+			result = Utils.showConfirmMessage(getShell(),Localizer._("mainwindow.serverlisttab.serverlist.server_delete_confirm_title"), Localizer._("mainwindow.serverlisttab.serverlist.servers_delete_confirm"));
+		if (result) 
+			new JMThread(new JMRunnable() {
+				public void JMRun() {
+					SWTServerListWrapper.getInstance().removeServer(list);
+				}
+				
+			}).start();
+			
+	}
+	
+	private void clearServerList() {
+		boolean returnvalue = Utils.showConfirmMessage(getShell(),Localizer._("mainwindow.serverlisttab.serverlist.clear_confirm_title"), Localizer._("mainwindow.serverlisttab.serverlist.clear_confirm"));
+		if (returnvalue) {
+			new JMThread( new JMRunnable() {
+				public void JMRun() {
+					SWTServerListWrapper.getInstance().clearServerList();
+				}
+			}).start();
+		}
+	}
+	
+	private void copyED2KLinks() {
+		String str = "";
+		List<Server> selected_servers = getSelectedObjects();
+		for(Server server : selected_servers) {
+			str+=server.getServerLink().getAsString()+System.getProperty("line.separator"); 
+		}
+		Utils.setClipBoardText(str);
+	}
+	
+	private void pasteED2KLinks() {
+		final String clipboard_content = Utils.getClipboardText();
+		new JMThread( new JMRunnable() {
+			public void JMRun() {
+				List<ED2KServerLink> server_links = ED2KServerLink.extractLinks(clipboard_content);
+				SWTServerListWrapper wrapper = SWTServerListWrapper.getInstance();
+				for(ED2KServerLink ed2k_link : server_links) {
+					Server server = new Server(ed2k_link);
+					wrapper.addServer(server);
+				}
+			}
+		}).start();
+		
+	}
+	
 	
 	private void showServerAddWindow() {
-		ServerAddWindow add_server_window = new ServerAddWindow(Localizer._("serveraddwindow.title"));
+		ServerAddWindow add_server_window = new ServerAddWindow();
 		add_server_window.getCoreComponents();
 		add_server_window.initUIComponents();
 	}
 	
 	public void addServer(final Server server) {
-		addLine(server);
-		updateLine(server);		
+		addRow(server);
+		
+		if (!CountryLocator.getInstance().isServiceDown()) {
+				Image image = new Image(SWTThread.getDisplay(),UICommon.getCountryFlag(server.getAddress()));
+				
+				CountryFlagPainter painter = new CountryFlagPainter(image);
+				
+				TableItemCountryFlag table_item_painter = new TableItemCountryFlag(SWTPreferences.getDefaultColumnOrder(SWTConstants.SERVER_LIST_FLAG_COLUMN_ID),painter);
+				addCustumControl(getItemCount()-1, table_item_painter);
+		}
+		
+		//updateLine(server);		
 	}
 	
 	public void removeServer(Server server) {
 		removeRow(server);
 	}
 	
-	protected void updateLine(Server server) {
-		int id = 0;
-		
+	public void serverDisconnected(Server server) {
+		updateRow(server);
+	}
+	
+	public void updateRow(Server server) {
 		if (server.isDown()) {
-			setLineImage(server,id,server_error);
+			setRowImage(server,SWTConstants.SERVER_LIST_NAME_COLUMN_ID, SWTImageRepository.getImage("server_error.png"));
 			setForegroundColor(server, server_down_color);
+			int id = getObjectID(server);
+			if ((id)%2==0)
+				setBackgroundColor(server, ROW_ALTERNATE_COLOR_2);
+			else
+				setBackgroundColor(server, ROW_ALTERNATE_COLOR_1);
 		} else
-		
-			if (server.isConnected()) {
-				setLineImage(server,id,server_connected);
-				setForegroundColor(server,server_connected_color);
+		if (server.isConnected()) {
+				setRowImage(server,SWTConstants.SERVER_LIST_NAME_COLUMN_ID,SWTImageRepository.getImage("server_connected.png"));
+				setForegroundColor(server,SWTThread.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				setBackgroundColor(server,server_connected_color);
 			}
 			else {
 				setForegroundColor(server,server_default_color);
-				setLineImage(server,id,server_default);
+				
+				int id = getObjectID(server);
+				if ((id)%2==0)
+					setBackgroundColor(server, ROW_ALTERNATE_COLOR_2);
+				else
+					setBackgroundColor(server, ROW_ALTERNATE_COLOR_1);
+				
+				
+				setRowImage(server,SWTConstants.SERVER_LIST_NAME_COLUMN_ID, SWTImageRepository.getImage("server.png"));
 			}
-
-		setLineText(server, SWTPreferences.SERVER_LIST_IP_ORDER_DEFAULT, server.getAddress()+":"+server.getPort());
-		setLineText(server, SWTPreferences.SERVER_LIST_NAME_ORDER_DEFAULT, server.getName());
-		setLineText(server, SWTPreferences.SERVER_LIST_DESCRIPTION_ORDER_DEFAULT,server.getDesc());
-		setLineText(server, SWTPreferences.SERVER_LIST_PING_ORDER_DEFAULT,server.getPing()+"");
-		setLineText(server, SWTPreferences.SERVER_LIST_USERS_ORDER_DEFAULT,server.getNumUsers()+"");
-		setLineText(server, SWTPreferences.SERVER_LIST_MAX_USERS_ORDER_DEFAULT,server.getMaxUsers()+"");
-		setLineText(server, SWTPreferences.SERVER_LIST_FILES_ORDER_DEFAULT,server.getNumFiles()+"");
-		setLineText(server, SWTPreferences.SERVER_LIST_SOFT_LIMIT_ORDER_DEFAULT,server.getSoftLimit()+"");
-		setLineText(server, SWTPreferences.SERVER_LIST_HARD_LIMIT_ORDER_DEFAULT,server.getHardLimit()+"");
-		setLineText(server, SWTPreferences.SERVER_LIST_SOFTWARE_ORDER_DEFAULT,server.getVersion()+"");
-
-	}
-	
-	public void lostFocus() {
-		GUIUpdater.getInstance().removeRefreshable(updater);
-	}
-	
-	public void obtainFocus() {
-		GUIUpdater.getInstance().addRefreshable(updater);
-	}
-
-	
-	private class ServerListUpdater implements Refreshable {
-
-		public void refresh() {
-			long start = System.currentTimeMillis();
-			int i=0;
-			for(Server server : servers_manager.getServers()) {
-				if (!getRow(server).isVisible()) continue ;
-				if (is_sorted)
-					sortColumn(last_sort_column,last_sort_dir);
-				updateLine(server);
-				i++;
-			}
-			long end = System.currentTimeMillis();
-		//	System.out.println("Processed items : "+i);
-		//	System.out.println("Refresh time : "+(end-start));
+				
+		setRowText(server, SWTConstants.SERVER_LIST_IP_COLUMN_ID, server.getAddress()+":"+server.getPort());
+		if (!CountryLocator.getInstance().isServiceDown()) {
+			String country_code = CountryLocator.getInstance().getCountryCode(server.getAddress());
+			setRowText(server, SWTConstants.SERVER_LIST_CC_COLUMN_ID, country_code);
 		}
 		
+		setRowText(server, SWTConstants.SERVER_LIST_NAME_COLUMN_ID, server.getName());
+		setRowText(server, SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID,server.getDesc());
+		setRowText(server, SWTConstants.SERVER_LIST_PING_COLUMN_ID,server.getPing()+"");
+		setRowText(server, SWTConstants.SERVER_LIST_USERS_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getNumUsers()));
+		setRowText(server, SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getMaxUsers()));
+		setRowText(server, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getNumFiles()));
+		setRowText(server, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getSoftLimit()));
+		setRowText(server, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getHardLimit()));
+		setRowText(server, SWTConstants.SERVER_LIST_VERSION_COLUMN_ID,server.getVersion()+"");
 		
-		
+		if (server.isStatic())
+			setRowText(server, SWTConstants.SERVER_LIST_STATIC_COLUMN_ID,_._("mainwindow.serverlisttab.serverlist.column.static.yes"));
+		else
+			setRowText(server, SWTConstants.SERVER_LIST_STATIC_COLUMN_ID,_._("mainwindow.serverlisttab.serverlist.column.static.no"));
 	}
 	
+	public void refresh() {
+		// Refresh server's data
+		for(Server server : servers_manager.getServers()) {
+			BufferedTableRow row = getRow(server);
+			if (row == null) continue;
+			if (!row.isVisible()) continue;
+			if (is_sorted)
+				sortColumn(last_sort_column,last_sort_dir);
+			updateRow(server);
+		}
+
+	}	
 }
