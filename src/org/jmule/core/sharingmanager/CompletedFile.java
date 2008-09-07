@@ -35,8 +35,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:06 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:59:42 $$
  */
 public class CompletedFile extends SharedFile {
 
@@ -64,5 +64,9 @@ public class CompletedFile extends SharedFile {
 
 	public String toString() {
 		return "["+getSharingName()+" ; "+file.length()+" ; "+" ]";
+	}
+
+	public boolean isCompleted() {
+		return true;
 	}
 }

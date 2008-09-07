@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:50:09 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:00:45 $$
  */
 public abstract class SharedFile {
 	
@@ -89,13 +89,14 @@ public abstract class SharedFile {
 		return new FileChunk(chunkData.getChunkBegin(),chunkData.getChunkEnd(),data);
 	}
 	
+	public abstract boolean isCompleted();
+	
 	public String getAbsolutePath() {
 		return file.getAbsolutePath();
 	}
 	
 	public void delete() {
 		FileUtils.deleteQuietly(file);
-		
 	}
 	
 	public String getSharingName() {
