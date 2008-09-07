@@ -22,58 +22,63 @@
  */
 package org.jmule.ui.swt.tables;
 
-import java.text.Collator;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.jmule.core.edonkey.impl.Server;
-import org.jmule.ui.UIImageRepository;
+import org.jmule.core.JMRunnable;
+import org.jmule.core.JMThread;
 import org.jmule.ui.swt.SWTConstants;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
-import org.jmule.ui.swt.Utils;
+import org.jmule.ui.swt.SWTThread;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:17 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:30:13 $$
  */
-public abstract class JMTable<T> extends Table{
-	public static final Color ROW_ALTERNATE_COLOR_1 = new Color(Utils.getDisplay(),238,238,238);
-	public static final Color ROW_ALTERNATE_COLOR_2 = Utils.getDisplay().getSystemColor(SWT.COLOR_WHITE);
+public abstract class JMTable<T> extends Table {
+
+	public static final Color ROW_ALTERNATE_COLOR_1 = new Color(SWTThread.getDisplay(),238,238,238);
+	public static final Color ROW_ALTERNATE_COLOR_2 = SWTThread.getDisplay().getSystemColor(SWT.COLOR_WHITE);
 	
-	protected List<BufferedTableRow> line_list = new LinkedList<BufferedTableRow>();
-	protected List<BufferedTableRow> default_line_list = new LinkedList<BufferedTableRow>();
+	protected List<BufferedTableRow> line_list = new LinkedList<BufferedTableRow>(); // Store buffered controls for each line
+	protected List<BufferedTableRow> default_line_list = new LinkedList<BufferedTableRow>(); // Store default buffered controls for each line
+	
+	private List<List<Object>> default_custom_control_list = new LinkedList<List<Object>>();// Default custom controls on each line
+	
 	private Listener column_move_listener;
 	private Listener column_resize_listener;
-	private SWTPreferences swt_preferences = SWTPreferences.getInstance();
+	protected SWTPreferences swt_preferences = SWTPreferences.getInstance();
 	protected boolean is_sorted = false;
-	protected String last_sort_column = "";
+	protected int last_sort_column ;
 	protected boolean last_sort_dir = true;
 	
-	public JMTable(Composite composite,boolean multiSelect) {
-		super(composite, multiSelect?SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | 
-				SWT.MULTI  : SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION );		
+	public JMTable(Composite composite) {
+		super(composite,SWT.VIRTUAL | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);		
+		
 		setHeaderVisible(true);
-		setLinesVisible (true);
+		setLinesVisible (false);
 		
 		column_move_listener = new Listener() {
 			public void handleEvent(Event arg0) {
 				saveColumnSettings();
 			}
-			
 		};
 		
 		column_resize_listener = new Listener() {
@@ -82,104 +87,193 @@ public abstract class JMTable<T> extends Table{
 			}
 		};
 		
-//		addListener(SWT.SetData, new Listener(){
-//			public void handleEvent(Event arg0) {
-//				TableItem item = (TableItem) arg0.item;
-//				int index = indexOf(item);
-//				T object = (T)line_list.get(index).getData(SWTConstants.ROW_OBJECT_KEY);
-//				updateLine(object);
-//			}
-//		});
+		addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent arg0) {
+				setMenu(getPopUpMenu());				
+			}
+		});
+		
+		addListener(SWT.SetData, new Listener(){
+
+			public void handleEvent(Event arg0) {
+				
+				TableItem item = (TableItem) arg0.item;
+				int index = indexOf(item);
+				// Time expensive
+				if (index%2==0)
+		        	item.setBackground(ROW_ALTERNATE_COLOR_2);
+		        else
+		        	item.setBackground(ROW_ALTERNATE_COLOR_1);
+				
+				T object = (T)line_list.get(index).getData(SWTConstants.ROW_OBJECT_KEY);
+				updateRow(object);
+			}
+		});
+		
+		addListener(SWT.MeasureItem, new Listener() {
+			public void handleEvent(Event event) {
+			    switch(event.type) {
+			     case SWT.MeasureItem: {
+			      event.height = SWTConstants.TABLE_ROW_HEIGHT;
+			      break;
+			     }}}
+		});
+		
+		addListener(SWT.PaintItem, new Listener() {
+			public void handleEvent(Event event) {
+				int row_id = indexOf((TableItem)event.item);
+				int column_id = event.index;
+				int width = getColumn(column_id).getWidth(); // event's width is not used !
+				BufferedTableRow row = line_list.get(row_id);
+				for(BufferedTableRowCustomControl control : row.getControlList()) {
+					if (control.getColumnID() == column_id) 
+						control.draw(event.gc, event.x,event.y, width, event.height);
+				}
+			}
+		});
 		
 	}
 	
-	protected abstract void updateLine(T object);
+	// method must update row assigned to object
+	public abstract void updateRow(T object);
 	
-	protected abstract int compareObjects(T object1, T object2, String columnID,boolean order);
+	// comparator used in sorting
+	protected abstract int compareObjects(T object1, T object2, int columnID,boolean order);
 	
-	public void addColumn(String ColumnID,String column,int width) {
-		TableColumn table_column = new TableColumn(this, SWT.NONE);
+	// pop-up menu getter
+	protected abstract Menu getPopUpMenu();
+	
+	public void addColumn(int style, int ColumnID,String columnTitle, String columnDesc,int width) {
+		TableColumn table_column = new TableColumn(this, style);
 		table_column.setData(SWTConstants.COLUMN_NAME_KEY, ColumnID);
 		table_column.setWidth(width);
-		table_column.setText(column);
+		
+		table_column.setText(columnTitle);
+		
+		table_column.setToolTipText(columnDesc);
+		table_column.setData(SWTConstants.COLUMN_DESC_KEY, columnDesc);
+		
 		table_column.setMoveable(true);
 		table_column.addListener(SWT.Move, column_move_listener);
 		table_column.addListener(SWT.Resize, column_resize_listener);
 		
 		Listener sort_listener = new Listener() {
 			private int sort_order = 0;
-			public void handleEvent(Event e) {
-				TableColumn column = (TableColumn)e.widget;
-				String column_id = (String)column.getData(SWTConstants.COLUMN_NAME_KEY);
-				if (is_sorted)
-					if (!last_sort_column.equals(column_id))
-						sort_order=0;
-				clearColumnImages();
-				if (sort_order == 0) {
-					sort_order = SWT.UP;
-				}
-				else
-					if (sort_order == SWT.UP)
-						sort_order = SWT.DOWN;
-					else
-						if (sort_order == SWT.DOWN) {
+			public void handleEvent(final Event e) {
+				
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+					
+					TableColumn column = (TableColumn)e.widget;
+					int column_id = (Integer)column.getData(SWTConstants.COLUMN_NAME_KEY);
+					if (is_sorted)
+						if (!(last_sort_column == column_id))
 							sort_order = 0;
-							is_sorted = false;
-						}
-				
-				if (sort_order == SWT.UP)
-					sortColumn(column_id, true);
-				
-				if (sort_order == SWT.DOWN) {
-					sortColumn(column_id, false);
+					clearColumnImages();
+					if (sort_order == 0) {
+						sort_order = SWT.UP;
+					}
+					else
+						if (sort_order == SWT.UP)
+							sort_order = SWT.DOWN;
+						else
+							if (sort_order == SWT.DOWN) {
+								sort_order = 0;
+								is_sorted = false;
+							}
+					
+					if (sort_order == SWT.UP)
+						sortColumn(column_id, true);
+					
+					if (sort_order == SWT.DOWN) {
+						sortColumn(column_id, false);
+					}
+						
+					if (sort_order == SWT.UP) {
+						column.setImage(SWTImageRepository.getImage("sort-down.png"));
+					}
+					
+					if (sort_order == SWT.DOWN) {
+						column.setImage(SWTImageRepository.getImage("sort-up.png"));
+					}
+					
+					if (sort_order == 0) {
+						column.setImage(null);
+						resetOrdering();
+					}
 				}
 				
-				if (sort_order == 0) ;
-
-				if (sort_order == SWT.UP) {
-					column.setImage(new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("sort-down.png")));
 				}
-				
-				if (sort_order == SWT.DOWN) {
-					column.setImage(new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("sort-up.png")));
-				}
-				
-				if (sort_order == 0) {
-					column.setImage(null);
-					resetOrdering();
-				}
-			}
-			
-		};
+			);}};
 		table_column.addListener(SWT.Selection, sort_listener);
 	}
-	
-	public void addLine(T object) {
-        BufferedTableRow table_row = new BufferedTableRow(this);
-        line_list.add(table_row);
-        default_line_list.add(table_row);
-        table_row.createSWTRow();
-        if (getItemCount()%2==0)
-        	table_row.setBackgrounColor(ROW_ALTERNATE_COLOR_1);
-        else
-        	table_row.setBackgrounColor(ROW_ALTERNATE_COLOR_2);
-        table_row.setData(SWTConstants.ROW_OBJECT_KEY, object);
+
+	public void disableColumn(int columnID) {
+		for(TableColumn column : getColumns()) {
+			int column_id = (Integer) column.getData(SWTConstants.COLUMN_NAME_KEY);
+			if (column_id == columnID) {
+				column.setData(SWTConstants.COLUMN_DISABLED_KEY, true);
+				return ;
+			}
+		}
 	}
 	
-	public void setLineText(T object,int columnID,String text) {
+	public void addRow(T... object) {
+		int ifactor = super.getItemCount();
+		int x = ifactor+object.length;
+		super.setItemCount(x);
+		for(int i = 0;i<object.length;i++) {
+	        BufferedTableRow table_row = new BufferedTableRow(this);
+	        line_list.add(table_row);
+	        default_line_list.add(table_row);
+	        default_custom_control_list.add(new LinkedList<Object>());
+	       
+	        TableItem item = getItem(ifactor+i);
+	        table_row.setSWTRow(item);
+        
+	       table_row.setData(SWTConstants.ROW_OBJECT_KEY, object[i]);
+    	   // updateLine(object[i]);
+
+		}
+        
+	}
+	
+	public void addCustumControl(final int line,BufferedTableRowCustomControl control) {
+		List<Object> control_list = default_custom_control_list.get(line);
+		control_list.add(control.getControl());
+		line_list.get(line).getControlList().add(control);
+	}
+	
+	public void setRowText(T object,int columnID,String text) {
 		int line_id = getObjectID(object);
 		if (line_id==-1) {
 			return ;
 		}
+		int column = getColumnOrder(columnID);
 		BufferedTableRow row = line_list.get(line_id);
-		row.setText(columnID, text);
+		row.setText(column, text);
 	}
 	
-	public void setLineImage(T object,int columnID,Image image) {
+	public void setRowImage(T object,int columnID,Image image) {
 		int line_id = getObjectID(object);
 		if (line_id==-1) return;
+		int column = getColumnOrder(columnID);
 		BufferedTableRow row = line_list.get(line_id);
-		row.setImage(columnID, image);
+		Image old_image = row.getImage(column);
+		if (old_image != null) 
+			old_image.dispose();
+		row.setImage(column, image);
+	}
+	
+	private int getColumnOrder(int columnID) {
+		int column_id = 0;
+		for(TableColumn column : getColumns()) {
+			Integer id = (Integer)column.getData(SWTConstants.COLUMN_NAME_KEY);
+			if (id == columnID)
+				return column_id;
+			column_id++;
+		}
+		return 0;
 	}
 	
 	private void clearColumnImages() {
@@ -189,13 +283,14 @@ public abstract class JMTable<T> extends Table{
 	}
 	
 	public void clear() {
+		default_line_list.clear();
         line_list.clear();
         removeAll();
     }
 	
 	public T getSelectedObject() {
 		int i = getSelectionIndex();
-		if (i==-1) return null;
+		if ( i == -1 ) return null;
 		return (T)line_list.get(i).getData(SWTConstants.ROW_OBJECT_KEY);
 	}
 	
@@ -219,15 +314,14 @@ public abstract class JMTable<T> extends Table{
 	
 	public void setForegroundColor(T object,final Color color) {
 		final BufferedTableRow item = getRow(object);
-		if (item==null) return ;
+		if (item == null) return ;
 	   	item.setForeground(color);
 	}
 	
-	public void setImage(T object,final int id,final Image image) {
-		int line_id = getObjectID(object);
-		if (line_id==-1) return;
-		line_list.get(line_id).setImage(id, image);
-		
+	public void setBackgroundColor(T object,final Color color) {
+		final BufferedTableRow item = getRow(object);
+		if (item == null) return ;
+	   	item.setBackgrounColor(color);
 	}
 	
 	public void removeRow(T object) {
@@ -236,36 +330,52 @@ public abstract class JMTable<T> extends Table{
 		if (id!=getItemCount()) {
 			
 		}
+		
 		remove(id);
 		line_list.remove(id);
+		default_custom_control_list.remove(id);
+		default_line_list.remove(id);
+		updateLineBackground();
+	}
+	
+	protected List<BufferedTableRowCustomControl> getCustumElements(T object) {
+		int lineID = getObjectID(object);
+		if (lineID==-1) return null;
 		
+		return line_list.get(lineID).getControlList();
+	}
+	
+	protected void updateLineBackground() {
+		int id;
 		for(id = 0;id<getItemCount();id++) {
 			BufferedTableRow row = line_list.get(id);
 			if ((id)%2==0)
-				row.setBackgrounColor(ROW_ALTERNATE_COLOR_2);
+				row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_2);
 			else
-				row.setBackgrounColor(ROW_ALTERNATE_COLOR_1);
+				row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_1);
 		}
-		
 	}
 	
 	protected void updateColumnVisibility() {
-		for(int i = 0;i<this.getColumnCount();i++) {
-			TableColumn column = this.getColumn(i);
+		for(TableColumn column : getColumns()) {
 			
-			String column_id = (String)column.getData(SWTConstants.COLUMN_NAME_KEY);
-
+			int column_id = (Integer)column.getData(SWTConstants.COLUMN_NAME_KEY);
+			
 			boolean column_visibility = swt_preferences.isColumnVisible(column_id);
+			
+			Object isDisabled = column.getData(SWTConstants.COLUMN_DISABLED_KEY);
+			if (isDisabled != null)
+				column_visibility = false;
+			
 			if (!column_visibility) {
 				if (column.getWidth()!=0) {
 				column.setWidth(0);
 				column.setResizable(false);
+		
 				}				
 			} else {
-				if (column.getWidth()==0) {
-					column.setWidth(swt_preferences.getDefaultColumnWidth((String)column.getData(SWTConstants.COLUMN_NAME_KEY)));
-					column.setResizable(true);
-					}
+				column.setResizable(true);
+				column.setWidth(swt_preferences.getColumnWidth(column_id));
 			}
 		}
 	}
@@ -274,12 +384,17 @@ public abstract class JMTable<T> extends Table{
 		int column_order[] = new int[getColumnCount()];
 		for(int i = 0; i < this.getColumnCount(); i++ ) {
 			TableColumn column = getColumn(i);
-			String column_id = (String)column.getData(SWTConstants.COLUMN_NAME_KEY);
+			int column_id = (Integer)column.getData(SWTConstants.COLUMN_NAME_KEY);
 			int pos = swt_preferences.getColumnOrder(column_id);
 			column_order[pos] = i;
 		}
 		
 		setColumnOrder(column_order);
+	}
+	
+	public void updateColumnSettings() {
+		updateColumnVisibility();
+		updateColumnOrder();
 	}
 	
 	protected void saveColumnSettings() {
@@ -290,32 +405,38 @@ public abstract class JMTable<T> extends Table{
 			int column_id = column_order[i];
 			TableColumn table_column = getColumn(column_id);
 			
-			String column_str_id = (String)table_column.getData(SWTConstants.COLUMN_NAME_KEY);
-			swt_preferences.setColumnOrder(column_str_id, i);
-			if (table_column.getWidth()==0)
-				swt_preferences.setColumnVisibility(column_str_id, false);
-			else 
-				swt_preferences.setColumnWidth(column_str_id, table_column.getWidth());
+			int column_id2 = (Integer)table_column.getData(SWTConstants.COLUMN_NAME_KEY);
+			swt_preferences.setColumnOrder(column_id2, i);
+			if (!swt_preferences.isColumnVisible(column_id2)) 
+				if (table_column.getWidth()!=0)
+					swt_preferences.setColumnWidth(column_id2, table_column.getWidth());
 		}
 	}
 	
-	protected void showColumnEditorWindow(TableStructureModificationListener listener) {
-		new TableColumnEditorWindow(this,this.getShell(),getColumns(),listener);
+	public void showColumnEditorWindow() {
+		new TableColumnEditorWindow(this,this.getShell(),getColumns(), new TableStructureModificationListener() {
+			public void tableStructureChanged() {
+				updateColumnVisibility();
+				updateColumnOrder();
+				
+				update();
+				redraw();
+			}
+		});
 	}
 	
-	protected int getFirstColumn() {
-		int columns[] = this.getColumnOrder();
-		int id = 0;
-		int first_column = columns[id];
+	protected boolean hasObject(T object) {
+		for(BufferedTableRow row : line_list) {
+			T o = (T)row.getData(SWTConstants.ROW_OBJECT_KEY);
+			if (o!=null)
+			if (object.equals(o)) 
+				return true;
+		}
 		
-		while((getColumn(first_column).getWidth()==0)&&(id<getColumnCount())) 
-			first_column = columns[++id];
-		
-		if (id<getColumnCount()) return -1;
-		return first_column;
+		return false;
 	}
 	
-	private int getObjectID(T object) {
+	protected int getObjectID(T object) {
 		int id = 0;
 		boolean found = false;
 		for(BufferedTableRow row : line_list) {
@@ -333,52 +454,69 @@ public abstract class JMTable<T> extends Table{
 		
 	}
 	
-	private boolean is_sorting = false;
-	protected void sortColumn(final String columnID,final boolean sortOrder) {
-		if (is_sorting) { return ;}
-		is_sorting = true;
-		is_sorted = true;
-		last_sort_column = columnID;
-		last_sort_dir = sortOrder;
-		synchronized(this) {
-			Collections.sort(line_list, new Comparator() {
-					public int compare(Object arg0, Object arg1) {
-						BufferedTableRow row1 = (BufferedTableRow)arg0;
-						BufferedTableRow row2 = (BufferedTableRow)arg1;
-						
-						T object1 = (T) row1.getData(SWTConstants.ROW_OBJECT_KEY);
-						T object2 = (T) row2.getData(SWTConstants.ROW_OBJECT_KEY);
-						return compareObjects(object1,object2,columnID,sortOrder);
-				} });
-			updateIndexes();
-			is_sorting = false;
-		}
+	private JMThread sort_thread;
+	protected void sortColumn(final int columnID,final boolean sortOrder) {
+		if (sort_thread!=null)
+			if (sort_thread.isAlive()) return ;
+		sort_thread = new JMThread(new JMRunnable() {
+			public void JMRun() {
+				last_sort_column = columnID;
+				last_sort_dir = sortOrder;
+				Collections.sort(line_list, new Comparator() {
+						public int compare(Object arg0, Object arg1) {
+							BufferedTableRow row1 = (BufferedTableRow)arg0;
+							BufferedTableRow row2 = (BufferedTableRow)arg1;
+								
+							T object1 = (T) row1.getData(SWTConstants.ROW_OBJECT_KEY);
+							T object2 = (T) row2.getData(SWTConstants.ROW_OBJECT_KEY);
+							return compareObjects(object1,object2,columnID,sortOrder);
+					} });
+				SWTThread.getDisplay().syncExec(new JMRunnable() {
+					public void JMRun() {
+						clearAll();
+						updateIndexes();
+						setItemCount(line_list.size());
+					}
+				});
+			} 
+		});
+		sort_thread.start();
 	}
 	
 	/**
 	 * Set to default order
 	 */
+	private JMThread reset_order_thread;
+	
 	private void resetOrdering() {
-		synchronized(line_list) {
-			line_list.clear();
-			for(BufferedTableRow row : default_line_list) {
-				line_list.add(row);
+		if (reset_order_thread != null)
+			if (reset_order_thread.isAlive()) return ;
+		reset_order_thread =  new JMThread(new JMRunnable() {
+			public void JMRun() {
+				for(int i = 0;i<default_line_list.size(); i++) {
+					line_list.set(i, default_line_list.get(i));
+				}
+				SWTThread.getDisplay().syncExec(new JMRunnable() {
+					public void JMRun() {
+						clearAll();
+						updateIndexes();
+						setItemCount(line_list.size());
+					}
+				});
 			}
-			updateIndexes();
-		}
-		
-		
+		});
+		reset_order_thread.start();		
 	}
 	
 	private void updateIndexes() {
-		
+
 		for(int i = 0;i<line_list.size();i++) {
-			line_list.get(i).setTableItem(i, false);
+			line_list.get(i).setSWTRow(getItem(i));
 		}
+		//updateLineBackground();
 		
 	}
-	
-	
+		
 	protected void checkSubclass() {}
 
 }
