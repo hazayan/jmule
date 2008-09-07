@@ -37,6 +37,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -99,8 +100,8 @@ import org.jmule.util.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:17:44 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:50:12 $$
  */
 public class PartMet extends MetFile {
 	
@@ -318,7 +319,7 @@ public class PartMet extends MetFile {
 	}
 	
 	public boolean delete() {
-		return part_file.delete();
+		return FileUtils.deleteQuietly(part_file);
 	}
 
 	public String getTempFileName() {
