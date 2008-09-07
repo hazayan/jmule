@@ -22,7 +22,10 @@
  */
 package org.jmule.core.uploadmanager;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMThread;
@@ -32,6 +35,7 @@ import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.EMulePacketFactory;
+import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileHashSetRequestSP;
@@ -51,14 +55,16 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 16:00:48 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:07:40 $$
  */
 public class UploadSession implements JMTransferSession {
 	
 	private static final int QUEUE_CHECK_INTERVAL			=   1000;
 	
-	private static final int QUEUE_PEER_DISCONNECT_TIME     =   1000;
+	private static final int QUEUE_PEER_DISCONNECT_TIME     =   9000;
+	
+	private static final int CHUNK_RQEUST_REMOVE_TIME 		= 	1000;
 	
 	private SharedFile sharedFile;
 
@@ -70,6 +76,7 @@ public class UploadSession implements JMTransferSession {
 	
 	private JMThread queue_cleaner;
 	
+	private List<ChunkResponseData> chunk_requests = new CopyOnWriteArrayList<ChunkResponseData>();	
 	public UploadSession(SharedFile sFile){
 		
 		sharedFile = sFile;
@@ -236,9 +243,15 @@ public class UploadSession implements JMTransferSession {
 				
 				return ;
 				
-				}
+			}	
 			
+			List<Packet> send_packet_list = new LinkedList<Packet>();
+
 			for(FileChunkRequest chunkRequest : sPacket) {
+				
+				if (containSendChunk(chunkRequest)) continue;
+				
+				chunk_requests.add(new ChunkResponseData(chunkRequest,System.currentTimeMillis()));
 				
 				FileChunk chunk;
 				
@@ -248,21 +261,41 @@ public class UploadSession implements JMTransferSession {
 					
 					FileHash fileHash = sharedFile.getFileHash();
 					
-					sender.sendPacket(PacketFactory.getFilePartSendingPacket(fileHash,  chunk));
-					
+					send_packet_list.add(PacketFactory.getFilePartSendingPacket(fileHash,  chunk));
+
 					totalUploaded +=(chunkRequest.getChunkEnd() - chunkRequest.getChunkBegin());
-					
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 				
+				for(Packet p : send_packet_list) { 
+					sender.sendPacket(p);
+				}
+				
 			}
-			
+
 			return ;
 		}
 		
 		
 	}
+	
+	private boolean containSendChunk(FileChunkRequest chunk) {
+		for(int i = 0;i<chunk_requests.size();i++) {
+			ChunkResponseData data = chunk_requests.get(i);
+			if (data.getRequest().getChunkBegin() == chunk.getChunkBegin())
+				if (data.getRequest().getChunkEnd() == chunk.getChunkEnd()) {
+					long time = System.currentTimeMillis() - data.getRequestTime();
+					if (time>CHUNK_RQEUST_REMOVE_TIME) {
+						chunk_requests.remove(i);
+						return false;
+					}
+					return true;
+				}
+		}
+		return false;
+	}
+	
 	
 	public void onPeerConnected(Peer peer) {
 		if (!uploadQueue.hasPeer(peer))
@@ -277,6 +310,7 @@ public class UploadSession implements JMTransferSession {
 	}
 	
 	public void onPeerDisconnected(Peer peer) {
+		
 		Peer last_peer = uploadQueue.getLastPeer();
 		if (last_peer != null) {
 		
@@ -328,6 +362,7 @@ public class UploadSession implements JMTransferSession {
 	}	
 
 	private void removeLastPeer(boolean totallyRemove){
+		chunk_requests.clear();
 		Peer rPeer = this.uploadQueue.pool();
 		if ((rPeer!=null)&&(!totallyRemove)) {
 			
@@ -387,4 +422,23 @@ public class UploadSession implements JMTransferSession {
 		UploadManagerFactory.getInstance().removeUpload(sharedFile.getFileHash());
 		queue_cleaner.JMStop();
 	}
+	
+	private class ChunkResponseData {
+		private FileChunkRequest request;
+		private long request_time;
+
+		public ChunkResponseData(FileChunkRequest request, long requestTime) {
+			this.request = request;
+		    request_time = requestTime;
+		}
+		
+		public FileChunkRequest getRequest() {
+			return request;
+		}
+		
+		public long getRequestTime() {
+			return request_time;
+		}
+	}
 }
+	
