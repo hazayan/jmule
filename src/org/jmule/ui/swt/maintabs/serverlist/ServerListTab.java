@@ -26,9 +26,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.jmule.core.JMuleCore;
+import org.jmule.core.edonkey.ServerManager;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
+import org.jmule.ui.localizer._;
+import org.jmule.ui.swt.GUIUpdater;
 import org.jmule.ui.swt.common.SashControl;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.skin.SWTSkin;
@@ -36,22 +40,28 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:47:13 $$
  */
 public class ServerListTab extends AbstractTab {
 
 	private Composite server_info_panel;
+	
 	private Composite server_table_panel;
+	
+	private ConnectionInfo connection_info;
 	
 	private ServerMessages server_messages_text;
 	
 	private ServerList server_list;
 	
-	public ServerListTab(Composite shell,JMuleCore _core) {
+	private Group server_list_group;
+	
+	
+	public ServerListTab(Composite shell,JMuleCore core) {
 		
 		super(shell);
-
+	
 		JMuleUI ui_instance = null;
 		try {
 			
@@ -65,7 +75,7 @@ public class ServerListTab extends AbstractTab {
 		FormLayout form = new FormLayout ();
 		setLayout (form);
 		
-		server_table_panel = new Composite(this,SWT.BORDER);
+		server_table_panel = new Composite(this,SWT.NONE);
 		server_table_panel.setLayout(new FillLayout());
 		
 		server_info_panel = new Composite(this,SWT.BORDER);
@@ -84,30 +94,45 @@ public class ServerListTab extends AbstractTab {
 		SashControl.createVerticalSash(20, 70, server_info_panel, server_messages, peer_info);
 
 		// Server List
-		server_list = new ServerList(server_table_panel,_core.getServersManager());
+		server_list_group = new Group(server_table_panel,SWT.NONE);
+		server_list_group.setLayout(new FillLayout());
+		
+		setServerCount(core.getServerManager().getServersCount());
+		
+		server_list = new ServerList(server_list_group,core.getServerManager());
 		
 		//Server Messages
 		server_messages_text = new ServerMessages(server_messages);
 		
-		ConnectionInfo myInfo = new ConnectionInfo(peer_info,_core);
+		connection_info = new ConnectionInfo(peer_info,core);
 		
-		myInfo.setFont(skin.getDefaultFont());
+		connection_info.setFont(skin.getDefaultFont());
+		
+		SWTServerListWrapper.getInstance().setServerListTab(this);
+	}
+	
+	public void setServerCount(int count) {
+		server_list_group.setText(_._("mainwindow.serverlisttab.group.servers") + "(" +count +")");
+		layout();
 	}
 
-	public int getTabType() {
-		return TAB_SERVERLIST;
+	public JMULE_TABS getTabType() {
+		return JMULE_TABS.SERVERLIST;
 	}
 
 	public void lostFocus() {
-		server_list.lostFocus();
+		GUIUpdater.getInstance().removeRefreshable(server_list);
+		GUIUpdater.getInstance().removeRefreshable(connection_info);
 	}
 
 	public void obtainFocus() {
-		server_list.obtainFocus();
+		GUIUpdater.getInstance().addRefreshable(server_list);
+		GUIUpdater.getInstance().addRefreshable(connection_info);
 	}
 
 	public void disposeTab() {
-		
+		GUIUpdater.getInstance().removeRefreshable(server_list);
+		GUIUpdater.getInstance().removeRefreshable(connection_info);
 	}
 
 }
