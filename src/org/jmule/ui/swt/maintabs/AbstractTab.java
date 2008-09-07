@@ -28,23 +28,18 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:38 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:41:59 $$
  */
 public abstract class AbstractTab extends Composite{
 
-	public static final int TAB_SERVERLIST = 0x01;
-	public static final int TAB_TRANSFERS = 0x02;
-	public static final int TAB_SHARED = 0x03;
-	public static final int TAB_SEARCH = 0x04;
-	public static final int TAB_STATISTICS = 0x05;
-	public static final int TAB_LOGS = 0x06;
+	public static enum JMULE_TABS { SERVERLIST, TRANSFERS, SEARCH, SHARED, STATISTICS, LOGS };
 	
 	public AbstractTab(Composite shell) {
 		super(shell, SWT.NONE);
 	}
 	
-	public abstract int getTabType();
+	public abstract JMULE_TABS getTabType();
 
 	public abstract void obtainFocus();
 	
