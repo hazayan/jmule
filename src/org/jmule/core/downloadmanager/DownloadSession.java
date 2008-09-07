@@ -37,6 +37,7 @@ import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -84,8 +85,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:45:54 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:47:40 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -241,10 +242,15 @@ public class DownloadSession implements JMTransferSession {
 					peer.sendPacket(packet);
 			
 			peer.getSessionList().removeSession(this);
+			
 		}
 		
 		peer_list.clear();
 		download_status_list.clear();
+		for (Peer peer : connecting_peers) {
+			peer.getSessionList().removeSession(this);
+		}
+		connecting_peers.clear();
 		
 		setStatus(STATUS_STOPPED);
 		
@@ -273,14 +279,6 @@ public class DownloadSession implements JMTransferSession {
 			if (connecting_peers.contains(peer)) continue;
 			
 			connecting_peers.add(peer);
-			
-//			peer_list.add(peer);
-			
-//			if (! download_status_list.hasPeer(peer)) {
-//				
-//				download_status_list.addPeer(peer);
-//				
-//			}
 			
 			if (peer.isConnected()) {
 
@@ -742,7 +740,10 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	public boolean hasPeer(Peer peer) {
-		return peer_list.contains(peer);
+		boolean result =  peer_list.contains(peer);
+		if (!result)
+			result = connecting_peers.contains(peer);
+		return result;
 	}
 	
 	public PeerDownloadStatus getPeerDownloadStatus(Peer peer) {
@@ -750,7 +751,10 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	public JMIterable<Peer> getPeers() {
-		return new JMIterable<Peer>(peer_list.iterator());
+		List<Peer> list = new LinkedList<Peer>();
+		list.addAll(peer_list);
+		list.addAll(connecting_peers);
+		return new JMIterable<Peer>(list.iterator());
 	}
 	
 	public String toString(){
@@ -826,7 +830,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	public int getPeersCount() {
 		
-		return peer_list.size();
+		return peer_list.size() + connecting_peers.size();
 		
 	}
 	
