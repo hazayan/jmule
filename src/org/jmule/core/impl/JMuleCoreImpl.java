@@ -59,8 +59,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:49:37 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:53:57 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -249,14 +249,15 @@ public class JMuleCoreImpl implements JMuleCore {
 		connectionWaiter.start();
 		
 		udp_connection = JMUDPConnection.getInstance();
-		
-		try {
-			
-			udp_connection.open();
-			
-		} catch (Throwable t) {
-			
-			t.printStackTrace();
+		if (configuration_manager.isUDPEnabled()) {
+			try {
+				
+				udp_connection.open();
+				
+			} catch (Throwable t) {
+				
+				t.printStackTrace();
+			}
 		}
 		
 		
@@ -472,12 +473,7 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		public void JMStop() {
 			stop = true;
-			
-			synchronized(this) {
-				
-				this.interrupt();
-				
-			}
+			interrupt();
 		}
 		
 	}
