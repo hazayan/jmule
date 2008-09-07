@@ -76,8 +76,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:52:24 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -500,6 +500,22 @@ public class StandardPacket extends AbstractPacket implements Packet {
     	ByteBuffer data = Misc.getByteBuffer(chunkEnd-chunkStart);
     	dataPacket.get(data.array());
     	return new FileChunk(chunkStart,chunkEnd,data);
+    }
+    
+    public long getFileChunkBegin() throws PacketException {
+    	if (this.getCommand() != OP_SENDINGPART) 
+    		throw new PacketException("No OP_SENDINGPART packet "+this);
+    	dataPacket.position(1 + 4 + 1 + 16);
+    	long chunkStart = Convert.intToLong(dataPacket.getInt());
+    	return chunkStart;
+    }
+    
+    public long getFileChunkEnd() throws PacketException {
+    	if (this.getCommand() != OP_SENDINGPART) 
+    		throw new PacketException("No OP_SENDINGPART packet "+this);
+    	dataPacket.position(1 + 4 + 1 + 16 + 4);
+    	long chunkEnd = Convert.intToLong(dataPacket.getInt());
+    	return chunkEnd;
     }
        
     public PartHashSet getPartHashSet() throws PacketException {
