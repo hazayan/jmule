@@ -30,13 +30,14 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:23 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:41:22 $$
  */
 public class ConnectButton extends ToolItem {
 
@@ -93,19 +94,19 @@ public class ConnectButton extends ToolItem {
 		switch(status) {
 			case STATUS_CONNECTING : {
 				setText(Localizer._("mainwindow.toolbar.connect_item.cancel"));
-				setImage(new Image(getDisplay(), UIImageRepository.getImageAsStream("connect_stop.png")));
+				setImage(SWTImageRepository.getImage("connect_stop.png"));
 				break;
 			}
 			
 			case STATUS_CONNECTED : {
 				setText(Localizer._("mainwindow.toolbar.connect_item.disconnect"));
-				setImage(new Image(getDisplay(), UIImageRepository.getImageAsStream("connect_drop.png")));
+				setImage(SWTImageRepository.getImage("connect_drop.png"));
 				break;
 			}
 			
 			case STATUS_DISCONNECTED : {
 				setText(Localizer._("mainwindow.toolbar.connect_item.connect"));
-				setImage(new Image(getDisplay(), UIImageRepository.getImageAsStream("connect_do.png")));
+				setImage(SWTImageRepository.getImage("connect_do.png"));
 				break;
 			}
 		}
