@@ -28,30 +28,21 @@ import org.jmule.ui.UIConstants;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:00 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:38:38 $$
  */
-public interface SWTConstants extends UIConstants {
+public class SWTConstants extends UIConstants {
 
-	public static final long GUI_UPDATE_INTERVAL		 = 1000;
+	public static final long GUI_UPDATE_INTERVAL		 		= 	1000;
 	
-	public static final String ROOT_NODE 				 =   "/org/jmule/ui/swt";
+	public static final int TABLE_ROW_HEIGHT					=   20;
 	
-	public static final String SERVER_LIST_NAME_COLUMN          =   ROOT_NODE + "/tables/columns/server_name";
-	public static final String SERVER_LIST_IP_COLUMN            =   ROOT_NODE + "/tables/columns/server_ip";
-	public static final String SERVER_LIST_DESCRIPTION_COLUMN   =   ROOT_NODE + "/tables/columns/server_description";
-	public static final String SERVER_LIST_PING_COLUMN          =   ROOT_NODE + "/tables/columns/server_ping";
-	public static final String SERVER_LIST_USERS_COLUMN         =   ROOT_NODE + "/tables/columns/server_user";
-	public static final String SERVER_LIST_MAX_USERS_COLUMN     =   ROOT_NODE + "/tables/columns/server_max_user";
-	public static final String SERVER_LIST_FILES_COLUMN         =   ROOT_NODE + "/tables/columns/server_files";
-	public static final String SERVER_LIST_SOFT_LIMIT_COLUMN    =   ROOT_NODE + "/tables/columns/server_soft_limit";
-	public static final String SERVER_LIST_HARD_LIMIT_COLUMN    =   ROOT_NODE + "/tables/columns/server_hard_limit";
-	public static final String SERVER_LIST_SOFTWARE_COLUMN   	=   ROOT_NODE + "/tables/columns/server_software";
+	protected static final String SWT_NODE 				 		=   "/swt";
 	
-	public static final String TOOLBAR_VISIBILITY_PREF_NODE		= 	ROOT_NODE + "/toolbar";
-	public static final String STATUSBAR_VISIBILITY_PREF_NODE	= 	ROOT_NODE + "/statusbar";
+	public static final String COLUMN_NAME_KEY			 		=   "ColumnID";
+	public static final String COLUMN_DISABLED_KEY	 			=   "ColumnDisabled";
+	public static final String COLUMN_DESC_KEY	 				=   "ColumnDesc";
 	
-	
-	public static final String COLUMN_NAME_KEY			 =   "ColumnID"; 
-	public static final String ROW_OBJECT_KEY			 =   "Column Object";
+	public static final String ROW_OBJECT_KEY				    =   "Row Object";
 }
+
