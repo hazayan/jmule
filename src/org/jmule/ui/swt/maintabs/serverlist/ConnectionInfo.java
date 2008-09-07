@@ -29,28 +29,32 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
+import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
-import org.jmule.ui.swt.common.ScrolledContent;
+import org.jmule.ui.swt.Refreshable;
+import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:10 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:00:33 $$
  */
-public class ConnectionInfo extends CTabFolder {
+public class ConnectionInfo extends CTabFolder implements Refreshable {
 
 	private Label my_info_status,my_info_client_id,my_info_nickname,
 					my_info_user_ip,my_info_sharedcount;
 	private Label server_address,server_name,server_desc,server_users,
 					server_files,server_ping,server_hard_limit,server_soft_limit,server_version;
 	private CTabItem my_info,server_info;
+	
 	private JMuleCore _core;
 	
 	public ConnectionInfo(Composite parent,JMuleCore core) {
@@ -78,10 +82,11 @@ public class ConnectionInfo extends CTabFolder {
 		
 		this.setSelection(my_info);
 		
-		ScrolledContent my_info_scroll = new ScrolledContent(this);
-		my_info.setControl(my_info_scroll);
+		//ScrolledContent my_info_scroll = new ScrolledContent(this);
+		//my_info.setControl(my_info_scroll);
 
-		Composite my_info_content = new Composite(my_info_scroll,SWT.NONE);
+		Composite my_info_content = new Composite(this,SWT.NONE);
+		my_info.setControl(my_info_content);
 		my_info_content.setLayout(new GridLayout(2,false));
 		
 		Label label;
@@ -113,6 +118,17 @@ public class ConnectionInfo extends CTabFolder {
 		my_info_nickname = new Label(my_info_content,SWT.NONE);
 		my_info_nickname.setFont(skin.getLabelFont());
 		my_info_nickname.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		my_info_nickname.setText(_core.getConfigurationManager().getNickName());
+		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
+			public void nickNameChanged(String nickName) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						my_info_nickname.setText(_core.getConfigurationManager().getNickName());
+					}
+				});
+			}
+		});
+		
 		label = new Label(my_info_content,SWT.NONE);
 		label.setFont(skin.getLabelFont());
 		label.setText(Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.sharedfiles") + " : ");
@@ -120,14 +136,15 @@ public class ConnectionInfo extends CTabFolder {
 		my_info_sharedcount = new Label(my_info_content,SWT.NONE);
 		my_info_sharedcount.setFont(skin.getLabelFont());
 		my_info_sharedcount.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		my_info_scroll.setContent(my_info_content);
+		my_info_sharedcount.setText(_core.getSharingManager().getFileCount()+"");
+		//my_info_scroll.setContent(my_info_content);
 		
-		ScrolledContent server_info_scroll = new ScrolledContent(this);
-		server_info.setControl(server_info_scroll);
+		//ScrolledContent server_info_scroll = new ScrolledContent(this);
+		//server_info.setControl(server_info_scroll);
 
-		Composite server_info_content = new Composite(server_info_scroll,SWT.NONE);
+		Composite server_info_content = new Composite(this,SWT.NONE);
 		server_info_content.setLayout(new GridLayout(2,false));
-
+		server_info.setControl(server_info_content);
 		label = new Label(server_info_content,SWT.NONE);
 		label.setFont(skin.getLabelFont());
 		label.setText(Localizer._("mainwindow.serverlisttab.connectioninfo.serverinfo.address")+" : ");
@@ -192,7 +209,7 @@ public class ConnectionInfo extends CTabFolder {
 		server_version.setFont(skin.getLabelFont());
 		server_version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		server_info_scroll.setContent(server_info_content);
+		//server_info_scroll.setContent(server_info_content);
 		
 		setStatusDisconnected();
 
@@ -202,7 +219,6 @@ public class ConnectionInfo extends CTabFolder {
 		my_info_status.setText(Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.disconnected"));
         my_info_client_id.setText("");
         my_info_client_id.setToolTipText("");
-        my_info_nickname.setText("");
         my_info_user_ip.setText("");
         
         server_address.setText("");
@@ -221,7 +237,6 @@ public class ConnectionInfo extends CTabFolder {
 		my_info_status.setText(Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.connecting"));
         my_info_client_id.setText("");
         my_info_client_id.setToolTipText("");
-        my_info_nickname.setText("");
         my_info_user_ip.setText("");
         
         if (server!=null)
@@ -244,7 +259,6 @@ public class ConnectionInfo extends CTabFolder {
 		long client_id = Convert.intToLong(server.getClientID().hashCode());
         my_info_client_id.setText(client_id + " " + (server.getClientID().isHighID() ? Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.high_id") : Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.low_id") ));
         my_info_client_id.setToolTipText("");
-        my_info_nickname.setText(_core.getConfigurationManager().getNickName());
         my_info_user_ip.setText(server.getClientID() + "");
         
         server_address.setText(server.getAddress() + ":" + server.getPort());
@@ -261,6 +275,11 @@ public class ConnectionInfo extends CTabFolder {
 	
 	
 	protected void checkSubclass() {}
+
+	public void refresh() {
+		if (isDisposed()) return ;
+		my_info_sharedcount.setText(_core.getSharingManager().getFileCount()+"");
+	}
 
 	
 }
