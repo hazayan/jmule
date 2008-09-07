@@ -28,40 +28,52 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.jmule.ui.UIConstants;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:01 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:02:25 $$
  */
 public class Utils {
 	
 	public static String getClipboardText() {
-	    final Clipboard cb = new Clipboard(Utils.getDisplay());
+	    final Clipboard cb = new Clipboard(SWTThread.getDisplay());
 	    final TextTransfer transfer = TextTransfer.getInstance();
 	    
 	    String data = (String)cb.getContents(transfer);
-	    
+	    if (data==null) return "";
 	    return data;
 	}
 	
-	public static int showConfirmMessageBox(Shell shell, String message) {
+	public static boolean showConfirmMessage(Shell shell, String title,String message) {
 		MessageBox dialog = new MessageBox(shell,
                 SWT.YES | SWT.NO | SWT.ICON_WARNING);
+		dialog.setText(title);
 		dialog.setMessage(message);
-		return dialog.open();
+		int result = dialog.open();
+		return result==SWT.YES;
+	}
+	
+	public static void showWarningMessage(Shell shell,String title,String message) {
+		MessageBox dialog = new MessageBox(shell,
+                SWT.OK | SWT.ICON_WARNING);
+		dialog.setText(title);
+		dialog.setMessage(message);
+		dialog.open();
 	}
 	
 	public static void setClipBoardText(String text) {
-		final Clipboard cb = new Clipboard(Utils.getDisplay());
+		final Clipboard cb = new Clipboard(SWTThread.getDisplay());
 		final TextTransfer transfer = TextTransfer.getInstance();
 		
 		cb.setContents(new String[]{text}, new Transfer[]{transfer});
@@ -92,14 +104,6 @@ public class Utils {
 		shellRect.y = displayArea.y + (displayArea.height - shellRect.height) / 2;
 
 		shell.setBounds(shellRect);
-	}
-	
-	public static Display getDisplay() {
-		SWTThread swt = SWTThread.getInstance();
-
-		Display display = swt.getDisplay();
-		
-		return display;
 	}
 	
 	public static boolean drawImage(GC gc, Image image, Rectangle dstRect,
@@ -163,6 +167,7 @@ public class Utils {
 
 		return true;
 	}
+	
 	
 	/**
 	 * Bottom Index may be negative
