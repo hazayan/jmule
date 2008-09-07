@@ -34,7 +34,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -53,29 +52,32 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.skin.SkinConstants;
 import org.jmule.ui.swt.SWTConstants;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
+import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.VerticalAligner;
 import org.jmule.ui.swt.skin.SWTSkin;
 
 /**
- * 
+ * @author tuxpaper
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:19 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:26:56 $$
  */
 public class TableColumnEditorWindow {
   
+  public static final Color ROW_ALTERNATE_COLOR_1 = new Color(SWTThread.getDisplay(),238,238,238);
+  public static final Color ROW_ALTERNATE_COLOR_2 = SWTThread.getDisplay().getSystemColor(SWT.COLOR_WHITE);
+	
   private Display display;
   private Shell shell;
   private Color blue;
   private Table table;
   
-  //private TableColumnCore[] tableColumns;
   private ArrayList<TableColumn> tableColumns;
   private Map<TableColumn,Boolean> newEnabledState;
   private TableStructureModificationListener listener;
@@ -94,7 +96,7 @@ public class TableColumnEditorWindow {
   public TableColumnEditorWindow(final Table editTable,Shell parent,
 		  						 TableColumn[] _tableColumns,
                                  TableStructureModificationListener _listener) {
-		JMuleUI ui_instance = null;
+	JMuleUI ui_instance = null;
 	try {
 		
 		ui_instance = JMuleUIManager.getJMuleUI();
@@ -114,22 +116,10 @@ public class TableColumnEditorWindow {
     	tableColumns.add(editTable.getColumn(id));
     }
     
-/*    tableColumns = new ArrayList(Arrays.asList(_tableColumns));
-    Collections.sort(tableColumns, new Comparator () {
-      public final int compare (Object a, Object b) {
-    	TableColumn t1 = (TableColumn)a;
-    	TableColumn t2 = (TableColumn)b;
-    	int i = editTable.getColumnOrder()[editTable.indexOf(t1)];
-    	int j = editTable.getColumnOrder()[editTable.indexOf(t2)];
-    	if (i>j) return 1;
-    	if (j<i) return -1;
-    	return 0;
-      }
-    });*/
     newEnabledState = new HashMap<TableColumn,Boolean>();
 
     for(TableColumn column : tableColumns) {
-    	String column_id = (String)column.getData(SWTConstants.COLUMN_NAME_KEY);
+    	int column_id = (Integer)column.getData(SWTConstants.COLUMN_NAME_KEY);
     	Boolean status = SWTPreferences.getInstance().isColumnVisible(column_id);
     	newEnabledState.put(column, status);
     }
@@ -140,7 +130,7 @@ public class TableColumnEditorWindow {
     Shell shell1=new Shell(display,SWT.ON_TOP);
 	shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 	shell.setText(Localizer._("columneditorwindow.title"));
-	shell.setImage(new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("columns_setup.png")));
+	shell.setImage(SWTImageRepository.getImage("columns_setup.png"));
 	
     GridLayout layout = new GridLayout();
     shell.setLayout (layout);
@@ -215,7 +205,7 @@ public class TableColumnEditorWindow {
     column = new TableColumn(table, SWT.NONE);
     column.setText(Localizer._("columneditorwindow.column.description"));
     table.getColumn(0).setWidth(160);
-    table.getColumn(1).setWidth(500);
+    table.getColumn(1).setWidth(1000);
 
     table.addListener(SWT.Selection,new Listener() {
       public void handleEvent(Event e) {
@@ -247,20 +237,22 @@ public class TableColumnEditorWindow {
 						return;
 				}
 				
+			if (index % 2 == 0)
+				item.setBackground(ROW_ALTERNATE_COLOR_2);
+			else
+				item.setBackground(ROW_ALTERNATE_COLOR_1);
+				
 			TableColumn tableColumn = tableColumns.get(index);
 		    //String sTitleLanguageKey = tableColumn.getTitleLanguageKey();
 		    item.setText(0, tableColumn.getText());
-		    String column_id = (String)tableColumn.getData(SWTConstants.COLUMN_NAME_KEY);
-		    item.setText(1, SWTPreferences.getColumnDescription(column_id));
+		    item.setText(1, (String)tableColumn.getData(SWTConstants.COLUMN_DESC_KEY));
 		    
 		    //Causes SetData listener to be triggered again, which messes up SWT 
 	        table.getColumn(1).pack();
 
 		    final boolean bChecked = ((Boolean) newEnabledState.get(tableColumn));
 		    item.setChecked(bChecked);
-		//				
-		   // Utils.setCheckedInSetData(item, bChecked);
-		  //  Utils.alternateRowBackground(item);
+
 			}
     }); 
     table.setItemCount(tableColumns.size());
@@ -374,8 +366,7 @@ public class TableColumnEditorWindow {
     for(int i = 0 ; i < items.length ; i++) {
       TableColumn tableColumn = tableColumns.get(i);
 	  boolean bChecked = ((Boolean) newEnabledState.get(tableColumn));
-	  String column_id = (String)tableColumn.getData(SWTConstants.COLUMN_NAME_KEY);
-	  System.out.println(column_id+" - "+i);
+	  int column_id = (Integer)tableColumn.getData(SWTConstants.COLUMN_NAME_KEY);
 	  SWTPreferences.getInstance().setColumnOrder(column_id, i);
 	  SWTPreferences.getInstance().setColumnVisibility(column_id, bChecked);
 	  
