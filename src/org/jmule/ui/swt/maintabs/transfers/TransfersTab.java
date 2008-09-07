@@ -27,9 +27,11 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.jmule.core.JMuleCore;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.swt.GUIUpdater;
 import org.jmule.ui.swt.common.SashControl;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.skin.SWTSkin;
@@ -37,8 +39,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:20 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:51:24 $$
  */
 public class TransfersTab extends AbstractTab{
 
@@ -46,9 +48,16 @@ public class TransfersTab extends AbstractTab{
 	
 	private Composite upload_panel;
 	
-	public TransfersTab(Composite shell) {
+	private JMuleCore _core;
+	
+	private DownloadList download_list;
+	private UploadList 	 upload_list;
+	
+	public TransfersTab(Composite shell,JMuleCore core) {
 		super(shell);
 
+		_core = core;
+		
 		setLayout(new FormLayout());
 		
 		download_panel = new Composite(this,SWT.NONE);
@@ -72,22 +81,30 @@ public class TransfersTab extends AbstractTab{
 		Group downloads = new Group(download_panel,SWT.NONE);
 		downloads.setFont(skin.getDefaultFont());
 		downloads.setText(Localizer._("mainwindow.transferstab.downloads"));
+		downloads.setLayout(new FillLayout());
+		download_list = new DownloadList(downloads,_core);
 		
 		Group uploads = new Group(upload_panel,SWT.NONE);
 		uploads.setFont(skin.getDefaultFont());
-		uploads.setText("Uploads");
+		uploads.setText(Localizer._("mainwindow.transferstab.uploads"));
+		uploads.setLayout(new FillLayout());
+		upload_list = new UploadList(uploads,_core);
+		
+		
 	}
 
-	public int getTabType() {
-		return TAB_TRANSFERS;
+	public JMULE_TABS getTabType() {
+		return JMULE_TABS.TRANSFERS;
 	}
 
 	public void lostFocus() {
-		
+		GUIUpdater.getInstance().removeRefreshable(download_list);
+		GUIUpdater.getInstance().removeRefreshable(upload_list);
 	}
 
 	public void obtainFocus() {
-		
+		GUIUpdater.getInstance().addRefreshable(download_list);
+		GUIUpdater.getInstance().addRefreshable(upload_list);
 	}
 
 	public void disposeTab() {
