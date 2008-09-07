@@ -25,54 +25,66 @@ package org.jmule.ui.swt.maintabs.serverlist;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UIImageRepository;
+import org.jmule.ui.UICommon;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.GUIUpdater;
 import org.jmule.ui.swt.Refreshable;
+import org.jmule.ui.swt.SWTImageRepository;
+import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.skin.SWTSkin;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:10 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:49:00 $$
  */
-public class ServerPropertiesWindow implements JMuleUIComponent {
+public class ServerPropertiesWindow implements JMuleUIComponent,Refreshable {
 
 	private Shell shell;
 	
 	private Label label_name,label_desc,label_users,label_files,label_ping,label_soft_limit,label_hard_limit,label_version;
 	private Server server;
-	private WindowUpdater updater;
 	
 	public ServerPropertiesWindow(Server server) {
+		this.server = server;
+	}
+	
+	public void getCoreComponents() {
+		
+	}
+
+	public void initUIComponents() {
 		JMuleUI ui_instance = null;
 		try {
-			
 		    ui_instance = JMuleUIManager.getJMuleUI();
-		
 		}catch(Throwable t) {
 		}
 		
 		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
-		this.server = server;
 		
-		final Shell shell1=new Shell(Utils.getDisplay(),SWT.ON_TOP);
-		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		
-		shell.setImage(new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("server_properties.png")));
+		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
+		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+		
+		shell.setImage(SWTImageRepository.getImage("server_properties.png"));
 		shell.setSize(500, 310);
 		shell.setText(Localizer._("serverpropertieswindow.title"));
 	
@@ -88,17 +100,38 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 		
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_address")+" : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_address")+" : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
-		label = new Label(server_fields,SWT.NONE);
+		Composite server_info = new Composite(server_fields,SWT.NONE);
+		GridLayout server_info_layout = new GridLayout(2,false);
+		server_info_layout.marginWidth = 0;
+		server_info_layout.marginHeight = 0;
+		server_info.setLayout(server_info_layout);
+	
+		CountryLocator country_locator = CountryLocator.getInstance();
+		if (!country_locator.isServiceDown()) {
+			label = new Label(server_info,SWT.NONE);
+			Image flag = new Image(SWTThread.getDisplay(),UICommon.getCountryFlag(server.getAddress()));
+			label.setImage(flag);
+			String country_name = country_locator.getCountryName(server.getAddress());
+			String country_code = country_locator.getCountryCode(server.getAddress());
+			
+			if (country_name.equals(CountryLocator.COUNTRY_NAME_NOT_AVAILABLE))
+				country_name = Localizer._("serverpropertieswindow.label.country.unknown_name");
+			if (country_code.equals(CountryLocator.COUNTRY_CODE_NOT_AVAILABLE))
+				country_code = Localizer._("serverpropertieswindow.label.country.unknown_code");
+			label.setToolTipText(country_name+" ("+country_code+")");
+		}
+		
+		label = new Label(server_info,SWT.NONE);
 		label.setFont(skin.getLabelFont());
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		label.setText(server.getAddress()+":"+server.getPort());
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_name"));
+		label.setText(Localizer._("serverpropertieswindow.label.server_name") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		label_name = new Label(server_fields,SWT.NONE);
@@ -107,7 +140,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_description") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_description") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
 		label_desc = new Label(server_fields,SWT.NONE);
@@ -116,7 +149,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_users") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_users") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 	
 		label_users = new Label(server_fields,SWT.NONE);
@@ -125,7 +158,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_files") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_files") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
 		
@@ -135,7 +168,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_ping") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_ping") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		label_ping = new Label(server_fields,SWT.NONE);
@@ -144,7 +177,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_hard_limit") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_hard_limit") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		label_hard_limit = new Label(server_fields,SWT.NONE);
@@ -153,7 +186,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.server_soft_limit") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.server_soft_limit") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		label_soft_limit = new Label(server_fields,SWT.NONE);
@@ -162,16 +195,32 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 
 		label = new Label(server_fields,SWT.NONE);
 		label.setFont(skin.getLabelFont());
-		label.setText(Localizer._("serverpropertieswindow.version") + " : ");
+		label.setText(Localizer._("serverpropertieswindow.label.version") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 	
 		label_version = new Label(server_fields,SWT.NONE);
 		label_version.setFont(skin.getDefaultFont());
 		label_version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		updater = new WindowUpdater();
-		GUIUpdater.getInstance().addRefreshable(updater);
-		updater.refresh();
+		label = new Label(server_fields,SWT.NONE);
+		label.setFont(skin.getLabelFont());
+		label.setText(Localizer._("serverpropertieswindow.label.ed2k_link") + " : ");
+		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+		label = new Label(server_fields,SWT.NONE);
+		label.setFont(skin.getDefaultFont());
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		label.setText(server.getServerLink().getAsString());
+		label.setToolTipText(_._("serverpropertieswindow.label.ed2k_link.tooltip"));
+		label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		label.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		label.addListener(SWT.MouseUp, new Listener() {
+			public void handleEvent(Event arg0) {
+				Utils.setClipBoardText(server.getServerLink().getAsString());
+			}
+		});
+		
+		GUIUpdater.getInstance().addRefreshable(this);
 		
 		Composite button_bar = new Composite(shell,SWT.NONE);
 		button_bar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -182,47 +231,44 @@ public class ServerPropertiesWindow implements JMuleUIComponent {
 		Button button = new Button(button_bar,SWT.NONE);
 		button.setFont(skin.getButtonFont());
 		button.setText(Localizer._("serverpropertieswindow.close"));
-		
+		button.setFocus();
 		GridData grid_data = new GridData();
 		grid_data.horizontalAlignment = GridData.END;
 		grid_data.widthHint = 60;
 		grid_data.grabExcessHorizontalSpace = true;
 		button.setLayoutData(grid_data);
 
+		label_version.setText(server.getVersion()+"");
+		label_soft_limit.setText(server.getSoftLimit()+"");
+		label_hard_limit.setText(server.getHardLimit()+"");
+		label_ping.setText(server.getPing()+"");
+		label_files.setText(server.getNumFiles()+"");
+		label_users.setText(server.getNumUsers()+"");
+		label_desc.setText(server.getDesc());
+		label_name.setText(server.getName());
+		
+		final Refreshable refreshable = this;
+		
 		button.addSelectionListener(new SelectionAdapter() {
-			
 			public void widgetSelected(final SelectionEvent e) {
-				GUIUpdater.getInstance().removeRefreshable(updater);
+				GUIUpdater.getInstance().removeRefreshable(refreshable);
 				shell.close();
 			}
-		
 		});
-	}
-	
-	public void getCoreComponents() {
 		
-	}
-
-	public void initUIComponents() {
 		shell.open();
-		while (!shell.isDisposed())
-		      if (!shell.getDisplay().readAndDispatch()) shell.getDisplay().sleep();
-	}
-		
-	private class WindowUpdater implements Refreshable {
-
-		public void refresh() {
-			label_version.setText(server.getVersion()+"");
-			label_soft_limit.setText(server.getSoftLimit()+"");
-			label_hard_limit.setText(server.getHardLimit()+"");
-			label_ping.setText(server.getPing()+"");
-			label_files.setText(server.getNumFiles()+"");
-			label_users.setText(server.getNumUsers()+"");
-			label_desc.setText(server.getDesc());
-			label_name.setText(server.getName());
-		}
-		
 	}
 	
+	public void refresh() {
+		if (shell.isDisposed()) return ;
+		label_version.setText(server.getVersion()+"");
+		label_soft_limit.setText(server.getSoftLimit()+"");
+		label_hard_limit.setText(server.getHardLimit()+"");
+		label_ping.setText(server.getPing()+"");
+		label_files.setText(server.getNumFiles()+"");
+		label_users.setText(server.getNumUsers()+"");
+		label_desc.setText(server.getDesc());
+		label_name.setText(server.getName());
+	}
 }
 
