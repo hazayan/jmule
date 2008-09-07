@@ -33,41 +33,44 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
+import org.jmule.core.JMRunnable;
+import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.JMuleUIManagerException;
+import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
+import org.jmule.ui.swt.Logger;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.maintabs.AbstractTab;
-import org.jmule.ui.swt.maintabs.LogsTab;
-import org.jmule.ui.swt.maintabs.SearchTab;
-import org.jmule.ui.swt.maintabs.SharedTab;
-import org.jmule.ui.swt.maintabs.StatisticsTab;
+import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
+import org.jmule.ui.swt.maintabs.logs.LogsTab;
+import org.jmule.ui.swt.maintabs.search.SearchTab;
 import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 import org.jmule.ui.swt.maintabs.serverlist.ServerListTab;
+import org.jmule.ui.swt.maintabs.shared.SharedTab;
+import org.jmule.ui.swt.maintabs.statistics.StatisticsTab;
 import org.jmule.ui.swt.maintabs.transfers.TransfersTab;
+import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
+import org.jmule.updater.JMUpdater;
+import org.jmule.updater.JMUpdaterException;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 15:05:23 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:53:03 $$
  */
 public class MainWindow implements JMuleUIComponent {
-
-	private static MainWindow singleton = null;
-	
-	public static MainWindow getInstance() {
-		if (singleton==null)
-			singleton = new MainWindow();
-		return singleton;
-	}
 
 	private List<AbstractTab> tab_list = new LinkedList<AbstractTab>();
 	private ScrolledComposite window_content;
@@ -78,31 +81,38 @@ public class MainWindow implements JMuleUIComponent {
 	private MainMenu main_menu;
 	private StatusBar status_bar;
 	
-	private MainWindow() {	
+	private static Logger logger;
+	
+	public MainWindow() {	
+	}
+	
+	public static Logger getLogger() {
+		return logger;
 	}
 	
 	public void initUIComponents() {
 		final Display display = SWTThread.getInstance().getDisplay();
-		
-		display.asyncExec(new Runnable() {
-            public void run() {
+		final MainWindow instance = this;
+		display.asyncExec(new JMRunnable() {
+            public void JMRun() {
 		
             	shell = new Shell(display);
             	
 				SWTServerListWrapper.createListener(_core.getServerManager());
-				            	
+				shell.setSize(800, 500); 	
             	Utils.centreWindow(shell);
             	
             	shell.setText(JMConstants.JMULE_FULL_NAME);
+            	shell.setImage(SWTImageRepository.getImage("jmule.png"));
             	
             	GridLayout gridLayout = new GridLayout(1,true);
             	gridLayout.marginHeight = 2;
             	gridLayout.marginWidth = 2;
             	shell.setLayout(gridLayout);
             	//Setup main_menu
-            	main_menu = new MainMenu(shell);
+            	main_menu = new MainMenu(shell,instance);
             	//Setup tool bar
-            	toolbar = new Toolbar(shell,_core);
+            	toolbar = new Toolbar(shell,_core,instance);
 		
             	window_content = new ScrolledComposite(shell,SWT.NONE);
             	window_content.setExpandHorizontal(true);
@@ -111,40 +121,81 @@ public class MainWindow implements JMuleUIComponent {
             	GridData gridData = new GridData(GridData.FILL_BOTH);
             	window_content.setLayoutData(gridData);
 		
-            	status_bar = new StatusBar(shell);
+            	status_bar = new StatusBar(shell,_core);
             	
-            	shell.setSize(800, 500);
-		
+            	
+            	LogsTab logs_tab = new LogsTab(window_content);
+            	logger = logs_tab;
+            	tab_list.add(logs_tab);
             	tab_list.add(new ServerListTab(window_content,_core));
-            	tab_list.add(new TransfersTab(window_content));
-            	tab_list.add(new SharedTab(window_content));
-            	tab_list.add(new SearchTab(window_content));
+            	tab_list.add(new TransfersTab(window_content,_core));
+            	tab_list.add(new SearchTab(window_content,_core));
+            	tab_list.add(new SharedTab(window_content,_core));
             	tab_list.add(new StatisticsTab(window_content));
-            	tab_list.add(new LogsTab(window_content));
 		
-            	setTab(AbstractTab.TAB_SERVERLIST);
+            	setTab(AbstractTab.JMULE_TABS.SERVERLIST);
             	
             	if (!SWTPreferences.getInstance().isStatusBarVisible())
         			statusBarToogleVisibility();
             	
         		if (!SWTPreferences.getInstance().isToolBarVisible())
         			toolbarToogleVisibility();
-            	
+
             	shell.open ();
-		
-            	shell.addDisposeListener(new DisposeListener() {
-            		public void widgetDisposed(DisposeEvent arg0) {
-				
-            			try {
-							JMuleUIManager.getSingleton().shutdown();
-						} catch (JMuleUIManagerException e) {
-							e.printStackTrace();
-						}
-            			
-            		}
-			
-            	});
+
+            	// show log messages
+            	new Thread(new Runnable() {
+            		public void run() {
+            			logger.fine(Localizer._("mainwindow.logtab.message_jmule_started",  JMConstants.JMULE_FULL_NAME));
+            			logger.fine(Localizer._("mainwindow.logtab.message_servers_loaded", _core.getServerManager().getServersCount() + ""));
+            			logger.fine(Localizer._("mainwindow.logtab.message_shared_loaded", _core.getSharingManager().getFileCount() + ""));
+            			logger.fine(Localizer._("mainwindow.logtab.message_partial_loaded", _core.getDownloadManager().getDownloadCount() + ""));
+            		}}).start();
             	
+            	
+            	// Update checker
+            	if (SWTPreferences.getInstance().updateCheckAtStartup()) {
+            		new JMThread(new JMRunnable() {
+            			public void JMRun() {
+            				try {
+								JMUpdater.getInstance().checkForUpdates();
+								if (JMUpdater.getInstance().isNewVersionAvailable())
+									SWTThread.getDisplay().asyncExec(new JMRunnable() {
+				            			public void JMRun() {
+				            				if (JMUpdater.getInstance().isNewVersionAvailable()) {
+												if (Utils.showConfirmMessage(shell, _._("mainwindow.new_version_available.title"), _._("mainwindow.new_version_available"))) {
+													UpdaterWindow window = new UpdaterWindow();
+													window.getCoreComponents();
+													window.initUIComponents();
+												} }
+				            		}});
+							} catch (JMUpdaterException e) {
+							}
+            			}
+            		}).start();
+            	}
+            	
+            	shell.addListener(SWT.Close, new Listener() {
+					public void handleEvent(Event arg0) {
+						boolean exit = SWTPreferences.getInstance().promptOnExit() ? 
+								Utils.showConfirmMessage(shell, _._("mainwindow.exit_prompt_title"), _._("mainwindow.exit_prompt")) : true;
+						arg0.doit = exit;
+					}
+            	});
+            	shell.addDisposeListener(new DisposeListener() {
+					public void widgetDisposed(DisposeEvent arg0) {
+						new JMThread(new JMRunnable() {
+							public void JMRun() {
+								try {
+									JMuleUIManager.getSingleton().shutdown();
+								} catch (JMuleUIManagerException e) {
+									e.printStackTrace();
+								}
+							}
+						}).start();
+						
+					}
+            	});
             	
             
             }});
@@ -165,7 +216,7 @@ public class MainWindow implements JMuleUIComponent {
 		return this.shell;
 	}
 	
-	public void setTab(int tabID) {
+	public void setTab(JMULE_TABS tabID) {
 		if (window_content.getContent()!=null) {
 		for(AbstractTab tab : tab_list) {
 			if (window_content.getContent().equals(tab)) {
@@ -185,6 +236,10 @@ public class MainWindow implements JMuleUIComponent {
 		
 	}
 
+	public void close() {
+		shell.close();
+	}
+	
 	public void getCoreComponents() {
 		
 			_core = JMuleCoreFactory.getSingleton();

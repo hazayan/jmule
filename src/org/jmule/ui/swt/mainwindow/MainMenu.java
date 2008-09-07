@@ -26,29 +26,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.jmule.core.JMConstants;
+import org.jmule.core.JMRunnable;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.SWTPreferences;
-import org.jmule.ui.swt.maintabs.AbstractTab;
-
+import org.jmule.ui.swt.SWTThread;
+import org.jmule.ui.swt.aboutwindow.AboutWindow;
+import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
+import org.jmule.ui.swt.serverlistimportwindow.ServerListImportWindow;
+import org.jmule.ui.swt.settingswindow.SettingsWindow;
+import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:50 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:52:19 $$
  */
 public class MainMenu extends Menu{
 
-	private Map<Integer,MenuItem> tab_map = new HashMap<Integer,MenuItem>();
+	private Map<JMULE_TABS,MenuItem> tab_map = new HashMap<JMULE_TABS,MenuItem>();
+	private MainWindow main_window;
 	
-	public MainMenu(Shell shell) {
+	public MainMenu(Shell shell, MainWindow mainWindow) {
 		super(shell, SWT.BAR);
-		
+		main_window = mainWindow;
 		shell.setMenuBar(this);
 		
 		//File menu
@@ -61,10 +69,26 @@ public class MainMenu extends Menu{
 		MenuItem import_servers = new MenuItem (submenu, SWT.PUSH);
 		import_servers.setText(Localizer._("mainwindow.mainmenu.file.import"));
 		
+		import_servers.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				ServerListImportWindow window = new ServerListImportWindow();
+				window.getCoreComponents();
+				window.initUIComponents();
+			}
+			
+		});
+		
 		new MenuItem (submenu, SWT.SEPARATOR);
 
 		MenuItem exit_item = new MenuItem (submenu, SWT.PUSH);
 		exit_item.setText(Localizer._("mainwindow.mainmenu.file.exit"));
+		
+		exit_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				main_window.close();
+			}
+			
+		});
 		
 		// View menu
 		MenuItem viewItem = new MenuItem (this, SWT.CASCADE);
@@ -81,84 +105,61 @@ public class MainMenu extends Menu{
 		
 		MenuItem servers_item = new MenuItem (tabs_menu, SWT.RADIO);
 		servers_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.servers"));
-		tab_map.put(AbstractTab.TAB_SERVERLIST,servers_item);
+		tab_map.put(JMULE_TABS.SERVERLIST,servers_item);
 		
-		servers_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
+		servers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().setTab(AbstractTab.TAB_SERVERLIST);
+				main_window.setTab(JMULE_TABS.SERVERLIST);
 			}
-			
 		});
 		
 		MenuItem transfers_item = new MenuItem (tabs_menu, SWT.RADIO);
 		transfers_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.transfers"));
-		tab_map.put(AbstractTab.TAB_TRANSFERS,transfers_item);
-		transfers_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
+		tab_map.put(JMULE_TABS.TRANSFERS,transfers_item);
+		transfers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().setTab(AbstractTab.TAB_TRANSFERS);
+				main_window.setTab(JMULE_TABS.TRANSFERS);
 			}
-			
 		});
 		
 		MenuItem search_item = new MenuItem (tabs_menu, SWT.RADIO);
 		search_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.search"));
-		tab_map.put(AbstractTab.TAB_SEARCH,search_item);
+		tab_map.put(JMULE_TABS.SEARCH ,search_item);
 		
-		search_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
+		search_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().setTab(AbstractTab.TAB_SEARCH);
+				main_window.setTab(JMULE_TABS.SEARCH);
 			}
 			
 		});
 		
 		MenuItem shared_item = new MenuItem (tabs_menu, SWT.RADIO);
 		shared_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.shared"));
-		tab_map.put(AbstractTab.TAB_SHARED,shared_item);
+		tab_map.put(JMULE_TABS.SHARED,shared_item);
 		
-		shared_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
+		shared_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().setTab(AbstractTab.TAB_SHARED);
+				main_window.setTab(JMULE_TABS.SHARED);
 			}
 			
 		});
 		
 		MenuItem stats_item = new MenuItem (tabs_menu, SWT.RADIO);
 		stats_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.stats"));
-		tab_map.put(AbstractTab.TAB_STATISTICS,stats_item);
-		stats_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
+		tab_map.put(JMULE_TABS.STATISTICS,stats_item);
+		stats_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().setTab(AbstractTab.TAB_STATISTICS);
+				main_window.setTab(JMULE_TABS.STATISTICS);
 			}
-			
 		});
-		
 		
 		MenuItem log_item = new MenuItem (tabs_menu, SWT.RADIO);
 		log_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.logs"));
-		tab_map.put(AbstractTab.TAB_LOGS,log_item);
-		log_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-
+		tab_map.put(JMULE_TABS.LOGS,log_item);
+		log_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().setTab(AbstractTab.TAB_LOGS);
+				main_window.setTab(JMULE_TABS.LOGS);
 			}
-			
 		});
 		
 		MenuItem toolbar_item = new MenuItem (submenu, SWT.CHECK);
@@ -167,13 +168,9 @@ public class MainMenu extends Menu{
 		else
 			toolbar_item.setSelection(true);
 		toolbar_item.setText(Localizer._("mainwindow.mainmenu.view.toolbar"));
-		toolbar_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-
+		toolbar_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().toolbarToogleVisibility();
+				main_window.toolbarToogleVisibility();
 			}
 			
 		});
@@ -184,15 +181,10 @@ public class MainMenu extends Menu{
 		else
 			status_item.setSelection(true);
 		status_item.setText(Localizer._("mainwindow.mainmenu.view.statusbar"));
-		status_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-
+		status_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				MainWindow.getInstance().statusBarToogleVisibility();
+				main_window.statusBarToogleVisibility();
 			}
-			
 		});
 		
 		//Tools menu
@@ -206,8 +198,18 @@ public class MainMenu extends Menu{
 		MenuItem wizard_item = new MenuItem (submenu, SWT.PUSH);
 		wizard_item.setText(Localizer._("mainwindow.mainmenu.tools.wizard"));
 		
+		new MenuItem (submenu, SWT.SEPARATOR);
+		
 		MenuItem options_item = new MenuItem (submenu, SWT.PUSH);
 		options_item.setText(Localizer._("mainwindow.mainmenu.tools.options"));
+		
+		options_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				SettingsWindow window = new SettingsWindow();
+				window.getCoreComponents();
+				window.initUIComponents();
+			}
+		});
 		
 		// Help menu
 		MenuItem helpItem = new MenuItem (this, SWT.CASCADE);
@@ -218,22 +220,55 @@ public class MainMenu extends Menu{
 		
 		MenuItem help_contents_item = new MenuItem (submenu, SWT.PUSH);
 		help_contents_item.setText(Localizer._("mainwindow.mainmenu.help.contents"));
+		help_contents_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						Program.launch(JMConstants.ONLINE_HELP_WEB_SITE);
+					}
+				});	
+			}
+		});
 		
 		MenuItem forum_item = new MenuItem (submenu, SWT.PUSH);
 		forum_item.setText(Localizer._("mainwindow.mainmenu.help.forum"));
+		forum_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						Program.launch(JMConstants.JMULE_FORUMS);
+					}
+				});
+			}
+		});
 		
 		new MenuItem (submenu, SWT.SEPARATOR);
 		
 		MenuItem update_check_item = new MenuItem (submenu, SWT.PUSH);
 		update_check_item.setText(Localizer._("mainwindow.mainmenu.help.updatecheck"));
+		update_check_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				UpdaterWindow window = new UpdaterWindow();
+				window.getCoreComponents();
+				window.initUIComponents();
+			}
+			
+		});
 		
 		new MenuItem (submenu, SWT.SEPARATOR);
 		
 		MenuItem about_item = new MenuItem (submenu, SWT.PUSH);
 		about_item.setText(Localizer._("mainwindow.mainmenu.help.about"));
+		about_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				AboutWindow window = new AboutWindow();
+				window.getCoreComponents();
+				window.initUIComponents();
+			}
+		});
 	}
 	
-	public void setSelectedTab(int tabID) {
+	public void setSelectedTab(JMULE_TABS tabID) {
 
 		for(MenuItem item : tab_map.values()) 
 			item.setSelection(false);

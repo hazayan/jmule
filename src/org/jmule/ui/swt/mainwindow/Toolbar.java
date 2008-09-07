@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -36,24 +37,30 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.jmule.core.JMuleCore;
 import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.common.ConnectButton;
 import org.jmule.ui.swt.maintabs.AbstractTab;
+import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:51 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:54:55 $$
  */
 public class Toolbar extends ToolBar {
 
 	private List<ToolItem> button_list = new LinkedList<ToolItem>();
 	private GridData grid_data;
+	private MainWindow main_window;
 	
-	public Toolbar(Composite shell,JMuleCore core) {
+	
+	public Toolbar(Composite shell,JMuleCore core, MainWindow mainWindow) {
 		super(shell, SWT.FLAT);
-
+		
+		main_window = mainWindow;
+		
 		grid_data = new GridData(GridData.FILL_HORIZONTAL);
 		
 		setLayoutData(grid_data);
@@ -65,117 +72,74 @@ public class Toolbar extends ToolBar {
 		final ToolItem servers_item = new ToolItem(this, SWT.PUSH);
 		servers_item.setText(Localizer._("mainwindow.toolbar.servers_item"));
 		servers_item.setSelection(true);
-		servers_item.setImage(new Image(shell.getDisplay(), UIImageRepository.getImageAsStream("servers.png")));
+		servers_item.setImage(SWTImageRepository.getImage("servers.png"));
 		button_list.add(servers_item);
 		
-		servers_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-
+		servers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				setSelection(servers_item);
-				
-				MainWindow.getInstance().setTab(AbstractTab.TAB_SERVERLIST);
-				
+				main_window.setTab(JMULE_TABS.SERVERLIST);
 			}
-			
 		});
 		
 		final ToolItem transfers_item = new ToolItem(this, SWT.PUSH);
 		transfers_item.setText(Localizer._("mainwindow.toolbar.transfers_item"));
-		transfers_item.setImage(new Image(shell.getDisplay(), UIImageRepository.getImageAsStream("transfer.png")));
+		transfers_item.setImage(SWTImageRepository.getImage("transfer.png"));
 		button_list.add(transfers_item);
 		
-		transfers_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-
+		transfers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				setSelection(transfers_item);
-				
-				MainWindow.getInstance().setTab(AbstractTab.TAB_TRANSFERS);
+				main_window.setTab(JMULE_TABS.TRANSFERS);
 			}
-			
-		});
-		
-		final ToolItem shared_item = new ToolItem(this, SWT.PUSH);
-		shared_item.setText(Localizer._("mainwindow.toolbar.shared_item"));
-		shared_item.setImage(new Image(shell.getDisplay(), UIImageRepository.getImageAsStream("shared_files.png")));
-		button_list.add(shared_item);
-		
-		shared_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-
-			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(shared_item);
-				
-				MainWindow.getInstance().setTab(AbstractTab.TAB_SHARED);
-			}
-			
 		});
 		
 		final ToolItem search_item = new ToolItem(this, SWT.PUSH);
 		search_item.setText(Localizer._("mainwindow.toolbar.search_item"));
-		search_item.setImage(new Image(shell.getDisplay(), UIImageRepository.getImageAsStream("search.png")));
+		search_item.setImage(SWTImageRepository.getImage("search.png"));
 		button_list.add(search_item);
 		
-		search_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-
+		search_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				setSelection(search_item);
-				
-				MainWindow.getInstance().setTab(AbstractTab.TAB_SEARCH);
+				main_window.setTab(JMULE_TABS.SEARCH);
 			}
-			
+		});
+		
+		final ToolItem shared_item = new ToolItem(this, SWT.PUSH);
+		shared_item.setText(Localizer._("mainwindow.toolbar.shared_item"));
+		shared_item.setImage(SWTImageRepository.getImage("shared_files.png"));
+		button_list.add(shared_item);
+		
+		shared_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				setSelection(shared_item);
+				main_window.setTab(JMULE_TABS.SHARED);
+			}
 		});
 		
 		final ToolItem statistics_item = new ToolItem(this,SWT.PUSH);
 		statistics_item.setText(Localizer._("mainwindow.toolbar.statistics_item"));
-		statistics_item.setImage(new Image(shell.getDisplay(), UIImageRepository.getImageAsStream("statistics.png")));
+		statistics_item.setImage(SWTImageRepository.getImage("statistics.png"));
 		button_list.add(statistics_item);
 		
-		statistics_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-
+		statistics_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				setSelection(statistics_item);
-				
-				MainWindow.getInstance().setTab(AbstractTab.TAB_STATISTICS);
+				main_window.setTab(JMULE_TABS.STATISTICS);
 			}
-			
 		});
 		
 		final ToolItem logs_item = new ToolItem(this, SWT.PUSH);
 		logs_item.setText(Localizer._("mainwindow.toolbar.logs_item"));
-		logs_item.setImage(new Image(shell.getDisplay(), UIImageRepository.getImageAsStream("logs.png")));
+		logs_item.setImage(SWTImageRepository.getImage("logs.png"));
 		button_list.add(logs_item);
 		
-		logs_item.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-
+		logs_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				setSelection(logs_item);
-				
-				MainWindow.getInstance().setTab(AbstractTab.TAB_LOGS);
+				main_window.setTab(JMULE_TABS.LOGS);
 			}
-			
 		});
 		
 	}
