@@ -34,8 +34,8 @@ import java.util.Map;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/06 17:53:54 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:18:26 $$
  */
 
 public class UIConstants {
@@ -84,6 +84,7 @@ public class UIConstants {
 	public static final int DOWNLOAD_LIST_STATUS_COLUMN_ID            = 1900;
 	
 	public static final int DOWNLOAD_PEER_LIST_IP_COLUMN_ID           = 2000;
+	public static final int DOWNLOAD_PEER_LIST_CC_COLUMN_ID	          = 2025;
 	public static final int DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID         = 2050;
 	public static final int DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID       = 2100;
 	public static final int DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID     = 2200;
@@ -100,6 +101,7 @@ public class UIConstants {
 	public static final int UPLOAD_LIST_UPLOADED_COLUMN_ID            = 2900;
 	
 	public static final int UPLOAD_PEER_LIST_IP_COLUMN_ID             = 3000;
+	public static final int UPLOAD_PEER_LIST_CC_COLUMN_ID		      = 3025;
 	public static final int UPLOAD_PEER_LIST_FLAG_COLUMN_ID		      = 3050;
 	public static final int UPLOAD_PEER_LIST_STATUS_COLUMN_ID         = 3100;
 	public static final int UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID   = 3150;
@@ -154,6 +156,7 @@ public class UIConstants {
 	protected static final String DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_NODE = "/download_peer_list_down_speed_column";
 	protected static final String DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_NODE   = "/download_peer_list_up_speed_column";
 	protected static final String DOWNLOAD_PEER_LIST_FLAG_COLUMN_NODE   	= "/download_peer_list_flag_column";
+	protected static final String DOWNLOAD_PEER_LIST_CC_COLUMN_NODE		   	= "/download_peer_list_cc_column";
 	
 	protected static final String UPLOAD_LIST_FILENAME_COLUMN_NODE          = "/upload_list_filename_column";
 	protected static final String UPLOAD_LIST_FILESIZE_COLUMN_NODE          = "/upload_list_filesize_column";
@@ -163,6 +166,7 @@ public class UIConstants {
 	protected static final String UPLOAD_LIST_UPLOADED_COLUMN_NODE          = "/upload_list_uploaded_column";
 	
 	protected static final String UPLOAD_PEER_LIST_IP_COLUMN_NODE           = "/upload_peer_list_ip_column";
+	protected static final String UPLOAD_PEER_LIST_CC_COLUMN_NODE	        = "/upload_peer_list_cc_column";
 	protected static final String UPLOAD_PEER_LIST_FLAG_COLUMN_NODE	        = "/upload_peer_list_flag_column";
 	protected static final String UPLOAD_PEER_LIST_STATUS_COLUMN_NODE       = "/upload_peer_list_status_column";
 	protected static final String UPLOAD_PEER_LIST_NICKNAME_COLUMN_NODE     = "/upload_peer_list_nickname_column";
@@ -224,6 +228,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID + VISIBILITY, true);
 		default_values.put(DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID + VISIBILITY,   true);
 		default_values.put(DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID + VISIBILITY,		 true);
+		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + VISIBILITY,		 true);
 		
 		default_values.put(UPLOAD_LIST_FILE_NAME_COLUMN_ID + VISIBILITY,         true);
 		default_values.put(UPLOAD_LIST_FILE_SIZE_COLUMN_ID + VISIBILITY,         true);
@@ -233,6 +238,7 @@ public class UIConstants {
 		default_values.put(UPLOAD_LIST_UPLOADED_COLUMN_ID + VISIBILITY,          true);
 		
 		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + VISIBILITY,           true);
+		default_values.put(UPLOAD_PEER_LIST_CC_COLUMN_ID + VISIBILITY,  	     true);
 		default_values.put(UPLOAD_PEER_LIST_FLAG_COLUMN_ID + VISIBILITY,         true);
 		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + VISIBILITY,       true);
 		default_values.put(UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID + VISIBILITY,     true);
@@ -279,12 +285,13 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + ORDER,           10);
 		
 		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + ORDER,    1);
-		default_values.put(DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID + ORDER,        2);
-		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,          3);
-		default_values.put(DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID + ORDER,  4);
-		default_values.put(DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID + ORDER,    5);
-		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,    6);
-		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,      7);
+		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + ORDER,	         2);
+		default_values.put(DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID + ORDER,        3);
+		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,          4);
+		default_values.put(DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID + ORDER,  5);
+		default_values.put(DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID + ORDER,    6);
+		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,    7);
+		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,      8);
 		
 		default_values.put(UPLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,          1);
 		default_values.put(UPLOAD_LIST_FILE_SIZE_COLUMN_ID + ORDER,          2);
@@ -294,11 +301,12 @@ public class UIConstants {
 		default_values.put(UPLOAD_LIST_UPLOADED_COLUMN_ID + ORDER,           6);
 		
 		default_values.put(UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID + ORDER,      1);
-		default_values.put(UPLOAD_PEER_LIST_FLAG_COLUMN_ID + ORDER,          2);
-		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,            3);
-		default_values.put(UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,  4);
-		default_values.put(UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,      5);
-		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,        6);
+		default_values.put(UPLOAD_PEER_LIST_CC_COLUMN_ID + ORDER,            2);
+		default_values.put(UPLOAD_PEER_LIST_FLAG_COLUMN_ID + ORDER,          3);
+		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,            4);
+		default_values.put(UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,  5);
+		default_values.put(UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,      6);
+		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,        7);
 				
 		default_values.put(SEARCH_FILENAME_COLUMN_ID + ORDER,                1);
 		default_values.put(SEARCH_FILESIZE_COLUMN_ID + ORDER,                2);
@@ -318,7 +326,7 @@ public class UIConstants {
 		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + WIDTH,               40);
 		default_values.put(SERVER_LIST_IP_COLUMN_ID + WIDTH,                150);
 		default_values.put(SERVER_LIST_DESCRIPTION_COLUMN_ID + WIDTH,       150);
-		default_values.put(SERVER_LIST_PING_COLUMN_ID + WIDTH,              150);
+		default_values.put(SERVER_LIST_PING_COLUMN_ID + WIDTH,              100);
 		default_values.put(SERVER_LIST_USERS_COLUMN_ID + WIDTH,             150);
 		default_values.put(SERVER_LIST_MAX_USERS_COLUMN_ID + WIDTH,         150);
 		default_values.put(SERVER_LIST_FILES_COLUMN_ID + WIDTH,             150);
@@ -339,6 +347,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + WIDTH,           100);
 		
 		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + WIDTH,          150);
+		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + WIDTH,	          50);
 		default_values.put(DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID + WIDTH,         50);
 		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + WIDTH,      150);
 		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + WIDTH,    100);
@@ -354,6 +363,7 @@ public class UIConstants {
 		default_values.put(UPLOAD_LIST_UPLOADED_COLUMN_ID + WIDTH,           100);
 		
 		default_values.put(UPLOAD_PEER_LIST_IP_COLUMN_ID + WIDTH,            150);
+		default_values.put(UPLOAD_PEER_LIST_CC_COLUMN_ID + WIDTH,            50);
 		default_values.put(UPLOAD_PEER_LIST_FLAG_COLUMN_ID + WIDTH,          50);
 		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + WIDTH,        150);
 		default_values.put(UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID + WIDTH,      100);
@@ -410,6 +420,7 @@ public class UIConstants {
 		  	case DOWNLOAD_LIST_STATUS_COLUMN_ID         :  return DOWNLOAD_LIST_STATUS_COLUMN_NODE;
 		  		
 		  	case DOWNLOAD_PEER_LIST_IP_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_IP_COLUMN_NODE;
+		  	case DOWNLOAD_PEER_LIST_CC_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_CC_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID      :  return DOWNLOAD_PEER_LIST_FLAG_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID    :  return DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID  :  return DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_NODE;
@@ -425,6 +436,7 @@ public class UIConstants {
 		  	case UPLOAD_LIST_UPLOADED_COLUMN_ID         :  return UPLOAD_LIST_UPLOADED_COLUMN_NODE;
 		  		
 		  	case UPLOAD_PEER_LIST_IP_COLUMN_ID          :  return UPLOAD_PEER_LIST_IP_COLUMN_NODE;
+		  	case UPLOAD_PEER_LIST_CC_COLUMN_ID          :  return UPLOAD_PEER_LIST_CC_COLUMN_NODE;
 		  	case UPLOAD_PEER_LIST_FLAG_COLUMN_ID        :  return UPLOAD_PEER_LIST_FLAG_COLUMN_NODE;
 		  	case UPLOAD_PEER_LIST_STATUS_COLUMN_ID      :  return UPLOAD_PEER_LIST_STATUS_COLUMN_NODE;
 		  	case UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID    :  return UPLOAD_PEER_LIST_NICKNAME_COLUMN_NODE;
