@@ -44,6 +44,8 @@ import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.skin.SkinConstants;
+import org.jmule.ui.swt.SWTImageRepository;
+import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.util.net.AddressUtils;
@@ -51,14 +53,23 @@ import org.jmule.util.net.AddressUtils;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:10 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:43:18 $$
  */
 public class ServerAddWindow implements JMuleUIComponent {
 
 	private Shell shell;
 		
-	public ServerAddWindow(String title) {
+	public ServerAddWindow() {
+		
+	}
+
+	public void getCoreComponents() {
+		
+	}
+
+	public void initUIComponents() {
+		String title = Localizer._("serveraddwindow.title");
 		JMuleUI ui_instance = null;
 		try {
 			
@@ -69,12 +80,12 @@ public class ServerAddWindow implements JMuleUIComponent {
 		
 		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
-		Display display = Utils.getDisplay();
+		Display display = SWTThread.getDisplay();
 		
 		final Shell shell1=new Shell(display,SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		
-		shell.setImage(new Image(display,UIImageRepository.getImageAsStream("server_add.png")));
+		shell.setImage(SWTImageRepository.getImage("server_add.png"));
 		shell.setText(title);
 		
 		Utils.centreWindow(shell);
@@ -111,9 +122,8 @@ public class ServerAddWindow implements JMuleUIComponent {
 			            e.doit = false;
 			            return;
 		          }
-				 }
+				}
 			}
-			
 		});
 		
 		Composite buttons_composite = new Composite(shell,SWT.NONE);
@@ -144,14 +154,15 @@ public class ServerAddWindow implements JMuleUIComponent {
 					dialog.open();
 					return ;
 				}
-				int server_port = Integer.parseInt(text_port.getText());
-				if (!AddressUtils.isPortInRange(server_port)) {
+				
+				if (!AddressUtils.isValidPort(text_port.getText())) {
 					MessageBox dialog = new MessageBox(shell,
 					SWT.OK | SWT.ICON_WARNING);
 					dialog.setMessage(Localizer._("serveraddwindow.wrong_server_port"));
 					dialog.open();
 					return ;
 				}
+				int server_port = Integer.parseInt(text_port.getText());
 				Server server = new Server(server_ip,server_port);
 				SWTServerListWrapper.getInstance().addServer(server);
 				shell.close();
@@ -174,17 +185,7 @@ public class ServerAddWindow implements JMuleUIComponent {
 		});
 		
 		shell.setSize(300, 175);
-	}
-
-	public void getCoreComponents() {
-		
-	}
-
-	public void initUIComponents() {
 		shell.open();
-		while(shell.isDisposed()) {
-			Utils.getDisplay().readAndDispatch();
-		}
 	}
 	
 }
