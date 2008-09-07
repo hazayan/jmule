@@ -31,19 +31,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMThread;
+import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerFactory;
+import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
+import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerFactory;
+import org.jmule.core.uploadmanager.UploadSession;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:39:52 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:58:41 $$
  */
 public class PeerManagerImpl implements PeerManager {
 	
@@ -76,7 +81,6 @@ public class PeerManagerImpl implements PeerManager {
 	}
 
 	public void makeKnownPeer(Peer peer) {
-		System.out.println(peer+"");
 		  if (!unknown_peer_list.contains(peer)) return ;
 		
 		  unknown_peer_list.remove(peer);
@@ -85,9 +89,9 @@ public class PeerManagerImpl implements PeerManager {
 			  
 			 for(Peer e_peer : peer_list) {
 				 if (e_peer.equals(peer)) {
+					 peer_list.remove(e_peer);
 					 peer.setSessionList(e_peer.getSessionList());
 					 e_peer.setSessionList(null);
-					 peer_list.remove(e_peer);
 					 peer_list.add(peer);
 					 return ;
 				 }
@@ -101,15 +105,13 @@ public class PeerManagerImpl implements PeerManager {
 			  return ;
 		  }
 
-		  System.out.println("Search low id peer : "+peer);
 		  if (!low_id_peer_list.contains(peer)) return ; 
-		  System.out.println("Found peer : "+peer);
 		  
 		  Peer old_peer = getLowIDPeer(peer);
+		  if (old_peer == null) return ;
 		  low_id_peer_list.remove(old_peer);
 		  
 		  peer.reusePeer(old_peer);
-		  System.out.println("Low id peer connected "+peer);
 		  addPeer(peer);
 	}
 
@@ -227,7 +229,7 @@ public class PeerManagerImpl implements PeerManager {
 			
 			if (unknown_peer_list.contains(peer)) continue;
 			
-			if (peer_list.contains(peer.getID())) continue;
+			if (peer_list.contains(peer)) continue;
 			
 			if (low_id_peer_list.contains(peer)) continue;
 			
@@ -251,9 +253,10 @@ public class PeerManagerImpl implements PeerManager {
 	public float getDownloadSpeed() {
 		float speed = 0;
 		
-		for(Peer peer : peer_list) {
-			speed+=peer.getDownloadSpeed();
-		}
+		DownloadManager download_manager = DownloadManagerFactory.getInstance();
+		
+		for(DownloadSession session : download_manager.getDownloads())
+			speed += session.getSpeed();
 		
 		return speed;
 	}
@@ -261,9 +264,10 @@ public class PeerManagerImpl implements PeerManager {
 	public float getUploadSpeed() {
 		float speed = 0;
 		
-		for(Peer peer : peer_list) {
-			speed+=peer.getUploadSpeed();
-		}
+		UploadManager upload_manager = UploadManagerFactory.getInstance();
+		
+		for(UploadSession session : upload_manager.getUploads())
+			speed += session.getSpeed();
 		
 		return speed;
 	}
@@ -309,7 +313,7 @@ public class PeerManagerImpl implements PeerManager {
 					if (peer.isConnected()) continue;
 					
 					if (System.currentTimeMillis()-peer.getConnectTime()>=PEER_CLEANER_DISCONNECT_TIME) {
-						if (peer.getSessionList().getSessionCount()==0) ;
+						if (peer.getSessionList().getSessionCount()==0)
 							peer.disconnect();
 						
 					}
@@ -321,7 +325,7 @@ public class PeerManagerImpl implements PeerManager {
 					if (peer.isConnected()) continue;
 					
 					if (System.currentTimeMillis()-peer.getConnectTime()>=PEER_CLEANER_DISCONNECT_TIME) {
-						
+						if (peer.getSessionList().getSessionCount()==0) 
 						peer.disconnect();
 						
 					}
