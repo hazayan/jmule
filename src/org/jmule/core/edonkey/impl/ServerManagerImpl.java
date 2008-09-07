@@ -51,8 +51,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:15:58 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:48:30 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -551,9 +551,7 @@ public class ServerManagerImpl implements ServerManager {
 		
 		public void JMStop() {
 			stop = true;
-			synchronized(this) {
-				this.interrupt();
-			}
+			interrupt();
 		}
 		
 	}

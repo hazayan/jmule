@@ -41,8 +41,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:28:31 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:54:40 $$
  */
 public abstract class JMConnection{
 	
@@ -476,12 +476,8 @@ public abstract class JMConnection{
 					
 					if (stop) return;
 					
-					if (e instanceof ClosedChannelException) {
-						disconnect();
-						return ;
-					}
-					
-					continue;
+					disconnect();
+					return ;
 				}
 				
 									
@@ -514,7 +510,8 @@ public abstract class JMConnection{
 					}
 					t.printStackTrace();
 					if (stop) return ;
-					continue;
+					disconnect();
+					return ;
 				}
 				connectionStats.addReceivedBytes(packet.getPacket().length);
 								

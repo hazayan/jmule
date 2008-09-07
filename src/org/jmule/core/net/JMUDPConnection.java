@@ -43,8 +43,8 @@ import org.jmule.util.Average;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:39:25 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:55:47 $$
  */
 public class JMUDPConnection {
 	
@@ -92,7 +92,7 @@ public class JMUDPConnection {
 			public void isUDPEnabledChanged(boolean enabled) {
 				try {
 					if (enabled)
-						open();
+						reopen();
 					else
 						close();
 				} catch (JMUDPConnectionException e) {
@@ -205,9 +205,7 @@ public class JMUDPConnection {
 		
 		public void JMStop() {
 			stop = true;
-			synchronized(this) {
-				interrupt();
-			}
+			interrupt();
 		}
 	}
 	
@@ -244,9 +242,7 @@ public class JMUDPConnection {
 		
 		public void JMStop() {
 			stop = true;
-			synchronized (this) {
-				this.interrupt();
-			}
+			interrupt();
 		}
 		
 		public boolean isSleeping() {
@@ -340,10 +336,7 @@ public class JMUDPConnection {
 		
 		public void JMStop() {
 			stop = true;
-			synchronized(this) {
-				this.interrupt();
-			}
-			
+			interrupt();
 		}
 	}
 

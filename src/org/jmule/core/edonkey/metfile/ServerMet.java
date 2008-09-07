@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -94,8 +93,8 @@ import org.jmule.util.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:50:54 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -274,8 +273,7 @@ public class ServerMet extends MetFile {
 		
 		Collection<Tag> tagList = server.getTagList().getTags();
 		
-		for(Iterator<Tag> j = tagList.iterator(); j.hasNext();) {
-			Tag tag = j.next();
+		for(Tag tag : tagList) {
 			data = Misc.getByteBuffer(tag.getData().length);
 			data.put(tag.getData());
 			data.position(0);
