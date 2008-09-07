@@ -28,42 +28,43 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.skin.SkinConstants;
-import org.jmule.ui.swt.Utils;
+import org.jmule.ui.swt.SWTImageRepository;
+import org.jmule.ui.swt.SWTThread;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:49 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:31:04 $$
  */
 public class DefaultSWTSkinImpl implements DefaultSWTSkin {
 
 	public Font getButtonFont() {
-		return Utils.getDisplay().getSystemFont();
+		return SWTThread.getDisplay().getSystemFont();
 	}
 
 	public Color getDefaultColor() {
-		return Utils.getDisplay().getSystemColor(SWT.COLOR_BLACK);
+		return SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 	}
 
 	public Font getDefaultFont() {
-		return Utils.getDisplay().getSystemFont();
+		return SWTThread.getDisplay().getSystemFont();
 	}
 
 	public Font getLabelFont() {
-		return Utils.getDisplay().getSystemFont();
+		return SWTThread.getDisplay().getSystemFont();
 	}
 
 	public Font getMenuBarFont() {
-		return Utils.getDisplay().getSystemFont();
+		return SWTThread.getDisplay().getSystemFont();
 	}
 
 	public Font getMenuFont() {
-		return Utils.getDisplay().getSystemFont();
+		return SWTThread.getDisplay().getSystemFont();
 	}
 
 	public Font getPopupMenuFont() {
-		return Utils.getDisplay().getSystemFont();
+		return SWTThread.getDisplay().getSystemFont();
 	}
 
 	public Image getButtonImage(int imageID) {
@@ -71,15 +72,15 @@ public class DefaultSWTSkinImpl implements DefaultSWTSkin {
 		switch (imageID) {
 		
 			case SkinConstants.OK_BUTTON_IMAGE  : {
-				return new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("ok.png"));
+				return SWTImageRepository.getImage("ok.png");
 			}
 		
 			case SkinConstants.CANCEL_BUTTON_IMAGE  : {
-				return new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("cancel.png"));
+				return SWTImageRepository.getImage("cancel.png");
 			}
 			
 			case SkinConstants.FINISH_BUTTON_IMAGE : {
-				return new Image(Utils.getDisplay(),UIImageRepository.getImageAsStream("accept.png"));
+				return SWTImageRepository.getImage("accept.png");
 			}
 		}
 		
