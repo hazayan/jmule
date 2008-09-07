@@ -52,8 +52,8 @@ import org.jmule.core.uploadmanager.UploadSession;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:52:57 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:04:16 $$
  */
 public class SharingManagerImpl implements SharingManager {
 
@@ -85,8 +85,12 @@ public class SharingManagerImpl implements SharingManager {
 					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_COUNT, getCompletedFiles().size());
 				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES)) { 
 					long total_bytes = 0;
-					for(SharedFile shared_file : sharedFiles.values())
+					for(PartialFile shared_file : getPartialFiles())
+						total_bytes += shared_file.getDownloadedBytes();
+					
+					for(CompletedFile shared_file : getCompletedFiles())
 						total_bytes += shared_file.length();
+					
 					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES, total_bytes);
 				}
 				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES)) { 
@@ -326,32 +330,28 @@ public class SharingManagerImpl implements SharingManager {
 	
 	public void makeCompletedFile(FileHash fileHash) throws SharingManagerException {
 		File incoming_dir = new File(ConfigurationManager.INCOMING_DIR);
+		
 		PartialFile shared_partial_file = getPartialFle(fileHash);
 		if( shared_partial_file == null ) throw new SharingManagerException("The file " + fileHash + "doesn't exists");
+		shared_partial_file.closeFile();
 		shared_partial_file.deletePartialFile();
-		File file = new File(incoming_dir + File.separator + shared_partial_file.getSharingName());
+		File completed_file = new File(incoming_dir.getAbsoluteFile() + File.separator + shared_partial_file.getSharingName());
 		UploadManager upload_manager = JMuleCoreFactory.getSingleton().getUploadManager();
 		try {
 		
 			if (upload_manager.hasUpload(fileHash)) { 	// JMule is now uploading file need to synchronize moving
 				UploadSession upload_sessison = upload_manager.getUpload(fileHash);
 				synchronized(upload_sessison.getSharedFile()) {
-					File completed_temp_file = new File(ConfigurationManager.TEMP_DIR+"/"+ shared_partial_file.getSharingName());
-					shared_partial_file.getFile().renameTo(completed_temp_file);
-					FileUtils.moveFile(completed_temp_file, file);
-					CompletedFile shared_completed_file = new CompletedFile(file);
-					shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 					sharedFiles.remove(fileHash);
+					FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
+					CompletedFile shared_completed_file = new CompletedFile(completed_file);
+					shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 					sharedFiles.put(fileHash, shared_completed_file);
-					upload_sessison.setSharedFile(shared_completed_file);
 				}
 			} else {
 				sharedFiles.remove(fileHash);
-				File completed_temp_file = new File(ConfigurationManager.TEMP_DIR+"/"+ shared_partial_file.getSharingName());
-				
-				shared_partial_file.getFile().renameTo(completed_temp_file);
-				FileUtils.moveFile(completed_temp_file, file);
-				CompletedFile shared_completed_file = new CompletedFile(file);
+				FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
+				CompletedFile shared_completed_file = new CompletedFile(completed_file);
 				shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 				sharedFiles.put(fileHash, shared_completed_file);
 			}
@@ -463,6 +463,7 @@ public class SharingManagerImpl implements SharingManager {
 	public void removeSharedFile(FileHash fileHash) {
 		SharedFile shared_file = sharedFiles.get(fileHash);
 		sharedFiles.remove(shared_file);
+		shared_file.closeFile();
 		shared_file.delete();
 	}
 	
