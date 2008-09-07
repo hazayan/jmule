@@ -31,8 +31,8 @@ import org.jmule.core.JMThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:00 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:30:25 $$
  */
 public class GUIUpdater extends JMThread {
 
@@ -62,11 +62,13 @@ public class GUIUpdater extends JMThread {
 	}
 	
 	public void addRefreshable(Refreshable refreshable) {
+		if (refreshable_list.contains(refreshable)) return;
 		refreshable_list.add(refreshable);
 	}
 
 	public void removeRefreshable(Refreshable refreshable) {
-		refreshable_list.remove(refreshable);
+		if (refreshable_list.contains(refreshable))
+			refreshable_list.remove(refreshable);
 	}
 
 	protected boolean process_refreshables = false; 
@@ -81,13 +83,15 @@ public class GUIUpdater extends JMThread {
 				if (stop) return ;
 			}
 			if (!process_refreshables) {
-			Utils.getDisplay().asyncExec(new JMRunnable() {
+				SWTThread.getDisplay().syncExec(new JMRunnable() {
 				public void JMRun() {
 					process_refreshables = true;
 					for(Refreshable refreshable : refreshable_list) {
 						try {
 							refreshable.refresh();
-						}catch(Throwable t) {}
+						}catch(Throwable t) {
+							t.printStackTrace();
+						}
 					}
 					process_refreshables = false;
 				}
