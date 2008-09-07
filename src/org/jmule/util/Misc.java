@@ -23,24 +23,19 @@
 package org.jmule.util;
 
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:12:34 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:55:49 $$
  */
 public class Misc {
 	

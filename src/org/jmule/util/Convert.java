@@ -30,11 +30,11 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:36:07 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:55:49 $$
  */
 public class Convert {
-
+	
 	public static int byteToInt(byte bvalue) {
 		
 		ByteBuffer data = ByteBuffer.allocate(4);
