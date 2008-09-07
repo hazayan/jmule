@@ -28,8 +28,8 @@ import org.jmule.core.JMThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:59 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:28:14 $$
  */
 public class SWTThread {
 
@@ -42,7 +42,7 @@ public class SWTThread {
 		return instance;
 	}
 	
-	private Display display;
+	private static Display display;
 	
 	private JMSWTThread swt_thread;
 	
@@ -56,10 +56,11 @@ public class SWTThread {
 	}
 	
 	public void initialize() {
+		if (!swt_thread.isAlive()) {
+			swt_thread.start();
 		
-		swt_thread.start();
-		
-		while(!display_created) ;
+			while(!display_created) ;
+		}
 		
 	}
 	
@@ -73,12 +74,18 @@ public class SWTThread {
 		
 	}
 	
-	public Display getDisplay() {
-		return this.display;
+	public static Display getDisplay() {
+		return display;
+	}
+	
+	public void stop() {
+		swt_thread.JMStop();
 	}
 	
 	private class JMSWTThread extends JMThread {
 	
+		private boolean stop = false;
+		
 		public JMSWTThread() {
 			
 			super("SWT Thread");
@@ -104,17 +111,23 @@ public class SWTThread {
 				}
 				
 			}
-			
-			try {
-		
-			while (!display.isDisposed ()) {
-				if (!display.readAndDispatch ()) 
-					display.sleep ();
-			}}catch(Throwable t) {
-				t.printStackTrace();
+		    
+			while(!stop) {
+				if (display.isDisposed()) return ; 
+				try {
+					while (!display.isDisposed ()) {
+						
+						if (!display.readAndDispatch ()) 
+							display.sleep ();
+					}
+					}catch(Throwable t) {
+						t.printStackTrace();
+				} 
 			}
+		}
 		
-			// Dispose was moved to JMuleSWTUI
+		public void JMStop() {
+			stop = true;
 		}
 	
 	}
