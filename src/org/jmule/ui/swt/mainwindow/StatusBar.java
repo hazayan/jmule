@@ -22,29 +22,44 @@
  */
 package org.jmule.ui.swt.mainwindow;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.jmule.core.JMConstants;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.peermanager.PeerManager;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
+import org.jmule.ui.swt.GUIUpdater;
+import org.jmule.ui.swt.Refreshable;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
-import org.jmule.ui.swt.Utils;
+import org.jmule.ui.swt.SWTThread;
+import org.jmule.ui.swt.common.SpeedScaleShell;
 import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 import org.jmule.ui.swt.skin.SWTSkin;
+import org.jmule.ui.utils.SpeedFormatter;
 import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/07/31 16:44:50 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:54:12 $
  */
 public class StatusBar extends Composite {
 
@@ -52,8 +67,19 @@ public class StatusBar extends Composite {
 	
 	private Label img_label,connection_status_label,client_id_label,downimg_label,downspeed_label,upimg_label,upspeed_label;
 	
-	public StatusBar(Composite parent) {
+	private JMuleCore _core;
+	
+	private ConfigurationManager config_manager ;
+	private PeerManager peer_manager ;
+	
+	public StatusBar(Composite parent,JMuleCore core) {
 		super(parent, SWT.NONE);
+		
+		_core = core;
+		
+		config_manager = _core.getConfigurationManager();
+		peer_manager = _core.getPeerManager();
+		
 		SWTServerListWrapper.getInstance().setStatusBar(this);
 		
 		JMuleUI ui_instance = null;
@@ -79,7 +105,7 @@ public class StatusBar extends Composite {
 		setLayout(layout);
 
 		img_label = new Label(this,SWT.NONE);
-		Image img = new Image(this.getDisplay(), UIImageRepository.getImageAsStream("toolbar_disconnected.png"));
+		Image img = SWTImageRepository.getImage("toolbar_disconnected.png");
 		img_label.setImage(img);
 		
 		connection_status_label = new Label(this,SWT.NONE);
@@ -90,57 +116,122 @@ public class StatusBar extends Composite {
 		client_id_label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING));
 		
 		downimg_label = new Label(this,SWT.NONE);
-		downimg_label.setImage(new Image(this.getDisplay(),UIImageRepository.getImageAsStream("down.gif")));
+		downimg_label.setImage(SWTImageRepository.getImage("down.gif"));
 		downimg_label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		downspeed_label = new Label(this,SWT.NONE);
 		downspeed_label.setFont(skin.getLabelFont());
 		downspeed_label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		downspeed_label.setText("100 KB/S");
+		downspeed_label.setText("");
+
 		upimg_label = new Label(this,SWT.NONE);
-		upimg_label.setImage(new Image(this.getDisplay(),UIImageRepository.getImageAsStream("up.gif")));
+		upimg_label.setImage(SWTImageRepository.getImage("up.gif"));
 		upimg_label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		upspeed_label = new Label(this,SWT.NONE);
 		upspeed_label.setFont(skin.getLabelFont());
-		upspeed_label.setText("200 KB/S");
+		upspeed_label.setText("");
 		upspeed_label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		setStatusDisconnected();
-		//setStatusConnected(new Server("1.1.1.1",123),new ClientID("123.0.1.0"));
+		
+		downimg_label.addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent arg0) {
+				showDownSpeedLimitScaleWindow();
+			}
+		});
+		
+		downspeed_label.addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent arg0) {
+				showDownSpeedLimitScaleWindow();
+			}
+		});
+		
+		upimg_label.addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent arg0) {
+				showUpSpeedLimitScaleWindow();
+			}
+		});
+		
+		upspeed_label.addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent arg0) {
+				showUpSpeedLimitScaleWindow();
+			}
+		});
+		
+		config_manager.addConfigurationListener(new ConfigurationAdapter() {
+			
+			public void uploadLimitChanged(long uploadLimit) {
+				String up_limit = "";
+				if (uploadLimit!=0)
+					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"]";
+				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
+				upspeed_label.setText(up_limit + up_speed);
+				layout();
+			}
+			
+			public void downloadLimitChanged(long downloadLimit) {
+				String down_limit = "";
+				if (downloadLimit!=0)
+					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"]";
+				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
+				downspeed_label.setText(down_limit + down_speed);
+				layout();
+			}
+			
+		});
+		
+		GUIUpdater.getInstance().addRefreshable(new Refreshable() {
+			public void refresh() {
+				if (isDisposed()) return ;
+				String down_limit = "";
+				if (config_manager.getDownloadLimit()!=0)
+					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"]";
+				String up_limit = "";
+				if (config_manager.getUploadLimit()!=0)
+					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"]";
+				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
+				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
+				
+				downspeed_label.setText(down_limit + down_speed);
+				upspeed_label.setText(up_limit + up_speed);
+				layout();
+			}
+			
+		});
 	}
 	
 
 	public void setStatusDisconnected() {
-		connection_status_label.setText(Localizer._("mainwindow.statusbar.connection_status_label.disconnected"));
-		Image img = new Image(this.getDisplay(), UIImageRepository.getImageAsStream("toolbar_disconnected.png"));
+		connection_status_label.setText(Localizer._("mainwindow.statusbar.label.disconnected"));
+		Image img = SWTImageRepository.getImage("toolbar_disconnected.png");
 		img_label.setImage(img);
-		client_id_label.setForeground(Utils.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+		client_id_label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		client_id_label.setText("");
 		layout();
 	}
 	
 	public void setStatusConnecting() {
-		connection_status_label.setText(Localizer._("mainwindow.statusbar.connection_status_label.connecting"));
-		Image img = new Image(this.getDisplay(), UIImageRepository.getImageAsStream("toolbar_disconnected.png"));
+		connection_status_label.setText(Localizer._("mainwindow.statusbar.label.connecting"));
+		Image img = SWTImageRepository.getImage("toolbar_disconnected.png");
 		img_label.setImage(img);
-		client_id_label.setForeground(Utils.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+		client_id_label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		client_id_label.setText("");
 		layout();
 	}
 	
 	public void setStatusConnected(Server server) {
 		ClientID client_id = server.getClientID();
-		connection_status_label.setText(Localizer._("mainwindow.statusbar.connection_status_label.connected"));
+		connection_status_label.setText(Localizer._("mainwindow.statusbar.label.connected"));
 		connection_status_label.setToolTipText(server.getAddress() + ":" + server.getPort());
-		client_id_label.setText(client_id.isHighID() ? Localizer._("mainwindow.statusbar.client_id_label.high_id") :Localizer._("mainwindow.statusbar.client_id_label.low_id"));
+		client_id_label.setText(client_id.isHighID() ? Localizer._("mainwindow.statusbar.label.high_id") :Localizer._("mainwindow.statusbar.label.low_id"));
 		if (!client_id.isHighID())
-			client_id_label.setForeground(Utils.getDisplay().getSystemColor(SWT.COLOR_RED));
+			client_id_label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
 		else
-			client_id_label.setForeground(Utils.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+			client_id_label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		long id = Convert.intToLong(client_id.hashCode());
 		client_id_label.setToolTipText(id+"");
-		Image img = new Image(Utils.getDisplay(), UIImageRepository.getImageAsStream("toolbar_connected.png"));
+		Image img = SWTImageRepository.getImage("toolbar_connected.png");
 		img_label.setImage(img);
 		layout();
 	}
@@ -155,5 +246,73 @@ public class StatusBar extends Composite {
 
 	protected void checkSubclass() {
     }
+	
+	private void showDownSpeedLimitScaleWindow() {
+		SpeedScaleShell speedScaleWidget = new SpeedScaleShell(_._("mainwindow.statusbar.speed_scale.download") + " :");
+		long down_limit = config_manager.getDownloadLimit() / 1024;
+		speedScaleWidget.setMaxValue(down_limit+500);
+		speedScaleWidget.setMaxTextValue(down_limit+500);
+		speedScaleWidget.addOption(_._("mainwindow.statusbar.speed_scale.no_limit"), 0);
+		
+		List<Long> sets = getDefaultSpeedValues(down_limit);
+		
+		for(Long v : sets) {
+			speedScaleWidget.addOption(SpeedFormatter.formatByteCountToKiBEtcPerSec(v * 1024,true), v);
+		}
+		
+		boolean result = speedScaleWidget.open(down_limit, JMConstants.isWindows);
+		if (result) {
+			long value = speedScaleWidget.getValue();
+			value*=1024;
+			config_manager.setDownloadLimit(value);
+		}
+	}
+	
+	private void showUpSpeedLimitScaleWindow() {
+		SpeedScaleShell speedScaleWidget = new SpeedScaleShell(_._("mainwindow.statusbar.speed_scale.upload") + " :");
+		long up_limit = config_manager.getUploadLimit() / 1024;
+		speedScaleWidget.setMaxValue(up_limit+500);
+		speedScaleWidget.setMaxTextValue(up_limit+500);
+		speedScaleWidget.addOption(_._("mainwindow.statusbar.speed_scale.no_limit"), 0);
+		
+		List<Long> sets = getDefaultSpeedValues(up_limit);
+		
+		for(Long v : sets) {
+			speedScaleWidget.addOption(SpeedFormatter.formatByteCountToKiBEtcPerSec(v * 1024,true), v);
+		}
+		
+		boolean result = speedScaleWidget.open(up_limit, JMConstants.isWindows);
+		if (result) {
+			long value = speedScaleWidget.getValue();
+			value*=1024;
+			config_manager.setUploadLimit(value);
+		}
+	}
+	
+	private List<Long> getDefaultSpeedValues(long speed) {
+		List<Long> speeds = new ArrayList<Long>();
+	
+		if (speed<=128) {
+			speeds.add(5L);
+			speeds.add(10L);
+			speeds.add(16L);
+			speeds.add(32L);
+			speeds.add(64L);
+			speeds.add(128L);
+		} else
+			if ((speed>128)&&(speed<=512)) {
+				speeds.add(64L);
+				speeds.add(128L);
+				speeds.add(256L);
+				speeds.add(512L);
+			} else {
+				speeds.add(speed - 10);
+				speeds.add(speed - 20);
+				speeds.add(speed + 10);
+				speeds.add(speed + 20);
+			}
+		
+		return speeds;
+	}
 	
 }
