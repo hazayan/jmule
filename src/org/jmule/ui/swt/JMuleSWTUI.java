@@ -31,12 +31,13 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:59 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:37:40 $$
  */
 public class JMuleSWTUI implements JMuleUI<SWTSkin> {
 	
 	private SWTSkin default_skin;
+	private MainWindow main_window;
 	
 	public void initialize() {
 		
@@ -46,23 +47,20 @@ public class JMuleSWTUI implements JMuleUI<SWTSkin> {
 
 		default_skin = new DefaultSWTSkinImpl();
 		
-		MainWindow.getInstance().getCoreComponents();
+		main_window = new MainWindow();
+		main_window.getCoreComponents();
 	}
 	
 	public void shutdown() {
 		GUIUpdater.getInstance().JMStop();
-		SWTThread.getInstance().getDisplay().dispose();
-
+		SWTThread.getInstance().start();
 	}
 
 	public void start() {
 
 		GUIUpdater.getInstance();
 		
-		MainWindow.getInstance().initUIComponents();
-		
-		//MainWindow.getInstance().createWindow(SWTThread.getInstance().getDisplay());
-		//Shell shell = MainWindow.getInstance().getShell();
+		main_window.initUIComponents();
 		
 		SWTThread.getInstance().start();
 		
