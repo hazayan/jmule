@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/01 18:42:01 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/11 18:35:07 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -108,7 +108,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		
 		if (user_hash_str==null) {
 			
-			user_hash.genNewUserHash();
+			user_hash = UserHash.genNewUserHash();
 			
 			config_store.setProperty(USER_HASH_KEY, user_hash.getAsString());
 			
