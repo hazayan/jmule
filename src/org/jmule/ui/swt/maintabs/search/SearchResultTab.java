@@ -58,11 +58,13 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/11 18:29:16 $
  */
 public class SearchResultTab {
 
+	private boolean hasResults = false;
+	
 	private CTabItem search_tab;
 	
 	private SearchRequest request;
@@ -77,7 +79,7 @@ public class SearchResultTab {
 	private SearchResult search_result;
 	
 	private Color color_red = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
-	private Color color_green = new Color(SWTThread.getDisplay(),60,229,92);
+	private Color color_green = new Color(SWTThread.getDisplay(),0,139,0);
 	
 	public SearchResultTab(CTabFolder parent,SearchRequest searchRequest,JMuleCore core) {
 		search_tab = new CTabItem(parent,SWT.CLOSE);
@@ -293,7 +295,11 @@ public class SearchResultTab {
 			}
 			
 		});
-		
+
+	}
+	
+	public SearchRequest getSerchRequest() {
+		return request;
 	}
 	
 	public CTabItem getSearchTab() {
@@ -301,10 +307,10 @@ public class SearchResultTab {
 	}
 	
 	public void addSearchResult(SearchResult searchResult) {
+		hasResults = true;
 		search_result = searchResult;
 		for(SearchResultItem item : searchResult.getSearchResultItemList()) {
 			search_results.addRow(item);
-			//search_results.updateLine(item);
 		}
 		String query = searchResult.getSearchRequest().getSearchQuery().getQuery();
 		String title = getTabTitle(query)+" ("+searchResult.getSearchResultItemList().size()+")";
@@ -324,6 +330,7 @@ public class SearchResultTab {
 	}
 	
 	private void retry() {
+		hasResults = false;
 		_core.getSearchManager().removeSearch(request);
 		search_results.clear();
 		_core.getSearchManager().search(request);
@@ -349,6 +356,8 @@ public class SearchResultTab {
 		return result;
 	}
 
-	
+	public boolean hasResults() {
+		return hasResults;
+	}
 	
 }

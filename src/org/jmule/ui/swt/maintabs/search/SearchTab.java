@@ -22,8 +22,8 @@
  */
 package org.jmule.ui.swt.maintabs.search;
 
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -36,8 +36,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
@@ -54,8 +56,8 @@ import org.jmule.ui.swt.mainwindow.MainWindow;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:23:25 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/11 18:29:16 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -65,7 +67,7 @@ public class SearchTab extends AbstractTab{
 	
 	private JMuleCore _core;
 	
-	private Map<SearchRequest,SearchResultTab> search_tabs = new Hashtable<SearchRequest,SearchResultTab>();
+	private List<SearchResultTab> search_tabs = new LinkedList<SearchResultTab>();
 	
 	public SearchTab(Composite parent, JMuleCore core) {
 		super(parent);
@@ -77,13 +79,12 @@ public class SearchTab extends AbstractTab{
 			public void resultArrived(final SearchResult searchResult) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
-						SearchResultTab tab = search_tabs.get(searchResult.getSearchRequest());
+						SearchResultTab tab = getSearchResultTab(searchResult.getSearchRequest());
 						if (tab != null) {
 							tab.addSearchResult(searchResult);
 							MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_search_result_arrived",
 									searchResult.getSearchRequest().getSearchQuery().getQuery(),searchResult.getSearchResultItemList().size()+""));
 						}
-						
 					}
 				}); 
 			}
@@ -139,6 +140,19 @@ public class SearchTab extends AbstractTab{
 		
 	}
 	
+	private SearchResultTab getSearchResultTab(SearchRequest searchRequest){
+		SearchResultTab result = null;
+		
+		for(SearchResultTab tab : search_tabs) {
+			if (tab.getSerchRequest().equals(searchRequest))
+				if (!tab.hasResults())
+					return tab;
+		}
+		
+		
+		return result;
+	}
+	
 	public JMULE_TABS getTabType() {
 		
 		return JMULE_TABS.SEARCH;
@@ -153,7 +167,7 @@ public class SearchTab extends AbstractTab{
 	}
 
 	public void disposeTab() {
-		for(SearchResultTab tab : search_tabs.values()) {
+		for(SearchResultTab tab : search_tabs) {
 			tab.getSearchTab().dispose();
 		}
 	}
@@ -181,17 +195,18 @@ public class SearchTab extends AbstractTab{
 		SearchManager manager = _core.getSearchManager();
 		manager.search(request);
 		
-		SearchResultTab tab = new SearchResultTab(search_query_tab_list,request,_core);
+		final SearchResultTab tab = new SearchResultTab(search_query_tab_list,request,_core);
 		
 		search_query_tab_list.setSelection(tab.getSearchTab());
 		
-		search_tabs.put(request, tab);
+		search_tabs.add(tab);
+
+		tab.getSearchTab().addListener(SWT.Close, new Listener() {
+			public void handleEvent(Event arg0) {
+				search_tabs.remove(tab);
+			}		
+		});
 		
-		
-//		CTabItem search_tab = new CTabItem(search_query_tab_list, SWT.CLOSE);
-//		search_tab.setText(search_query.getText());
-//		search_query.setText("");
-//		search_query_tab_list.setSelection(search_tab);
 	}
 	
 
