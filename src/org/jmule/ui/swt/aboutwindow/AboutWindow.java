@@ -66,8 +66,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:26 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/11 18:31:37 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -141,7 +141,7 @@ public class AboutWindow implements JMuleUIComponent {
 				gc.setForeground(new Color(SWTThread.getDisplay(),0,0,0));
 				font = new Font(display,"Arial",10,SWT.NONE ); 
 				gc.setFont(font);
-				gc.drawText("Version " + JMConstants.JMULE_VERSION, 17, TOP_GRADIENT_HEIGHT / 2 + 5,true);
+				gc.drawText("Version : " + JMConstants.JMULE_VERSION, 17, TOP_GRADIENT_HEIGHT / 2 + 5,true);
 			}
 		});
 		
