@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:44:23 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/11 18:30:18 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -40,6 +40,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       INCOMING_DIR    				=     "incoming";
 	public static final String       TEMP_DIR        				=     "temp";
 	public static final String       LOGS_DIR        				=     "logs";
+	public static final String		 SYSTEM_PROPERTIES_DUMP			=     LOGS_DIR + File.separator + "dump.properties";
 	public static final String       SETTINGS_DIR    				=     "settings";
 	public static final String       CONFIG_FILE     				=     SETTINGS_DIR + File.separator + "jmule.properties";
 	public static final String       KNOWN_MET         				=     SETTINGS_DIR + File.separator + "known.met";
