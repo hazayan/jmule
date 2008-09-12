@@ -70,8 +70,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:23:25 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/12 16:55:58 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -272,7 +272,7 @@ public class SharedTab extends AbstractTab {
 			}
 
 			public void updateRow(SharedFile object) {
-				Image icon = SWTImageRepository.getIconByException(object.getSharingName());
+				Image icon = SWTImageRepository.getIconByExtension(object.getSharingName());
 				setRowImage(object, SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID, icon);
 				setRowText(object,  SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID, object.getSharingName());
 				long file_size = object.getFile().length();

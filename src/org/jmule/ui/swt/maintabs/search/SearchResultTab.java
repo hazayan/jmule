@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/11 18:29:16 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 16:55:44 $
  */
 public class SearchResultTab {
 
@@ -171,7 +171,7 @@ public class SearchResultTab {
 					
 				
 				setRowText(object, SWTConstants.SEARCH_FILENAME_COLUMN_ID, object.getFileName());
-				Image file_icon = SWTImageRepository.getIconByException(object.getFileName());
+				Image file_icon = SWTImageRepository.getIconByExtension(object.getFileName());
 				setRowImage(object, SWTPreferences.SEARCH_FILENAME_COLUMN_ID, file_icon);
 				
 				setRowText(object, SWTPreferences.SEARCH_FILESIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));

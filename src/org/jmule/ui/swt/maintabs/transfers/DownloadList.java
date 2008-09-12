@@ -62,8 +62,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:50:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/12 16:55:27 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -380,7 +380,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 
 	public void updateRow(DownloadSession session) {
 		String file_name = session.getSharingName();
-		Image image = SWTImageRepository.getIconByException(file_name);
+		Image image = SWTImageRepository.getIconByExtension(file_name);
 		setRowImage(session, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, image);
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, file_name);
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, FileFormatter.formatFileSize(session.getFileSize()));
@@ -427,6 +427,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	}
 
 	public void refresh() {
+		redraw();
 		for(DownloadSession session : download_manager.getDownloads()) {
 			updateRow(session);
 		}

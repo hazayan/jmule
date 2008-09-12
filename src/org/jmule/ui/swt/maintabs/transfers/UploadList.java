@@ -55,8 +55,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:12 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 16:56:10 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -183,7 +183,7 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	}
 
 	public void updateRow(UploadSession object) {
-		Image image = SWTImageRepository.getIconByException(object.getSharingName());
+		Image image = SWTImageRepository.getIconByExtension(object.getSharingName());
 		setRowImage(object, SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, image);
 		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, object.getSharingName());
 		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));

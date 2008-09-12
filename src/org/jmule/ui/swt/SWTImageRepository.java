@@ -32,8 +32,8 @@ import org.jmule.ui.UIConstants;
 /**
  * Created on Aug 12, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:39:00 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 16:56:35 $
  */
 public class SWTImageRepository {
 
@@ -44,7 +44,7 @@ public class SWTImageRepository {
 		return new Image(SWTThread.getDisplay(),input_stream);
 	}
 	
-	public static Image getIconByException(String fileName) {
+	public static Image getIconByExtension(String fileName) {
 		int id = fileName.length()-1;
 		while(id>0) { 
 			if (fileName.charAt(id)=='.') break;
