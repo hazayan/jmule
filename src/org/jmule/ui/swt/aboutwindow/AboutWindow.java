@@ -66,8 +66,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/11 18:31:37 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 14:10:05 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -257,16 +257,17 @@ public class AboutWindow implements JMuleUIComponent {
 		gridData.horizontalAlignment = GridData.CENTER;
 		link.setLayoutData(gridData);
 		
-		CTabItem settings_tab = new CTabItem(tab_list,SWT.NONE);
+		CTabItem license_tab = new CTabItem(tab_list,SWT.NONE);
 		content = new Composite(tab_list,SWT.NONE);
-		settings_tab.setControl(content);
-		settings_tab.setText(_._("aboutwindow.tab.license"));
+		license_tab.setControl(content);
+		license_tab.setText(_._("aboutwindow.tab.license"));
 		
 		content.setLayout(new FillLayout());
 		
 		Text license_text = new Text(content,SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
 	    license_text.setText(UIConstants.GNU_LICENSE);
-        
+	    license_text.setBackground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+	    
 		tab_list.setSelection(general_tab);
 		
 		Composite button_bar = new Composite(shell,SWT.NONE);
@@ -297,10 +298,10 @@ public class AboutWindow implements JMuleUIComponent {
 		shell.setImage(SWTImageRepository.getImage("jmule.png"));
 		shell.setSize(500,400);
 		Utils.centreWindow(shell);
+		
+		shell.setAlpha(255);
 		if (JMConstants.isLinux)
-			shell.setAlpha(0);
-		else
-			shell.setAlpha(100);
+			shell.setAlpha(0);			
 		shell.open();
 		
 		// Mega cool show effect
