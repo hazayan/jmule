@@ -24,8 +24,11 @@ package org.jmule.util;
 
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -34,12 +37,29 @@ import java.nio.channels.FileChannel;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:55:49 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:07:14 $$
  */
 public class Misc {
 	
 	public static final int    INFINITY_AS_INT = 31536000;
+	
+	public static String getStackTrace(Throwable e) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos));
+
+			e.printStackTrace(pw);
+
+			pw.close();
+
+			return baos.toString();
+
+		} catch (Throwable ignore) {
+			return "";
+		}
+	}
 	
 	public static int compareAllObjects(Object object1, Object object2,String methodName,boolean order) {
 
