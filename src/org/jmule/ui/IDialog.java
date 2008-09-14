@@ -26,11 +26,18 @@ package org.jmule.ui;
  *
  * Created on Sep 14, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/09/14 13:06:35 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/09/14 15:28:22 $
  */
 public interface IDialog {
 
+	public enum DialogAction {
+		OK,
+		APPLY,
+		CANCEL
+	}
+	
 	public void setVisible(boolean visibility);
 	
+	public DialogAction getDialogAction(); 
 }
