@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:34:23 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 13:03:49 $$
  */
 public class Peer extends JMConnection {
 	
@@ -570,17 +570,11 @@ public class Peer extends JMConnection {
 	public int getClientSoftware() {
 		int clientInfo;
 		try {
-			
 			clientInfo = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
 		}catch(Throwable e) {
 			return E2DKConstants.SO_COMPAT_UNK;
 		}
-		
-		int cSoft =(int) (clientInfo & 0x00ffffff);
-		
-		cSoft=(cSoft>>17) & 0x7f;
-		
-		return cSoft;
+		return (clientInfo >> 24) & 0x000000ff;
 	}
 	
 	/**
