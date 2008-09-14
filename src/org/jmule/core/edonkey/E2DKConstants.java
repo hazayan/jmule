@@ -28,18 +28,18 @@ import java.util.Set;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:59:00 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 13:04:25 $$
  */
 public class E2DKConstants {
 
-	public final static int ClientSoftware 				= 0xAA;// JMule client identification!
+	public final static int ClientSoftware 				= E2DKConstants.SO_JMULE;// JMule client identification!
 	public final static int SoftwareVersionMajor 		= 0x00;
 	public final static int SoftwareVersionMinor 		= 40;
 	public final static int SoftwareVersionUpdate 		= 0x00;
 	public final static int SoftwareVersion 			= ((ClientSoftware<<24) | (SoftwareVersionMajor<<17) | (SoftwareVersionMinor<<10) | (SoftwareVersionUpdate<<7));
 	
-	public final static int ServerClientSoftware 		= 0xAA;
+	public final static int ServerClientSoftware 		= E2DKConstants.SO_JMULE;
 	public final static int ServerSoftwareVersionMajor 	= 0x00;
 	public final static int ServerSoftwareVersionMinor 	= 40;
 	public final static int ServerSoftwareVersionUpdate = 0x00;
