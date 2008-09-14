@@ -65,8 +65,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * @author tuxpaper
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:26:56 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:45:53 $$
  */
 public class TableColumnEditorWindow {
   
@@ -248,7 +248,7 @@ public class TableColumnEditorWindow {
 		    item.setText(1, (String)tableColumn.getData(SWTConstants.COLUMN_DESC_KEY));
 		    
 		    //Causes SetData listener to be triggered again, which messes up SWT 
-	        table.getColumn(1).pack();
+	        //table.getColumn(1).pack();
 
 		    final boolean bChecked = ((Boolean) newEnabledState.get(tableColumn));
 		    item.setChecked(bChecked);
