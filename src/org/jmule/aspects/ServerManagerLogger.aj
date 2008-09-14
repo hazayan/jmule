@@ -22,22 +22,21 @@
  */
 package org.jmule.aspects;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.jmule.core.edonkey.impl.Server;
-import org.jmule.core.edonkey.metfile.ServerMet;
-import org.jmule.core.edonkey.metfile.ServerMetException;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:29 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public aspect ServerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.ServerManager");
 	
+	after() throwing (Throwable t): execution (* ServerManager.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
 	
 }

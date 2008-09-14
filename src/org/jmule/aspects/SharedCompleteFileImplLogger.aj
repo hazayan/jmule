@@ -24,22 +24,19 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.edonkey.impl.PartHashSet;
-import org.jmule.core.sharingmanager.CompletedFile;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public aspect SharedCompleteFileImplLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharedmanager.SharedCompleteFileImpl");
 	
-	after(CompletedFile cFile) returning(PartHashSet pSet) :target(cFile) && call (PartHashSet CompletedFile.calcHashSets()) {
-		if (pSet!=null)
-			log.fine("File : "+cFile.getSharingName()+"\nNew file Hash : "+pSet.getFileHash()+"\nHashSet : "+pSet);
-		else 
-			log.warning("Failed to calc hash sets for "+cFile.getSharingName());
+	after() throwing (Throwable t): execution (* SharedCompleteFile.*(..)) {
+		log.warning(Misc.getStackTrace(t));
 	}
+	
 }

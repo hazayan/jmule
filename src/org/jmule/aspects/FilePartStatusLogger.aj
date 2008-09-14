@@ -27,27 +27,24 @@ import java.util.logging.Logger;
 import org.jmule.core.downloadmanager.FilePartStatus;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.sharingmanager.JMuleBitSet;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:25 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public aspect FilePartStatusLogger {
-	private Logger log;
+	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.FilePartStatus");
 	
-	before() : call(FilePartStatus.new(..)) {
-		log=Logger.getLogger("org.jmule.core.downloadmanager.FilePartStatus");
+	after() throwing (Throwable t): execution (* FilePartStatus.*(..)) {
+		log.warning(Misc.getStackTrace(t));
 	}
 	
 	after(Peer p) returning(boolean result) : args(p) && execution(boolean FilePartStatus.hasStatus(Peer)) {
-		if (!result) ;
-			//log.warning("Peer : "+p+" already exist in  file status list");
 	}
 	
 	before(FilePartStatus fStatus,JMuleBitSet bitSet,boolean add) : target(fStatus)&& args(bitSet,add) && call(void FilePartStatus.UpdateTotalAvailability(JMuleBitSet,boolean) ) {
-		if (bitSet.getPartCount()!=fStatus.getPartCount())
-			log.severe("Can't update total availability part count not equals ");
 	}
 }

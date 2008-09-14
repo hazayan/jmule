@@ -24,24 +24,22 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.edonkey.packet.tag.impl.TagException;
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
+import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.TagList;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public aspect TagListLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.packet.tag.impl.TagList");
 	
-	after() throwing(TagException e) : execution(int TagList.getDWORDTag(..)) {
-		//log.warning(e.getMessage());
+	after() throwing(TagException e) : execution(* TagList.*(..)) {
 	}
 
 	after() throwing(TagException e) : execution(* TagList.getStringTag(..)) {
-		//log.warning(e.getMessage());
 	}
 	
 }

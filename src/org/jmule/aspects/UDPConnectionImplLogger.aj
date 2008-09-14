@@ -29,21 +29,26 @@ import java.nio.channels.DatagramChannel;
 import java.util.logging.Logger;
 
 import org.jmule.core.net.JMUDPConnection2;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:27 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public privileged aspect UDPConnectionImplLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.net.impl.UDPConnectionImpl");
+	
+	after() throwing (Throwable t): execution (* UDPConnection.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
 	
 	after(SocketAddress s) throwing(IOException e) : args(*,s) && call(* DatagramChannel.send(ByteBuffer,SocketAddress)) {
 		log.info("Failed to send UDP packet to "+s);
 	}
 	
-	before() : call (void JMUDPConnection2.ban()) {
+	before() : call (void JMUDPConnection.ban()) {
 		log.warning("UDP flood");
 	}
 }

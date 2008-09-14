@@ -25,26 +25,25 @@ package org.jmule.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.net.JMConnectionWaiter;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
  */
 public privileged aspect JMConnectionWaiterLogger {
 	
 	private Logger log = Logger.getLogger("org.jmule.core.net.JMConnectionWaiter");
 
+	after() throwing (Throwable t): execution (* JMConnectionWaiter.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
+	
 	before(JMConnectionWaiter connectionListener) : target(connectionListener) && execution(void JMConnectionWaiter.start()) {
-		if (connectionListener.connectionListenerThread!=null)
-			log.severe("Listener already running");
-		else 
-			log.info("Start TCP connection listener ");
 	}
 	
 	before(JMConnectionWaiter connectionListener) : target(connectionListener) && execution(void JMConnectionWaiter.stop()) {
-	//	//if (connectionListener.connectionListenerThread!=null)
-	//		log.severe("Failed to stop connection listener");
 	}
 }

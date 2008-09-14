@@ -28,15 +28,19 @@ import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.edonkey.metfile.PartMetException;
-
+import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:28 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public privileged aspect PartialFileLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartialFile");
+	
+	after() throwing (Throwable t): execution (* PartMet.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
 	
 	after(PartMet part_met) throwing(PartMetException e) : target(part_met) && call (void PartMet.writeFile()) {
 		log.info("Failed to write data in file "+part_met.getName() );
@@ -46,11 +50,6 @@ public privileged aspect PartialFileLogger {
 		log.fine("New partial file : \n"+pFile);
 	}
 	
-	
-	after(PartialFile pFile) throwing() : target(pFile) && execution(void PartialFile.closeFile()) {
-		log.warning("Failed to close file "+pFile);
-	}
-
 	after(PartialFile pFile) returning(boolean result) : target(pFile) && execution(boolean PartialFile.checkFullFileIntegrity()) {
 		
 		if (!pFile.hasHashSet()) {

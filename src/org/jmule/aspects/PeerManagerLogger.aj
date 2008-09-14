@@ -30,42 +30,33 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.peermanager.PeerManagerImpl;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:28 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
  */
 public privileged aspect PeerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.peermanager.PeerManager");
 	
+	after() throwing (Throwable t): execution (* PeerManager.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
+	
 	before(Peer peer) : args(peer) && execution(void PeerManager.addUnknownPeer(Peer)) {
-		
-		log.info("Unknow peer : " + peer);
-		
+	
 	}
 	
 	before(Peer peer) : target(peer) && call(void Peer.disconnect()) && cflow (execution(void PeerManagerImpl.PeerCleaner.run())) {
-		
-		log.warning("Cleaning peer "+peer);
-		
+	
 	}
 	
 	before(FileHash fileHash, List<Peer> peerList) : args(fileHash, peerList) && execution(void PeerManager.addPeer(FileHash,List)) {
-		
-//		String str = " Peers who have "+fileHash+"\n";
-//		
-//		for(Peer peer : peerList)
-//			
-//			str += peer + "\n";
-//		
-//		log.info(str);
 	}
 	
 	after(Peer p) returning(boolean result) : args(p) && execution(boolean PeerManager.hasPeer(Peer)) {
-		if (!result);
-			//log.warning("Don't have peer "+p);
 	}
 
 	

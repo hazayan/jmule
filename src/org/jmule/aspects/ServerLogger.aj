@@ -34,12 +34,13 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerSearchResultSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerServerListSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerCallbackFailed;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public aspect ServerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.Server");
@@ -47,20 +48,19 @@ public aspect ServerLogger {
 	before() :call(Server.new(..)) {
 	}
 	
+	after() throwing (Throwable t): execution (* Server.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
+	
 	before(Server s) : target(s) && call (void Server.searchFiles(String)) {
-		if (!s.allowSearch())
-			log.warning("Can't search now");
 	}
 	
 	before(Server s, ClientID client_id) : target(s) && args(client_id) && execution(void Server.callBackRequest(ClientID)) {
-		log.info("Call back request "+client_id);
 	}
 	
 	before(ScannedPacket packet, Server s) : target(s) && args(packet)&& execution (void Server.processPacket(ScannedPacket)) {
 		
-		if (packet instanceof JMServerMessageSP) {
-			JMServerMessageSP sPacket = (JMServerMessageSP)packet;
-			log.info("Server message : \n"+sPacket.getServerMessage());
+		if (packet instanceof JMServerMessageSP) {						
 			return ;
 		}
 		
@@ -70,22 +70,15 @@ public aspect ServerLogger {
 		}
 		
 		if (packet instanceof JMServerCallbackFailed) {
-			
-			log.info("Call back failed");
 			return ;
 		}
 		
 		if (packet instanceof JMServerSearchResultSP) {
-			log.info("Received  search results from "+s);
 			return ;
 		}
 		
 		if (packet instanceof JMServerFoundSourceSP) {
-			JMServerFoundSourceSP scannedPacket = (JMServerFoundSourceSP)packet;
-			String msg = "Sources for file : "+scannedPacket.getFileHash()+"\n";
-			//for(Peer peer : scannedPacket) 
-			//	msg+=peer+"\n";
-			log.info(msg);
+			return ;
 		}
 	}
 	

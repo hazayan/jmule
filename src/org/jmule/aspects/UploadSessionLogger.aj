@@ -24,37 +24,26 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.*;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
-import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:27 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public privileged aspect UploadSessionLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.uploadmanager.UploadSession");
 	
-	before(Peer peer,ScannedPacket packet,UploadSession us) : target(us) && args(peer,packet,*) && execution(void UploadSession.processPacket(Peer,ScannedPacket, PeerSessionList)) {
-		
-		if (packet instanceof JMPeerRequestFilePartSP) {
-			log.info("Peer "+peer+" request file fragments of "+us.getFileHash());
-		}
-		
-		if (packet instanceof JMPeerSlotTakenSP) 
-			log.fine("*Remove peer "+peer+" from "+us.sharedFile+" upload queue");
-	}
+	after() throwing (Throwable t): execution (* UploadSession.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}		
 	
-	before(Peer peer,long time) : args(peer,time) && execution(void UploadSession.reportInactivity(Peer,long)) {
-		if (time>=ConfigurationManager.PEER_INACTIVITY_REMOVE_TIME) {
-			log.warning("Remove peer "+peer+" inactivity for "+time/1000+" sec");
-		}
+	before(Peer peer,ScannedPacket packet,UploadSession us) : target(us) && args(peer,packet) && execution(void UploadSession.processPacket(Peer,ScannedPacket)) {
 	}
-	
 }

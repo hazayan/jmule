@@ -29,26 +29,27 @@ import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.impl.JMuleCoreImpl;
 import org.jmule.core.peermanager.*;
 import org.jmule.core.uploadmanager.*;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:27 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
  */
 public privileged aspect JMuleCoreImplLogger {
 	private Logger log = Logger.getLogger("org.jmule");
 	
 	before() : call( JMuleCoreImpl.new()) {
-		//	log=Logger.getLogger("org.jmule.core.impl.JMuleCoreImpl");
+		log.info(" JMule Core creation ");
 	}
 	
-	before() : execution(void JMuleCoreImpl.start()) {
-	
-	};
-	
 	after() : execution(void JMuleCoreImpl.start()) {
-		log.info("Core started ");
+		log.info(" JMule Core started ");
+	}
+	
+	after() throwing (Throwable t): execution (* JMuleCoreImpl.*(..)) {
+		log.warning(Misc.getStackTrace(t));
 	}
 	
 	before(String event) : args(event) && (call(void JMuleCoreImpl.logEvent(String))) {
@@ -73,6 +74,12 @@ public privileged aspect JMuleCoreImplLogger {
 		for(Peer peer : PeerManagerFactory.getInstance().getUnknownPeers())
 			
 			peermanager += peer + "\n";
+		
+		peermanager += " Low ID Peers \n";
+		PeerManagerImpl impl = (PeerManagerImpl)PeerManagerFactory.getInstance();
+		for(Peer peer : impl.low_id_peer_list) {
+			peermanager += peer + "\n";
+		}
 		
 		String uploadmanager = "Upload Manager :\n";
 		

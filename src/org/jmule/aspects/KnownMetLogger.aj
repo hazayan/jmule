@@ -24,14 +24,20 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
+import org.jmule.util.Misc;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:25 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public aspect KnownMetLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.metfile.KnownMet");
+	
+	after() throwing (Throwable t): execution (* KnownMet.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
 	
 	//Add code from KnownMet class, line 106
 //	after() returning

@@ -24,43 +24,20 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 import org.jmule.core.net.JMConnection;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:25 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
  */
 public privileged aspect JMConnectionLogger {
 	
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.Server");
 	
-	after(JMConnection connection) : target(connection) && call(void JMConnection.disconnect()) {
-	}
-	
-	before(JMConnection connection) : target(connection) && call(void JMConnection.startConnecting()) {
-		
-		if ((connection.connectingThread != null) && (connection.connectingThread.isAlive()))
-			
-			log.severe("Failed to start connecting to "
-					+ connection.getAddress()+" connecting thread already run!");
-			
-	}
-
-	before(JMConnection connection) : target(connection) && call(void JMConnection.startReceiver()) {
-		
-		if ((connection.packetReceiverThread != null) && (connection.packetReceiverThread.isAlive()))
-			
-			log.severe("Failed to start reciver for "+connection.getAddress());
-			
-	}
-	
-	before(JMConnection connection) : target(connection) && call(void JMConnection.stopReceiver()) {
-		
-		if ((connection.packetReceiverThread != null) && (connection.packetReceiverThread.isAlive()))
-			
-			log.severe("Failed to stop receiver for "+connection.getAddress());
-		
+	after() throwing (Throwable t): execution (* JMConnection.*(..)) {
+		log.warning(Misc.getStackTrace(t));
 	}
 	
 	before(JMConnection connection) : target(connection) && execution(void JMConnection.ban()) {

@@ -31,17 +31,22 @@ import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.*;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:28 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
  */
 public privileged aspect PeerSessionListLogger {
 	
 	private Logger log = Logger.getLogger("org.jmule.core.peermanager.PeerSessionList");
 
+	after() throwing (Throwable t): execution (* PeerSessionList.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
+	
 	before (ScannedPacket packet) : args(packet) && execution (void PeerSessionList.processPacket(ScannedPacket)) {
 	}
 			

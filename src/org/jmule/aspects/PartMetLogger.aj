@@ -24,19 +24,16 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.edonkey.packet.tag.impl.TagList;
-import org.jmule.util.Convert;
-
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:28 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
  */
 public aspect PartMetLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.metfile.PartMet");
 	
 	after(byte metaTag[]) throwing(Exception e) : args(metaTag) && execution(* TagList.getStringTag(byte[])) {
-		log.warning("Tag : "+Convert.byteToHexString(metaTag));
+		
 	}
 }

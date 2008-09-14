@@ -31,16 +31,21 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerChatMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
 import org.jmule.core.net.JMConnection;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:30 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
  */
 public privileged aspect PeerLogger {
 	
-	private Logger log =Logger.getLogger("org.jmule.core.edonkey.impl.Peer");
+	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.Peer");
+	
+	after() throwing (Throwable t): execution (* Peer.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
 	
 	before() : call(Peer.new(..)) {
 	
@@ -48,19 +53,12 @@ public privileged aspect PeerLogger {
 	
 	before(Peer p) : target(p) && execution(void Peer.onDisconnect()) {
 		
-		log.info("**Peer : "+p+" Disconnected");
-		
 	}
 	
 	before(Peer p) : target(p) && execution(void Peer.onConnect()) {
-		
-		log.info("**Peer : "+p+" Connected");
-		
 	}
 	
 	before(Peer p) : target(p) && call( void Peer.connect()) {
-		log.info("Begin to connect with : "+p);
-		
 		if (p.getStatus()==JMConnection.TCP_SOCKET_DISCONNECTED)
 			if (!p.isHighID())
 				if (p.getConnectedServer()==null)
@@ -68,21 +66,6 @@ public privileged aspect PeerLogger {
 	}
 	
 	before(ScannedPacket packet, Peer p) : target(p) && args(packet)&& execution (void Peer.processPacket(ScannedPacket)) {
-		if (packet instanceof JMPeerHelloSP) {
-			log.info("Hello from peer "+p);
-			return ; 
-		}
-		
-		if (packet instanceof JMPeerHelloAnswerSP) {
-			log.info("Hello answer from : "+p);
-			return ;
-		}
-		
-		if (packet instanceof JMPeerChatMessageSP) {
-			JMPeerChatMessageSP sPacket = (JMPeerChatMessageSP)packet;
-			log.info("Message from peer "+p+" : \n"+sPacket.getPeerMessage());
-			return;
-		}
 	}
 	
 	after(Peer p) returning(Packet packet) :target(p) && execution(Packet JMConnection.getReceivedPacket()) {
@@ -93,8 +76,6 @@ public privileged aspect PeerLogger {
 	before(Peer p,long time) : target(p) && args(time) && execution (void Peer.reportInactivity(long)) {
 		if (p.lastPacket!=null)
 			if (p.getStatus() == JMConnection.TCP_SOCKET_CONNECTED)
-				log.warning("Resend last packet to peer "+p);
-		
-		
+				log.warning("Resend last packet to peer "+p);		
 	}
 }
