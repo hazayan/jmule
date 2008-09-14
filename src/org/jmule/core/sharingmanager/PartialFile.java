@@ -50,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 08:01:27 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:39:36 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -184,7 +184,6 @@ public class PartialFile extends SharedFile {
 		
 	public void setHashSet(PartHashSet newSet) throws SharedFileException  {
 		int partCount = Misc.getPartCount(this.length());
-		System.out.println("New hash set : \n"+newSet+"\n Part count : "+partCount+"\n Length : "+this.length());
 		if (newSet.size() < partCount)
 			throw new SharedFileException("Wrong hash set response");
 		
@@ -358,8 +357,6 @@ public class PartialFile extends SharedFile {
 		PartHashSet fileHashSet = partFile.getFileHashSet();
 		
 		PartHashSet newSet = MD4FileHasher.calcHashSets(fileChannel);
-		System.out.println("File hash : " + fileHashSet+" ");
-		System.out.println("New set : "+newSet+"");
 		if (newSet.size()!=fileHashSet.size()) 
 			return false;
 		
@@ -456,8 +453,6 @@ public class PartialFile extends SharedFile {
 			msgDigest.finalDigest(hashset);
 			
 			if (!Arrays.equals(hashSet.get(partID),hashset.array())) {
-				System.out.println(Convert.byteToHexString(hashSet.get(partID)));
-				System.out.println(Convert.byteToHexString(hashset.array()));
 				return false;
 			}
 			return true;
