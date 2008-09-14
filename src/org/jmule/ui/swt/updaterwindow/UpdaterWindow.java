@@ -30,6 +30,8 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
+import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.ui.JMuleUI;
@@ -62,8 +65,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:26 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/14 16:22:08 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
@@ -118,7 +121,9 @@ public class UpdaterWindow implements JMuleUIComponent {
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		user_version = new Label(window_content,SWT.NONE);
-		user_version.setFont(skin.getDefaultFont());
+		FontData data = skin.getDefaultFont().getFontData()[0];
+		Font font = new Font(SWTThread.getDisplay(),data.getName(),data.getHeight(),SWT.BOLD );
+		user_version.setFont(font);
 		user_version.setText(JMConstants.CURRENT_JMULE_VERSION);
 		user_version.setForeground(green_color);
 		
@@ -128,7 +133,7 @@ public class UpdaterWindow implements JMuleUIComponent {
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		available_version = new Label(window_content,SWT.NONE);
-		available_version.setFont(skin.getDefaultFont());
+		available_version.setFont(font);
 		available_version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		available_version.setForeground(green_color);
 		
@@ -182,37 +187,6 @@ public class UpdaterWindow implements JMuleUIComponent {
 		layout = new GridLayout(3,false);
 		button_bar.setLayout(layout);
 		
-		final Button button_update = new Button(button_bar,SWT.NONE);
-		button_update.setFont(skin.getButtonFont());
-		button_update.setText(_._("updaterwindow.button.update"));
-		
-		button_update.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				new Thread(new Runnable() {
-					public void run() {
-						SWTThread.getDisplay().asyncExec(new JMRunnable() {
-							public void JMRun() {
-								clearControls();
-								button_update.setEnabled(false);
-							}});
-						try {
-							updater.checkForUpdates();
-						}catch(JMUpdaterException e) {
-							SWTThread.getDisplay().asyncExec(new JMRunnable() {
-								public void JMRun() {
-									Utils.showWarningMessage(shell, _._("updaterwindow.connect_failed_title"), _._("updaterwindow.connect_failed")+"\n"+updater.getErrorCode());
-								}});
-						}
-						SWTThread.getDisplay().asyncExec(new JMRunnable() {
-							public void JMRun() {
-								updateControls();
-								button_update.setEnabled(true);
-							}});
-					}
-				}).start();
-			}
-		});
-		
 		Button button_ok = new Button(button_bar,SWT.NONE);
 		button_ok.setFont(skin.getButtonFont());
 		button_ok.setText(_._("updaterwindow.button.ok"));
@@ -234,6 +208,28 @@ public class UpdaterWindow implements JMuleUIComponent {
 		updateControls();
 		
 		shell.open();
+		
+		new JMThread(new JMRunnable() {
+			public void JMRun() {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						clearControls();
+					}});
+				try {
+					updater.checkForUpdates();
+				}catch(JMUpdaterException e) {
+					SWTThread.getDisplay().asyncExec(new JMRunnable() {
+						public void JMRun() {
+							Utils.showWarningMessage(shell, _._("updaterwindow.connect_failed_title"), _._("updaterwindow.connect_failed")+"\n"+updater.getErrorCode());
+						}});
+				}
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						updateControls();
+					}});
+			}
+		}).start();
+		
 	}
 
 	private void clearControls() {
