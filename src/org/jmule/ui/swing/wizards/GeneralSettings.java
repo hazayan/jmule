@@ -30,11 +30,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.jmule.ui.swing.common.PortTextField;
+
 /**
  * Created on 07-19-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:33:43 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/14 17:31:49 $$
  */
 public class GeneralSettings extends WizardPanel {
 
@@ -42,10 +44,10 @@ public class GeneralSettings extends WizardPanel {
     private JPanel connection_panel;
     private JCheckBox disable_udp_port;
     private JPanel general_panel;
-    private JTextField tcp_port;
+    private PortTextField tcp_port;
     private JLabel tcp_port_caption;
     private JLabel tcp_port_desc;
-    private JTextField udp_port;
+    private PortTextField udp_port;
     private JLabel udp_port_caption;
     private JLabel udp_port_desc;
     private JTextField user_name;
@@ -64,9 +66,9 @@ public class GeneralSettings extends WizardPanel {
         connection_panel = new JPanel();
         tcp_port_desc = new JLabel();
         tcp_port_caption = new JLabel();
-        tcp_port = new JTextField();
+        tcp_port = new PortTextField();
         udp_port_caption = new JLabel();
-        udp_port = new JTextField();
+        udp_port = new PortTextField();
         udp_port_desc = new JLabel();
         disable_udp_port = new JCheckBox();
  
