@@ -22,32 +22,22 @@
  */
 package org.jmule.aspects;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.downloadmanager.DownloadManagerImpl;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:29 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:51:46 $$
  */
-public aspect DownloadManagerLogger {
-	private Logger log;
+public privileged aspect DownloadManagerLogger {
+	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.DownloadManager");;
 	
-	before() : call(DownloadManagerImpl.new()) {
-		log=Logger.getLogger("org.jmule.core.downloadmanager.DownloadManager");
-	}
-	
-	before(FileHash fileHash, List<Peer> peerList) : args(fileHash,peerList) && execution(void DownloadManager.addDownloadPeers(FileHash, List)) {
-		String msg = " Add peer to download "+ fileHash+"\n";
-		
-		log.info(msg);
-		
+	after() throwing (Throwable t): execution (* DownloadManager.*(..)) {
+		log.warning(Misc.getStackTrace(t));
 	}
 
 }

@@ -25,45 +25,45 @@ package org.jmule.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerAcceptUploadRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
 import org.jmule.core.peermanager.PeerSessionList;
-import org.jmule.core.sharingmanager.PartialFile;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:52:07 $$
  */
 public privileged aspect DownloadSessionLogger {
 
-	private Logger log;
+	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.DownloadSession");
 	
-	before():call(DownloadSession.new(..)) {
-		log=Logger.getLogger("org.jmule.core.downloadmanager.DownloadSession");
+	after() throwing (Throwable t): execution (* DownloadSession.*(..)) {
+		log.warning(Misc.getStackTrace(t));
 	}
-
+	
 	before(DownloadSession downloadSession) : target(downloadSession) &&call(void DownloadSession.startDownload()) {
-		log.info("Start to download : "+downloadSession.getDownloadFile().getSharingName());
+		log.info("Start to download : "+downloadSession.getSharingName());
 	}
 	
 	before(Peer peer, ScannedPacket packet, PeerSessionList router,DownloadSession downloadSession) : target(downloadSession) && args(peer,packet,router) && execution (void DownloadSession.processPacket(Peer, ScannedPacket, PeerSessionList)) {
 		if (packet instanceof JMPeerSendingPartSP ) {
-			JMPeerSendingPartSP sPacket = (JMPeerSendingPartSP) packet;
-			log.info("File "+downloadSession.getDownloadFile()+" chunk answer from peer "+peer+"\nChunk : "+sPacket.getFileChunk());
 		}
+		
+		if (packet instanceof JMPeerAcceptUploadRequestSP ) {
+			
+		}
+		
+		
 	}
 	
 	after(DownloadSession downloadSession) : target(downloadSession) && call(void DownloadSession.completeDownload()) {
-		log.info("Download of file "+downloadSession.getDownloadFile()+" finished");
-	}
-	
-	after(PartialFile sharedFile,FileChunk fileChunk) : args(fileChunk) && target(sharedFile) && call(void PartialFile.writeData(FileChunk)) {
-		log.info("File Fragment\nFile : "+sharedFile.getSharingName()+"\nFragment : "+fileChunk+"\nGap List After : "+sharedFile.getGapList());
+		log.info("Download of file "+downloadSession.getSharingName()+" finished");
 	}
 	
 	before(Peer peer) : args(peer) && call(void Peer.sendPacket(Packet)) && cflow( call (void DownloadSession.resendFilePartsRequest(Peer))) {
