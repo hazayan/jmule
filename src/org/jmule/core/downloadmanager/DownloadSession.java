@@ -85,8 +85,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:47:40 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:31:19 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -241,14 +241,17 @@ public class DownloadSession implements JMTransferSession {
 				
 					peer.sendPacket(packet);
 			
-			peer.getSessionList().removeSession(this);
+			PeerSessionList list = peer.getSessionList();
+			if (list != null)
+				list.removeSession(this);
 			
 		}
 		
 		peer_list.clear();
 		download_status_list.clear();
 		for (Peer peer : connecting_peers) {
-			peer.getSessionList().removeSession(this);
+			if (peer.getSessionList()!=null)
+					peer.getSessionList().removeSession(this);
 		}
 		connecting_peers.clear();
 		
@@ -270,7 +273,7 @@ public class DownloadSession implements JMTransferSession {
 	public void addDownloadPeers(List<Peer> peerList){
 
 		for(Peer peer : peerList) { 
-
+			if (peer.getSessionList() == null) continue;
 			if (peer.getSessionList().hasDownloadSession(this)) continue;
 				
 			peer.getSessionList().addDownloadSession(this);
@@ -328,7 +331,9 @@ public class DownloadSession implements JMTransferSession {
 			if (peer_list.contains(peer)) {
 				fileRequestList.remove(peer);
 				download_status_list.removePeer(peer);
-				peer.getSessionList().removeSession(this);
+				PeerSessionList list = peer.getSessionList();
+				if (list != null)
+					list.removeSession(this);
 				peer_list.remove(peer);
 			} else
 				connecting_peers.remove(peer);

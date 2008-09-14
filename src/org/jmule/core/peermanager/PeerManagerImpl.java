@@ -47,8 +47,8 @@ import org.jmule.core.uploadmanager.UploadSession;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:58:41 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:38:03 $$
  */
 public class PeerManagerImpl implements PeerManager {
 	
@@ -105,7 +105,10 @@ public class PeerManagerImpl implements PeerManager {
 			  return ;
 		  }
 
-		  if (!low_id_peer_list.contains(peer)) return ; 
+		  if (!low_id_peer_list.contains(peer)) { 
+			  	addPeer(peer);
+			  	return ;
+		  }
 		  
 		  Peer old_peer = getLowIDPeer(peer);
 		  if (old_peer == null) return ;
@@ -141,8 +144,13 @@ public class PeerManagerImpl implements PeerManager {
 		}
 		
 		// remove peer when is not registred in any session
-		if (peer.getSessionList().getSessionCount()==0)
-				peer_list.remove(peer);
+		
+		PeerSessionList list = peer.getSessionList();
+		if (list == null)
+			peer_list.remove(peer);
+			else
+				if (peer.getSessionList().getSessionCount()==0)
+					peer_list.remove(peer);
 		
 	}
 
@@ -179,7 +187,7 @@ public class PeerManagerImpl implements PeerManager {
 	   JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
 		public void updateStats(Set<String> types, Map<String, Object> values) {
 			if (types.contains(JMuleCoreStats.ST_NET_PEERS_COUNT)) {
-				values.put(JMuleCoreStats.ST_NET_PEERS_COUNT, peer_list.size());
+				values.put(JMuleCoreStats.ST_NET_PEERS_COUNT, peer_list.size() + low_id_peer_list.size());
 			}
 		}
 	   });
@@ -313,8 +321,12 @@ public class PeerManagerImpl implements PeerManager {
 					if (peer.isConnected()) continue;
 					
 					if (System.currentTimeMillis()-peer.getConnectTime()>=PEER_CLEANER_DISCONNECT_TIME) {
-						if (peer.getSessionList().getSessionCount()==0)
+						PeerSessionList list = peer.getSessionList();
+						if (list == null)
 							peer.disconnect();
+							else
+								if (peer.getSessionList().getSessionCount()==0)
+									peer.disconnect();
 						
 					}
 					

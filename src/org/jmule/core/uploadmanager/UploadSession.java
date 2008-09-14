@@ -44,6 +44,7 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusRequestS
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotReleaseSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotRequestSP;
+import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.GapList;
@@ -55,8 +56,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:07:40 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:44:33 $$
  */
 public class UploadSession implements JMTransferSession {
 	
@@ -414,7 +415,9 @@ public class UploadSession implements JMTransferSession {
 	
 	public void stopSesison() {
 		for(Peer peer : uploadQueue.getPeers()) {
-			peer.getSessionList().removeSession(this);
+			PeerSessionList list = peer.getSessionList();
+			if (list != null)
+				list.removeSession(this);
 			if (peer.isConnected()) peer.disconnect();
 		}
 		uploadQueue.clear();

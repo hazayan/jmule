@@ -52,8 +52,8 @@ import org.jmule.core.uploadmanager.UploadSession;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:04:16 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:42:45 $$
  */
 public class SharingManagerImpl implements SharingManager {
 
@@ -462,6 +462,7 @@ public class SharingManagerImpl implements SharingManager {
 
 	public void removeSharedFile(FileHash fileHash) {
 		SharedFile shared_file = sharedFiles.get(fileHash);
+		if (shared_file==null) return ;
 		sharedFiles.remove(shared_file);
 		shared_file.closeFile();
 		shared_file.delete();

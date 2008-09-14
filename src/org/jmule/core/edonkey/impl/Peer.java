@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/05 16:25:26 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:34:23 $$
  */
 public class Peer extends JMConnection {
 	
@@ -201,7 +201,10 @@ public class Peer extends JMConnection {
 			
 			result += " Client ID : "+clientID+" [ "+(isHighID() ? "HIGH ID" : "LOW ID")+" ] ";
 						
-		result += " Session count : " + sessionList.getSessionCount();
+		if (sessionList != null)		
+			result += " Session count : " + sessionList.getSessionCount();
+		else
+			result +=" Session count : null";
 		
 		result += "  "+ (isBanned() ? "Banned" : "Unbanned");
 		
@@ -246,7 +249,7 @@ public class Peer extends JMConnection {
 	}
 	
 	public void reusePeer(Peer peer) {
-		setSessionList(peer.getSessionList());
+		setSessionList(peer.getSessionList()); // warning : peer.getSessionList() may return null
 		peer.setSessionList(null);
 		if (peer.getUserHash() != null) {
 			userHash = peer.getUserHash();
