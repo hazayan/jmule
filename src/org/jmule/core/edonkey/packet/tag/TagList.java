@@ -32,8 +32,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/30 13:34:02 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:36:04 $$
  */
 public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 	private int tagsSize=0;
@@ -146,7 +146,7 @@ public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 					throw new TagException("Wrong tag format");
 				}
 			}		
-		throw new TagException("Tag : "+Convert.byteToHexString(tagName)+" not found");
+		return 0;
 	}
 	
 	public String getStringTag(byte[] metaTagName) throws TagException {
@@ -157,6 +157,6 @@ public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 				} catch (TagException e) {
 					throw new TagException("Wrong tag format");
 				}
-		throw new TagException("Tag : "+Convert.byteToHexString(metaTagName)+" not found");
+		return "";
 	}
 }

@@ -41,8 +41,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:54:40 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:36:50 $$
  */
 public abstract class JMConnection{
 	
@@ -131,8 +131,7 @@ public abstract class JMConnection{
 
 		try {
 			remoteConnection.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Throwable e) {
 		}
 		
 		if (getStatus() == TCP_SOCKET_CONNECTING)
