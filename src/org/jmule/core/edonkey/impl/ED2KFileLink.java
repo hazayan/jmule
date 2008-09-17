@@ -27,16 +27,18 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jmule.core.edonkey.ED2KLink;
+
 /**
  * Examples :
  * ed2k://|file|NAME|SIZE|MD4-HASH|p=HASH1:HASH2:...|/
  * ed2k://|file|NAME|SIZE|MD4-HASH|h=HASH|/
  * ed2k://|file|NAME|SIZE|MD4-HASH|/|sources,<IP:Port>,<IP:Port>,...|/
  * @author binary
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:09:57 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/17 08:52:38 $$
  */
-public class ED2KFileLink {
+public class ED2KFileLink extends ED2KLink {
 
 	private String fileName;
 	

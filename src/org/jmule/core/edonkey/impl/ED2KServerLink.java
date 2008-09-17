@@ -27,14 +27,16 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jmule.core.edonkey.ED2KLink;
+
 /**
  * ED2K server link
  * ed2k://|server|IP|PORT|/
  * @author binary
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/15 10:06:36 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/17 08:52:38 $$
  */
-public class ED2KServerLink {
+public class ED2KServerLink extends ED2KLink {
 
 	private String server_address = "";
 	
