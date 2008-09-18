@@ -35,8 +35,8 @@ import org.jmule.core.edonkey.ED2KLink;
  * ed2k://|file|NAME|SIZE|MD4-HASH|h=HASH|/
  * ed2k://|file|NAME|SIZE|MD4-HASH|/|sources,<IP:Port>,<IP:Port>,...|/
  * @author binary
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/17 08:52:38 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:36:54 $$
  */
 public class ED2KFileLink extends ED2KLink {
 
@@ -47,104 +47,75 @@ public class ED2KFileLink extends ED2KLink {
 	private FileHash fileHash;
 	
 	public ED2KFileLink(String fileName,long fileSize,FileHash fileHash) {
-		
 		this.fileName = fileName;
-		
 		this.fileSize = fileSize;
-		
 		this.fileHash = fileHash;
-		
 	}
 	
 	public ED2KFileLink(String fileLink){
-		
 		Pattern s;
-		
 		Matcher m;
-		
 		s = Pattern.compile("ed2k:\\/\\/\\|file\\|([^|]*)\\|([0-9]*)\\|([a-h0-9A-H]*)\\|\\/");
-		
 		m = s.matcher(fileLink);
-
 		if (m.matches()) {
-			
 			this.fileName=m.group(1);
-			
 			this.fileSize=Long.valueOf(m.group(2)).longValue();
-			
 			this.fileHash = new FileHash(m.group(3));
 	    }
-		
 	}
 	
 	public static List<ED2KFileLink> extractLinks(String rawData) {
-		
 		Pattern s;
-		
 		Matcher m;
-		
 		s = Pattern.compile("ed2k:\\/\\/\\|file\\|([^|]*)\\|([0-9]*)\\|([a-h0-9A-H]*)\\|\\/");
-		
 		m = s.matcher(rawData);
-		
 		List<ED2KFileLink> links = new LinkedList<ED2KFileLink>();
-		
 		while(m.find()) {
-			
 			String fileName = m.group(1);
-			
 			long fileSize = Long.valueOf(m.group(2)).longValue();
-			
 			FileHash fileHash = new FileHash(m.group(3));
-		
 			links.add(new ED2KFileLink(fileName,fileSize,fileHash));
-			
 		}
-		
 		return links;
-		
 	}
 	
 	public static boolean isValidLink(String link) {
 		Pattern s;
-		
 		Matcher m;
-		
 		s = Pattern.compile("ed2k:\\/\\/\\|file\\|([^|]*)\\|([0-9]*)\\|([a-h0-9A-H]*)\\|\\/");
-		
 		m = s.matcher(link);
-		
 		return m.matches();
 	}
 	
 	public String getAsString() {
-		
 		return "ed2k://|file|"+fileName+"|"+fileSize+"|"+fileHash+"|/";
-		
 	}
 	
 	public long getFileSize() {
-		
 		return this.fileSize;
-		
 	}
 	
 	public String getFileName() {
-		
 		return this.fileName;
-		
 	}
 	
 	public String toString(){
-		
 		return "ed2k://|file|"+fileName+"|"+fileSize+"|"+fileHash+"|/";
-		
 	}
 	
 	public FileHash getFileHash() {
-		
 		return this.fileHash;
-		
+	}
+
+	public int hashCode() {
+		return getAsString().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		if (object == null) return false;
+		if (!(object instanceof ED2KFileLink)) return false;
+		if (hashCode() != object.hashCode()) return false;
+		return true;
 	}
 	
 	public static void main(String... args) {

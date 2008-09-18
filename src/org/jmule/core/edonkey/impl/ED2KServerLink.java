@@ -33,8 +33,8 @@ import org.jmule.core.edonkey.ED2KLink;
  * ED2K server link
  * ed2k://|server|IP|PORT|/
  * @author binary
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/17 08:52:38 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:36:54 $$
  */
 public class ED2KServerLink extends ED2KLink {
 
@@ -114,18 +114,29 @@ public class ED2KServerLink extends ED2KLink {
 		return server_port;
 	}
 	
+	public int hashCode() {
+		return getAsString().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		if (object == null) return false;
+		if (!(object instanceof ED2KServerLink)) return false;
+		if (hashCode() != object.hashCode()) return false;
+		return true;
+	}
+	
 	public static void main(String... args) {
 		
 		ED2KServerLink link;
-		link = new ED2KServerLink("ed2k://|server|207.44.222.51|4242|/");
+		link = new ED2KServerLink("ed2k://|server|213.25.156.20|7000|/");
 		System.out.println("Link : "+link.getServerAddress()+" : "+link.getServerPort());
 		
-		String text = "dwhkgshked2k://|server|207.44.222.51|4242|/sdasded2k://|server|207.44.222.51|4242|/ed2k://|server|207.44.222.51|4242|/";
+		/*String text = "dwhkgshked2k://|server|207.44.222.51|4242|/sdasded2k://|server|207.44.222.51|4242|/ed2k://|server|207.44.222.51|4242|/";
 		List<ED2KServerLink> list = ED2KServerLink.extractLinks(text);
 		
 		for(ED2KServerLink l : list) {
 			System.out.println(l+"");
-		}
+		}*/
 		
 	}
 }
