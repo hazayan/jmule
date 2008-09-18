@@ -46,8 +46,8 @@ import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:54:55 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:55:12 $$
  */
 public class Toolbar extends ToolBar {
 
@@ -69,7 +69,7 @@ public class Toolbar extends ToolBar {
 		
 		new ToolItem(this,SWT.SEPARATOR);
 		
-		final ToolItem servers_item = new ToolItem(this, SWT.PUSH);
+		final ToolItem servers_item = new ToolItem(this, SWT.CHECK);
 		servers_item.setText(Localizer._("mainwindow.toolbar.servers_item"));
 		servers_item.setSelection(true);
 		servers_item.setImage(SWTImageRepository.getImage("servers.png"));
@@ -82,7 +82,7 @@ public class Toolbar extends ToolBar {
 			}
 		});
 		
-		final ToolItem transfers_item = new ToolItem(this, SWT.PUSH);
+		final ToolItem transfers_item = new ToolItem(this, SWT.CHECK);
 		transfers_item.setText(Localizer._("mainwindow.toolbar.transfers_item"));
 		transfers_item.setImage(SWTImageRepository.getImage("transfer.png"));
 		button_list.add(transfers_item);
@@ -94,7 +94,7 @@ public class Toolbar extends ToolBar {
 			}
 		});
 		
-		final ToolItem search_item = new ToolItem(this, SWT.PUSH);
+		final ToolItem search_item = new ToolItem(this, SWT.CHECK);
 		search_item.setText(Localizer._("mainwindow.toolbar.search_item"));
 		search_item.setImage(SWTImageRepository.getImage("search.png"));
 		button_list.add(search_item);
@@ -106,7 +106,7 @@ public class Toolbar extends ToolBar {
 			}
 		});
 		
-		final ToolItem shared_item = new ToolItem(this, SWT.PUSH);
+		final ToolItem shared_item = new ToolItem(this, SWT.CHECK);
 		shared_item.setText(Localizer._("mainwindow.toolbar.shared_item"));
 		shared_item.setImage(SWTImageRepository.getImage("shared_files.png"));
 		button_list.add(shared_item);
@@ -118,7 +118,7 @@ public class Toolbar extends ToolBar {
 			}
 		});
 		
-		final ToolItem statistics_item = new ToolItem(this,SWT.PUSH);
+		final ToolItem statistics_item = new ToolItem(this, SWT.CHECK);
 		statistics_item.setText(Localizer._("mainwindow.toolbar.statistics_item"));
 		statistics_item.setImage(SWTImageRepository.getImage("statistics.png"));
 		button_list.add(statistics_item);
@@ -130,7 +130,7 @@ public class Toolbar extends ToolBar {
 			}
 		});
 		
-		final ToolItem logs_item = new ToolItem(this, SWT.PUSH);
+		final ToolItem logs_item = new ToolItem(this, SWT.CHECK);
 		logs_item.setText(Localizer._("mainwindow.toolbar.logs_item"));
 		logs_item.setImage(SWTImageRepository.getImage("logs.png"));
 		button_list.add(logs_item);
