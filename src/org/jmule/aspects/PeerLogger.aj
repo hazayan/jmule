@@ -27,17 +27,14 @@ import java.util.logging.Logger;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerChatMessageSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
 import org.jmule.core.net.JMConnection;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
  */
 public privileged aspect PeerLogger {
 	
@@ -71,11 +68,5 @@ public privileged aspect PeerLogger {
 	after(Peer p) returning(Packet packet) :target(p) && execution(Packet JMConnection.getReceivedPacket()) {
 		if (packet==null)
 			log.warning("Scanned Packet is null from client  : "+p);
-	}
-	
-	before(Peer p,long time) : target(p) && args(time) && execution (void Peer.reportInactivity(long)) {
-		if (p.lastPacket!=null)
-			if (p.getStatus() == JMConnection.TCP_SOCKET_CONNECTED)
-				log.warning("Resend last packet to peer "+p);		
 	}
 }

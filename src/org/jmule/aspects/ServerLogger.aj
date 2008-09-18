@@ -26,21 +26,20 @@ import java.util.logging.Logger;
 
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerCallbackFailed;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerFoundSourceSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerSearchResultSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerServerListSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerCallbackFailed;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
  */
 public aspect ServerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.Server");
@@ -50,9 +49,6 @@ public aspect ServerLogger {
 	
 	after() throwing (Throwable t): execution (* Server.*(..)) {
 		log.warning(Misc.getStackTrace(t));
-	}
-	
-	before(Server s) : target(s) && call (void Server.searchFiles(String)) {
 	}
 	
 	before(Server s, ClientID client_id) : target(s) && args(client_id) && execution(void Server.callBackRequest(ClientID)) {
@@ -83,14 +79,11 @@ public aspect ServerLogger {
 	}
 	
 	before(Server s) : target(s) && execution(void Server.onConnect()) {
-		log.info("Send login packet to "+s);
 	}
 	
 	before(Server s) : target(s) && execution(void Server.onDisconnect()) {
-		log.info("Disconnect from  "+s);
 	}
 	
 	before(Server s, FileHash fileHash,long fileSize) : target(s) && args(fileHash,fileSize) && execution(void Server.requestSources(FileHash,long)) {
-		log.info("Request sources for "+fileHash);
 	}
 }

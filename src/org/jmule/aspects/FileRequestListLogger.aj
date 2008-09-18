@@ -30,17 +30,14 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
  */
 public aspect FileRequestListLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.FileRequestList");
 
 	after() throwing (Throwable t): execution (* FileRequestList.*(..)) {
 		log.warning(Misc.getStackTrace(t));
-	}
-	
-	after(long begin,long end) returning(boolean result)  : args(begin,end) && call(boolean FileRequestList.haveFragment(long,long)) {
 	}
 	
 }

@@ -22,18 +22,12 @@
  */
 package org.jmule.aspects;
 
-import java.util.logging.Logger;
-
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
  */
 public aspect PartMetLogger {
-	private Logger log = Logger.getLogger("org.jmule.core.edonkey.metfile.PartMet");
-	
-	after(byte metaTag[]) throwing(Exception e) : args(metaTag) && execution(* TagList.getStringTag(byte[])) {
-		
-	}
+
 }

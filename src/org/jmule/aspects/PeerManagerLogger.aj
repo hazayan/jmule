@@ -25,18 +25,16 @@ package org.jmule.aspects;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.peermanager.PeerManager;
-import org.jmule.core.peermanager.PeerManagerImpl;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
  */
 public privileged aspect PeerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.peermanager.PeerManager");
@@ -46,10 +44,6 @@ public privileged aspect PeerManagerLogger {
 	}
 	
 	before(Peer peer) : args(peer) && execution(void PeerManager.addUnknownPeer(Peer)) {
-	
-	}
-	
-	before(Peer peer) : target(peer) && call(void Peer.disconnect()) && cflow (execution(void PeerManagerImpl.PeerCleaner.run())) {
 	
 	}
 	

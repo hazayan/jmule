@@ -26,14 +26,13 @@ import java.util.logging.Logger;
 
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.sharingmanager.PartialFile;
-import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.edonkey.metfile.PartMetException;
 import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
  */
 public privileged aspect PartialFileLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartialFile");
@@ -43,17 +42,13 @@ public privileged aspect PartialFileLogger {
 	}
 	
 	after(PartMet part_met) throwing(PartMetException e) : target(part_met) && call (void PartMet.writeFile()) {
-		log.info("Failed to write data in file "+part_met.getName() );
-	}
-	
-	after(PartialFile pFile) : target(pFile) && execution(PartialFile.new(..)) {
-		log.fine("New partial file : \n"+pFile);
+		log.warning("Failed to write data in file "+part_met.getName() );
 	}
 	
 	after(PartialFile pFile) returning(boolean result) : target(pFile) && execution(boolean PartialFile.checkFullFileIntegrity()) {
 		
 		if (!pFile.hasHashSet()) {
-			log.info("Can't check file integrity don't have part hash set");
+			log.warning("Can't check file integrity don't have part hash set");
 			return ;
 		}
 		
@@ -63,7 +58,7 @@ public privileged aspect PartialFileLogger {
 	
 	after(PartialFile pFile) returning(boolean result) : target(pFile) && execution(boolean PartialFile.checkFilePartsIntegrity()) {
 		if (!pFile.hasHashSet()) {
-			log.info("Can't check file integrity don't have part hash set");
+			log.warning("Can't check file integrity don't have part hash set");
 			return ;
 		}
 		if (!result)

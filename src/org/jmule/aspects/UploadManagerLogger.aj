@@ -24,25 +24,19 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerImpl;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:58 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
  */
 public privileged aspect UploadManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.uploadmanager.UploadManager");
 	
-	after(FileHash fileHash) returning(boolean result) : args(fileHash) && call(boolean UploadManager.hasSession(FileHash)) {
-		if (!result)
-			log.warning("Don't have File Hash : "+fileHash);
-	}
-	
-	after() throwing (Throwable t): execution (* UploadManager.*(..)) {
+	after() throwing (Throwable t): execution (* UploadManagerImpl.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
 }

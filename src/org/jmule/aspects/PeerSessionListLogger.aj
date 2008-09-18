@@ -24,20 +24,15 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.peermanager.PeerSessionList;
-import org.jmule.core.uploadmanager.UploadManager;
-import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.*;
+import org.jmule.core.peermanager.PeerSessionList;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
  */
 public privileged aspect PeerSessionListLogger {
 	

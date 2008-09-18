@@ -26,16 +26,14 @@ import java.util.logging.Logger;
 
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:00:00 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
  */
 public privileged aspect UploadSessionLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.uploadmanager.UploadSession");
