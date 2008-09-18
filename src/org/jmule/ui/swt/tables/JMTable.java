@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:30:13 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:54:06 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -68,9 +68,10 @@ public abstract class JMTable<T> extends Table {
 	protected boolean is_sorted = false;
 	protected int last_sort_column ;
 	protected boolean last_sort_dir = true;
+	protected boolean enabled_sorting = true;
 	
-	public JMTable(Composite composite) {
-		super(composite,SWT.VIRTUAL | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);		
+	public JMTable(Composite composite, int style) {
+		super(composite,SWT.VIRTUAL | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER | style);		
 		
 		setHeaderVisible(true);
 		setLinesVisible (false);
@@ -163,7 +164,7 @@ public abstract class JMTable<T> extends Table {
 				
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
-					
+					if (!enabled_sorting) return ;
 					TableColumn column = (TableColumn)e.widget;
 					int column_id = (Integer)column.getData(SWTConstants.COLUMN_NAME_KEY);
 					if (is_sorted)
@@ -208,6 +209,10 @@ public abstract class JMTable<T> extends Table {
 		table_column.addListener(SWT.Selection, sort_listener);
 	}
 
+	public void setSorting(boolean value) {
+		enabled_sorting = value;
+	}
+	
 	public void disableColumn(int columnID) {
 		for(TableColumn column : getColumns()) {
 			int column_id = (Integer) column.getData(SWTConstants.COLUMN_NAME_KEY);
@@ -335,7 +340,8 @@ public abstract class JMTable<T> extends Table {
 		line_list.remove(id);
 		default_custom_control_list.remove(id);
 		default_line_list.remove(id);
-		updateLineBackground();
+
+		clearAll();		
 	}
 	
 	protected List<BufferedTableRowCustomControl> getCustumElements(T object) {
@@ -397,6 +403,10 @@ public abstract class JMTable<T> extends Table {
 		updateColumnOrder();
 	}
 	
+	public T getData(int index) {
+		return (T) line_list.get(index).getData(SWTConstants.ROW_OBJECT_KEY);
+	}
+	
 	protected void saveColumnSettings() {
 		if (!isVisible()) return ;
 		int column_order[];
@@ -425,7 +435,7 @@ public abstract class JMTable<T> extends Table {
 		});
 	}
 	
-	protected boolean hasObject(T object) {
+	public boolean hasObject(T object) {
 		for(BufferedTableRow row : line_list) {
 			T o = (T)row.getData(SWTConstants.ROW_OBJECT_KEY);
 			if (o!=null)
