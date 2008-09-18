@@ -25,7 +25,6 @@ package org.jmule.ui.swt.maintabs.serverlist;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,7 +40,6 @@ import org.jmule.core.edonkey.impl.Server;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.skin.SkinConstants;
 import org.jmule.ui.swt.SWTImageRepository;
@@ -53,8 +51,8 @@ import org.jmule.util.net.AddressUtils;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:43:18 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:59:37 $$
  */
 public class ServerAddWindow implements JMuleUIComponent {
 
@@ -103,6 +101,22 @@ public class ServerAddWindow implements JMuleUIComponent {
 		final Text text_server_ip = new Text(content,SWT.BORDER);
 		text_server_ip.setFont(skin.getDefaultFont());
 		text_server_ip.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		text_server_ip.addListener(SWT.Verify,new Listener() {
+			public void handleEvent(Event e) {
+		        String text = e.text;
+		        char[] chars = new char[text.length()];
+		        text.getChars(0, chars.length, chars, 0);
+		        for (int i = 0; i < chars.length; i++) {
+		          if (!('0' <= chars[i] && chars[i] <= '9'))
+		        	  if (chars[i]!='.') {
+		        	  
+			            e.doit = false;
+			            return;
+		          }
+				}
+			}
+		});
 		
 		label = new Label(content,SWT.NONE);
 		label.setFont(skin.getLabelFont());
