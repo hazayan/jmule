@@ -62,8 +62,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/12 16:55:27 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 07:03:02 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -83,7 +83,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 									  MULTIPLE_STOPPED_DOWNLOADS_SELECTED, MULTIPLE_MISC_DOWNLOADS_SELECTED };
 		  
 	public DownloadList(Composite composite, JMuleCore core) {
-		super(composite);
+		super(composite, SWT.NONE);
 		
 		_core = core;
 		download_manager = core.getDownloadManager();

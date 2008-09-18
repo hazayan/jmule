@@ -55,8 +55,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 16:56:10 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:03:03 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -69,7 +69,7 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	private Menu upload_selected_menu;
 	
 	public UploadList(Composite composite,JMuleCore core) {
-		super(composite);
+		super(composite, SWT.NONE);
 
 		upload_manager   = core.getUploadManager();
 		download_manager = core.getDownloadManager(); 

@@ -61,8 +61,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:03:27 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -124,7 +124,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 	private class UploadPeerList extends JMTable<Peer> {
 
 		public UploadPeerList(Composite composite) {
-			super(composite);
+			super(composite, SWT.NONE);
 			int width;
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.nickname"), _._("uploadinfowindow.tab.peerlist.column.nickname.desc"),	SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID));
 			

@@ -67,8 +67,8 @@ import com.maxmind.geoip.Country;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:13 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:03:27 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -152,7 +152,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 	private class DownloadPeerList extends JMTable<Peer>{		
 		
 		public DownloadPeerList(Composite content) {
-			super(content);
+			super(content, SWT.NONE);
 			int width;
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID);

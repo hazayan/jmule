@@ -70,8 +70,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/12 16:55:58 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 07:02:17 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -205,7 +205,7 @@ public class SharedTab extends AbstractTab {
 		shared_files.setLayout(new FillLayout());
 		
 		
-		shared_files_table = new JMTable<SharedFile>(shared_files){
+		shared_files_table = new JMTable<SharedFile>(shared_files, SWT.NONE){
 
 			protected int compareObjects(SharedFile object1, SharedFile object2,
 					int columnID, boolean order) {

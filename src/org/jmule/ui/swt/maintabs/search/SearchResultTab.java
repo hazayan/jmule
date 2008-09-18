@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 16:55:44 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:02:19 $
  */
 public class SearchResultTab {
 
@@ -94,7 +94,7 @@ public class SearchResultTab {
 		search_tab.setControl(content);
 		content.setLayout(new FillLayout());
 		
-		search_results = new JMTable<SearchResultItem>(content) {
+		search_results = new JMTable<SearchResultItem>(content, SWT.NONE) {
 
 			protected int compareObjects(SearchResultItem object1,
 					SearchResultItem object2, int columnID, boolean order) {
