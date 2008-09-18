@@ -29,7 +29,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,7 +40,6 @@ import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.GUIUpdater;
 import org.jmule.ui.swt.Refreshable;
@@ -53,8 +51,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 4, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:04:03 $
  */
 public class DownloadInfoWindow implements JMuleUIComponent {
 
@@ -118,7 +116,6 @@ public class DownloadInfoWindow implements JMuleUIComponent {
 		button_close.setLayoutData(grid_data);
 		
 		button_close.setFont(skin.getButtonFont());
-		//button_close.setImage(skin.getButtonImage(SkinConstants.OK_BUTTON_IMAGE));
 		button_close.setText(Localizer._("downloadinfowindow.button.close"));
 		
 		button_close.addSelectionListener(new SelectionAdapter() {

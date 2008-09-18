@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:44:28 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 07:00:10 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
@@ -88,7 +88,7 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 							 		  SELECTED_DISCONNECTED_SERVER_CONNECTED }
 	
 	public ServerList(Composite composite, final ServerManager server_manager) {
-		super(composite);
+		super(composite, SWT.NONE);
 		
 		SWTServerListWrapper.getInstance().setServerList(this);
 		
