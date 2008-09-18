@@ -26,13 +26,14 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.jmule.core.JMuleManager;
+import org.jmule.core.edonkey.impl.ED2KServerLink;
 import org.jmule.core.edonkey.impl.Server;
 
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 14:48:53 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:35:45 $$
  */
 public interface ServerManager extends JMuleManager {
 
@@ -51,6 +52,12 @@ public interface ServerManager extends JMuleManager {
 	 */
 	public void addServer(Server server);
 
+	/**
+	 * Add a new server specified by ED2K link to the server list
+	 * @param serverLink
+	 */
+	public void addServer(ED2KServerLink serverLink);
+	
 	/**
 	 * Removes the given server form the server list
 	 * @param server the given server
@@ -131,6 +138,18 @@ public interface ServerManager extends JMuleManager {
 	public boolean hasServer(Server server);
 	
 	/**
+	 * Check if ServerManager has server specified by address and port
+	 * @return true - server exists in list, false - server is not present
+	 */
+	public boolean hasServer(String address, int port);
+	
+	/**
+	 * Check if ServerManager has server specified by address and port
+	 * @return true - server exists in list, false - server is not present
+	 */
+	public boolean hasServer(ED2KServerLink link);
+	
+	/**
 	 * Starts the UDP query thread
 	 */
 	public void startUDPQuery();
@@ -163,5 +182,13 @@ public interface ServerManager extends JMuleManager {
 	 * @param serverListener the given server listener
 	 */
 	public void removeServerListener(ServerListener serverListener);
+	
+	public void serverConnecting(Server server);
+	
+	public void serverConnected(Server server);
+	
+	public void serverDisconnected(Server server);
+	
+	public void serverMessage(Server server, String message);
 	
 }

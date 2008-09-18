@@ -51,14 +51,16 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:48:30 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:36:01 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
 	private List<Server> server_list = new CopyOnWriteArrayList<Server>();
 	
 	private List<ServerListListener> server_list_listeners = new CopyOnWriteArrayList<ServerListListener>();
+	
+	private List<ServerListener> server_listeners = new LinkedList<ServerListener>();
 	
 	// UDP query
 	
@@ -119,6 +121,7 @@ public class ServerManagerImpl implements ServerManager {
 		
 		if (server_list.contains(server)) return ;
 		
+		
 		server_list.add(server);
 		
 		// notify all listeners that a new server has been added to the server list
@@ -128,6 +131,11 @@ public class ServerManagerImpl implements ServerManager {
 			
 		}
 	
+	}
+	
+	public void addServer(ED2KServerLink serverLink) {
+		Server server = new Server(serverLink);
+		addServer(server);
 	}
 	
 	public void removeServer(List<Server> serverList) {
@@ -276,7 +284,7 @@ public class ServerManagerImpl implements ServerManager {
 			
 			/// for testing only
 			
-			((Server)min_ping_server).addServerListener(new ServerListenerAdapter() {
+			/*((Server)min_ping_server).addServerListener(new ServerListenerAdapter() {
 				public void connected(Server server) {
                      System.out.println("Connected to " + server);
 				}
@@ -288,7 +296,7 @@ public class ServerManagerImpl implements ServerManager {
 				 public void disconnected(Server server) {
 					 System.out.println("Disconnected from " + server);
 				 }
-			});
+			});*/
 			
             ((Server)min_ping_server).connect();
 			
@@ -494,10 +502,26 @@ public class ServerManagerImpl implements ServerManager {
 		return false;
 	}
 
+	public boolean hasServer(String address, int port) {
+		for(Server checked_server : server_list) {
+			if (checked_server.getAddress().equals(address))
+				if (checked_server.getPort() == port)
+					return true;
+		}
+		return false;
+	}
 
+	public boolean hasServer(ED2KServerLink link) {
+		for(Server checked_server : server_list) {
+			if (checked_server.getServerLink().equals(link)) 
+				return true;
+		}
+		return false;
+	}
+	
 	public Server getServer(InetSocketAddress address) {
 		String ip_address = address.getAddress().getHostAddress();
-		// can't compare by InetAddress : UDP packet is from another port(allways 4665) but same IP
+		// can't compare by InetAddress : UDP packet is from another port(4665) but same IP
 		for(Server checked_server : server_list) {
 			if (checked_server.getAddress().equals(ip_address))
 					return checked_server;
@@ -509,22 +533,36 @@ public class ServerManagerImpl implements ServerManager {
 
 	public void addServerListener(ServerListener serverListener) {
 		
-          for(Server server : this.getServers()) {
-        	  
-        	  server.addServerListener(serverListener);
-        	  
-          }
-		
+		  server_listeners.add(serverListener);
+		  
 	}
 
 
 	public void removeServerListener(ServerListener serverListener) {
 		
-          for(Server server : this.getServers()) {
-      	  
-      	      server.addServerListener(serverListener);
-      	  
-          }
+		  server_listeners.remove(serverListener);
+
+	}
+	
+	public void serverConnecting(Server server) {
+		for(ServerListener listener : server_listeners)
+			listener.isconnecting(server);
+	}
+	
+	public void serverConnected(Server server) {
+		for(ServerListener listener : server_listeners)
+			listener.connected(server);
+	}
+
+	public void serverDisconnected(Server server) {
+		for(ServerListener listener : server_listeners)
+			listener.disconnected(server);
+	}
+
+	public void serverMessage(Server server, String message) {
+
+		for(ServerListener listener : server_listeners)
+			listener.serverMessage(server, message);
 		
 	}
 
@@ -554,7 +592,5 @@ public class ServerManagerImpl implements ServerManager {
 			interrupt();
 		}
 		
-	}
-
-		
+	}	
 }
