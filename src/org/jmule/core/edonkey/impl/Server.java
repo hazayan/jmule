@@ -50,6 +50,7 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.ServerListener;
 import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.UDPPacket;
@@ -84,8 +85,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:14:40 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:36:22 $$
  */
 public class Server extends JMConnection {
 	
@@ -121,10 +122,7 @@ public class Server extends JMConnection {
 	private TimerTask search_task;
 	
 	private Timer search_timer;
-	
-	// Listeners
-	private List<ServerListener> server_listeners = new CopyOnWriteArrayList<ServerListener>();
-	
+
 	public Server() {
 		
 		super();
@@ -358,12 +356,8 @@ public class Server extends JMConnection {
 				return;
 			}
 			
-			for(ServerListener server_listener : server_listeners) {
-				
-				server_listener.serverMessage(this, scannedPacket.getServerMessage());
-				
-			}
-			
+			ServerManagerFactory.getInstance().serverMessage(this, scannedPacket.getServerMessage());
+
 			return;
 			
 		}
@@ -883,55 +877,31 @@ public class Server extends JMConnection {
 	
 	private void notify_server_event(int socket_status) {
 		
-		for(ServerListener server_listener : server_listeners) {
-			
-		   switch( socket_status ) {
-		    
-		      case TCP_SOCKET_CONNECTED : {
-		    	  
-		    	  server_listener.connected(this);
-		    	  
-		    	  break;
-		      }
-		      
-		      case TCP_SOCKET_DISCONNECTED : {
-		    	  
-		    	  server_listener.disconnected(this);
-		    	
-		    	  break;
-		      }
-		      
-		      case TCP_SOCKET_CONNECTING : {
-		    	  
-		    	  server_listener.isconnecting(this);
-		    	  
-		    	  break;
-		      }
-		       
-		 
-		   }
-		}
+		switch( socket_status ) {
+	    
+	      case TCP_SOCKET_CONNECTED : {
+	    	  
+	    	  ServerManagerFactory.getInstance().serverConnected(this);
+	    	  
+	    	  break;
+	      }
+	      
+	      case TCP_SOCKET_DISCONNECTED : {
+	    	  
+	    	  ServerManagerFactory.getInstance().serverDisconnected(this);
+	    	
+	    	  break;
+	      }
+	      
+	      case TCP_SOCKET_CONNECTING : {
+	    	  
+	    	  ServerManagerFactory.getInstance().serverConnecting(this);
+	    	  
+	    	  break;
+	      }
+	       
+	 
+	   }
 		
 	}
-	
-	/**
-	 * Adds a server listener
-	 * @param serverListener the given server listener
-	 */
-	public void addServerListener(ServerListener serverListener) {
-		
-		server_listeners.add(serverListener);
-		
-	}
-	
-	/**
-	 * Remove the server listener
-	 * @param serverListener the given server listener
-	 */
-	public void removeServerListener(ServerListener serverListener) {
-	
-		server_listeners.remove(serverListener);
-		
-	}
-
 }
