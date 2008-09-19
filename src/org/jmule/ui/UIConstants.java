@@ -34,8 +34,8 @@ import java.util.Map;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:18:26 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:53:54 $$
  */
 
 public class UIConstants {
@@ -123,6 +123,14 @@ public class UIConstants {
 	public static final int SHARED_LIST_FILE_ID_COLUMN_ID             = 4300;
 	public static final int SHARED_LIST_COMPLETED_COLUMN_ID           = 4400;
 	
+	// add new downloads
+	public static final int NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID	  = 4500;
+	public static final int NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID	  = 4600;
+	public static final int NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID		  = 4700;
+	
+	public static final int NEW_SERVER_LIST_NAME_COLUMN_ID		 	  = 4800;
+	public static final int NEW_SERVER_LIST_PORT_COLUMN_ID		  	  = 4900;
+	
 	// Column UI nodes
 	protected static final String SERVER_LIST_NAME_NODE                     = "/server_list_name_column";
 	protected static final String SERVER_LIST_CC_NODE                       = "/server_list_cc_column";
@@ -186,6 +194,13 @@ public class UIConstants {
 	protected static final String SHARED_LIST_FILE_ID_COLUMN_NODE           = "/shared_list_file_id_column";
 	protected static final String SHARED_LIST_COMPLETED_COLUMN_NODE         = "/shared_list_completed_column";
 	
+	protected static final String NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE	= "/new_download_list_file_name_column";
+	protected static final String NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_NODE	= "/new_download_list_file_size_column";
+	protected static final String NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_NODE		= "/new_download_list_file_id_column";
+	
+	protected static final String NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE	= "/new_server_list_name_column";
+	protected static final String NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE	= "/new_server_list_port_column";
+
 	protected static final String TOOL_BAR_NODE                             = "/tool_bar";
 	protected static final String STATUS_BAR_NODE                           = "/status_bar";
 	
@@ -257,6 +272,13 @@ public class UIConstants {
 		default_values.put(SHARED_LIST_FILE_TYPE_COLUMN_ID + VISIBILITY,         true);
 		default_values.put(SHARED_LIST_FILE_ID_COLUMN_ID + VISIBILITY,           true);
 		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + VISIBILITY,         true);
+
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + VISIBILITY, 	 true);
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID + VISIBILITY, 	 true);
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID + VISIBILITY, 	 true);
+		
+		default_values.put(NEW_SERVER_LIST_NAME_COLUMN_ID + VISIBILITY, 	 	 true);
+		default_values.put(NEW_SERVER_LIST_PORT_COLUMN_ID + VISIBILITY, 	 	 true);
 		
 		// default table column's order
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + ORDER,               1);
@@ -321,6 +343,13 @@ public class UIConstants {
 		default_values.put(SHARED_LIST_FILE_ID_COLUMN_ID + ORDER,            4);
 		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + ORDER,          5);
 		
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,    1);
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID + ORDER,    2);
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID + ORDER,    	 3);
+		
+		default_values.put(NEW_SERVER_LIST_NAME_COLUMN_ID + ORDER, 	 		 1);
+		default_values.put(NEW_SERVER_LIST_PORT_COLUMN_ID + ORDER, 	 		 2);
+		
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + WIDTH,              150);
 		default_values.put(SERVER_LIST_CC_COLUMN_ID + WIDTH,                 40);
 		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + WIDTH,               40);
@@ -382,6 +411,13 @@ public class UIConstants {
 		default_values.put(SHARED_LIST_FILE_TYPE_COLUMN_ID + WIDTH,          150);
 		default_values.put(SHARED_LIST_FILE_ID_COLUMN_ID + WIDTH,            250);
 		default_values.put(SHARED_LIST_COMPLETED_COLUMN_ID + WIDTH,          60);
+		
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + WIDTH, 	 150);
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID + WIDTH, 	 100);
+		default_values.put(NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID + WIDTH, 	 150);
+
+		default_values.put(NEW_SERVER_LIST_NAME_COLUMN_ID + WIDTH, 	 		 150);
+		default_values.put(NEW_SERVER_LIST_PORT_COLUMN_ID + WIDTH, 	 		 150);
 		
 		default_values.put(TOOL_BAR_ID + VISIBILITY,                         true);
 		default_values.put(STATUS_BAR_ID + VISIBILITY,                       true);
@@ -456,6 +492,12 @@ public class UIConstants {
 		  	case SHARED_LIST_FILE_ID_COLUMN_ID          :  return SHARED_LIST_FILE_ID_COLUMN_NODE;
 		  	case SHARED_LIST_COMPLETED_COLUMN_ID        :  return SHARED_LIST_COMPLETED_COLUMN_NODE;
 		  	 
+		  	case NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID  	: return NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_NODE;
+		  	case NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID  : return NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE;
+		  	case NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID  : return NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_NODE;
+
+		  	case NEW_SERVER_LIST_NAME_COLUMN_ID 		: return NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE;
+		  	case NEW_SERVER_LIST_PORT_COLUMN_ID 		: return NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE;		  	
 		}
 		
 		return "unknown column ID";
