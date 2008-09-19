@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.aboutwindow.AboutWindow;
@@ -46,8 +47,8 @@ import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:52:19 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:32:45 $$
  */
 public class MainMenu extends Menu{
 
@@ -59,12 +60,43 @@ public class MainMenu extends Menu{
 		main_window = mainWindow;
 		shell.setMenuBar(this);
 		
-		//File menu
+		// File menu
 		MenuItem fileItem = new MenuItem (this, SWT.CASCADE);
 		fileItem.setText (Localizer._("mainwindow.mainmenu.file"));
 		
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
 		fileItem.setMenu (submenu);
+
+		MenuItem new_item = new MenuItem(submenu,SWT.CASCADE);
+		new_item.setText(_._("mainwindow.mainmenu.file.new"));
+		
+		Menu new_submenu = new Menu(shell,SWT.DROP_DOWN);
+		new_item.setMenu(new_submenu);
+		
+		MenuItem new_server_item = new MenuItem(new_submenu,SWT.PUSH);
+		new_server_item.setText(_._("mainwindow.mainmenu.file.new.new_server"));
+		
+		new_server_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				new NewWindow(NewWindow.WindowType.SERVER);			
+			}
+		});
+		
+		MenuItem new_download_item = new MenuItem(new_submenu,SWT.PUSH);
+		new_download_item.setText(_._("mainwindow.mainmenu.file.new.new_download"));
+		new_download_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				new NewWindow(NewWindow.WindowType.DOWNLOAD);			
+			}
+		});
+		
+		MenuItem new_shared_folder_item = new MenuItem(new_submenu,SWT.PUSH);
+		new_shared_folder_item.setText(_._("mainwindow.mainmenu.file.new.new_shared_dir"));
+		new_shared_folder_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				new NewWindow(NewWindow.WindowType.SHARED_DIR);			
+			}
+		});
 		
 		MenuItem import_servers = new MenuItem (submenu, SWT.PUSH);
 		import_servers.setText(Localizer._("mainwindow.mainmenu.file.import"));
