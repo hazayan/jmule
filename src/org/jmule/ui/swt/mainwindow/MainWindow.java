@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
@@ -67,8 +68,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:53:03 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:32:25 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -91,7 +92,7 @@ public class MainWindow implements JMuleUIComponent {
 	}
 	
 	public void initUIComponents() {
-		final Display display = SWTThread.getInstance().getDisplay();
+		final Display display = SWTThread.getDisplay();
 		final MainWindow instance = this;
 		display.asyncExec(new JMRunnable() {
             public void JMRun() {
@@ -121,8 +122,9 @@ public class MainWindow implements JMuleUIComponent {
             	GridData gridData = new GridData(GridData.FILL_BOTH);
             	window_content.setLayoutData(gridData);
 		
-            	status_bar = new StatusBar(shell,_core);
+            	new Label(shell,SWT.SEPARATOR | SWT.HORIZONTAL).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
             	
+            	status_bar = new StatusBar(shell,_core);
             	
             	LogsTab logs_tab = new LogsTab(window_content);
             	logger = logs_tab;
@@ -144,8 +146,8 @@ public class MainWindow implements JMuleUIComponent {
             	shell.open ();
 
             	// show log messages
-            	new Thread(new Runnable() {
-            		public void run() {
+            	new JMThread(new JMRunnable() {
+            		public void JMRun() {
             			logger.fine(Localizer._("mainwindow.logtab.message_jmule_started",  JMConstants.JMULE_FULL_NAME));
             			logger.fine(Localizer._("mainwindow.logtab.message_servers_loaded", _core.getServerManager().getServersCount() + ""));
             			logger.fine(Localizer._("mainwindow.logtab.message_shared_loaded", _core.getSharingManager().getFileCount() + ""));
@@ -169,12 +171,10 @@ public class MainWindow implements JMuleUIComponent {
 													window.initUIComponents();
 												} }
 				            		}});
-							} catch (JMUpdaterException e) {
-							}
+							} catch (JMUpdaterException e) {}
             			}
             		}).start();
             	}
-            	
             	shell.addListener(SWT.Close, new Listener() {
 					public void handleEvent(Event arg0) {
 						boolean exit = SWTPreferences.getInstance().promptOnExit() ? 
@@ -193,11 +193,8 @@ public class MainWindow implements JMuleUIComponent {
 								}
 							}
 						}).start();
-						
 					}
             	});
-            	
-            
             }});
 		
 	} 
@@ -217,6 +214,7 @@ public class MainWindow implements JMuleUIComponent {
 	}
 	
 	public void setTab(JMULE_TABS tabID) {
+		toolbar.setSelection(tabID);
 		if (window_content.getContent()!=null) {
 		for(AbstractTab tab : tab_list) {
 			if (window_content.getContent().equals(tab)) {
@@ -232,8 +230,6 @@ public class MainWindow implements JMuleUIComponent {
 			else {
 			}
 		}
-		
-		
 	}
 
 	public void close() {
@@ -241,9 +237,7 @@ public class MainWindow implements JMuleUIComponent {
 	}
 	
 	public void getCoreComponents() {
-		
-			_core = JMuleCoreFactory.getSingleton();
-
+		_core = JMuleCoreFactory.getSingleton();
 	}
 
 }
