@@ -58,8 +58,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:54:12 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/19 12:27:09 $
  */
 public class StatusBar extends Composite {
 
@@ -84,11 +84,8 @@ public class StatusBar extends Composite {
 		
 		JMuleUI ui_instance = null;
 		try {
-			
 		    ui_instance = JMuleUIManager.getJMuleUI();
-		
-		}catch(Throwable t) {
-		}
+		}catch(Throwable t) {}
 		
 		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
@@ -97,7 +94,7 @@ public class StatusBar extends Composite {
 		
 		setLayoutData(grid_data);
 
-		GridLayout layout = new GridLayout(7,false);
+		GridLayout layout = new GridLayout(8,false);
 		
 		layout.marginWidth = 0;
 		layout.verticalSpacing = 0;
@@ -110,7 +107,13 @@ public class StatusBar extends Composite {
 		
 		connection_status_label = new Label(this,SWT.NONE);
 		connection_status_label.setFont(skin.getLabelFont());
-			
+		connection_status_label.setText(Localizer._("mainwindow.statusbar.label.disconnected"));
+
+		GridData data = new GridData();
+		data.heightHint = 16;
+		
+		new Label(this,SWT.SEPARATOR | SWT.VERTICAL).setLayoutData(data);
+		
 		client_id_label = new Label(this,SWT.NONE);
 		client_id_label.setFont(skin.getLabelFont());
 		client_id_label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING));
@@ -208,6 +211,7 @@ public class StatusBar extends Composite {
 		img_label.setImage(img);
 		client_id_label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		client_id_label.setText("");
+		client_id_label.setToolTipText("");
 		layout();
 	}
 	

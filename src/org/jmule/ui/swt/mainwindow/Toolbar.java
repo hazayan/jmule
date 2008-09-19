@@ -28,26 +28,22 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.jmule.core.JMuleCore;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.common.ConnectButton;
-import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:55:12 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:23:42 $$
  */
 public class Toolbar extends ToolBar {
 
@@ -55,6 +51,7 @@ public class Toolbar extends ToolBar {
 	private GridData grid_data;
 	private MainWindow main_window;
 	
+	private static final String 	DATA_KEY		=  "DataKey";
 	
 	public Toolbar(Composite shell,JMuleCore core, MainWindow mainWindow) {
 		super(shell, SWT.FLAT);
@@ -65,95 +62,92 @@ public class Toolbar extends ToolBar {
 		
 		setLayoutData(grid_data);
 		
-		ConnectButton connect_item = new ConnectButton(this);
+		new ConnectButton(this);
 		
 		new ToolItem(this,SWT.SEPARATOR);
 		
 		final ToolItem servers_item = new ToolItem(this, SWT.CHECK);
 		servers_item.setText(Localizer._("mainwindow.toolbar.servers_item"));
 		servers_item.setSelection(true);
+		servers_item.setData(DATA_KEY, JMULE_TABS.SERVERLIST);
 		servers_item.setImage(SWTImageRepository.getImage("servers.png"));
+		
 		button_list.add(servers_item);
 		
 		servers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(servers_item);
 				main_window.setTab(JMULE_TABS.SERVERLIST);
 			}
 		});
 		
 		final ToolItem transfers_item = new ToolItem(this, SWT.CHECK);
 		transfers_item.setText(Localizer._("mainwindow.toolbar.transfers_item"));
-		transfers_item.setImage(SWTImageRepository.getImage("transfer.png"));
+		transfers_item.setData(DATA_KEY, JMULE_TABS.TRANSFERS);
+		transfers_item.setImage(SWTImageRepository.getImage("transfer.png"));		
 		button_list.add(transfers_item);
 		
 		transfers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(transfers_item);
 				main_window.setTab(JMULE_TABS.TRANSFERS);
 			}
 		});
 		
 		final ToolItem search_item = new ToolItem(this, SWT.CHECK);
 		search_item.setText(Localizer._("mainwindow.toolbar.search_item"));
+		search_item.setData(DATA_KEY, JMULE_TABS.SEARCH);
 		search_item.setImage(SWTImageRepository.getImage("search.png"));
 		button_list.add(search_item);
 		
 		search_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(search_item);
 				main_window.setTab(JMULE_TABS.SEARCH);
 			}
 		});
 		
 		final ToolItem shared_item = new ToolItem(this, SWT.CHECK);
 		shared_item.setText(Localizer._("mainwindow.toolbar.shared_item"));
+		shared_item.setData(DATA_KEY, JMULE_TABS.SHARED);
 		shared_item.setImage(SWTImageRepository.getImage("shared_files.png"));
 		button_list.add(shared_item);
 		
 		shared_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(shared_item);
 				main_window.setTab(JMULE_TABS.SHARED);
 			}
 		});
 		
 		final ToolItem statistics_item = new ToolItem(this, SWT.CHECK);
 		statistics_item.setText(Localizer._("mainwindow.toolbar.statistics_item"));
+		statistics_item.setData(DATA_KEY, JMULE_TABS.STATISTICS);
 		statistics_item.setImage(SWTImageRepository.getImage("statistics.png"));
 		button_list.add(statistics_item);
 		
 		statistics_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(statistics_item);
 				main_window.setTab(JMULE_TABS.STATISTICS);
 			}
 		});
 		
 		final ToolItem logs_item = new ToolItem(this, SWT.CHECK);
 		logs_item.setText(Localizer._("mainwindow.toolbar.logs_item"));
+		logs_item.setData(DATA_KEY, JMULE_TABS.LOGS);
 		logs_item.setImage(SWTImageRepository.getImage("logs.png"));
 		button_list.add(logs_item);
 		
 		logs_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				setSelection(logs_item);
 				main_window.setTab(JMULE_TABS.LOGS);
 			}
-		});
-		
+		});	
 	}
-	
-	private void setSelection(ToolItem selected_item) {
-		
-		selected_item.setSelection(true);
-		
+
+	public void setSelection(JMULE_TABS tabs) {
 		for(ToolItem item : button_list) {
-			
-			if (!item.equals(selected_item))
-				
+			JMULE_TABS tab = (JMULE_TABS) item.getData(DATA_KEY);
+			if (tab == tabs)
+				item.setSelection(true);
+			else 
 				item.setSelection(false);
-			
 		}
 		
 	}
