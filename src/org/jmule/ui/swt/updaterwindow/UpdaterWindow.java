@@ -47,8 +47,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
-import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreFactory;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
@@ -65,13 +63,15 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/14 16:22:08 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/19 12:35:01 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
-	private JMUpdater updater = JMUpdater.getInstance();
+	public static final int UPDATE_INTERVAL		= 10000;
 	
+	private JMUpdater updater = JMUpdater.getInstance();
+
 	private Shell shell;
 	private Label available_version, last_update, user_version;
 	private StyledText changelog_text;
@@ -79,10 +79,7 @@ public class UpdaterWindow implements JMuleUIComponent {
 	
 	private Color green_color = new Color(SWTThread.getDisplay(),68,174,71);
 	
-	private JMuleCore _core;
-	
 	public void getCoreComponents() {
-		_core = JMuleCoreFactory.getSingleton();
 	}
 
 	public void initUIComponents() {
@@ -208,6 +205,12 @@ public class UpdaterWindow implements JMuleUIComponent {
 		updateControls();
 		
 		shell.open();
+		
+		
+		long update_time = updater.getLastUpdateTime();
+		
+		if ((System.currentTimeMillis() - update_time) <= UPDATE_INTERVAL)
+			return ;
 		
 		new JMThread(new JMRunnable() {
 			public void JMRun() {
