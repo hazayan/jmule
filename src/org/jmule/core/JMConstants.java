@@ -24,13 +24,11 @@ package org.jmule.core;
 
 import java.util.StringTokenizer;
 
-import org.jmule.ui.localizer._;
-
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/28 17:19:09 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:38:20 $$
  */
 public class JMConstants {
      
@@ -41,6 +39,8 @@ public class JMConstants {
 	  public static final String OPEN_SUPPORT              = "http://jmule.org/opensupport";
 	  public static final String SF_WEB_SITE               = "http://sourceforge.net/projects/jmule";
 	  public static final String JMULE_BUG_TRACKER		   = "http://jmule.net/bugtracker";
+	  
+	  public static final String ABOUT_ED2K_LINKS		   = "http://jmule.net?page=ed2k_links";
 	  
 	  public static final String[] JMULE_DOMAINS 		   = { "jmule.org", "jmule.net" };
 	  
