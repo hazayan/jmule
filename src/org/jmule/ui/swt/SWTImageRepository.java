@@ -32,8 +32,8 @@ import org.jmule.ui.UIConstants;
 /**
  * Created on Aug 12, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 16:56:35 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 16:43:02 $
  */
 public class SWTImageRepository {
 
@@ -62,6 +62,13 @@ public class SWTImageRepository {
 		Image image = new Image(SWTThread.getDisplay(),image_data);
 		
 		return image;
+	}
+	
+	public static Image getMenuImage(String name) {
+		InputStream input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/menuicons/" + name));
+		if ( input_stream == null )
+			input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/image_not_found.png"));
+		return new Image(SWTThread.getDisplay(),input_stream);
 	}
 	
 }
