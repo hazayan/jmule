@@ -36,6 +36,7 @@ import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
+import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.aboutwindow.AboutWindow;
@@ -47,8 +48,8 @@ import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:32:45 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 16:48:35 $$
  */
 public class MainMenu extends Menu{
 
@@ -75,6 +76,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem new_server_item = new MenuItem(new_submenu,SWT.PUSH);
 		new_server_item.setText(_._("mainwindow.mainmenu.file.new.new_server"));
+		new_server_item.setImage(SWTImageRepository.getMenuImage("server_add.png"));
 		
 		new_server_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -84,6 +86,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem new_download_item = new MenuItem(new_submenu,SWT.PUSH);
 		new_download_item.setText(_._("mainwindow.mainmenu.file.new.new_download"));
+		new_download_item.setImage(SWTImageRepository.getMenuImage("folder_down.png"));
 		new_download_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				new NewWindow(NewWindow.WindowType.DOWNLOAD);			
@@ -92,6 +95,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem new_shared_folder_item = new MenuItem(new_submenu,SWT.PUSH);
 		new_shared_folder_item.setText(_._("mainwindow.mainmenu.file.new.new_shared_dir"));
+		new_shared_folder_item.setImage(SWTImageRepository.getMenuImage("share_folder.png"));
 		new_shared_folder_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				new NewWindow(NewWindow.WindowType.SHARED_DIR);			
@@ -100,7 +104,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem import_servers = new MenuItem (submenu, SWT.PUSH);
 		import_servers.setText(Localizer._("mainwindow.mainmenu.file.import"));
-		
+		import_servers.setImage(SWTImageRepository.getMenuImage("import.png"));
 		import_servers.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				ServerListImportWindow window = new ServerListImportWindow();
@@ -114,7 +118,7 @@ public class MainMenu extends Menu{
 
 		MenuItem exit_item = new MenuItem (submenu, SWT.PUSH);
 		exit_item.setText(Localizer._("mainwindow.mainmenu.file.exit"));
-		
+		exit_item.setImage(SWTImageRepository.getMenuImage("door_in.png"));
 		exit_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				main_window.close();
@@ -224,15 +228,19 @@ public class MainMenu extends Menu{
 		toolsItem.setText (Localizer._("mainwindow.mainmenu.tools"));
 		submenu = new Menu (shell, SWT.DROP_DOWN);
 		toolsItem.setMenu (submenu);
+		
 		MenuItem gui_chooser_item = new MenuItem (submenu, SWT.PUSH);
+		gui_chooser_item.setImage(SWTImageRepository.getMenuImage("switchui.png"));
 		gui_chooser_item.setText(Localizer._("mainwindow.mainmenu.tools.uichooser"));
 		
 		MenuItem wizard_item = new MenuItem (submenu, SWT.PUSH);
+		wizard_item.setImage(SWTImageRepository.getMenuImage("wizard.png"));
 		wizard_item.setText(Localizer._("mainwindow.mainmenu.tools.wizard"));
 		
 		new MenuItem (submenu, SWT.SEPARATOR);
 		
 		MenuItem options_item = new MenuItem (submenu, SWT.PUSH);
+		options_item.setImage(SWTImageRepository.getMenuImage("cog_edit.png"));
 		options_item.setText(Localizer._("mainwindow.mainmenu.tools.options"));
 		
 		options_item.addSelectionListener(new SelectionAdapter() {
@@ -252,6 +260,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem help_contents_item = new MenuItem (submenu, SWT.PUSH);
 		help_contents_item.setText(Localizer._("mainwindow.mainmenu.help.contents"));
+		help_contents_item.setImage(SWTImageRepository.getMenuImage("world_link.png"));
 		help_contents_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
@@ -264,6 +273,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem forum_item = new MenuItem (submenu, SWT.PUSH);
 		forum_item.setText(Localizer._("mainwindow.mainmenu.help.forum"));
+		forum_item.setImage(SWTImageRepository.getMenuImage("world_link.png"));
 		forum_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
@@ -278,6 +288,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem update_check_item = new MenuItem (submenu, SWT.PUSH);
 		update_check_item.setText(Localizer._("mainwindow.mainmenu.help.updatecheck"));
+		update_check_item.setImage(SWTImageRepository.getMenuImage("updater.png"));
 		update_check_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				UpdaterWindow window = new UpdaterWindow();
@@ -291,6 +302,7 @@ public class MainMenu extends Menu{
 		
 		MenuItem about_item = new MenuItem (submenu, SWT.PUSH);
 		about_item.setText(Localizer._("mainwindow.mainmenu.help.about"));
+		about_item.setImage(SWTImageRepository.getMenuImage("information.png"));
 		about_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				AboutWindow window = new AboutWindow();
