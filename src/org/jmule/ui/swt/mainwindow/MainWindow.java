@@ -52,6 +52,7 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
+import org.jmule.ui.swt.common.NightlyBuildWarningWindow;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 import org.jmule.ui.swt.maintabs.logs.LogsTab;
@@ -62,14 +63,15 @@ import org.jmule.ui.swt.maintabs.shared.SharedTab;
 import org.jmule.ui.swt.maintabs.statistics.StatisticsTab;
 import org.jmule.ui.swt.maintabs.transfers.TransfersTab;
 import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
+import org.jmule.ui.utils.NightlyBuildWarning;
 import org.jmule.updater.JMUpdater;
 import org.jmule.updater.JMUpdaterException;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:32:25 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 16:54:59 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -145,6 +147,13 @@ public class MainWindow implements JMuleUIComponent {
 
             	shell.open ();
 
+            	if (JMConstants.IS_NIGHTLY_BUILD) 
+            		if (NightlyBuildWarning.showWarning()){
+            			NightlyBuildWarningWindow warning_window = new NightlyBuildWarningWindow();
+            			warning_window.getCoreComponents();
+            			warning_window.initUIComponents();
+            	}
+            	
             	// show log messages
             	new JMThread(new JMRunnable() {
             		public void JMRun() {
