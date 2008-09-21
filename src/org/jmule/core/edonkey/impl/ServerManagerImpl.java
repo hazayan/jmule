@@ -35,11 +35,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.edonkey.AutoConnectDoesNotSucceedException;
 import org.jmule.core.edonkey.ServerListIsNullException;
 import org.jmule.core.edonkey.ServerListListener;
 import org.jmule.core.edonkey.ServerListener;
-import org.jmule.core.edonkey.ServerListenerAdapter;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.metfile.ServerMet;
@@ -51,8 +49,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:36:01 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:55:26 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -60,7 +58,7 @@ public class ServerManagerImpl implements ServerManager {
 	
 	private List<ServerListListener> server_list_listeners = new CopyOnWriteArrayList<ServerListListener>();
 	
-	private List<ServerListener> server_listeners = new LinkedList<ServerListener>();
+	private List<ServerListener> server_listeners = new CopyOnWriteArrayList<ServerListener>();
 	
 	// UDP query
 	
@@ -69,30 +67,20 @@ public class ServerManagerImpl implements ServerManager {
 	// Auto connect process
 	private List<Server> checked_servers = new LinkedList<Server>();
 	
-	private boolean auto_connect = false;
-	
 	private ServerMet server_met;
 	
 	private Comparator compare_servers_by_ping = new Comparator() {
-
 		public int compare(Object object1, Object object2) {
-
 			if( ((Server)object1).getPing() < ((Server)object2).getPing() ) {
-				
 				return -1;
-				
 			} else if( ((Server)object1).getPing() > ((Server)object2).getPing() ) {
-				
 				return +1;
-				
 			}
-			
 			return 0;
 		}
 	};
 	
 	public ServerManagerImpl() {
-		
 	}
 	
 	public boolean isConnected() {
@@ -243,104 +231,101 @@ public class ServerManagerImpl implements ServerManager {
 		startAutoConnect();
 	}
 	
+	JMThread auto_connect_thread;
+	
 	public void startAutoConnect() throws ServerManagerException {
 		
-		if( auto_connect ) throw new ServerManagerException("The auto connect process is already running");
-	    
+		if (auto_connect_thread != null)
+			if( auto_connect_thread.isAlive() ) 
+				throw new ServerManagerException("The auto connect process is already running");
+		
 		if( server_list.isEmpty() ) throw new ServerListIsNullException();
 		
-		Server connected_server = getConnectedServer();
-		
-		if( connected_server != null ) { // maybe should throw an exception
+		auto_connect_thread = new JMThread() {
+			boolean stop = false;
+			Server min_ping_server;
 			
-			connected_server.disconnect();
-		}
-		
-	    for(ServerListListener listener : server_list_listeners) {
-	    	
-	    	listener.autoConnectStarted();
-	    }
-		
-		List<Server> candidate_servers = new LinkedList<Server>();
-		
-		for(Server server : server_list) {
-			
-			if( !server.isDown() ) candidate_servers.add(server);
-			
-			// for testing only
-			if( !server.isDown() ) System.out.println("---"+server.getPing());
-		}
-		
-		while( !candidate_servers.isEmpty() ) {
-			
-			Object min_ping_server = Collections.min(candidate_servers, compare_servers_by_ping);
-			
-			if( ((Server)min_ping_server).isDown() ) {
-				
-				candidate_servers.remove(min_ping_server);
-				
-				continue;
-			}
-			
-			/// for testing only
-			
-			/*((Server)min_ping_server).addServerListener(new ServerListenerAdapter() {
-				public void connected(Server server) {
-                     System.out.println("Connected to " + server);
+			public void run() {
+				Server connected_server = getConnectedServer();
+				if( connected_server != null ) { // maybe should throw an exception
+					connected_server.disconnect();
 				}
 				
-				 public void isconnecting(Server server) {
-					 System.out.println("Is connecting to " + server);
-				 }
-				 
-				 public void disconnected(Server server) {
-					 System.out.println("Disconnected from " + server);
-				 }
-			});*/
+			    for(ServerListListener listener : server_list_listeners) 
+			    	listener.autoConnectStarted();
+			    
+				List<Server> candidate_servers = new LinkedList<Server>();
+				for(Server server : server_list) {
+					//	if (server.isDown()) continue;
+					candidate_servers.add(server);
+				}
+				
+				final JMThread thread = this;
+				
+				ServerListener server_listener = new ServerListener() {
+
+					public void connected(Server server) {
+						thread.interrupt();
+					}
+
+					public void disconnected(Server server) {
+						thread.interrupt();
+					}
+
+					public void isconnecting(Server server) {}
+
+					public void serverMessage(Server server, String message) {}
+					
+				};
+				
+				addServerListener(server_listener);
+				while( !candidate_servers.isEmpty() ) {
+					min_ping_server = (Server)Collections.min(candidate_servers, compare_servers_by_ping);
+					if( min_ping_server.isDown() ) {
+						candidate_servers.remove(min_ping_server);
+						continue;
+					}
+		            min_ping_server.connect();
+		            try {
+		              Thread.sleep(10000);
+		            }catch(Throwable t) {
+		            	if (stop) {
+		            		if (min_ping_server!= null)
+		            			min_ping_server.disconnect();
+		            		removeServerListener(server_listener);
+		            		return;
+		            	}
+		            }
+		            if( min_ping_server.isConnected() ) {
+		        	    for(ServerListListener listener : server_list_listeners) {
+		        	    	listener.autoConnectStopped();
+		        	    }
+		        	    removeServerListener(server_listener);
+		            	return;
+		            } else {
+		            	min_ping_server.disconnect();
+		            	candidate_servers.remove(min_ping_server);
+		            }
+				}
+				removeServerListener(server_listener);
+			}
 			
-            ((Server)min_ping_server).connect();
-			
-            try {
-            	
-              Thread.currentThread().sleep(10000);
-              
-            }catch(Throwable t) {
-            	t.printStackTrace();
-            }
-            
-            if( ((Server)min_ping_server).isConnected() ) {
-            	
-        	    for(ServerListListener listener : server_list_listeners) {
-        	    	
-        	    	listener.autoConnectStopped();
-        	    }
-            	
-            	return;
-            	
-            } else {
-            	
-            	((Server)min_ping_server).disconnect();
-            	
-            	candidate_servers.remove(min_ping_server);
-            }
-		}
-		
-		if( candidate_servers.isEmpty() ) throw new AutoConnectDoesNotSucceedException();
-		
+			public void JMStop() {
+				stop = true;
+				interrupt();
+			}
+		};
+		auto_connect_thread.start();
 	}
 	
 	public void stopAutoConnect() {
-		
-		auto_connect = false;
-		
-		checked_servers.get(checked_servers.size()-1).disconnect();
-		
-		for(ServerListListener s : server_list_listeners) {
-				
-				s.autoConnectStopped();
-				
-		}
-		
+		if (auto_connect_thread != null)
+			if (auto_connect_thread.isAlive()) {
+				auto_connect_thread.JMStop();
+				for(ServerListListener s : server_list_listeners) {
+					s.autoConnectStopped();
+				}
+			}
 	}
 	
 	public Server getConnectedServer() {
