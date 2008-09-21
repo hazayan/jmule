@@ -63,8 +63,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/19 12:35:01 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:00:01 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
@@ -96,6 +96,7 @@ public class UpdaterWindow implements JMuleUIComponent {
 		shell.setSize(400, 330);
 		Utils.centreWindow(shell);
 		
+		shell.setImage(SWTImageRepository.getImage("updater.png"));
 		shell.setText(_._("updaterwindow.title"));
 
 		shell.setLayout(new GridLayout(1,false));
@@ -170,19 +171,19 @@ public class UpdaterWindow implements JMuleUIComponent {
 		changelog_text = new StyledText(changelog_group,SWT.H_SCROLL | SWT.V_SCROLL);
 		changelog_text.setEditable(false);
 		
-		final Button button_startup_check = new Button(shell,SWT.CHECK);
+		Composite button_bar = new Composite(shell,SWT.NONE);
+		button_bar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		layout = new GridLayout(3,false);
+		button_bar.setLayout(layout);
+		
+		final Button button_startup_check = new Button(button_bar,SWT.CHECK);
 		grid_data = new GridData();
 		grid_data.horizontalSpan = 2;
 		grid_data.horizontalAlignment = GridData.BEGINNING;
 		button_startup_check.setLayoutData(grid_data);
 		button_startup_check.setText(_._("updaterwindow.check.startup_check"));
 		button_startup_check.setSelection(SWTPreferences.getInstance().updateCheckAtStartup());
-		
-		Composite button_bar = new Composite(shell,SWT.NONE);
-		button_bar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		layout = new GridLayout(3,false);
-		button_bar.setLayout(layout);
 		
 		Button button_ok = new Button(button_bar,SWT.NONE);
 		button_ok.setFont(skin.getButtonFont());
