@@ -47,8 +47,8 @@ import org.jmule.core.uploadmanager.UploadSession;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:38:03 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 14:03:01 $$
  */
 public class PeerManagerImpl implements PeerManager {
 	
@@ -212,22 +212,6 @@ public class PeerManagerImpl implements PeerManager {
 		peer_cleaner.start();
 		
 	}
-
-	private boolean hasPeer(String address) {
-		
-		for(Peer peer : peer_list) {
-			
-			String s = peer.getAddress()+" : "+peer.getPort();
-			
-			if (s.equals(address))
-				
-				return true;
-		}
-		
-
-		
-		return false;
-	}
 	
 	public void addPeer(FileHash fileHash, List<Peer> peerList) {
 		
@@ -327,9 +311,7 @@ public class PeerManagerImpl implements PeerManager {
 							else
 								if (peer.getSessionList().getSessionCount()==0)
 									peer.disconnect();
-						
 					}
-					
 				}
 				
 				for(Peer peer : unknown_peer_list) {

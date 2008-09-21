@@ -22,10 +22,8 @@
  */
 package org.jmule.core.net;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,8 +39,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:36:50 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 14:04:12 $$
  */
 public abstract class JMConnection{
 	
@@ -177,8 +175,6 @@ public abstract class JMConnection{
 			return this.remoteAddress.getHostName();
 		
 		return this.remoteAddress.getAddress().getHostAddress();
-		
-	//	return Convert.IPtoString(this.remonteAddress.getAddress().getAddress());
 	}
 
 	public int getPort() {
@@ -367,9 +363,7 @@ public abstract class JMConnection{
 	}
 	
 	public void ban() {
-		
 		disconnect();
-		
 	}
 	
 	// Threads 
@@ -386,51 +380,30 @@ public abstract class JMConnection{
 			
 		}
 		public void run() {
-			
 			ByteBuffer packet;
-			
 			while (!stop) {
-				
 				if (outgoing_packet_queue.isEmpty())
 						return ;
-				
 				Packet EDPacket = getSendPacket();
-				
 				packet = EDPacket.getAsByteBuffer();
-				
 				packet.position(0);
-				
 				long bSneded = 0;
-				
 				try {
-					
 					if (packet!=null) {
-						
 						bSneded = remoteConnection.write(packet);
-						connectionStats.addSendBytes(bSneded);
-												
+						connectionStats.addSendBytes(bSneded);					
 					}
 										
 				} catch (Throwable e1) {
-					
-					//e1.printStackTrace();
-					
 					if (stop) return ;
-					
-					//if (!remoteConnection.isOpen())
-						
-					//	disconnect();
-					
 				}
 
 			}
 		}
 		
 		public void JMStop() {
-			
 			stop = true;
 			interrupt();
-			
 		}
 		
 	}
@@ -466,7 +439,6 @@ public abstract class JMConnection{
 					
 				}catch(Throwable e) {
 					if (e instanceof JMEndOfStreamException) {
-						System.out.println(getAddress()+" : "+getPort());
 						disconnect();
 						return ;
 					}
