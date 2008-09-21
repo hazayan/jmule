@@ -36,22 +36,26 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.jmule.core.JMConstants;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
+import org.jmule.ui.utils.NightlyBuildWarning;
 
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:44:27 $
  */
 public class GeneralTab extends AbstractTab {
 
 	private Text nick_name_text;
 	private Button prompt_on_exit_check, server_list_update;
+	
+	private Button show_nightly_build_warning = null;
 	
 	private ConfigurationManager config_manager;
 	private SWTPreferences swt_preferences;
@@ -125,6 +129,15 @@ public class GeneralTab extends AbstractTab {
 		layout_data.horizontalSpan = 2;
 		startup_update_check.setLayoutData(layout_data);
 		startup_update_check.setSelection(swt_preferences.updateCheckAtStartup());
+		
+		if (JMConstants.IS_NIGHTLY_BUILD) {
+			show_nightly_build_warning = new Button(content,SWT.CHECK);
+			show_nightly_build_warning.setText(_._("settingswindow.tab.general.checkbox.show_nightly_build_warning"));
+			layout_data = new GridData(GridData.FILL_HORIZONTAL);
+			layout_data.horizontalSpan = 2;
+			show_nightly_build_warning.setLayoutData(layout_data);
+			show_nightly_build_warning.setSelection(NightlyBuildWarning.showWarning());
+		}
 		
 		Group ports = new Group(content,SWT.NONE);
 		ports.setText(_._("settingswindow.tab.general.group.ports"));
@@ -406,6 +419,11 @@ public class GeneralTab extends AbstractTab {
 		
 		swt_preferences.setPromprtOnExit(prompt_on_exit_check.getSelection());
 		swt_preferences.setUpdateCheckAtStartup(startup_update_check.getSelection());
+		
+		if (JMConstants.IS_NIGHTLY_BUILD) {
+			boolean selection = show_nightly_build_warning.getSelection();
+			NightlyBuildWarning.setShowWarning(selection);
+		}
 		
 		int tcp = tcp_port.getSelection();
 		if (config_manager.getTCP() != tcp)
