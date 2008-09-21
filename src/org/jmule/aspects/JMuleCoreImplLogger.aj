@@ -30,12 +30,12 @@ import org.jmule.core.impl.JMuleCoreImpl;
 import org.jmule.core.peermanager.*;
 import org.jmule.core.uploadmanager.*;
 import org.jmule.util.Misc;
-
+import org.jmule.core.JMThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:59:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 14:41:51 $$
  */
 public privileged aspect JMuleCoreImplLogger {
 	private Logger log = Logger.getLogger("org.jmule");
@@ -49,6 +49,10 @@ public privileged aspect JMuleCoreImplLogger {
 	}
 	
 	after() throwing (Throwable t): execution (* JMuleCoreImpl.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
+
+	after() throwing (Throwable t): execution (* JMThread.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
 	
