@@ -37,18 +37,15 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
-import org.jmule.core.edonkey.ServerListener;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.packet.Packet;
@@ -85,8 +82,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:36:22 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:56:56 $$
  */
 public class Server extends JMConnection {
 	
@@ -470,14 +467,13 @@ public class Server extends JMConnection {
 
 	protected void onDisconnect() {
 		
+		last_udp_response = System.currentTimeMillis();
+		
 		isConnected = false;
 		
 		allowSearch = false;
 		
 		notify_server_event(TCP_SOCKET_DISCONNECTED);
-	}
-
-	protected void reportInactivity(long time) {
 	}
 
 	public TagList getTagList() {
