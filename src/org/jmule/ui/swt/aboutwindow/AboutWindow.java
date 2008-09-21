@@ -66,8 +66,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/12 14:10:05 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:47:22 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -183,17 +183,12 @@ public class AboutWindow implements JMuleUIComponent {
 			nightly_build_link.addListener(SWT.Selection, link_listener);
 		}
 		
-		Label about_jmule1 = new Label(content,SWT.NONE);
-		about_jmule1.setText(_._("aboutwindow.tab.general.label.about1"));
+		Label about_jmule1 = new Label(content,SWT.CENTER);
+		about_jmule1.setText(_._("aboutwindow.tab.general.label.about1")+"\n"+_._("aboutwindow.tab.general.label.about2"));
 		layout_data = new GridData(GridData.FILL_HORIZONTAL);
 		layout_data.horizontalAlignment = GridData.CENTER;
+		layout_data.grabExcessVerticalSpace = true;
 		about_jmule1.setLayoutData(layout_data);
-		
-		Label about_jmule2 = new Label(content,SWT.NONE);
-		about_jmule2.setText(_._("aboutwindow.tab.general.label.about2"));
-		layout_data = new GridData(GridData.FILL_BOTH);
-		layout_data.horizontalAlignment = GridData.CENTER;
-		about_jmule2.setLayoutData(layout_data);
 		
 		Group internet_group = new Group(content,SWT.NONE);
 		internet_group.setText(_._("aboutwindow.tab.general.group.internet"));
@@ -233,13 +228,13 @@ public class AboutWindow implements JMuleUIComponent {
 		gridData.horizontalAlignment = GridData.CENTER;
 		link.setLayoutData(gridData);
 		
-		link = new Link(internet_group,SWT.NONE);
+		/*link = new Link(internet_group,SWT.NONE);
 		link.setText("<a href=\""+JMConstants.SF_WEB_SITE+"\">"+_._("aboutwindow.tab.general.label.sf_page")+"</a>");
 		link.addListener(SWT.Selection, link_listener);
 		gridData = new GridData(GridData.FILL_HORIZONTAL);
 		gridData.horizontalSpan = 1;
 		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);
+		link.setLayoutData(gridData);*/
 		
 		link = new Link(internet_group,SWT.NONE);
 		link.setText("<a href=\""+JMConstants.JMULE_BUG_TRACKER+"\">"+_._("aboutwindow.tab.general.label.bugtracker")+"</a>");
