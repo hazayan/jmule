@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/11 18:30:18 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:53:10 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -225,17 +225,17 @@ public interface ConfigurationManager extends JMuleManager {
     public long getUploadBandwidth();
     
     
-    public int getIntParameter(String parameter, int defaultValue);
+    public Integer getIntParameter(String parameter, Integer defaultValue);
     
     public String getStringParameter(String parameter, String defaultValue);
     
-    public float getFloatParameter(String parameter, float defaultValue);
+    public Float getFloatParameter(String parameter, Float defaultValue);
     
-    public double getDoubleParameter(String parameter, double defaultValue);
+    public Double getDoubleParameter(String parameter, Double defaultValue);
     
-    public long getLongParameter(String parameter, long defaultValue);
+    public Long getLongParameter(String parameter, Long defaultValue);
     
-    public boolean getBooleanParameter(String parameter, boolean defaultValue);
+    public Boolean getBooleanParameter(String parameter, Boolean defaultValue);
     
     public void setParameter(String parameter, int value);
     
@@ -248,6 +248,10 @@ public interface ConfigurationManager extends JMuleManager {
     public void setParameter(String parameter,long value);
     
     public void setParameter(String parameter,boolean value);
+    
+    public void removeParameter(String parameter);
+    
+    public boolean hasParameter(String parameter);
     
 	/**
 	 * Adds a configuration listener

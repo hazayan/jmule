@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/11 18:35:07 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:53:10 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -296,46 +296,45 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	}
 
 	public boolean isUDPEnabled() {
-		
 		String udp_enabled = config_store.getProperty(UDP_ENABLED_KEY);
 		return ( udp_enabled == null ) ? UDP_ENABLED : Boolean.parseBoolean(udp_enabled);
 	}
 	
-	public int getIntParameter(String parameter, int defaultValue) {
-		int result;
+	public Integer getIntParameter(String parameter, Integer defaultValue) {
+		Integer result;
 		try {
 			result = Integer.parseInt(config_store.getProperty(parameter));
-		}catch(Exception e) {
+		}catch(Throwable e) {
 			return defaultValue;
 		}
 		return result;
 	}
 	
-	public float getFloatParameter(String parameter, float defaultValue) {
-		float result;
+	public Float getFloatParameter(String parameter, Float defaultValue) {
+		Float result;
 		try {
 			result = Float.parseFloat(config_store.getProperty(parameter));
-		}catch(Exception e) {
+		}catch(Throwable e) {
 			return defaultValue;
 		}
 		return result;
 	}
 	
-	public double getDoubleParameter(String parameter, double defaultValue) {
-		double result;
+	public Double getDoubleParameter(String parameter, Double defaultValue) {
+		Double result;
 		try {
 			result = Double.parseDouble(config_store.getProperty(parameter));
-		}catch(Exception e) {
+		}catch(Throwable e) {
 			return defaultValue;
 		}
 		return result;
 	}
 
-	public long getLongParameter(String parameter, long defaultValue) {
-		long result;
+	public Long getLongParameter(String parameter, Long defaultValue) {
+		Long result;
 		try {
 			result = Long.parseLong(config_store.getProperty(parameter));
-		}catch(Exception e) {
+		}catch(Throwable e) {
 			return defaultValue;
 		}
 		return result;
@@ -345,17 +344,17 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		String result;
 		try {
 			result = config_store.getProperty(parameter);
-		}catch(Exception e) {
+		}catch(Throwable e) {
 			return defaultValue;
 		}
 		return result;
 	}
 	
-	public boolean getBooleanParameter(String parameter, boolean defaultValue) {
-		boolean result;
+	public Boolean getBooleanParameter(String parameter, Boolean defaultValue) {
+		Boolean result;
 		try {
 			result = Boolean.parseBoolean(config_store.getProperty(parameter));
-		}catch(Exception e) {
+		}catch(Throwable e) {
 			return defaultValue;
 		}
 		return result;
@@ -390,6 +389,14 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		notifyCustomPropertyChanged(parameter,value);
 	}
 
+	public void removeParameter(String parameter) {
+		config_store.remove(parameter);
+	}
+	
+	public boolean hasParameter(String parameter) {
+		return config_store.containsKey(parameter);
+	}
+	
 	private void notifyCustomPropertyChanged(String key, Object new_value) {
 		List<ConfigurationListener> listener_list = parameter_listeners.get(key);
 		if (listener_list == null) return ;
