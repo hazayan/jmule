@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:53:10 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/22 12:44:23 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -148,11 +148,15 @@ public interface ConfigurationManager extends JMuleManager {
 	 */
 	public void setDownloadLimit(long downloadLimit);
 	
+	public void setDownloadLimit(String downloadLimit);
+	
 	/**
 	 * Sets the upload limit
 	 * @param uploadLimit the given upload limit
 	 */
 	public void setUploadLimit(long uploadLimit);
+	
+	public void setUploadLimit(String uploadLimit);
 	
 	/**
 	 * Sets the download bandwidth for the connection that the client will use
@@ -160,11 +164,15 @@ public interface ConfigurationManager extends JMuleManager {
 	 */
 	public void setDownloadBandwidth(long downloadBandwidth);
 	
+	public void setDownloadBandwidth(String downloadBandwidth);
+	
 	/**
 	 * Sets the upload bandwidth for the connection that the client will use
-	 * @param downloadBandwidth
+	 * @param uploadBandwidth
 	 */
-	public void setUploadBandwidth(long downloadBandwidth);
+	public void setUploadBandwidth(long uploadBandwidth);
+	
+	public void setUploadBandwidth(String uploadBandwidth);
 	
 	/**
 	 * @return the nick name

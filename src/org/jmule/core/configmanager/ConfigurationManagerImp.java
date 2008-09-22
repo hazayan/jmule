@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:53:10 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/22 12:44:22 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -164,6 +164,12 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		 
 		 notifyPropertyChanged( DOWNLOAD_BANDWIDTH_KEY, downloadBandwidth );
 	}
+	
+	public void setDownloadBandwidth(String downloadBandwidth) {
+		
+		setDownloadBandwidth(Long.parseLong(downloadBandwidth));
+		
+	}
 
 	public void setDownloadLimit(long downloadLimit) {
 		
@@ -171,7 +177,12 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		
 		notifyPropertyChanged( DOWNLOAD_LIMIT_KEY, downloadLimit );
 	}
-
+	
+	public void setDownloadLimit(String downloadLimit) {
+		
+		setDownloadLimit(Long.parseLong(downloadLimit));
+		
+	}
 
 	public void setNickName(String nickName) {
 
@@ -266,12 +277,24 @@ public class ConfigurationManagerImp implements ConfigurationManager {
        
        notifyPropertyChanged( UPLOAD_BANDWIDTH_KEY, downloadBandwidth );
 	}
+	
+	public void setUploadBandwidth(String uploadBandwidth) {
+		
+		setUploadBandwidth(Long.parseLong(uploadBandwidth));
+		
+	}
 
 	public void setUploadLimit(long uploadLimit) {
 		
        config_store.setProperty( UPLOAD_LIMIT_KEY, uploadLimit + "" );
        
        notifyPropertyChanged( UPLOAD_LIMIT_KEY, uploadLimit );
+	}
+	
+	public void setUploadLimit(String uploadLimit) {
+		
+		setUploadLimit(Long.parseLong(uploadLimit));
+		
 	}
 
 	public void initialize() {
