@@ -27,8 +27,8 @@ import java.util.StringTokenizer;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:38:20 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/24 15:33:36 $$
  */
 public class JMConstants {
      
@@ -50,7 +50,7 @@ public class JMConstants {
 	  public static final boolean IS_NIGHTLY_BUILD         = false;
 	  
 	  // is used for nightly builds, format : "B" + 1,2,3...
-	  public static final String BETA_VERSION              = "B14";
+	  public static final String BETA_VERSION              = "B1";
 	  
 	  public static final String DEV_VERSION               = JMULE_VERSION + "_" + BETA_VERSION;
 	  
@@ -229,5 +229,28 @@ public class JMConstants {
 	  		return( 0 );
 	  	}
 	  }
+	  
+	   public static int compareDevVersions(String dev_ver_1, String dev_ver_2) {
+			  
+		    String str_array[] = dev_ver_1.split("_");
+		    String ver_1 = str_array[0];
+		    String dev_1 = str_array[1];
+		    
+		    str_array = dev_ver_2.split("_");
+		    String ver_2 = str_array[0];
+		    String dev_2 = str_array[1];
+		    
+		    if( compareVersions(ver_1, ver_2) == 0 ) {
+		    	String str_array1[] = dev_1.split("B");
+		    	String str_array2[] = dev_2.split("B");
+		    	int val_1 = Integer.parseInt(str_array1[1]);
+		    	int val_2 = Integer.parseInt(str_array2[1]);
+		    	if(val_1 > val_2) return 1;
+		    	if(val_1 == val_2) return 0;
+		    	if(val_1 < val_2) return -1;
+		    }
+		    
+		    return compareVersions(ver_1, ver_2);
+	   }
 
 }
