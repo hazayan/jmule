@@ -57,7 +57,6 @@ import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 import org.jmule.ui.swt.maintabs.logs.LogsTab;
 import org.jmule.ui.swt.maintabs.search.SearchTab;
-import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 import org.jmule.ui.swt.maintabs.serverlist.ServerListTab;
 import org.jmule.ui.swt.maintabs.shared.SharedTab;
 import org.jmule.ui.swt.maintabs.statistics.StatisticsTab;
@@ -70,8 +69,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 16:54:59 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:14:31 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -101,7 +100,6 @@ public class MainWindow implements JMuleUIComponent {
 		
             	shell = new Shell(display);
             	
-				SWTServerListWrapper.createListener(_core.getServerManager());
 				shell.setSize(800, 500); 	
             	Utils.centreWindow(shell);
             	
