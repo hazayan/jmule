@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 06:54:06 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:15:30 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -69,6 +69,7 @@ public abstract class JMTable<T> extends Table {
 	protected int last_sort_column ;
 	protected boolean last_sort_dir = true;
 	protected boolean enabled_sorting = true;
+	protected boolean enable_alternate_background_color = true;
 	
 	public JMTable(Composite composite, int style) {
 		super(composite,SWT.VIRTUAL | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER | style);		
@@ -101,10 +102,11 @@ public abstract class JMTable<T> extends Table {
 				TableItem item = (TableItem) arg0.item;
 				int index = indexOf(item);
 				// Time expensive
-				if (index%2==0)
-		        	item.setBackground(ROW_ALTERNATE_COLOR_2);
-		        else
-		        	item.setBackground(ROW_ALTERNATE_COLOR_1);
+				if (enable_alternate_background_color)
+					if (index%2==0)
+						item.setBackground(ROW_ALTERNATE_COLOR_2);
+					else
+						item.setBackground(ROW_ALTERNATE_COLOR_1);
 				
 				T object = (T)line_list.get(index).getData(SWTConstants.ROW_OBJECT_KEY);
 				updateRow(object);
@@ -143,6 +145,10 @@ public abstract class JMTable<T> extends Table {
 	
 	// pop-up menu getter
 	protected abstract Menu getPopUpMenu();
+	
+	public void setAlternateBackgroundColor(boolean value) {
+		enable_alternate_background_color = value;
+	}
 	
 	public void addColumn(int style, int ColumnID,String columnTitle, String columnDesc,int width) {
 		TableColumn table_column = new TableColumn(this, style);
@@ -355,10 +361,11 @@ public abstract class JMTable<T> extends Table {
 		int id;
 		for(id = 0;id<getItemCount();id++) {
 			BufferedTableRow row = line_list.get(id);
-			if ((id)%2==0)
-				row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_2);
-			else
-				row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_1);
+			if (enable_alternate_background_color)
+				if ((id)%2==0)
+					row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_2);
+				else
+					row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_1);
 		}
 	}
 	
@@ -523,7 +530,6 @@ public abstract class JMTable<T> extends Table {
 		for(int i = 0;i<line_list.size();i++) {
 			line_list.get(i).setSWTRow(getItem(i));
 		}
-		//updateLineBackground();
 		
 	}
 		

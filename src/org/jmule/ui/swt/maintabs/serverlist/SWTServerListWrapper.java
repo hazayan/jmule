@@ -25,6 +25,7 @@ package org.jmule.ui.swt.maintabs.serverlist;
 import java.util.List;
 
 import org.jmule.core.JMRunnable;
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.edonkey.ServerListListener;
 import org.jmule.core.edonkey.ServerListener;
 import org.jmule.core.edonkey.ServerManager;
@@ -39,8 +40,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:48:20 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:13:13 $$
  */
 public class SWTServerListWrapper {
 	
@@ -58,12 +59,10 @@ public class SWTServerListWrapper {
 	
 	private boolean single_connect = false;
 	private Server connecting_server = null;
-		
-	public static void createListener(ServerManager serverManager) {
-		instance = new SWTServerListWrapper(serverManager);
-	}
 	
 	public static SWTServerListWrapper getInstance() {
+		if (instance == null)
+			instance = new SWTServerListWrapper(JMuleCoreFactory.getSingleton().getServerManager());
 		return instance;
 	}
 	
@@ -75,11 +74,11 @@ public class SWTServerListWrapper {
 				if (is_autoconnect) {
 					is_autoconnect = false;
 					setUIConnected(server);
-				}
-				if (single_connect) {
-					single_connect = false;
-					setUIConnected(server);
-				}
+				} else 
+					if (single_connect) {
+						single_connect = false;
+						setUIConnected(server);
+					}
 			}
 
 			public void disconnected(Server server) {
@@ -114,7 +113,7 @@ public class SWTServerListWrapper {
 			public void autoConnectStopped() {
 				if (is_autoconnect) {
 					is_autoconnect = false;
-					setUIDisconnected();
+					setUIDisconnected(null);
 				}
 			}
 
@@ -175,7 +174,7 @@ public class SWTServerListWrapper {
 			}});
 	}
 	
-	private void setUIDisconnected(final Server... serverList) {
+	private void setUIDisconnected(final Server server) {
 		if (SWTThread.getDisplay().isDisposed()) return ;
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
@@ -186,9 +185,10 @@ public class SWTServerListWrapper {
 				if (!connection_info.isDisposed())
 					connection_info.setStatusDisconnected();
 				if (!server_list.isDisposed()) 
-					if (serverList.length>0)
-						server_list.serverDisconnected(serverList[0]);
-					
+						if (server!=null)
+							server_list.serverDisconnected(server);
+				if (server != null)
+					MainWindow.getLogger().warning(Localizer.getString("mainwindow.logtab.message_disconnected", server.getAddress()));
 			}});
 	}
 	
@@ -202,6 +202,7 @@ public class SWTServerListWrapper {
 					status_bar.setStatusConnected(server);
 				if (!connection_info.isDisposed())
 					connection_info.setStatusConnected(server);
+				MainWindow.getLogger().fine(Localizer.getString("mainwindow.logtab.message_connected_to", server.getAddress()));
 			}});
 	}
 	
@@ -212,7 +213,7 @@ public class SWTServerListWrapper {
 					server_manager.connect();
 				} catch (ServerManagerException e) {
 					e.printStackTrace();
-					setUIDisconnected();
+					setUIDisconnected(null);
 				}
 			}
 		});
