@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 13:03:49 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:33:14 $$
  */
 public class Peer extends JMConnection {
 	
@@ -121,8 +121,7 @@ public class Peer extends JMConnection {
 		this.setAddress(clientID+"", remotePort);
 		
 		this.connectedServer = connectedServer;
-		
-		//PeerManagerFactory.getInstance().addPeer(this);
+
 		PeerManagerFactory.getInstance().addUnknownPeer(this);
 		
 	}
@@ -228,7 +227,7 @@ public class Peer extends JMConnection {
 		try {
 			return peerTags.getStringTag(TAG_NAME_NICKNAME);
 		} catch (TagException e) {
-			return "";
+			return getAddress();
 		}
 	}
 	
@@ -343,10 +342,6 @@ public class Peer extends JMConnection {
 			
 			if (getPort() != tcp_port) 
 				remoteAddress = new InetSocketAddress(getAddress(),tcp_port);
-				
-			
-//			if (auto_add_on_connect)
-//				PeerManagerFactory.getInstance().addPeer(this);
 
 			isConnected = true;
 			
@@ -409,9 +404,6 @@ public class Peer extends JMConnection {
 			
 			if (getPort() != tcp_port) 
 				remoteAddress = new InetSocketAddress(getAddress(),tcp_port);
-			
-//			if (auto_add_on_connect)
-//				PeerManagerFactory.getInstance().addPeer(this);
 			
 			isConnected = true;
 			
@@ -478,8 +470,6 @@ public class Peer extends JMConnection {
 		if ((id == null) || (id2 == null)) return getAddress().equals(p.getAddress());
 		byte[] b1 = id.getClientID();
 		byte[] b2 = id2.getClientID();
-		
-	//	System.out.println("Compare : "+this +" \n"+p+"  "+Arrays.equals(b1, b2));
 		
 		return Arrays.equals(b1, b2);
 	}
