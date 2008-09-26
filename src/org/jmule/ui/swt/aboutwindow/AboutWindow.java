@@ -22,9 +22,12 @@
  */
 package org.jmule.ui.swt.aboutwindow;
 
+import java.util.Set;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -43,16 +46,15 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.UIConstants;
@@ -62,16 +64,17 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.skin.SWTSkin;
+import org.jmule.ui.swt.tables.JMTable;
 
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:47:22 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/26 15:30:52 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
-	private int TOP_GRADIENT_HEIGHT = 80;
+	private int TOP_GRADIENT_HEIGHT = 60;
 	private Color GRADIENT_COLOR_1 = SWTThread.getDisplay().getSystemColor (SWT.COLOR_WHITE);
 	private Color GRADIENT_COLOR_2 = new Color(SWTThread.getDisplay(),255,141,5);
 	
@@ -85,15 +88,10 @@ public class AboutWindow implements JMuleUIComponent {
 	}
 
 	public void initUIComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-			
-		    ui_instance = JMuleUIManager.getJMuleUI();
-		
-		}catch(Throwable t) {
-		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
+		}catch(Throwable t) { }
 		
 		display = SWTThread.getDisplay();
 		
@@ -163,10 +161,68 @@ public class AboutWindow implements JMuleUIComponent {
 		content = new Composite(tab_list,SWT.NONE);
 		general_tab.setControl(content);
 		general_tab.setText(_._("aboutwindow.tab.general"));
-		
-		content.setLayout(new GridLayout(1,false));
+		layout = new GridLayout(1,false);
+		layout.marginTop +=10;
+		content.setLayout(layout);
 
+		Composite container1 = new Composite(content,SWT.NONE);
+		container1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		layout = new GridLayout(1,false);
+		layout.marginWidth = 15;
+		container1.setLayout(layout);
+		
+		Label jmule_version = new Label(container1,SWT.LEFT);
+		jmule_version.setText(JMConstants.JMULE_FULL_NAME);
+		
+		Label copyright = new Label(container1,SWT.LEFT);
+		copyright.setText("Copyright (C) 2007-2008 JMule Team");
+		
+		new Label(container1,SWT.NONE);
+		
+		StyledText about_text = new StyledText(container1,SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
+		about_text.setText(_._("aboutwindow.tab.general.label.about"));
+		about_text.setWordWrap(true);
+		about_text.setBackground(shell.getBackground());
+		layout_data = new GridData(GridData.FILL_HORIZONTAL);
+		about_text.setLayoutData(layout_data);
+		
+		Composite links_container = new Composite(content,SWT.NONE);
+		links_container.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		layout = new GridLayout(2,false);
+		layout.marginWidth = 15;
+		links_container.setLayout(layout);
+		
+		Link link;
+		
+		link = new Link(links_container,SWT.NONE);
+		link.setText(_._("aboutwindow.tab.general.label.home_page") + " : ");
+		link = new Link(links_container,SWT.NONE);
+		link.setText("<a href=\""+JMConstants.JMULE_WEB_SITE+"\">"+JMConstants.JMULE_WEB_SITE+"</a>");
+		link.addListener(SWT.Selection, link_listener);
+		
+		link = new Link(links_container,SWT.NONE);
+		link.setText(_._("aboutwindow.tab.general.label.forum") + " : ");
+		link = new Link(links_container,SWT.NONE);
+		link.setText("<a href=\""+JMConstants.JMULE_FORUMS+"\">"+JMConstants.JMULE_FORUMS+"</a>");
+		link.addListener(SWT.Selection, link_listener);
+		
 		if (JMConstants.IS_NIGHTLY_BUILD) {
+			CTabItem nightly_build = new CTabItem(tab_list,SWT.NONE);
+			content = new Composite(tab_list,SWT.NONE);
+			nightly_build.setControl(content);
+			nightly_build.setText("Nightly build");
+			layout = new GridLayout(1,false);
+			layout.marginHeight = 10;
+			layout.marginWidth  = 10;
+			content.setLayout(layout);
+			
+			final Label image = new Label(content,SWT.NONE);
+			image.setImage(SWTImageRepository.getImage("bomb.png"));
+			layout_data = new GridData();
+			layout_data.grabExcessHorizontalSpace = true;
+			layout_data.horizontalAlignment = GridData.CENTER;
+			image.setLayoutData(layout_data);
+			
 			Link nightly_build_link = new Link(content,SWT.NONE);
 			nightly_build_link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
 			layout_data = new GridData(GridData.FILL_HORIZONTAL);
@@ -183,75 +239,51 @@ public class AboutWindow implements JMuleUIComponent {
 			nightly_build_link.addListener(SWT.Selection, link_listener);
 		}
 		
-		Label about_jmule1 = new Label(content,SWT.CENTER);
-		about_jmule1.setText(_._("aboutwindow.tab.general.label.about1")+"\n"+_._("aboutwindow.tab.general.label.about2"));
-		layout_data = new GridData(GridData.FILL_HORIZONTAL);
-		layout_data.horizontalAlignment = GridData.CENTER;
-		layout_data.grabExcessVerticalSpace = true;
-		about_jmule1.setLayoutData(layout_data);
-		
-		Group internet_group = new Group(content,SWT.NONE);
-		internet_group.setText(_._("aboutwindow.tab.general.group.internet"));
-		internet_group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_END));
-		layout = new GridLayout();
-		layout.numColumns = 3;
-		layout.makeColumnsEqualWidth = true;
-		
-		internet_group.setLayout(layout);
+		CTabItem environment_tab = new CTabItem(tab_list,SWT.NONE);
+		content = new Composite(tab_list,SWT.NONE);
+		environment_tab.setControl(content);
+		environment_tab.setText(_._("aboutwindow.tab.environment"));
+		content.setLayout(new FillLayout());
 		
 		
-		
-		Link link;
-		
-		link = new Link(internet_group,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.JMULE_WEB_SITE+"\">"+_._("aboutwindow.tab.general.label.home_page")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan = 1;
-		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);
-		
-		link = new Link(internet_group,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.JMULE_FORUMS+"\">"+_._("aboutwindow.tab.general.label.forum")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan = 1;
-		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);
+		JMTable<String> table = new JMTable<String>(content,SWT.NONE) {
+			
+			protected int compareObjects(String object1, String object2,
+					int columnID, boolean order) {
+				return 0;
+			}
 
+			protected Menu getPopUpMenu() {
+				return null;
+			}
+
+			public void updateRow(String object) {
+				setRowText(object, 1, object);
+				if (object.equals("line.separator"))
+					setRowText(object,2,"\\n");
+				else {
+					String data = System.getProperty(object);
+					setRowText(object,2,data);
+				}
+			}
+			
+			protected void saveColumnSettings() {
+			}
+			
+		};
+		table.setLayout(new FillLayout());
+		table.setLinesVisible(true);
+		table.setAlternateBackgroundColor(false);
+		table.setSorting(false);
+		table.addColumn(SWT.LEFT, 1, _._("aboutwindow.tab.environment.table.column.key"), "", 200);
+		table.addColumn(SWT.LEFT, 2, _._("aboutwindow.tab.environment.table.column.value"), "", 500);
 		
-		link = new Link(internet_group,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.ONLINE_HELP_WEB_SITE+"\">"+_._("aboutwindow.tab.general.label.online_help")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan = 1;
-		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);
+		Set<Object> keys = System.getProperties().keySet();
 		
-		/*link = new Link(internet_group,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.SF_WEB_SITE+"\">"+_._("aboutwindow.tab.general.label.sf_page")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan = 1;
-		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);*/
-		
-		link = new Link(internet_group,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.JMULE_BUG_TRACKER+"\">"+_._("aboutwindow.tab.general.label.bugtracker")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan = 1;
-		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);
-		
-		link = new Link(internet_group,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.JMULE_DOWNLOAD_PAGE+"\">"+_._("aboutwindow.tab.general.label.downloads")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan = 1;
-		gridData.horizontalAlignment = GridData.CENTER;
-		link.setLayoutData(gridData);
-		
+		for(Object key : keys) {
+			String value = (String) key;
+			table.addRow(value);
+		}
 		CTabItem license_tab = new CTabItem(tab_list,SWT.NONE);
 		content = new Composite(tab_list,SWT.NONE);
 		license_tab.setControl(content);
@@ -294,13 +326,9 @@ public class AboutWindow implements JMuleUIComponent {
 		shell.setSize(500,400);
 		Utils.centreWindow(shell);
 		
-		shell.setAlpha(255);
-		if (JMConstants.isLinux)
-			shell.setAlpha(0);			
+		shell.setAlpha(0);			
 		shell.open();
-		
-		// Mega cool show effect
-		if (JMConstants.isLinux) {
+
 			new JMThread(new JMRunnable() {
 					int i;
 					public void JMRun() {
@@ -313,9 +341,6 @@ public class AboutWindow implements JMuleUIComponent {
 						}
 					}
 				}).start();
-		}
-
-
 	}
 
 }
