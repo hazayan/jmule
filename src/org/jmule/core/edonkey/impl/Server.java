@@ -82,8 +82,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:56:56 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:35:09 $$
  */
 public class Server extends JMConnection {
 	
@@ -203,8 +203,8 @@ public class Server extends JMConnection {
 	}
 	
 	private void stopSearchTask() {
-		
-		search_timer.cancel();
+		if (search_timer != null)
+			search_timer.cancel();
 	}
 	
 	public ED2KServerLink getServerLink() {
@@ -735,51 +735,6 @@ public class Server extends JMConnection {
 		UDPPacket packet = UDPPacketFactory.getUDPStatusRequest(challenge, udpAddress);
 		JMUDPConnection.getInstance().sendPacket(packet);
 	}
-	
-/*	private class udpQueryThread extends JMThread {
-		
-		private boolean stop = false;
-		
-		public udpQueryThread() {
-			
-			super("Server UDP query thread");
-			
-			start();
-			
-		}
-
-		public void run() {
-			
-			Random random = new Random();
-			
-			while (!stop) {
-
-				try {
-					
-					
-
-					udp_connection.sendPacket();
-
-
-
-					udp_connection.sendPacket(UDPPacketFactory
-							.getUDPStatusRequest(challenge, udpAddress));
-
-					
-					Thread.sleep(ConfigurationManager.SERVER_UDP_QUERY_INTERVAL);
-					
-				} catch (InterruptedException e) {
-				}
-			}
-		}
-		
-		public void JMStop() {
-			
-			stop = true;
-			
-			this.interrupt();
-		}
-	}*/
 
 	private class ProcessPacketsThread extends JMThread {
 		
@@ -816,61 +771,6 @@ public class Server extends JMConnection {
 		}
 	}
 	
-	/*
-	private class ProcessUDPPacketsThread extends JMThread {
-		
-		private boolean stop = false;
-		
-		public ProcessUDPPacketsThread() {
-			
-			super("Server UDP packets processor ");
-			
-		}
-		
-		public void run() {
-			
-			while(!stop) {
-				
-				if (!udp_connection.hasIncomingPackets()) {
-					
-					synchronized(this) {
-						
-						try {
-							
-							this.sleep(2000);
-							
-						} catch (Throwable e) {
-						}
-						
-						if (stop) return;
-						
-						continue;
-					}
-				}
-				
-				UDPPacket packet = udp_connection.getNextIncomingPacket();
-				
-				ScannedPacket scannedPacket = PacketScanner.scanPacket(packet);
-				
-				processPacket(scannedPacket);
-				
-				last_udp_response = System.currentTimeMillis();
-				
-			}
-			
-		}
-		
-		public void JMStop() {
-			
-			stop = true;
-			
-			interrupt();
-			
-		}
-		
-		
-	} */
-	
 	private void notify_server_event(int socket_status) {
 		
 		switch( socket_status ) {
@@ -895,9 +795,6 @@ public class Server extends JMConnection {
 	    	  
 	    	  break;
 	      }
-	       
-	 
-	   }
-		
+	   }	
 	}
 }
