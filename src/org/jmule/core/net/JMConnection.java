@@ -39,8 +39,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 14:04:12 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:21:51 $$
  */
 public abstract class JMConnection{
 	
@@ -73,8 +73,6 @@ public abstract class JMConnection{
 	private int currentlyWrongPackets = 0;
 	
 	private WrongPacketCheckingThread wrongPacketChekingThread;
-	
-	private  boolean allowStopReceiver = true;
 	
 	protected Packet lastPacket;
 	
@@ -126,31 +124,30 @@ public abstract class JMConnection{
 	}
 		
 	public void disconnect() {
-
+		int old_status = getStatus();
+		if (getStatus() == TCP_SOCKET_DISCONNECTED) return ;
+		setStatus(TCP_SOCKET_DISCONNECTED);
 		try {
 			remoteConnection.close();
-		} catch (Throwable e) {
-		}
-		
-		if (getStatus() == TCP_SOCKET_CONNECTING)
+		} catch (Throwable e) { }
+		if (old_status == TCP_SOCKET_CONNECTING)
 			stopConnecting();
-		
-		if (getStatus() == TCP_SOCKET_CONNECTED) {
-			if (allowStopReceiver) // receiver may self stop	
-				stopReceiver(); 
-		
-			stopSender();
-	
+
+		if (old_status == TCP_SOCKET_CONNECTED) {
 			
+			if (packetReceiverThread != null)
+				if (packetReceiverThread.isAlive())
+					packetReceiverThread.JMStop(); 
 			
+			if (packetSenderThread != null)
+				if (packetSenderThread.isAlive())
+					packetSenderThread.JMStop();
+
 			wrongPacketChekingThread.JMStop();
 			
 			connectionStats.stopSpeedCounter();
-		
 		}
 		
-		setStatus(TCP_SOCKET_DISCONNECTED);
-
 		onDisconnect();
 		
 	}
@@ -162,9 +159,7 @@ public abstract class JMConnection{
 	}
 	
 	private void setStatus(int newStatus){
-		
-		this.connectionStatus = newStatus;
-		
+		connectionStatus = newStatus;
 	}
 	
 	
@@ -265,39 +260,14 @@ public abstract class JMConnection{
 		if ((packetReceiverThread != null) && (packetReceiverThread.isAlive()));
 		
 		else {
-			
-			allowStopReceiver = true;
-			
 			packetReceiverThread = new PacketReceiverThread();
 			
 		}
 	}
 
-	private void stopReceiver() {
-		
-		if ((packetReceiverThread != null) && (packetReceiverThread.isAlive()))
-			
-			packetReceiverThread.JMStop();
-		
-		else;
-	}
-
 	private void startSender() {
-		
 		if ((packetSenderThread == null) || (!packetSenderThread.isAlive()))
-			
 			packetSenderThread = new PacketSenderThread();
-		
-	}
-
-	private void stopSender() {
-		
-		if ((packetSenderThread != null) && (packetSenderThread.isAlive()))
-			
-			this.packetSenderThread.JMStop();
-		
-		else ;
-		
 	}
 
 	
@@ -392,8 +362,7 @@ public abstract class JMConnection{
 					if (packet!=null) {
 						bSneded = remoteConnection.write(packet);
 						connectionStats.addSendBytes(bSneded);					
-					}
-										
+					}		
 				} catch (Throwable e1) {
 					if (stop) return ;
 				}
@@ -407,8 +376,6 @@ public abstract class JMConnection{
 		}
 		
 	}
-	
-	
 
 	private class PacketReceiverThread extends JMThread {
 		
@@ -438,15 +405,11 @@ public abstract class JMConnection{
 					remoteConnection.read(packetHeader);
 					
 				}catch(Throwable e) {
-					if (e instanceof JMEndOfStreamException) {
-						disconnect();
-						return ;
-					}
-					
 					e.printStackTrace();
 					
-					if (stop) return;
+					if (stop) return ;
 					
+					if (connectionStatus == TCP_SOCKET_DISCONNECTED) return ; 
 					disconnect();
 					return ;
 				}
@@ -481,6 +444,7 @@ public abstract class JMConnection{
 					}
 					t.printStackTrace();
 					if (stop) return ;
+					if (connectionStatus == TCP_SOCKET_DISCONNECTED) return ; 
 					disconnect();
 					return ;
 				}
@@ -492,10 +456,8 @@ public abstract class JMConnection{
 		}
 		
 		public void JMStop() {
-			
 			stop = true;
 			interrupt();
-			
 		}
 	}	
 	
@@ -522,7 +484,7 @@ public abstract class JMConnection{
 				wrongPacketChekingThread.start();
 				
 				SocketChannel channel = SocketChannel.open(new InetSocketAddress(getAddress(),getPort()));
-				channel.socket().setSoTimeout(2000);
+
 				remoteConnection=new JMuleSocketChannel(channel);
 				
 				remoteConnection.configureBlocking(true);
@@ -547,10 +509,10 @@ public abstract class JMConnection{
 				
 				if (stop) return ;
 				
-				connectionStatus = TCP_SOCKET_DISCONNECTED;
-				
-				onDisconnect();
-				
+				if (connectionStatus != TCP_SOCKET_DISCONNECTED) {
+					connectionStatus = TCP_SOCKET_DISCONNECTED;
+					onDisconnect();
+				}
 				return ;
 				
 			}	
