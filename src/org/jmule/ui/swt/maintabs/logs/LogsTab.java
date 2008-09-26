@@ -53,8 +53,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:23:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 14:56:56 $$
  */
 public class LogsTab extends AbstractTab implements Logger {
 
@@ -179,6 +179,7 @@ public class LogsTab extends AbstractTab implements Logger {
 				int date_begin = log_content.getText().length();
 				String date = TimeFormatter.twoDigits(calendar.get(Calendar.DAY_OF_MONTH)) + "." + TimeFormatter.twoDigits(calendar.get(Calendar.MONTH)) + "." + TimeFormatter.twoDigits(calendar.get(Calendar.YEAR));
 				date += " "+TimeFormatter.twoDigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + TimeFormatter.twoDigits(calendar.get(Calendar.MINUTE))+":"+TimeFormatter.twoDigits(calendar.get(Calendar.SECOND));
+				date = "[" + date + "]";
 				log_content.append(date);
 								
 				StyleRange date_style = new StyleRange();
