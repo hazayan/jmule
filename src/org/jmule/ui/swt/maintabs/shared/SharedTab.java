@@ -70,8 +70,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 07:02:17 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:09:29 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -306,7 +306,7 @@ public class SharedTab extends AbstractTab {
 	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID,   _._("mainwindow.sharedtab.column.fileid"),   _._("mainwindow.sharedtab.column.fileid.desc"), width);
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID);
-	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID, _._("mainwindow.sharedtab.column.completed"),_._("mainwindow.sharedtab.column.completed.desc") , width);
+	  shared_files_table.addColumn(SWT.RIGHT,  SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID, _._("mainwindow.sharedtab.column.completed"),_._("mainwindow.sharedtab.column.completed.desc") , width);
 	  
 	  shared_files_table.updateColumnSettings();
 	  

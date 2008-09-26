@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:02:19 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/26 15:09:29 $
  */
 public class SearchResultTab {
 
@@ -194,10 +194,10 @@ public class SearchResultTab {
 		search_results.addColumn(SWT.RIGHT, SWTConstants.SEARCH_FILESIZE_COLUMN_ID, _._("mainwindow.searchtab.column.filesize"),		 _._("mainwindow.searchtab.column.filesize.desc") , width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID);
-		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID, _._("mainwindow.searchtab.column.availability"),_._("mainwindow.searchtab.column.availability.desc") , width);
+		search_results.addColumn(SWT.RIGHT,  SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID, _._("mainwindow.searchtab.column.availability"),_._("mainwindow.searchtab.column.availability.desc") , width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID);
-		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID, _._("mainwindow.searchtab.column.completesrcs"), _._("mainwindow.searchtab.column.completesrcs.desc"), width);
+		search_results.addColumn(SWT.RIGHT,  SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID, _._("mainwindow.searchtab.column.completesrcs"), _._("mainwindow.searchtab.column.completesrcs.desc"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID);
 		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID, _._("mainwindow.searchtab.column.filetype"),		 _._("mainwindow.searchtab.column.filetype.desc"), width);

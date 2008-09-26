@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
-import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerListener;
@@ -55,13 +54,12 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:03:03 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/26 15:13:45 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
 	private UploadManager   upload_manager;
-	private DownloadManager download_manager;
 	
 	private enum UploadListStatus { NO_UPLOADS,NO_UPLOADS_SELECTED,UPLOAD_SELECTED,MULTIPLE_UPLOADS_SELECTED };
 	
@@ -72,7 +70,6 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		super(composite, SWT.NONE);
 
 		upload_manager   = core.getUploadManager();
-		download_manager = core.getDownloadManager(); 
 		
 		
 		upload_manager.addUploadManagerListener(this);
@@ -83,19 +80,19 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.filename"), _._("mainwindow.transferstab.uploads.column.filename"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.filesize"), _._("mainwindow.transferstab.uploads.column.filesize"), width);
+		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.filesize"), _._("mainwindow.transferstab.uploads.column.filesize"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploadspeed"), _._("mainwindow.transferstab.uploads.column.uploadspeed"), width);
+		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploadspeed"), _._("mainwindow.transferstab.uploads.column.uploadspeed"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.peers"), 	_._("mainwindow.transferstab.uploads.column.peers"), width);
+		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.peers"), 	_._("mainwindow.transferstab.uploads.column.peers"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID); 
-		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.eta"), 	_._("mainwindow.transferstab.uploads.column.eta"), width);
+		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.eta"), 	_._("mainwindow.transferstab.uploads.column.eta"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploaded"), _._("mainwindow.transferstab.uploads.column.uploaded"), width);
+		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploaded"), _._("mainwindow.transferstab.uploads.column.uploaded"), width);
 		
 		updateColumnOrder();
 		updateColumnVisibility();
