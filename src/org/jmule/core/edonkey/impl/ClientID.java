@@ -27,8 +27,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:33 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 12:36:11 $$
  */
 public class ClientID {
 	
@@ -62,7 +62,15 @@ public class ClientID {
 
 	public String toString() {
 		
-		return Convert.byteToInt(data[0])+"."+Convert.byteToInt(data[1])+"."+Convert.byteToInt(data[2])+"."+Convert.byteToInt(data[3]);
+		long num = data[0];
+		
+		num+=Math.pow(2, 8)*data[1];
+		
+		num+=Math.pow(2, 16)*data[2];
+		
+		num+=Math.pow(2, 24)*data[3];
+		
+		return num + "";
 		
 	}
 	
