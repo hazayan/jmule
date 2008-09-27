@@ -53,10 +53,8 @@ import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.ED2KServerLink;
-import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.utils.FileUtils;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -75,8 +73,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Sep 16, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/19 12:21:47 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 13:28:24 $
  */
 public class NewWindow implements JMuleUIComponent {
 	public static enum WindowType { DOWNLOAD, SERVER, SHARED_DIR };
@@ -130,11 +128,10 @@ public class NewWindow implements JMuleUIComponent {
 			
 			return ;
 		}
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {}
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		Display display = SWTThread.getDisplay();
 		GridData grid_data;
 		
