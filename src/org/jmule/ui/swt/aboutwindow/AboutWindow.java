@@ -34,6 +34,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -69,8 +70,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/26 15:30:52 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:06:20 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -172,10 +173,15 @@ public class AboutWindow implements JMuleUIComponent {
 		container1.setLayout(layout);
 		
 		Label jmule_version = new Label(container1,SWT.LEFT);
+		FontData data = skin.getLabelFont().getFontData()[0];
+		
+		Font bold_font = new Font(display,data.getName(),data.getHeight(),SWT.BOLD);
 		jmule_version.setText(JMConstants.JMULE_FULL_NAME);
+		jmule_version.setFont(bold_font);
 		
 		Label copyright = new Label(container1,SWT.LEFT);
 		copyright.setText("Copyright (C) 2007-2008 JMule Team");
+		copyright.setFont(bold_font);
 		
 		new Label(container1,SWT.NONE);
 		

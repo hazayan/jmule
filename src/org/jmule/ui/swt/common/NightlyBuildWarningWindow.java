@@ -23,6 +23,8 @@
 package org.jmule.ui.swt.common;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -49,8 +51,8 @@ import org.jmule.ui.utils.NightlyBuildWarning;
 /**
  * Created on Sep 19, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:43:06 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:06:20 $
  */
 public class NightlyBuildWarningWindow implements JMuleUIComponent {
 
@@ -71,7 +73,7 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		shell=new Shell(shell1,SWT.BORDER );
 		shell.setText(_._("nightlybuildwarningwindow.title"));
 		shell.setImage(SWTThread.getDisplay().getSystemImage(SWT.COLOR_WHITE));
-		shell.setSize(370,260);
+		shell.setSize(400,320);
 		
 		GridData grid_data;
 		GridLayout grid_layout = new GridLayout(1,false);
@@ -80,7 +82,7 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		
 		shell.setLayout(grid_layout);
 		
-		Label image = new Label(shell,SWT.NONE);
+		final Label image = new Label(shell,SWT.NONE);
 		image.setImage(SWTImageRepository.getImage("bomb.png"));
 		grid_data = new GridData();
 		grid_data.grabExcessHorizontalSpace = true;
@@ -144,6 +146,12 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 			public void widgetSelected(SelectionEvent e) {
 				NightlyBuildWarning.setShowWarning(button_check.getSelection());
 				shell.close();
+			}
+		});
+		
+		shell.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent arg0) {
+				image.getImage().dispose();
 			}
 		});
 		
