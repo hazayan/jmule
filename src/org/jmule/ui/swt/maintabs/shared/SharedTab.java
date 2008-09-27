@@ -70,8 +70,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:09:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:08:24 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -294,19 +294,19 @@ public class SharedTab extends AbstractTab {
 	  int width;
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID);
-	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID, _._("mainwindow.sharedtab.column.filename"), _._("mainwindow.sharedtab.column.filename.desc"), width);
+	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID, _._("mainwindow.sharedtab.column.filename"), "", width);
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_FILE_SIZE_COLUMN_ID);
-	  shared_files_table.addColumn(SWT.RIGHT, SWTConstants.SHARED_LIST_FILE_SIZE_COLUMN_ID, _._("mainwindow.sharedtab.column.filesize"), _._("mainwindow.sharedtab.column.filesize.desc"), width);
+	  shared_files_table.addColumn(SWT.RIGHT, SWTConstants.SHARED_LIST_FILE_SIZE_COLUMN_ID, _._("mainwindow.sharedtab.column.filesize"), "", width);
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_FILE_TYPE_COLUMN_ID);
-	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_TYPE_COLUMN_ID, _._("mainwindow.sharedtab.column.filetype"), _._("mainwindow.sharedtab.column.filetype.desc"),width);
+	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_TYPE_COLUMN_ID, _._("mainwindow.sharedtab.column.filetype"), "",width);
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID);
-	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID,   _._("mainwindow.sharedtab.column.fileid"),   _._("mainwindow.sharedtab.column.fileid.desc"), width);
+	  shared_files_table.addColumn(SWT.LEFT,  SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID,   _._("mainwindow.sharedtab.column.fileid"), "", width);
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID);
-	  shared_files_table.addColumn(SWT.RIGHT,  SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID, _._("mainwindow.sharedtab.column.completed"),_._("mainwindow.sharedtab.column.completed.desc") , width);
+	  shared_files_table.addColumn(SWT.RIGHT,  SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID, _._("mainwindow.sharedtab.column.completed"), "", width);
 	  
 	  shared_files_table.updateColumnSettings();
 	  

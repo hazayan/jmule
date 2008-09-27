@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:09:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:08:24 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
@@ -95,7 +95,7 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		this.servers_manager = server_manager;
 		int width;
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_NAME_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_NAME_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.name"), _._("mainwindow.serverlisttab.serverlist.column.name.desc"),width);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_NAME_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.name"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_CC_COLUMN_ID);
 		addColumn(SWT.CENTER, SWTConstants.SERVER_LIST_CC_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.country_code"), _._("mainwindow.serverlisttab.serverlist.column.country_code.desc"),width);
@@ -103,39 +103,39 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 			disableColumn(SWTConstants.SERVER_LIST_CC_COLUMN_ID);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_FLAG_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_FLAG_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.country"), _._("mainwindow.serverlisttab.serverlist.column.country.desc"),width);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_FLAG_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.country"), "",width);
 		if (CountryLocator.getInstance().isServiceDown()) 
 			disableColumn(SWTConstants.SERVER_LIST_FLAG_COLUMN_ID);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_IP_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_IP_COLUMN_ID, Localizer._("mainwindow.serverlisttab.serverlist.column.address"), _._("mainwindow.serverlisttab.serverlist.column.address.desc"),width);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_IP_COLUMN_ID, Localizer._("mainwindow.serverlisttab.serverlist.column.address"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.description"), _._("mainwindow.serverlisttab.serverlist.column.description.desc"),width);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.description"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_PING_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_PING_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.ping"), _._("mainwindow.serverlisttab.serverlist.column.ping.desc"),width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_PING_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.ping"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_USERS_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_USERS_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.users"), _._("mainwindow.serverlisttab.serverlist.column.users.desc"),width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_USERS_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.users"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.max_users"), _._("mainwindow.serverlisttab.serverlist.column.maxusers.desc"),width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_FILES_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.files"), _._("mainwindow.serverlisttab.serverlist.column.files.desc"),width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.files"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.soft_limit"), _._("mainwindow.serverlisttab.serverlist.column.soft_limit.desc"),width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.soft_limit"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.hard_limit"), _._("mainwindow.serverlisttab.serverlist.column.hard_limit.desc"),width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.hard_limit"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_VERSION_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_VERSION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.software"), _._("mainwindow.serverlisttab.serverlist.column.software.desc"),width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_VERSION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.software"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_STATIC_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_STATIC_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.static"), _._("mainwindow.serverlisttab.serverlist.column.static.desc"),width);
+		addColumn(SWT.LEFT, SWTConstants.SERVER_LIST_STATIC_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.static"), "",width);
 		
 		updateColumnOrder();
 		updateColumnVisibility();

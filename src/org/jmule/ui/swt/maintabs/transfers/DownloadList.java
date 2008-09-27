@@ -62,8 +62,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:13:45 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:08:24 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -92,34 +92,34 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		int width;
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID); 
-		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.filename"), 		_._("mainwindow.transferstab.downloads.column.filename.desc"), width);
+		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.filename"),"", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, 	Localizer._("mainwindow.transferstab.downloads.column.size"), 			_._("mainwindow.transferstab.downloads.column.size.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, 	Localizer._("mainwindow.transferstab.downloads.column.size"),"", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.transferred"), 	_._("mainwindow.transferstab.downloads.column.transferred.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.transferred"),"", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.download_speed"), _._("mainwindow.transferstab.downloads.column.download_speed.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.download_speed"), "", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.upload_speed"),   _._("mainwindow.transferstab.downloads.column.upload_speed.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.upload_speed"),"", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.progress"),       _._("mainwindow.transferstab.downloads.column.progress.desc"), width);
+		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.progress"),"", width);
 
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.completed"),      _._("mainwindow.transferstab.downloads.column.completed.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.completed"),"", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.sources"), 		_._("mainwindow.transferstab.downloads.column.sources.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.sources"),"", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.remaining"), 		_._("mainwindow.transferstab.downloads.column.remaining.desc"), width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.remaining"), "", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.status"), 		_._("mainwindow.transferstab.downloads.column.status.desc"), width);
+		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.status"),"", width);
 		
 		updateColumnOrder();
 		updateColumnVisibility();
