@@ -27,13 +27,12 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.edonkey.packet.tag.impl.MetaTag;
-import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:36:04 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 12:58:12 $$
  */
 public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 	private int tagsSize=0;
@@ -155,8 +154,9 @@ public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 				try {
 					return tmpTag.getString();
 				} catch (TagException e) {
+					
 					throw new TagException("Wrong tag format");
 				}
-		return "";
+			return "";
 	}
 }
