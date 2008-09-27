@@ -27,8 +27,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 12:36:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/27 13:28:18 $$
  */
 public class ClientID {
 	
@@ -62,15 +62,7 @@ public class ClientID {
 
 	public String toString() {
 		
-		long num = data[0];
-		
-		num+=Math.pow(2, 8)*data[1];
-		
-		num+=Math.pow(2, 16)*data[2];
-		
-		num+=Math.pow(2, 24)*data[3];
-		
-		return num + "";
+		return Convert.intToLong( hashCode() ) + "";
 		
 	}
 	
