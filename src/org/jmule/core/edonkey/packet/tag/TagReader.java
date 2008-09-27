@@ -23,6 +23,12 @@
 package org.jmule.core.edonkey.packet.tag;
 
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXBYTE;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXDWORD;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXSTRING_LONG;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXSTRING_SHORT_BEGIN;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXSTRING_SHORT_END;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXWORD;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
 import java.io.IOException;
@@ -39,8 +45,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/27 17:03:04 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 12:57:31 $
  */
 public class TagReader {
 
@@ -67,56 +73,132 @@ public class TagReader {
 		return tag;
 	}
 	
-	/**
-	 * Load 1 standard tag from file channel 
-	 * @param fileChannel
-	 * @return
-	 * @throws IOException
-	 */
-	public static StandardTag loadStandardTag(FileChannel fileChannel) throws IOException{
-		ByteBuffer data;
-		data = Misc.getByteBuffer(1);
-		fileChannel.read(data);
-		byte tagType = data.get(0);
+	public static Tag readTag(FileChannel fileChannel) throws IOException {
+		long position = fileChannel.position();
+		ByteBuffer header = Misc.getByteBuffer(1);
+		fileChannel.read(header);
+		fileChannel.position(position);
+		byte tag_header = header.get(0);
+		
+		boolean isStandardTag = standard_tags.contains(tag_header);
+		
+		ByteBuffer tagType = Misc.getByteBuffer(1);
+	    fileChannel.read(tagType);
+		if (isStandardTag) {
+			
+	   	    ByteBuffer metaTagLength = Misc.getByteBuffer(2);
+			fileChannel.read(metaTagLength);
+			metaTagLength.position(0);
+			ByteBuffer metaTag = Misc.getByteBuffer(metaTagLength.getShort(0));
+			fileChannel.read(metaTag);
+			metaTag.position(0);
+			switch(tagType.get(0)) {
+				case TAG_TYPE_STRING : {
+					ByteBuffer strLength = Misc.getByteBuffer(2);
+					fileChannel.read(strLength);
+					strLength.position(0);
+					ByteBuffer str = Misc.getByteBuffer(strLength.getShort(0));
+					fileChannel.read(str);
+					str.position(0);					
+					ByteBuffer tag_data = Misc.getByteBuffer(1 + 2 + metaTagLength.get(0) + 2 + strLength.getShort(0));
+					tag_data.put(TAG_TYPE_STRING);
+					tag_data.put(metaTagLength);
+					tag_data.put(metaTag);
+					tag_data.put(strLength);
+					tag_data.put(str);
+					
+					return new StandardTag(metaTag,tag_data);
+				}
+				
+				case TAG_TYPE_DWORD : {
+					ByteBuffer dword_tag = Misc.getByteBuffer(4);
+					fileChannel.read(dword_tag);
+					dword_tag.position(0);
+					
+					ByteBuffer tag_data = Misc.getByteBuffer(1 + 2 + metaTagLength.getShort(0) + 4);
+					tag_data.put(TAG_TYPE_DWORD);
+					tag_data.put(metaTagLength);
+					tag_data.put(metaTag);
+					tag_data.put(dword_tag);
+					
+					return new StandardTag(metaTag,tag_data);
+				}
+			}
+		} else {
+			byte type = tagType.get(0);
+			if (type == TAG_TYPE_EXSTRING_LONG) {
+				ByteBuffer metaTagName = Misc.getByteBuffer(1);
+				fileChannel.read(metaTagName);
+				metaTagName.position(0);
+				
+				ByteBuffer strLen = Misc.getByteBuffer(2);
+				fileChannel.read(strLen);
+				strLen.position(0);
+				ByteBuffer str = Misc.getByteBuffer(strLen.getShort(0));
+				fileChannel.read(str);
+				str.position(0);
+				
+				ByteBuffer tag_data = Misc.getByteBuffer(1 + 1 + 2 + strLen.getShort(0));
+				tag_data.put(TAG_TYPE_EXSTRING_LONG);
+				tag_data.put(metaTagName);
+				tag_data.put(strLen);
+				tag_data.put(str);
+				
+				return new ExtendedTag(metaTagName,tag_data);
+			}
+			
+			 if ((type>=TAG_TYPE_EXSTRING_SHORT_BEGIN)&&(type<=TAG_TYPE_EXSTRING_SHORT_END)){
+				 ByteBuffer metaTagName = Misc.getByteBuffer(1);
+				 fileChannel.read(metaTagName);
+				 metaTagName.position(0);
+				 short strLength = (short)(type - TAG_TYPE_EXSTRING_SHORT_BEGIN);
+				 ByteBuffer tag_data = Misc.getByteBuffer(1 + 1 + strLength);
+				 tag_data.put(type);
+				 tag_data.put(metaTagName);
+				 fileChannel.read(tag_data);
 
-		data =  Misc.getByteBuffer(2);
-		fileChannel.read(data);
-		short metaTagLength = data.getShort(0);
-
-		data = Misc.getByteBuffer(metaTagLength);
-		fileChannel.read(data);
-
-		StandardTag tag = new StandardTag(tagType, data.array());
-		
-		switch (tagType) {
-		
-		case TAG_TYPE_STRING: {
-			data = Misc.getByteBuffer(2);
-			fileChannel.read(data);
-			short strLength = data.getShort(0);
-			
-			data = Misc.getByteBuffer(strLength);
-			fileChannel.read(data);
-			
-			tag.insertString(new String(data.array()));
-			
-			break;
+				 return new ExtendedTag(metaTagName,tag_data);
+			 }
+			 
+			 if (type == TAG_TYPE_EXBYTE) {
+				 ByteBuffer metaTagName = Misc.getByteBuffer(1);
+				 fileChannel.read(metaTagName);
+				 metaTagName.position(0);
+				 ByteBuffer tag_data = Misc.getByteBuffer(1 + 1 + 1);
+				 tag_data.put(type);
+				 tag_data.put(metaTagName);
+				 fileChannel.read(tag_data);
+				 
+				 return new ExtendedTag(metaTagName,tag_data);
+			 }
+			 
+			 if (type == TAG_TYPE_EXWORD) {
+				 ByteBuffer metaTagName = Misc.getByteBuffer(1);
+				 fileChannel.read(metaTagName);
+				 metaTagName.position(0);
+				 
+				 ByteBuffer tag_data = Misc.getByteBuffer(1 + 1 + 2);
+				 tag_data.put(type);
+				 tag_data.put(metaTagName);
+				 fileChannel.read(tag_data);
+				 
+				 return new ExtendedTag(metaTagName,tag_data);
+			 }
+			 
+			 if (type == TAG_TYPE_EXDWORD) {
+				 ByteBuffer metaTagName = Misc.getByteBuffer(1);
+				 fileChannel.read(metaTagName);
+				 metaTagName.position(0);
+				 ByteBuffer tag_data = Misc.getByteBuffer(1 + 1 + 4);
+				 
+				 tag_data.put(type);
+				 tag_data.put(metaTagName);
+				 fileChannel.read(tag_data);
+				 
+				 return new ExtendedTag(metaTagName,tag_data);
+			 }
 		}
 		
-		case TAG_TYPE_DWORD : {
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			tag.insertDWORD(data.getInt(0));
-			
-			break;
-		}
-		
-		default : {
-			break;
-		}
-		
-		}
-		return tag;
+		return null;
 	}
-	
 }
