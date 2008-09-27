@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:33:14 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:13:35 $$
  */
 public class Peer extends JMConnection {
 	
@@ -432,8 +432,6 @@ public class Peer extends JMConnection {
 		}
 		
 		if (packet instanceof JMPeerChatMessageSP) {
-			
-			JMPeerChatMessageSP sPacket = (JMPeerChatMessageSP)packet;
 			
 			return;
 			
