@@ -50,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:39:36 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:03:52 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -78,6 +78,7 @@ public class PartialFile extends SharedFile {
 			fileChannel = new RandomAccessFile(file,"rws").getChannel();
 			
 		} catch (Throwable e) {
+			e.printStackTrace();
 			throw new SharedFileException("Failed to open "+file);
 		}
 		

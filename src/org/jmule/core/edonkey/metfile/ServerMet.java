@@ -93,8 +93,8 @@ import org.jmule.util.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:50:54 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:05:11 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -238,8 +238,11 @@ public class ServerMet extends MetFile {
 		int tagCount = data.getInt(0);
 						
 		//Load tags....
-		for(int j = 0; j<tagCount; j++)
-			tagList.addTag(TagReader.loadStandardTag(fileChannel));
+		for(int j = 0; j<tagCount; j++) {
+			Tag tag = TagReader.readTag(fileChannel);
+			if (tag != null)
+				tagList.addTag(tag);
+		}
 		
 		Server server = new Server(remonteAddress,remontePort,tagList);
 		server.setStatic(true);

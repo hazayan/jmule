@@ -101,8 +101,8 @@ import org.jmule.util.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:05:11 $$
  */
 public class KnownMet extends MetFile {
 
@@ -162,8 +162,9 @@ public class KnownMet extends MetFile {
 			int tagCount = data.getInt(0);
 			TagList tagList = new TagList();
 			for(int i = 0;i<tagCount;i++) {
-				Tag tag = TagReader.loadStandardTag(fileChannel);
-				tagList.addTag(tag);
+				Tag tag = TagReader.readTag(fileChannel);
+				if (tag != null)
+					tagList.addTag(tag);
 			}
 			known_met_entity.setTagList(tagList);
 		

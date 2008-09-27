@@ -100,8 +100,8 @@ import org.jmule.util.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:50:12 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:05:11 $$
  */
 public class PartMet extends MetFile {
 	
@@ -157,7 +157,7 @@ public class PartMet extends MetFile {
 			data = Misc.getByteBuffer(16);
 			fileChannel.read(data);
 			fileHash = new FileHash(data.array());
-			this.fileHashSet = new PartHashSet(fileHash);
+			fileHashSet = new PartHashSet(fileHash);
 			
 			//Read part count
 			data = Misc.getByteBuffer(2);
@@ -168,7 +168,7 @@ public class PartMet extends MetFile {
 			for(int i = 0 ; i <partCount; i++){
 				data.clear();
 				fileChannel.read(data);
-				this.fileHashSet.add(data.array());
+				fileHashSet.add(data.array());
 			}
 			
 			//Read tag count
@@ -178,8 +178,10 @@ public class PartMet extends MetFile {
 			//Load Tags
 			this.tagList = new TagList();
 			for(int i = 0 ; i < tagCount; i++) {
-				Tag tag = TagReader.loadStandardTag(fileChannel);
-				tagList.addTag(tag);
+				
+				Tag tag = TagReader.readTag(fileChannel);
+				if (tag != null)
+					tagList.addTag(tag);
 			}
 			gapList = new GapList();
 			byte tag_id = E2DKConstants.GAP_OFFSET;
@@ -205,11 +207,11 @@ public class PartMet extends MetFile {
 			throw new PartMetException("Failed to load PartFile ");
 		} catch (IOException e) {
 			throw new PartMetException("Failed to read data from PartFile ");
+		} catch(Throwable t) {
+			throw new PartMetException(Misc.getStackTrace(t));
 		}
 	}
-	
-	
-	
+
 	public void writeFile() throws PartMetException {
 		try {
 			fileChannel.position(0);
