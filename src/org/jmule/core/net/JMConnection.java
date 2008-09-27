@@ -39,8 +39,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:21:51 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 16:53:37 $$
  */
 public abstract class JMConnection{
 	
@@ -50,6 +50,8 @@ public abstract class JMConnection{
 	
 	public static final int TCP_SOCKET_CONNECTED = 0x02;
 		
+	private static final int CONNECTING_TIMEOUT = 2000;
+	
 	private int connectionStatus = TCP_SOCKET_DISCONNECTED;
 	
 	protected Queue<Packet> incoming_packet_queue = new ConcurrentLinkedQueue<Packet>();
@@ -406,9 +408,7 @@ public abstract class JMConnection{
 					
 				}catch(Throwable e) {
 					e.printStackTrace();
-					
 					if (stop) return ;
-					
 					if (connectionStatus == TCP_SOCKET_DISCONNECTED) return ; 
 					disconnect();
 					return ;
@@ -484,7 +484,9 @@ public abstract class JMConnection{
 				wrongPacketChekingThread.start();
 				
 				SocketChannel channel = SocketChannel.open(new InetSocketAddress(getAddress(),getPort()));
-
+				
+				channel.socket().setSoTimeout(CONNECTING_TIMEOUT);
+				
 				remoteConnection=new JMuleSocketChannel(channel);
 				
 				remoteConnection.configureBlocking(true);
