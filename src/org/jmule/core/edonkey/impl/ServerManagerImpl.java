@@ -49,8 +49,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 13:55:26 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 16:56:36 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
@@ -308,6 +308,7 @@ public class ServerManagerImpl implements ServerManager {
 		            }
 				}
 				removeServerListener(server_listener);
+				stopAutoConnect();
 			}
 			
 			public void JMStop() {
@@ -448,16 +449,6 @@ public class ServerManagerImpl implements ServerManager {
     }
 
 	public void start() {}
-	
-	private void disconnectIfConnected(Server server) {
-		
-		if( ( server != null ) && ( server.isConnected() ) ) {
-			
-			server.disconnect();
-			
-		}
-		 
-	}
 
 
 	public void startUDPQuery() {
