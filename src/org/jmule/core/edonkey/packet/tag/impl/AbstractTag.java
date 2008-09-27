@@ -27,8 +27,8 @@ import java.nio.ByteBuffer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:57 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:02:50 $$
  */
 public abstract class AbstractTag {
 	
@@ -37,6 +37,16 @@ public abstract class AbstractTag {
 	protected ByteBuffer tag = null;
 	
 	protected byte tagType = 0;
+	
+	public AbstractTag() {
+		
+	}
+	
+	public AbstractTag(ByteBuffer metaTag, ByteBuffer tag) {
+		metaTagName.setMetaTagName(metaTag.array());
+		this.tag = tag;
+		setType(tag.get(0));
+	}
 	
 	public MetaTag getMetaTag() {
 		return metaTagName;

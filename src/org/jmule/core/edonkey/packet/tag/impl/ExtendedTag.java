@@ -126,18 +126,24 @@ import org.jmule.core.edonkey.packet.tag.TagException;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:53:02 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:02:51 $$
  */
 
 public class ExtendedTag extends AbstractTag implements Tag{
+	
+	public ExtendedTag(){
+	}
+	
+	public ExtendedTag(ByteBuffer metaTag, ByteBuffer tag) {
+		super(metaTag,tag);
+	}
 	
 	/**
 	 * Extract extended eDonkeyTag from ByteBuffer value 
 	 */
 	public void extractTag(ByteBuffer data) {
-			
-		// byte tagType;
+		
 		boolean tagIsOk=false;
 				
 	    setType(data.get());

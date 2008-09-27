@@ -83,12 +83,16 @@ import org.jmule.util.Convert;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:22:55 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:02:50 $$
  */
 public class StandardTag extends AbstractTag implements Tag {
 
 	public StandardTag() {
+	}
+	
+	public StandardTag(ByteBuffer metaTag, ByteBuffer tag) {
+		super(metaTag,tag);
 	}
 	
 	/**
@@ -99,7 +103,7 @@ public class StandardTag extends AbstractTag implements Tag {
 	public StandardTag(byte tagType, byte[] metaTagName) {
 		super();
 		setType(tagType);
-		this.metaTagName.setMetaTagName(metaTagName.clone());
+		this.metaTagName.setMetaTagName(metaTagName);
 	}
 	
 	public void  insertString(String stringData){
