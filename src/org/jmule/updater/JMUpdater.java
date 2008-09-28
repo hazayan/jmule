@@ -33,8 +33,8 @@ import org.jmule.ui.localizer._;
 /**
  * Created on Aug 20, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/27 17:14:47 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:24:16 $
  */
 public class JMUpdater {
 
@@ -125,7 +125,7 @@ public class JMUpdater {
 	
 	public String getErrorCode() {
 		String result = error_codes.get(response_code);
-		return result == null ? "" : result;
+		return result == null ? "HTTP Error " + response_code : result;
 	}
 	
 	public boolean isNewVersionAvailable() {

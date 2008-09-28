@@ -61,8 +61,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:03:27 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:26:32 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -126,30 +126,30 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 		public UploadPeerList(Composite composite) {
 			super(composite, SWT.NONE);
 			int width;
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.nickname"), _._("uploadinfowindow.tab.peerlist.column.nickname.desc"),	SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID));
+			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.nickname"), "",	SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID));
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID);
-			addColumn(SWT.CENTER, SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID, 		_._("uploadinfowindow.tab.peerlist.column.country_code"), _._("uploadinfowindow.tab.peerlist.column.country_code.desc"), 		width );
+			addColumn(SWT.CENTER, SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID, 		_._("uploadinfowindow.tab.peerlist.column.country_code"), "", 		width );
 			if (CountryLocator.getInstance().isServiceDown())
 				disableColumn(SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID);
 			
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID, 		_._("uploadinfowindow.tab.peerlist.column.flag"), _._("uploadinfowindow.tab.peerlist.column.flag.desc"), 		width );
+			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID, 		_._("uploadinfowindow.tab.peerlist.column.flag"), "", 		width );
 			if (CountryLocator.getInstance().isServiceDown())
 				disableColumn(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID);
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID, 			_._("uploadinfowindow.tab.peerlist.column.address"), _._("uploadinfowindow.tab.peerlist.column.address.desc"), width);
+			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID, 			_._("uploadinfowindow.tab.peerlist.column.address"), "", width);
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.up_speed"),_._("uploadinfowindow.tab.peerlist.column.up_speed.desc"), width);
+			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.up_speed"), "", width);
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.software"), _._("uploadinfowindow.tab.peerlist.column.software.desc"), 	width);
+			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.software"), "", 	width);
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.status"), _._("uploadinfowindow.tab.peerlist.column.status.desc"), width);
+			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.status"), "", width);
 
 			updateColumnVisibility();
 			updateColumnOrder();

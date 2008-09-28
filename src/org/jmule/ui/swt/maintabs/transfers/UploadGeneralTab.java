@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.jmule.core.uploadmanager.UploadSession;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -49,8 +48,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:12 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:26:32 $
  */
 public class UploadGeneralTab extends CTabItem implements Refreshable {
 
@@ -63,14 +62,12 @@ public class UploadGeneralTab extends CTabItem implements Refreshable {
 		upload_session = session;
 		setText(Localizer._("uploadinfowindow.tab.general.title"));
 		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {
 		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
-		Composite content = new Composite(tabFolder,SWT.BORDER);
+		Composite content = new Composite(tabFolder,SWT.NONE);
 		setControl(content);
 		content.setLayout(new GridLayout(1,false));
 		Label label;

@@ -52,8 +52,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:13 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:26:31 $
  */
 public class DownloadGeneralTab extends CTabItem implements Refreshable {
 
@@ -73,7 +73,7 @@ public class DownloadGeneralTab extends CTabItem implements Refreshable {
 		}
 		
 		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
-		Composite content = new Composite(tabFolder,SWT.BORDER);
+		Composite content = new Composite(tabFolder,SWT.NONE);
 		setControl(content);
 		content.setLayout(new GridLayout(1,false));
 		

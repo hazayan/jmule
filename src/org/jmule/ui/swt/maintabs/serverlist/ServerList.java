@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:08:24 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:30:27 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
@@ -814,11 +814,11 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		setRowText(server, SWTConstants.SERVER_LIST_NAME_COLUMN_ID, server.getName());
 		setRowText(server, SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID,server.getDesc());
 		setRowText(server, SWTConstants.SERVER_LIST_PING_COLUMN_ID,server.getPing()+"");
-		setRowText(server, SWTConstants.SERVER_LIST_USERS_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getNumUsers()));
-		setRowText(server, SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getMaxUsers()));
-		setRowText(server, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getNumFiles()));
-		setRowText(server, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getSoftLimit()));
-		setRowText(server, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,NumberFormatter.formatHumanReadable(server.getHardLimit()));
+		setRowText(server, SWTConstants.SERVER_LIST_USERS_COLUMN_ID,NumberFormatter.formatSizeHumanReadable(server.getNumUsers()));
+		setRowText(server, SWTConstants.SERVER_LIST_MAX_USERS_COLUMN_ID,NumberFormatter.formatSizeHumanReadable(server.getMaxUsers()));
+		setRowText(server, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,NumberFormatter.formatSizeHumanReadable(server.getNumFiles()));
+		setRowText(server, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,NumberFormatter.formatSizeHumanReadable(server.getSoftLimit()));
+		setRowText(server, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,NumberFormatter.formatSizeHumanReadable(server.getHardLimit()));
 		setRowText(server, SWTConstants.SERVER_LIST_VERSION_COLUMN_ID,server.getVersion()+"");
 		
 		if (server.isStatic())
