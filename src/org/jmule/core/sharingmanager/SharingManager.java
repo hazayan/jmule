@@ -32,8 +32,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 06:04:19 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:16:46 $$
  */
 public interface SharingManager extends JMuleManager {
 
@@ -81,7 +81,9 @@ public interface SharingManager extends JMuleManager {
 	
 	public double getCurrentHashingFilePercent();
 	
-	public String getCurrentHashingFile();
+	public SharedFile getCurrentHashingFile();
+	
+	public List<CompletedFile> getUnhashedFiles();
 	
 	/**
 	 * Move the completed file (identified by fileHash) from temp dir to incoming dir 
