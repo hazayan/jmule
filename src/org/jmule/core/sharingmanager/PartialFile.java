@@ -50,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:03:52 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:14:16 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -89,12 +89,17 @@ public class PartialFile extends SharedFile {
 		metFileName = tempDir + File.separator + partFile.getName();
 		
 		hashSet = partFile.getFileHashSet();
-				
+		if (hashSet.isEmpty()) {
+			hasHashSet = false;
+		}
+		else
+			hasHashSet = true;
+		
 		checkedParts = new boolean[Misc.getPartCount(length())];
 		
 		int partCount = Misc.getPartCount(length());
 		
-		hasHashSet = true;
+		
 		
 		for(int i = 0;i < partCount;i++) {
 			
