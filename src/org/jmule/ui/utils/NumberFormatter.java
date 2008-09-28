@@ -28,12 +28,18 @@ import java.text.DecimalFormat;
 /**
  * Created on Sep 5, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/06 14:29:00 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:22:48 $
  */
 public class NumberFormatter {
 
-	public static String formatHumanReadable(long number) {
+	private static DecimalFormat formatter = new DecimalFormat("0.00");
+	 
+	 public static String formatProgress(double progress) {
+		 return formatter.format(progress)+"%";
+	 }
+	
+	public static String formatSizeHumanReadable(long number) {
 		String result = "";
 		
 		DecimalFormat formatter = new DecimalFormat("0");
