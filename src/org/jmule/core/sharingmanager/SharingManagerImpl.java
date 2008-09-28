@@ -33,10 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -52,20 +54,19 @@ import org.jmule.core.uploadmanager.UploadSession;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:42:45 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:18:34 $$
  */
 public class SharingManagerImpl implements SharingManager {
 
 	private Map<FileHash,SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
 	private LoadPartialFiles load_partial_files;
-	private String current_hashing_file;
+	private SharedFile current_hashing_file;
 	private List<CompletedFileListener> completed_file_listeners = new LinkedList<CompletedFileListener>();
 	
 	public void initialize() {
 	     sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
-
 	     
 	     Set<String> types = new HashSet<String>();
 	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT);
@@ -108,6 +109,11 @@ public class SharingManagerImpl implements SharingManager {
 				}
 			}
 	     });
+	     
+	     JMuleCoreFactory.getSingleton().getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
+	    	 public void sharedDirectoriesChanged(List<File> sharedDirs) {
+	    		 loadCompletedFiles();
+	     }});
 	}
 	
 	public void start() {
@@ -160,6 +166,7 @@ public class SharingManagerImpl implements SharingManager {
 	private class LoadCompletedFiles extends JMFileTask {
 		
 		private FileHashing file_hashing;
+		private List<CompletedFile> files_needed_to_hash;
 		
 		public void JMStop() {
 			
@@ -176,7 +183,7 @@ public class SharingManagerImpl implements SharingManager {
 		     Map<String,KnownMetEntity> known_file_list;
 		
 		     // new files from user's shared dirs that need to be hashed
-		     List<File> files_needed_to_hash = new LinkedList<File>();
+		     files_needed_to_hash = new CopyOnWriteArrayList<CompletedFile>();
 		
 		     sharedFiles.clear();
 		     
@@ -196,6 +203,7 @@ public class SharingManagerImpl implements SharingManager {
 		     for(File dir : shared_dirs) {
 		    	 if( stop ) return;
 		    	 Iterator<File> i = FileUtils.iterateFiles(dir, null, true);
+		    	 
 		    	 String file_name;
 		    	 long file_size;
 		    	 KnownMetEntity known_met_entity = null;
@@ -207,7 +215,7 @@ public class SharingManagerImpl implements SharingManager {
 		    		 file_size = f.length();
 		    		 known_met_entity = known_file_list.get(file_name + file_size);
 		    		 if( known_met_entity == null) {
-		    			 files_needed_to_hash.add(f);
+		    			 files_needed_to_hash.add(new CompletedFile(f));
 		    		 } else {
 		    			 CompletedFile shared_completed_file = new CompletedFile(f);
 		    			 try {
@@ -221,22 +229,22 @@ public class SharingManagerImpl implements SharingManager {
 		    	 }  
 		      }
 	    	 // hash new files from the file system
-	    	 for(File f : files_needed_to_hash) {
+	    	 for(CompletedFile shared_completed_file : files_needed_to_hash) {
 	    		 if( stop ) return;
-	    		 current_hashing_file = f.toString();
 	    		 try {
-	    		  FileChannel file_channel = new FileInputStream(f).getChannel();
-	    		  file_hashing = new FileHashing(file_channel);
-	    		  file_hashing.start();
-	    		  file_hashing.join();
-	    		  if(!file_hashing.isDone()) return;
-	    		  //PartHashSet file_hash_set = MD4FileHasher.calcHashSets(file_channel);
-	    		  CompletedFile shared_completed_file = new CompletedFile(f);
-	    		  shared_completed_file.setHashSet(file_hashing.getFileHashSet());
-	    		  sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
-	    		  notifyCompletedFileAdded(shared_completed_file);
+	    			 current_hashing_file = shared_completed_file;
+	    			 FileChannel file_channel = new FileInputStream(shared_completed_file.getFile()).getChannel();
+	    			 file_hashing = new FileHashing(file_channel);
+	    			 file_hashing.start();
+	    			 file_hashing.join();
+	    			 if(!file_hashing.isDone()) continue;
+	    			 files_needed_to_hash.remove(shared_completed_file);
+	    			 shared_completed_file.setHashSet(file_hashing.getFileHashSet());
+	    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
+	    			 file_channel.close();
+	    			 notifyCompletedFileAdded(shared_completed_file);
 	    		 } catch( Throwable t ) {
-	    			 t.printStackTrace(); 
+	    		 		t.printStackTrace(); 
 	    		 }
 	    	 }
 	    	 // write our files in known.met
@@ -248,17 +256,23 @@ public class SharingManagerImpl implements SharingManager {
 		}
 		
 		public double getPercent() {
-			
 			return file_hashing.getPercent();
-			
 		}
 		
-		public String getCurrentHashingFile() {
-			
+		public SharedFile getCurrentHashingFile() {
 			return current_hashing_file;
-			
 		}
 		
+		public List<CompletedFile> getUnhashedFiles() {
+			return files_needed_to_hash;
+		}
+		
+	}
+	
+	public List<CompletedFile> getUnhashedFiles() {
+		if( ( load_completed_files == null ) || ( !load_completed_files.isAlive()))
+			return null;
+		return load_completed_files.getUnhashedFiles();
 	}
 	
 	public double getCurrentHashingFilePercent() {
@@ -268,9 +282,9 @@ public class SharingManagerImpl implements SharingManager {
 		return load_completed_files.getPercent(); 
     }
 	
-	public String getCurrentHashingFile() {
+	public SharedFile getCurrentHashingFile() {
 		
-		if( ( load_completed_files == null ) || ( !load_completed_files.isAlive())) return "";
+		if( ( load_completed_files == null ) || ( !load_completed_files.isAlive())) return null;
 		
 		return load_completed_files.getCurrentHashingFile();
 	}
@@ -289,9 +303,10 @@ public class SharingManagerImpl implements SharingManager {
 	}
 	
 	public void loadCompletedFiles() {
-	  
+		if (load_completed_files != null)
+			if (load_completed_files.isAlive()) 
+				return ;
 		load_completed_files = new LoadCompletedFiles();
-		
 		load_completed_files.start();
 	}
 	
