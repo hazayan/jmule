@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -63,12 +62,14 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:00:01 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:22:03 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
 	public static final int UPDATE_INTERVAL		= 10000;
+	
+	private enum WindowStatus { CONNECTING, CONNECTED, FAILED};
 	
 	private JMUpdater updater = JMUpdater.getInstance();
 
@@ -78,17 +79,17 @@ public class UpdaterWindow implements JMuleUIComponent {
 	private Link download_link;
 	
 	private Color green_color = new Color(SWTThread.getDisplay(),68,174,71);
+	private Color red_color = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
+	private Color connecting_color = SWTThread.getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
 	
 	public void getCoreComponents() {
 	}
 
 	public void initUIComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) { }
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -152,7 +153,7 @@ public class UpdaterWindow implements JMuleUIComponent {
 		grid_data = new GridData(GridData.HORIZONTAL_ALIGN_CENTER);
 		grid_data.horizontalSpan = 2;
 		download_link.setLayoutData(grid_data);
-		download_link.setText("<a href=\"http://jmule.org/?page=download\">"+_._("updaterwindow.label.download_link")+"</a>");
+		download_link.setText("<a href=\""+JMConstants.JMULE_DOWNLOAD_PAGE+"\">"+_._("updaterwindow.label.download_link")+"</a>");
 		download_link.setVisible(false);
 		
 		download_link.addListener(SWT.Selection, new Listener() {
@@ -202,22 +203,23 @@ public class UpdaterWindow implements JMuleUIComponent {
 			}
 		});
 		
-
-		updateControls();
-		
 		shell.open();
 		
 		
 		long update_time = updater.getLastUpdateTime();
 		
-		if ((System.currentTimeMillis() - update_time) <= UPDATE_INTERVAL)
+		if ((System.currentTimeMillis() - update_time) <= UPDATE_INTERVAL) {
+			setWindowStatus(WindowStatus.CONNECTED);
 			return ;
+		}
+		
+		setWindowStatus(WindowStatus.CONNECTING);
 		
 		new JMThread(new JMRunnable() {
 			public void JMRun() {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
-						clearControls();
+						setWindowStatus(WindowStatus.CONNECTING);
 					}});
 				try {
 					updater.checkForUpdates();
@@ -225,28 +227,42 @@ public class UpdaterWindow implements JMuleUIComponent {
 					SWTThread.getDisplay().asyncExec(new JMRunnable() {
 						public void JMRun() {
 							Utils.showWarningMessage(shell, _._("updaterwindow.connect_failed_title"), _._("updaterwindow.connect_failed")+"\n"+updater.getErrorCode());
+							setWindowStatus(WindowStatus.FAILED);
 						}});
+					return ;
 				}
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
-						updateControls();
+						setWindowStatus(WindowStatus.CONNECTED);
 					}});
 			}
 		}).start();
 		
 	}
 
-	private void clearControls() {
-		changelog_text.setText("");
-		available_version.setText("");
-		last_update.setText("");
-		download_link.setVisible(false);
-		user_version.setForeground(green_color);
-	}
-	
-	private void updateControls() {
+	private void setWindowStatus(WindowStatus status) {
+		if (status == WindowStatus.CONNECTING) {
+			changelog_text.setText("");
+			available_version.setText(_._("updaterwindow.label.connecting"));
+			available_version.setForeground(connecting_color);
+			last_update.setText("");
+			download_link.setVisible(false);
+			user_version.setForeground(green_color);
+			return ;
+		}
+		if (status == WindowStatus.FAILED) {
+			changelog_text.setText("");
+			available_version.setText(_._("updaterwindow.label.failed"));
+			available_version.setForeground(red_color);
+			last_update.setText("");
+			download_link.setVisible(false);
+			user_version.setForeground(green_color);
+			return ;
+		}
+		
 		changelog_text.setText(updater.getChangeLog());
 		available_version.setText(updater.getVersion());
+		available_version.setForeground(green_color);
 		
 		long check_time = updater.getLastUpdateTime();
 		if (check_time != 0) {
@@ -264,6 +280,7 @@ public class UpdaterWindow implements JMuleUIComponent {
 			user_version.setForeground(green_color);
 			download_link.setVisible(false);
 		}
+		
 	}
 	
 	private String format(int value) {
