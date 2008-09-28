@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:15:30 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:21:02 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -61,9 +61,8 @@ public abstract class JMTable<T> extends Table {
 	protected List<BufferedTableRow> default_line_list = new LinkedList<BufferedTableRow>(); // Store default buffered controls for each line
 	
 	private List<List<Object>> default_custom_control_list = new LinkedList<List<Object>>();// Default custom controls on each line
-	
-	private Listener column_move_listener;
-	private Listener column_resize_listener;
+
+	private Listener column_data_save_listener;
 	protected SWTPreferences swt_preferences = SWTPreferences.getInstance();
 	protected boolean is_sorted = false;
 	protected int last_sort_column ;
@@ -77,13 +76,7 @@ public abstract class JMTable<T> extends Table {
 		setHeaderVisible(true);
 		setLinesVisible (false);
 		
-		column_move_listener = new Listener() {
-			public void handleEvent(Event arg0) {
-				saveColumnSettings();
-			}
-		};
-		
-		column_resize_listener = new Listener() {
+		column_data_save_listener = new Listener() {
 			public void handleEvent(Event arg0) {
 				saveColumnSettings();
 			}
@@ -161,8 +154,8 @@ public abstract class JMTable<T> extends Table {
 		table_column.setData(SWTConstants.COLUMN_DESC_KEY, columnDesc);
 		
 		table_column.setMoveable(true);
-		table_column.addListener(SWT.Move, column_move_listener);
-		table_column.addListener(SWT.Resize, column_resize_listener);
+		table_column.setResizable(true);
+		table_column.addListener(SWT.Resize, column_data_save_listener);
 		
 		Listener sort_listener = new Listener() {
 			private int sort_order = 0;
@@ -418,14 +411,13 @@ public abstract class JMTable<T> extends Table {
 		if (!isVisible()) return ;
 		int column_order[];
 		column_order = getColumnOrder();
-		for(int i = 0; i < this.getColumnCount(); i++ ) {
+		for(int i = 0; i < getColumnCount(); i++ ) {
 			int column_id = column_order[i];
 			TableColumn table_column = getColumn(column_id);
 			
 			int column_id2 = (Integer)table_column.getData(SWTConstants.COLUMN_NAME_KEY);
 			swt_preferences.setColumnOrder(column_id2, i);
-			if (!swt_preferences.isColumnVisible(column_id2)) 
-				if (table_column.getWidth()!=0)
+			if (swt_preferences.isColumnVisible(column_id2)) 
 					swt_preferences.setColumnWidth(column_id2, table_column.getWidth());
 		}
 	}
@@ -451,6 +443,15 @@ public abstract class JMTable<T> extends Table {
 		}
 		
 		return false;
+	}
+	
+	public List<T> getObjects() {
+		List<T> list = new LinkedList<T>();
+		for(BufferedTableRow row : line_list) {
+			T o = (T)row.getData(SWTConstants.ROW_OBJECT_KEY);
+			list.add(o);
+		}
+		return list;
 	}
 	
 	protected int getObjectID(T object) {
