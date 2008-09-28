@@ -73,8 +73,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Sep 16, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 13:28:24 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:28:04 $
  */
 public class NewWindow implements JMuleUIComponent {
 	public static enum WindowType { DOWNLOAD, SERVER, SHARED_DIR };
@@ -137,10 +137,14 @@ public class NewWindow implements JMuleUIComponent {
 		
 		final Shell shell1=new Shell(display,SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-		if	(type == WindowType.DOWNLOAD)
+		if	(type == WindowType.DOWNLOAD) {
 			shell.setText(_._("newwindow.title.download"));
-		else
+			shell.setImage(SWTImageRepository.getMenuImage("folder_down.png"));
+		}
+		else {
 			shell.setText(_._("newwindow.title.server"));
+			shell.setImage(SWTImageRepository.getMenuImage("server_add.png"));
+		}
 		shell.setSize(600, 300);
 		shell.setLayout(new GridLayout(1,false));
 		
