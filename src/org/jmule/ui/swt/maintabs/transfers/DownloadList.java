@@ -62,8 +62,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:08:24 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:25:32 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -422,14 +422,14 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		TableItemGapList painter = new TableItemGapList(SWTPreferences.getDefaultColumnOrder(SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID),gap_list_painter);
 		
 		addCustumControl(getItemCount()-1, painter);
-		
-		// updateRow(session);
 	}
 
 	public void refresh() {
 		redraw();
 		for(DownloadSession session : download_manager.getDownloads()) {
-			updateRow(session);
+			if (!hasObject(session)) continue;
+			if (getRow(session).isVisible())
+				updateRow(session);
 		}
 	}
 	

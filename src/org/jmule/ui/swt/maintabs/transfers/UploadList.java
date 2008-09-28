@@ -36,7 +36,6 @@ import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerListener;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.ui.localizer.Localizer;
-import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
 import org.jmule.ui.swt.SWTImageRepository;
@@ -54,8 +53,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:08:24 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:25:32 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -70,7 +69,6 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		super(composite, SWT.NONE);
 
 		upload_manager   = core.getUploadManager();
-		
 		
 		upload_manager.addUploadManagerListener(this);
 		
@@ -130,11 +128,9 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 			}
 		});
 		
-		
 		for(UploadSession session : upload_manager.getUploads()) {
 			if (session.sharingCompleteFile()) {
 				addRow(session);
-				updateRow(session);
 			}
 		}
 		
