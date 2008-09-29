@@ -22,10 +22,17 @@
  */
 package org.jmule.ui.swt.common;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.ui.swt.SWTThread;
@@ -33,20 +40,23 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:40:14 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:17:14 $$
  */
 public class GapListPainter {
 	
 	private GapList gap_list;
 	private long file_size;
 	
-    private static Color blue  = new Color(SWTThread.getDisplay(), new RGB(0, 128, 255));
-    private static Color green = new Color(SWTThread.getDisplay(), new RGB(72, 179, 72));
-    private static Color black = new Color(SWTThread.getDisplay(), new RGB(0, 0, 0));
-    private static Color white = new Color(SWTThread.getDisplay(), new RGB(255, 255, 255));
+	private static Color gaplist_border_color  = new Color(SWTThread.getDisplay(), new RGB(194, 194, 194));
+	private static Color gaplist_bg_color  = new Color(SWTThread.getDisplay(), new RGB(0, 128, 255)); // light blue
+    private static Color gaplist_fg_color = new Color(SWTThread.getDisplay(), new RGB(255, 255, 255)); // white
+    private static Color progress_bar_fg_color = new Color(SWTThread.getDisplay(), new RGB(0, 100, 199)); // dark blue
+    private static Color progress_bar_bg_color = new Color(SWTThread.getDisplay(), new RGB(255, 255, 255)); // white
+    private static Color separator_color = new Color(SWTThread.getDisplay(), new RGB(209,209,209));
+    
 	private static final int PROGRESS_BAR_HEIGHT = 3;
-	private int margin_width = 3;
+	private int margin_width = 4;
 		
 	public GapListPainter(GapList gapList,long fileSize) {
 		gap_list = gapList;
@@ -55,7 +65,7 @@ public class GapListPainter {
 	
 	public void setData(GapList gapList, long fileSize) {
 		gap_list = gapList;
-		file_size = fileSize;
+		file_size = fileSize ;
 	}
 	
 	public GapList getGapList() {
@@ -71,19 +81,20 @@ public class GapListPainter {
 	}
 	
 	public void draw(GC gc, int x,int y, int width, int height) {
-		width -=margin_width;
-		height -= margin_width;
-		x+=margin_width;
-		y+=margin_width;
+		
+		width  = width  - margin_width - 3;
+		height = height - margin_width - 2;
+		x += margin_width;
+		y += margin_width;
+		
 		float k = (float)(width)/(float)(file_size);
 		//Gaps
-		
-		gc.setBackground(blue);
+		gc.setBackground(gaplist_bg_color);
 		gc.fillRectangle(new Rectangle(x,y,width,height));
-		gc.setBackground(white);
+		gc.setBackground(gaplist_fg_color);
 		for(Gap gap : gap_list.getGaps()) {
-			int startPos = (int)(gap.getStart()*k);
-			int length = (int)((gap.getEnd() - gap.getStart()) * k);
+			int startPos = Math.round((float)(gap.getStart() * k));
+			int length = Math.round((float)((gap.getEnd() - gap.getStart()) * k));
 			Rectangle rect = new Rectangle(x + startPos,y + 0,length,height);
 			gc.fillRectangle(rect);
 		}
@@ -92,11 +103,51 @@ public class GapListPainter {
 		long progress = Math.round(((downloaded* 100f)/ (float) file_size));
 		k = (float)(width)/100f;
 		Rectangle progress_bar = new Rectangle(x, y,(int)( width), PROGRESS_BAR_HEIGHT);
-		gc.setBackground(black);
+		gc.setBackground(progress_bar_bg_color);
 		gc.fillRectangle(progress_bar);
 		progress_bar = new Rectangle(x,y,(int)(progress* k),PROGRESS_BAR_HEIGHT);
-		gc.setBackground(green);
+		gc.setBackground(progress_bar_fg_color);
 		gc.fillRectangle(progress_bar);
+		
+		gc.setForeground(separator_color);
+		gc.drawLine(x,y + PROGRESS_BAR_HEIGHT,x + width, y + PROGRESS_BAR_HEIGHT);
+		
+		gc.setForeground(gaplist_border_color);
+		gc.drawRectangle(x, y, width, height);
+	}
+	static Shell shell;
+	static GapListPainter gap_list_painter;
+	public static void main(String... args) {
+		Display display = Display.getCurrent();
+		shell = new Shell(display);
+		GapList gap_list = new GapList();
+		gap_list.addGap(70, 90);
+		gap_list.addGap(1, 20);
+		gap_list.addGap(25, 40);
+		gap_list_painter = new GapListPainter(gap_list,100); 
+		FillLayout layout = new FillLayout();
+		layout.marginHeight = 10;
+		layout.marginWidth  = 10;
+		shell.setLayout(layout);
+		final Canvas canvas = new Canvas(shell,SWT.NONE);
+		
+		canvas.addPaintListener(new PaintListener() {
+			public void paintControl(PaintEvent arg0) {
+				System.out.println(arg0.width+" : " + arg0.height);
+				gap_list_painter.draw(arg0.gc, 0, 0, arg0.width, arg0.height);
+			}
+		});
+		
+		shell.setSize(500,100);
+		shell.open();
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+		display.dispose();
+
+		
+		
 	}
 	
 }
