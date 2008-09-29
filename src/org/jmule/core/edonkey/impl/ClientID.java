@@ -27,8 +27,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/27 13:28:18 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:11:06 $$
  */
 public class ClientID {
 	
@@ -60,6 +60,10 @@ public class ClientID {
 		
 	}
 
+	public String getAsString() {
+		return Convert.byteToInt(data[0])+"."+Convert.byteToInt(data[1])+"."+Convert.byteToInt(data[2])+"."+Convert.byteToInt(data[3]);
+	}
+	
 	public String toString() {
 		
 		return Convert.intToLong( hashCode() ) + "";

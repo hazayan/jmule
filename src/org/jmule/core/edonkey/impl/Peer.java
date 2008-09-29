@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 17:13:35 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:12:39 $$
  */
 public class Peer extends JMConnection {
 	
@@ -103,7 +103,7 @@ public class Peer extends JMConnection {
 	public Peer(String remoteAddress, int remotePort,Server connectedServer) {
 		
 		super();
-		
+	
 		super.setAddress(remoteAddress, remotePort);
 		
 		this.connectedServer = connectedServer;
@@ -118,7 +118,9 @@ public class Peer extends JMConnection {
 		
 		this.clientID = clientID;
 		
-		this.setAddress(clientID+"", remotePort);
+		
+		
+		this.setAddress(clientID.getAsString(), remotePort);
 		
 		this.connectedServer = connectedServer;
 
@@ -132,7 +134,7 @@ public class Peer extends JMConnection {
 		
 		this.clientID = clientID;
 		
-		this.setAddress(clientID+"", remotePort);
+		this.setAddress(clientID.getAsString(), remotePort);
 		
 		this.connectedServer = connectedServer;
 		
