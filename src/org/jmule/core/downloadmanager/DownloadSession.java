@@ -85,14 +85,16 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:31:19 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:13:26 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
 	public final static int STATUS_STARTED = 0x01;
 	
 	public final static int STATUS_STOPPED = 0x02;
+	
+	private final static int PEER_MONITOR_INTERVAL =  1000;
 	
 	private PartialFile sharedFile;
 
@@ -1002,7 +1004,7 @@ public class DownloadSession implements JMTransferSession {
 			while(!stop) {
 
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(PEER_MONITOR_INTERVAL);
 				} catch (InterruptedException e) {
 					if (stop) return ;
 					continue;
@@ -1038,8 +1040,6 @@ public class DownloadSession implements JMTransferSession {
 					}
 					
 				}
-				
-			//	activateUnusedPeers(); //Use for TESTING ONLY!
 				
 				}
 				
