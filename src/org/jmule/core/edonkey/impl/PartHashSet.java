@@ -30,8 +30,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:35 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:11:47 $$
  */
 public class PartHashSet extends LinkedList<byte[]> {
 	
@@ -70,6 +70,14 @@ public class PartHashSet extends LinkedList<byte[]> {
 		
 		return super.get(partID);
 		
+	}
+	
+	public boolean isEmpty() {
+		for(byte[] hashSet : this) {
+			for(int i = 0; i<hashSet.length;i++)
+				if (hashSet[i] != 0) return false;
+		}
+		return true;
 	}
 	
 	public String toString() {
