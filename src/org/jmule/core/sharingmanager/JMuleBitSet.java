@@ -29,8 +29,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:01 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/30 16:35:48 $$
  */
 public class JMuleBitSet extends BitSet {
 	private int partCount;
@@ -56,6 +56,14 @@ public class JMuleBitSet extends BitSet {
 			byteArray[i] = rawData[i];
 		
 		return byteArray;
+	}
+	
+	public int getBitCount(boolean value) {
+		int count = 0;
+		for(int i = 0;i<size();i++)
+			if (get(i) == value)
+				count++;
+		return count;
 	}
 	
 	public String toString() {
