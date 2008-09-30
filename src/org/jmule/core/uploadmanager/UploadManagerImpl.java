@@ -39,8 +39,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:43:55 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/30 14:30:04 $$
  */
 public class UploadManagerImpl implements UploadManager {
 
@@ -144,5 +144,9 @@ public class UploadManagerImpl implements UploadManager {
 		return new JMIterable<UploadSession>(session_list.values().iterator());
 	}
 
+	public int getUploadCount() {
+		
+		return session_list.size();
+	}
 
 }

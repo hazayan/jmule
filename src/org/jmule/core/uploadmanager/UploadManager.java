@@ -29,8 +29,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:48 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/09/30 14:30:04 $$
  */
 public interface UploadManager extends JMuleManager{
 
@@ -44,16 +44,10 @@ public interface UploadManager extends JMuleManager{
 	
 	public JMIterable<UploadSession> getUploads();
 	
-	/**
-	 * Add new Uplopad Manager listener.
-	 * @param listener
-	 */
+	public int getUploadCount();
+	
 	public void addUploadManagerListener(UploadManagerListener listener);
 	
-	/**
-	 * Remove Upload Manager listener.
-	 * @param listener
-	 */
 	public void removeUploadMaanagerListener(UploadManagerListener listener);
 	
 }
