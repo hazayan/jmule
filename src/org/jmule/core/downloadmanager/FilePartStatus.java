@@ -32,13 +32,16 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * and count total availability of the file in the network.
  * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:08 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/30 16:42:43 $$
  */
 public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 	private int partCount;
 	private int partAvailability[];
-		
+	
+	private int complete_sources = 0;
+	private int partial_sources  = 0;
+	
 	public FilePartStatus(int partCount) {
 		if (partCount==0) partCount++;
 		this.partCount = partCount;
@@ -46,17 +49,17 @@ public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 	}
 	
 	public boolean hasStatus(Peer peer) {
-		return super.get(peer)!=null;
+		return get(peer)!=null;
 	}
 	
 	public String toString() {
 		String result ="";
 		
-		for(int i = 0;i <this.keySet().size();i++) {
-			Peer p = (Peer)this.keySet().toArray()[i];
+		for(int i = 0;i <keySet().size();i++) {
+			Peer p = (Peer)keySet().toArray()[i];
 			result += "{ ";
 			result+= p.getAddress()+" : "+p.getPort()+" ";
-			result+=" BitSet :  " +this.get(p);
+			result+=" BitSet :  " +get(p);
 			result +=" } ";
 		}
 		
@@ -65,41 +68,64 @@ public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 	
 	public synchronized void addPartStatus(Peer peer,JMuleBitSet partStatus) {
 		try {
-		if (this.hasStatus(peer)) {
-			this.removePartStatus(peer);
-		}
-		super.put(peer, partStatus);
-		this.UpdateTotalAvailability(partStatus, true);
+			if (hasStatus(peer))
+				removePartStatus(peer);
+			if (partStatus.getBitCount(true) == partCount)
+				complete_sources++;
+			else
+				partial_sources++;
+			super.put(peer, partStatus);
+			UpdateTotalAvailability(partStatus, true);
 		}catch(Exception e ){
 			e.printStackTrace();
 		}
 	}
 	
 	public void removePartStatus(Peer peer){
-		if (this.hasStatus(peer)) {
-			JMuleBitSet bitSet = super.get(peer);
+		if (hasStatus(peer)) {
+			JMuleBitSet bit_set = get(peer);
+			if (bit_set.getBitCount(true) == partCount)
+				complete_sources--;
+			else
+				partial_sources--;
 			super.remove(peer);
-			this.UpdateTotalAvailability(bitSet, false);
+			UpdateTotalAvailability(bit_set, false);
 		}
 	}
 	
+	public void clear() {
+		super.clear();
+		complete_sources = 0;
+		partial_sources = 0;
+	}
+	
 	public int[] getPartAvailibility(){
-		return this.partAvailability.clone();
+		return partAvailability;
 	}
 	
 	private void UpdateTotalAvailability(JMuleBitSet bitSet,boolean add) {
-		if (bitSet.getPartCount()!=this.partCount) {
+		if (bitSet.getPartCount() != partCount) {
 			return ;
 		}
 		
 		for(int i = 0;i<bitSet.getPartCount();i++) {
 			if (bitSet.get(i)) 
-				if (add) this.partAvailability[i]++;
-				else this.partAvailability[i]--;
+				if (add) 
+					partAvailability[i]++;
+				else 
+					partAvailability[i]--;
 		}
 	}
 
 	public int getPartCount() {
 		return partCount;
+	}
+
+	public int getCompletedSources() {
+		return complete_sources;
+	}
+
+	public int getPartialSources() {
+		return partial_sources;
 	}
 }
