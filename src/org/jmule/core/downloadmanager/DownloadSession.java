@@ -54,7 +54,6 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.impl.Server;
-import org.jmule.core.edonkey.packet.EMulePacketFactory;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
@@ -85,8 +84,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:13:26 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/30 16:45:50 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -115,8 +114,6 @@ public class DownloadSession implements JMTransferSession {
 	/**Request downloading information from server*/
 	
 	private SourcesQueryThread queryThread;
-	
-	private SlotRequestThread slotRequestThread;
 	
 	private PeersMonitor peers_monitor;
 	
@@ -251,6 +248,8 @@ public class DownloadSession implements JMTransferSession {
 		
 		peer_list.clear();
 		download_status_list.clear();
+		partStatus.clear();
+		fileRequestList.clear();
 		for (Peer peer : connecting_peers) {
 			if (peer.getSessionList()!=null)
 					peer.getSessionList().removeSession(this);
@@ -333,6 +332,7 @@ public class DownloadSession implements JMTransferSession {
 			if (peer_list.contains(peer)) {
 				fileRequestList.remove(peer);
 				download_status_list.removePeer(peer);
+				partStatus.removePartStatus(peer);
 				PeerSessionList list = peer.getSessionList();
 				if (list != null)
 					list.removeSession(this);
@@ -345,12 +345,10 @@ public class DownloadSession implements JMTransferSession {
 		
 		if ((download_status_list==null) ||(status.getPeerStatus() != PeerDownloadStatus.IN_QUEUE)) {
 			// if peer is not in queue - totally remove
+			partStatus.removePartStatus(peer);
 			fileRequestList.remove(peer);
-			
 			peer_list.remove(peer);
-			
 			download_status_list.removePeer(peer);
-			
 			peer.getSessionList().removeSession(this);
 			return ;
 		}
@@ -415,12 +413,6 @@ public class DownloadSession implements JMTransferSession {
 				
 				return;
 			}
-			// packet already sent
-		//	Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
-			
-		//	sender.sendPacket(sendPacket);
-			
-//			download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
 			
 			return ;
 		}
@@ -451,23 +443,6 @@ public class DownloadSession implements JMTransferSession {
 					return;
 				} 
 			}
-			// packet already sent
-//			Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
-				
-//			sender.sendPacket(sendPacket);
-				
-//			download_status_list.setPeerStatus(sender, PeerDownloadStatus.UPLOAD_REQUEST);
-				
-//			List<PeerDownloadStatus> status_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST);
-				
-//			for(PeerDownloadStatus peer_status : status_list) {
-//					
-//				peer_status.getPeer().sendPacket(PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash()));
-//			
-//				peer_status.setPeerStatus(PeerDownloadStatus.UPLOAD_REQUEST);
-//					
-//				}
-			
 			return;
 		}
 		
@@ -489,17 +464,6 @@ public class DownloadSession implements JMTransferSession {
 				completeDownload();
 				
 				} else {
-					// Re request download
-//					List<PeerDownloadStatus> status_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST);
-//					
-//					for(PeerDownloadStatus peer_status : status_list) {
-//						
-//						peer_status.getPeer().sendPacket(PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash()));
-//						
-//						peer_status.setPeerStatus(PeerDownloadStatus.UPLOAD_REQUEST);
-//						
-//					}
-				
 				}
 			
 			fileChunkRequest(sender);
@@ -631,17 +595,17 @@ public class DownloadSession implements JMTransferSession {
 		
 		/** Queue peers for sources **/
 		
-		List<Peer> peerList = PeerManagerFactory.getInstance().getPeers(getFileHash());
+		//List<Peer> peerList = PeerManagerFactory.getInstance().getPeers(getFileHash());
 		
-		for(Peer p : peerList) {
+		//for(Peer p : peerList) {
 			
-			if (p.getStatus() == Peer.TCP_SOCKET_CONNECTED) {
+		//	if (p.getStatus() == Peer.TCP_SOCKET_CONNECTED) {
 				
-				Packet packet = EMulePacketFactory.getSourcesRequestPacket(sharedFile.getFileHash());
+				//Packet packet = EMulePacketFactory.getSourcesRequestPacket(sharedFile.getFileHash());
 				
 				//p.sendPacket(packet);
-			}
-		}
+		//	}
+		//}
 		
 	}
 	
@@ -904,6 +868,18 @@ public class DownloadSession implements JMTransferSession {
 		peer.sendPacket(status.getLastFilePartRequest());
 	}
 
+	public int getCompletedSources() {
+		return partStatus.getCompletedSources();
+	}
+	
+	public int getPartialSources() {
+		return partStatus.getPartialSources();
+	}
+	
+	public int getUnknownSources() {
+		return getPeersCount() - (getCompletedSources() + getPartialSources());
+	}
+	
 	/** Query for sources **/
 	
 	private class SourcesQueryThread extends JMThread {
