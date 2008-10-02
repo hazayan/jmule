@@ -33,7 +33,6 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.edonkey.impl.Server;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.Refreshable;
@@ -44,8 +43,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:00:33 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:09:28 $$
  */
 public class ConnectionInfo extends CTabFolder implements Refreshable {
 
@@ -61,16 +60,13 @@ public class ConnectionInfo extends CTabFolder implements Refreshable {
 		super(parent,SWT.BORDER);
 		_core = core;
 		SWTServerListWrapper.getInstance().setConnectionInfo(this);
-		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
 			
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
 		
 		}catch(Throwable t) {
 		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
 		setSimple(false);
 		
@@ -80,10 +76,7 @@ public class ConnectionInfo extends CTabFolder implements Refreshable {
 		server_info = new CTabItem(this, SWT.NONE);
 		server_info.setText(Localizer._("mainwindow.serverlisttab.connectioninfo.serverinfo"));
 		
-		this.setSelection(my_info);
-		
-		//ScrolledContent my_info_scroll = new ScrolledContent(this);
-		//my_info.setControl(my_info_scroll);
+		setSelection(my_info);
 
 		Composite my_info_content = new Composite(this,SWT.NONE);
 		my_info.setControl(my_info_content);
@@ -259,7 +252,7 @@ public class ConnectionInfo extends CTabFolder implements Refreshable {
 		long client_id = Convert.intToLong(server.getClientID().hashCode());
         my_info_client_id.setText(client_id + " " + (server.getClientID().isHighID() ? Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.high_id") : Localizer._("mainwindow.serverlisttab.connectioninfo.myinfo.low_id") ));
         my_info_client_id.setToolTipText("");
-        my_info_user_ip.setText(server.getClientID() + "");
+        my_info_user_ip.setText(server.getClientID().getAsString() + "");
         
         server_address.setText(server.getAddress() + ":" + server.getPort());
         server_name.setText(server.getName());
