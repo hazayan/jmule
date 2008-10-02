@@ -40,8 +40,6 @@ import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.countrylocator.CountryLocator;
-import org.jmule.ui.JMuleUI;
-import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.UICommon;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -51,7 +49,6 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.common.CountryFlagPainter;
-import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.swt.tables.TableItemCountryFlag;
 import org.jmule.ui.utils.PeerInfoFormatter;
@@ -61,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:26:32 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 06:25:15 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -77,14 +74,8 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 		upload_session = uploadSession;
 		
 		setText(Localizer._("uploadinfowindow.tab.peerlist.title"));
-		JMuleUI ui_instance = null;
-		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
-		}catch(Throwable t) {
-		}
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
-		Composite content = new Composite(tabFolder,SWT.BORDER);
+		Composite content = new Composite(tabFolder,SWT.NONE);
 		setControl(content);
 		content.setLayout(new GridLayout(1,true));
 		peers_table =  new UploadPeerList(content);
