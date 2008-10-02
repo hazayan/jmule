@@ -50,7 +50,6 @@ import static org.jmule.core.edonkey.E2DKConstants.SUPPORTED_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.ServerSoftwareVersion;
 import static org.jmule.core.edonkey.E2DKConstants.SoftwareVersion;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_FILE_TYPE;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS1;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS2;
@@ -86,8 +85,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:32 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 08:12:35 $$
  */
 public class PacketFactory {
 	
