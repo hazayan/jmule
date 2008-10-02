@@ -51,8 +51,8 @@ import org.jmule.ui.utils.NightlyBuildWarning;
 /**
  * Created on Sep 19, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:06:20 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 08:00:11 $
  */
 public class NightlyBuildWarningWindow implements JMuleUIComponent {
 
@@ -65,9 +65,7 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		SWTSkin skin = null;
 		try {
 			skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
-		}catch(Throwable t) {
-			
-		}
+		}catch(Throwable t) {}
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.BORDER );
@@ -106,16 +104,23 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 			}
 		};
 		
-		Link window_message2 = new Link(shell,SWT.NONE);
+		Composite container = new Composite(shell,SWT.NONE);
+		container.setLayout(new GridLayout(2,false));
+		container.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
+		
+		Label window_message2 = new Label(container,SWT.NONE);
 		window_message2.setFont(skin.getLabelFont());
 		grid_data = new GridData();
 		grid_data.grabExcessHorizontalSpace = true;
 		grid_data.horizontalAlignment = GridData.CENTER;
 		window_message2.setLayoutData(grid_data);
 		window_message2.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
-		window_message2.setText(_._("nightlybuildwarningwindow.label.message2")+" <a href=\""+JMConstants.JMULE_FORUMS+"\">"+_._("nightlybuildwarningwindow.label.forum")+"</a>");
+		window_message2.setText(_._("nightlybuildwarningwindow.label.message2"));
 		
-		window_message2.addListener(SWT.Selection, link_listener);
+		Link link = new Link(container,SWT.NONE);
+		link.setFont(skin.getLabelFont());
+		link.setText("<a href=\""+JMConstants.JMULE_FORUMS+"\">"+_._("nightlybuildwarningwindow.label.forum")+"</a>");
+		link.addListener(SWT.Selection, link_listener);
 		
 		Composite controls_composite = new Composite(shell,SWT.NONE);
 		grid_data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_END);
