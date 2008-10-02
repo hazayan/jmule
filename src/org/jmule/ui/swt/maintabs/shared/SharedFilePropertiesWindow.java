@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -52,8 +51,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 18, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 06:11:28 $
  */
 public class SharedFilePropertiesWindow implements JMuleUIComponent {
 
@@ -67,16 +66,11 @@ public class SharedFilePropertiesWindow implements JMuleUIComponent {
 	}
 	
 	public void getCoreComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-			
-		    ui_instance = JMuleUIManager.getJMuleUI();
-		
+		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {
 		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
-		
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);

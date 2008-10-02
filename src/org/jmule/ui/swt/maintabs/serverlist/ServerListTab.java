@@ -28,8 +28,6 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.jmule.core.JMuleCore;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.GUIUpdater;
@@ -40,8 +38,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:47:13 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
  */
 public class ServerListTab extends AbstractTab {
 
@@ -50,8 +48,6 @@ public class ServerListTab extends AbstractTab {
 	private Composite server_table_panel;
 	
 	private ConnectionInfo connection_info;
-	
-	private ServerMessages server_messages_text;
 	
 	private ServerList server_list;
 	
@@ -62,16 +58,12 @@ public class ServerListTab extends AbstractTab {
 		
 		super(shell);
 	
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
 			
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		
-		}catch(Throwable t) {
-		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
-		
+		}catch(Throwable t) {}
 		FormLayout form = new FormLayout ();
 		setLayout (form);
 		
@@ -102,7 +94,7 @@ public class ServerListTab extends AbstractTab {
 		server_list = new ServerList(server_list_group,core.getServerManager());
 		
 		//Server Messages
-		server_messages_text = new ServerMessages(server_messages);
+		new ServerMessages(server_messages);
 		
 		connection_info = new ConnectionInfo(peer_info,core);
 		

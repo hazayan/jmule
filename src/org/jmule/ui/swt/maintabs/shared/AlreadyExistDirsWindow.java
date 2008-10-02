@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -45,8 +44,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 06:11:28 $
  */
 public class AlreadyExistDirsWindow implements JMuleUIComponent {
 
@@ -62,16 +61,12 @@ public class AlreadyExistDirsWindow implements JMuleUIComponent {
 	}
 
 	public void initUIComponents() {
-		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
 			
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
 		
-		}catch(Throwable t) {
-		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		}catch(Throwable t) {}
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
@@ -81,6 +76,7 @@ public class AlreadyExistDirsWindow implements JMuleUIComponent {
 		shell.setLayout(new GridLayout(1,false));
 		
 		Label info = new Label(shell,SWT.NONE);
+		info.setFont(skin.getLabelFont());
 		info.setText(_._("alreadyexistdirswindow.label.info"));
 		
 		List file_list = new List(shell,SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);

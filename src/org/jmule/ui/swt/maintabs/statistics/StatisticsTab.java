@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.jmule.core.statistics.JMuleCoreStats;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.GUIUpdater;
@@ -56,8 +55,8 @@ import sun.management.ManagementFactory;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:23:25 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
  */
 public class StatisticsTab extends AbstractTab{
 
@@ -138,15 +137,12 @@ public class StatisticsTab extends AbstractTab{
 			}
 		};
 		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
 			
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
 		
-		}catch(Throwable t) {
-		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		}catch(Throwable t) {}
 		
 		Composite content;
 		GridData layout_data;

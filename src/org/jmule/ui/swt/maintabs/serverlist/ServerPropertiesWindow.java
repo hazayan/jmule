@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.countrylocator.CountryLocator;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.UICommon;
@@ -53,8 +52,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:49:00 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
  */
 public class ServerPropertiesWindow implements JMuleUIComponent,Refreshable {
 
@@ -72,13 +71,11 @@ public class ServerPropertiesWindow implements JMuleUIComponent,Refreshable {
 	}
 
 	public void initUIComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {
 		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);

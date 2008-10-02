@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
@@ -42,19 +41,17 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:49:40 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
  */
 public class ServerMessages extends Text {
 
 	public ServerMessages(Composite composite) {
 		super(composite,SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
-		}catch(Throwable t) {
-		}
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
+		}catch(Throwable t) {}
 		
 		setFont(skin.getDefaultFont());
 		setEditable(false);
