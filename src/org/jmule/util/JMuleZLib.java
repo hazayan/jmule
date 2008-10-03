@@ -31,17 +31,19 @@ import java.util.zip.Inflater;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:06:05 $$
  */
 public class JMuleZLib{
 
+	private static int BLOCK_SIZE = 1000;
+	
 	public static ByteBuffer compressData(ByteBuffer inputData) {
 		
 		Deflater compressor = new Deflater();
 		
 		compressor.setInput(inputData.array());
-		
+		compressor.finish();
 		long capacity = 0;
 		
 		int byte_count = 0;
@@ -49,11 +51,12 @@ public class JMuleZLib{
 		Vector<ByteBuffer> vector = new Vector<ByteBuffer>();
 		
 		do {
-			
-			ByteBuffer tmpData = Misc.getByteBuffer(1000);
+			ByteBuffer tmpData = Misc.getByteBuffer(BLOCK_SIZE);
 			
 			byte_count = compressor.deflate(tmpData.array());
 		
+			if (byte_count == 0) break;
+			
 			tmpData.limit(byte_count);
 			
 			vector.add(tmpData);
@@ -62,12 +65,13 @@ public class JMuleZLib{
 			
 		} while (byte_count != 0);
 		
+		compressor.end();
+		
 		ByteBuffer outputData = Misc.getByteBuffer(capacity);
 		
 		for(ByteBuffer buffer : vector) {
-			
+			buffer.position(0);
 			outputData.put(buffer.array(), 0, buffer.limit());
-			
 		}
 		
 		return outputData;
@@ -100,7 +104,7 @@ public class JMuleZLib{
 			
 		} while(byte_count !=0 );
 		
-		
+		decompressor.end();
 		
 		ByteBuffer outputBuffer = Misc.getByteBuffer(capacity);
 		
