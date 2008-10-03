@@ -71,6 +71,7 @@ import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.edonkey.packet.impl.EMuleCompressedPacket;
 import org.jmule.core.edonkey.packet.impl.StandardPacket;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagFactory;
@@ -85,8 +86,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 08:12:35 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:30:24 $$
  */
 public class PacketFactory {
 	
@@ -457,7 +458,7 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
      */
-    public static Packet getOfferFilePacket(ClientID userID) {
+    public static Packet getOfferFilesPacket(ClientID userID) {
     	JMIterable<SharedFile> fileList = SharingManagerFactory.getInstance().getSharedFiles();
     	int sharedCount = 0;
     	List<ByteBuffer> shared_files_data = new LinkedList<ByteBuffer>();
@@ -491,14 +492,21 @@ public class PacketFactory {
     		i++;
     	}
     	
-    	Packet packet = new StandardPacket(4+enLen);
+    	StandardPacket packet = new StandardPacket(4+enLen);
     	packet.setCommand(OP_OFFERFILES);
     	packet.insertData(sharedCount);
     	
     	for(ByteBuffer buffer : shared_files_data)
     		packet.insertData(buffer.array());
     	
-    	return packet;
+    	EMuleCompressedPacket compressed_packet = new EMuleCompressedPacket(packet);
+    	compressed_packet.compressPacket();
+    	if (packet.getLength()<compressed_packet.getLength()) {
+    		compressed_packet.clear();
+    		return packet;
+    	}
+    	packet.clear();
+    	return compressed_packet;
     }
     
 	 // =======================
