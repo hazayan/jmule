@@ -30,36 +30,36 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:43 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:07:49 $$
  */
 public class AbstractPacket {
 	
-	protected ByteBuffer dataPacket = null;
+	protected ByteBuffer packet_data = null;
 
 	public void clear() {
 		
-		if (dataPacket==null) return ;
+		if (packet_data==null) return ;
 		
-		dataPacket.clear();
+		packet_data.clear();
 		
-		dataPacket.compact();
+		packet_data.compact();
 		
-		dataPacket.rewind();
+		packet_data.rewind();
 		
-		dataPacket.limit(0);
+		packet_data.limit(0);
 		
 	}
 	
 	public String toString() {
 		
-		return Convert.byteToHexString(dataPacket.array()," 0x");
+		return Convert.byteToHexString(packet_data.array()," 0x");
 		
 	}
 	
 	public void setCommand(byte packetCommand) {
 		
-		this.dataPacket.put(5, packetCommand);
+		packet_data.put(5, packetCommand);
 		
 	}
 
@@ -67,7 +67,7 @@ public class AbstractPacket {
 		
 		try {
 			
-		return this.dataPacket.get(5);
+		return packet_data.get(5);
 		
 		}catch(Exception e ){
 			
@@ -79,91 +79,91 @@ public class AbstractPacket {
 
 	public void setProtocol(byte packetType) {
 		
-		dataPacket.put(0,packetType);
+		packet_data.put(0,packetType);
 		
 	}
 	
 	public byte getProtocol() {
 		
-		return dataPacket.get(0);
+		return packet_data.get(0);
 		
 	}
 
 	public void insertData(byte[] insertData) {
 		
-		dataPacket.put(insertData);
+		packet_data.put(insertData);
 		
 	}
 
 	public void insertData(int startPos, byte[] insertData) {
 		
-		dataPacket.position(startPos);
+		packet_data.position(startPos);
 		
-		dataPacket.put(insertData);
+		packet_data.put(insertData);
 		
 	}
 	
 	public void insertData(ByteBuffer insertData) {
 		
-		dataPacket.put(insertData);
+		packet_data.put(insertData);
 		
 	}
 	
 	public void insertData(int startPos,ByteBuffer insertData) {
 		
-		dataPacket.position(startPos);
+		packet_data.position(startPos);
 		
-		dataPacket.put(insertData.array());
+		packet_data.put(insertData.array());
 		
 	}
 
 	public void insertData(int insertData) {
 		
-		dataPacket.putInt(insertData);
+		packet_data.putInt(insertData);
 		
 	}
 
 	public void insertData(short insertData) {
 		
-		dataPacket.putShort(insertData);
+		packet_data.putShort(insertData);
 		
 	}
 
 	public void insertData(byte insertData) {
 		
-		dataPacket.put(insertData);
+		packet_data.put(insertData);
 		
 	}
 
 	public byte[] getPacket() {
 		
-		return dataPacket.array();
+		return packet_data.array();
 		
 	}
 
 	public ByteBuffer getAsByteBuffer() {
 		
-		return dataPacket;
+		return packet_data;
 		
 	}
 
 	public int getLength() {
 		
-		return dataPacket.capacity();
+		return packet_data.capacity();
 		
 	}
 	
     public FileHash getFileHash() {
     	
-    	int iPos = dataPacket.position();
+    	int iPos = packet_data.position();
     	
     	byte[] data = new byte[16];
     	
-    	dataPacket.position(1+4+1);
+    	packet_data.position(1+4+1);
     	
-    	dataPacket.get(data);
+    	packet_data.get(data);
     	
-    	dataPacket.position(iPos);
+    	packet_data.position(iPos);
     	
     	return new FileHash(data);
     }

@@ -36,12 +36,13 @@ import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMFloodException;
 import org.jmule.core.net.JMuleSocketChannel;
+import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:11:59 $$
  */
 public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 
@@ -49,12 +50,11 @@ public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 	}
 	
 	public EMuleExtendedTCPPacket(int packetLength) {
-		dataPacket = ByteBuffer.allocate(packetLength+1+4+1);
-		dataPacket.order(ByteOrder.LITTLE_ENDIAN);
-		
-		dataPacket.put(PROTO_EMULE_EXTENDED_TCP);
-		dataPacket.putInt(packetLength+1);
-		dataPacket.put((byte)0);
+		packet_data = Misc.getByteBuffer(packetLength+1+4+1);
+		packet_data.position(0);
+		packet_data.put(PROTO_EMULE_EXTENDED_TCP);
+		packet_data.putInt(packetLength+1);
+		packet_data.put((byte)0);
 	}
 	
 	
@@ -68,10 +68,10 @@ public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 			throw new EMulePacketException("Wrong packet type");
 		
 		short queueRanking=0;
-		int iPos = dataPacket.position();
-		dataPacket.position(1+4+1);
-		queueRanking = dataPacket.getShort();
-		dataPacket.position(iPos);
+		int iPos = packet_data.position();
+		packet_data.position(1+4+1);
+		queueRanking = packet_data.getShort();
+		packet_data.position(iPos);
 		return queueRanking;
 	}
 
@@ -86,20 +86,19 @@ public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 	 * @throws JMEndOfStreamException 
 	 */
 	public void  readPacket(JMuleSocketChannel connection)throws IOException, JMEndOfStreamException, InterruptedException,JMFloodException {
-		this.clear();
-		ByteBuffer packetLength=ByteBuffer.allocate(4);
-		packetLength.order(ByteOrder.LITTLE_ENDIAN);
+		clear();
+		ByteBuffer packetLength = Misc.getByteBuffer(4);
 		
 		connection.read(packetLength);
 		int pkLength = packetLength.getInt(0);
 		if (pkLength>ConfigurationManager.MAX_PACKET_SIZE) 
 			throw new JMFloodException("Packet length is too big, packet length : "+pkLength);
 		
-		dataPacket=ByteBuffer.allocate(pkLength+1+4+1);
-		dataPacket.order(ByteOrder.LITTLE_ENDIAN);
-		dataPacket.put(PROTO_EMULE_EXTENDED_TCP);
-		dataPacket.putInt(pkLength+1);//Put length +1 to write command byte
-		dataPacket.put((byte)0);//Put default command
+		packet_data=ByteBuffer.allocate(pkLength+1+4+1);
+		packet_data.order(ByteOrder.LITTLE_ENDIAN);
+		packet_data.put(PROTO_EMULE_EXTENDED_TCP);
+		packet_data.putInt(pkLength+1);//Put length +1 to write command byte
+		packet_data.put((byte)0);//Put default command
 		ByteBuffer defaultData = PacketReader.readBytes(connection, pkLength);
 		this.insertData(5,defaultData.array());
 	}

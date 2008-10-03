@@ -76,8 +76,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:52:24 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:08:26 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -86,15 +86,15 @@ public class StandardPacket extends AbstractPacket implements Packet {
 	
 	public StandardPacket(int packetLength) {
 		
-		dataPacket=ByteBuffer.allocate(packetLength+1+4+1);
+		packet_data=ByteBuffer.allocate(packetLength+1+4+1);
 		
-		dataPacket.order(ByteOrder.LITTLE_ENDIAN);
+		packet_data.order(ByteOrder.LITTLE_ENDIAN);
 		
-		dataPacket.put(PROTO_EDONKEY_TCP);
+		packet_data.put(PROTO_EDONKEY_TCP);
 		
-		dataPacket.putInt(packetLength+1);//Put length +1 to write command byte
+		packet_data.putInt(packetLength+1);//Put length +1 to write command byte
 		
-		dataPacket.put((byte)0);//Put default command
+		packet_data.put((byte)0);//Put default command
 	}
 	
 	/** 
@@ -111,9 +111,9 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			
 			ClientID id;
 			
-			dataPacket.position(6);
+			packet_data.position(6);
 			
-			dataPacket.get(b);
+			packet_data.get(b);
 			
 			id = new ClientID((b));
 			
@@ -137,7 +137,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
 		}
 		try {
 			
-			return dataPacket.getInt(6);
+			return packet_data.getInt(6);
 			
 		}catch(Exception e){
 			throw new PacketException("Failed to extract NumUsers data from packet : "+this);
@@ -156,7 +156,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
 		}
 		try {
 			
-			return dataPacket.getInt(10);
+			return packet_data.getInt(10);
 			
 		} catch (Exception e) {
 			
@@ -179,13 +179,13 @@ public class StandardPacket extends AbstractPacket implements Packet {
 		
 		try {
 			
-			short msgLen = dataPacket.getShort(6);
+			short msgLen = packet_data.getShort(6);
 			
 			String srvMsg = "";
 			
 			for (int i = 0; i < msgLen; i++)
 				
-				srvMsg = srvMsg + (char) dataPacket.get(8 + i);
+				srvMsg = srvMsg + (char) packet_data.get(8 + i);
 			
 			return srvMsg;
 			
@@ -207,16 +207,16 @@ public class StandardPacket extends AbstractPacket implements Packet {
 		
 		List<Server> server_list = new LinkedList<Server>();
 		
-		int server_count = Convert.byteToInt(dataPacket.get(6));
+		int server_count = Convert.byteToInt(packet_data.get(6));
 		
-		dataPacket.position(7);
+		packet_data.position(7);
 		
 		for(int i = 0;i < server_count; i++) {
 			byte address[] = new byte[4];
 			int port ;
 			
-			dataPacket.get(address);
-			port = Convert.shortToInt(dataPacket.getShort());
+			packet_data.get(address);
+			port = Convert.shortToInt(packet_data.getShort());
 			
 			server_list.add(new Server(Convert.IPtoString(address),port));
 		}
@@ -229,15 +229,15 @@ public class StandardPacket extends AbstractPacket implements Packet {
 	 */
 	public UserHash getUserHashHelloAnswerPacket(){
 		byte[] data = new byte[16];
-		dataPacket.position(1 + 4 + 1);
-		dataPacket.get(data);
+		packet_data.position(1 + 4 + 1);
+		packet_data.get(data);
 		return new UserHash(data);
 	}
 	
 	public int getTCPPortHelloAnswerPacket() {
 		int port;
-		dataPacket.position(1 + 4 + 1 + 16 + 4 );
-		port = Convert.shortToInt(dataPacket.getShort());
+		packet_data.position(1 + 4 + 1 + 16 + 4 );
+		port = Convert.shortToInt(packet_data.getShort());
 		return port;
 	}
 	
@@ -247,15 +247,15 @@ public class StandardPacket extends AbstractPacket implements Packet {
 	 */
 	public UserHash getUserHashHelloPacket(){
 		byte[] data = new byte[16];
-		dataPacket.position(1 + 4 + 1 + 1);
-		dataPacket.get(data);
+		packet_data.position(1 + 4 + 1 + 1);
+		packet_data.get(data);
 		return new UserHash(data);
 	}
 	
 	public int getTCPPortHelloPacket() {
 		int port;
-		dataPacket.position(1 + 4 + 1 + 1 + 16 + 4 );
-		port = Convert.shortToInt(dataPacket.getShort());
+		packet_data.position(1 + 4 + 1 + 1 + 16 + 4 );
+		port = Convert.shortToInt(packet_data.getShort());
 		return port;
 	}
 	
@@ -268,7 +268,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			throw new PacketException("No SRVSEARCHRESULT Packet "+this);
 		}
 		try {
-			return dataPacket.getInt(6);
+			return packet_data.getInt(6);
 		}catch(Exception e){
 			throw new PacketException("Failed to extract result count "+this);
 		}
@@ -280,24 +280,24 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			throw new PacketException("No SRVSEARCHRESULT Packet "+this);
 		}
 		SearchResultItemList searchResults = new SearchResultItemList();
-		dataPacket.position(6);
-		int resultCount = dataPacket.getInt();
+		packet_data.position(6);
+		int resultCount = packet_data.getInt();
 		for(int i = 0;i<resultCount;i++) {
 			byte fileHash[] = new byte[16];
-			dataPacket.get(fileHash);
+			packet_data.get(fileHash);
 			
 			byte clientID[] = new byte[4];
-			dataPacket.get(clientID);
+			packet_data.get(clientID);
 			
-			short clientPort = dataPacket.getShort();
+			short clientPort = packet_data.getShort();
 			
 			SearchResultItem result = new SearchResultItem(new FileHash(fileHash), new ClientID(clientID),clientPort); 
 			
-			int tagCount = dataPacket.getInt();
+			int tagCount = packet_data.getInt();
 			
 			for(int j=0;j<tagCount;j++) {
 				//Tag tag = Misc.loadStandardTag(dataPacket);
-				Tag tag = TagReader.readTag(dataPacket);
+				Tag tag = TagReader.readTag(packet_data);
 				result.addTag(tag);
 			}
 			searchResults.add(result);
@@ -309,7 +309,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
     public long getSourceCountFoundSources() throws PacketException {
             if (this.getCommand() != PACKET_SRVFOUNDSOURCES)
                     throw new PacketException("No PACKET_SRVFOUNDSOURCES "+this);
-            long sourceCount = Convert.byteToLong(dataPacket.get( 1 + 4 + 1 + 16 ));
+            long sourceCount = Convert.byteToLong(packet_data.get( 1 + 4 + 1 + 16 ));
             return sourceCount;
     }
     
@@ -321,7 +321,7 @@ public class StandardPacket extends AbstractPacket implements Packet {
             
             long sourceCount = getSourceCountFoundSources();
             Collection<Peer> peerList = new LinkedList<Peer>();
-            dataPacket.position( 1 + 4 + 1 + 16 + 1 );
+            packet_data.position( 1 + 4 + 1 + 16 + 1 );
             byte[] peerID = new byte[4];
             int peerPort;
             ByteBuffer data = ByteBuffer.allocate(4);
@@ -330,13 +330,13 @@ public class StandardPacket extends AbstractPacket implements Packet {
             	for( int j = 0 ; j < 4 ; j++ ){
             	data.clear();
             	data.rewind();
-                byte b = dataPacket.get();
+                byte b = packet_data.get();
                 data.put(b);
                 peerID[j] = Convert.intToByte(data.getInt(0));
                 }
             	
             	byte[] portArray=new byte[2];
-            	dataPacket.get(portArray);
+            	packet_data.get(portArray);
                 
             	ByteBuffer tmpData=ByteBuffer.allocate(4);
                 tmpData.order(ByteOrder.LITTLE_ENDIAN);
@@ -363,14 +363,14 @@ public class StandardPacket extends AbstractPacket implements Packet {
     	byte[] fileHash = new byte[16];
     	if (this.getCommand() != PACKET_SRVFOUNDSOURCES)
             throw new PacketException("No PACKET_SRVFOUNDSOURCES "+this);
-    	dataPacket.position( 1 + 4 + 1 );
-    	dataPacket.get(fileHash);
+    	packet_data.position( 1 + 4 + 1 );
+    	packet_data.get(fileHash);
     	return new FileHash(fileHash);
     }
 	
     public TagList getPeerHelloTagList() throws PacketException{
     	if (this.getCommand()!=OP_PEERHELLO) throw new PacketException("No OP_PEERHELLO "+this);
-    	this.dataPacket.position(1+4+1+1+16+4+2);
+    	this.packet_data.position(1+4+1+1+16+4+2);
     	TagList TagList = this.getTags();
     	
     	return TagList;
@@ -378,17 +378,17 @@ public class StandardPacket extends AbstractPacket implements Packet {
     
     public InetSocketAddress getPeerHelloServerAddress() throws PacketException {
     	if (this.getCommand()!=OP_PEERHELLO) throw new PacketException("No OP_PEERHELLO packet "+this);
-    	dataPacket.position(dataPacket.capacity()-6);
+    	packet_data.position(packet_data.capacity()-6);
     	byte[] IPAddress = new byte[4];
-    	dataPacket.get(IPAddress);
-    	short port = dataPacket.getShort();
+    	packet_data.get(IPAddress);
+    	short port = packet_data.getShort();
     	InetSocketAddress address = InetSocketAddress.createUnresolved(Convert.IPtoString(IPAddress), port);
     	return address;
     }
     
     public TagList getPeerHelloAnswerTagList() throws PacketException{
     	if (this.getCommand()!=OP_PEERHELLOANSWER) throw new PacketException("No OP_PEERHELLOANSWER packet "+this);
-    	this.dataPacket.position(1+4+1+16+4+2);
+    	this.packet_data.position(1+4+1+16+4+2);
     	TagList TagList = this.getTags();
     	
     	return TagList;
@@ -396,10 +396,10 @@ public class StandardPacket extends AbstractPacket implements Packet {
     
     public InetSocketAddress getPeerHelloAnswerServerAddress() throws PacketException {
     	if (this.getCommand()!=OP_PEERHELLOANSWER) throw new PacketException("No OP_PEERHELLOANSWER packet "+this);
-    	dataPacket.position(dataPacket.capacity()-6);
+    	packet_data.position(packet_data.capacity()-6);
     	byte[] IPAddress = new byte[4];
-    	dataPacket.get(IPAddress);
-    	short port = dataPacket.getShort();
+    	packet_data.get(IPAddress);
+    	short port = packet_data.getShort();
     	InetSocketAddress address = InetSocketAddress.createUnresolved(Convert.IPtoString(IPAddress), port);
     	return address;
     }
@@ -407,10 +407,10 @@ public class StandardPacket extends AbstractPacket implements Packet {
     public String getPeerMessage()throws PacketException {
     	if (this.getCommand()!=OP_MESSAGE)
     		throw new PacketException("No OP_MESSAGE packet "+this);
-    	short strLength = dataPacket.getShort(1+4+1);
+    	short strLength = packet_data.getShort(1+4+1);
     	byte[] strData = new byte[strLength];
-    	dataPacket.position(1+4+1+2);
-    	dataPacket.get(strData);
+    	packet_data.position(1+4+1+2);
+    	packet_data.get(strData);
     	return new String(strData);
     }
         
@@ -419,8 +419,8 @@ public class StandardPacket extends AbstractPacket implements Packet {
      */
     public ClientID getPeerClientIDHelloPacket() throws PacketException {
     	byte clientID[] = new byte[4];
-    	dataPacket.position(1+4+1+1+16);
-    	dataPacket.get(clientID);
+    	packet_data.position(1+4+1+1+16);
+    	packet_data.get(clientID);
     	return new ClientID(clientID);
     }
    
@@ -429,8 +429,8 @@ public class StandardPacket extends AbstractPacket implements Packet {
      */
     public ClientID getPeerClientIDHelloAnswerPacket() throws PacketException {
     	byte clientID[] = new byte[4];
-    	dataPacket.position(1+4+1+16);
-    	dataPacket.get(clientID);
+    	packet_data.position(1+4+1+16);
+    	packet_data.get(clientID);
     	return new ClientID(clientID);
     }
 	
@@ -443,8 +443,8 @@ public class StandardPacket extends AbstractPacket implements Packet {
     	byte[] fileHash = new byte[16];
     	if (this.getCommand() != OP_FILEREQANSNOFILE)
     				throw new PacketException("No OP_FILEREQANSNOFILE packet "+this);
-    	dataPacket.position( 1 + 4 + 1 );
-    	dataPacket.get( fileHash );
+    	packet_data.position( 1 + 4 + 1 );
+    	packet_data.get( fileHash );
     	return new FileHash(fileHash);
     }
 
@@ -457,18 +457,18 @@ public class StandardPacket extends AbstractPacket implements Packet {
     	byte[] fileHash = new byte[16];
     	if (this.getCommand() != OP_FILEREQANSWER)
     				throw new PacketException("No OP_FILEREQANSWER packet "+this);
-    	int iPos = dataPacket.position();
-    	dataPacket.position(1 + 4 + 1);
-    	dataPacket.get(fileHash);
-    	dataPacket.position(iPos);
+    	int iPos = packet_data.position();
+    	packet_data.position(1 + 4 + 1);
+    	packet_data.get(fileHash);
+    	packet_data.position(iPos);
     	return  new FileHash(fileHash);
     }
     
     public String getFileNameRequestAnswer() throws PacketException {
-    	dataPacket.position(1 + 4 + 1+16);
-    	short strLen = dataPacket.getShort();
+    	packet_data.position(1 + 4 + 1+16);
+    	short strLen = packet_data.getShort();
     	byte strData[] = new byte[strLen];
-    	dataPacket.get(strData);
+    	packet_data.get(strData);
     	
     	return new String(strData);
     }
@@ -483,10 +483,10 @@ public class StandardPacket extends AbstractPacket implements Packet {
 
     	if (this.getCommand() != OP_SENDINGPART) 
     		throw new PacketException("No OP_SENDINGPART packet : "+this);
-    	int iPos = dataPacket.position();
-    	dataPacket.position(1 + 4 + 1);//Move to file hash
-    	dataPacket.get(fileHash);
-    	dataPacket.position(iPos);
+    	int iPos = packet_data.position();
+    	packet_data.position(1 + 4 + 1);//Move to file hash
+    	packet_data.get(fileHash);
+    	packet_data.position(iPos);
     	return new FileHash(fileHash);
     }
     
@@ -494,27 +494,27 @@ public class StandardPacket extends AbstractPacket implements Packet {
     public FileChunk getFileChunk() throws PacketException {
     	if (this.getCommand() != OP_SENDINGPART) 
     		throw new PacketException("No OP_SENDINGPART packet "+this);
-    	dataPacket.position(1+4+1+16);
-    	long chunkStart = Convert.intToLong(dataPacket.getInt());
-    	long chunkEnd = Convert.intToLong(dataPacket.getInt());
+    	packet_data.position(1+4+1+16);
+    	long chunkStart = Convert.intToLong(packet_data.getInt());
+    	long chunkEnd = Convert.intToLong(packet_data.getInt());
     	ByteBuffer data = Misc.getByteBuffer(chunkEnd-chunkStart);
-    	dataPacket.get(data.array());
+    	packet_data.get(data.array());
     	return new FileChunk(chunkStart,chunkEnd,data);
     }
     
     public long getFileChunkBegin() throws PacketException {
     	if (this.getCommand() != OP_SENDINGPART) 
     		throw new PacketException("No OP_SENDINGPART packet "+this);
-    	dataPacket.position(1 + 4 + 1 + 16);
-    	long chunkStart = Convert.intToLong(dataPacket.getInt());
+    	packet_data.position(1 + 4 + 1 + 16);
+    	long chunkStart = Convert.intToLong(packet_data.getInt());
     	return chunkStart;
     }
     
     public long getFileChunkEnd() throws PacketException {
     	if (this.getCommand() != OP_SENDINGPART) 
     		throw new PacketException("No OP_SENDINGPART packet "+this);
-    	dataPacket.position(1 + 4 + 1 + 16 + 4);
-    	long chunkEnd = Convert.intToLong(dataPacket.getInt());
+    	packet_data.position(1 + 4 + 1 + 16 + 4);
+    	long chunkEnd = Convert.intToLong(packet_data.getInt());
     	return chunkEnd;
     }
        
@@ -522,14 +522,14 @@ public class StandardPacket extends AbstractPacket implements Packet {
        	if (this.getCommand() != OP_HASHSETANSWER) 
     		throw new PacketException("No OP_HASHSETANSWER packet "+this);
     	byte[] fileHash = new byte[16];
-    	dataPacket.position(1 + 4 + 1);
-    	dataPacket.get(fileHash);
-    	int partCount = Convert.shortToInt(dataPacket.getShort());
+    	packet_data.position(1 + 4 + 1);
+    	packet_data.get(fileHash);
+    	int partCount = Convert.shortToInt(packet_data.getShort());
     	PartHashSet partSet = new  PartHashSet(new FileHash(fileHash));
     	byte[] partHash = new byte[16];
 
     	for( short i = 1 ; i <= partCount ; i++ ) {
-    		dataPacket.get(partHash);
+    		packet_data.get(partHash);
     		partSet.add(partHash);
     	}
     	return partSet;
@@ -539,13 +539,13 @@ public class StandardPacket extends AbstractPacket implements Packet {
     	if (this.getCommand() != OP_FILEREQUEST)
     		throw new PacketException("No OP_FILEREQUEST packet " + this);
     	
-    	int iPos = dataPacket.getInt();
+    	int iPos = packet_data.getInt();
     	byte[] data = new byte[16];
     	
-    	dataPacket.position(1+4+1);
-    	dataPacket.get(data);
+    	packet_data.position(1+4+1);
+    	packet_data.get(data);
     	FileHash fileHash = new FileHash(data);
-    	dataPacket.position(iPos);
+    	packet_data.position(iPos);
     	
     	return fileHash;
     }
@@ -553,17 +553,17 @@ public class StandardPacket extends AbstractPacket implements Packet {
     public Collection<FileChunkRequest> getFileChunksRequest() throws PacketException {
     	if (this.getCommand()!=OP_REQUESTPARTS)
     		throw new PacketException("No OP_REQUESTPARTS packet "+this);
-    	dataPacket.position(1+4+1+16);
+    	packet_data.position(1+4+1+16);
     	Collection<FileChunkRequest> chunks = new LinkedList<FileChunkRequest>();
 
     	long[] startPos = new long[3];
     	long[] endPos = new long[3];
     	
       	for(int i = 0; i<3 ; i++ )
-    		startPos[i]=Convert.intToLong(dataPacket.getInt());
+    		startPos[i]=Convert.intToLong(packet_data.getInt());
 
     	for(int i = 0; i<3 ; i++ )
-    		endPos[i]=Convert.intToLong(dataPacket.getInt());
+    		endPos[i]=Convert.intToLong(packet_data.getInt());
     	
     	
     	for(int i = 0;i<3;i++) {
@@ -584,23 +584,23 @@ public class StandardPacket extends AbstractPacket implements Packet {
     		throw new PacketException("No OP_REQUESTPARTS packet " + this);
     	
     	long[][] pos = new long[3][2];
-    	int iPos = dataPacket.position();
-    	dataPacket.position(1+4+1+16);
+    	int iPos = packet_data.position();
+    	packet_data.position(1+4+1+16);
     	//Part begin
     	for(int i = 0; i<3 ; i++ )
-    		pos[i][0]=dataPacket.getInt();
+    		pos[i][0]=packet_data.getInt();
     	//Part end
     	for(int i = 0; i<3 ; i++ )
-    		pos[i][1]=dataPacket.getInt();
-    	dataPacket.position(iPos);
+    		pos[i][1]=packet_data.getInt();
+    	packet_data.position(iPos);
     	return pos;
     }
     
     public int getPartCount() throws PacketException {
     	if (this.getCommand()!=OP_FILESTATUS)
     		throw new PacketException("No OP_FILESTATUS packet "+this);
-    	dataPacket.position(1+4+1+16);
-    	return dataPacket.getShort();
+    	packet_data.position(1+4+1+16);
+    	return packet_data.getShort();
     }
     
     public JMuleBitSet getPartStatus() throws PacketException {
@@ -608,15 +608,15 @@ public class StandardPacket extends AbstractPacket implements Packet {
     	
     	if (pcmd!=OP_FILESTATUS)
     		throw new PacketException("No OP_FILESTATUS packet "+this);
-    	dataPacket.position(1+4+1+16);
-    	short partCount = dataPacket.getShort();
+    	packet_data.position(1+4+1+16);
+    	short partCount = packet_data.getShort();
     	
     	int count = (partCount+7)/8;
     	if (((partCount+7)/8)!=0) count++;
     	
     	byte[] data = new byte[count];
     	for(int i=0;i<count;i++)
-    		data[i] = dataPacket.get();
+    		data[i] = packet_data.get();
     	
     	JMuleBitSet bitSet;
      	bitSet = Convert.byteToBitset(data);
@@ -626,11 +626,11 @@ public class StandardPacket extends AbstractPacket implements Packet {
     
     /** Get all tags from current position **/
 	public TagList getTags() {
-	    int tagCount = this.dataPacket.getInt();
+	    int tagCount = this.packet_data.getInt();
 	    TagList TagList = new TagList();
 	    for(int i = 0;i<tagCount;i++) {
 	    	StandardTag Tag = new StandardTag();
-	    	Tag.extractTag(this.dataPacket);
+	    	Tag.extractTag(this.packet_data);
 	    	TagList.addTag(Tag);
 	    }
 		return TagList;
@@ -659,11 +659,11 @@ public class StandardPacket extends AbstractPacket implements Packet {
 		if (pkLength>ConfigurationManager.MAX_PACKET_SIZE) 
 			throw new JMFloodException("Packet length is too big, packet length : "+pkLength);
 		
-		dataPacket=ByteBuffer.allocate(pkLength+1+4+1);
-		dataPacket.order(ByteOrder.LITTLE_ENDIAN);
-		dataPacket.put(PROTO_EDONKEY_TCP);
-		dataPacket.putInt(pkLength+1);//Put length +1 to write command byte
-		dataPacket.put((byte)0);//Put default command
+		packet_data=ByteBuffer.allocate(pkLength+1+4+1);
+		packet_data.order(ByteOrder.LITTLE_ENDIAN);
+		packet_data.put(PROTO_EDONKEY_TCP);
+		packet_data.putInt(pkLength+1);//Put length +1 to write command byte
+		packet_data.put((byte)0);//Put default command
 		ByteBuffer defaultData = PacketReader.readBytes(connection, pkLength);
 		this.insertData(5,defaultData.array());
 		
