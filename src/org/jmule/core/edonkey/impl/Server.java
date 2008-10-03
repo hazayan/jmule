@@ -82,8 +82,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:35:09 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 18:55:49 $$
  */
 public class Server extends JMConnection {
 	
@@ -295,7 +295,7 @@ public class Server extends JMConnection {
 
 	public void offerFiles() {
 		
-		super.sendPacket(PacketFactory.getOfferFilePacket(clientID));
+		super.sendPacket(PacketFactory.getOfferFilesPacket(clientID));
 		
 	}
 	
