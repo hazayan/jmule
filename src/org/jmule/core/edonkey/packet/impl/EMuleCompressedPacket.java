@@ -27,7 +27,6 @@ import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_COMPRESSED_TCP;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.zip.DataFormatException;
 
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -42,8 +41,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:19:11 $$
  */
 public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 	
@@ -55,17 +54,25 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 	public EMuleCompressedPacket() {
 	}
 	
+	public EMuleCompressedPacket(StandardPacket packet) {
+		packet_data = Misc.getByteBuffer(packet.getLength());
+		packet_data.position(0);
+		packet.getAsByteBuffer().position(0);
+		packet_data.put(packet.getAsByteBuffer());
+		packet_data.position(0);
+		packet_data.put(PROTO_EMULE_COMPRESSED_TCP);
+		isCompressed = false;
+	}
+	
 	public EMuleCompressedPacket(int packetLength) {
 		
-		dataPacket = ByteBuffer.allocate(packetLength + 1 + 4 + 1);
-		
-		dataPacket.order(ByteOrder.LITTLE_ENDIAN);
+		packet_data = Misc.getByteBuffer(packetLength + 1 + 4 + 1);
 
-		dataPacket.put(PROTO_EMULE_COMPRESSED_TCP);
+		packet_data.put(PROTO_EMULE_COMPRESSED_TCP);
 		
-		dataPacket.putInt(packetLength + 1);
+		packet_data.putInt(packetLength + 1);
 		
-		dataPacket.put((byte) 0);
+		packet_data.put((byte) 0);
 		
 	}
 	
@@ -76,8 +83,8 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		byte packetCmd = getCommand();
 		
 		byte data[] = new byte[getLength() - 1 - 4 - 1];
-		
-		dataPacket.get(data,1+4+1,data.length);
+		packet_data.position(1+4+1);
+		packet_data.get(data,0,data.length);
 		
 		ByteBuffer un_compressed_data = Misc.getByteBuffer(data.length);
 		
@@ -85,8 +92,9 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		
 		ByteBuffer compressed_data = JMuleZLib.compressData(un_compressed_data);
 		
-		dataPacket = Misc.getByteBuffer(compressed_data.capacity()+1+4+1);
+		packet_data = Misc.getByteBuffer(compressed_data.capacity()+1+4+1);
 		
+		packet_data.position(0);
 		insertData((byte) PROTO_EMULE_COMPRESSED_TCP);
 		
 		insertData((int) (compressed_data.capacity() + 1));// Put length +1
@@ -95,8 +103,8 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		
 		insertData((byte) packetCmd);// Insert packet command
 		
-		dataPacket.position(0);
-		
+		packet_data.position(0);
+		compressed_data.position(0);
 		insertData(6, compressed_data);// Insert packet data
 		
 		isCompressed = true;
@@ -109,21 +117,21 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		
 		byte packetCmd = getCommand();
 		
-		byte data[] = new byte[dataPacket.capacity() - 1 - 4 - 1];
+		byte data[] = new byte[packet_data.capacity() - 1 - 4 - 1];
 		
-		dataPacket.position(1 + 4 + 1);
+		packet_data.position(1 + 4 + 1);
 		
 		ByteBuffer compressed_data = Misc.getByteBuffer(data.length);
 		
 		compressed_data.position(0);
 		
-		compressed_data.put(dataPacket.array(), 1+4+1, dataPacket.capacity()-1-4-1);
+		compressed_data.put(packet_data.array(), 1+4+1, packet_data.capacity()-1-4-1);
 		
 		try {
 			
 			ByteBuffer decompressed_data = JMuleZLib.decompressData(compressed_data);
 			
-			dataPacket = Misc.getByteBuffer(decompressed_data.capacity()+1+4+1);
+			packet_data = Misc.getByteBuffer(decompressed_data.capacity()+1+4+1);
 			
 			insertData((byte) PROTO_EDONKEY_TCP);
 			
@@ -133,7 +141,7 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 			
 			insertData((byte) packetCmd);// Insert packet command
 			
-			dataPacket.position(0);
+			packet_data.position(0);
 
 			insertData(6, decompressed_data.array());// Insert packet data
 			
@@ -152,7 +160,7 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 
 			int pkLength=1+4+1+data.capacity();
 			
-			dataPacket=Misc.getByteBuffer(pkLength);
+			packet_data=Misc.getByteBuffer(pkLength);
 			
 			insertData((byte)PROTO_EMULE_COMPRESSED_TCP);	
 			
@@ -194,7 +202,7 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 	
 		pkLength = 1 + 4 + 1 + packetContent.capacity();
 		
-		dataPacket = Misc.getByteBuffer(pkLength);
+		packet_data = Misc.getByteBuffer(pkLength);
 			
 		insertData((byte)PROTO_EMULE_COMPRESSED_TCP);
 		
@@ -202,7 +210,7 @@ public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 		
 		insertData((byte)packetCmd);//Insert packet command
 		
-		dataPacket.position(0);
+		packet_data.position(0);
 		
 		insertData(6,packetContent);//Insert packet data
 		
