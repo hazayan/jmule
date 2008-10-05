@@ -43,7 +43,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMThread;
-import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategy;
@@ -84,8 +83,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/30 16:45:50 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:47:20 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -495,15 +494,6 @@ public class DownloadSession implements JMTransferSession {
 				
 			}
 			
-			long new_available_part_count = sharedFile.getAvailablePartCount();
-			
-			if (new_available_part_count > available_part_count) {
-				// offer new files to connected server
-				Server connected_server = JMuleCoreFactory.getSingleton().getServerManager().getConnectedServer();
-				if (connected_server!=null)
-					connected_server.offerFiles();
-			}
-			
 			fileRequestList.splitFragment(sender, sPacket.getFileChunk().getChunkStart(), sPacket.getFileChunk().getChunkEnd());
 			
 			if (this.sharedFile.getGapList().size()==0)
@@ -622,12 +612,6 @@ public class DownloadSession implements JMTransferSession {
 		}
 	
 		DownloadManagerFactory.getInstance().removeDownload(getFileHash());
-		
-		Server server = ServerManagerFactory.getInstance().getConnectedServer();
-		
-		if (server != null)
-			
-			server.offerFiles();
 	}
 	
 	private void fileChunkRequest(Peer peer) {
