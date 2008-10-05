@@ -28,8 +28,8 @@ import java.util.Set;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 13:04:25 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:48:28 $$
  */
 public class E2DKConstants {
 
@@ -68,6 +68,7 @@ public class E2DKConstants {
 	
 	public final static long PARTSIZE 					= 0x947000; //9728000
     public final static int BLOCKSIZE 					= 184320;//184320 10240
+    public final static int MAX_OFFER_FILES				= 200;
 	public final static byte PROTO_EDONKEY_TCP 			= (byte) 0xE3;
 	public final static byte PROTO_EDONKEY_SERVER_UDP 	= (byte) 0xE3;
 	public final static byte PROTO_EDONKEY_PEER_UDP 	= (byte) 0xC5;
