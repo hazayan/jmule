@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/22 12:44:23 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:44:17 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -72,6 +72,11 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final long          WRONG_PACKET_CHECK_INTERVAL	=     1000 * 5;
 	public static final long		  MAX_WRONG_PACKET_COUNT		=     50 ;
+	
+	public static final int 		  DIR_RESCAN_INTERVAL  			= 1000*60*10;
+	public static final int 		  SEARCH_QUERY_CHECK_INTERVAL   = 10000;
+	
+	public static final int 		  SHARED_FILES_PUBLISH_INTERVAL = 1000 * 60;
 	// data base keys
 	public static final String       NICK_NAME_KEY                         =     "NickName";
 	public static final String       TCP_PORT_KEY                          =     "TCPPort";
