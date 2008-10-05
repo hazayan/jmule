@@ -32,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -50,34 +52,32 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
 
-/**
- * 
- * @author javajox
- * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:18:34 $$
- */
 public class SharingManagerImpl implements SharingManager {
-
+	
 	private Map<FileHash,SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
 	private LoadPartialFiles load_partial_files;
 	private SharedFile current_hashing_file;
+	
 	private List<CompletedFileListener> completed_file_listeners = new LinkedList<CompletedFileListener>();
 	
+	private List<SharedFile> new_files = new CopyOnWriteArrayList<SharedFile>();
+	private Timer sharing_manager_timer;
+	private TimerTask rescan_dirs_task;
 	public void initialize() {
-	     sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
+		sharing_manager_timer = new Timer();
+	    sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
 	     
-	     Set<String> types = new HashSet<String>();
-	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT);
-	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_COUNT);
-	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_COUNT);
-	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES);
-	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES);
-	     types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_BYTES);
+	    Set<String> types = new HashSet<String>();
+	    types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT);
+	    types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_COUNT);
+	    types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_COUNT);
+	    types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_BYTES);
+	    types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_BYTES);
+	    types.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_BYTES);
 	     
-	     JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
-			public void updateStats(Set<String> types,Map<String, Object> values) {
+	    JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+	    	public void updateStats(Set<String> types,Map<String, Object> values) {
 				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT))
 					values.put(JMuleCoreStats.ST_DISK_SHARED_FILES_COUNT, sharedFiles.size());
 				if (types.contains(JMuleCoreStats.ST_DISK_SHARED_FILES_PARTIAL_COUNT)) 
@@ -117,7 +117,12 @@ public class SharingManagerImpl implements SharingManager {
 	}
 	
 	public void start() {
-		
+		rescan_dirs_task = new TimerTask() {
+			public void run() {
+				loadCompletedFiles();
+			}
+		};
+		sharing_manager_timer.scheduleAtFixedRate(rescan_dirs_task, ConfigurationManager.DIR_RESCAN_INTERVAL, ConfigurationManager.DIR_RESCAN_INTERVAL);
 	}
 	
 	public boolean isLoadingCompletedFileProcessRunning() {
@@ -149,7 +154,7 @@ public class SharingManagerImpl implements SharingManager {
 		    		part_met.loadFile();
 		    		PartialFile partial_shared_file = new PartialFile(part_met);
 		    		sharedFiles.put(partial_shared_file.getFileHash(), partial_shared_file);
-		    		
+		    		new_files.add(partial_shared_file);
 		    		JMuleCoreFactory.getSingleton().getDownloadManager().addDownload(partial_shared_file);
 		    		
 		    	}catch(Throwable t) { t.printStackTrace();}
@@ -181,11 +186,10 @@ public class SharingManagerImpl implements SharingManager {
 			String knownFilePath = ConfigurationManager.KNOWN_MET;
 			
 		     Map<String,KnownMetEntity> known_file_list;
-		
+		     Set<FileHash> files_hash_set = new HashSet<FileHash>();
 		     // new files from user's shared dirs that need to be hashed
 		     files_needed_to_hash = new CopyOnWriteArrayList<CompletedFile>();
-		
-		     sharedFiles.clear();
+		     files_hash_set.addAll(sharedFiles.keySet());
 		     
 		     // load shared completed files
 		     try {
@@ -194,6 +198,7 @@ public class SharingManagerImpl implements SharingManager {
 		     } catch (Throwable e) {
 			     known_file_list = new Hashtable<String,KnownMetEntity>();
 		     }
+
 		     File incoming_dir = new File(ConfigurationManager.INCOMING_DIR);
 		     List<File> shared_dirs = ConfigurationManagerFactory.getInstance().getSharedFolders();
 		     if (shared_dirs==null)
@@ -211,12 +216,16 @@ public class SharingManagerImpl implements SharingManager {
 		    	 while(i.hasNext()) {
 		    		 if( stop ) return;
 		    		 File f = i.next();
-		    		 file_name = f.getName();
+		    		 file_name = f.getName(); 
 		    		 file_size = f.length();
 		    		 known_met_entity = known_file_list.get(file_name + file_size);
 		    		 if( known_met_entity == null) {
 		    			 files_needed_to_hash.add(new CompletedFile(f));
 		    		 } else {
+		    			 FileHash hash = known_met_entity.getFileHash();
+		    			 if (files_hash_set.contains(hash))
+		    				 files_hash_set.remove(hash);
+		    			 if (sharedFiles.get(hash)!= null) continue; // file already in list
 		    			 CompletedFile shared_completed_file = new CompletedFile(f);
 		    			 try {
 							shared_completed_file.setHashSet(known_met_entity.getPartHashSet());
@@ -224,11 +233,17 @@ public class SharingManagerImpl implements SharingManager {
 						}
 		    			 shared_completed_file.setTagList(known_met_entity.getTagList());
 		    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
+		    			 new_files.add(shared_completed_file);
 		    		 }
 		    		 known_met_entity = null;
 		    	 }  
 		      }
+		     for(FileHash file_hash : files_hash_set) {
+		    	 sharedFiles.remove(file_hash);
+		     }
+		     
 	    	 // hash new files from the file system
+		     boolean need_to_write_metadata = files_needed_to_hash.size() != 0;
 	    	 for(CompletedFile shared_completed_file : files_needed_to_hash) {
 	    		 if( stop ) return;
 	    		 try {
@@ -237,18 +252,23 @@ public class SharingManagerImpl implements SharingManager {
 	    			 file_hashing = new FileHashing(file_channel);
 	    			 file_hashing.start();
 	    			 file_hashing.join();
-	    			 if(!file_hashing.isDone()) continue;
+	    			 file_channel.close();
 	    			 files_needed_to_hash.remove(shared_completed_file);
+	    			 if(!file_hashing.isDone()) 
+	    				 continue;
+	    			 if (sharedFiles.containsKey(file_hashing.getFileHashSet().getFileHash()))
+	    				 continue;
 	    			 shared_completed_file.setHashSet(file_hashing.getFileHashSet());
 	    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
-	    			 file_channel.close();
+	    			 new_files.add(shared_completed_file);
+	    			 
 	    			 notifyCompletedFileAdded(shared_completed_file);
 	    		 } catch( Throwable t ) {
 	    		 		t.printStackTrace(); 
 	    		 }
 	    	 }
 	    	 // write our files in known.met
-	    	 if (files_needed_to_hash.size() !=0 ) {
+	    	 if ( need_to_write_metadata ) {
 	    		 writeMetadata();
 	    	 } 
 	    	 
@@ -354,7 +374,7 @@ public class SharingManagerImpl implements SharingManager {
 		UploadManager upload_manager = JMuleCoreFactory.getSingleton().getUploadManager();
 		try {
 		
-			if (upload_manager.hasUpload(fileHash)) { 	// JMule is now uploading file need to synchronize moving
+			if (upload_manager.hasUpload(fileHash)) { 	// JMule is now uploading file, need to synchronize moving
 				UploadSession upload_sessison = upload_manager.getUpload(fileHash);
 				synchronized(upload_sessison.getSharedFile()) {
 					sharedFiles.remove(fileHash);
@@ -362,6 +382,7 @@ public class SharingManagerImpl implements SharingManager {
 					CompletedFile shared_completed_file = new CompletedFile(completed_file);
 					shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 					sharedFiles.put(fileHash, shared_completed_file);
+					new_files.add(shared_completed_file);
 				}
 			} else {
 				sharedFiles.remove(fileHash);
@@ -369,6 +390,7 @@ public class SharingManagerImpl implements SharingManager {
 				CompletedFile shared_completed_file = new CompletedFile(completed_file);
 				shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 				sharedFiles.put(fileHash, shared_completed_file);
+				new_files.add(shared_completed_file);
 			}
 			writeMetadata();
 		} catch (Throwable e) {
@@ -409,7 +431,6 @@ public class SharingManagerImpl implements SharingManager {
 	
 	public List<PartialFile> getPartialFiles() {
 		List<PartialFile> file_list = new LinkedList<PartialFile>();
-		
 		for(SharedFile file : sharedFiles.values())
 			if (file instanceof PartialFile)
 					file_list.add((PartialFile) file);
@@ -435,15 +456,27 @@ public class SharingManagerImpl implements SharingManager {
    		  KnownMet known_met = new KnownMet(ConfigurationManager.KNOWN_MET);
    		  
    		  known_met.writeFile(sharedFiles.values());
-	   } catch(Throwable t) { }
+	   } catch(Throwable t) {
+		   t.printStackTrace();
+	   }
 	}
 	
 	public void shutdown() {
+		sharing_manager_timer.cancel();
 		
-		this.stopLoadingCompletedFiles();
+		stopLoadingCompletedFiles();
 		
-		this.stopLoadingPartialFiles();
+		stopLoadingPartialFiles();
 		
+	}
+	
+	public List<SharedFile> getUnsharedFiles() {
+		return new_files;
+	}
+	
+	public void resetUnsharedFiles() {
+		new_files.clear();
+		new_files.addAll(sharedFiles.values());
 	}
 	
 	public void addCompletedFileListener(CompletedFileListener listener) {
@@ -482,5 +515,4 @@ public class SharingManagerImpl implements SharingManager {
 		shared_file.closeFile();
 		shared_file.delete();
 	}
-	
 }

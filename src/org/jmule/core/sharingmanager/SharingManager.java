@@ -32,11 +32,11 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:16:46 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:43:01 $$
  */
 public interface SharingManager extends JMuleManager {
-
+	
 	/**
 	 * Loads the completed shared files from shared folders. This is a long time process 
 	 * that eats a lot of CPU cycles. Can be interrupted with stopLoadingCompletedFiles()
@@ -64,6 +64,16 @@ public interface SharingManager extends JMuleManager {
 	public boolean isLoadingCompletedFileProcessRunning();
 	
 	public boolean isLoadingPartialFileProcessRunning();
+	
+	/**
+	 * Return list with all unshared files 
+	 */
+	public List<SharedFile> getUnsharedFiles();
+	
+	/**
+	 * Mark all files as unshared
+	 */
+	public void resetUnsharedFiles();
 	
 	/**
 	 * Get the completed shared file identified by file hash

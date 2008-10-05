@@ -22,6 +22,7 @@
  */
 package org.jmule.core.edonkey.packet;
 
+import static org.jmule.core.edonkey.E2DKConstants.MAX_OFFER_FILES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
@@ -64,7 +65,7 @@ import java.nio.ByteOrder;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jmule.core.JMIterable;
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.ClientID;
@@ -77,17 +78,15 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagFactory;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
-import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
-import org.jmule.core.sharingmanager.SharingManagerFactory;
 import org.jmule.util.Convert;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:30:24 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:43:01 $$
  */
 public class PacketFactory {
 	
@@ -459,25 +458,25 @@ public class PacketFactory {
 	 * </table>
      */
     public static Packet getOfferFilesPacket(ClientID userID) {
-    	JMIterable<SharedFile> fileList = SharingManagerFactory.getInstance().getSharedFiles();
-    	int sharedCount = 0;
+    	List<SharedFile> unshared_files = JMuleCoreFactory.getSingleton().getSharingManager().getUnsharedFiles();
+    	int sharedCount = unshared_files.size();
+    	if (sharedCount > MAX_OFFER_FILES)
+    		sharedCount = MAX_OFFER_FILES;
+    	
     	List<ByteBuffer> shared_files_data = new LinkedList<ByteBuffer>();
-    	int enLen=0;
+    	int data_length=0;
     	int i = 0;
-    	for( SharedFile sFile : fileList){
-    		if (sFile instanceof PartialFile) {
-    			PartialFile p_file = (PartialFile)sFile;
-    			if (p_file.getAvailablePartCount() == 0) continue; 
-    		}
-    		sharedCount ++;
+    	for(SharedFile sFile : unshared_files) {
+    		if (i>sharedCount) break;
+    		i++;
+    		unshared_files.remove(sFile);
     		Tag tagFileName = TagFactory.getStringTag(sFile.getSharingName(), TAG_NAME_NAME);
     		Tag tagSize = TagFactory.getDWORDTag((int)sFile.length(), TAG_NAME_SIZE);
     		ByteBuffer buffer = Misc.getByteBuffer(16 + 4 + 2 + 4 + tagFileName.getSize() + tagSize.getSize());
-    		enLen += buffer.limit();
+    		data_length += buffer.limit();
     		buffer.position(0);
     		buffer.put(sFile.getFileHash().getHash());
     		if (userID.isHighID()) {
-    		//	buffer.put((byte)0xfb);
     			buffer.put(userID.getClientID());
     			buffer.putShort((short)ConfigurationManagerFactory.getInstance().getTCP());
     		}
@@ -489,10 +488,9 @@ public class PacketFactory {
     		buffer.put(tagFileName.getData());
     		buffer.put(tagSize.getData());
     		shared_files_data.add(buffer);
-    		i++;
     	}
     	
-    	StandardPacket packet = new StandardPacket(4+enLen);
+    	StandardPacket packet = new StandardPacket(4+data_length);
     	packet.setCommand(OP_OFFERFILES);
     	packet.insertData(sharedCount);
     	

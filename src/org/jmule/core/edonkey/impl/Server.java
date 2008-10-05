@@ -76,14 +76,15 @@ import org.jmule.core.searchmanager.SearchManagerFactory;
 import org.jmule.core.searchmanager.SearchRequest;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultItemList;
+import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.util.Convert;
 
 /**
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 18:55:49 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:43:01 $$
  */
 public class Server extends JMConnection {
 	
@@ -116,9 +117,11 @@ public class Server extends JMConnection {
 	
 	private volatile boolean allowSearch = false;
 	
+	private Timer server_timer;
+	
 	private TimerTask search_task;
 	
-	private Timer search_timer;
+	private TimerTask shared_files_offer_task;
 
 	public Server() {
 		
@@ -195,16 +198,27 @@ public class Server extends JMConnection {
 				
 				sendPacket(searchQueryPacket);
 			}};
-		
-		search_timer.purge();
 			
-		search_timer.scheduleAtFixedRate(search_task, new Date(System.currentTimeMillis()),10000);
+		server_timer.purge();
+		server_timer.scheduleAtFixedRate(search_task, new Date(System.currentTimeMillis()), ConfigurationManager.SEARCH_QUERY_CHECK_INTERVAL);
 		
 	}
 	
-	private void stopSearchTask() {
-		if (search_timer != null)
-			search_timer.cancel();
+	private void stopServerTimer() {
+		if (server_timer != null)
+			server_timer.cancel();
+	}
+	
+	private void startSharedFilesOfferTask() {
+		shared_files_offer_task = new TimerTask() {
+			SharingManager manager = JMuleCoreFactory.getSingleton().getSharingManager();
+			public void run() {
+				if (manager.getUnsharedFiles().size()!=0)
+					offerFiles();
+			}
+		};
+		server_timer.purge();
+		server_timer.scheduleAtFixedRate(shared_files_offer_task, new Date(System.currentTimeMillis()), ConfigurationManager.SHARED_FILES_PUBLISH_INTERVAL);
 	}
 	
 	public ED2KServerLink getServerLink() {
@@ -253,7 +267,7 @@ public class Server extends JMConnection {
 		
 		this.allowSearch = false;
 		
-		stopSearchTask();
+		stopServerTimer();
 		
 		super.disconnect();
 		
@@ -293,7 +307,7 @@ public class Server extends JMConnection {
 		
 	}
 
-	public void offerFiles() {
+	private void offerFiles() {
 		
 		super.sendPacket(PacketFactory.getOfferFilesPacket(clientID));
 		
@@ -315,17 +329,21 @@ public class Server extends JMConnection {
 			
 			isConnected = true;
 			
-			search_timer = new Timer();
+			server_timer = new Timer();
 			
 			JMuleCore core = JMuleCoreFactory.getSingleton();
+			
+			core.getSharingManager().resetUnsharedFiles();
+			
 			boolean update_server_list = core.getConfigurationManager().getBooleanParameter(
 										 ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, false);
+			
 			if (update_server_list)
 				sendPacket(PacketFactory.getGetServerListPacket());
 			
 			notify_server_event(TCP_SOCKET_CONNECTED);
 			
-			offerFiles();
+			startSharedFilesOfferTask();
 			
 			return;
 			
@@ -690,7 +708,6 @@ public class Server extends JMConnection {
 		tagList.removeTag(SL_FILES);
 		
 		tagList.addTag(tag);
-		
 		
 	}
 	
