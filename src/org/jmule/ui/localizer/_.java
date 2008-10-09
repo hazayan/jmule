@@ -26,14 +26,20 @@ package org.jmule.ui.localizer;
  *
  * Created on Aug 15, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/08/15 13:19:16 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/09 10:12:11 $
  */
 public class _ {
 
 	public static String _(String key) {
 		
 		return Localizer.getString(key);
+		
+	}
+	
+	public static String _(String key, String... params) {
+		
+		return Localizer.getString(key, params);
 		
 	}
 	
