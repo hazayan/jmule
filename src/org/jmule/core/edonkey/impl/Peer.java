@@ -54,8 +54,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:12:39 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:32:07 $$
  */
 public class Peer extends JMConnection {
 	
@@ -155,7 +155,6 @@ public class Peer extends JMConnection {
 	}
 	
 	public void connect() {
-		
 		connectTime = System.currentTimeMillis();
 		 
 		if (isConnected())
@@ -312,8 +311,8 @@ public class Peer extends JMConnection {
 				}
 				
 				isConnected = false;
-				
-				sessionList.onDisconnect();
+				if (sessionList != null)
+					sessionList.onDisconnect();
 			
 				PeerManagerFactory.getInstance().removePeer(peer);
 			}
@@ -467,7 +466,8 @@ public class Peer extends JMConnection {
 			return p.getUserHash().equals(getUserHash());
 		ClientID id = p.getID();
 		ClientID id2 = getID();
-		if ((id == null) || (id2 == null)) return getAddress().equals(p.getAddress());
+		if ((id == null) || (id2 == null)) 
+			return (getAddress()+":"+getPort()).equals(p.getAddress()+":"+p.getPort());
 		byte[] b1 = id.getClientID();
 		byte[] b2 = id2.getClientID();
 		
