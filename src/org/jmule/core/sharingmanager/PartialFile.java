@@ -50,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:14:16 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 10:11:34 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -74,12 +74,17 @@ public class PartialFile extends SharedFile {
 		file = new File(tempDir+File.separator+partFile.getTempFileName());
 		
 		try {
-			
-			fileChannel = new RandomAccessFile(file,"rws").getChannel();
-			
+			readChannel = new RandomAccessFile(file,"rws").getChannel();
+			readChannel.position(0);
 		} catch (Throwable e) {
-			e.printStackTrace();
-			throw new SharedFileException("Failed to open "+file);
+			throw new SharedFileException("Failed to open "+file+"\n"+Misc.getStackTrace(e));
+		}
+		
+		try {
+			writeChannel = new RandomAccessFile(file,"rws").getChannel();
+			writeChannel.position(0);
+		} catch (Throwable e) {
+			throw new SharedFileException("Failed to open "+file+"\n"+Misc.getStackTrace(e));
 		}
 		
 		this.partFile = partFile;
@@ -99,18 +104,11 @@ public class PartialFile extends SharedFile {
 		
 		int partCount = Misc.getPartCount(length());
 		
-		
-		
 		for(int i = 0;i < partCount;i++) {
-			
 			if (partFile.getGapList().getIntersectedGaps(PARTSIZE*i, PARTSIZE*(i+1)-1).size()==0)
-				
 				checkedParts[i] = true;
-			
 				else
-					
 				checkedParts[i] = false;
-			
 		}
 	}
 	
@@ -125,11 +123,17 @@ public class PartialFile extends SharedFile {
 		file = new File(tempFileName);
 		
 		try {
-			
-			fileChannel = new RandomAccessFile(file,"rws").getChannel();
-			
+			readChannel = new RandomAccessFile(file,"rws").getChannel();
+			readChannel.position(0);
 		} catch (Throwable e) {
-			throw new SharedFileException("Failed to open "+file);
+			throw new SharedFileException("Failed to open "+file+"\n"+Misc.getStackTrace(e));
+		}
+		
+		try {
+			writeChannel = new RandomAccessFile(file,"rws").getChannel();
+			writeChannel.position(0);
+		} catch (Throwable e) {
+			throw new SharedFileException("Failed to open "+file+"\n"+Misc.getStackTrace(e));
 		}
 		
 		try {
@@ -252,66 +256,47 @@ public class PartialFile extends SharedFile {
 		return false;
 	}
 	
-	public void writeData(FileChunk fileChunk) throws SharedFileException {
-
-		try { 
-			if (fileChannel == null) {
-				
+	public synchronized void writeData(FileChunk fileChunk) throws SharedFileException {
+			try { 
+				if (writeChannel == null) {
+					
+					try {
+						writeChannel = new RandomAccessFile(file,"rws").getChannel();
+					} catch (Throwable e) {
+						throw new SharedFileException("Error on opening file");
+					}
+					
+				}
+				//** Check file limit and add more data if need **//
+				long toAdd = 0;
+				if (writeChannel.size()<=fileChunk.getChunkStart()) {
+					toAdd = fileChunk.getChunkStart() - writeChannel.size();
+					toAdd += fileChunk.getChunkData().capacity();
+					
+				} else
+				if ((writeChannel.size()>fileChunk.getChunkStart())&&(writeChannel.size()<=fileChunk.getChunkEnd())) {
+					toAdd = fileChunk.getChunkEnd() - writeChannel.size();
+				}
+				if (toAdd != 0) {
+					toAdd += E2DKConstants.PARTSIZE;
+					if (toAdd + writeChannel.size()>length()) {
+						toAdd = length() - writeChannel.size();
+					}
+					addBytes(toAdd);
+				}
+				writeChannel.position(fileChunk.getChunkStart());
+				fileChunk.getChunkData().position(0);
+				writeChannel.write(fileChunk.getChunkData());
+				partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
 				try {
-					
-					fileChannel = new RandomAccessFile(file,"rws").getChannel();
-					//fileChannel.force(true);
-				} catch (Throwable e) {
-					
-					throw new SharedFileException("Error on opening file");
-					
+					partFile.writeFile();
+				} catch (PartMetException e) {
+					throw new SharedFileException("Failed to save part.met file\n"+Misc.getStackTrace(e));
 				}
-				
+				checkFilePartsIntegrity();
+			}catch(Throwable t) {
+				throw new SharedFileException("Failed to write data\n"+Misc.getStackTrace(t));
 			}
-			
-			//** Check file limit and add more data if need **//*
-			
-			long toAdd = 0;
-			if (fileChannel.size()<=fileChunk.getChunkStart()) {
-				
-				toAdd = fileChunk.getChunkStart() - fileChannel.size();
-				
-				toAdd += fileChunk.getChunkData().capacity();
-				
-			} else
-				
-			if ((fileChannel.size()>fileChunk.getChunkStart())&&(fileChannel.size()<=fileChunk.getChunkEnd())) {
-				
-				toAdd = fileChunk.getChunkEnd() - fileChannel.size();
-				
-			}
-			if (toAdd != 0) {
-				toAdd += E2DKConstants.PARTSIZE;
-				if (toAdd + fileChannel.size()>length()) {
-					toAdd = length() - fileChannel.size();
-				}
-				addBytes(toAdd);
-				
-			}
-			fileChannel.position(fileChunk.getChunkStart());
-			
-			fileChunk.getChunkData().position(0);
-			
-			fileChannel.write(fileChunk.getChunkData());
-			partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
-			try {
-				
-				partFile.writeFile();
-				
-			} catch (PartMetException e) {
-				
-				throw new SharedFileException("Failed to save part.met file");
-				
-			}
-			checkFilePartsIntegrity();
-		}catch(Throwable t) {
-			throw new SharedFileException("Failed to write data");
-		}
 		
 	}
 
@@ -323,7 +308,7 @@ public class PartialFile extends SharedFile {
 		
 		try {
 			
-			fileChannel.position(fileChannel.size());
+			writeChannel.position(writeChannel.size());
 		
 			long byteCount = 0;
 			
@@ -333,7 +318,7 @@ public class PartialFile extends SharedFile {
 				
 				block.position(0);
 				
-				fileChannel.write(block);
+				writeChannel.write(block);
 				
 			}
 			
@@ -343,7 +328,7 @@ public class PartialFile extends SharedFile {
 			
 			block.position(0);
 			
-			fileChannel.write(block);
+			writeChannel.write(block);
 			
 		} catch (IOException e) {
 						
@@ -361,8 +346,8 @@ public class PartialFile extends SharedFile {
 		if (!hasHashSet()) return false;
 		
 		PartHashSet fileHashSet = partFile.getFileHashSet();
-		
-		PartHashSet newSet = MD4FileHasher.calcHashSets(fileChannel);
+		PartHashSet newSet = MD4FileHasher.calcHashSets(writeChannel);
+
 		if (newSet.size()!=fileHashSet.size()) 
 			return false;
 		
@@ -393,7 +378,7 @@ public class PartialFile extends SharedFile {
 		
 		if (!newSet.getFileHash().equals(fileHashSet.getFileHash())) {
 			
-			this.partFile.getGapList().addGap(0, length());
+			partFile.getGapList().addGap(0, length());
 			
 			return false;
 			
@@ -448,9 +433,9 @@ public class PartialFile extends SharedFile {
 		msgDigest.reset();
 		try {
 			
-			fileChannel.position(start);
+			readChannel.position(start);
 			
-			int count = fileChannel.read(partData);
+			int count = readChannel.read(partData);
 			partData.limit(count);
 			msgDigest.update(partData);
 			
@@ -574,17 +559,17 @@ public class PartialFile extends SharedFile {
 					
 					long toAdd = 0;
 					
-					if (fileChannel.size()<=chunk.getChunkStart()) {
+					if (readChannel.size()<=chunk.getChunkStart()) {
 						
-						toAdd = chunk.getChunkStart() - fileChannel.size();
+						toAdd = chunk.getChunkStart() - readChannel.size();
 						
 						toAdd += chunk.getChunkData().capacity();
 						
 					} else
 						
-					if ((fileChannel.size()>chunk.getChunkStart())&&(fileChannel.size()<=chunk.getChunkEnd())) {
+					if ((readChannel.size()>chunk.getChunkStart())&&(readChannel.size()<=chunk.getChunkEnd())) {
 						
-						toAdd = chunk.getChunkEnd() - fileChannel.size();
+						toAdd = chunk.getChunkEnd() - readChannel.size();
 						
 					}
 					System.out.println("A");
@@ -594,11 +579,11 @@ public class PartialFile extends SharedFile {
 						
 					}
 					System.out.println("B");
-					fileChannel.position(chunk.getChunkStart());
+					readChannel.position(chunk.getChunkStart());
 					
 					chunk.getChunkData().position(0);
 					
-					fileChannel.write(chunk.getChunkData());
+					readChannel.write(chunk.getChunkData());
 					System.out.println("C");
 					try {
 						
