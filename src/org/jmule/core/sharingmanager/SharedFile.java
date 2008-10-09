@@ -58,33 +58,32 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:15:42 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 10:10:33 $$
  */
 public abstract class SharedFile {
 	
-	protected FileChannel fileChannel = null;
-	
+	protected FileChannel readChannel  = null;
+	protected FileChannel writeChannel = null;
 	protected PartHashSet hashSet = null;
 	protected TagList tagList = new TagList();
 	protected File file;
 
 	public FileChunk getData(FileChunkRequest chunkData) throws SharedFileException{
-		if (fileChannel == null)
+		if (readChannel == null)
 			try {
-				fileChannel = new RandomAccessFile(file,"rws").getChannel();
+				readChannel = new RandomAccessFile(file,"rws").getChannel();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			
 		ByteBuffer data = Misc.getByteBuffer(chunkData.getChunkEnd()-chunkData.getChunkBegin());
 		data.position(0);
 		try {
-			fileChannel.position(chunkData.getChunkBegin());
+			readChannel.position(chunkData.getChunkBegin());
 			
-			fileChannel.read(data);
+			readChannel.read(data);
 		} catch (IOException e) {
-			throw new SharedFileException("I/O error on reading file "+this);
+			throw new SharedFileException("I/O error on reading file "+this+"\n"+Misc.getStackTrace(e));
 		}
 		return new FileChunk(chunkData.getChunkBegin(),chunkData.getChunkEnd(),data);
 	}
@@ -165,13 +164,13 @@ public abstract class SharedFile {
 	}
 	
 	public void updateHashes() throws SharedFileException {
-		if (fileChannel == null)
+		if (readChannel == null)
 			try {
-				fileChannel = new RandomAccessFile(file,"rws").getChannel();
+				readChannel = new RandomAccessFile(file,"rws").getChannel();
 			} catch (FileNotFoundException e) {
 				throw new SharedFileException("Shared file not found");
 			}
-		PartHashSet newSets = MD4FileHasher.calcHashSets(fileChannel);
+		PartHashSet newSets = MD4FileHasher.calcHashSets(readChannel);
 		hashSet = newSets;
 	}
 
@@ -197,9 +196,16 @@ public abstract class SharedFile {
 	
 	public void closeFile() {
 		
-		if (fileChannel!=null)
+		if (readChannel!=null)
 			try {
-				fileChannel.close();
+				readChannel.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		if (writeChannel!=null)
+			try {
+				writeChannel.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
