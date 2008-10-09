@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/04 14:31:35 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:30:57 $$
  */
 public class DownloadManagerImpl implements DownloadManager {
 
@@ -53,9 +53,6 @@ public class DownloadManagerImpl implements DownloadManager {
 	private List<DownloadManagerListener> listener_list = new LinkedList<DownloadManagerListener>();
 	
 	public DownloadManagerImpl() {
-		
-	
-		
 	}
 	
 	public void addDownload(SearchResultItem searchResult) {
@@ -200,8 +197,8 @@ public class DownloadManagerImpl implements DownloadManager {
 	public void addDownloadPeers(FileHash fileHash, List<Peer> peerList) {
 		
 		DownloadSession downloadSession = session_list.get(fileHash);
-		
-		downloadSession.addDownloadPeers(peerList);
+		if (downloadSession != null)
+			downloadSession.addDownloadPeers(peerList);
 	}
 
 	public DownloadSession getDownload(FileHash fileHash) {

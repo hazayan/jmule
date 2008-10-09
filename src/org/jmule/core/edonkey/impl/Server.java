@@ -46,6 +46,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.packet.Packet;
@@ -83,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:43:01 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:34:26 $$
  */
 public class Server extends JMConnection {
 	
@@ -363,12 +364,14 @@ public class Server extends JMConnection {
 		if (packet instanceof JMServerMessageSP) {
 			
 			JMServerMessageSP scannedPacket = (JMServerMessageSP) packet;
-			 
-			if (scannedPacket.getServerMessage().contains("WARNING : This server is full.")) {
-				
-				disconnect();
-				
-				return;
+			
+			String server_message = scannedPacket.getServerMessage().toLowerCase();
+			for(String msg : E2DKConstants.SERVER_ERROR_MESSAGES) {
+				msg = msg.toLowerCase();
+				if (server_message.equals(msg)) {
+					disconnect();
+					return ;
+				}
 			}
 			
 			ServerManagerFactory.getInstance().serverMessage(this, scannedPacket.getServerMessage());
@@ -406,7 +409,7 @@ public class Server extends JMConnection {
 		if (packet instanceof JMServerFoundSourceSP) {
 			
 			JMServerFoundSourceSP scannedPacket = (JMServerFoundSourceSP) packet;
-			
+
 			PeerManagerFactory.getInstance().addPeer(scannedPacket.getFileHash(), scannedPacket);
 
 			return;
