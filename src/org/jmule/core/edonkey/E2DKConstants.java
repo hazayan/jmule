@@ -23,13 +23,15 @@
 package org.jmule.core.edonkey;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:48:28 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:32:39 $$
  */
 public class E2DKConstants {
 
@@ -65,6 +67,13 @@ public class E2DKConstants {
 	public final static int ProtocolVersion 			= 60;
 		
 	public final static int SUPPORTED_FLAGS 			= E2DKConstants.CAP_ZLIB | E2DKConstants.CAP_UNICODE | E2DKConstants.CAP_LARGEFILES ;
+	
+	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
+	 
+	static {
+		SERVER_ERROR_MESSAGES.add("WARNING : This server is full.");
+		SERVER_ERROR_MESSAGES.add("ERROR : Connection refused. Your IP is currently blacklisted.");
+	}
 	
 	public final static long PARTSIZE 					= 0x947000; //9728000
     public final static int BLOCKSIZE 					= 184320;//184320 10240
