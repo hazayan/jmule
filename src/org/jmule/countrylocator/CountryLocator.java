@@ -35,8 +35,8 @@ import com.maxmind.geoip.LookupService;
  * Created on Aug 12, 2008
  * @author javajox
  * @author binary256_
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/20 15:53:20 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/09 15:16:01 $
  */
 public class CountryLocator {
 
@@ -107,19 +107,32 @@ public class CountryLocator {
 		return service_down ? null : getCountry( inetAddress ).getName();
 	}
 	
-	public String getCountryCode( InetAddress inetAddress ) {
+	//public String getCountryCode( InetAddress inetAddress ) {
 		
-		return service_down ? null : getCountry( inetAddress ).getCode();
-	}
+	//	return service_down ? null : getCountry( inetAddress ).getCode();
+	//}
 	
-	public String getCountryCode( long inetAddress ) {
+	//public String getCountryCode( long inetAddress ) {
 		
-		return service_down ? null : getCountry( inetAddress ).getCode();
-	}
+	//	return service_down ? null : getCountry( inetAddress ).getCode();
+	//}
 	
-	public String getCountryCode( String inetAddress ) {
+	//public String getCountryCode( String inetAddress ) {
 		
-		return service_down ? null : getCountry( inetAddress ).getCode();
+	//	return service_down ? null : getCountry( inetAddress ).getCode();
+	//}
+	
+	public String getCountryCode(Object inetAddress) {
+		
+		if( service_down ) return null;
+		
+		if(inetAddress instanceof String) 
+			return lookup_service.getCountry((String)inetAddress).getCode();
+		
+		if(inetAddress instanceof InetAddress)
+		    return lookup_service.getCountry((InetAddress)inetAddress).getCode();
+		
+		return null;
 	}
 	
 	public boolean isServiceDown() {
