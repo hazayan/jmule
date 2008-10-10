@@ -83,8 +83,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:47:20 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/10 16:53:10 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -272,7 +272,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	public void addDownloadPeers(List<Peer> peerList){
 
-		for(Peer peer : peerList) { 
+		for(Peer peer : peerList) {
 			if (peer.getSessionList() == null) continue;
 			if (peer.getSessionList().hasDownloadSession(this)) continue;
 				
@@ -342,7 +342,7 @@ public class DownloadSession implements JMTransferSession {
 		
 		PeerDownloadStatus status = download_status_list.getDownloadStatus(peer);
 		
-		if ((download_status_list==null) ||(status.getPeerStatus() != PeerDownloadStatus.IN_QUEUE)) {
+		if ((status==null) ||(status.getPeerStatus() != PeerDownloadStatus.IN_QUEUE)) {
 			// if peer is not in queue - totally remove
 			partStatus.removePartStatus(peer);
 			fileRequestList.remove(peer);

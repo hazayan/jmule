@@ -49,11 +49,13 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 16:56:36 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/10 16:50:18 $$
  */
 public class ServerManagerImpl implements ServerManager {
 
+	private static final int AUTOCONNECT_SLEEP_INTERVAL = 10000;
+	
 	private List<Server> server_list = new CopyOnWriteArrayList<Server>();
 	
 	private List<ServerListListener> server_list_listeners = new CopyOnWriteArrayList<ServerListListener>();
@@ -65,7 +67,6 @@ public class ServerManagerImpl implements ServerManager {
 	private ServersUDPQueryThread udp_query_thread;
 	
 	// Auto connect process
-	private List<Server> checked_servers = new LinkedList<Server>();
 	
 	private ServerMet server_met;
 	
@@ -256,7 +257,6 @@ public class ServerManagerImpl implements ServerManager {
 			    
 				List<Server> candidate_servers = new LinkedList<Server>();
 				for(Server server : server_list) {
-					//	if (server.isDown()) continue;
 					candidate_servers.add(server);
 				}
 				
@@ -281,13 +281,10 @@ public class ServerManagerImpl implements ServerManager {
 				addServerListener(server_listener);
 				while( !candidate_servers.isEmpty() ) {
 					min_ping_server = (Server)Collections.min(candidate_servers, compare_servers_by_ping);
-					if( min_ping_server.isDown() ) {
-						candidate_servers.remove(min_ping_server);
-						continue;
-					}
+
 		            min_ping_server.connect();
 		            try {
-		              Thread.sleep(10000);
+		              Thread.sleep(AUTOCONNECT_SLEEP_INTERVAL);
 		            }catch(Throwable t) {
 		            	if (stop) {
 		            		if (min_ping_server!= null)
