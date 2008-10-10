@@ -29,10 +29,10 @@ import org.jmule.core.edonkey.impl.ServerManagerImpl;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/10 17:10:39 $$
  */
-public aspect ServerManagerLogger {
+public privileged aspect ServerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.ServerManager");
 	
 	after() throwing (Throwable t): execution (* ServerManagerImpl.*(..)) {
