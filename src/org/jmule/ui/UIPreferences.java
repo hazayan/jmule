@@ -24,18 +24,26 @@ package org.jmule.ui;
 
 import java.util.prefs.Preferences;
 
+import org.jmule.core.JMConstants;
+
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/22 08:42:31 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/12 11:58:38 $$
  */
 public class UIPreferences extends UIConstants {
 
+	static Preferences preferences = Preferences.systemRoot();
 
+	private static UIPreferences instance = null;
+	
+	public static UIPreferences getSingleton() {
+		if( instance == null ) instance = new UIPreferences();
+		return instance;
+	}
+	
 	public static void storeDefaultPreferences(String particular_ui_root) {
-		
-		Preferences preferences = Preferences.systemRoot();
 		
 		try {
 			 // sets the visibility of the columns
@@ -608,11 +616,138 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SHARED_LIST_COMPLETED_COLUMN_ID ) ).
 			 putInt(ORDER, getDefaultColumnOrder( SHARED_LIST_COMPLETED_COLUMN_ID ) );
+			 
+			 // other elements
+			 
+			 preferences.
+			 node( getPromptOnExitNodePath( particular_ui_root ) ).
+			 putBoolean(ENABLED, getDefaultPromptOnExit());
 			
+			 preferences.
+			 node( getStartupCheckUpdateNodePath( particular_ui_root ) ).
+			 putBoolean(ENABLED, getDefaultStartupCheckUpdate());
+			 
+			 preferences.
+			 node( getToolBarNodePath( particular_ui_root ) ).
+			 putBoolean(VISIBILITY, getToolBarDefaultVisibility());
+			 
+			 preferences.
+			 node( getStatusBarNodePath( particular_ui_root ) ).
+			 putBoolean(VISIBILITY, getStatusBarDefaultVisibility());
+			 
+			 preferences.
+			 node( getConnectAtStartupNodePath( particular_ui_root ) ).
+			 putBoolean(ENABLED, getDefaultConnectAtStartup());
+
+			 
 		}catch(Throwable t) {
 			t.printStackTrace();
 		}
 		
 	}
 	
+	// PromptOnExit methods
+	
+   void setPromptOnExit(String uiRoot, boolean value) {
+		String prompt_on_exit_node = getPromptOnExitNodePath(uiRoot);
+		preferences.node(prompt_on_exit_node).putBoolean(ENABLED, value);
+	}
+	
+	boolean isPromptOnExitEnabled(String uiRoot) {
+		String node = getPromptOnExitNodePath(uiRoot);
+		return preferences.node(node).getBoolean(ENABLED, getDefaultPromptOnExit());
+	}
+	
+	// end PromptOnExitMethods
+	
+	// CheckForUpdatesAtStartup methods
+	
+	boolean isCheckForUpdatesAtStartup(String uiRoot) {
+		String update_check_node = getStartupCheckUpdateNodePath(uiRoot);
+		return preferences.node(update_check_node).getBoolean(ENABLED, getDefaultStartupCheckUpdate());
+	}
+	
+	void setCheckForUpdatesAtStartup(String uiRoot, boolean value) {
+		String update_check_node = getStartupCheckUpdateNodePath(uiRoot);
+		preferences.node(update_check_node).putBoolean(ENABLED, value);
+	}
+	
+	// end CheckForUpdatesAtStartup methods
+	
+	// ToolBar methods
+	
+	boolean isToolBarVisible(String uiRoot) {
+		String toolbar_node = getToolBarNodePath(uiRoot);
+		return preferences.node(toolbar_node).getBoolean(VISIBILITY, getToolBarDefaultVisibility());
+	}
+	
+    void setToolBarVisible(String uiRoot, boolean visibility) {
+		String toolbar_node = getToolBarNodePath(uiRoot);
+		preferences.node(toolbar_node).putBoolean(VISIBILITY,visibility);
+	}
+	
+	// end ToolBar methods
+	
+	// StatusBar methods
+	
+	boolean isStatusBarVisible(String uiRoot) {
+		String toolbar_node = getStatusBarNodePath(uiRoot);
+		return preferences.node(toolbar_node).getBoolean(VISIBILITY, getStatusBarDefaultVisibility());
+	}
+	
+	void setStatusBarVisible(String uiRoot, boolean visibility) {
+		String toolbar_node = getStatusBarNodePath(uiRoot);
+		preferences.node(toolbar_node).putBoolean(VISIBILITY,visibility);
+	}
+	
+	// end StatusBar methods
+	
+	// NightlyBuildWarning methods
+	
+	boolean isNightlyBuildWarning(String uiRoot) {
+		String node = getNightlyBuildWarningNodePath(uiRoot);
+		boolean value = preferences.node(node).getBoolean(ENABLED, getDefaultNightlyBuildWarningEnabled());
+		if(value) {
+			setNightlyBuildWarningJMVer(uiRoot, JMConstants.DEV_VERSION);
+			return true;
+		}
+		String stored_ver = getNightlyBuildWarningJMVer(uiRoot);
+		if( JMConstants.compareDevVersions(stored_ver, JMConstants.DEV_VERSION) !=0 ) {
+			setNightlyBuildWarning(uiRoot, true);
+			setNightlyBuildWarningJMVer(uiRoot, JMConstants.DEV_VERSION);
+			return true;
+		}
+		return false;
+	}
+	
+	void setNightlyBuildWarning(String uiRoot, boolean value) {
+		String node = getNightlyBuildWarningNodePath(uiRoot);
+		preferences.node(node).putBoolean(ENABLED, value);
+	}
+	
+	void setNightlyBuildWarningJMVer(String uiRoot, String value) {
+		String node_path = getNightlyBuildWarningJMVerNodePath(uiRoot);
+		preferences.node(node_path).put(node_path, value);
+	}
+	
+	String getNightlyBuildWarningJMVer(String uiRoot) {
+		String node_path = getNightlyBuildWarningJMVerNodePath(uiRoot);
+		return preferences.node(node_path).get(ENABLED, getDefaultNightlyBuildWarningJMVer());
+	}
+	
+	// end NightlyBuildWarning methods
+	
+	// Connect at start up methods
+	
+	boolean isConnectAtStartup(String uiRoot) {
+	   String node = getConnectAtStartupNodePath(uiRoot);
+	   return preferences.node(node).getBoolean(ENABLED, getDefaultConnectAtStartup());
+	}
+	
+	void setConnectAtStartup(String uiRoot, boolean value) {
+		String node = getConnectAtStartupNodePath(uiRoot);
+		preferences.node(node).putBoolean(ENABLED, value);
+	}
+	
+	// end connect at startup methods
 }

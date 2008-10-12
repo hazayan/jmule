@@ -23,19 +23,21 @@
 package org.jmule.ui;
 
 
-import java.util.HashMap;
-
 import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+
+import org.jmule.core.JMConstants;
 
 
 /**
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:53:54 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/12 11:58:38 $$
  */
 
 public class UIConstants {
@@ -46,13 +48,21 @@ public class UIConstants {
 	protected static final String ORDER             =       "ORDER";
 	protected static final String WIDTH             =       "WIDTH";
 	protected static final String ENABLED           =       "ENABLED";
+	protected static final String VERSION           =       "VERSION";
 	protected static final String TABLE_COLUMN_PATH =       "/tables/columns";
 	
 	public static final int TOOL_BAR_ID                         = 1;
 	public static final int STATUS_BAR_ID                       = 2;
 
 	public static final int PROMPT_ON_EXIT_ID					= 3;
-	public static final int UPDATE_CHECK_AT_STARTUP_ID			= 4;
+	public static final int CHECK_UPDATE_AT_STARTUP_ID			= 4;
+	
+	// if the current JM version is greater than NIGHTLY_BUILD_WARNING_JM_VER_ID
+	// then the warning is shown at least once 
+	public static final int NIGHTLY_BUILD_WARNING_ID            = 5;
+	public static final int NIGHTLY_BUILD_WARNING_JM_VER_ID     = 6;
+	
+	public static final int CONNECT_AT_STARTUP_ID               = 7;
 	
 	// Columns ID
 
@@ -70,6 +80,7 @@ public class UIConstants {
 	public static final int SERVER_LIST_HARD_LIMIT_COLUMN_ID    =   900;
 	public static final int SERVER_LIST_VERSION_COLUMN_ID   	=   1000;
 	public static final int SERVER_LIST_STATIC_COLUMN_ID        =   1010;
+	public static final int SERVER_LIST_DOWN_COLUMN_ID          =   1020;
 	
 	// downloads
 	public static final int DOWNLOAD_LIST_FILE_NAME_COLUMN_ID         = 1100; 
@@ -78,6 +89,7 @@ public class UIConstants {
 	public static final int DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID    = 1400;
 	public static final int DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID      = 1500;
 	public static final int DOWNLOAD_LIST_PROGRESS_COLUMN_ID          = 1600;
+	public static final int DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID      = 1610;
 	public static final int DOWNLOAD_LIST_COMPLETED_COLUMN_ID         = 1650;
 	public static final int DOWNLOAD_LIST_SOURCES_COLUMN_ID           = 1700;
 	public static final int DOWNLOAD_LIST_REMAINING_COLUMN_ID         = 1800;
@@ -145,6 +157,7 @@ public class UIConstants {
 	protected static final String SERVER_LIST_HARD_LIMIT_NODE               = "/server_list_hard_limit_column";
 	protected static final String SERVER_LIST_VERSION_NODE                  = "/server_list_version_column";
 	protected static final String SERVER_LIST_STATIC_NODE                   = "/server_list_static_column";
+	protected static final String SERVER_LIST_DOWN_NODE                     = "/server_list_down_column";
 	
 	protected static final String DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE       = "/download_list_file_name_column";
 	protected static final String DOWNLOAD_LIST_SIZE_COLUMN_NODE            = "/download_list_size_column";
@@ -152,6 +165,7 @@ public class UIConstants {
 	protected static final String DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_NODE  = "/download_list_download_speed_column";
 	protected static final String DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_NODE    = "/download_list_upload_speed_column";
 	protected static final String DOWNLOAD_LIST_PROGRESS_COLUMN_NODE        = "/download_list_progress_column";
+	protected static final String DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_NODE    = "/download_list_progress_bar_column";
 	protected static final String DOWNLOAD_LIST_COMPLETED_COLUMN_NODE       = "/download_list_completed_column";
 	protected static final String DOWNLOAD_LIST_SOURCES_COLUMN_NODE         = "/download_list_sources_column";
 	protected static final String DOWNLOAD_LIST_REMAINING_COLUMN_NODE       = "/download_remaining_column";
@@ -205,7 +219,12 @@ public class UIConstants {
 	protected static final String STATUS_BAR_NODE                           = "/status_bar";
 	
 	protected static final String PROMPT_ON_EXIT_NODE						= "/prompt_on_exit";
-	protected static final String UPDATE_CHECK_AT_STARTUP_NODE				= "/startup_update_check";
+	protected static final String CHECK_UPDATE_AT_STARTUP_NODE				= "/startup_update_check";
+	
+	protected static final String NIGHTLY_BUILD_WARNING_NODE                = "/nightly_build_warning";
+	protected static final String NIGHTLY_BUILD_WARNING_JM_VER_NODE         = "/nightly_build_warning_jm_ver";
+	
+	protected static final String CONNECT_AT_STARTUP_NODE                   = "/connect_at_startup";
 	
 	protected static final HashMap<String,Object> default_values = new HashMap<String,Object>();
 	
@@ -224,6 +243,7 @@ public class UIConstants {
 		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + VISIBILITY,        true);
 		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + VISIBILITY,           true);
 		default_values.put(SERVER_LIST_STATIC_COLUMN_ID + VISIBILITY,            true);
+		default_values.put(SERVER_LIST_DOWN_COLUMN_ID + VISIBILITY,              true);
 		
 		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + VISIBILITY,       true);
 		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + VISIBILITY,            true);
@@ -231,6 +251,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID + VISIBILITY,  true);
 		default_values.put(DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + VISIBILITY,    true);
 		default_values.put(DOWNLOAD_LIST_PROGRESS_COLUMN_ID + VISIBILITY,        true);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID + VISIBILITY,    true);
 		default_values.put(DOWNLOAD_LIST_COMPLETED_COLUMN_ID + VISIBILITY,       true);
 		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + VISIBILITY,         true);
 		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + VISIBILITY,       true);
@@ -294,6 +315,7 @@ public class UIConstants {
 		default_values.put(SERVER_LIST_HARD_LIMIT_COLUMN_ID + ORDER,         11);
 		default_values.put(SERVER_LIST_VERSION_COLUMN_ID + ORDER,            12);
 		default_values.put(SERVER_LIST_STATIC_COLUMN_ID + ORDER,             13);
+		default_values.put(SERVER_LIST_DOWN_COLUMN_ID + ORDER,               14);
 		
 		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,        1);
 		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + ORDER,             2);
@@ -305,6 +327,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + ORDER,          8);
 		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + ORDER,        9);
 		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + ORDER,           10);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID + ORDER,     11);
 		
 		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + ORDER,    1);
 		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + ORDER,	         2);
@@ -374,6 +397,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + WIDTH,          100);
 		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + WIDTH,        100);
 		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + WIDTH,           100);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID + WIDTH,     200);
 		
 		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + WIDTH,          150);
 		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + WIDTH,	          50);
@@ -423,7 +447,13 @@ public class UIConstants {
 		default_values.put(STATUS_BAR_ID + VISIBILITY,                       true);
 		
 		default_values.put(PROMPT_ON_EXIT_ID + ENABLED,						 true);
-		default_values.put(UPDATE_CHECK_AT_STARTUP_ID + ENABLED,			 true);
+		default_values.put(CHECK_UPDATE_AT_STARTUP_ID + ENABLED,			 true);
+		
+		default_values.put(NIGHTLY_BUILD_WARNING_ID + ENABLED,               true);
+		default_values.put(NIGHTLY_BUILD_WARNING_JM_VER_ID + VERSION,        JMConstants.DEV_VERSION);
+		
+		default_values.put(CONNECT_AT_STARTUP_ID + ENABLED,                  false);
+		
 	}
 	
 	protected static String getColumnNodeById(int ColumnID) {
@@ -443,6 +473,7 @@ public class UIConstants {
 		  	case SERVER_LIST_HARD_LIMIT_COLUMN_ID       :  return SERVER_LIST_HARD_LIMIT_NODE;
 		  	case SERVER_LIST_VERSION_COLUMN_ID          :  return SERVER_LIST_VERSION_NODE;
 		  	case SERVER_LIST_STATIC_COLUMN_ID           :  return SERVER_LIST_STATIC_NODE;
+		  	case SERVER_LIST_DOWN_COLUMN_ID             :  return SERVER_LIST_DOWN_NODE;
 		  	
 		  	case DOWNLOAD_LIST_FILE_NAME_COLUMN_ID      :  return DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE;
 		  	case DOWNLOAD_LIST_SIZE_COLUMN_ID           :  return DOWNLOAD_LIST_SIZE_COLUMN_NODE;
@@ -454,6 +485,7 @@ public class UIConstants {
 		  	case DOWNLOAD_LIST_SOURCES_COLUMN_ID        :  return DOWNLOAD_LIST_SOURCES_COLUMN_NODE;
 		  	case DOWNLOAD_LIST_REMAINING_COLUMN_ID      :  return DOWNLOAD_LIST_REMAINING_COLUMN_NODE;	
 		  	case DOWNLOAD_LIST_STATUS_COLUMN_ID         :  return DOWNLOAD_LIST_STATUS_COLUMN_NODE;
+		  	case DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID   :  return DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_NODE;
 		  		
 		  	case DOWNLOAD_PEER_LIST_IP_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_IP_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_CC_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_CC_COLUMN_NODE;
@@ -492,26 +524,32 @@ public class UIConstants {
 		  	case SHARED_LIST_FILE_ID_COLUMN_ID          :  return SHARED_LIST_FILE_ID_COLUMN_NODE;
 		  	case SHARED_LIST_COMPLETED_COLUMN_ID        :  return SHARED_LIST_COMPLETED_COLUMN_NODE;
 		  	 
-		  	case NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID  	: return NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_NODE;
-		  	case NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID  : return NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE;
-		  	case NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID  : return NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_NODE;
+		  	case NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_ID  	:  return NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_NODE;
+		  	case NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_ID  :  return NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE;
+		  	case NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_ID  :  return NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_NODE;
 
-		  	case NEW_SERVER_LIST_NAME_COLUMN_ID 		: return NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE;
-		  	case NEW_SERVER_LIST_PORT_COLUMN_ID 		: return NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE;		  	
+		  	case NEW_SERVER_LIST_NAME_COLUMN_ID 		:  return NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE;
+		  	case NEW_SERVER_LIST_PORT_COLUMN_ID 		:  return NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE;
+		  	
+		  	//case NIGHTLY_BUILD_WARNING_ID               :  return NIGHTLY_BUILD_WARNING_NODE;
+		  	//case NIGHTLY_BUILD_WARNING_JM_VER_ID        :  return NIGHTLY_BUILD_WARNING_JM_VER_NODE;
+		  	
 		}
 		
 		return "unknown column ID";
 	}
 	
-	protected static String getToolBarNode() {
+	//protected static String getToolBarNode() {
 		
-		return TOOL_BAR_NODE;
-	}
+	//	return TOOL_BAR_NODE;
+	//}
 	
-	protected static String getStatusBarNode() {
+	//protected static String getStatusBarNode() {
 		
-		return STATUS_BAR_NODE;
-	}
+	//	return STATUS_BAR_NODE;
+	///}
+	
+	// ToolBar methods
 	
 	protected static String getToolBarNodePath(String variablePath) {
 		
@@ -519,32 +557,93 @@ public class UIConstants {
 	}
 	
 	protected static boolean getToolBarDefaultVisibility() {
+		
 		return Boolean.parseBoolean(default_values.get(TOOL_BAR_ID + VISIBILITY).toString());
 	}
 	
+	// end ToolBar methods
+	
+	// StatusBar methods
+	
 	protected static String getStatusBarNodePath(String variablePath) {
+		
 		return UI_ROOT + variablePath + STATUS_BAR_NODE;
 	}
 	
 	protected static boolean getStatusBarDefaultVisibility() {
+		
 		return Boolean.parseBoolean(default_values.get(STATUS_BAR_ID + VISIBILITY).toString());
 	}
 	
+	// end StatusBar methods
+	
+	// PromptOnExit methods
+	
 	protected static boolean getDefaultPromptOnExit() {
+		
 		return Boolean.parseBoolean(default_values.get(PROMPT_ON_EXIT_ID + ENABLED).toString());
 	}
 	
 	protected static String getPromptOnExitNodePath(String variablePath) {
+		
 		return UI_ROOT + variablePath + PROMPT_ON_EXIT_NODE;
 	}
 	
-	protected static boolean getDefaultStartupUpdateCheck() {
-		return Boolean.parseBoolean(default_values.get(UPDATE_CHECK_AT_STARTUP_ID + ENABLED).toString());
+	// end PromptOnExit methods
+	
+	// StartupCheckUpdate methods
+	
+	protected static boolean getDefaultStartupCheckUpdate() {
+		
+		return Boolean.parseBoolean(default_values.get(CHECK_UPDATE_AT_STARTUP_ID + ENABLED).toString());
 	}
 	
-	protected static String getStartupUpdateCheckNodePath(String variablePath) {
-		return UI_ROOT + variablePath + UPDATE_CHECK_AT_STARTUP_NODE;
+	protected static String getStartupCheckUpdateNodePath(String variablePath) {
+		
+		return UI_ROOT + variablePath + CHECK_UPDATE_AT_STARTUP_NODE;
 	}
+	
+	// end StartupCheckUpdate methods
+	
+	// NightlyBuildWarning methods
+	
+	protected static String getNightlyBuildWarningNodePath(String variablePath) {
+		
+		return UI_ROOT + variablePath + NIGHTLY_BUILD_WARNING_NODE;
+	}
+	
+	protected static String getNightlyBuildWarningJMVerNodePath(String variablePath) {
+		
+		return UI_ROOT + variablePath + NIGHTLY_BUILD_WARNING_JM_VER_NODE;
+	}
+	
+	protected static boolean getDefaultNightlyBuildWarningEnabled() {
+		
+		return Boolean.parseBoolean(default_values.get(NIGHTLY_BUILD_WARNING_ID + ENABLED).toString());
+	}
+	
+	protected static String getDefaultNightlyBuildWarningJMVer() {
+		
+		return default_values.get(NIGHTLY_BUILD_WARNING_JM_VER_ID + VERSION).toString();
+	}
+	
+	// end NightlyBuildWarning methods
+	
+	// Connect at startup methods
+	
+	protected static boolean getDefaultConnectAtStartup() {
+		
+		return Boolean.parseBoolean(default_values.get(CONNECT_AT_STARTUP_ID + ENABLED).toString());
+	}
+	
+	protected static String getConnectAtStartupNodePath(String variablePath) {
+		
+		return UI_ROOT + variablePath + CONNECT_AT_STARTUP_NODE;
+	}
+	
+	// end connect at startup methods
+	
+	// Column methods
 	
 	protected static String getColumnNodePath(String variablePath, int columnID) {
 		
@@ -565,6 +664,8 @@ public class UIConstants {
 		
 		return Integer.parseInt(default_values.get(columnID + WIDTH).toString());
 	}
+	
+	// end column methods
 
 	private static Map<String,String> icon_name_by_extension = new Hashtable<String,String>();
 
@@ -628,6 +729,22 @@ public class UIConstants {
 		return UIImageRepository.getImageAsStream(image_path);
 	}
 	
+	public static URL getMimeURLByExtension(String extension) {
+		extension = extension.toLowerCase();
+		URL url = null;
+		
+		String file_name = icon_name_by_extension.get(extension);
+		if(file_name != null)
+		   url = UIConstants.class.
+		           getClassLoader().
+		             getResource("org/jmule/ui/resources/" + icon_name_by_extension.get(extension));
+		else
+		   url = UIConstants.class.
+	           getClassLoader().
+	             getResource("org/jmule/ui/resources/mimetypes/default.png");
+		
+		return url;
+	}
 	
 	public static final String GNU_LICENSE = "		    GNU GENERAL PUBLIC LICENSE"+
     "\n		       Version 2, June 1991"+
