@@ -29,8 +29,8 @@ import org.jmule.core.JMConstants;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/12 12:13:08 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/12 12:54:31 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -750,4 +750,35 @@ public class UIPreferences extends UIConstants {
 	}
 	
 	// end connect at startup methods
+	
+	protected void setColumnWidth(String uiRoot, int columnID,int width) {
+		String node = getColumnNodePath(uiRoot, columnID);
+		preferences.node(node).putInt(WIDTH, width);
+	}
+	
+	protected int getColumnWidth(String uiRoot, int columnID) {
+		String node = getColumnNodePath(uiRoot, columnID);
+		return preferences.node(node).getInt(WIDTH, getDefaultColumnWidth(columnID));
+	}
+	
+	protected void setColumnOrder(String uiRoot, int columnID,int order) {
+		String node = getColumnNodePath(uiRoot, columnID);
+		preferences.node(node).putInt(ORDER, order);
+	}
+	
+	protected int getColumnOrder(String uiRoot, int columnID) {
+		String node = getColumnNodePath(uiRoot, columnID);
+		return preferences.node(node).getInt(ORDER, getDefaultColumnOrder(columnID));
+	}
+
+	protected void setColumnVisibility(String uiRoot, int columnID,boolean visibility) {
+		String node = getColumnNodePath(uiRoot, columnID);
+		preferences.node(node).putBoolean(VISIBILITY, visibility);
+	}
+	
+	protected boolean isColumnVisible(String uiRoot, int columnID) {
+		String node = getColumnNodePath(uiRoot, columnID);
+		return preferences.node(node).getBoolean(VISIBILITY, getDefaultColumnVisibility(columnID));
+	}
+	
 }
