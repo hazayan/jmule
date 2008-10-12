@@ -29,8 +29,8 @@ import org.jmule.core.JMConstants;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/12 11:58:38 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/12 12:13:08 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -648,12 +648,12 @@ public class UIPreferences extends UIConstants {
 	
 	// PromptOnExit methods
 	
-   void setPromptOnExit(String uiRoot, boolean value) {
+	protected void setPromptOnExit(String uiRoot, boolean value) {
 		String prompt_on_exit_node = getPromptOnExitNodePath(uiRoot);
 		preferences.node(prompt_on_exit_node).putBoolean(ENABLED, value);
 	}
-	
-	boolean isPromptOnExitEnabled(String uiRoot) {
+
+	protected boolean isPromptOnExitEnabled(String uiRoot) {
 		String node = getPromptOnExitNodePath(uiRoot);
 		return preferences.node(node).getBoolean(ENABLED, getDefaultPromptOnExit());
 	}
@@ -662,12 +662,12 @@ public class UIPreferences extends UIConstants {
 	
 	// CheckForUpdatesAtStartup methods
 	
-	boolean isCheckForUpdatesAtStartup(String uiRoot) {
+	protected boolean isCheckForUpdatesAtStartup(String uiRoot) {
 		String update_check_node = getStartupCheckUpdateNodePath(uiRoot);
 		return preferences.node(update_check_node).getBoolean(ENABLED, getDefaultStartupCheckUpdate());
 	}
 	
-	void setCheckForUpdatesAtStartup(String uiRoot, boolean value) {
+	protected void setCheckForUpdatesAtStartup(String uiRoot, boolean value) {
 		String update_check_node = getStartupCheckUpdateNodePath(uiRoot);
 		preferences.node(update_check_node).putBoolean(ENABLED, value);
 	}
@@ -676,12 +676,12 @@ public class UIPreferences extends UIConstants {
 	
 	// ToolBar methods
 	
-	boolean isToolBarVisible(String uiRoot) {
+	protected boolean isToolBarVisible(String uiRoot) {
 		String toolbar_node = getToolBarNodePath(uiRoot);
 		return preferences.node(toolbar_node).getBoolean(VISIBILITY, getToolBarDefaultVisibility());
 	}
 	
-    void setToolBarVisible(String uiRoot, boolean visibility) {
+	protected void setToolBarVisible(String uiRoot, boolean visibility) {
 		String toolbar_node = getToolBarNodePath(uiRoot);
 		preferences.node(toolbar_node).putBoolean(VISIBILITY,visibility);
 	}
@@ -690,12 +690,12 @@ public class UIPreferences extends UIConstants {
 	
 	// StatusBar methods
 	
-	boolean isStatusBarVisible(String uiRoot) {
+	protected boolean isStatusBarVisible(String uiRoot) {
 		String toolbar_node = getStatusBarNodePath(uiRoot);
 		return preferences.node(toolbar_node).getBoolean(VISIBILITY, getStatusBarDefaultVisibility());
 	}
 	
-	void setStatusBarVisible(String uiRoot, boolean visibility) {
+	protected void setStatusBarVisible(String uiRoot, boolean visibility) {
 		String toolbar_node = getStatusBarNodePath(uiRoot);
 		preferences.node(toolbar_node).putBoolean(VISIBILITY,visibility);
 	}
@@ -704,7 +704,7 @@ public class UIPreferences extends UIConstants {
 	
 	// NightlyBuildWarning methods
 	
-	boolean isNightlyBuildWarning(String uiRoot) {
+	protected boolean isNightlyBuildWarning(String uiRoot) {
 		String node = getNightlyBuildWarningNodePath(uiRoot);
 		boolean value = preferences.node(node).getBoolean(ENABLED, getDefaultNightlyBuildWarningEnabled());
 		if(value) {
@@ -720,17 +720,17 @@ public class UIPreferences extends UIConstants {
 		return false;
 	}
 	
-	void setNightlyBuildWarning(String uiRoot, boolean value) {
+	protected void setNightlyBuildWarning(String uiRoot, boolean value) {
 		String node = getNightlyBuildWarningNodePath(uiRoot);
 		preferences.node(node).putBoolean(ENABLED, value);
 	}
 	
-	void setNightlyBuildWarningJMVer(String uiRoot, String value) {
+	protected void setNightlyBuildWarningJMVer(String uiRoot, String value) {
 		String node_path = getNightlyBuildWarningJMVerNodePath(uiRoot);
 		preferences.node(node_path).put(node_path, value);
 	}
 	
-	String getNightlyBuildWarningJMVer(String uiRoot) {
+	protected String getNightlyBuildWarningJMVer(String uiRoot) {
 		String node_path = getNightlyBuildWarningJMVerNodePath(uiRoot);
 		return preferences.node(node_path).get(ENABLED, getDefaultNightlyBuildWarningJMVer());
 	}
@@ -739,12 +739,12 @@ public class UIPreferences extends UIConstants {
 	
 	// Connect at start up methods
 	
-	boolean isConnectAtStartup(String uiRoot) {
+	protected boolean isConnectAtStartup(String uiRoot) {
 	   String node = getConnectAtStartupNodePath(uiRoot);
 	   return preferences.node(node).getBoolean(ENABLED, getDefaultConnectAtStartup());
 	}
 	
-	void setConnectAtStartup(String uiRoot, boolean value) {
+	protected void setConnectAtStartup(String uiRoot, boolean value) {
 		String node = getConnectAtStartupNodePath(uiRoot);
 		preferences.node(node).putBoolean(ENABLED, value);
 	}
