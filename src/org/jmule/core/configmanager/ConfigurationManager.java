@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 19:02:20 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 19:21:21 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -59,8 +59,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
 	public static final int          UPLOAD_QUEUE_SIZE              =     200;
-	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 3;
-	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60;
+	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 30;
+	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
 	// the network
 	public static final long          DOWNLOAD_BANDWIDTH            =     1024 * 10 * 256;
