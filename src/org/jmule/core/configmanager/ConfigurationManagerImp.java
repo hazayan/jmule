@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/22 12:44:22 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 18:48:18 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -161,20 +161,19 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public void setDownloadBandwidth(long downloadBandwidth) {
 		
 		 config_store.setProperty( DOWNLOAD_BANDWIDTH_KEY, downloadBandwidth + "" );
-		 
+		 save();
 		 notifyPropertyChanged( DOWNLOAD_BANDWIDTH_KEY, downloadBandwidth );
 	}
 	
 	public void setDownloadBandwidth(String downloadBandwidth) {
 		
 		setDownloadBandwidth(Long.parseLong(downloadBandwidth));
-		
 	}
 
 	public void setDownloadLimit(long downloadLimit) {
 		
 		config_store.setProperty( DOWNLOAD_LIMIT_KEY, downloadLimit + "" );
-		
+		save();	
 		notifyPropertyChanged( DOWNLOAD_LIMIT_KEY, downloadLimit );
 	}
 	
@@ -187,7 +186,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public void setNickName(String nickName) {
 
         config_store.setProperty(NICK_NAME_KEY, nickName);
-        
+		save();
         notifyPropertyChanged( NICK_NAME_KEY, nickName ); 
 	}
 
@@ -207,7 +206,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 			config_store.setProperty(SHARED_DIRECTORIES_KEY + i, sharedFolders.get(i).toString());
 			
 		}
-		
+		save();	
 		notifyPropertyChanged( SHARED_DIRECTORIES_KEY, sharedFolders );
 	}
 	
@@ -247,34 +246,32 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 
 	public void setTCP(String tcp) {
 	
-		config_store.setProperty( TCP_PORT_KEY, tcp );
-		 
+		setTCP(Integer.parseInt(tcp));
 	}
 	
 	public void setTCP(int tcp) {
-		
-		setTCP( tcp + "" );
-		
+		config_store.setProperty( TCP_PORT_KEY, tcp + "" );
+		save(); 
 		notifyPropertyChanged( TCP_PORT_KEY, tcp );
+		
 	}
 	
 	public void setUDP(String udp) {	
 		
-		config_store.setProperty( UDP_PORT_KEY, udp );
-		
+		setUDP(Integer.parseInt(udp));
 	}
 
 	public void setUDP(int udp) {
-		
-		setUDP( udp + "" );
-       
-       notifyPropertyChanged( UDP_PORT_KEY, udp );
+		config_store.setProperty( UDP_PORT_KEY, udp + "" );
+		save(); 
+		notifyPropertyChanged( UDP_PORT_KEY, udp );
+
 	}
 
 	public void setUploadBandwidth(long downloadBandwidth) {
 		
        config_store.setProperty( UPLOAD_BANDWIDTH_KEY, downloadBandwidth + "" );
-       
+       save(); 
        notifyPropertyChanged( UPLOAD_BANDWIDTH_KEY, downloadBandwidth );
 	}
 	
@@ -287,7 +284,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public void setUploadLimit(long uploadLimit) {
 		
        config_store.setProperty( UPLOAD_LIMIT_KEY, uploadLimit + "" );
-       
+       save(); 
        notifyPropertyChanged( UPLOAD_LIMIT_KEY, uploadLimit );
 	}
 	
@@ -314,7 +311,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public void setUDPEnabled(boolean enabled) {
 		
 		config_store.setProperty( UDP_ENABLED_KEY, enabled + "" );
-		
+		save(); 
 		notifyPropertyChanged( UDP_ENABLED_KEY, enabled );
 	}
 
@@ -385,35 +382,43 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 
 	public void setParameter(String parameter, int value) {
 		config_store.put(parameter, value+"");
+		save(); 
 		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, String value) {
 		config_store.put(parameter, value+"");
+		save(); 
+		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, float value) {
 		config_store.put(parameter, value+"");
+		save(); 
 		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, long value) {
 		config_store.put(parameter, value+"");
+		save(); 
 		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void setParameter(String parameter, boolean value) {
 		config_store.put(parameter, value+"");
+		save(); 
 		notifyCustomPropertyChanged(parameter,value);
 	}
 	
 	public void setParameter(String parameter, double value) {
 		config_store.put(parameter, value+"");
+		save(); 
 		notifyCustomPropertyChanged(parameter,value);
 	}
 
 	public void removeParameter(String parameter) {
 		config_store.remove(parameter);
+		save(); 
 	}
 	
 	public boolean hasParameter(String parameter) {
