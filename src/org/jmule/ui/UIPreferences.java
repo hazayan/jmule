@@ -29,8 +29,8 @@ import org.jmule.core.JMConstants;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/12 12:54:31 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/14 18:28:38 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -508,6 +508,14 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SOURCES_COLUMN_ID ) ).
 			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_REMAINING_COLUMN_ID ) ).
