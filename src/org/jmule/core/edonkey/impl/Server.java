@@ -84,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:34:26 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 18:49:10 $$
  */
 public class Server extends JMConnection {
 	
@@ -472,7 +472,7 @@ public class Server extends JMConnection {
 		
 		if (isConnected) return false;
 		
-		if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_UDP_QUERY_INTERVAL * 3)
+		if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_DOWN_TIMEOUT)
 			
 			return true;
 		
@@ -487,8 +487,8 @@ public class Server extends JMConnection {
 	}
 
 	protected void onDisconnect() {
-		
-		last_udp_response = System.currentTimeMillis();
+		if (isDown())
+			last_udp_response = System.currentTimeMillis();
 		
 		isConnected = false;
 		
@@ -509,9 +509,9 @@ public class Server extends JMConnection {
 		
 		tag.insertString(newName);
 		
-		this.tagList.removeTag(SL_SERVERNAME);
+		tagList.removeTag(SL_SERVERNAME);
 		
-		this.tagList.addTag(tag);
+		tagList.addTag(tag);
 		
 	}
 
@@ -541,9 +541,9 @@ public class Server extends JMConnection {
 		
 		tag.insertString(serverDesc);
 		
-		this.tagList.removeTag(SL_DESCRIPTION);
+		tagList.removeTag(SL_DESCRIPTION);
 		
-		this.tagList.addTag(tag);
+		tagList.addTag(tag);
 		
 	}
 
@@ -551,7 +551,7 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return this.tagList.getStringTag(SL_DESCRIPTION);
+			return tagList.getStringTag(SL_DESCRIPTION);
 			
 		} catch (TagException e) {
 			
@@ -565,9 +565,9 @@ public class Server extends JMConnection {
 		
 		tag.insertDWORD(softLimit);
 		
-		this.tagList.removeTag(SL_SOFTFILES);
+		tagList.removeTag(SL_SOFTFILES);
 		
-		this.tagList.addTag(tag);
+		tagList.addTag(tag);
 		
 	}
 
@@ -575,7 +575,7 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return this.tagList.getDWORDTag(SL_SOFTFILES);
+			return tagList.getDWORDTag(SL_SOFTFILES);
 			
 		} catch (TagException e) {
 			return 0;
@@ -588,9 +588,9 @@ public class Server extends JMConnection {
 		
 		tag.insertDWORD(hardLimit);
 		
-		this.tagList.removeTag(SL_HARDFILES);
+		tagList.removeTag(SL_HARDFILES);
 		
-		this.tagList.addTag(tag);
+		tagList.addTag(tag);
 		
 	}
 
@@ -598,7 +598,7 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return this.tagList.getDWORDTag(SL_HARDFILES);
+			return tagList.getDWORDTag(SL_HARDFILES);
 			
 		} catch (TagException e) {
 			
@@ -783,8 +783,6 @@ public class Server extends JMConnection {
 				} catch (Throwable e) {
 					
 					e.printStackTrace();
-					
-					return;
 				}
 
 			}
