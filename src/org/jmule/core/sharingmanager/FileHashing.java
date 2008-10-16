@@ -39,8 +39,8 @@ import org.jmule.core.utils.MD4;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:01 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:22:33 $$
  */
 public class FileHashing extends JMFileTask {
 
@@ -75,9 +75,8 @@ public class FileHashing extends JMFileTask {
 			result = (double)(rate) / (double)(fileChannel.size());
 			
 		} catch (IOException e) {
-			
 			e.printStackTrace();
-			
+			return 100d;
 		} 
 		
 		return result;

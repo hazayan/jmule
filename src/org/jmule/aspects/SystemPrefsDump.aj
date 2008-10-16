@@ -23,14 +23,17 @@
 package org.jmule.aspects;
 
 import java.io.FileOutputStream;
-import org.jmule.core.configmanager.ConfigurationManager;
+
+import org.jmule.core.JMConstants;
 import org.jmule.core.impl.JMuleCoreImpl;
 import org.jmule.main.Main;
+import org.jmule.core.configmanager.ConfigurationManager;
+
 /**
  * Created on Sep 11, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/11 15:39:32 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:25:41 $
  */ 
 public aspect SystemPrefsDump {
  
@@ -47,7 +50,7 @@ public aspect SystemPrefsDump {
 	private void saveSystemPrefs() {
 		if (prefs_dumped) return ;
 		try {
-			System.getProperties().store(new FileOutputStream(ConfigurationManager.SYSTEM_PROPERTIES_DUMP), "Dump of system properties");
+			System.getProperties().store(new FileOutputStream(ConfigurationManager.SYSTEM_PROPERTIES_DUMP), "Dump of system properties\n#" + JMConstants.JMULE_FULL_NAME);
 			prefs_dumped = true;
 		}catch(Throwable t) {
 			System.err.println("Failed to dump system properties");

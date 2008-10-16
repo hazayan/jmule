@@ -31,13 +31,13 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public privileged aspect PartialFileLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartialFile");
 	
-	after() throwing (Throwable t): execution (* PartMet.*(..)) {
+	after() throwing (Throwable t): execution (* PartialFile.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
 	

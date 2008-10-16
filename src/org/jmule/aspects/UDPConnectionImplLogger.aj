@@ -34,8 +34,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public privileged aspect UDPConnectionImplLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.net.impl.UDPConnectionImpl");
@@ -45,7 +45,7 @@ public privileged aspect UDPConnectionImplLogger {
 	}
 	
 	after(SocketAddress s) throwing(IOException e) : args(*,s) && call(* DatagramChannel.send(ByteBuffer,SocketAddress)) {
-		log.info("Failed to send UDP packet to "+s);
+		log.warning("Failed to send UDP packet to "+s);
 	}
 	
 	before() : call (void JMUDPConnection.ban()) {

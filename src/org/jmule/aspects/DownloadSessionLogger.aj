@@ -36,8 +36,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:52:07 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public privileged aspect DownloadSessionLogger {
 
@@ -48,7 +48,7 @@ public privileged aspect DownloadSessionLogger {
 	}
 	
 	before(DownloadSession downloadSession) : target(downloadSession) &&call(void DownloadSession.startDownload()) {
-		log.info("Start to download : "+downloadSession.getSharingName());
+		//log.info("Start to download : "+downloadSession.getSharingName());
 	}
 	
 	before(Peer peer, ScannedPacket packet, PeerSessionList router,DownloadSession downloadSession) : target(downloadSession) && args(peer,packet,router) && execution (void DownloadSession.processPacket(Peer, ScannedPacket, PeerSessionList)) {
@@ -63,15 +63,15 @@ public privileged aspect DownloadSessionLogger {
 	}
 	
 	after(DownloadSession downloadSession) : target(downloadSession) && call(void DownloadSession.completeDownload()) {
-		log.info("Download of file "+downloadSession.getSharingName()+" finished");
+		//log.info("Download of file "+downloadSession.getSharingName()+" finished");
 	}
 	
 	before(Peer peer) : args(peer) && call(void Peer.sendPacket(Packet)) && cflow( call (void DownloadSession.resendFilePartsRequest(Peer))) {
-		log.info("Resend last file part request to "+peer);
+		//log.info("Resend last file part request to "+peer);
 	}
 	
 	before(Peer peer) : target(peer) && call(void Peer.sendPacket(Packet)) && cflow( execution (void DownloadSession.SlotRequestThread.run())) {
-		log.info("Resend last file part request to "+peer);
+		//log.info("Resend last file part request to "+peer);
 	}
 	
 }

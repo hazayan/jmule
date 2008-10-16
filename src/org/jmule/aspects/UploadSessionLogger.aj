@@ -32,8 +32,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public privileged aspect UploadSessionLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.uploadmanager.UploadSession");
@@ -41,7 +41,5 @@ public privileged aspect UploadSessionLogger {
 	after() throwing (Throwable t): execution (* UploadSession.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}		
-	
-	before(Peer peer,ScannedPacket packet,UploadSession us) : target(us) && args(peer,packet) && execution(void UploadSession.processPacket(Peer,ScannedPacket)) {
-	}
+
 }

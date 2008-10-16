@@ -33,8 +33,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public privileged aspect PeerLogger {
 	
@@ -56,10 +56,6 @@ public privileged aspect PeerLogger {
 	}
 	
 	before(Peer p) : target(p) && call( void Peer.connect()) {
-		if (p.getStatus()==JMConnection.TCP_SOCKET_DISCONNECTED)
-			if (!p.isHighID())
-				if (p.getConnectedServer()==null)
-					log.warning("Can't connect to low id peer, dont have server data");
 	}
 	
 	before(ScannedPacket packet, Peer p) : target(p) && args(packet)&& execution (void Peer.processPacket(ScannedPacket)) {

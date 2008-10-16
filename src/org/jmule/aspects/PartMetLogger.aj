@@ -22,12 +22,22 @@
  */
 package org.jmule.aspects;
 
+import java.util.logging.Logger;
+import org.jmule.core.edonkey.metfile.PartMet;
+import org.jmule.util.Misc;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:10 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public aspect PartMetLogger {
 
+	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartMet");
+	
+	after() throwing (Throwable t): execution (* PartMet.*(..)) {
+		log.warning(Misc.getStackTrace(t));
+	}
+	
 }

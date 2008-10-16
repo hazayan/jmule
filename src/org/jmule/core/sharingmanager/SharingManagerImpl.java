@@ -64,6 +64,7 @@ public class SharingManagerImpl implements SharingManager {
 	private List<SharedFile> new_files = new CopyOnWriteArrayList<SharedFile>();
 	private Timer sharing_manager_timer;
 	private TimerTask rescan_dirs_task;
+	
 	public void initialize() {
 		sharing_manager_timer = new Timer();
 	    sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
@@ -276,6 +277,8 @@ public class SharingManagerImpl implements SharingManager {
 		}
 		
 		public double getPercent() {
+			if (file_hashing==null) return 100;
+			if (!file_hashing.isAlive()) return 100;
 			return file_hashing.getPercent();
 		}
 		
@@ -512,6 +515,7 @@ public class SharingManagerImpl implements SharingManager {
 		SharedFile shared_file = sharedFiles.get(fileHash);
 		if (shared_file==null) return ;
 		sharedFiles.remove(shared_file);
+		if (shared_file instanceof CompletedFile) return ;
 		shared_file.closeFile();
 		shared_file.delete();
 	}

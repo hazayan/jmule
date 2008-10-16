@@ -29,11 +29,10 @@ import org.jmule.util.Misc;
 /**
  * Created on Oct 10, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/10 17:09:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:25:41 $
  */
 public aspect SpeedManagerLogger {
-
 
 	private Logger log = Logger.getLogger("org.jmule.core.speedmanager.SpeedManager");
 	

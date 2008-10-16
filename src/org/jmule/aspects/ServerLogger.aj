@@ -24,66 +24,20 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.edonkey.impl.ClientID;
-import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Server;
-import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerCallbackFailed;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerFoundSourceSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerMessageSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerSearchResultSP;
-import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerServerListSP;
 import org.jmule.util.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public aspect ServerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.Server");
 	
-	before() :call(Server.new(..)) {
-	}
-	
 	after() throwing (Throwable t): execution (* Server.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
-	
-	before(Server s, ClientID client_id) : target(s) && args(client_id) && execution(void Server.callBackRequest(ClientID)) {
-	}
-	
-	before(ScannedPacket packet, Server s) : target(s) && args(packet)&& execution (void Server.processPacket(ScannedPacket)) {
-		
-		if (packet instanceof JMServerMessageSP) {						
-			return ;
-		}
-		
-		if (packet instanceof JMServerServerListSP) {
 
-			return ;
-		}
-		
-		if (packet instanceof JMServerCallbackFailed) {
-			return ;
-		}
-		
-		if (packet instanceof JMServerSearchResultSP) {
-			return ;
-		}
-		
-		if (packet instanceof JMServerFoundSourceSP) {
-			return ;
-		}
-	}
-	
-	before(Server s) : target(s) && execution(void Server.onConnect()) {
-	}
-	
-	before(Server s) : target(s) && execution(void Server.onDisconnect()) {
-	}
-	
-	before(Server s, FileHash fileHash,long fileSize) : target(s) && args(fileHash,fileSize) && execution(void Server.requestSources(FileHash,long)) {
-	}
 }

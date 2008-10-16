@@ -34,8 +34,8 @@ import org.jmule.core.JMThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 14:41:51 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
  */
 public privileged aspect JMuleCoreImplLogger {
 	private Logger log = Logger.getLogger("org.jmule");
@@ -59,18 +59,14 @@ public privileged aspect JMuleCoreImplLogger {
 	before(String event) : args(event) && (call(void JMuleCoreImpl.logEvent(String))) {
 		
 		String downloadmanager = "Downloads : \n";
-		
 		for(DownloadSession download_session : DownloadManagerFactory.getInstance().getDownloads()) {
-			
 			downloadmanager += download_session + "\n";
-
 		}
 		
 		String peermanager = "Peer Manager : \n";
 		
 		for (Peer peer : PeerManagerFactory.getInstance().getPeers()) {
-			
-			peermanager += peer + " \n";
+				peermanager += peer + " \n";
 		}
 		
 		peermanager += "Unknown peers : \n";
@@ -79,7 +75,7 @@ public privileged aspect JMuleCoreImplLogger {
 			
 			peermanager += peer + "\n";
 		
-		peermanager += " Low ID Peers \n";
+		peermanager += "Low ID Peers \n";
 		PeerManagerImpl impl = (PeerManagerImpl)PeerManagerFactory.getInstance();
 		for(Peer peer : impl.low_id_peer_list) {
 			peermanager += peer + "\n";
@@ -95,12 +91,6 @@ public privileged aspect JMuleCoreImplLogger {
 				peermanager+"\n"+
 				downloadmanager+"\n"+
 				uploadmanager+"\n");
-//		log.info("\nEvent : "+event+"\nDebug data :\n"+
-//				"Connection Listener : \n"+JMConnectionWaiter.getInstance()+"\n");
-//				"Peer Listener : \nSize : "+OldPeerManager.getInstance().size()+"\n"+PeerManagerFactory.getInstance()+"\n" +
-//				"Share Manager :\n"+SharingManagerFactory.getInstance()+"\n"+
-//				"Download Manager :\n"+OldDownloadManager.getInstance()+"\n"+
-//				"Upload Manager : \n"+UploadManager.getInstance());
 	}
 	
 
