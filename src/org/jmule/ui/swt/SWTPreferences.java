@@ -30,15 +30,14 @@ import org.jmule.ui.UIConstants;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:39:39 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 15:35:50 $$
  */
 public class SWTPreferences extends SWTConstants {
 	
-	
-	private Preferences preferences;
-	
 	private static SWTPreferences instance = null;
+	
+	Preferences preferences = Preferences.systemRoot();
 	
 	public static SWTPreferences getInstance() {
 		if (instance == null)
@@ -47,53 +46,47 @@ public class SWTPreferences extends SWTConstants {
 	}
 	
 	private SWTPreferences() {
-		preferences = Preferences.systemRoot();
 		
 	}
 	
 	public static int getDefaultColumnOrder(int columnID) {
-		return UIConstants.getDefaultColumnOrder(columnID) - 1;
+		if (columnID == DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID)
+			return UIConstants.getDefaultColumnOrder(columnID)-2;
+		if (columnID == DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID)
+			return UIConstants.getDefaultColumnOrder(columnID)-2;
+		return UIConstants.getDefaultColumnOrder(columnID)-1;
 	}
 	
 	public boolean promptOnExit() {
-		String prompt_on_exit_node = getPromptOnExitNodePath(SWT_NODE);
-		return preferences.node(prompt_on_exit_node).getBoolean(ENABLED, getDefaultPromptOnExit());
+		return isPromptOnExitEnabled(SWT_NODE);
 	}
 	
 	public void setPromprtOnExit(boolean value) {
-		String prompt_on_exit_node = getPromptOnExitNodePath(SWT_NODE);
-		preferences.node(prompt_on_exit_node).putBoolean(ENABLED, value);
+		setPromptOnExit(SWT_NODE, value);
 	}
 	
 	public boolean updateCheckAtStartup() {
-		String update_check_node = getStartupUpdateCheckNodePath(SWT_NODE);
-		return preferences.node(update_check_node).getBoolean(ENABLED, getDefaultStartupUpdateCheck());
+		return isCheckForUpdatesAtStartup(SWT_NODE);
 	}
 	
 	public void setUpdateCheckAtStartup(boolean value) {
-		String update_check_node = getStartupUpdateCheckNodePath(SWT_NODE);
-		preferences.node(update_check_node).putBoolean(ENABLED, value);
+		setCheckForUpdatesAtStartup(SWT_NODE,value);
 	}
 	
-	
 	public boolean isToolBarVisible() {
-		String toolbar_node = getToolBarNodePath(SWT_NODE);
-		return preferences.node(toolbar_node).getBoolean(VISIBILITY, getToolBarDefaultVisibility());
+		return isToolBarVisible(SWT_NODE);
 	}
 	
 	public boolean isStatusBarVisible() {
-		String toolbar_node = getStatusBarNodePath(SWT_NODE);
-		return preferences.node(toolbar_node).getBoolean(VISIBILITY, getStatusBarDefaultVisibility());
+		return isStatusBarVisible(SWT_NODE);
 	}
 		
 	public void setToolBarVisible(boolean visibility) {
-		String toolbar_node = getToolBarNodePath(SWT_NODE);
-		preferences.node(toolbar_node).putBoolean(VISIBILITY,visibility);
+		setToolBarVisible(SWT_NODE, visibility);
 	}
 	
 	public void setStatusBarVisible(boolean visibility) {
-		String toolbar_node = getStatusBarNodePath(SWT_NODE);
-		preferences.node(toolbar_node).putBoolean(VISIBILITY,visibility);
+		setStatusBarVisible(SWT_NODE, visibility);
 	}
 	
 	/**
@@ -107,33 +100,29 @@ public class SWTPreferences extends SWTConstants {
 	
 	/**
 	 * @param columnId the id of the column
+	 * @param order the order of the column
+	 */
+	public void setColumnOrder(int columnID, int order) {
+		super.setColumnOrder(SWT_NODE, columnID, order);
+	}
+	
+	/**
+	 * @param columnId the id of the column
 	 * @return the column width
 	 */
 	public int getColumnWidth(int columnID) {
-		if (isColumnVisible(columnID)) {
-			String node = getColumnNodePath(SWT_NODE, columnID);
-			return preferences.node(node).getInt(WIDTH, getDefaultColumnWidth(columnID));
-		}
+		if (isColumnVisible(columnID)) 
+			return super.getColumnWidth(SWT_NODE, columnID);
 		else 
 			return 0;
 	}
-		
+	
 	/**
 	 * @param columnId the id of the column
 	 * @return true if the column is visible
 	 */
 	public boolean isColumnVisible(int columnID) {
-		String node = getColumnNodePath(SWT_NODE, columnID);
-		return preferences.node(node).getBoolean(VISIBILITY, getDefaultColumnVisibility(columnID));
-	}
-	
-	/**
-	 * @param columnId the id of the column
-	 * @param order the order of the column
-	 */
-	public void setColumnOrder(int columnID, int order) {
-		String node = getColumnNodePath(SWT_NODE, columnID);
-		preferences.node(node).putInt(ORDER, order);
+		return super.isColumnVisible(SWT_NODE, columnID);
 	}
 	
 	/**
@@ -141,8 +130,7 @@ public class SWTPreferences extends SWTConstants {
 	 * @param value true if the column must be visible, false otherwise
 	 */
 	public void setColumnVisibility(int columnID, boolean value) {
-		String node = getColumnNodePath(SWT_NODE, columnID);
-		preferences.node(node).putBoolean(VISIBILITY, value);
+		super.setColumnVisibility(SWT_NODE, columnID, value);
 	}
 	
 	/**
@@ -150,8 +138,23 @@ public class SWTPreferences extends SWTConstants {
 	 * @param value the column width
 	 */
 	public void setColumnWidth(int columnID, int value) {
-		String node = getColumnNodePath(SWT_NODE, columnID);
-		preferences.node(node).putInt(WIDTH , value);
+		super.setColumnWidth(SWT_NODE, columnID, value);
 	}
 	
+	
+	public boolean isNightlyBuildWarning() {
+		return super.isNightlyBuildWarning(SWT_NODE);
+	}
+	
+	public void setNightlyBuildWarning(boolean value) {
+		super.setNightlyBuildWarning(SWT_NODE, value);
+	}
+	
+	public boolean isConnectAtStartup() {
+		return super.isConnectAtStartup(SWT_NODE);
+	}
+	
+	public void setConnectAtStartup(boolean value) {
+		super.setConnectAtStartup(SWT_NODE, value);
+	}
 }
