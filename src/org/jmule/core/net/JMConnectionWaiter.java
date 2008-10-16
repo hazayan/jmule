@@ -36,8 +36,8 @@ import org.jmule.core.edonkey.impl.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:29:40 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:23:13 $$
  */
 public class JMConnectionWaiter{
 	
@@ -114,7 +114,7 @@ public class JMConnectionWaiter{
 			
 		} catch (IOException e) {
 			
-			e.printStackTrace();
+			
 		} }
 		
 		if (connectionListenerThread != null)
@@ -189,7 +189,6 @@ public class JMConnectionWaiter{
 					
 					if (!listenSocket.isOpen()) return ;
 					
-					e.printStackTrace();
 				}
 			}
 		}

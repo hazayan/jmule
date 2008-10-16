@@ -39,8 +39,8 @@ import org.jmule.util.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/10 16:47:40 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:23:13 $$
  */
 public abstract class JMConnection{
 	
@@ -441,7 +441,6 @@ public abstract class JMConnection{
 					if (t instanceof JMFloodException) { 
 						ban();
 					}
-					t.printStackTrace();
 					if (stop) return ;
 					if (connectionStatus == TCP_SOCKET_DISCONNECTED) return ; 
 					disconnect();
@@ -503,9 +502,7 @@ public abstract class JMConnection{
 				
 
 				
-			} catch (Exception e) {
-
-				e.printStackTrace();
+			} catch (Throwable e) {
 				
 				if (stop) return ;
 				
