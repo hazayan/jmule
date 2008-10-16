@@ -46,8 +46,8 @@ import org.jmule.ui.swt.SWTPreferences;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:27:54 $$
  */
 public class SetupWizard extends JDialog {
 	
@@ -177,7 +177,9 @@ public class SetupWizard extends JDialog {
 					CommonUIPreferences.getSingleton().save();
 					
 					 //splash.increaseProgress(5, "Starting JMule UI manager");
-				 
+
+					if (_core.isFirstRun())
+					
 					try {
 					 
 						JMuleUIManager.create();
