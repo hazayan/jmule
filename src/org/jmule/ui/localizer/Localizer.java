@@ -24,19 +24,16 @@ package org.jmule.ui.localizer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import org.jmule.ui.UIConstants;
-
 /**
  * 
  * @author javajox
- * @author binary
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:08:38 $$
+ * @author binary256
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:55 $$
  */
 public class Localizer {
 
