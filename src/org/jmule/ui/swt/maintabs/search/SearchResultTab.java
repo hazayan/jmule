@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:08:24 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class SearchResultTab {
 
@@ -79,7 +79,8 @@ public class SearchResultTab {
 	private SearchResult search_result;
 	
 	private Color color_red = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
-	private Color color_green = new Color(SWTThread.getDisplay(),0,139,0);
+	//private Color color_green = new Color(SWTThread.getDisplay(),0,139,0);
+	//private Color color_black = new Color(SWTThread.getDisplay(),0,0,0);
 	
 	public SearchResultTab(CTabFolder parent,SearchRequest searchRequest,JMuleCore core) {
 		search_tab = new CTabItem(parent,SWT.CLOSE);
@@ -135,21 +136,45 @@ public class SearchResultTab {
 				return 0;
 			}
 
+			final static int NO_FILE 		= 0x01;
+			final static int DOWNLOAD_FILE  = 0x02;
+			final static int SHARED_FILE 	= 0x03;
+			
 			protected Menu getPopUpMenu() {
-
 				if (getItemCount()==0) return no_items_menu;
-				boolean contain_unshared = false;
+				int download_status = NO_FILE;
 				
-				SharingManager manager = _core.getSharingManager();
+				SharingManager  sharing_manager  = _core.getSharingManager();
+				DownloadManager download_manager = _core.getDownloadManager();
 				
-				for(SearchResultItem item : getSelectedObjects())
-					if (!manager.hasFile(item.getFileHash()))
-							contain_unshared = true;
-				if (contain_unshared)
-					download_item.setEnabled(true);
-				else
-					download_item.setEnabled(false);
+				for(SearchResultItem item : getSelectedObjects()) {
+					if (download_manager.hasDownload(item.getFileHash())) {
+						if (!download_manager.getDownload(item.getFileHash()).isStarted()) {
+							download_status = DOWNLOAD_FILE;
+						} else  
+							download_status = SHARED_FILE;
+						break;
+					}
+					if (sharing_manager.hasFile(item.getFileHash()))
+						download_status = SHARED_FILE;
+				}
 				
+				switch(download_status) {
+					case NO_FILE : {
+						download_item.setEnabled(true);
+						break;
+					}
+					
+					case SHARED_FILE : {
+						download_item.setEnabled(false);
+						break;
+					}
+				
+					case DOWNLOAD_FILE : {
+						download_item.setEnabled(true);
+						break;
+					}
+				}
 				if (getSelectionCount()>1)
 					properties_item.setEnabled(false);
 				else
@@ -165,10 +190,9 @@ public class SearchResultTab {
 				if (_core.getDownloadManager().hasDownload(fileHash)) {
 					setForegroundColor(object, color_red);
 				}
-				else
+				/*else
 					if (_core.getSharingManager().hasFile(fileHash))
-						setForegroundColor(object, color_green);
-					
+						setForegroundColor(object, color_green);*/
 				
 				setRowText(object, SWTConstants.SEARCH_FILENAME_COLUMN_ID, object.getFileName());
 				Image file_icon = SWTImageRepository.getIconByExtension(object.getFileName());
@@ -208,6 +232,16 @@ public class SearchResultTab {
 		search_results.updateColumnSettings();
 		
 		no_items_menu = new Menu(search_results);
+		
+		MenuItem no_items_close_tab = new MenuItem(no_items_menu,SWT.PUSH);
+		no_items_close_tab.setText(_._("mainwindow.searchtab.popupmenu.close"));
+		no_items_close_tab.setImage(SWTImageRepository.getImage("cancel.png"));
+		no_items_close_tab.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				search_tab.dispose();
+			}
+			
+		});
 		
 		MenuItem no_items_column_setup_item = new MenuItem(no_items_menu,SWT.PUSH);
 		no_items_column_setup_item.setText(_._("mainwindow.searchtab.popupmenu.column_setup"));
@@ -323,6 +357,11 @@ public class SearchResultTab {
 		List<SearchResultItem> list = search_results.getSelectedObjects();
 		DownloadManager download_manager = _core.getDownloadManager();
 		for(SearchResultItem item : list) {
+			if (download_manager.hasDownload(item.getFileHash())) {
+				if (!download_manager.getDownload(item.getFileHash()).isStarted())
+					download_manager.getDownload(item.getFileHash()).startDownload();
+				continue;
+			}
 			download_manager.addDownload(item);
 			download_manager.getDownload(item.getFileHash()).startDownload();
 			search_results.updateRow(item);

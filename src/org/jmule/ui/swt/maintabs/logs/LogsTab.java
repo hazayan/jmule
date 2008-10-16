@@ -53,8 +53,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 14:56:56 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public class LogsTab extends AbstractTab implements Logger {
 
@@ -172,6 +172,7 @@ public class LogsTab extends AbstractTab implements Logger {
 	
 	private void log(final long time,final Color foreground, final String text) {
 		// syncExec - we need sequentially logging
+		if (log_content.isDisposed()) return;
 		SWTThread.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				Calendar calendar = new GregorianCalendar();

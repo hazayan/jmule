@@ -23,19 +23,20 @@
 package org.jmule.ui.swt.common;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
 import org.jmule.ui.JMuleUIComponent;
@@ -43,20 +44,24 @@ import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
+import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.skin.SWTSkin;
-import org.jmule.ui.utils.NightlyBuildWarning;
 
 /**
  * Created on Sep 19, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 08:00:11 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class NightlyBuildWarningWindow implements JMuleUIComponent {
-
+	private Shell parent_shell;
 	private Shell shell;
+	
+	public NightlyBuildWarningWindow(Shell parent_shell) {
+		this.parent_shell = parent_shell;
+	}
 	
 	public void getCoreComponents() {
 	}
@@ -66,28 +71,29 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		try {
 			skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {}
-		
-		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
-		shell=new Shell(shell1,SWT.BORDER );
+
+		shell = new Shell(parent_shell,SWT.BORDER);
 		shell.setText(_._("nightlybuildwarningwindow.title"));
 		shell.setImage(SWTThread.getDisplay().getSystemImage(SWT.COLOR_WHITE));
 		shell.setSize(400,320);
+		shell.setLayout(new FillLayout());
+		Composite content = new Composite(shell,SWT.NONE);
 		
 		GridData grid_data;
 		GridLayout grid_layout = new GridLayout(1,false);
 		grid_layout.marginWidth = 0;
 		grid_layout.marginHeight = 0;
 		
-		shell.setLayout(grid_layout);
+		content.setLayout(grid_layout);
 		
-		final Label image = new Label(shell,SWT.NONE);
+		final Label image = new Label(content,SWT.NONE);
 		image.setImage(SWTImageRepository.getImage("bomb.png"));
 		grid_data = new GridData();
 		grid_data.grabExcessHorizontalSpace = true;
 		grid_data.horizontalAlignment = GridData.CENTER;
 		image.setLayoutData(grid_data);
 		
-		Label window_message = new Label(shell,SWT.NONE);
+		Label window_message = new Label(content,SWT.NONE);
 		window_message.setFont(skin.getLabelFont());
 		grid_data = new GridData();
 		grid_data.grabExcessHorizontalSpace = true;
@@ -96,33 +102,43 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		window_message.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
 		window_message.setText(_._("nightlybuildwarningwindow.label.message1"));
 		
-		Listener link_listener = new Listener() {
-			public void handleEvent(Event arg0) {
-				if (!Program.launch(arg0.text)) 
+		MouseAdapter link_listener = new MouseAdapter() {
+			public void mouseDoubleClick(MouseEvent arg0) {
+				String path = (String) ((CLabel) arg0.widget).getData();
+				if (!Utils.launchProgram(path)) 
 					Utils.showWarningMessage(shell, _._("nightlybuildwarningwindow.error_open_url.title")
-							, Localizer._("nightlybuildwarningwindow.error_open_url",arg0.text));
+							, Localizer._("nightlybuildwarningwindow.error_open_url",path));
+			}
+			public void mouseDown(MouseEvent arg0) {
+				String path = (String) ((CLabel) arg0.widget).getData();
+				if (!Utils.launchProgram(path)) 
+					Utils.showWarningMessage(shell, _._("nightlybuildwarningwindow.error_open_url.title")
+							, Localizer._("nightlybuildwarningwindow.error_open_url",path));
 			}
 		};
-		
-		Composite container = new Composite(shell,SWT.NONE);
-		container.setLayout(new GridLayout(2,false));
-		container.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
-		
-		Label window_message2 = new Label(container,SWT.NONE);
+
+		Label window_message2 = new Label(content,SWT.NONE);
 		window_message2.setFont(skin.getLabelFont());
 		grid_data = new GridData();
 		grid_data.grabExcessHorizontalSpace = true;
 		grid_data.horizontalAlignment = GridData.CENTER;
 		window_message2.setLayoutData(grid_data);
 		window_message2.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
-		window_message2.setText(_._("nightlybuildwarningwindow.label.message2"));
+		window_message2.setText(_._("nightlybuildwarningwindow.label.message2")+" " + (_._("nightlybuildwarningwindow.label.forum")));
 		
-		Link link = new Link(container,SWT.NONE);
+		CLabel link = new CLabel(content,SWT.NONE);
+		grid_data = new GridData();
+		grid_data.grabExcessHorizontalSpace = true;
+		grid_data.horizontalAlignment = GridData.CENTER;
+		link.setLayoutData(grid_data);
 		link.setFont(skin.getLabelFont());
-		link.setText("<a href=\""+JMConstants.JMULE_FORUMS+"\">"+_._("nightlybuildwarningwindow.label.forum")+"</a>");
-		link.addListener(SWT.Selection, link_listener);
+		link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		link.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		link.setText(JMConstants.JMULE_FORUMS);
+		link.setData(JMConstants.JMULE_FORUMS);
+		link.addMouseListener(link_listener);
 		
-		Composite controls_composite = new Composite(shell,SWT.NONE);
+		Composite controls_composite = new Composite(content,SWT.NONE);
 		grid_data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_END);
 		grid_data.grabExcessHorizontalSpace = true;
 		grid_data.grabExcessVerticalSpace = true;
@@ -135,7 +151,7 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		grid_data = new GridData();
 		button_check.setLayoutData(grid_data);
 		button_check.setText(_._("nightlybuildwarningwindow.label.show_at_startup"));
-		button_check.setSelection(NightlyBuildWarning.showWarning());
+		button_check.setSelection(SWTPreferences.getInstance().isNightlyBuildWarning());
 		
 		Button button = new Button(controls_composite,SWT.PUSH);
 		grid_data = new GridData();
@@ -149,7 +165,7 @@ public class NightlyBuildWarningWindow implements JMuleUIComponent {
 		button.setImage(skin.getButtonImage(SWTSkin.OK_BUTTON_IMAGE));
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				NightlyBuildWarning.setShowWarning(button_check.getSelection());
+				SWTPreferences.getInstance().setNightlyBuildWarning(button_check.getSelection());
 				shell.close();
 			}
 		});

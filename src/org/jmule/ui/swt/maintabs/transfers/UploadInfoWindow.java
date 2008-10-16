@@ -29,7 +29,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,10 +37,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.uploadmanager.UploadSession;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.GUIUpdater;
 import org.jmule.ui.swt.Refreshable;
@@ -53,8 +50,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:50:12 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
  */
 public class UploadInfoWindow implements JMuleUIComponent {
 
@@ -71,15 +68,10 @@ public class UploadInfoWindow implements JMuleUIComponent {
 	}
 
 	public void initUIComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-			
-		    ui_instance = JMuleUIManager.getJMuleUI();
-		
-		}catch(Throwable t) {
-		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
+		}catch(Throwable t) {}
 		Display display = SWTThread.getDisplay();
 		final Shell shell1=new Shell(display,SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);

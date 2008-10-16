@@ -26,23 +26,23 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
@@ -62,8 +62,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:22:03 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
@@ -76,7 +76,7 @@ public class UpdaterWindow implements JMuleUIComponent {
 	private Shell shell;
 	private Label available_version, last_update, user_version;
 	private StyledText changelog_text;
-	private Link download_link;
+	private CLabel download_link;
 	
 	private Color green_color = new Color(SWTThread.getDisplay(),68,174,71);
 	private Color red_color = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
@@ -149,20 +149,30 @@ public class UpdaterWindow implements JMuleUIComponent {
 		last_update.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		
-		download_link = new Link(shell,SWT.NONE);
+		download_link = new CLabel(shell,SWT.NONE);
 		grid_data = new GridData(GridData.HORIZONTAL_ALIGN_CENTER);
 		grid_data.horizontalSpan = 2;
 		download_link.setLayoutData(grid_data);
-		download_link.setText("<a href=\""+JMConstants.JMULE_DOWNLOAD_PAGE+"\">"+_._("updaterwindow.label.download_link")+"</a>");
-		download_link.setVisible(false);
-		
-		download_link.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event arg0) {
-				if (!Program.launch(arg0.text)) 
+		download_link.setText(_._("updaterwindow.label.download_link"));
+		download_link.setData(JMConstants.JMULE_DOWNLOAD_PAGE);
+		download_link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		download_link.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		download_link.addMouseListener(new MouseAdapter() {	
+			public void mouseDoubleClick(MouseEvent arg0) {
+				String path = (String) ((CLabel) arg0.widget).getData();
+				if (!Utils.launchProgram(path)) 
 					Utils.showWarningMessage(shell, _._("updaterwindow.error_open_url.title")
-							, Localizer._("updaterwindow.error_open_url",arg0.text));
+							, Localizer._("updaterwindow.error_open_url",path));
+			}
+			public void mouseDown(MouseEvent arg0) {
+				String path = (String) ((CLabel) arg0.widget).getData();
+				if (!Utils.launchProgram(path)) 
+					Utils.showWarningMessage(shell, _._("updaterwindow.error_open_url.title")
+							, Localizer._("updaterwindow.error_open_url",path));
 			}
 		});
+		
+		download_link.setVisible(false);
 		
 		Group changelog_group = new Group(shell,SWT.NONE);
 		changelog_group.setLayout(new FillLayout());

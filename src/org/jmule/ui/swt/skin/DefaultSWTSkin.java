@@ -22,14 +22,12 @@
  */
 package org.jmule.ui.swt.skin;
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:42:48 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public interface DefaultSWTSkin extends SWTSkin {
 

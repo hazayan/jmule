@@ -36,6 +36,7 @@ import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerListener;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
 import org.jmule.ui.swt.SWTImageRepository;
@@ -53,8 +54,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:25:32 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -87,7 +88,7 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.peers"), "", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID); 
-		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.eta"),"", width);
+		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.eta"), _._("mainwindow.transferstab.uploads.column.eta.desc"), width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploaded"), "", width);

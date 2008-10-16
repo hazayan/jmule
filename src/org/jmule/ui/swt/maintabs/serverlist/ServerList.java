@@ -39,7 +39,7 @@ import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.impl.ED2KServerLink;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.countrylocator.CountryLocator;
-import org.jmule.ui.UICommon;
+import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
@@ -58,8 +58,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:30:27 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
@@ -68,6 +68,8 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 	private Color server_down_color      = new Color(getDisplay(),178,178,178);
 	private Color server_connected_color = new Color(getDisplay(),124,152,225);
 	private Color server_default_color   = new Color(getDisplay(),0,0,0);
+	
+	private static final FlagSize default_flag_size = FlagSize.S25x15;
 	
 	private Menu no_servers_menu;
 	private Menu no_selected_servers_menu;
@@ -126,10 +128,10 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_FILES_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.files"), "",width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.soft_limit"), "",width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_SOFT_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.soft_limit"), _._("mainwindow.serverlisttab.serverlist.column.soft_limit.desc"),width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.hard_limit"), "",width);
+		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_HARD_LIMIT_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.hard_limit"), _._("mainwindow.serverlisttab.serverlist.column.hard_limit.desc"),width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SERVER_LIST_VERSION_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.SERVER_LIST_VERSION_COLUMN_ID,Localizer._("mainwindow.serverlisttab.serverlist.column.software"), "",width);
@@ -596,8 +598,7 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 	}
 	
 
-	protected int compareObjects(Server object1, Server object2,
-			int columnID, boolean order) {
+	protected int compareObjects(Server object1, Server object2, int columnID, boolean order) {
 		
 		if (columnID == SWTConstants.SERVER_LIST_NAME_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getName", order);
@@ -605,7 +606,7 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		
 		if ((columnID == SWTConstants.SERVER_LIST_CC_COLUMN_ID)||(columnID == SWTConstants.SERVER_LIST_FLAG_COLUMN_ID)) {
 			String country1 = CountryLocator.getInstance().getCountryName(object1.getAddress());
-			String country2 = CountryLocator.getInstance().getCountryName(object1.getAddress());
+			String country2 = CountryLocator.getInstance().getCountryName(object2.getAddress());
 			int result = country1.compareTo(country2);
 			if (order)
 				return result;
@@ -758,7 +759,7 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		addRow(server);
 		
 		if (!CountryLocator.getInstance().isServiceDown()) {
-				Image image = new Image(SWTThread.getDisplay(),UICommon.getCountryFlag(server.getAddress()));
+				Image image = SWTImageRepository.getFlagByAddress(server.getAddress(),default_flag_size);
 				
 				CountryFlagPainter painter = new CountryFlagPainter(image);
 				
@@ -781,6 +782,7 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		if (server.isDown()) {
 			setRowImage(server,SWTConstants.SERVER_LIST_NAME_COLUMN_ID, SWTImageRepository.getImage("server_error.png"));
 			setForegroundColor(server, server_down_color);
+			
 			int id = getObjectID(server);
 			if ((id)%2==0)
 				setBackgroundColor(server, ROW_ALTERNATE_COLOR_2);

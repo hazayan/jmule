@@ -22,9 +22,6 @@
  */
 package org.jmule.ui.swt.settingswindow;
 
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -35,12 +32,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -52,8 +45,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:26 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
  */
 public class SettingsWindow implements JMuleUIComponent {
 
@@ -67,13 +60,10 @@ public class SettingsWindow implements JMuleUIComponent {
 	}
 
 	public void initUIComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
-		}catch(Throwable t) {
-		}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
+		}catch(Throwable t) {}
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL );

@@ -40,7 +40,6 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerException;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -52,8 +51,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:26 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class ServerListImportWindow implements JMuleUIComponent{
 
@@ -69,12 +68,10 @@ public class ServerListImportWindow implements JMuleUIComponent{
 	}
 
 	public void initUIComponents() {
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {}
-		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
 		final Shell shell1=new Shell(SWTThread.getDisplay(),SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);

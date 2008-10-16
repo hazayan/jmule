@@ -30,16 +30,19 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.jmule.ui.swt.tables.BufferedTableRow;
+import org.jmule.ui.swt.tables.JMTable;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:46:59 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public class Utils {
 	
@@ -165,6 +168,19 @@ public class Utils {
 		return true;
 	}
 	
+	public static void updateTableBackground(JMTable table) {
+		for(int i = 0;i<table.getItemCount();i++) {
+			Object object = table.getObjects().get(i);
+			if (object == null) continue;
+			BufferedTableRow row = table.getRow(object);
+			if (!row.isVisible()) continue;
+			if (i%2==0)
+				row.setBackgrounColor(JMTable.ROW_ALTERNATE_COLOR_2);
+			else
+				row.setBackgrounColor(JMTable.ROW_ALTERNATE_COLOR_1);
+		}
+	}
+	
 	
 	/**
 	 * Bottom Index may be negative
@@ -212,6 +228,10 @@ public class Utils {
   	int iBottomIndex = (bottomItem != null) ? table.indexOf(bottomItem) :
 			itemCount - 1;
   	return iBottomIndex;
+	}
+	
+	public static boolean launchProgram(String program) {
+		return Program.launch(program);
 	}
 	
 }

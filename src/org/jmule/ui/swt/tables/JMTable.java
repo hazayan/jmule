@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:21:02 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -89,12 +89,10 @@ public abstract class JMTable<T> extends Table {
 		});
 		
 		addListener(SWT.SetData, new Listener(){
-
 			public void handleEvent(Event arg0) {
-				
 				TableItem item = (TableItem) arg0.item;
 				int index = indexOf(item);
-				// Time expensive
+				
 				if (enable_alternate_background_color)
 					if (index%2==0)
 						item.setBackground(ROW_ALTERNATE_COLOR_2);
@@ -156,6 +154,7 @@ public abstract class JMTable<T> extends Table {
 		table_column.setMoveable(true);
 		table_column.setResizable(true);
 		table_column.addListener(SWT.Resize, column_data_save_listener);
+		table_column.addListener(SWT.Move, column_data_save_listener);
 		
 		Listener sort_listener = new Listener() {
 			private int sort_order = 0;
@@ -350,18 +349,6 @@ public abstract class JMTable<T> extends Table {
 		return line_list.get(lineID).getControlList();
 	}
 	
-	protected void updateLineBackground() {
-		int id;
-		for(id = 0;id<getItemCount();id++) {
-			BufferedTableRow row = line_list.get(id);
-			if (enable_alternate_background_color)
-				if ((id)%2==0)
-					row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_2);
-				else
-					row.getTableItem().setBackground(ROW_ALTERNATE_COLOR_1);
-		}
-	}
-	
 	protected void updateColumnVisibility() {
 		for(TableColumn column : getColumns()) {
 			
@@ -377,7 +364,6 @@ public abstract class JMTable<T> extends Table {
 				if (column.getWidth()!=0) {
 				column.setWidth(0);
 				column.setResizable(false);
-		
 				}				
 			} else {
 				column.setResizable(true);
@@ -414,6 +400,7 @@ public abstract class JMTable<T> extends Table {
 		for(int i = 0; i < getColumnCount(); i++ ) {
 			int column_id = column_order[i];
 			TableColumn table_column = getColumn(column_id);
+			if (table_column.getWidth()==0) continue;
 			
 			int column_id2 = (Integer)table_column.getData(SWTConstants.COLUMN_NAME_KEY);
 			swt_preferences.setColumnOrder(column_id2, i);

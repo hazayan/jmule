@@ -25,10 +25,8 @@ package org.jmule.ui.swt.common;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
@@ -36,8 +34,8 @@ import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:41:22 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class ConnectButton extends ToolItem {
 

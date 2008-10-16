@@ -25,14 +25,18 @@ package org.jmule.ui.swt.aboutwindow;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
@@ -41,15 +45,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -70,8 +70,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:06:20 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -99,11 +99,18 @@ public class AboutWindow implements JMuleUIComponent {
 		final Shell shell1=new Shell(display,SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		
-		Listener link_listener = new Listener() {
-			public void handleEvent(Event arg0) {
-				if (!Program.launch(arg0.text)) 
+		MouseAdapter link_listener = new MouseAdapter() {
+			public void mouseDoubleClick(MouseEvent arg0) {
+				String path = (String) ((CLabel) arg0.widget).getData();
+				if (!Utils.launchProgram(path)) 
 					Utils.showWarningMessage(shell, _._("aboutwindow.error_open_url.title")
-							, Localizer._("aboutwindow.error_open_url",arg0.text));
+							, Localizer._("aboutwindow.error_open_url",path));
+			}
+			public void mouseDown(MouseEvent arg0) {
+				String path = (String) ((CLabel) arg0.widget).getData();
+				if (!Utils.launchProgram(path)) 
+					Utils.showWarningMessage(shell, _._("aboutwindow.error_open_url.title")
+							, Localizer._("aboutwindow.error_open_url",path));
 			}
 		};
 		
@@ -133,7 +140,7 @@ public class AboutWindow implements JMuleUIComponent {
 				gc.drawImage(image, rect.width - image.getImageData().width - 10, 5);
 				
 				gc.setForeground(new Color(SWTThread.getDisplay(),0,0,0));
-				Font font = new Font(display,"Arial",14,SWT.BOLD ); 
+				Font font = new Font(display,"Arial",14,SWT.NONE ); 
 				gc.setFont(font);
 				gc.drawText(JMConstants.JMULE_NAME, 20, TOP_GRADIENT_HEIGHT / 2 - 15,true);
 				
@@ -185,7 +192,7 @@ public class AboutWindow implements JMuleUIComponent {
 		
 		new Label(container1,SWT.NONE);
 		
-		StyledText about_text = new StyledText(container1,SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
+		StyledText about_text = new StyledText(container1,SWT.LEFT | SWT.READ_ONLY);
 		about_text.setText(_._("aboutwindow.tab.general.label.about"));
 		about_text.setWordWrap(true);
 		about_text.setBackground(shell.getBackground());
@@ -198,25 +205,37 @@ public class AboutWindow implements JMuleUIComponent {
 		layout.marginWidth = 15;
 		links_container.setLayout(layout);
 		
-		Link link;
+		FontData link_font_data = skin.getLabelFont().getFontData()[0];
+		Font link_font = new Font(SWTThread.getDisplay(),link_font_data.getName(), link_font_data.getHeight(), SWT.UNDERLINE_SINGLE);
 		
-		link = new Link(links_container,SWT.NONE);
+		CLabel link;
+		
+		link = new CLabel(links_container,SWT.NONE);
 		link.setText(_._("aboutwindow.tab.general.label.home_page") + " : ");
-		link = new Link(links_container,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.JMULE_WEB_SITE+"\">"+JMConstants.JMULE_WEB_SITE+"</a>");
-		link.addListener(SWT.Selection, link_listener);
-		
-		link = new Link(links_container,SWT.NONE);
+		link = new CLabel(links_container,SWT.NONE);
+		link.setFont(link_font);
+		link.setText(JMConstants.JMULE_WEB_SITE);
+		link.setData(JMConstants.JMULE_WEB_SITE);
+		link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		link.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		link.addMouseListener(link_listener);
+
+		link = new CLabel(links_container,SWT.NONE);
 		link.setText(_._("aboutwindow.tab.general.label.forum") + " : ");
-		link = new Link(links_container,SWT.NONE);
-		link.setText("<a href=\""+JMConstants.JMULE_FORUMS+"\">"+JMConstants.JMULE_FORUMS+"</a>");
-		link.addListener(SWT.Selection, link_listener);
+		
+		link = new CLabel(links_container,SWT.NONE);
+		link.setFont(link_font);
+		link.setText(JMConstants.JMULE_FORUMS);
+		link.setData(JMConstants.JMULE_FORUMS);
+		link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		link.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		link.addMouseListener(link_listener);
 		
 		if (JMConstants.IS_NIGHTLY_BUILD) {
 			CTabItem nightly_build = new CTabItem(tab_list,SWT.NONE);
 			content = new Composite(tab_list,SWT.NONE);
 			nightly_build.setControl(content);
-			nightly_build.setText("Nightly build");
+			nightly_build.setText(_._("aboutwindow.tab.nightly_build"));
 			layout = new GridLayout(1,false);
 			layout.marginHeight = 10;
 			layout.marginWidth  = 10;
@@ -229,20 +248,30 @@ public class AboutWindow implements JMuleUIComponent {
 			layout_data.horizontalAlignment = GridData.CENTER;
 			image.setLayoutData(layout_data);
 			
-			Link nightly_build_link = new Link(content,SWT.NONE);
-			nightly_build_link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
+			Label nightly_build_label = new Label(content,SWT.NONE);
+			nightly_build_label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
 			layout_data = new GridData(GridData.FILL_HORIZONTAL);
 			layout_data.horizontalAlignment = GridData.CENTER;
-			nightly_build_link.setLayoutData(layout_data);
-			nightly_build_link.setText(_._("aboutwindow.tab.general.label.nightly_buld_str1"));
+			nightly_build_label.setLayoutData(layout_data);
+			nightly_build_label.setText(_._("aboutwindow.tab.nightly_build.label.nightly_buld_str1"));
 			
-			nightly_build_link = new Link(content,SWT.NONE);
-			nightly_build_link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
+			Label nightly_build_label2 = new Label(content,SWT.NONE);
+			nightly_build_label2.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED));
 			layout_data = new GridData(GridData.FILL_HORIZONTAL );
 			layout_data.horizontalAlignment = GridData.CENTER;
-			nightly_build_link.setLayoutData(layout_data);
-			nightly_build_link.setText(_._("aboutwindow.tab.general.label.nightly_buld_str2") + " <a href=\""+JMConstants.JMULE_FORUMS+"\">"+_._("aboutwindow.tab.general.label.forum")+"</a>");
-			nightly_build_link.addListener(SWT.Selection, link_listener);
+			nightly_build_label2.setLayoutData(layout_data);
+			nightly_build_label2.setText(_._("aboutwindow.tab.nightly_build.label.nightly_buld_str2")+" "+_._("aboutwindow.tab.general.label.forum"));
+			
+			CLabel forum_link = new CLabel(content,SWT.NONE);
+			layout_data = new GridData(GridData.FILL_HORIZONTAL );
+			layout_data.horizontalAlignment = GridData.CENTER;
+			forum_link.setLayoutData(layout_data);
+			forum_link.setFont(link_font);
+			forum_link.setText(JMConstants.JMULE_FORUMS);
+			forum_link.setData(JMConstants.JMULE_FORUMS);
+			forum_link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+			forum_link.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+			forum_link.addMouseListener(link_listener);
 		}
 		
 		CTabItem environment_tab = new CTabItem(tab_list,SWT.NONE);
@@ -251,9 +280,7 @@ public class AboutWindow implements JMuleUIComponent {
 		environment_tab.setText(_._("aboutwindow.tab.environment"));
 		content.setLayout(new FillLayout());
 		
-		
 		JMTable<String> table = new JMTable<String>(content,SWT.NONE) {
-			
 			protected int compareObjects(String object1, String object2,
 					int columnID, boolean order) {
 				return 0;
@@ -272,10 +299,7 @@ public class AboutWindow implements JMuleUIComponent {
 					setRowText(object,2,data);
 				}
 			}
-			
-			protected void saveColumnSettings() {
-			}
-			
+			protected void saveColumnSettings() {}
 		};
 		table.setLayout(new FillLayout());
 		table.setLinesVisible(true);
@@ -335,18 +359,19 @@ public class AboutWindow implements JMuleUIComponent {
 		shell.setAlpha(0);			
 		shell.open();
 
-			new JMThread(new JMRunnable() {
-					int i;
-					public void JMRun() {
-						for(i = 0; i<255;i++ ) {
-						display.syncExec(new JMRunnable() {
-							public void JMRun() {
-								shell.setAlpha(i);
-							}
-						});
+		new JMThread(new JMRunnable() {
+				int i;
+				private static final int INCREMENT = 10;
+				public void JMRun() {
+					for(i = 0; i<255;i+=INCREMENT ) {
+					display.syncExec(new JMRunnable() {
+						public void JMRun() {
+							shell.setAlpha(i);
 						}
+					});
 					}
-				}).start();
+				}
+			}).start();
 	}
 
 }

@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -51,8 +50,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 4, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/18 07:04:03 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class DownloadInfoWindow implements JMuleUIComponent {
 
@@ -70,16 +69,12 @@ public class DownloadInfoWindow implements JMuleUIComponent {
 	}
 
 	public void initUIComponents() {
-		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-			
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
+		}catch(Throwable t) {}
 		
-		}catch(Throwable t) {
-		}
 		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		Display display = SWTThread.getDisplay();
 		final Shell shell1=new Shell(display,SWT.ON_TOP);
 		shell=new Shell(shell1,SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
@@ -126,7 +121,7 @@ public class DownloadInfoWindow implements JMuleUIComponent {
 				shell.close();
 		}});
 		
-		shell.setSize(600, 440);
+		shell.setSize(600, 450);
 		Utils.centreWindow(shell);
 		
 		shell.open();

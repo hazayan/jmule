@@ -50,7 +50,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.skin.SkinConstants;
@@ -65,8 +64,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * @author tuxpaper
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:45:53 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public class TableColumnEditorWindow {
   
@@ -96,15 +95,13 @@ public class TableColumnEditorWindow {
   public TableColumnEditorWindow(final Table editTable,Shell parent,
 		  						 TableColumn[] _tableColumns,
                                  TableStructureModificationListener _listener) {
-	JMuleUI ui_instance = null;
+	SWTSkin skin = null;
 	try {
 		
-		ui_instance = JMuleUIManager.getJMuleUI();
+		skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		
 	}catch(Throwable t) {
 	}
-		
-	SWTSkin skin = (SWTSkin)ui_instance.getSkin();
 		
     RowData rd;
     display = parent.getDisplay();

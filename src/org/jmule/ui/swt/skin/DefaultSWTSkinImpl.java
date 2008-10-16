@@ -26,7 +26,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
-import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.skin.SkinConstants;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTThread;
@@ -34,8 +33,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:31:04 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public class DefaultSWTSkinImpl implements DefaultSWTSkin {
 

@@ -41,7 +41,6 @@ import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
-import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
@@ -62,8 +61,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:25:32 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -91,35 +90,41 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		
 		int width;
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID); 
-		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.filename"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID); 
+		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.filename"),"", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, 	Localizer._("mainwindow.transferstab.downloads.column.size"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, 	_._("mainwindow.transferstab.downloads.column.size"),"", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.transferred"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.transferred"),"", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.download_speed"), "", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.download_speed"), "", width);
 		
 		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.upload_speed"),"", width);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.upload_speed"),"", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.progress"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.progress"),"", width);
 
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.completed"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_COMPLETED_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.completed"),"", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.sources"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.sources"),"", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID);
-		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.remaining"), "", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.eta"), _._("mainwindow.transferstab.downloads.column.eta.desc"), width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID);
-		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID, Localizer._("mainwindow.transferstab.downloads.column.status"),"", width);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID);
+		addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.status"),"", width);
+		
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.completed_src"), "", width);
+		
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID);
+		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.partial_src"), "", width);
 		
 		updateColumnOrder();
 		updateColumnVisibility();
@@ -127,7 +132,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		no_downloads_menu = new Menu(this);
 		
 		MenuItem paste_ed2k_file_links = new MenuItem(no_downloads_menu,SWT.PUSH);
-		paste_ed2k_file_links.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.paste_ed2k_links"));
+		paste_ed2k_file_links.setText(_._("mainwindow.transferstab.downloads.popupmenu.paste_ed2k_links"));
 		paste_ed2k_file_links.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
 		paste_ed2k_file_links.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -137,7 +142,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		new MenuItem(no_downloads_menu,SWT.SEPARATOR);
 		
 		MenuItem column_setup = new MenuItem(no_downloads_menu,SWT.PUSH);
-		column_setup.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.column_setup"));
+		column_setup.setText(_._("mainwindow.transferstab.downloads.popupmenu.column_setup"));
 		column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
 		column_setup.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -148,7 +153,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		single_download_selected = new Menu(this);
 		
 		set_download_status = new MenuItem(single_download_selected,SWT.PUSH);
-		set_download_status.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.start_download"));
+		set_download_status.setText(_._("mainwindow.transferstab.downloads.popupmenu.start_download"));
 		set_download_status.setImage(SWTImageRepository.getImage("start_download.png"));
 		set_download_status.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -159,7 +164,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		}});
 		
 		MenuItem single_cancel_download = new MenuItem(single_download_selected,SWT.PUSH);
-		single_cancel_download.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.cancel_download"));
+		single_cancel_download.setText(_._("mainwindow.transferstab.downloads.popupmenu.cancel_download"));
 		single_cancel_download.setImage(SWTImageRepository.getImage("cancel.png"));
 		single_cancel_download.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -169,7 +174,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		new MenuItem(single_download_selected,SWT.SEPARATOR);
 		
 		MenuItem copy_ed2k_link = new MenuItem(single_download_selected,SWT.PUSH);
-		copy_ed2k_link.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.copy_ed2k_link"));
+		copy_ed2k_link.setText(_._("mainwindow.transferstab.downloads.popupmenu.copy_ed2k_link"));
 		copy_ed2k_link.setImage(SWTImageRepository.getImage("ed2k_link.png"));
 		copy_ed2k_link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -179,7 +184,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		
 		
 		MenuItem paste_ed2k_link = new MenuItem(single_download_selected,SWT.PUSH);
-		paste_ed2k_link.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.paste_ed2k_link"));
+		paste_ed2k_link.setText(_._("mainwindow.transferstab.downloads.popupmenu.paste_ed2k_link"));
 		paste_ed2k_link.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
 		paste_ed2k_link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -189,7 +194,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		new MenuItem(single_download_selected,SWT.SEPARATOR);
 		
 		column_setup = new MenuItem(single_download_selected,SWT.PUSH);
-		column_setup.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.column_setup"));
+		column_setup.setText(_._("mainwindow.transferstab.downloads.popupmenu.column_setup"));
 		column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
 		column_setup.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -199,7 +204,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		new MenuItem(single_download_selected,SWT.SEPARATOR);
 		
 		MenuItem download_details = new MenuItem(single_download_selected,SWT.PUSH);
-		download_details.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.details"));
+		download_details.setText(_._("mainwindow.transferstab.downloads.popupmenu.details"));
 		download_details.setImage(SWTImageRepository.getImage("info.png"));
 		
 		download_details.addSelectionListener(new SelectionAdapter() {
@@ -211,13 +216,12 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 				}catch(Throwable es) {
 					es.printStackTrace();
 				}
-				
 		}});
 		
 		multiple_downloads_selected = new Menu(this);
 		
 		multiple_start_download = new MenuItem(multiple_downloads_selected,SWT.PUSH);
-		multiple_start_download.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.start_downloads"));
+		multiple_start_download.setText(_._("mainwindow.transferstab.downloads.popupmenu.start_downloads"));
 		multiple_start_download.setImage(SWTImageRepository.getImage("start_download.png"));
 		multiple_start_download.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -225,7 +229,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		}});
 		
 		multiple_stop_download = new MenuItem(multiple_downloads_selected,SWT.PUSH);
-		multiple_stop_download.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.stop_downloads"));
+		multiple_stop_download.setText(_._("mainwindow.transferstab.downloads.popupmenu.stop_downloads"));
 		multiple_stop_download.setImage(SWTImageRepository.getImage("stop_download.png"));
 		multiple_stop_download.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -233,7 +237,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		}});
 		
 		MenuItem multiple_cancel_download = new MenuItem(multiple_downloads_selected,SWT.PUSH);
-		multiple_cancel_download.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.cancel_downloads"));
+		multiple_cancel_download.setText(_._("mainwindow.transferstab.downloads.popupmenu.cancel_downloads"));
 		multiple_cancel_download.setImage(SWTImageRepository.getImage("cancel.png"));
 		multiple_cancel_download.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -242,8 +246,19 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		
 		new MenuItem(multiple_downloads_selected,SWT.SEPARATOR);
 		
+		MenuItem multiple_copy_ed2k_links = new MenuItem(multiple_downloads_selected, SWT.PUSH);
+		multiple_copy_ed2k_links.setText(_._("mainwindow.transferstab.downloads.popupmenu.copy_ed2k_links"));
+		multiple_copy_ed2k_links.setImage(SWTImageRepository.getImage("ed2k_link_paste.png"));
+		multiple_copy_ed2k_links.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				copyED2KLink();
+			}
+		});
+		
+		new MenuItem(multiple_downloads_selected,SWT.SEPARATOR);
+		
 		column_setup = new MenuItem(multiple_downloads_selected,SWT.PUSH);
-		column_setup.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.column_setup"));
+		column_setup.setText(_._("mainwindow.transferstab.downloads.popupmenu.column_setup"));
 		column_setup.setImage(SWTImageRepository.getImage("columns_setup.png"));
 		column_setup.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected( SelectionEvent e ) {
@@ -304,13 +319,13 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		
 		case STARTED_DOWNLOAD_SELECTED : {
 			set_download_status.setImage(SWTImageRepository.getImage("stop_download.png"));
-			set_download_status.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.stop_download"));
+			set_download_status.setText(_._("mainwindow.transferstab.downloads.popupmenu.stop_download"));
 			return single_download_selected;
 		}
 		
 		case STOPPED_DOWNLOAD_SELECTED : {
 			set_download_status.setImage(SWTImageRepository.getImage("start_download.png"));
-			set_download_status.setText(Localizer._("mainwindow.transferstab.downloads.popupmenu.start_download"));
+			set_download_status.setText(_._("mainwindow.transferstab.downloads.popupmenu.start_download"));
 			return single_download_selected;
 		}
 		
@@ -367,6 +382,14 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 			return Misc.compareAllObjects(object1, object2, "getPeersCount", order);
 		}
 		
+		if (columnID == SWTConstants.DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID) {
+			return Misc.compareAllObjects(object1, object2, "getCompletedSources", order);
+		}
+		
+		if (columnID == SWTConstants.DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID) {
+			return Misc.compareAllObjects(object1, object2, "getPartialSources", order);
+		}
+		
 		if (columnID == SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getETA", order);
 		}
@@ -404,13 +427,20 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		if (upload_session != null)
 			peerCount += upload_session.getPeersCount();
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID,peerCount+"");
+		setRowText(session, SWTConstants.DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID, session.getCompletedSources()+"");
+		int partialSources = session.getPartialSources();
+		if (upload_session != null)
+			partialSources += upload_session.getPeersCount();
+		setRowText(session, SWTConstants.DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID, partialSources+"");
+		
+		
 		String time = TimeFormatter.formatColon(session.getETA());
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID,time);
 		String status;
 		if (session.getStatus() == DownloadSession.STATUS_STARTED)
-			status = Localizer._("mainwindow.transferstab.downloads.column.status.started");
+			status = _._("mainwindow.transferstab.downloads.column.status.started");
 		else
-			status = Localizer._("mainwindow.transferstab.downloads.column.status.stopped");
+			status = _._("mainwindow.transferstab.downloads.column.status.stopped");
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_STATUS_COLUMN_ID,status);
 	}
 	
@@ -425,6 +455,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	}
 
 	public void refresh() {
+		if (isDisposed()) return ;
 		redraw();
 		for(DownloadSession session : download_manager.getDownloads()) {
 			if (!hasObject(session)) continue;
@@ -455,9 +486,9 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		boolean result;
 		List<DownloadSession> list = getSelectedObjects();
 		if (list.size()==1)
-			result = Utils.showConfirmMessage(getShell(),Localizer._("mainwindow.transferstab.downloads.confirm_cancel.title"), Localizer._("mainwindow.transferstab.downloads.confirm_cancel"));
+			result = Utils.showConfirmMessage(getShell(),_._("mainwindow.transferstab.downloads.confirm_cancel.title"), _._("mainwindow.transferstab.downloads.confirm_cancel"));
 		else
-			result = Utils.showConfirmMessage(getShell(), Localizer._("mainwindow.transferstab.downloads.confirm_cancel.title") , Localizer._("mainwindow.transferstab.downloads.confirm_cancel_multi"));
+			result = Utils.showConfirmMessage(getShell(), _._("mainwindow.transferstab.downloads.confirm_cancel.title") , _._("mainwindow.transferstab.downloads.confirm_cancel_multi"));
 		if (result)
 			for(DownloadSession downloadSession : list)
 				download_manager.removeDownload(downloadSession.getFileHash());
@@ -475,7 +506,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 				failed+=link.getFileName()+"\n";
 		}
 		if (failed.length()!=0)
-			Utils.showWarningMessage(getShell(), Localizer._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist.title"),Localizer._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist")+" : \n"+failed);
+			Utils.showWarningMessage(getShell(), _._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist.title"),_._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist")+" : \n"+failed);
 		
 	}
 
@@ -492,7 +523,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 			public void JMRun() {
 				DownloadSession session = download_manager.getDownload(fileHash);
 				addDownlaodSession(session);
-				MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_download_added",session.getSharingName()));
+				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_added",session.getSharingName()));
 			}
 		});
 		
@@ -514,9 +545,9 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 				removeRow(session);
 				refresh();
 				if (session.getPercentCompleted()!=100)
-					MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_download_removed",session.getSharingName()));
+					MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_removed",session.getSharingName()));
 				else
-					MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_download_finished",session.getSharingName()));
+					MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_finished",session.getSharingName()));
 			}
 		});
 	}
@@ -526,7 +557,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 			public void JMRun() {
 				DownloadSession downloadSession = download_manager.getDownload(fileHash);
 				updateRow(downloadSession);
-				MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_download_started",downloadSession.getSharingName()));
+				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_started",downloadSession.getSharingName()));
 		}});
 		
 	}
@@ -536,7 +567,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 			public void JMRun() {
 				DownloadSession downloadSession = download_manager.getDownload(fileHash);
 				updateRow(downloadSession);
-				MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_download_stopped",downloadSession.getSharingName()));
+				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_stopped",downloadSession.getSharingName()));
 		}});
 	}
 

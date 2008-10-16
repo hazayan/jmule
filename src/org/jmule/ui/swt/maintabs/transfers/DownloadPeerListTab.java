@@ -44,14 +44,13 @@ import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.countrylocator.CountryLocator;
-import org.jmule.ui.UICommon;
+import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
-import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.common.CountryFlagPainter;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.swt.tables.TableItemCountryFlag;
@@ -62,8 +61,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:26:32 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -79,7 +78,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 		download_session = downloadSession;
 		setText(_._("downloadinfowindow.tab.peerlist.title"));		
 		
-		Composite content = new Composite(tabFolder,SWT.BORDER);
+		Composite content = new Composite(tabFolder,SWT.NONE);
 		setControl(content);
 		content.setLayout(new GridLayout(1,true));
 		peers_table =  new DownloadPeerList(content);
@@ -145,32 +144,32 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			super(content, SWT.NONE);
 			int width;
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID,   _._("downloadinfowindow.tab.peerlist.column.nickname"), "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID);
 			addColumn(SWT.CENTER,SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID, _._("downloadinfowindow.tab.peerlist.column.country_code"), _._("downloadinfowindow.tab.peerlist.column.country_code.desc"), width);
 			if (CountryLocator.getInstance().isServiceDown())
 				disableColumn(SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID, 	  	_._("downloadinfowindow.tab.peerlist.column.flag"), "", width);
 			if (CountryLocator.getInstance().isServiceDown())
 				disableColumn(SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID, 	  	 _._("downloadinfowindow.tab.peerlist.column.address"), "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID); 
-			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID, _._("downloadinfowindow.tab.peerlist.column.download_speed"), "", width);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID); 
+			addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID, _._("downloadinfowindow.tab.peerlist.column.download_speed"), "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID,   _._("downloadinfowindow.tab.peerlist.column.upload_speed"),  "", width);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID);
+			addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID,   _._("downloadinfowindow.tab.peerlist.column.upload_speed"),  "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID); 
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID); 
 			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID,   _._("downloadinfowindow.tab.peerlist.column.software"), "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID,     _._("downloadinfowindow.tab.peerlist.column.status"), "", width);
 
 			updateColumnVisibility();
@@ -239,7 +238,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			
 			if (!CountryLocator.getInstance().isServiceDown()) {
 				
-				Image image = new Image(SWTThread.getDisplay(),UICommon.getCountryFlag(object.getAddress()));
+				Image image = SWTImageRepository.getFlagByAddress(object.getAddress(),FlagSize.S25x15);
 				
 				CountryFlagPainter painter = new CountryFlagPainter(image);
 				TableItemCountryFlag table_item_painter = new TableItemCountryFlag(SWTPreferences.getDefaultColumnOrder(SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID),painter);

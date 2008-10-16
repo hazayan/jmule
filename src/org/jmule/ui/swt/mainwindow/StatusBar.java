@@ -40,7 +40,6 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.peermanager.PeerManager;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -58,8 +57,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/19 12:27:09 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class StatusBar extends Composite {
 
@@ -82,12 +81,12 @@ public class StatusBar extends Composite {
 		
 		SWTServerListWrapper.getInstance().setStatusBar(this);
 		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+			skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {}
 		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
+		
 		
 		grid_data = new GridData(GridData.FILL_HORIZONTAL);
 		grid_data.heightHint = 16;

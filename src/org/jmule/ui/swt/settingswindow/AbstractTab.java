@@ -28,15 +28,14 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.jmule.core.JMuleCore;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.swt.skin.SWTSkin;
 
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 15:23:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
  */
 public abstract class AbstractTab extends Composite {
 
@@ -51,20 +50,19 @@ public abstract class AbstractTab extends Composite {
 		setLayout(new FillLayout());
 		
 		content = new Group(this,SWT.NONE);
-		// content.setText(getName());
 		
-		JMuleUI ui_instance = null;
+		skin = null;
 		try {
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		}catch(Throwable t) {
 		}
 		
-		skin = (SWTSkin)ui_instance.getSkin();
+		
 	}
 	
 	public abstract Image getImage();
 	
-	public abstract String getName();
+	public abstract String getTabName();
 	
 	public abstract boolean checkFields();
 

@@ -25,6 +25,8 @@ package org.jmule.ui.swt.mainwindow;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JFrame;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -36,6 +38,8 @@ import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
+import org.jmule.ui.swing.wizards.SetupWizard;
+import org.jmule.ui.swing.wizards.UIChooserWizad;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
@@ -48,8 +52,8 @@ import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 16:48:35 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class MainMenu extends Menu{
 
@@ -232,10 +236,23 @@ public class MainMenu extends Menu{
 		MenuItem gui_chooser_item = new MenuItem (submenu, SWT.PUSH);
 		gui_chooser_item.setImage(SWTImageRepository.getMenuImage("switchui.png"));
 		gui_chooser_item.setText(Localizer._("mainwindow.mainmenu.tools.uichooser"));
+		gui_chooser_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				UIChooserWizad ui_chooser_wizard = new UIChooserWizad(new JFrame());
+				ui_chooser_wizard.setSize(500, 400);
+				ui_chooser_wizard.setVisible(true);
+			}
+		});
 		
 		MenuItem wizard_item = new MenuItem (submenu, SWT.PUSH);
 		wizard_item.setImage(SWTImageRepository.getMenuImage("wizard.png"));
 		wizard_item.setText(Localizer._("mainwindow.mainmenu.tools.wizard"));
+		wizard_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				SetupWizard setup_wizard = new SetupWizard();
+				setup_wizard.setVisible(true);
+			}
+		});
 		
 		new MenuItem (submenu, SWT.SEPARATOR);
 		
@@ -258,7 +275,33 @@ public class MainMenu extends Menu{
 		submenu = new Menu (shell, SWT.DROP_DOWN);
 		helpItem.setMenu (submenu);
 		
-		MenuItem help_contents_item = new MenuItem (submenu, SWT.PUSH);
+		MenuItem open_support_item = new MenuItem (submenu, SWT.PUSH);
+		open_support_item.setText(Localizer._("mainwindow.mainmenu.help.open_support"));
+		open_support_item.setImage(SWTImageRepository.getMenuImage("world_link.png"));
+		open_support_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						Program.launch(JMConstants.OPEN_SUPPORT);
+					}
+				});	
+			}
+		});
+		
+		MenuItem bugtracker_item = new MenuItem (submenu, SWT.PUSH);
+		bugtracker_item.setText(Localizer._("mainwindow.mainmenu.help.bug_tracker"));
+		bugtracker_item.setImage(SWTImageRepository.getMenuImage("world_link.png"));
+		bugtracker_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						Program.launch(JMConstants.JMULE_BUG_TRACKER);
+					}
+				});	
+			}
+		});
+		
+		/*MenuItem help_contents_item = new MenuItem (submenu, SWT.PUSH);
 		help_contents_item.setText(Localizer._("mainwindow.mainmenu.help.contents"));
 		help_contents_item.setImage(SWTImageRepository.getMenuImage("world_link.png"));
 		help_contents_item.addSelectionListener(new SelectionAdapter() {
@@ -269,7 +312,7 @@ public class MainMenu extends Menu{
 					}
 				});	
 			}
-		});
+		});*/
 		
 		MenuItem forum_item = new MenuItem (submenu, SWT.PUSH);
 		forum_item.setText(Localizer._("mainwindow.mainmenu.help.forum"));

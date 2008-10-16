@@ -29,8 +29,8 @@ import org.eclipse.swt.widgets.Table;
 /**
  * @author Olivier
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:18 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
  */
 public abstract class BufferedTableItemImpl implements BufferedTableItem
 {
@@ -39,8 +39,6 @@ public abstract class BufferedTableItemImpl implements BufferedTableItem
 	private int position;
 
 	private Color ourFGColor = null;
-	
-	private String text = "";
 
 	public BufferedTableItemImpl(BufferedTableRow row, int position) {
 		this.row = row;

@@ -28,10 +28,10 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.jmule.core.JMuleCore;
-import org.jmule.ui.JMuleUI;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.GUIUpdater;
+import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.common.SashControl;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.skin.SWTSkin;
@@ -39,8 +39,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:51:24 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class TransfersTab extends AbstractTab{
 
@@ -53,6 +53,8 @@ public class TransfersTab extends AbstractTab{
 	private DownloadList download_list;
 	private UploadList 	 upload_list;
 	
+	private Refreshable refreshable;
+	private Group downloads, uploads;	
 	public TransfersTab(Composite shell,JMuleCore core) {
 		super(shell);
 
@@ -68,29 +70,34 @@ public class TransfersTab extends AbstractTab{
 		download_panel.setLayout(new FillLayout());
 		upload_panel.setLayout(new FillLayout());
 		
-		JMuleUI ui_instance = null;
+		SWTSkin skin = null;
 		try {
 			
-		    ui_instance = JMuleUIManager.getJMuleUI();
+		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
 		
-		}catch(Throwable t) {
-		}
+		}catch(Throwable t) {}
 		
-		SWTSkin skin = (SWTSkin)ui_instance.getSkin();
-		
-		Group downloads = new Group(download_panel,SWT.NONE);
+		downloads = new Group(download_panel,SWT.NONE);
 		downloads.setFont(skin.getDefaultFont());
-		downloads.setText(Localizer._("mainwindow.transferstab.downloads"));
 		downloads.setLayout(new FillLayout());
 		download_list = new DownloadList(downloads,_core);
 		
-		Group uploads = new Group(upload_panel,SWT.NONE);
+		uploads = new Group(upload_panel,SWT.NONE);
 		uploads.setFont(skin.getDefaultFont());
-		uploads.setText(Localizer._("mainwindow.transferstab.uploads"));
 		uploads.setLayout(new FillLayout());
 		upload_list = new UploadList(uploads,_core);
 		
-		
+		refreshable = new Refreshable() {
+			public void refresh() {
+				if (isDisposed()) return;
+				int download_count = _core.getDownloadManager().getDownloadCount();
+				int upload_count = _core.getUploadManager().getUploadCount();
+				
+				downloads.setText(Localizer._("mainwindow.transferstab.downloads")+"("+download_count+")");
+				uploads.setText(Localizer._("mainwindow.transferstab.uploads")+"("+upload_count+")");
+			}
+		};
+		refreshable.refresh();
 	}
 
 	public JMULE_TABS getTabType() {
@@ -100,11 +107,13 @@ public class TransfersTab extends AbstractTab{
 	public void lostFocus() {
 		GUIUpdater.getInstance().removeRefreshable(download_list);
 		GUIUpdater.getInstance().removeRefreshable(upload_list);
+		GUIUpdater.getInstance().removeRefreshable(refreshable);
 	}
 
 	public void obtainFocus() {
 		GUIUpdater.getInstance().addRefreshable(download_list);
 		GUIUpdater.getInstance().addRefreshable(upload_list);
+		GUIUpdater.getInstance().addRefreshable(refreshable);
 	}
 
 	public void disposeTab() {

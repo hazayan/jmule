@@ -39,7 +39,7 @@ import org.jmule.core.edonkey.impl.Server;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.UICommon;
+import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.GUIUpdater;
@@ -52,8 +52,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class ServerPropertiesWindow implements JMuleUIComponent,Refreshable {
 
@@ -109,7 +109,7 @@ public class ServerPropertiesWindow implements JMuleUIComponent,Refreshable {
 		CountryLocator country_locator = CountryLocator.getInstance();
 		if (!country_locator.isServiceDown()) {
 			label = new Label(server_info,SWT.NONE);
-			Image flag = new Image(SWTThread.getDisplay(),UICommon.getCountryFlag(server.getAddress()));
+			Image flag = SWTImageRepository.getFlagByAddress(server.getAddress(),FlagSize.S18x25);
 			label.setImage(flag);
 			String country_name = country_locator.getCountryName(server.getAddress());
 			String country_code = country_locator.getCountryCode(server.getAddress());

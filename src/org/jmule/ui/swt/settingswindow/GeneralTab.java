@@ -42,20 +42,19 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
-import org.jmule.ui.utils.NightlyBuildWarning;
 
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/21 14:44:27 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
  */
 public class GeneralTab extends AbstractTab {
 
 	private Text nick_name_text;
 	private Button prompt_on_exit_check, server_list_update;
-	
 	private Button show_nightly_build_warning = null;
+	private Button connect_at_startup = null;
 	
 	private ConfigurationManager config_manager;
 	private SWTPreferences swt_preferences;
@@ -102,6 +101,7 @@ public class GeneralTab extends AbstractTab {
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		nick_name_text = new Text(content,SWT.BORDER);
+		nick_name_text.setFont(skin.getDefaultFont());
 		layout_data = new GridData(GridData.FILL_HORIZONTAL);
 		nick_name_text.setLayoutData(layout_data);
 		
@@ -130,13 +130,21 @@ public class GeneralTab extends AbstractTab {
 		startup_update_check.setLayoutData(layout_data);
 		startup_update_check.setSelection(swt_preferences.updateCheckAtStartup());
 		
+		connect_at_startup = new Button(content,SWT.CHECK);
+		connect_at_startup.setText(_._("settingswindow.tab.general.checkbox.connect_at_startup"));
+		layout_data = new GridData(GridData.FILL_HORIZONTAL);
+		layout_data.horizontalSpan = 2;
+		connect_at_startup.setLayoutData(layout_data);
+		connect_at_startup.setSelection(swt_preferences.isConnectAtStartup());
+		
+		
 		if (JMConstants.IS_NIGHTLY_BUILD) {
 			show_nightly_build_warning = new Button(content,SWT.CHECK);
 			show_nightly_build_warning.setText(_._("settingswindow.tab.general.checkbox.show_nightly_build_warning"));
 			layout_data = new GridData(GridData.FILL_HORIZONTAL);
 			layout_data.horizontalSpan = 2;
 			show_nightly_build_warning.setLayoutData(layout_data);
-			show_nightly_build_warning.setSelection(NightlyBuildWarning.showWarning());
+			show_nightly_build_warning.setSelection(swt_preferences.isNightlyBuildWarning());
 		}
 		
 		Group ports = new Group(content,SWT.NONE);
@@ -365,7 +373,7 @@ public class GeneralTab extends AbstractTab {
 	}
 
 
-	public String getName() {
+	public String getTabName() {
 		return _._("settingswindow.tab.general.name");
 	}
 
@@ -419,10 +427,11 @@ public class GeneralTab extends AbstractTab {
 		
 		swt_preferences.setPromprtOnExit(prompt_on_exit_check.getSelection());
 		swt_preferences.setUpdateCheckAtStartup(startup_update_check.getSelection());
+		swt_preferences.setConnectAtStartup(connect_at_startup.getSelection());
 		
 		if (JMConstants.IS_NIGHTLY_BUILD) {
 			boolean selection = show_nightly_build_warning.getSelection();
-			NightlyBuildWarning.setShowWarning(selection);
+			swt_preferences.setNightlyBuildWarning(selection);
 		}
 		
 		int tcp = tcp_port.getSelection();
@@ -444,7 +453,6 @@ public class GeneralTab extends AbstractTab {
 			download_c/=8;
 			upload_c/=8;
 		}
-
 		config_manager.setDownloadBandwidth(download_c*1024);
 		config_manager.setUploadBandwidth(upload_c*1024);
 	}

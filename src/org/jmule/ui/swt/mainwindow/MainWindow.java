@@ -42,6 +42,7 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.JMuleUIManagerException;
@@ -62,15 +63,14 @@ import org.jmule.ui.swt.maintabs.shared.SharedTab;
 import org.jmule.ui.swt.maintabs.statistics.StatisticsTab;
 import org.jmule.ui.swt.maintabs.transfers.TransfersTab;
 import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
-import org.jmule.ui.utils.NightlyBuildWarning;
 import org.jmule.updater.JMUpdater;
 import org.jmule.updater.JMUpdaterException;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:14:31 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -145,9 +145,17 @@ public class MainWindow implements JMuleUIComponent {
 
             	shell.open ();
 
+            	if (SWTPreferences.getInstance().isConnectAtStartup()) {
+	            	try {
+						_core.getServerManager().connect();
+					} catch (ServerManagerException e1) {
+						e1.printStackTrace();
+					}	
+            	}
+            	
             	if (JMConstants.IS_NIGHTLY_BUILD) 
-            		if (NightlyBuildWarning.showWarning()){
-            			NightlyBuildWarningWindow warning_window = new NightlyBuildWarningWindow();
+            		if (SWTPreferences.getInstance().isNightlyBuildWarning()){
+            			NightlyBuildWarningWindow warning_window = new NightlyBuildWarningWindow(shell);
             			warning_window.getCoreComponents();
             			warning_window.initUIComponents();
             	}

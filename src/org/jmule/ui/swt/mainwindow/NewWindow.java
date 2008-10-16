@@ -28,18 +28,20 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -73,8 +75,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Sep 16, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:28:04 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class NewWindow implements JMuleUIComponent {
 	public static enum WindowType { DOWNLOAD, SERVER, SHARED_DIR };
@@ -87,8 +89,8 @@ public class NewWindow implements JMuleUIComponent {
 	private ConfigurationManager config_manager;
 	private GenericTable table;
 	
-	public NewWindow(WindowType n) {
-		type = n;
+	public NewWindow(WindowType windowType) {
+		type = windowType;
 		getCoreComponents();
 		initUIComponents();
 	}
@@ -156,15 +158,24 @@ public class NewWindow implements JMuleUIComponent {
 		else
 			table = new ServerList(content);
 		
-		Link learn_more_link = new Link(shell,SWT.NONE);
-		learn_more_link.setText("<a href=\""+JMConstants.ABOUT_ED2K_LINKS+"\">"+_._("newwindow.label.about_ed2k_links")+"</a>");
-
-		learn_more_link.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event arg0) {
-				if (!Program.launch(arg0.text)) 
-					Utils.showWarningMessage(shell, _._("newwindow.error_open_url.title")
-							, Localizer._("newwindow.error_open_url",arg0.text));
-			}
+		CLabel learn_more_link = new CLabel(shell,SWT.NONE);
+		learn_more_link.setText(_._("newwindow.label.about_ed2k_links"));
+		learn_more_link.setData(JMConstants.ABOUT_ED2K_LINKS);
+		learn_more_link.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		learn_more_link.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		learn_more_link.addMouseListener(new MouseAdapter() {	
+				public void mouseDoubleClick(MouseEvent arg0) {
+					String path = (String) ((CLabel) arg0.widget).getData();
+					if (!Utils.launchProgram(path)) 
+						Utils.showWarningMessage(shell, _._("newwindow.error_open_url.title")
+								, Localizer._("newwindow.error_open_url",path));
+				}
+				public void mouseDown(MouseEvent arg0) {
+					String path = (String) ((CLabel) arg0.widget).getData();
+					if (!Utils.launchProgram(path)) 
+						Utils.showWarningMessage(shell, _._("newwindow.error_open_url.title")
+								, Localizer._("newwindow.error_open_url",path));
+				}
 		});
 		
 		Composite buttons_composite = new Composite(shell,SWT.BORDER);

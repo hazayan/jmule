@@ -23,6 +23,7 @@
 package org.jmule.ui.swt.maintabs.shared;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -49,6 +50,7 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationListener;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.PartialFile;
@@ -68,13 +70,12 @@ import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.utils.FileFormatter;
-import org.jmule.ui.utils.NumberFormatter;
 import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/28 16:29:11 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -103,6 +104,11 @@ public class SharedTab extends AbstractTab {
 	
 	private Refreshable refreshable;
 	
+	private Group shared_files_group;
+	private Group dir_list_content;
+	
+	private ConfigurationListener config_listener;
+	
 	public SharedTab(Composite shell,JMuleCore core) {
 		super(shell);
 		
@@ -120,35 +126,36 @@ public class SharedTab extends AbstractTab {
 		Composite shared_files = new Composite(this,SWT.NONE);
 		
 		SashControl.createHorizontalSash(50, 50, this, dir_list, shared_files);
-	
-		dir_list.setLayout(new FillLayout());
-		Group dir_list_content = new Group(dir_list,SWT.NONE);
-		dir_list_content.setLayout(new GridLayout(2,false));
 		
-		shared_dir_list = new List (dir_list_content, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		shared_dir_list.setLayoutData(new GridData(GridData.FILL_BOTH));
-				
-		shared_dir_list.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				String selected_dir = shared_dir_list.getSelection()[0];
-				if (selected_dir.equals(last_selection)) return ;
-				last_selection = selected_dir;
-				updateFileList(selected_dir);
-				
-				int selection_id = shared_dir_list.getSelectionIndex();
-				if ((selection_id>=no_remove_id_start)&&(selection_id<=no_remove_id_end)) {
-					remove_button.setEnabled(false);
-					return;
-				}
-				remove_button.setEnabled(true);
+		GridLayout layout;
+		
+		dir_list.setLayout(new FillLayout());
+		dir_list_content = new Group(dir_list,SWT.NONE);
+		java.util.List<File> dir = _core.getConfigurationManager().getSharedFolders();
+		if (dir != null)
+			dir_list_content.setText(_._("mainwindow.sharedtab.group.shared_dirs")+"("+dir.size()+")");
+		else
+			dir_list_content.setText(_._("mainwindow.sharedtab.group.shared_dirs")+"(0)");
+		
+		config_listener = new ConfigurationAdapter() {
+			public void sharedDirectoriesChanged(java.util.List<File> sharedDirs) {
+				dir_list_content.setText(_._("mainwindow.sharedtab.group.shared_dirs")+"("+sharedDirs.size()+")");
 			}
-		});
+		};
+		
+		layout = new GridLayout(1,false);
+		layout.marginWidth  = 2;
+		layout.marginHeight = 2;
+		dir_list_content.setLayout(layout);
 		
 		Composite control_block = new Composite(dir_list_content,SWT.NONE);
-		GridData data = new GridData(GridData.FILL_VERTICAL);
-		data.widthHint = 100;
+		layout = new GridLayout(4,false);
+		layout.marginHeight = 0;
+		layout.marginWidth  = 0;
+		control_block.setLayout(layout);
+		GridData data = new GridData();
+		data.widthHint = 400;
 		control_block.setLayoutData(data);
-		control_block.setLayout(new GridLayout(1,false));
 		
 		Button add_button = new Button(control_block,SWT.NONE);
 		add_button.setFont(skin.getButtonFont());
@@ -202,13 +209,41 @@ public class SharedTab extends AbstractTab {
 			public void widgetSelected(SelectionEvent event) {
 				clearDirList();
 		} });
-
 		
+		Button reload_button = new Button(control_block,SWT.NONE);
+		reload_button.setFont(skin.getButtonFont());
+		reload_button.setText(_._("mainwindow.sharedtab.button.reload"));
+		reload_button.setImage(SWTImageRepository.getImage("refresh.png"));
+		reload_button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				sharing_manager.loadCompletedFiles();
+			}
+		});
+		
+		shared_dir_list = new List (dir_list_content, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+		shared_dir_list.setLayoutData(new GridData(GridData.FILL_BOTH));
+				
+		shared_dir_list.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				String selected_dir = shared_dir_list.getSelection()[0];
+				if (selected_dir.equals(last_selection)) return ;
+				last_selection = selected_dir;
+				updateFileList(selected_dir);
+				
+				int selection_id = shared_dir_list.getSelectionIndex();
+				if ((selection_id>=no_remove_id_start)&&(selection_id<=no_remove_id_end)) {
+					remove_button.setEnabled(false);
+					return;
+				}
+				remove_button.setEnabled(true);
+			}
+		});
+
 		shared_files.setLayout(new FillLayout());
-		
-		
-		shared_files_table = new JMTable<SharedFile>(shared_files, SWT.NONE){
-
+		shared_files_group = new Group(shared_files,SWT.NONE);
+		shared_files_group.setText(_._("mainwindow.sharedtab.group.shared_files"));
+		shared_files_group.setLayout(new FillLayout());
+		shared_files_table = new JMTable<SharedFile>(shared_files_group, SWT.NONE){
 			protected int compareObjects(SharedFile object1, SharedFile object2,
 					int columnID, boolean order) {
 				if (columnID == SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID) {
@@ -308,12 +343,6 @@ public class SharedTab extends AbstractTab {
 				
 				String text = object.getSharingName();
 				
-				if (status == HASHING)
-					text += " + " + _._("mainwindow.sharedtab.label.hashing") + " : " +NumberFormatter.formatProgress(sharing_manager.getCurrentHashingFilePercent());
-				
-				if (status == UNHASHED)
-					text += " + " + _._("mainwindow.sharedtab.label.waiting_to_hash") ;
-				
 				setRowText(object,  SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID, text);
 				long file_size = object.getFile().length();
 				setRowText(object, SWTConstants.SHARED_LIST_FILE_SIZE_COLUMN_ID, FileFormatter.formatFileSize(file_size));
@@ -334,11 +363,10 @@ public class SharedTab extends AbstractTab {
 						setRowText(object,SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID, _._("mainwindow.sharedtab.label.hashing"));
 					else
 						setRowText(object,SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID, _._("mainwindow.sharedtab.label.waiting_to_hash"));
-				
-					
 			}
 		
 		};
+
 	  int width;
 	  
 	  width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID);
@@ -425,6 +453,21 @@ public class SharedTab extends AbstractTab {
 	  
 	  refreshable = new Refreshable() {
 		public void refresh() {
+			String text = _._("mainwindow.sharedtab.group.shared_files");
+			SharedFile hashing_file = sharing_manager.getCurrentHashingFile();
+			if (hashing_file != null) {
+				text +="  Hashing [";
+				DecimalFormat formatter = new DecimalFormat("0.00");
+				String file_name = hashing_file.getSharingName();
+				if (file_name.length()>20)
+					file_name = file_name.substring(0, 20) + "...";
+				text +=file_name+" : " + formatter.format(sharing_manager.getCurrentHashingFilePercent())+"%";
+				text +="]";
+			}
+			
+			
+			shared_files_group.setText(text);
+			
 			for(SharedFile shared_file : shared_files_table.getObjects()) {
 				if (shared_files_table.getRow(shared_file).isVisible()) 
 					shared_files_table.updateRow(shared_file);
@@ -500,25 +543,36 @@ public class SharedTab extends AbstractTab {
 									 _._("mainwindow.sharedtab.confirm_remove_from_disk"))) return ;
 		SharingManager sharing_manager = _core.getSharingManager();
 		for(SharedFile shared_file : shared_files_table.getSelectedObjects()) {
+			FileUtils.deleteQuietly(shared_file.getFile());
 			sharing_manager.removeSharedFile(shared_file.getFileHash());
 			shared_files_table.removeRow(shared_file);
 		}
 	}
 
-	private void updateDirList(java.util.List<File> directoryList) {
-		shared_dir_list.removeAll();
-		// Add static fields 
-		shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.incoming"));
-		shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.partial"));
-		shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.all"));
-		if (directoryList == null)
-			directoryList = _core.getConfigurationManager().getSharedFolders();
-		clear_button.setEnabled(false);
-		if (directoryList == null) return ;
-		for(File file : directoryList) {
-			shared_dir_list.add(file.getAbsolutePath());
-		}
-		clear_button.setEnabled(true);
+	private void updateDirList(final java.util.List<File> directoryList) {
+		SWTThread.getDisplay().asyncExec(new JMRunnable() {
+			public void JMRun() {
+				shared_dir_list.removeAll();
+//				java.util.List<File> directoryList2 = null;
+				shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.incoming"));
+				shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.partial"));
+				shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.all"));
+				clear_button.setEnabled(false);
+				if (directoryList == null)
+					return ;
+					//directoryList2 = _core.getConfigurationManager().getSharedFolders();
+//				else
+	//				return ;
+				
+				for(File file : directoryList) {
+					shared_dir_list.add(file.getAbsolutePath());
+				}
+				clear_button.setEnabled(true);
+				
+			}
+			
+		});
+
 	}
 	
 	private JMThread file_list_updater;
@@ -540,35 +594,32 @@ public class SharedTab extends AbstractTab {
 			
 			public void run() {
 				File shared_dir = null;
+				SWTThread.getDisplay().syncExec(new JMRunnable() {
+					public void JMRun() {
+						shared_files_table.clear();
+				}});
 				if (dir.equals(_._("mainwindow.sharedtab.shared_dirs.incoming"))) 
 					shared_dir = new File(ConfigurationManager.INCOMING_DIR);
 				else
 					if (dir.equals(_._("mainwindow.sharedtab.shared_dirs.partial"))) {
-						
-						SWTThread.getDisplay().syncExec(new JMRunnable() {
-								public void JMRun() {
-									shared_files_table.clear();
-							}});
 							
-							SharingManager manager = _core.getSharingManager();
-							final java.util.List<PartialFile> partial_file_list = manager.getPartialFiles();
-									for(final SharedFile partial_file : partial_file_list ) {
-										if (stop) return ;
-										SWTThread.getDisplay().syncExec(new JMRunnable() {
-											public void JMRun() {
-												shared_files_table.addRow(partial_file);
-											}}); 
-										}
-								
-							return ;
+						SharingManager manager = _core.getSharingManager();
+						final java.util.List<PartialFile> partial_file_list = manager.getPartialFiles();
+								for(final SharedFile partial_file : partial_file_list ) {
+									if (stop) return ;
+									SWTThread.getDisplay().syncExec(new JMRunnable() {
+										public void JMRun() {
+											shared_files_table.addRow(partial_file);
+										}}); 
+									}
+							
+								return ;
 						}
 					if (!dir.equals(_._("mainwindow.sharedtab.shared_dirs.all"))) {
+						// files from selected dir
 						if (shared_dir == null)
 							shared_dir = new File(dir);
-						SWTThread.getDisplay().syncExec(new JMRunnable() {
-							public void JMRun() {
-								shared_files_table.clear();
-						}});
+						
 						
 						Iterator<File> i = FileUtils.iterateFiles(shared_dir, null, true);
 						while(i.hasNext()) {
@@ -583,7 +634,7 @@ public class SharedTab extends AbstractTab {
 									}
 								});
 							java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
-							if (unhashed_file_list == null) return ;
+							if (unhashed_file_list == null) continue ;
 							for(final SharedFile unhashed_file : unhashed_file_list) {
 								if (unhashed_file.getFile().equals(shared_file))
 									SWTThread.getDisplay().syncExec(new JMRunnable() {
@@ -593,11 +644,12 @@ public class SharedTab extends AbstractTab {
 
 							}
 						}
-					} else {
+					} else { // all files
 						SWTThread.getDisplay().syncExec(new JMRunnable() {
 							public void JMRun() {
-								shared_files_table.clear();
-								for(SharedFile file : sharing_manager.getUnhashedFiles()) {
+								java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
+								if (unhashed_file_list == null) return ;
+								for(SharedFile file : unhashed_file_list) {
 										shared_files_table.addRow(file);
 								}
 							}});
@@ -624,14 +676,17 @@ public class SharedTab extends AbstractTab {
 
 	public void lostFocus() {
 		GUIUpdater.getInstance().removeRefreshable(refreshable);
+		_core.getConfigurationManager().removeConfigurationListener(config_listener);
 	}
 
 	public void obtainFocus() {
 		GUIUpdater.getInstance().addRefreshable(refreshable);
+		_core.getConfigurationManager().addConfigurationListener(config_listener);
 	}
 
 	public void disposeTab() {
 		GUIUpdater.getInstance().removeRefreshable(refreshable);
+		_core.getConfigurationManager().removeConfigurationListener(config_listener);
 	}
 
 }

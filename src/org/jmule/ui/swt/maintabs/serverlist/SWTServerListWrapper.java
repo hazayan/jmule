@@ -32,6 +32,7 @@ import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.common.ConnectButton;
 import org.jmule.ui.swt.mainwindow.MainWindow;
@@ -40,8 +41,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/26 15:13:13 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
  */
 public class SWTServerListWrapper {
 	
@@ -165,6 +166,7 @@ public class SWTServerListWrapper {
 		if (SWTThread.getDisplay().isDisposed()) return ;
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
+				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_connecting_to",server.getAddress()+":"+server.getPort()));
 				if (!connect_button.isDisposed())
 					connect_button.setConnecting();
 				if (!status_bar.isDisposed())
@@ -188,7 +190,7 @@ public class SWTServerListWrapper {
 						if (server!=null)
 							server_list.serverDisconnected(server);
 				if (server != null)
-					MainWindow.getLogger().warning(Localizer.getString("mainwindow.logtab.message_disconnected", server.getAddress()));
+					MainWindow.getLogger().warning(Localizer.getString("mainwindow.logtab.message_disconnected", server.getAddress()+":"+server.getPort()));
 			}});
 	}
 	
@@ -202,7 +204,7 @@ public class SWTServerListWrapper {
 					status_bar.setStatusConnected(server);
 				if (!connection_info.isDisposed())
 					connection_info.setStatusConnected(server);
-				MainWindow.getLogger().fine(Localizer.getString("mainwindow.logtab.message_connected_to", server.getAddress()));
+				MainWindow.getLogger().fine(Localizer.getString("mainwindow.logtab.message_connected_to", server.getAddress()+":"+server.getPort()));
 			}});
 	}
 	

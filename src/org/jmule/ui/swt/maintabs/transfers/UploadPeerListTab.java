@@ -40,14 +40,13 @@ import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.countrylocator.CountryLocator;
-import org.jmule.ui.UICommon;
+import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
-import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.common.CountryFlagPainter;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.swt.tables.TableItemCountryFlag;
@@ -58,8 +57,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 06:25:15 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -134,7 +133,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID, 			_._("uploadinfowindow.tab.peerlist.column.address"), "", width);
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID);
-			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.up_speed"), "", width);
+			addColumn(SWT.RIGHT, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.up_speed"), "", width);
 			
 			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.software"), "", 	width);
@@ -150,7 +149,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 		public void addRow(Peer object) {
 			super.addRow(object);
 			if (!CountryLocator.getInstance().isServiceDown()) {
-				Image image = new Image(SWTThread.getDisplay(),UICommon.getCountryFlag(object.getAddress()));
+				Image image = SWTImageRepository.getFlagByAddress(object.getAddress(),FlagSize.S25x15);
 				
 				CountryFlagPainter painter = new CountryFlagPainter(image);
 				TableItemCountryFlag table_item_painter = new TableItemCountryFlag(SWTPreferences.getDefaultColumnOrder(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID),painter);
