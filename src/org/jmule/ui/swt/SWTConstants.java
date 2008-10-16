@@ -22,16 +22,16 @@
  */
 package org.jmule.ui.swt;
 
-import org.jmule.ui.UIConstants;
+import org.jmule.ui.UIPreferences;
 
 /**
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:38:38 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 15:36:17 $$
  */
-public class SWTConstants extends UIConstants {
+public class SWTConstants extends UIPreferences {
 
 	public static final long GUI_UPDATE_INTERVAL		 		= 	1000;
 	
