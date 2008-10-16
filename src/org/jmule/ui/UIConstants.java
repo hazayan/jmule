@@ -36,8 +36,8 @@ import org.jmule.core.JMConstants;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:26:56 $$
  */
 
 public class UIConstants {
@@ -326,20 +326,20 @@ public class UIConstants {
 		default_values.put(SERVER_LIST_STATIC_COLUMN_ID + ORDER,             13);
 		default_values.put(SERVER_LIST_DOWN_COLUMN_ID + ORDER,               14);
 		
-		default_values.put(DOWNLOAD_LIST_ORDER_ID + ORDER,                   1);
-		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,        2);
-		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + ORDER,             3);
-		default_values.put(DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID + ORDER,      4);
-		default_values.put(DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID + ORDER,   5);
-		default_values.put(DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,     6);
-		default_values.put(DOWNLOAD_LIST_PROGRESS_COLUMN_ID + ORDER,         7);
-		default_values.put(DOWNLOAD_LIST_COMPLETED_COLUMN_ID + ORDER,        8);
-		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + ORDER,          9);
-		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + ORDER,        10);
-		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + ORDER,           11);
-		default_values.put(DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID + ORDER,     12);
-		default_values.put(DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID + ORDER, 13);
-		default_values.put(DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID + ORDER,  14);
+		default_values.put(DOWNLOAD_LIST_ORDER_ID + ORDER,                   100);
+		default_values.put(DOWNLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,        1);
+		default_values.put(DOWNLOAD_LIST_SIZE_COLUMN_ID + ORDER,             2);
+		default_values.put(DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID + ORDER,      3);
+		default_values.put(DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID + ORDER,   4);
+		default_values.put(DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,     5);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_COLUMN_ID + ORDER,         6);
+		default_values.put(DOWNLOAD_LIST_COMPLETED_COLUMN_ID + ORDER,        7);
+		default_values.put(DOWNLOAD_LIST_SOURCES_COLUMN_ID + ORDER,          8);
+		default_values.put(DOWNLOAD_LIST_REMAINING_COLUMN_ID + ORDER,        9);
+		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + ORDER,           10);
+		default_values.put(DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_ID + ORDER,     11);
+		default_values.put(DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID + ORDER, 12);
+		default_values.put(DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID + ORDER,  13);
 
 		
 		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + ORDER,    1);
