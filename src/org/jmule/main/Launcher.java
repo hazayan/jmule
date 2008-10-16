@@ -32,24 +32,41 @@ import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.ui.CommonUIPreferences;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.Splash;
 import org.jmule.ui.swing.JSplash;
 import org.jmule.ui.swing.wizards.SetupWizard;
+import org.jmule.ui.swt.SWTSplash;
+import org.jmule.ui.swt.SWTThread;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:48 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:36:32 $$
  */
 public class Launcher {
 
+	Splash splash = null;
+	
 	public Launcher() {
 		
 		try {
 			
-			final Splash splash = new JSplash();
+			CommonUIPreferences _pref = CommonUIPreferences.getSingleton();
+			
+			
+			if(_pref.getUIType().equals(JMuleUIManager.SWING_UI)) {
+				splash = new JSplash();	
+			}
+			
+			if(_pref.getUIType().equals(JMuleUIManager.SWT_UI)) {
+				// first of all we must start the swt thread
+				SWTThread.getInstance().initialize();
+				SWTThread.getInstance().start();
+				splash = new SWTSplash();
+			}
 			
 			splash.splashOn();
 			
@@ -96,6 +113,8 @@ public class Launcher {
 				
 				splash.increaseProgress(5, "Starting JMule UI manager");
 				
+				splash.splashOff();
+				
 				JMuleUIManager.create();
 				
 			}
@@ -104,14 +123,18 @@ public class Launcher {
 				
 				splash.increaseProgress(5, "Running setup wizard");
 				
-				setup_wizard = new SetupWizard(splash);
+				//setup_wizard = new SetupWizard(splash);
+				
+				setup_wizard = new SetupWizard();
 				
 				setup_wizard.setAlwaysOnTop(true);
 				
 				setup_wizard.setVisible(true);
+				
+				splash.splashOff();
 			}
 			
-			splash.splashOff();
+			
 			
 		}catch(Throwable t) {
 			
