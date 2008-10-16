@@ -22,17 +22,14 @@
  */
 package org.jmule.core.searchmanager;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.jmule.core.edonkey.impl.Server;
 
 /**
  *
  * Created on Aug 9, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/08/12 07:20:15 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:22:56 $
  */
 public class SearchResult {
 
