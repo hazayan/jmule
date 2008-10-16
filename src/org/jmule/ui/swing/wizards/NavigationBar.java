@@ -25,7 +25,6 @@ package org.jmule.ui.swing.wizards;
 import javax.swing.JPanel;
 
 import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.swing.UISwingImageRepository;
@@ -33,8 +32,8 @@ import org.jmule.ui.swing.UISwingImageRepository;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:10 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class NavigationBar extends JPanel implements JMuleUIComponent  {
 
@@ -54,14 +53,8 @@ public class NavigationBar extends JPanel implements JMuleUIComponent  {
 	}
 	
 	public void getCoreComponents() {
-	
-		try {
 		
 		  _core = JMuleCoreFactory.getSingleton();
-		 
-		}catch(JMuleCoreException e) {
-			
-		}
 		
 	}
 	

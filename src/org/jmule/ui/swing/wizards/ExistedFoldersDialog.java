@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -38,8 +39,8 @@ import org.jmule.ui.swing.SwingUtils;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:06 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class ExistedFoldersDialog extends javax.swing.JDialog {
 
@@ -49,18 +50,16 @@ public class ExistedFoldersDialog extends javax.swing.JDialog {
     private JButton ok_button;
     private ListModel list_model;
 	
+    public ExistedFoldersDialog(JFrame parent, boolean modal, AbstractListModel listModel) {
+        super(parent, modal);
+        this.list_model = listModel;
+        initComponents();
+    }
+    
     public ExistedFoldersDialog(JDialog parent, boolean modal, AbstractListModel listModel) {
         super(parent, modal);
         this.list_model = listModel;
         initComponents();
-        final ExistedFoldersDialog _this = this;
-        ok_button.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent event) {
-        		_this.setVisible(false);
-        	}
-        });
-        SwingUtils.centerOnScreen( this );
-        setResizable(false);
     }
 
     private void initComponents() {
@@ -116,6 +115,15 @@ public class ExistedFoldersDialog extends javax.swing.JDialog {
         );
 
         pack();
+        
+        final ExistedFoldersDialog _this = this;
+        ok_button.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent event) {
+        		_this.setVisible(false);
+        	}
+        });
+        SwingUtils.centerOnScreen( this );
+        setResizable(false);
     }
 
 }

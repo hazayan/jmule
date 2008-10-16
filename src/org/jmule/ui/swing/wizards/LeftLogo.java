@@ -23,9 +23,7 @@
 package org.jmule.ui.swing.wizards;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.jmule.ui.swing.UISwingImageRepository;
@@ -33,8 +31,8 @@ import org.jmule.ui.swing.UISwingImageRepository;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:12 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class LeftLogo extends JPanel {
 	
@@ -47,17 +45,5 @@ public class LeftLogo extends JPanel {
 	}
 
     private javax.swing.JLabel left_logo_image;
-    
-    public static void main(String[] args) {
-    	
-    	JFrame frame =  new JFrame();
-    	frame.setSize(400,400);
-    	frame.setLayout(new GridLayout(1,1));
-    	LeftLogo left_logo = new LeftLogo();
-    	frame.add(left_logo);
-    	frame.setVisible(true);
-    	
-    	
-    }
 
 }

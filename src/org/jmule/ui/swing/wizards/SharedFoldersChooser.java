@@ -45,8 +45,8 @@ import org.jmule.ui.swing.UISwingImageRepository;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/28 09:04:40 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class SharedFoldersChooser extends WizardPanel {
 
@@ -85,6 +85,15 @@ public class SharedFoldersChooser extends WizardPanel {
         file_chooser.setMultiSelectionEnabled(true);
         
         chosen_folders = new ChosenFolders();
+        
+        List<File> shared_folders = _config.getSharedFolders();
+        
+        if(shared_folders != null) {      	
+        	for(File folder : shared_folders) {
+        	    chosen_folders.add(folder);	
+        	}
+        }
+        
         folder_list.setModel( chosen_folders );
         
         final SharedFoldersChooser _this = this;
@@ -100,7 +109,7 @@ public class SharedFoldersChooser extends WizardPanel {
         			for(File file : newFolders)
         				chosen_folders.add(file);
         			if(already_existed_folders.size() != 0) {
-        			   ExistedFoldersDialog existed_folders_dialog = new ExistedFoldersDialog(parent, true, new AbstractListModel() {
+         			   ExistedFoldersDialog existed_folders_dialog = new ExistedFoldersDialog(parent, true, new AbstractListModel() {
         				   public int getSize() { 
         					
         					   return already_existed_folders.size();

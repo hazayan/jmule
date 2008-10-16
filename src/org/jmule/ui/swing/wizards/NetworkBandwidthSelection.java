@@ -23,8 +23,11 @@
 package org.jmule.ui.swing.wizards;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -35,12 +38,16 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.configmanager.ConfigurationManager;
+
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:07 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class NetworkBandwidthSelection extends WizardPanel {
 
@@ -55,6 +62,41 @@ public class NetworkBandwidthSelection extends WizardPanel {
     private JTextField true_download_bandwidth;
     private JTextField true_upload_bandwidth;
 	
+	DecimalFormat format = new DecimalFormat("0.00");
+    
+    JRadioButton prec_radio;
+    ActionListener radion_action_listener = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource() == prec_radio) return;
+			prec_radio = (JRadioButton)e.getSource();
+			float down_speed = Float.parseFloat(true_download_bandwidth.getText());
+			float up_speed = Float.parseFloat(true_upload_bandwidth.getText()); 
+			if(kbit_s_radio.isSelected()) {
+				down_speed *= 1024;
+				down_speed *= 8;
+				down_speed /= 1024;
+				
+				up_speed *= 1024;
+				up_speed *= 8;
+				up_speed /= 1024;
+			}
+			else { 
+				down_speed *= 1024;
+				down_speed /= 8;
+				down_speed /= 1024;
+				
+				up_speed *= 1024;
+				up_speed /= 8;
+				up_speed /= 1024;
+			}
+			true_download_bandwidth.setText( format.format(down_speed) );
+			true_upload_bandwidth.setText( format.format(up_speed) );
+		}
+	};
+    
+    private JMuleCore _core = JMuleCoreFactory.getSingleton();
+    private ConfigurationManager _config = _core.getConfigurationManager();
+    
     public NetworkBandwidthSelection() {
         initComponents();
         disableCustomSpeedSettings( true );
@@ -73,6 +115,8 @@ public class NetworkBandwidthSelection extends WizardPanel {
         kbit_s_radio = new javax.swing.JRadioButton();
         kbyte_s_radio = new javax.swing.JRadioButton();
 
+        prec_radio = kbit_s_radio;
+        
         true_download_bandwidth_label.setFont( skin.getLabelFont() );
         true_upload_bandwidth_label.setFont( skin.getLabelFont() );
         kbit_s_radio.setFont( skin.getDefaultFont() );
@@ -100,8 +144,8 @@ public class NetworkBandwidthSelection extends WizardPanel {
                 {"Versatel DSL 6000", "6144", "512"},
                 {"Cable", "187", "32"},
                 {"Cable", "187", "64"},
-                {"T1", "1500", "1500"},
-                {"T3+", "44 Mbps", "44 Mbps"}
+                {"T1", "1500", "1500"}
+              //  {"T3+", "44 Mbps", "44 Mbps"}
             },
             new String [] {
                 "Connection", "Down (KBit/s)", "Up (KBit/s)"
@@ -122,11 +166,11 @@ public class NetworkBandwidthSelection extends WizardPanel {
 				String up_speed = (String)cst.getModel().getValueAt(row, 2);
 				switch(row) {
 				   case 0  : disableCustomSpeedSettings( true );
-					         true_download_bandwidth.setText("0");
-				             true_upload_bandwidth.setText("0");
+					         //true_download_bandwidth.setText("0");
+				             //true_upload_bandwidth.setText("0");
 				             break;
-				   case 1  : true_download_bandwidth.setText("");
-				             true_upload_bandwidth.setText("");
+				   case 1  : //true_download_bandwidth.setText("");
+				             //true_upload_bandwidth.setText("");
 					         disableCustomSpeedSettings( false ); 
 				             break;
 				   default : disableCustomSpeedSettings( true );
@@ -201,6 +245,9 @@ public class NetworkBandwidthSelection extends WizardPanel {
                 .add(connection_type_panel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(13, Short.MAX_VALUE))
         );
+        kbit_s_radio.addActionListener(radion_action_listener);
+        kbyte_s_radio.addActionListener(radion_action_listener);
+        initBandwidths();
     }
     
     private void disableCustomSpeedSettings(boolean state) {
@@ -211,18 +258,23 @@ public class NetworkBandwidthSelection extends WizardPanel {
         kbit_s_radio.setSelected( true );
     }
     
+    private void initBandwidths() {
+    	true_download_bandwidth.setText( (_config.getDownloadBandwidth() * 8 / 1024) + "");
+    	true_upload_bandwidth.setText( (_config.getUploadBandwidth() * 8 / 1024) + "");
+    }
+    
     public long getDownloadBandwidth() {
     	
     	int down_speed = Integer.parseInt(true_download_bandwidth.getText());
     	
-    	return Math.round(  kbit_s_radio.isEnabled() ?  down_speed / 8 : down_speed );
+    	return Math.round(  kbit_s_radio.isSelected() ?  (down_speed * 1024) / 8  : (down_speed * 1024) );
     }
     
     public long getUploadBandwidth() {
     	
     	int up_speed = Integer.parseInt(true_upload_bandwidth.getText());
     	
-    	return Math.round( kbit_s_radio.isEnabled() ? up_speed / 8 : up_speed );
+    	return Math.round( kbit_s_radio.isSelected() ? (up_speed * 1024 ) / 8 : (up_speed * 1024) );
     }
 
 }

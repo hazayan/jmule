@@ -28,24 +28,26 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import org.jmule.core.JMConstants;
+import org.jmule.core.JMRunnable;
+import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.ui.CommonUIPreferences;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.Splash;
 import org.jmule.ui.swing.SwingConstants;
+import org.jmule.ui.swing.SwingPreferences;
 import org.jmule.ui.swing.SwingUtils;
+import org.jmule.ui.swt.SWTPreferences;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/03 09:35:21 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class SetupWizard extends JDialog {
 	
@@ -134,15 +136,11 @@ public class SetupWizard extends JDialog {
 			
 			 public void actionPerformed(ActionEvent event) {
 				
-			   SwingUtilities.invokeLater( new Runnable() {	 
-				
-				public void run() {   
-				   
-					_this.setVisible(false);
-				 
-					//splash.splashOn();
+				_this.setVisible(false);
 					
-					//splash.increaseProgress(5, "Save user settings");
+			   (new JMThread( new JMRunnable() {	 
+				
+				public void JMRun() {   
 				 
 					ConfigurationManager _config = _core.getConfigurationManager();
 				 
@@ -168,6 +166,14 @@ public class SetupWizard extends JDialog {
 				 
 					CommonUIPreferences.getSingleton().setUIType( ((UIChooser)stage5).getChosenUI() );
 				 
+					//TODO modify this
+					String our_ui = ((UIChooser)stage5).getChosenUI();
+					
+					if(our_ui.equals("SWT"))
+						SWTPreferences.getInstance().setConnectAtStartup(gs.isConnectAtStartup());
+					else if(our_ui.equals("SWING"))
+						SwingPreferences.getSingleton().setConnectAtStartup(gs.isConnectAtStartup());
+					
 					CommonUIPreferences.getSingleton().save();
 					
 					 //splash.increaseProgress(5, "Starting JMule UI manager");
@@ -185,7 +191,7 @@ public class SetupWizard extends JDialog {
 				 
 				}	
 				 
-			   });	 
+			   })).start();	 
 		    }
 				 
 		});
@@ -304,23 +310,6 @@ public class SetupWizard extends JDialog {
 		this.navigation_bar.getNextButton().setEnabled(false);
 		this.navigation_bar.getFinishButton().setEnabled(true);
 		this.repaint();
-	}
-	
-	
-	public static void main(String[] args) {
-		JMuleCore _core;
-		try {
-		    JMuleCoreFactory.create();
-		    _core = JMuleCoreFactory.getSingleton();
-		    _core.start();
-		} catch(JMuleCoreException jce) {
-			System.out.println("JMule core can't be started");
-		}
-		
-		SetupWizard welcome = new SetupWizard();
-		//welcome.setSize(500, 400);
-		welcome.pack();
-		welcome.setVisible(true);
 	}
 
 }

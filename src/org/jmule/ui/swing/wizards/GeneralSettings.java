@@ -30,13 +30,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.ui.CommonUIPreferences;
+import org.jmule.ui.swing.SwingPreferences;
 import org.jmule.ui.swing.common.PortTextField;
+import org.jmule.ui.swt.SWTPreferences;
 
 /**
  * Created on 07-19-2008
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/14 17:31:49 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class GeneralSettings extends WizardPanel {
 
@@ -52,6 +57,8 @@ public class GeneralSettings extends WizardPanel {
     private JLabel udp_port_desc;
     private JTextField user_name;
     private JLabel user_name_desc;
+    
+    JMuleCore _core = JMuleCoreFactory.getSingleton();
 	
     public GeneralSettings() {
         initComponents();
@@ -87,7 +94,22 @@ public class GeneralSettings extends WizardPanel {
 
         connect_at_start_up.setText("Enable this option if you want JMule to connect at start up");
 
+        connect_at_start_up.setSelected(false);
 
+        CommonUIPreferences _pref = CommonUIPreferences.getSingleton();
+        if(_pref.getUIType().equals("SWT")) {
+        	if(SWTPreferences.getInstance().isConnectAtStartup())
+        		connect_at_start_up.setSelected(true);
+        	else 
+        		connect_at_start_up.setSelected(false);
+        } else if(_pref.getUIType().equals("SWING")) {
+        	if(SwingPreferences.getSingleton().isConnectAtStartup()) 
+        		connect_at_start_up.setSelected(true);
+        	else 
+        	    connect_at_start_up.setSelected(false);
+        } 
+        	
+        
         org.jdesktop.layout.GroupLayout general_panelLayout = new org.jdesktop.layout.GroupLayout(general_panel);
         general_panel.setLayout(general_panelLayout);
         general_panelLayout.setHorizontalGroup(
@@ -126,8 +148,12 @@ public class GeneralSettings extends WizardPanel {
         udp_port.setText(_config.getUDP()+"");
 
         udp_port_desc.setText("<html>UDP port is used for additional functionalities<br>(for better work the port must be enabled and available)</html>");
-
+        
         disable_udp_port.setText("Disable");
+        
+        disable_udp_port.setSelected(!_config.isUDPEnabled());
+        
+        udp_port.setEnabled( _config.isUDPEnabled() ); 
         
         disable_udp_port.addMouseListener(new MouseAdapter() {
            	public void mouseClicked(MouseEvent evt) {
@@ -221,5 +247,9 @@ public class GeneralSettings extends WizardPanel {
     	return !disable_udp_port.isSelected();
     }
     
+    public boolean isConnectAtStartup() {
+    	
+    	return connect_at_start_up.isSelected();
+    }
 
 }

@@ -23,6 +23,9 @@
 package org.jmule.ui.swing.wizards;
 
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -30,255 +33,134 @@ import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 
+import org.jmule.ui.CommonUIPreferences;
 import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.swing.BrowserLauncher;
 import org.jmule.ui.swing.ImgRep;
-import org.jmule.ui.swing.common.JMSAction;
-import org.jmule.ui.swing.common.LinkLabel;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:09 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
  */
 public class UIChooser extends WizardPanel {
 
-    private JPanel bottom_panel;
-    private ButtonGroup button_group;
-    private JRadioButton com_line_button;
-    private JLabel com_line_desc;
-    private JLabel com_line_screen;
-    private JLabel eclipse_logo;
-    private JLabel java_logo;
-    private JPanel middle_panel;
-    private JRadioButton swing_button;
-    private JLabel swing_desc_label;
-    private LinkLabel swing_link_label;
-    private JRadioButton swt_button;
-    private JLabel swt_desc_label;
-    private LinkLabel swt_link_label;
-    private JPanel top_panel;
+	private JPanel swt_panel = new JPanel();
+	private JPanel swing_panel = new JPanel();
+	private JTextArea swing_text_area = new JTextArea();
+	private JTextArea swt_text_area = new JTextArea();
+	private JRadioButton swing_radio_button = new JRadioButton();
+	private JRadioButton swt_radio_button = new JRadioButton();
+	private JLabel swing_logo_label = new JLabel();
+	private JLabel eclipse_logo_label = new JLabel();
+	private ButtonGroup radio_group = new ButtonGroup();
 	
-    public UIChooser() {
-        initComponents();
-    }
-
-    private void initComponents() {
-
-        button_group = new javax.swing.ButtonGroup();
-        top_panel = new javax.swing.JPanel();
-        eclipse_logo = new javax.swing.JLabel();
-        swt_button = new javax.swing.JRadioButton();
-        swt_desc_label = new javax.swing.JLabel();
-        middle_panel = new javax.swing.JPanel();
-        java_logo = new javax.swing.JLabel();
-        swing_button = new javax.swing.JRadioButton();
-        swing_desc_label = new javax.swing.JLabel();
-        bottom_panel = new javax.swing.JPanel();
-        com_line_screen = new javax.swing.JLabel();
-        com_line_button = new javax.swing.JRadioButton();
-        com_line_desc = new javax.swing.JLabel();
-
-        JMSAction open_swt_link = new JMSAction() {
-
-			@Override
-			public void refreshActionState() {
-				
-			}
-
-			public void actionPerformed(ActionEvent e) {
-				
-				BrowserLauncher.openURL("http://eclipse.org/swt");
-			}
-        	
-        };
-        
-        open_swt_link.setName("More info");
-        open_swt_link.setToolTipText("http://eclipse.org/swt");
-        
-        swt_link_label = new LinkLabel(open_swt_link);
-        
-        JMSAction open_swing_link = new JMSAction() {
-
-			@Override
-			public void refreshActionState() {
-
-			}
-
-			public void actionPerformed(ActionEvent e) {
-
-				BrowserLauncher.openURL("http://en.wikipedia.org/wiki/Swing_(Java)");
-			}
-        	
-        };
-        
-        open_swing_link.setName("More info");
-        open_swing_link.setToolTipText("http://en.wikipedia.org/wiki/Swing_(Java)");
-        
-        swing_link_label = new LinkLabel(open_swing_link);
-        
-        setLayout(new java.awt.GridLayout(3, 1));
-
-        eclipse_logo.setIcon(ImgRep.getIcon("wizard/eclipse_logo.jpg"));
-        
-        button_group.add(swt_button);
-        swt_button.setForeground(new java.awt.Color(51, 51, 255));
-        swt_button.setSelected(true);
-        swt_button.setText("SWT");
-
-        swt_desc_label.setText("<html>Standard Widget Toolkit - is a native platform<br>independent user interface framework</html>");
-
-        //swt_link_label.setText();
-
-        // <<< actions that change the panel background >>>
-        swt_button.addActionListener(new ActionListener() {
-        	 public void actionPerformed(ActionEvent event) {
-        		 top_panel.setBackground(skin.getHighlightedUIChooserItem());
-        		 middle_panel.setBackground(new Color(238, 238, 238));
-        		 bottom_panel.setBackground(new Color(238, 238, 238));
-        		 
-        		 swt_button.setBackground(skin.getHighlightedUIChooserItem());
-        		 swing_button.setBackground(new Color(238, 238, 238));
-        		 com_line_button.setBackground(new Color(238, 238, 238));
-        	 }
-        });
-        
-        swing_button.addActionListener(new ActionListener() {
-        	 public void actionPerformed(ActionEvent event) {
-        		 top_panel.setBackground(new Color(238, 238, 238));
-        		 middle_panel.setBackground(skin.getHighlightedUIChooserItem());
-        		 bottom_panel.setBackground(new Color(238, 238, 238));
-        		 
-        		 swt_button.setBackground(new Color(238, 238, 238));
-        		 swing_button.setBackground(skin.getHighlightedUIChooserItem());
-        		 com_line_button.setBackground(new Color(238, 238, 238));
-        	 }
-        });
-        
-        com_line_button.addActionListener(new ActionListener() {
-        	 public void actionPerformed(ActionEvent event) {
-        		 top_panel.setBackground(new Color(238, 238, 238));
-        		 middle_panel.setBackground(new Color(238, 238, 238));
-        		 bottom_panel.setBackground(skin.getHighlightedUIChooserItem());
-        		 
-        		 swt_button.setBackground(new Color(238, 238, 238));
-        		 swing_button.setBackground(new Color(238, 238, 238));
-        		 com_line_button.setBackground(skin.getHighlightedUIChooserItem());
-        	 }
-        });
-        // <<< end change the panel background >>>
-        
-        swt_button.doClick();
-        
-        org.jdesktop.layout.GroupLayout top_panelLayout = new org.jdesktop.layout.GroupLayout(top_panel);
-        top_panel.setLayout(top_panelLayout);
-        top_panelLayout.setHorizontalGroup(
-            top_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(top_panelLayout.createSequentialGroup()
-                .add(eclipse_logo)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(top_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(swt_desc_label)
-                    .add(swt_button)
-                    .add(swt_link_label))
-                .addContainerGap(29, Short.MAX_VALUE))
-        );
-        top_panelLayout.setVerticalGroup(
-            top_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(top_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(swt_button)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(swt_desc_label)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(swt_link_label)
-                .addContainerGap(20, Short.MAX_VALUE))
-            .add(eclipse_logo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-        );
-
-        add(top_panel);
-
-        java_logo.setIcon(ImgRep.getIcon("wizard/java_logo.jpg")); 
-
-        button_group.add(swing_button);
-        swing_button.setForeground(new java.awt.Color(51, 51, 255));
-        swing_button.setText("SWING");
-
-        swing_desc_label.setText("Standard Java GUI provided by Sun Microsystems");
-
-        //swing_link_label.setText("http://en.wikipedia.org/wiki/Swing_(Java)");
-
-        org.jdesktop.layout.GroupLayout middle_panelLayout = new org.jdesktop.layout.GroupLayout(middle_panel);
-        middle_panel.setLayout(middle_panelLayout);
-        middle_panelLayout.setHorizontalGroup(
-            middle_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(middle_panelLayout.createSequentialGroup()
-                .add(java_logo)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(middle_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(swing_button)
-                    .add(swing_desc_label)
-                    .add(swing_link_label))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        middle_panelLayout.setVerticalGroup(
-            middle_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(middle_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(swing_button)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(swing_desc_label)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(swing_link_label)
-                .addContainerGap(35, Short.MAX_VALUE))
-            .add(java_logo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-        );
-
-        add(middle_panel);
-
-        com_line_screen.setIcon(ImgRep.getIcon("wizard/ui_console.jpg"));
-
-        button_group.add(com_line_button);
-        com_line_button.setForeground(new java.awt.Color(51, 51, 255));
-        com_line_button.setText("Command line");
-
-        com_line_desc.setText("Very fast user interface (for advanced users only)");
-
-        org.jdesktop.layout.GroupLayout bottom_panelLayout = new org.jdesktop.layout.GroupLayout(bottom_panel);
-        bottom_panel.setLayout(bottom_panelLayout);
-        bottom_panelLayout.setHorizontalGroup(
-            bottom_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(bottom_panelLayout.createSequentialGroup()
-                .add(com_line_screen)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(bottom_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(com_line_button)
-                    .add(com_line_desc))
-                .addContainerGap(13, Short.MAX_VALUE))
-        );
-        bottom_panelLayout.setVerticalGroup(
-            bottom_panelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(bottom_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(com_line_button)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(com_line_desc)
-                .addContainerGap(56, Short.MAX_VALUE))
-            .add(com_line_screen, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-        );
-
-        add(bottom_panel);
-    }
+	public UIChooser() {
+		
+		init();
+	}
+	
+	private void init() {
+		GridBagLayout main_grid_bag_layout = new GridBagLayout();
+		main_grid_bag_layout.rowWeights = new double[] {0.1, 0.1};
+		main_grid_bag_layout.rowHeights = new int[] {7, 7};
+		main_grid_bag_layout.columnWeights = new double[] {0.1};
+		main_grid_bag_layout.columnWidths = new int[] {7};
+		this.setPreferredSize(new java.awt.Dimension(497, 282));
+		this.setLayout(main_grid_bag_layout);
+		
+		swt_panel = new JPanel();
+		GridBagLayout swt_panel_layout = new GridBagLayout();
+		swt_panel_layout.columnWidths = new int[] {17, 119, 95, 7};
+		swt_panel_layout.rowHeights = new int[] {7};
+		swt_panel_layout.columnWeights = new double[] {0.0, 0.0, 0.0, 0.1};
+		swt_panel_layout.rowWeights = new double[] {0.1};
+		this.add(swt_panel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(20, 0, 20, 10), 0, 0));
+		swt_panel.setLayout(swt_panel_layout);
+		eclipse_logo_label = new JLabel();
+		eclipse_logo_label.setIcon(ImgRep.getIcon("wizard/eclipse_logo.jpg"));
+		eclipse_logo_label.setOpaque(true);
+		eclipse_logo_label.setBackground(Color.WHITE);
+		swt_panel.add(eclipse_logo_label, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		eclipse_logo_label.setName("eclipse_logo_label");
+		swt_radio_button = new JRadioButton("SWT");
+		swt_radio_button.setSelected(true);
+		swt_radio_button.addActionListener(new ActionListener() {
+		        	 public void actionPerformed(ActionEvent event) {
+		        		 swt_panel.setBackground(Color.GRAY);
+		        		 swing_panel.setBackground(new Color(238, 238, 238));		        		 
+		        		 swt_radio_button.setBackground(Color.GRAY);
+		        		 swing_radio_button.setBackground(new Color(238, 238, 238));
+		        		 swt_text_area.setBackground(Color.GRAY);
+		        		 swt_text_area.setForeground(Color.WHITE);
+		        		 
+		        		 swing_text_area.setBackground(new Color(238, 238, 238));
+		        		 swing_text_area.setForeground(Color.BLACK);
+		        	 }
+		        });
+		swt_panel.add(swt_radio_button, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+		swt_radio_button.setName("swt_radio_button");
+		swt_text_area = new JTextArea();
+		swt_text_area.setBackground(swt_panel.getBackground());
+		swt_text_area.setEditable(false);
+		swt_text_area.setText("Standard Widget Toolkit - is a native\nplatform independent user interface\nframework\nMore info on http://eclipse.org/swt");
+		swt_panel.add(swt_text_area, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		swing_panel = new JPanel();
+	    GridBagLayout swing_panel_layout = new GridBagLayout();
+		swing_panel_layout.columnWidths = new int[] {16, 121, 96, 7};
+		swing_panel_layout.rowHeights = new int[] {7};
+		swing_panel_layout.columnWeights = new double[] {0.0, 0.0, 0.0, 0.1};
+		swing_panel_layout.rowWeights = new double[] {0.1};
+		this.add(swing_panel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(20, 0, 20, 10), 0, 0));
+		swing_panel.setLayout(swing_panel_layout);
+		swing_logo_label = new JLabel();
+		swing_logo_label.setIcon(ImgRep.getIcon("wizard/java_logo.jpg"));
+		swing_logo_label.setOpaque(true);
+		swing_logo_label.setBackground(Color.WHITE);
+		swing_panel.add(swing_logo_label, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		swing_logo_label.setName("swing_logo_label");
+		swing_radio_button = new JRadioButton("SWING");
+		swing_radio_button.addActionListener(new ActionListener() {
+		        	 public void actionPerformed(ActionEvent event) {
+		        		 swt_panel.setBackground(new Color(238, 238, 238));
+		        		 swing_panel.setBackground(Color.GRAY);
+		        		 
+		        		 swt_radio_button.setBackground(new Color(238, 238, 238));
+		        		 swing_radio_button.setBackground(Color.GRAY);
+		        		 
+		        		 swt_text_area.setBackground(new Color(238, 238, 238));
+		        		 swt_text_area.setForeground(Color.BLACK);
+		        		 
+		        		 swing_text_area.setBackground(Color.GRAY);
+		        		 swing_text_area.setForeground(Color.WHITE);
+		        	 }
+		          });
+		swing_panel.add(swing_radio_button, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+		swing_text_area = new JTextArea();
+		swing_text_area.setBackground(swing_panel.getBackground());
+		swing_text_area.setEditable(false);
+		swing_text_area.setText("Standard Java GUI provided by Sun\nMicrosystems. More info on\nhttp://en.wikipedia.org/wiki/Swing_(Java)");
+		swing_panel.add(swing_text_area, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		swing_text_area.setName("swing_text_area");
+		
+		radio_group.add(swt_radio_button);
+		radio_group.add(swing_radio_button);
+		
+		if(CommonUIPreferences.getSingleton().getUIType().equals("SWT"))
+		  swt_radio_button.doClick();
+		else 
+		  swing_radio_button.doClick();
+	}
 
     public String getChosenUI() {
     	
-    	     if( swt_button.isSelected() ) return JMuleUIManager.SWT_UI;
+    	     if( swt_radio_button.isSelected() ) return JMuleUIManager.SWT_UI;
     	
-    	else if( swing_button.isSelected() ) return JMuleUIManager.SWING_UI;
+    	else if( swing_radio_button.isSelected() ) return JMuleUIManager.SWING_UI;
     	     
-    	else if( com_line_button.isSelected() ) return JMuleUIManager.CONSOLE_UI;
+    	//else if( com_line_button.isSelected() ) return JMuleUIManager.CONSOLE_UI;
     	
     	return null;
     }
