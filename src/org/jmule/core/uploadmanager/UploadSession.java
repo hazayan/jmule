@@ -56,8 +56,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:44:33 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:57:51 $$
  */
 public class UploadSession implements JMTransferSession {
 	
@@ -136,6 +136,15 @@ public class UploadSession implements JMTransferSession {
 	
 	public JMIterable<Peer> getPeers() {
 		return uploadQueue.getPeers();
+	}
+	
+	public Peer getPeer(int i) {
+		int j = 0;
+		for(Peer peer : uploadQueue.getPeers()) {
+			if( j == i ) return peer;
+			++j;
+		}
+		return null;
 	}
 	
 	public boolean hasPeer(Peer peer) {

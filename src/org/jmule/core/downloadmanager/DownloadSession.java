@@ -83,8 +83,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/10 16:53:10 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:56:21 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -710,6 +710,13 @@ public class DownloadSession implements JMTransferSession {
 		list.addAll(peer_list);
 		list.addAll(connecting_peers);
 		return new JMIterable<Peer>(list.iterator());
+	}
+	
+	public List<Peer> getPeersAsList() {
+		List<Peer> result = new LinkedList<Peer>();
+		result.addAll(peer_list);
+		result.addAll(connecting_peers);
+		return result;
 	}
 	
 	public String toString(){

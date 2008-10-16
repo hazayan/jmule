@@ -29,8 +29,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/09/30 14:30:04 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:57:51 $$
  */
 public interface UploadManager extends JMuleManager{
 
@@ -41,6 +41,8 @@ public interface UploadManager extends JMuleManager{
 	public void removeUpload(FileHash fileHash);
 
 	public UploadSession getUpload(FileHash fileHash);
+	
+	public UploadSession getUpload(long i);
 	
 	public JMIterable<UploadSession> getUploads();
 	

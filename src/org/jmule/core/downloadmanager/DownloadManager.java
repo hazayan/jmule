@@ -36,35 +36,21 @@ import org.jmule.core.sharingmanager.PartialFile;
  * Created on 2008-Apr-20
  * @author javajox
  * @author binary
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:56:21 $$
  */
 public interface DownloadManager extends JMuleManager {
 	
-	/**
-	 * Add download based on the search result.
-	 * @param searchResult 
-	 */
+
 	public void addDownload(SearchResultItem searchResult);
 	
-	/**
-	 * Add download based on the ed2k file link.
-	 * @param fileLink
-	 */
 	public void addDownload(ED2KFileLink fileLink);
 	
-	/**
-	 * Add download based on the partialFile
-	 * @param partialFile
-	 */
 	public void addDownload(PartialFile partialFile);
 
-	/**
-	 * Obtain download by FileHash
-	 * @param fileHash
-	 * @return
-	 */
 	public DownloadSession getDownload(FileHash fileHash);
+	
+	public DownloadSession getDownload(long i);
 	
 	public int getDownloadCount();
 	
@@ -79,22 +65,15 @@ public interface DownloadManager extends JMuleManager {
 	public JMIterable<DownloadSession> getDownloads();
 	
 	/**
-	 * Add peers who has fileHash to download session.
+	 * Add peers which have fileHash to the download session identified by fileHash
 	 * @param fileHash
 	 * @param peerList
 	 */
 	public void addDownloadPeers(FileHash fileHash, List<Peer> peerList);
 	
-	/**
-	 * Add new Download Manager listener.
-	 * @param listener
-	 */
+
 	public void addDownloadManagerListener(DownloadManagerListener listener);
 	
-	/**
-	 * Remove the given listener from listener list.
-	 * @param listener
-	 */
 	public void removeDownloadMangerListener(DownloadManagerListener listener);
 	
 }
