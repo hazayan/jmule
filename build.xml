@@ -23,7 +23,7 @@
 
 <!--
   Author : javajox
-  Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:39 $$
+  Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:59:25 $$
 -->
 
 <project name="JMule" default="standard" basedir=".">
@@ -94,7 +94,8 @@
   <iajc destdir="${bin}" source="1.5" srcdir="./src">
      <classpath>
 	    <pathelement location="${lib}/aspectjrt.jar"/>
-	    <pathelement location="${lib}/swt.jar"/>
+	    <pathelement location="${lib}/swt-linux/swt.jar"/>
+	    <pathelement location="${lib}/swingx-0.9.3.jar"/>
         <pathelement location="./mainandconstants.jar"/>
      </classpath>
 	<exclude name="**/Main.java"/>
