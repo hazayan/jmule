@@ -59,8 +59,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:53:57 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:23:45 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -292,7 +292,7 @@ public class JMuleCoreImpl implements JMuleCore {
 
 		
 		/** Enable Debug thread!**/	
-		debugThread = new DebugThread();
+		// debugThread = new DebugThread();
 		
 		Runtime.getRuntime().addShutdownHook( new JMThread("Shutdown Hook") {
 			
@@ -382,7 +382,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		notifyComponentStopped(ConfigurationManagerFactory.getInstance());
 		
-		debugThread.JMStop();
+		if (debugThread != null)
+			debugThread.JMStop();
 		
 		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
 		
