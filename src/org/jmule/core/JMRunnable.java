@@ -25,8 +25,8 @@ package org.jmule.core;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:09:26 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:00 $$
  */
 public abstract class JMRunnable implements Runnable {
 
@@ -37,7 +37,7 @@ public abstract class JMRunnable implements Runnable {
 			JMRun();
 			
 		} catch(Throwable t) {
-			
+			t.printStackTrace();
 		}
 		
 	}
