@@ -83,8 +83,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:56:21 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:24:24 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -482,8 +482,6 @@ public class DownloadSession implements JMTransferSession {
 			
 			download_status_list.getDownloadStatus(sender).setResendCount(0);
 			
-			long available_part_count = sharedFile.getAvailablePartCount();
-			
 			try {
 				
 				sharedFile.writeData(sPacket.getFileChunk());
@@ -517,7 +515,15 @@ public class DownloadSession implements JMTransferSession {
 						
 						return ;
 						
-					} 
+					}
+					Packet sendPacket = PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash());
+					sender.sendPacket(sendPacket);
+					download_status_list.setPeerStatus(sender, PeerDownloadStatus.UPLOAD_REQUEST);
+					List<PeerDownloadStatus> status_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST, PeerDownloadStatus.ACTIVE_UNUSED);
+					for(PeerDownloadStatus peer_status : status_list) {
+						peer_status.getPeer().sendPacket(PacketFactory.getUploadReuqestPacket(sharedFile.getFileHash()));
+						peer_status.setPeerStatus(PeerDownloadStatus.UPLOAD_REQUEST);
+					}
 					
 				}
 			FragmentList list = fileRequestList.get(sender);
@@ -721,7 +727,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	public String toString(){
 		
-		String str=" [ ";
+		String str="[ ";
 		
 		str+= sharedFile.getSharingName() + " " + sharedFile.getGapList() + " " + sharedFile.getFileHash() + "\n";
 		str+= "Peer used by session : \n";
@@ -729,15 +735,15 @@ public class DownloadSession implements JMTransferSession {
 		for(Peer peer : peer_list)
 			str+=peer+"\n";
 		
-		str+=" Connecting peers : \n";
+		str+="Connecting peers : \n";
 		
 		for(Peer peer : connecting_peers) 
 			str+=peer+"\n";
 		
 		str += "\nDownload status list :\n"+ download_status_list + "\n";
 		
-		str+= fileRequestList+"\n";
-		str+=" ] ";
+		str+= fileRequestList+"";
+		str+="]";
 		
 		return str;
 	}
@@ -1009,9 +1015,6 @@ public class DownloadSession implements JMTransferSession {
 				}
 				
 				}
-				
-				
-				
 			}
 		}
 		
