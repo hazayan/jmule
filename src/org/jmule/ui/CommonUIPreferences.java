@@ -28,13 +28,14 @@ import java.util.prefs.Preferences;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
  */
-public class CommonUIPreferences implements UIPreferences {
+public class CommonUIPreferences extends UIPreferences {
 
 	private Preferences preferences;
 	private static CommonUIPreferences singleton = null;
+	public static String UI_TYPE = "ui_type";
 	
 	public static CommonUIPreferences getSingleton() {
 		if( singleton == null ) singleton = new CommonUIPreferences();

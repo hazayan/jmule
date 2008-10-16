@@ -22,56 +22,95 @@
  */
 package org.jmule.ui.swing.tables;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.JFrame;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 
-import org.jmule.ui.swing.models.JMTableModel;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.table.TableColumnExt;
+import org.jmule.ui.swing.SwingPreferences;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:03 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
  */
-public class JMTable extends JTable {
+public class JMTable extends JXTable {
 
-	 private DefaultTableCellRenderer whiteRenderer;
-	 private DefaultTableCellRenderer grayRenderer;
-	 
-	 String[] headerStr = {"Name", "Date", "Size", "Dir"};
-	 int[] columnWidth = {100, 150, 100, 50};
+	protected List<TableColumnExt> table_columns = new LinkedList<TableColumnExt>();
+	protected SwingPreferences _pref = SwingPreferences.getSingleton();
+    protected JFrame parent;
 	
-	 public JMTable(JMTableModel tableModel) { 
-		 //super();
-		 this.setModel(tableModel);
-		 this.setShowGrid(false);
-		 this.setRowHeight(25);
-		 this.setShowGrid(false);
-		 this.setIntercellSpacing(new Dimension(0,0));
-		 //this.setCellSelectionEnabled(true);
-		 this.setRowSelectionAllowed(true);
-		 
-		 SortButtonRenderer renderer = new SortButtonRenderer();
-		 TableColumnModel model = this.getColumnModel();
-		 //int n = headerStr.length;
-		 int n = 10;
-		 for(int i = 0; i < n; i++) {
-		    model.getColumn(i).setHeaderRenderer(renderer);
-		    //model.getColumn(i).setPreferredWidth(columnWidth[i]);
-		 }
-		 JTableHeader header = this.getTableHeader();
-		 header.addMouseListener(new HeaderListener(header, renderer));
-	 }
+	public JMTable() {
+		init();
+	}
+	
+	public JMTable(JFrame parent) {
+		this.parent = parent;
+		init();
+	}
+	
+	private void init() {
+		this.setRowHeight(20);
+		this.setShowGrid(false); 
+		//this.setIntercellSpacing(new Dimension(0,0));
+		//this.setColumnMargin(0);
+		//this.setDoubleBuffered(true);
+		//this.setShowVerticalLines(false);
+		//this.setHorizontalScrollEnabled(false);
+		//this.setRowMargin(0);
+		this.setHorizontalScrollEnabled(true);
+		//this.setFillsViewportHeight(true);
+		//this.setRowMargin(0);
+		//this.setShowVerticalLines(false);
+		//this.set
+        //this.setIntercellSpacing(new java.awt.Dimension(0, 0));
+       // this.setRowMargin(0);
+       // this.setShowHorizontalLines(false);
+       // this.setShowVerticalLines(false);
+        //setRowMargin(0);
+       // getColumnModel().setColumnMargin(0);
+
+       // resizeAndRepaint();
+	}
+	
+	protected void buildColumns(AbstractTableModel tableModel) {
+		// set the table columns like user prefer
+		Collections.sort(table_columns, new Comparator<TableColumnExt>() {
+          	public int compare(TableColumnExt o1, TableColumnExt o2) {
+          		  int o1_order = _pref.getColumnOrder(Integer.parseInt(o1.getIdentifier().toString()));
+          		  int o2_order = _pref.getColumnOrder(Integer.parseInt(o2.getIdentifier().toString()));
+                  if( o1_order < o2_order ) return -1; 
+                  if( o1_order > o2_order ) return 1;
+              return 0;
+			}
+		});		
+		TableColumnModel column_model = new DefaultTableColumnModel();		
+		for(TableColumnExt column : table_columns) {
+			column_model.addColumn(column);
+		}		
+		column_model.setColumnMargin(0);
+		this.setModel(tableModel);
+		this.setColumnModel(column_model);
+	}
+	
+	public void updateUI() {
+		super.updateUI();
+		
+		setIntercellSpacing( new Dimension( 0, 0 ) );
+	}
+	 //private DefaultTableCellRenderer whiteRenderer;
+	 //private DefaultTableCellRenderer grayRenderer;
 	 
-     public TableCellRenderer getCellRenderer(int row, int column) {
+     /*public TableCellRenderer getCellRenderer(int row, int column) {
 	      if (whiteRenderer == null)
 	      {
 	         whiteRenderer = new DefaultTableCellRenderer();
@@ -86,44 +125,5 @@ public class JMTable extends JTable {
 	            return whiteRenderer;
 	      else
 	            return grayRenderer;
-	 }
-     
-     // We must listen for mouse clicks in order to do table sorting
-     class HeaderListener extends MouseAdapter {
- 		JTableHeader header;
- 		SortButtonRenderer renderer;
- 		
- 		HeaderListener(JTableHeader header, SortButtonRenderer renderer) {
- 			this.header = header;
- 			this.renderer = renderer;
- 		}
- 		
- 		public void mousePressed(MouseEvent e) {
- 			int col = header.columnAtPoint(e.getPoint());
- 			int sortCol = header.getTable().convertColumnIndexToModel(col);
- 			renderer.setPressedColumn(col);
- 			renderer.setSelectedColumn(col);
- 			header.repaint();
- 			
- 			if(header.getTable().isEditing()) {
- 				header.getTable().getCellEditor().stopCellEditing();
- 			}
- 			
- 			boolean isAscent;
- 			if(SortButtonRenderer.DOWN == renderer.getState(col)) {
- 				isAscent = true;
- 			} else {
- 				isAscent = false;
- 			}
- 			((JMTableModel)header.getTable().getModel())
- 			    .sortByColumn(sortCol, isAscent);
- 		}
- 		
- 		public void mouseReleased(MouseEvent e) {
-             int col = header.columnAtPoint(e.getPoint());
-             renderer.setPressedColumn(-1);                  //clear
-             header.repaint();
- 		}
- 	}
-	
+	 }*/
 }

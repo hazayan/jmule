@@ -30,8 +30,8 @@ import org.jmule.ui.swt.JMuleSWTUI;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:53 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
  */
 public class JMuleUIManager {
 
@@ -104,6 +104,15 @@ public class JMuleUIManager {
 		
 	}
 	
+	public static String getCurrentUIType() {
+		
+		if( ui_instance instanceof JMuleSWTUI ) return SWT_UI;
+		
+		if( ui_instance instanceof JMuleSwingUI ) return SWING_UI;
+		
+		return null;
+	}
+	
 	public static void create() throws JMuleUIManagerException {
 		
 		if( singleton == null ) singleton = new JMuleUIManager();
@@ -119,7 +128,6 @@ public class JMuleUIManager {
 	
 	public void shutdown() {
 		
-		ui_instance.shutdown();
 		
 		try {
 			

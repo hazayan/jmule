@@ -22,16 +22,27 @@
  */
 package org.jmule.ui.swing;
 
+import java.awt.Color;
+
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
+
+import org.jmule.core.JMConstants;
 import org.jmule.ui.JMuleUI;
+import org.jmule.ui.localizer.Localizer;
+import org.jmule.ui.swing.dialogs.NightlyBuildDialog;
 import org.jmule.ui.swing.mainwindow.MainWindow;
 import org.jmule.ui.swing.skin.DefaultSwingSkinImpl;
 import org.jmule.ui.swing.skin.SwingSkin;
+import org.jmule.ui.swing.versionchecker.VersionChecker;
+import org.jmule.updater.JMUpdater;
+import org.jmule.updater.JMUpdaterException;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:05 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
  */
 public class JMuleSwingUI implements JMuleUI<SwingSkin> {
 
@@ -40,6 +51,13 @@ public class JMuleSwingUI implements JMuleUI<SwingSkin> {
 	private MainWindow main_window;
 	
 	public void initialize() {
+		
+		Localizer.initialize();
+		
+		SwingGUIUpdater.getInstance().start();
+		
+		UIManager.put("ToolTip.foreground", new ColorUIResource(Color.BLACK));
+		UIManager.put("ToolTip.background", new ColorUIResource(0Xfdf7c2));
 		
 		swing_preferences = SwingPreferences.getSingleton();
 		
@@ -55,7 +73,37 @@ public class JMuleSwingUI implements JMuleUI<SwingSkin> {
 
 	public void start() {
 		
+		SwingPreferences _pref = SwingPreferences.getSingleton();
+		
 		main_window.setVisible( true );
+		
+		
+		if(JMConstants.IS_NIGHTLY_BUILD) 
+			
+		  if(_pref.isNightlyBuildWarning()) {	
+			
+		     NightlyBuildDialog nightly_build_dialog = new NightlyBuildDialog(main_window);
+		  
+		     SwingUtils.setWindowLocationRelativeTo(nightly_build_dialog, main_window);
+		     
+		     nightly_build_dialog.setVisible(true);
+		  }
+		
+		// check for newer version if the option is enabled
+		if(_pref.isCheckForUpdatesAtStartup()) {
+		  JMUpdater update = JMUpdater.getInstance();
+		  try {
+			 update.checkForUpdates();
+		  } catch (JMUpdaterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		  }
+		  if(update.isNewVersionAvailable()) {
+		    VersionChecker version_checker = new VersionChecker(main_window);
+		    SwingUtils.setWindowLocationRelativeTo(version_checker, main_window);
+		    version_checker.setVisible(true);
+		  }
+		}
 		
 	}
 

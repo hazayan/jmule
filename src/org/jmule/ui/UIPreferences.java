@@ -29,8 +29,8 @@ import org.jmule.core.JMConstants;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/14 18:28:38 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -100,6 +100,10 @@ public class UIPreferences extends UIConstants {
 			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SERVER_LIST_STATIC_COLUMN_ID ) );
 			 
 			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_ORDER_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_ORDER_ID ) );
+			 
+			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
 			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) );
 			 
@@ -126,6 +130,14 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SOURCES_COLUMN_ID ) ).
 			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_REMAINING_COLUMN_ID ) ).
@@ -291,6 +303,10 @@ public class UIPreferences extends UIConstants {
 			 putInt(WIDTH, getDefaultColumnWidth( SERVER_LIST_STATIC_COLUMN_ID ) );
 			 
 			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_ORDER_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_ORDER_ID ) );
+			 
+			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
 			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) );
 			 
@@ -317,6 +333,14 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_SOURCES_COLUMN_ID ) ).
 			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_REMAINING_COLUMN_ID ) ).
@@ -480,6 +504,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SERVER_LIST_STATIC_COLUMN_ID ) ).
 			 putInt(ORDER, getDefaultColumnOrder( SERVER_LIST_STATIC_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_ORDER_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( DOWNLOAD_LIST_ORDER_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, DOWNLOAD_LIST_FILE_NAME_COLUMN_ID ) ).
@@ -733,14 +761,14 @@ public class UIPreferences extends UIConstants {
 		preferences.node(node).putBoolean(ENABLED, value);
 	}
 	
-	protected void setNightlyBuildWarningJMVer(String uiRoot, String value) {
+	private void setNightlyBuildWarningJMVer(String uiRoot, String value) {
 		String node_path = getNightlyBuildWarningJMVerNodePath(uiRoot);
-		preferences.node(node_path).put(node_path, value);
+		preferences.node(node_path).put(VERSION, value);
 	}
 	
-	protected String getNightlyBuildWarningJMVer(String uiRoot) {
+	private String getNightlyBuildWarningJMVer(String uiRoot) {
 		String node_path = getNightlyBuildWarningJMVerNodePath(uiRoot);
-		return preferences.node(node_path).get(ENABLED, getDefaultNightlyBuildWarningJMVer());
+		return preferences.node(node_path).get(VERSION, getDefaultNightlyBuildWarningJMVer());
 	}
 	
 	// end NightlyBuildWarning methods

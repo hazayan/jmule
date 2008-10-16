@@ -20,23 +20,31 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.ui.swing.maintabs;
+package org.jmule.ui.swing.tables;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.awt.Component;
+
+import javax.swing.JTable;
+
+import org.jmule.core.edonkey.impl.Peer;
 
 /**
- * 
+ *
+ * Created on Oct 6, 2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:03 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
  */
-public class SharedTab extends JPanel {
+public class DownloadPeersTableCellRenderer extends JMTableCellRenderer {
 
-	public SharedTab() {
-		
-		this.add(new JLabel("Shared . . ."));
-		
+	protected Peer peer;
+	
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
+		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		if(value instanceof Peer)
+		 peer = (Peer)value;
+		return this;
 	}
 	
 }

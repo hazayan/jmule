@@ -22,14 +22,64 @@
  */
 package org.jmule.ui.swing.tables;
 
+import java.awt.Component;
+
+import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
+
+import org.jmule.ui.swing.models.MyInfoTableModel;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:05 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
  */
 public class MyInfoTable extends JTable {
 
+	// ---------- Table cell renderers -------------------
+	
+	class MyInfoLabelCellRenderer extends JLabel implements TableCellRenderer {
+		  public Component getTableCellRendererComponent(JTable table, Object value,
+			    	boolean isSelected, boolean hasFocus, int row, int column) {
+			  this.setText((String)value);
+			  return this;
+		  }
+    }
+	
+	class MyInfoParamCellRenderer extends JLabel implements TableCellRenderer {
+	  public Component getTableCellRendererComponent(JTable table, Object value,
+		    	boolean isSelected, boolean hasFocus, int row, int column) {
+		  this.setText((String)value);
+		  return this;
+	  }
+	}
+	
+	
+	public MyInfoTable() {
+	
+	    /*TableColumnExt my_info_label_column = new TableColumnExt();
+	    my_info_label_column.setModelIndex(0);
+	    my_info_label_column.setHeaderValue("aaaa");
+	    my_info_label_column.setWidth(10);
+	    my_info_label_column.setCellRenderer(new MyInfoLabelCellRenderer());
+	    
+	    TableColumnExt my_info_param_column = new TableColumnExt();
+	    my_info_param_column.setModelIndex(1);
+	    my_info_param_column.setHeaderValue("aaaa");
+	    my_info_param_column.setCellRenderer(new MyInfoParamCellRenderer());*/
+		
+	    //TableColumnModel column_model = new DefaultTableColumnModel();
+		//column_model.addColumn(my_info_label_column);
+		//column_model.addColumn(my_info_param_column);
+		//this.addColumn(my_info_label_column);
+		//this.addColumn(my_info_param_column);
+		
+		this.setModel(new MyInfoTableModel());
+		//this.setColumnModel(column_model);
+		
+		
+	}
+	
 }

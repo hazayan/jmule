@@ -20,71 +20,89 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.ui.swing.maintabs;
+package org.jmule.ui.swing.maintabs.serverlist;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
-import org.jmule.ui.swing.tables.MyInfoTable;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.edonkey.ServerListListener;
+import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.edonkey.impl.Server;
+import org.jmule.ui.swing.maintabs.AbstractTab;
 import org.jmule.ui.swing.tables.ServerListTable;
 
 /**
  * 
  * @author javajox
  * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:02 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:14 $$
  */
-public class ServerListTab extends JPanel {
+public class ServerListTab extends AbstractTab {
 
-   private JSplitPane splitPane;
-   private JSplitPane splitPane2;
+   private JSplitPane splitPane;   // splits up the visible area into 2 horizontal parts: top, where the server list is located
+                                   // and bottom (server messages and infoes)
+   private JSplitPane splitPane2;  // bottom visible area is splitted up into 2 vertical parts: left, server messages, right infoes
    private JScrollPane serverListScrollPane;
    private JScrollPane serverMessagesScrollPane;
    private JScrollPane myInfoScrollPane;
    private GridLayout gridLayout;
    private ServerListTable serverListTable;
-   private MyInfoTable myInfoTable;
+   //private MyInfoTable myInfoTable;
+   private Info myInfoTable;
    private JTextArea serverMessages;
+   private TitledBorder serverListScrollPaneBorder;
+   
+   private JMuleCore _core = JMuleCoreFactory.getSingleton();
+   private ServerManager _server_manager = _core.getServerManager();
 	
-   public ServerListTab() {
+   public ServerListTab(JFrame parent) {
+	   super(parent);
 	   initComponents();
    }
    
-   private void initComponents() {
-	   
+   private void initComponents() {   
 	   splitPane = new JSplitPane();
 	   splitPane2 = new JSplitPane();
 	   serverListScrollPane = new JScrollPane();
 	   serverMessagesScrollPane = new JScrollPane();
 	   myInfoScrollPane = new JScrollPane();
 	   gridLayout = new GridLayout(1,1);
-	   serverListTable = new ServerListTable(); 
-	   myInfoTable = new MyInfoTable();
-	   serverMessages = new JTextArea();
-	   
+	   serverListTable = new ServerListTable(parent); 
+	   //myInfoTable = new MyInfoTable();
+	   myInfoTable = new Info();
+	   serverMessages = new JTextArea();	   
+	   splitPane.setDividerLocation(200);
+	   splitPane2.setDividerLocation(500);
 	   this.setLayout(gridLayout);
 	   splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 	   this.add(splitPane);
-	   
 	   splitPane2.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 	   splitPane.setBottomComponent(splitPane2);
 	   
 	   //The following declarations are the style for titled border used in the appl.
-	   Font titledBorderTextFont = new java.awt.Font("Dialog", 1, 12);
-	   Color titledBorderTextColor = new java.awt.Color(0, 0, 255); 
-	   Color titledBorderColor = new java.awt.Color(0, 0, 0);
+	   Font titledBorderTextFont = new java.awt.Font("Dialog", 0, 12);
+	   Color titledBorderTextColor = Color.BLACK; 
+	   Color titledBorderColor = Color.GRAY;
 	   LineBorder border = new javax.swing.border.LineBorder(titledBorderColor, 1, true);
-	   
+	   serverMessages.setEditable(false);
 	   //Set up the border and border style for the all titled borders
 	   /*TitledBorder titledBorder = 
 		   javax.swing.BorderFactory.createTitledBorder(
@@ -96,21 +114,49 @@ public class ServerListTab extends JPanel {
                    titledBorderTextColor);*/
 	   
 	   //Set up the title border for serverListScrollPane
-	   TitledBorder serverListScrollPaneBorder = 
+	  
+	   serverListScrollPaneBorder = 
 		   javax.swing.BorderFactory.createTitledBorder(
 				   border, 
-                   "Servers(212)", 
+				   "Servers", 
                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                    javax.swing.border.TitledBorder.DEFAULT_POSITION, 
                    titledBorderTextFont, 
                    titledBorderTextColor);
+	   //TitledBorder serverListScrollPaneBorder = javax.swing.BorderFactory.createTitledBorder("Servers");
 	   serverListScrollPane.setBorder(serverListScrollPaneBorder);
+	   
+	   _server_manager.addServerListListener(new ServerListListener() {
+          public void autoConnectStarted() {}
+          public void autoConnectStopped() {}
+          public void serverAdded(Server server) {
+        	  SwingUtilities.invokeLater(new Runnable() {
+        		   public void run() {
+        			   setServerListCount();
+        		   }
+        	  });       	   
+		  }
+          public void serverListCleared() {
+        	  SwingUtilities.invokeLater(new Runnable() {
+       		      public void run() {
+       			      setServerListCount();
+       		      } 
+       	       });
+		  }
+          public void serverRemoved(Server server) {
+        	  SwingUtilities.invokeLater(new Runnable() {
+       		      public void run() {
+       			       setServerListCount();
+       		      }
+       	      });
+		  }
+	   });
 	   
 	   serverListScrollPane.setViewportView(serverListTable);
 	   splitPane.setTopComponent(serverListScrollPane);
 	   
 	   //Set up the border for myInfoScrollPane
-	   TitledBorder myInfoScrollPaneBorder = 
+	  /* TitledBorder myInfoScrollPaneBorder = 
 		   javax.swing.BorderFactory.createTitledBorder(
 				   border, 
 				   "My info", 
@@ -119,7 +165,7 @@ public class ServerListTab extends JPanel {
 				   titledBorderTextFont, 
 				   titledBorderTextColor);
 	   myInfoScrollPane.setBorder(myInfoScrollPaneBorder);
-	   
+	   */
 	   myInfoScrollPane.setViewportView(myInfoTable);
 	   splitPane2.setBottomComponent(myInfoScrollPane);
 	   serverMessagesScrollPane.setViewportView(serverMessages);
@@ -133,12 +179,50 @@ public class ServerListTab extends JPanel {
 				   javax.swing.border.TitledBorder.DEFAULT_POSITION, 
 				   titledBorderTextFont, 
 				   titledBorderTextColor);
+	   //TitledBorder serverMessagesScrollPaneBorder  = javax.swing.BorderFactory.createTitledBorder("Messages");
 	   serverMessagesScrollPane.setBorder(serverMessagesScrollPaneBorder);
 	   splitPane2.setTopComponent(serverMessagesScrollPane);
 	   
 	   serverListScrollPane.setPreferredSize(new Dimension(300,200));
 	   serverMessagesScrollPane.setPreferredSize(new Dimension(200,300));
 	   
+	   // Clear server messages popup menu
+	   final JPopupMenu popup_menu = new JPopupMenu();
+	   JMenuItem clear_menu_item = new JMenuItem("Clear");
+	   clear_menu_item.addActionListener(new ActionListener() {
+		   public void actionPerformed(ActionEvent event) {
+			   serverMessages.setText("");
+		   }
+	   });
+	   popup_menu.add(clear_menu_item);
+		
+		class MousePopupListener extends MouseAdapter {
+		    public void mousePressed(MouseEvent e) {
+		      checkPopup(e);
+		    }
+
+		    public void mouseClicked(MouseEvent e) {
+		      checkPopup(e);
+		    }
+
+		    public void mouseReleased(MouseEvent e) {
+		      checkPopup(e);
+		    }
+
+		    private void checkPopup(MouseEvent e) {
+		      if (e.isPopupTrigger()) {
+		        popup_menu.show(e.getComponent(), e.getX(), e.getY());
+		      }
+		    }
+		}
+	   serverMessages.addMouseListener(new MousePopupListener());
+	   setServerListCount();
+   }
+   
+   private void setServerListCount() {
+	   String server_count = "Servers(" + _server_manager.getServersCount() + ")";
+	   serverListScrollPaneBorder.setTitle(server_count);
+	   serverListScrollPane.repaint();
    }
    
    public ServerListTable getServerListTable() {
@@ -149,20 +233,28 @@ public class ServerListTab extends JPanel {
 		this.serverListTable = serverListTable;
    }
 
-   public MyInfoTable getMyInfoTable() {
+   public Info getMyInfoTable() {
 		return myInfoTable;
    }
 
-   public void setMyInfoTable(MyInfoTable myInfoTable) {
+   public void setMyInfoTable(Info myInfoTable) {
 		this.myInfoTable = myInfoTable;
    }
    
-   public static void main(String args[]) {
+   public void setServerMessage(String serverMessage) {
+	   serverMessages.setText(serverMessage);
+   }
+   
+   public void clearServerMessage() {
+	   serverMessages.setText("");
+   }
+   
+   /*public static void main(String args[]) {
 	   JFrame frame = new JFrame();
 	   ServerListTab server_list_tab = new ServerListTab();
 	   frame.setSize(600,900);
 	   frame.add(server_list_tab);
 	   frame.setVisible(true);
-   }
+   }*/
    
 }

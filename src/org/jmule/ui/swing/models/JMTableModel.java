@@ -27,54 +27,14 @@ import javax.swing.table.DefaultTableModel;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:58 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
  */
 public class JMTableModel extends DefaultTableModel {
 
-	int[] indexes;
-	JMTableSorter sorter;
-	
-	//public JMTableModel() {
-	//	super();
-	//}
-	
-	public Object getValueAt(int row, int col) {
-		int rowIndex = row;
-		if(indexes != null) {
-			rowIndex = indexes[row];
-		}
-		return super.getValueAt(rowIndex, col);
-	}
-	
-	public void setValueAt(Object value, int row, int col) {
-		int rowIndex = row;
-		if(indexes != null) {
-			rowIndex = indexes[row];
-		}
-		super.setValueAt(value, rowIndex, col);
-	}
-	
-	public void sortByColumn(int column, boolean isAscent) {
-		if( sorter == null ) {
-			sorter = new JMTableSorter(this);
-		}
-		sorter.sort(column, isAscent);
-		fireTableDataChanged();
-	}
-	
-	public int[] getIndexes() {
-		int n = getRowCount();
-		if(indexes != null) {
-			if(indexes.length == n) {
-				return indexes;
-			}
-		}
-		indexes = new int[n];
-		for(int i=0; i<n; i++) {
-			indexes[i] = i;
-		}
-		return indexes;
-	}
+
+    public boolean isCellEditable(int row, int col) {
+        return false;
+     }
 	
 }

@@ -20,22 +20,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.ui.swing.maintabs;
+package org.jmule.ui.swing.tables;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
- * 
+ * JMSColumn stands for : JMule Swing Table Column
+ * Created on Oct 2, 2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:00 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
  */
-public class SearchTab extends JPanel {
+public class JMTableColumn extends TableColumnExt {
 
-	public SearchTab() {
-		
-		this.add(new JLabel("Search . . ."));
+	public JMTableColumn() {
 		
 	}
 	

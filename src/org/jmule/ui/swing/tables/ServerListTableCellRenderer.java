@@ -20,23 +20,39 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.ui.swing.maintabs;
+package org.jmule.ui.swing.tables;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Component;
+
+import javax.swing.JTable;
+
+import org.jmule.core.edonkey.impl.Server;
 
 /**
- * 
+ *
+ * Created on Sep 2, 2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:01 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
  */
-public class StatisticsTabs extends JPanel {
-
-	public StatisticsTabs() {
-		
-		this.add(new JLabel("Statistics"));
-		
+public class ServerListTableCellRenderer extends JMTableCellRenderer {
+	
+    protected Server server;
+    
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
+		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		if(value instanceof Server) {
+			server = (Server)value;
+			if(server.isDown())  this.setForeground(new Color(0xc0c0c0));
+			else this.setForeground(Color.BLACK);
+			if(server.isConnected()) {
+				this.setForeground(Color.BLUE);
+				this.setBackground(Color.YELLOW);
+			}
+		}
+		return this;
 	}
 	
 }
