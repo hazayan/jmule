@@ -88,8 +88,8 @@ import org.jmule.util.GeneralComparator;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:33:41 $$
  */
 public class ServerListTable extends JMTable {
 
@@ -127,13 +127,14 @@ public class ServerListTable extends JMTable {
 			                           ( ver != null ? ver : "" ) +
 			                           ( desc != null ? desc : "" ) +
 			              "<hr>" +
-			              "<table>" + ( ( ip != null || flag_icon_url != null ) ? ("<tr><td>IP</td><td>" + ( flag_icon_url != null ? "<img src="+flag_icon_url+"/>&nbsp;" : "" ) + ( ip != null ? ip : "") + "</td></tr>") : "" ) +
+			              "<table>" + ( ( ip != null || flag_icon_url != null ) ? ("<tr><td>IP</td><td>" + ( flag_icon_url != null ? "<img src=\""+flag_icon_url+"\">&nbsp;" : "" ) + ( ip != null ? ip : "") + "</td></tr>") : "" ) +
 			                          ( ping != null ? ping  : "" ) +
 			                          ( users != null ? users : "" ) +
 			                          ( files != null ? files : "" ) + 
 			              "</table>"+
 			              "</body>" +
 			              "</html>";
+			//System.out.println(text);
 			this.setToolTipText(text);
 			this.setHorizontalAlignment(SwingConstants.LEFT);
 			return this;

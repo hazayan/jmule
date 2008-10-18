@@ -82,8 +82,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:33:41 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -122,7 +122,7 @@ public class DownloadsTable extends JMTable {
             String eta = TimeFormatter.format(session.getETA());
             
             String str = "<html> " +
-            		"<table><tr><td><img src=" + icon_url + "/></td><td><b>" + fn + "</b></td><tr></table>" +
+            		"<table><tr><td><img src=\"" + icon_url + "\"></td><td><b>" + fn + "</b></td><tr></table>" +
             		"<hr>" +
             		"<table>" +
             		"<tr><td>Size</td><td>" + size + "</td></tr>" +
