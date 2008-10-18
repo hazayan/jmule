@@ -81,6 +81,7 @@ import org.jmule.ui.swing.SwingUtils;
 import org.jmule.ui.swing.UISwingImageRepository;
 import org.jmule.ui.swing.dialogs.AboutDialog;
 import org.jmule.ui.swing.dialogs.AdjustSpeedLimitsDialog;
+import org.jmule.ui.swing.maintabs.AbstractTab;
 import org.jmule.ui.swing.maintabs.LogTab;
 import org.jmule.ui.swing.maintabs.search.SearchTab;
 import org.jmule.ui.swing.maintabs.serverlist.ServerListTab;
@@ -96,8 +97,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -128,6 +129,8 @@ public class MainWindow extends JFrame implements WindowListener  {
 	private PeerManager _peer_manager = _core.getPeerManager();
 	private SwingPreferences _pref = SwingPreferences.getSingleton();
 	private ConfigurationManager _config = _core.getConfigurationManager(); 
+	
+	private AbstractTab previous_panel;
 	
 	class JMToggleButton extends JToggleButton {
 		public JMToggleButton() {
@@ -434,6 +437,20 @@ public class MainWindow extends JFrame implements WindowListener  {
 		this.setJMenuBar( main_menu_bar );
 	}
 	
+	private void setActiveMainTab(AbstractTab active_tab, JRadioButtonMenuItem menu_item_button) {
+		if(active_tab != previous_panel) {
+		   if(previous_panel != null) {
+			   previous_panel.setVisible(false);
+			   previous_panel.deregisterAllRefreshables();
+		   }
+		   active_tab.setVisible(true);
+		   setView( active_tab );
+		   active_tab.registerAllRefreshables();
+		   previous_panel = active_tab;
+		   menu_item_button.setSelected(true);
+		}
+	}
+	
 	//TODO extract this for a new class -> MainButtonsBar.java
 	private void setMainButtonsBar() {
         main_buttons_bar = new JToolBar();
@@ -454,9 +471,13 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
  
 		server_list_button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {			
-				 setView( server_list_tab );
-				 servers.setSelected(true);
+			public void actionPerformed(ActionEvent e) {
+				setActiveMainTab(server_list_tab, servers);
+				// if(previous_panel != null) previous_panel.setVisible(false);
+				// server_list_tab.setVisible(true);
+				// setView( server_list_tab );
+				// previous_panel = server_list_tab;
+				// servers.setSelected(true);
 			}			
 		});
 		server_list_button.setIcon( UISwingImageRepository.getIcon("servers.png") );
@@ -466,8 +487,12 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
 		transfers_button.addActionListener( new ActionListener() {			
 			 public void actionPerformed(ActionEvent e) {
-				 setView( transfers_tab );
-				 transfers.setSelected(true);
+				setActiveMainTab(transfers_tab, transfers); 
+				// if(previous_panel != null) previous_panel.setVisible(false);
+				// transfers_tab.setVisible(true);
+				// setView( transfers_tab );
+				// previous_panel = transfers_tab;
+				// transfers.setSelected(true);
 			 }
 		});
 		transfers_button.setIcon( UISwingImageRepository.getIcon("transfer.png") );
@@ -477,8 +502,12 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
 		search_button.addActionListener(new ActionListener() {			
 			 public void actionPerformed(ActionEvent e) {
-				 setView( search_tab );
-				 search.setSelected(true);
+				 setActiveMainTab(search_tab, search);
+				 //if(previous_panel != null) previous_panel.setVisible(false);
+				 //search_tab.setVisible(true);
+				 //setView( search_tab );
+				 //previous_panel = search_tab;
+				 //search.setSelected(true);
 			 }
 		});		
 		search_button.setIcon( UISwingImageRepository.getIcon("search.png") );
@@ -488,8 +517,12 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
 		shared_files_button.addActionListener(new ActionListener() {			
 			 public void actionPerformed(ActionEvent e) {
-				 setView( shared_tab );
-				 shared_files.setSelected(true);
+				 setActiveMainTab(shared_tab, shared_files);
+				// if(previous_panel != null) previous_panel.setVisible(false);
+				// shared_tab.setVisible(true);
+				// setView( shared_tab );
+				// previous_panel = shared_tab;
+				// shared_files.setSelected(true);
 			 }
 		});
 		shared_files_button.setIcon( UISwingImageRepository.getIcon("shared_files.png") );
@@ -499,8 +532,12 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
 		statistics_button.addActionListener(new ActionListener() {			
 			public void actionPerformed(ActionEvent e) {
-				setView( statistic_tab );
-				stats.setSelected(true);
+				setActiveMainTab(statistic_tab, stats);
+				//if(previous_panel != null) previous_panel.setVisible(false);
+				//statistic_tab.setVisible(true);
+				//setView( statistic_tab );
+				//previous_panel = statistic_tab;
+				//stats.setSelected(true);
 			}
 		}); 
 		statistics_button.setText("Statistics");
@@ -510,8 +547,12 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
 		log_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			     setView( log_tab );
-			     logs.setSelected(true);
+				setActiveMainTab(log_tab, logs);
+				// if(previous_panel != null) previous_panel.setVisible(false);
+				// log_tab.setVisible(true);
+			    // setView( log_tab );
+			    // previous_panel = log_tab;
+			    // logs.setSelected(true);
 			}
 		});
 		log_button.setText("Log");

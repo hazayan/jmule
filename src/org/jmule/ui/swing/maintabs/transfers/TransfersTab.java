@@ -48,8 +48,8 @@ import org.jmule.ui.swing.tables.UploadsTable;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
  */
 public class TransfersTab extends AbstractTab {
 
@@ -69,6 +69,8 @@ public class TransfersTab extends AbstractTab {
 	public TransfersTab(JFrame parent) {
 		super(parent);
 		initComponents();
+		super.registerRefreshable(downloadsTable);
+		super.registerRefreshable(uploadsTable);
 	}
 	
 	private void initComponents() {

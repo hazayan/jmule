@@ -35,15 +35,16 @@ import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.jmule.ui.swing.Refreshable;
 import org.jmule.ui.swing.SwingPreferences;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:46 $$
  */
-public class JMTable extends JXTable {
+public class JMTable extends JXTable implements Refreshable {
 
 	protected List<TableColumnExt> table_columns = new LinkedList<TableColumnExt>();
 	protected SwingPreferences _pref = SwingPreferences.getSingleton();
@@ -109,6 +110,11 @@ public class JMTable extends JXTable {
 	}
 	 //private DefaultTableCellRenderer whiteRenderer;
 	 //private DefaultTableCellRenderer grayRenderer;
+
+	public void refresh() {
+		
+		repaint();
+	}
 	 
      /*public TableCellRenderer getCellRenderer(int row, int column) {
 	      if (whiteRenderer == null)

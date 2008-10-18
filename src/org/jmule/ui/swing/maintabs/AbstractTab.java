@@ -22,23 +22,68 @@
  */
 package org.jmule.ui.swing.maintabs;
 
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import org.jmule.ui.swing.Refreshable;
+import org.jmule.ui.swing.SwingGUIUpdater;
 
 /**
  *
  * Created on Oct 6, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/18 17:42:47 $
  */
 public abstract class AbstractTab extends JPanel {
 
 	protected JFrame parent;
 	
+	protected List<Refreshable> refreshable_components = new LinkedList<Refreshable>();
+	private SwingGUIUpdater _updater = SwingGUIUpdater.getInstance();
+	
 	public AbstractTab(JFrame parent) {
 		
-		this.parent = parent;
+		this.parent = parent;		
+		
+		/*this.addComponentListener(new ComponentAdapter() {
+			
+			 public void componentHidden(ComponentEvent evt) {
+				 System.out.println("Component become hidden " + refreshable_components);
+				 for(Refreshable refreshable : refreshable_components) 
+					 _updater.removeRefreshable(refreshable);
+			 }
+			 
+			 public void componentShown(ComponentEvent evt) {
+				 System.out.println("Component become visible " + refreshable_components);
+				 for(Refreshable refreshable : refreshable_components)
+					 _updater.addRefreshable(refreshable);
+			 }
+		});*/
+	}
+	
+	protected synchronized void registerRefreshable(Refreshable refreshable) {
+		
+		refreshable_components.add(refreshable);
+	}
+	
+	public synchronized void registerAllRefreshables() {
+		 for(Refreshable refreshable : refreshable_components) {
+			 _updater.addRefreshable(refreshable);
+			 System.out.println("Register refreshable =>" + refreshable);
+		 }
+	}
+	
+	public synchronized void deregisterAllRefreshables() {
+		 for(Refreshable refreshable : refreshable_components) {
+			 _updater.removeRefreshable(refreshable);
+			 System.out.println("De-Register refreshable =>" + refreshable);
+		 }
 	}
 	
 }

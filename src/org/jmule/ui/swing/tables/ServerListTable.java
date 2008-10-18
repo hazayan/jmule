@@ -75,7 +75,6 @@ import org.jmule.ui.UIConstants;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.maintabs.serverlist.INewServerDialog;
 import org.jmule.ui.swing.ImgRep;
-import org.jmule.ui.swing.Refreshable;
 import org.jmule.ui.swing.SwingGUIUpdater;
 import org.jmule.ui.swing.SwingUtils;
 import org.jmule.ui.swing.maintabs.serverlist.SNewServerDialog;
@@ -88,8 +87,8 @@ import org.jmule.util.GeneralComparator;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:33:41 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:46 $$
  */
 public class ServerListTable extends JMTable {
 
@@ -290,18 +289,19 @@ public class ServerListTable extends JMTable {
         super(parent);
 		init();
 		_this = this;
-		_gui_updater.addRefreshable(new Refreshable() {
-			 public void refresh() {
-				 //_this.updateUI();
-				// TableModel model = _this.getModel();
-				 //((AbstractTableModel)model).fireTableDataChanged();
-				 //TableModel model = _this.getModel();
-				 //((AbstractTableModel)model).fireTableRowsUpdated(
-		         //           0, model.getRowCount() );
-				 _this.repaint();
-			 }
-		});
 	}
+	
+	//public void refresh() {
+	
+			 //_this.updateUI();
+			// TableModel model = _this.getModel();
+			 //((AbstractTableModel)model).fireTableDataChanged();
+			 //TableModel model = _this.getModel();
+			 //((AbstractTableModel)model).fireTableRowsUpdated(
+	         //           0, model.getRowCount() );
+		//	 repaint();
+		
+	//}
 	
 	private void init() {
         

@@ -24,8 +24,6 @@ package org.jmule.ui.swing.maintabs.statistics;
 
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
@@ -42,7 +40,6 @@ import javax.swing.JTabbedPane;
 
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.ui.swing.Refreshable;
-import org.jmule.ui.swing.SwingGUIUpdater;
 import org.jmule.ui.swing.maintabs.AbstractTab;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.TimeFormatter;
@@ -52,8 +49,8 @@ import sun.management.ManagementFactory;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
  */
 public class StatisticsTabs extends AbstractTab {
 
@@ -83,20 +80,17 @@ public class StatisticsTabs extends AbstractTab {
 	private MemoryUsage nonheap_memory = memory_bean.getNonHeapMemoryUsage();
 	private ThreadMXBean thread_bean = ManagementFactory.getThreadMXBean();
 	
-	private SwingGUIUpdater _gui_updater = SwingGUIUpdater.getInstance();
-	private Refreshable refreshable = new Refreshable() {
-		public void refresh() {
-			updateData();
-		}
-	};
-	
 	private final static Font label_value_font = new java.awt.Font("Dialog", 0, 12);
 	
 	public StatisticsTabs(JFrame parent) {
 		super(parent);
 		init();
-		
-        _gui_updater.addRefreshable(refreshable);
+        
+        super.registerRefreshable(new Refreshable() {
+		   public void refresh() {
+			  updateData();
+		   }
+	    });
         
         updateData();
 	}

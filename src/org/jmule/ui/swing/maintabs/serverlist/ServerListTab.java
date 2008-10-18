@@ -52,8 +52,8 @@ import org.jmule.ui.swing.tables.ServerListTable;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:30:19 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
  */
 public class ServerListTab extends AbstractTab {
 
@@ -76,6 +76,7 @@ public class ServerListTab extends AbstractTab {
    public ServerListTab(JFrame parent) {
 	   super(parent);
 	   initComponents();
+	   super.registerRefreshable(serverListTable);
    }
    
    private void initComponents() {   

@@ -82,8 +82,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:33:41 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:46 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -402,11 +402,6 @@ public class DownloadsTable extends JMTable {
 	public DownloadsTable(JFrame parent) {
 		super(parent);
 		init();		
-		_gui_updater.addRefreshable(new Refreshable() {
-			 public void refresh() {
-				repaint();
-			 }
-		});
 	}
 	
 	private void init() {
