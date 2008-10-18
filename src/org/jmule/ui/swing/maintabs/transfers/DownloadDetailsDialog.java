@@ -26,7 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -40,8 +39,8 @@ import org.jmule.ui.swing.tables.DownloadPeersTable;
  *
  * Created on Oct 5, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:15 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
  */
 public class DownloadDetailsDialog extends RefreshableDialog {
 
@@ -84,13 +83,5 @@ public class DownloadDetailsDialog extends RefreshableDialog {
     	else 
     	  download_peers_table.repaint();
     }
-	
-	public static void main(String args[]) {
-		JFrame frame = new JFrame("Test test test");
-		frame.setSize(300, 400);
-		DownloadDetailsDialog ddd = new DownloadDetailsDialog(frame, null);
-		frame.setVisible(true);
-		ddd.setVisible(true);
-	}
 
 }

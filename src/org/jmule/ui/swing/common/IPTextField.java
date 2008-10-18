@@ -27,8 +27,8 @@ package org.jmule.ui.swing.common;
  * @author javajox
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/gui/common/IPTextField.java?view=log
  * @see phex.gui.common.IPTextField
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:44 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:30:19 $$
  */
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -391,14 +391,6 @@ public class IPTextField extends JPanel
                 }
             }
         }
-    }
-    
-    public static void main(String args[]) {
-    	JFrame jf = new JFrame();
-    	jf.setSize(200,300);
-    	IPTextField ipp = new IPTextField();
-    	jf.add(ipp);
-    	jf.setVisible(true);
     }
 }
 

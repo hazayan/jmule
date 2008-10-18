@@ -43,8 +43,8 @@ import org.jmule.util.Misc;
  *
  * Created on Oct 11, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:15 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
  */
 public class UploadDetailsPanel extends JPanel {
 
@@ -111,13 +111,5 @@ public class UploadDetailsPanel extends JPanel {
 		eta_value.setText(TimeFormatter.format(session.getETA()));
 		peers_value.setText(session.getPeersCount() + "");
 	}
-	
-	public static void main(String args[]) {
-		JFrame frame = new JFrame("Test test test");
-		UploadDetailsPanel udp = new UploadDetailsPanel(null);
-		frame.setLayout(new GridLayout(1,1));
-		frame.add(udp);
-		frame.setSize(400, 500);
-		frame.setVisible(true);
-	}
+
 }

@@ -27,8 +27,8 @@ package org.jmule.ui.swing.common;
  * @author javajox
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/gui/common/GradientPanel.java?view=log
  * @see phex.gui.common.GradientPanel
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:43 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:30:19 $$
  */
 
 import java.awt.Color;
@@ -88,15 +88,6 @@ public class GradientPanel extends JPanel
         g2.setPaint( gradient );
         g2.fillRect( viewRect.x, viewRect.y,
             viewRect.width, viewRect.height );
-    }
-    
-    public static void main(String args[]) {
-    	
-    	GradientPanel gp = new GradientPanel(new Color(239,132,6), new Color(255,255,255));
-    	JFrame jf = new JFrame();
-    	jf.setSize(100,200);
-    	jf.add(gp);
-    	jf.setVisible(true);
     }
 }
 

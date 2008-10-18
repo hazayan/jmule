@@ -47,8 +47,8 @@ import org.jmule.util.net.AddressUtils;
  *
  * Created on Sep 14, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:14 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
  */
 public class SNewServerDialog extends JDialog implements INewServerDialog<String, Integer> {
 
@@ -159,13 +159,4 @@ public class SNewServerDialog extends JDialog implements INewServerDialog<String
 		return dialog_action;
 	}
 
-	public static void main(String args[]) {
-		JFrame frame = new JFrame();
-		frame.setSize(400, 500);
-		SNewServerDialog server_dialog = new SNewServerDialog(frame);
-		server_dialog.setServerIP("123.23.23.23");
-		server_dialog.setServerPort(65556);
-		frame.setVisible(true);
-		server_dialog.setVisible(true);
-	}
 }

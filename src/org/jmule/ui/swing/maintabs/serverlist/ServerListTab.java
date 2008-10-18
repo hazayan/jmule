@@ -52,8 +52,8 @@ import org.jmule.ui.swing.tables.ServerListTable;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:14 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:30:19 $$
  */
 public class ServerListTab extends AbstractTab {
 
@@ -248,13 +248,5 @@ public class ServerListTab extends AbstractTab {
    public void clearServerMessage() {
 	   serverMessages.setText("");
    }
-   
-   /*public static void main(String args[]) {
-	   JFrame frame = new JFrame();
-	   ServerListTab server_list_tab = new ServerListTab();
-	   frame.setSize(600,900);
-	   frame.add(server_list_tab);
-	   frame.setVisible(true);
-   }*/
    
 }

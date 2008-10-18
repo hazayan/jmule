@@ -54,8 +54,8 @@ import org.jmule.ui.swing.common.PortTextField;
  *
  * Created on Sep 21, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:15 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
  */
 public class SettingsDialog extends JDialog implements IDialog {
 
@@ -537,24 +537,6 @@ public class SettingsDialog extends JDialog implements IDialog {
 	    if(JMConstants.IS_NIGHTLY_BUILD) 			
 			if( _ui_pref.isNightlyBuildWarning() != this.isNightlyBuildWarning() )
 				_ui_pref.setNightlyBuildWarning(this.isNightlyBuildWarning());	
-		
-	}
-	
-	public static void main(String args[]) {
-		
-		try {
-	    	JMuleCoreFactory.create();
-	    	JMuleCoreFactory.getSingleton().start();
-		}catch(Throwable t) {
-			t.printStackTrace();
-		}
-		
-		JFrame frame = new JFrame("Testing settings");
-		SettingsDialog dialog = new SettingsDialog(frame);
-		frame.setSize(300, 300);
-		dialog.setSize(379, 495);
-		frame.setVisible(true);
-		dialog.setVisible(true);
 		
 	}
 
