@@ -97,8 +97,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 07:43:09 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 17:48:05 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -352,6 +352,7 @@ public class MainWindow extends JFrame implements WindowListener  {
 		exit.setMnemonic('x');
 		exit.setIcon(ImgRep.getIcon("menuicons/door_in.png"));
 		import_server_list.setText(_._("mainwindow.mainmenu.file.import"));
+		import_server_list.setIcon(ImgRep.getIcon("import.png"));
 		servers.setText(_._("mainwindow.mainmenu.view.tabs.servers"));
 		servers.setIcon(ImgRep.getIcon("menuicons/servers.png"));
 		servers.setMnemonic('s');
