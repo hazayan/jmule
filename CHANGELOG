@@ -1,2 +1,10 @@
-BUGFIX: Swing UI | The icon is not shown on a ToolTip if the system is packed into a .jar file [javajox]
-FEATURE: Swing UI | Tabs that aren't visible don't update their  UIes. The overall UI should work faster now [javajox]
+
+  JMule CHANGELOG
+ -----------------------
+
+ 2008.10.19 | JMule 0.4.1
+
+ BUGFIX:  Swing UI | The icon is not shown on a ToolTip if the system is packed into a .jar file [javajox]
+ FEATURE: Swing UI | Tabs that aren't visible don't update their  UIes. The overall UI should work faster now [javajox]
+ FEATURE: Swing UI | A more number of columns are sortable [javajox]
+ CHANGE:  Swing UI | Other optimizations and improvements [javajox]
