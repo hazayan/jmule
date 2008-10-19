@@ -48,8 +48,8 @@ import org.jmule.ui.swing.tables.UploadsTable;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 17:34:24 $$
  */
 public class TransfersTab extends AbstractTab {
 
@@ -114,20 +114,20 @@ public class TransfersTab extends AbstractTab {
 
 			public void downloadAdded(FileHash fileHash) {
 				countDownloads();
-				LogTab.getLogInstance().addMessage("Download added : " + _download_manager.getDownload(fileHash).getSharingName());
+				LogTab.getLogInstance().addMessage("Download added : " + fileHash.getAsString());
 			}
 
 			public void downloadRemoved(FileHash fileHash) {
 				countDownloads();
-				LogTab.getLogInstance().addMessage("Download removed : " + _download_manager.getDownload(fileHash).getSharingName());
+				LogTab.getLogInstance().addMessage("Download removed : " + fileHash.getAsString());
 			}
 
 			public void downloadStarted(FileHash fileHash) {
-				LogTab.getLogInstance().addMessage("Download started : " + _download_manager.getDownload(fileHash).getSharingName());
+				LogTab.getLogInstance().addMessage("Download started : " + fileHash.getAsString());
 			}
 
 			public void downloadStopped(FileHash fileHash) {
-				LogTab.getLogInstance().addMessage("Download stopped : " + _download_manager.getDownload(fileHash).getSharingName());
+				LogTab.getLogInstance().addMessage("Download stopped : " + fileHash.getAsString());
 			}
 			
 		});
