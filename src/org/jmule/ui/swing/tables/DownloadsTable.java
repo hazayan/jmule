@@ -66,7 +66,6 @@ import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.swing.ImgRep;
-import org.jmule.ui.swing.Refreshable;
 import org.jmule.ui.swing.SwingGUIUpdater;
 import org.jmule.ui.swing.SwingUtils;
 import org.jmule.ui.swing.maintabs.transfers.DownloadDetailsDialog;
@@ -82,8 +81,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:46 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 18:03:14 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -722,7 +721,7 @@ public class DownloadsTable extends JMTable {
                                     break;
                                   
 					     case E :   popup_menu = new JPopupMenu();
-					                popup_menu.add(copy_ed2k_links);
+					                //popup_menu.add(copy_ed2k_links);
                                     popup_menu.add(paste_ed2k_links);
                             //        popup_menu.addSeparator();
                             //        popup_menu.add(column_setup);
@@ -805,7 +804,7 @@ public class DownloadsTable extends JMTable {
 	 *     |
 	 *   D |  Yes     -     Yes    Yes    Yes    Yes    Yes
 	 *     |
-	 *   E |   -      -      -     Yes    Yes    Yes     -
+	 *   E |   -      -      -     -     Yes    Yes     -
 	 *     |
 	 *   F |  Yes    Yes    Yes    Yes    Yes    Yes     -
 	 */
