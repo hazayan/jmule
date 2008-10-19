@@ -22,6 +22,7 @@
  */
 package org.jmule.ui.swing.maintabs.transfers;
 
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -43,8 +44,8 @@ import org.jmule.util.Misc;
  *
  * Created on Oct 11, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/19 17:47:14 $
  */
 public class UploadDetailsPanel extends JPanel {
 
@@ -67,6 +68,9 @@ public class UploadDetailsPanel extends JPanel {
 	
 	private UploadSession session;
 	
+    private final static Font label_value_font = new java.awt.Font("Dialog", 0, 12);
+    private final static Font label_font = new java.awt.Font("Dialog", 1, 12);
+	
 	public UploadDetailsPanel(UploadSession session) {
 		
 		this.session = session;
@@ -80,6 +84,25 @@ public class UploadDetailsPanel extends JPanel {
 		grid_bag_layout.rowHeights = new int[] {19, 20, 20, 21, 21, 19, 20, 20, 20, 7};
 		grid_bag_layout.columnWeights = new double[] {0.0, 0.0, 0.0, 0.1};
 		grid_bag_layout.columnWidths = new int[] {7, 113, 18, 7};
+		
+		file_name_label.setFont(label_font);
+		file_hash_label.setFont(label_font);
+		file_size_label.setFont(label_font);
+		ed2k_link_label.setFont(label_font);
+		upload_speed_label.setFont(label_font);
+		transferred_label.setFont(label_font);
+		eta_label.setFont(label_font);
+		peers_label.setFont(label_font);
+		
+		file_name_value.setFont(label_value_font);
+		file_hash_value.setFont(label_value_font);
+		file_size_value.setFont(label_value_font);
+		ed2k_link_value.setFont(label_value_font);
+		upload_speed_value.setFont(label_value_font);
+		transferred_value.setFont(label_value_font);
+		eta_value.setFont(label_value_font);
+		peers_value.setFont(label_value_font);
+		
 		this.setLayout(grid_bag_layout);
 		this.add(file_name_label, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		this.add(file_hash_label, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
