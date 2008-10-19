@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,6 +54,7 @@ import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.searchmanager.SearchResultItemList;
+import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.localizer._;
@@ -69,8 +71,8 @@ import org.jmule.util.Misc;
  *
  * Created on Sep 10, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/19 18:01:34 $
  */
 public class SearchResultTable extends JMTable {
 
@@ -210,6 +212,13 @@ public class SearchResultTable extends JMTable {
 		type.setVisible(_pref.isColumnVisible(UIConstants.SEARCH_FILE_TYPE_COLUMN_ID));
 		type.setHeaderValue(_._("mainwindow.searchtab.column.filetype"));
 		type.setCellRenderer(new TypeTableCellRenderer());
+		type.setComparator(new Comparator() {
+			public int compare(Object o1, Object o2) {
+				String file_type1 = FileFormatter.formatMimeType(((SearchResultItem)o1).getMimeType());
+				String file_type2 = FileFormatter.formatMimeType(((SearchResultItem)o2).getMimeType());
+				return Misc.compareAllObjects(file_type1, file_type2, "toString", true);
+			}			
+		});
 		
 		table_columns.add(type);
 		
@@ -219,10 +228,9 @@ public class SearchResultTable extends JMTable {
 		file_id.setVisible(_pref.isColumnVisible(UIConstants.SEARCH_FILE_ID_COLUMN_ID));
 		file_id.setHeaderValue(_._("mainwindow.searchtab.column.fileid"));
 		file_id.setCellRenderer(new FileIDTableCellRenderer());
+		file_id.setComparator(new GeneralComparator("getFileHash"));
 		
 		table_columns.add(file_id);
-		
-		System.out.println("searchResult from SearchResultTable" + searchResult.getSearchResultItemList().size());
 		
 		SearchResultTableModel search_result_table_model = new SearchResultTableModel(searchResult);
 		//SearchResultTableModel search_result_table_model;
