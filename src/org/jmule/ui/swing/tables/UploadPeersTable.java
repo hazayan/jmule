@@ -38,7 +38,6 @@ import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack;
 import org.jmule.ui.UIConstants;
-import org.jmule.ui.swing.models.DownloadTableModel;
 import org.jmule.ui.swing.models.UploadPeersModel;
 import org.jmule.ui.utils.PeerInfoFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
@@ -49,8 +48,8 @@ import org.jmule.util.Misc;
  *
  * Created on Oct 7, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/19 17:59:25 $
  */
 public class UploadPeersTable extends JMTable {
 
@@ -83,7 +82,7 @@ public class UploadPeersTable extends JMTable {
     				boolean isSelected, boolean hasFocus, int row, int column) {
     		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			this.setHorizontalAlignment(SwingConstants.CENTER);
-    		this.setIcon(FlagPack.getFlagAsIconByIP(peer.getAddress(), FlagPack.FlagSize.S25x15));	
+    		this.setIcon(FlagPack.getFlagAsIconByIP(peer.getAddress(), FlagPack.FlagSize.S18x25));	
     		this.setToolTipText(country_locator.getCountryName(peer.getAddress()));
     		return this;
     	}
@@ -123,7 +122,7 @@ public class UploadPeersTable extends JMTable {
     				boolean isSelected, boolean hasFocus, int row, int column) {
     		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     		this.setHorizontalAlignment(SwingConstants.LEFT);
-    		this.setText(PeerInfoFormatter.formatPeerSoftware(peer));
+    		this.setText(" " + PeerInfoFormatter.formatPeerSoftware(peer));
     		return this;
     	}
     }
