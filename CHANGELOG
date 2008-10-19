@@ -8,3 +8,4 @@
  FEATURE: Swing UI | Tabs that aren't visible don't update their  UIes. The overall UI should work faster now [javajox]
  FEATURE: Swing UI | A more number of columns are sortable [javajox]
  CHANGE:  Swing UI | Other optimizations and improvements [javajox]
+ BUGFIX:  Core	   | 'java.lang.OutOfMemoryError: Java heap space' [binary256]
