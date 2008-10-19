@@ -97,8 +97,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 07:43:09 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -805,7 +805,8 @@ public class MainWindow extends JFrame implements WindowListener  {
 			   case LOW_ID       : client_id.setForeground(Color.RED);
 				                   client_id.setText("LOW ID");
 			                       client_id.setToolTipText(clientID); break;
-			   case HIGH_ID      : client_id.setText("HIGH ID");
+			   case HIGH_ID      : client_id.setForeground(Color.BLACK);
+				                   client_id.setText("HIGH ID");
 			                       client_id.setToolTipText(clientID); break;
 			   case NO_ID        : client_id.setText("");
 	                               client_id.setToolTipText(""); break;
