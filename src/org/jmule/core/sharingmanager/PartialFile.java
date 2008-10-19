@@ -50,8 +50,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 10:11:34 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/19 18:53:03 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -288,6 +288,9 @@ public class PartialFile extends SharedFile {
 				fileChunk.getChunkData().position(0);
 				writeChannel.write(fileChunk.getChunkData());
 				partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
+				
+				fileChunk.getChunkData().clear();
+				
 				try {
 					partFile.writeFile();
 				} catch (PartMetException e) {
@@ -301,10 +304,9 @@ public class PartialFile extends SharedFile {
 	}
 
 	private void addBytes(long bytes) {
-		long WRITE_BLOCK = 1024*1024*25;
+		long WRITE_BLOCK = 1024*1024*20;
+		ByteBuffer block = Misc.getByteBuffer(WRITE_BLOCK);	
 		long blockCount = bytes / WRITE_BLOCK;
-		
-		ByteBuffer block = Misc.getByteBuffer(WRITE_BLOCK);
 		
 		try {
 			
@@ -321,15 +323,16 @@ public class PartialFile extends SharedFile {
 				writeChannel.write(block);
 				
 			}
-			
+			block.clear();
+			System.gc();
 			if ((bytes - byteCount)==0) return ;
 			
-			block = Misc.getByteBuffer(bytes - byteCount);
+			ByteBuffer block2 = Misc.getByteBuffer(bytes - byteCount);
 			
-			block.position(0);
+			block2.position(0);
 			
-			writeChannel.write(block);
-			
+			writeChannel.write(block2);
+			block2.clear();
 		} catch (IOException e) {
 						
 			e.printStackTrace();
