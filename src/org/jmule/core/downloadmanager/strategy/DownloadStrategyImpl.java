@@ -39,8 +39,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:48 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/19 18:53:36 $$
  */
 public class DownloadStrategyImpl implements DownloadStrategy{
 	
@@ -53,7 +53,7 @@ public class DownloadStrategyImpl implements DownloadStrategy{
 		
 		JMuleBitSet bs = filePartStatus.get(sender);
 		
-		for(int i = 0;i<availibility.length;i++) {
+		for(int i = 0;i<filePartStatus.getPartAvailibility().length;i++) {
 			
 			if (availibility[i]!=0)
 				
