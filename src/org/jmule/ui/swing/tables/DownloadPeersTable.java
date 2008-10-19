@@ -47,8 +47,8 @@ import org.jmule.util.GeneralComparator;
  *
  * Created on Oct 6, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2008/10/19 18:03:56 $
  */
 public class DownloadPeersTable extends JMTable {
 
@@ -95,7 +95,7 @@ public class DownloadPeersTable extends JMTable {
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			this.setHorizontalAlignment(SwingConstants.LEFT);
-			this.setText(" " + peer.getAddress());
+			this.setText(" " + peer.getAddress() + " : " + peer.getPort());
 			return this;
 		}
 	}
@@ -190,7 +190,7 @@ public class DownloadPeersTable extends JMTable {
 		address.setIdentifier(UIConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID);
 		address.setModelIndex(DownloadPeersModel.ADDRESS);
 		address.setVisible(_pref.isColumnVisible(UIConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID));
-		address.setHeaderValue("IP");
+		address.setHeaderValue("IP:Port");
 		address.setCellRenderer(new AddressTableCellRenderer());
 		
 		table_columns.add(address);
