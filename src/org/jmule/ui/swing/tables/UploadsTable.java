@@ -54,8 +54,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 18:00:41 $$
  */
 public class UploadsTable extends JMTable {
 
@@ -237,7 +237,7 @@ public class UploadsTable extends JMTable {
 					
 					 switch( whichCondition() ) {
 					   
-					    case  A  :  //popup_menu = new JPopupMenu();
+					    case  A  :  popup_menu = new JPopupMenu();
 					                //popup_menu.add(column_setup);
 					                //popup_menu.addSeparator();
 					                popup_menu.add(properties);
@@ -258,7 +258,7 @@ public class UploadsTable extends JMTable {
 			
 		}
 		
-	//	this.addMouseListener(new PopupListener());
+		this.addMouseListener(new PopupListener());
 	}
 	
 	private UploadSession[] getUploadSessionsByIndexes(int[] indexes) {
