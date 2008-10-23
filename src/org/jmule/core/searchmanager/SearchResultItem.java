@@ -22,6 +22,7 @@
  */
 package org.jmule.core.searchmanager;
 
+import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ARC;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_AUDIO;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_DOC;
@@ -47,14 +48,15 @@ import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.util.Convert;
 import org.jmule.util.Misc;
 
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:10:45 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:09:20 $$
  */
 public class SearchResultItem extends TagList {
 
@@ -109,6 +111,16 @@ public class SearchResultItem extends TagList {
 			return super.getDWORDTag(TAG_NAME_COMPLETESRC);
 		} catch (TagException e) {
 			return 0;
+		}
+	}
+	
+	public FileQuality getFileQuality() {
+		try {
+			int quality = super.getDWORDTag(FT_FILERATING);
+			return FileQuality.getAsFileQuality(quality);
+		} catch (TagException e) {
+			e.printStackTrace();
+			return FileQuality.NOTRATED;
 		}
 	}
 	
