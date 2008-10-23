@@ -28,8 +28,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/23 11:13:41 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:05:39 $$
  */
 public class FileHash {
 	
@@ -43,6 +43,8 @@ public class FileHash {
 	
 	
 	public FileHash(String inputString){
+		
+		inputString = inputString.toUpperCase();
 		
 		fileHash = new byte[16];
 		

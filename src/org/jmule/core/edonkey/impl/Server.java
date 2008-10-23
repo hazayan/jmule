@@ -84,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 18:49:10 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:05:18 $$
  */
 public class Server extends JMConnection {
 	
@@ -328,9 +328,9 @@ public class Server extends JMConnection {
 			
 			allowSearch = true;
 			
-			isConnected = true;
-			
 			server_timer = new Timer();
+			
+			startSharedFilesOfferTask();
 			
 			JMuleCore core = JMuleCoreFactory.getSingleton();
 			
@@ -342,10 +342,10 @@ public class Server extends JMConnection {
 			if (update_server_list)
 				sendPacket(PacketFactory.getGetServerListPacket());
 			
+			isConnected = true;
+			
 			notify_server_event(TCP_SOCKET_CONNECTED);
-			
-			startSharedFilesOfferTask();
-			
+
 			return;
 			
 		}
