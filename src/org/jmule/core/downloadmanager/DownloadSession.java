@@ -83,8 +83,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:24:24 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 07:16:33 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -634,16 +634,16 @@ public class DownloadSession implements JMTransferSession {
 		int unused = 0;
 		
 		for(int i = 0;i<fragments.length;i++) {
-			//System.out.println(fragments[i]);
 			if (((fragments[i].getChunkBegin()==fragments[i].getChunkEnd())&&(fragments[i].getChunkBegin()==0)))
-				
 				unused++;
 		}
 		if (unused==3){
 			
 			download_status_list.setPeerStatus(peer, PeerDownloadStatus.ACTIVE_UNUSED);
 			
-			download_status_list.getDownloadStatus(peer).setLastFilePartRequest(null);
+			PeerDownloadStatus status = download_status_list.getDownloadStatus(peer);
+			if (status != null)
+				status.setLastFilePartRequest(null);
 			
 			return;
 			
