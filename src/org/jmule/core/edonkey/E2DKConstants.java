@@ -30,8 +30,8 @@ import java.util.Set;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:32:39 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:07:48 $$
  */
 public class E2DKConstants {
 
@@ -161,7 +161,19 @@ public class E2DKConstants {
 	public final static byte CAP_UNICODE 				= (byte)0x0010;
 	public final static byte CAP_ZLIB 					= (byte)0x0001;
 		
-	// Search tags
+	// Search constants
+	public final static byte SEARCH_BYNAME 				= (byte) 0x01;
+	public final static byte[] FT_FILERATING			= new byte[]{(byte)0xF7};
+	
+	public final static byte FILE_QUALITY_NOTRATED			= 0x00;
+	public final static byte FILE_QUALITY_FAKE				= 0x01;
+	public final static byte FILE_QUALITY_POOR				= 0x02;
+	public final static byte FILE_QUALITY_FAIR				= 0x03;
+	public final static byte FILE_QUALITY_GOOD				= 0x04;
+	public final static byte FILE_QUALITY_EXCELENT			= 0x05;
+	
+	public final static int SERVER_SEARCH_RATIO 			= 255 / FILE_QUALITY_EXCELENT;
+
 	public final static byte[] TAG_NAME_SIZE 			= new byte[]{0x02};
 	public final static byte[] TAG_NAME_FILE_TYPE		= new byte[]{0x03};
 	public final static byte[] TAG_NAME_AVIABILITY 		= new byte[]{0x15};
@@ -232,11 +244,7 @@ public class E2DKConstants {
 		iso_extensions.add("nrg");
 		iso_extensions.add("mdf");
 	}
-	
-	
-	
-	// Search constants
-	public final static byte SEARCH_BYNAME 				= (byte) 0x01;
+
 	// Part files constants
 	public final static byte PARTFILE_VERSION 			= (byte)0xe0;
 	public final static byte[] FT_FILENAME				= new byte[]{0x01};
