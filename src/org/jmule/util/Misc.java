@@ -37,8 +37,8 @@ import java.nio.channels.FileChannel;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 12:07:14 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:12:21 $$
  */
 public class Misc {
 	
@@ -199,6 +199,12 @@ public class Misc {
 		int partCount = (int)(fileSize/PARTSIZE);
 		if (fileSize%PARTSIZE !=0) partCount++;
 		return partCount;
+	}
+	
+	public static byte getByte(int num,int pos) {
+		ByteBuffer data = Misc.getByteBuffer(4);
+		data.putInt(0, num);
+		return data.get(pos);
 	}
 	
 }
