@@ -22,6 +22,7 @@
  */
 package org.jmule.core.edonkey.packet.impl;
 
+import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQUEST;
@@ -39,6 +40,7 @@ import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVMESSAGE;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVSEARCHRESULT;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVSTATUS;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
+import static org.jmule.core.edonkey.E2DKConstants.SERVER_SEARCH_RATIO;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -60,6 +62,7 @@ import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
@@ -76,8 +79,8 @@ import org.jmule.util.Misc;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:08:26 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:04:41 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -296,10 +299,21 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			int tagCount = packet_data.getInt();
 			
 			for(int j=0;j<tagCount;j++) {
-				//Tag tag = Misc.loadStandardTag(dataPacket);
 				Tag tag = TagReader.readTag(packet_data);
 				result.addTag(tag);
 			}
+
+			// transform Server's file rating into eMule file rating
+			if (result.hasTag(FT_FILERATING)) {
+				Tag tag = result.getRawTag(FT_FILERATING);
+				try {
+					int data = tag.getDWORD();
+					data = Convert.byteToInt(Misc.getByte(data, 0));
+					int rating_value = data / SERVER_SEARCH_RATIO;
+					tag.insertDWORD(rating_value);
+				} catch (TagException e) {e.printStackTrace();}
+			}
+
 			searchResults.add(result);
 		}
 		
