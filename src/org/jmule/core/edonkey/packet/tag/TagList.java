@@ -22,6 +22,7 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,8 +32,8 @@ import org.jmule.core.edonkey.packet.tag.impl.MetaTag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 12:58:12 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:08:23 $$
  */
 public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 	private int tagsSize=0;
@@ -100,6 +101,15 @@ public class TagList extends ConcurrentHashMap<MetaTag,Tag>{
 	
 	public boolean hasTag(MetaTag metaTag){
 		return !(super.get(metaTag) == null);
+	}
+	
+	public boolean hasTag(byte[] metaTag) {
+		for(Tag tag : values()) {
+			byte[] meta_tag = tag.getMetaTag().getRawMetaTagName();
+			if (Arrays.equals(meta_tag,metaTag))
+				return true;
+		}
+		return false;
 	}
 
 	/**
