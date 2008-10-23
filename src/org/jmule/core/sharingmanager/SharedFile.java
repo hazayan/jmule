@@ -22,6 +22,7 @@
  */
 package org.jmule.core.sharingmanager;
 
+import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ARC;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_AUDIO;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_DOC;
@@ -30,6 +31,7 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ISO;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_PROGRAM;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_UNKNOWN;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_VIDEO;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
 import static org.jmule.core.edonkey.E2DKConstants.archive_extensions;
 import static org.jmule.core.edonkey.E2DKConstants.audio_extensions;
 import static org.jmule.core.edonkey.E2DKConstants.doc_extensions;
@@ -50,7 +52,10 @@ import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
+import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.utils.MD4FileHasher;
 import org.jmule.util.Misc;
@@ -58,8 +63,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 10:10:33 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:10:47 $$
  */
 public abstract class SharedFile {
 	
@@ -188,6 +193,30 @@ public abstract class SharedFile {
 
 	public void setTagList(TagList newTagList) {
 		this.tagList = newTagList;		
+	}
+	
+	public void setFileQuality(FileQuality quality) {
+		int tag_value = quality.getAsInt();
+		if (tagList.hasTag(FT_FILERATING))
+			tagList.removeTag(FT_FILERATING);
+		Tag tag = new StandardTag(TAG_TYPE_DWORD,FT_FILERATING);		
+		tag.insertDWORD(tag_value);
+		//System.out.println(""+tag);
+		tagList.addTag(tag);
+		
+		SharingManagerFactory.getInstance().writeMetadata();
+	}
+	
+	public FileQuality getFileQuality() {
+		if (tagList.hasTag(FT_FILERATING)) {
+			Tag tag = tagList.getRawTag(FT_FILERATING);
+			try {
+				return FileQuality.getAsFileQuality(tag.getDWORD());
+			} catch (TagException e) {
+				return FileQuality.NOTRATED;
+			}
+		}
+		return FileQuality.NOTRATED;
 	}
 	
 	public ED2KFileLink getED2KLink() {
