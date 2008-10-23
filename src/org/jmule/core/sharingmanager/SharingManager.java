@@ -28,15 +28,13 @@ import java.util.List;
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleManager;
 import org.jmule.core.edonkey.impl.FileHash;
-
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:43:01 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:11:43 $$
  */
 public interface SharingManager extends JMuleManager {
-	
 	/**
 	 * Loads the completed shared files from shared folders. This is a long time process 
 	 * that eats a lot of CPU cycles. Can be interrupted with stopLoadingCompletedFiles()
@@ -159,6 +157,11 @@ public interface SharingManager extends JMuleManager {
 	 * @return 
 	 */
 	public List<CompletedFile> getCompletedFiles();
+	
+	/**
+	 * Write the all meta-info about files from completed files hash table in known.met
+	 */
+	public void writeMetadata();
 	
 	/**
 	 * Remove shared file identified by file hash

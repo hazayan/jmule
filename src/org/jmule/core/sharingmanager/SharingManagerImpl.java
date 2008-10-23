@@ -196,6 +196,7 @@ public class SharingManagerImpl implements SharingManager {
 		     try {
 		    	 KnownMet known_met = new KnownMet(knownFilePath);
 			     known_file_list = known_met.loadFile();
+			     known_met.close();
 		     } catch (Throwable e) {
 			     known_file_list = new Hashtable<String,KnownMetEntity>();
 		     }
@@ -451,14 +452,14 @@ public class SharingManagerImpl implements SharingManager {
 		return file_list;
 	}
 	
-	/**
-	 * Write the all meta-info about files from completed files hash table in known.met
-	 */
-	private void writeMetadata() {
+	
+	public void writeMetadata() {
    	   try {
    		  KnownMet known_met = new KnownMet(ConfigurationManager.KNOWN_MET);
    		  
    		  known_met.writeFile(sharedFiles.values());
+   		  
+   		  known_met.close();
 	   } catch(Throwable t) {
 		   t.printStackTrace();
 	   }
