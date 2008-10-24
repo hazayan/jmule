@@ -29,8 +29,8 @@ import org.jmule.core.JMConstants;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:21:42 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -202,6 +202,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
 			 putBoolean(VISIBILITY, getDefaultColumnVisibility( UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILEQUALITY_COLUMN_ID ) ).
+			 putBoolean(VISIBILITY, getDefaultColumnVisibility( SEARCH_FILEQUALITY_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SEARCH_FILENAME_COLUMN_ID ) ).
@@ -407,6 +411,10 @@ public class UIPreferences extends UIConstants {
 			 putInt(WIDTH, getDefaultColumnWidth( UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
 			 
 			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILEQUALITY_COLUMN_ID ) ).
+			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_FILEQUALITY_COLUMN_ID ) );
+			 
+			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SEARCH_FILENAME_COLUMN_ID ) ).
 			 putInt(WIDTH, getDefaultColumnWidth( SEARCH_FILENAME_COLUMN_ID ) );
 			 
@@ -608,6 +616,10 @@ public class UIPreferences extends UIConstants {
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) ).
 			 putInt(ORDER, getDefaultColumnOrder( UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID ) );
+			 
+			 preferences.
+			 node( getColumnNodePath( particular_ui_root, SEARCH_FILEQUALITY_COLUMN_ID ) ).
+			 putInt(ORDER, getDefaultColumnOrder( SEARCH_FILEQUALITY_COLUMN_ID ) );
 			 
 			 preferences.
 			 node( getColumnNodePath( particular_ui_root, SEARCH_FILENAME_COLUMN_ID ) ).

@@ -36,8 +36,8 @@ import org.jmule.core.JMConstants;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:26:56 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:21:42 $$
  */
 
 public class UIConstants {
@@ -124,6 +124,7 @@ public class UIConstants {
 	public static final int UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID       = 3300;
 	
 	// search
+	public static final int SEARCH_FILEQUALITY_COLUMN_ID              = 3350;
 	public static final int SEARCH_FILENAME_COLUMN_ID                 = 3400;
 	public static final int SEARCH_FILESIZE_COLUMN_ID                 = 3500;
 	public static final int SEARCH_AVAILABILITY_COLUMN_ID             = 3600;
@@ -203,6 +204,7 @@ public class UIConstants {
 	
 	protected static final String SEARCH_FILENAME_COLUMN_NODE               = "/search_filename_column";
 	protected static final String SEARCH_FILESIZE_COLUMN_NODE               = "/search_filesize_column";
+	protected static final String SEARCH_FILEQUALITY_COLUMN_NODE            = "/search_filequality_column";
 	protected static final String SEARCH_AVAILABILITY_COLUMN_NODE           = "/search_availability_column";
 	protected static final String SEARCH_COMPLETESRC_COLUMN_NODE            = "/search_completsrc_column";
 	protected static final String SEARCH_FILE_TYPE_COLUMN_NODE              = "/search_file_type_column";
@@ -292,6 +294,7 @@ public class UIConstants {
 		
 		default_values.put(SEARCH_FILENAME_COLUMN_ID + VISIBILITY,               true);
 		default_values.put(SEARCH_FILESIZE_COLUMN_ID + VISIBILITY,               true);
+		default_values.put(SEARCH_FILEQUALITY_COLUMN_ID + VISIBILITY,            true);
 		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + VISIBILITY,           true);
 		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + VISIBILITY,            true);
 		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + VISIBILITY,              true);
@@ -365,13 +368,14 @@ public class UIConstants {
 		default_values.put(UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID + ORDER,  5);
 		default_values.put(UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,      6);
 		default_values.put(UPLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,        7);
-				
-		default_values.put(SEARCH_FILENAME_COLUMN_ID + ORDER,                1);
-		default_values.put(SEARCH_FILESIZE_COLUMN_ID + ORDER,                2);
-		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + ORDER,            3);
-		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + ORDER,             4);
-		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + ORDER,               5);
-		default_values.put(SEARCH_FILE_ID_COLUMN_ID + ORDER,                 6);
+		
+		default_values.put(SEARCH_FILEQUALITY_COLUMN_ID + ORDER,             1);
+		default_values.put(SEARCH_FILENAME_COLUMN_ID + ORDER,                2);
+		default_values.put(SEARCH_FILESIZE_COLUMN_ID + ORDER,                3);
+		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + ORDER,            4);
+		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + ORDER,             5);
+		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + ORDER,               6);
+		default_values.put(SEARCH_FILE_ID_COLUMN_ID + ORDER,                 7);
 		
 		default_values.put(SHARED_LIST_FILE_NAME_COLUMN_ID + ORDER,          1);
 		default_values.put(SHARED_LIST_FILE_SIZE_COLUMN_ID + ORDER,          2);
@@ -441,6 +445,7 @@ public class UIConstants {
 		
 		default_values.put(SEARCH_FILENAME_COLUMN_ID + WIDTH,                150);
 		default_values.put(SEARCH_FILESIZE_COLUMN_ID + WIDTH,                150);
+		default_values.put(SEARCH_FILEQUALITY_COLUMN_ID + WIDTH,              20);
 		default_values.put(SEARCH_AVAILABILITY_COLUMN_ID + WIDTH,            150);
 		default_values.put(SEARCH_COMPLETESRC_COLUMN_ID + WIDTH,             150);
 		default_values.put(SEARCH_FILE_TYPE_COLUMN_ID + WIDTH,               159);
@@ -532,6 +537,7 @@ public class UIConstants {
 		  	
 		  	case SEARCH_FILENAME_COLUMN_ID              :  return SEARCH_FILENAME_COLUMN_NODE;
 		  	case SEARCH_FILESIZE_COLUMN_ID              :  return SEARCH_FILESIZE_COLUMN_NODE;
+		  	case SEARCH_FILEQUALITY_COLUMN_ID           :  return SEARCH_FILEQUALITY_COLUMN_NODE;
 		  	case SEARCH_AVAILABILITY_COLUMN_ID          :  return SEARCH_AVAILABILITY_COLUMN_NODE;
 		  	case SEARCH_COMPLETESRC_COLUMN_ID           :  return SEARCH_COMPLETESRC_COLUMN_NODE;
 		  	case SEARCH_FILE_TYPE_COLUMN_ID             :  return SEARCH_FILE_TYPE_COLUMN_NODE;
