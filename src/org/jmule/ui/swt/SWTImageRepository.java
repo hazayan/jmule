@@ -27,15 +27,17 @@ import java.io.InputStream;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.program.Program;
+import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.ui.FlagPack;
 import org.jmule.ui.UIConstants;
+import org.jmule.ui.UIImageRepository;
 import org.jmule.ui.FlagPack.FlagSize;
 
 /**
  * Created on Aug 12, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/09 16:53:03 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:17:26 $
  */
 public class SWTImageRepository {
 
@@ -76,6 +78,14 @@ public class SWTImageRepository {
 	public static Image getFlagByAddress(String address,FlagSize size) {
 		InputStream stream = FlagPack.getFlagAsInputStreamByIP(address, size);
 		return new Image(SWTThread.getDisplay(),stream);
+	}
+	
+	public static Image getImage(FileQuality fileQuality) {
+		String path = UIImageRepository.getImagePath(fileQuality);
+		InputStream input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream(path));
+		if ( input_stream == null )
+			input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/image_not_found.png"));
+		return new Image(SWTThread.getDisplay(),input_stream);
 	}
 	
 }
