@@ -56,7 +56,6 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS1;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS2;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NAME;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_PROTOCOLVERSION;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_SIZE;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT_PEER;
 
@@ -76,6 +75,7 @@ import org.jmule.core.edonkey.packet.impl.EMuleCompressedPacket;
 import org.jmule.core.edonkey.packet.impl.StandardPacket;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagFactory;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -85,8 +85,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/05 10:43:01 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:26:13 $$
  */
 public class PacketFactory {
 	
@@ -470,9 +470,9 @@ public class PacketFactory {
     		if (i>sharedCount) break;
     		i++;
     		unshared_files.remove(sFile);
-    		Tag tagFileName = TagFactory.getStringTag(sFile.getSharingName(), TAG_NAME_NAME);
-    		Tag tagSize = TagFactory.getDWORDTag((int)sFile.length(), TAG_NAME_SIZE);
-    		ByteBuffer buffer = Misc.getByteBuffer(16 + 4 + 2 + 4 + tagFileName.getSize() + tagSize.getSize());
+    		TagList tag_list = sFile.getTagList();
+    		int tag_list_size = tag_list.getTotalSize();
+    		ByteBuffer buffer = Misc.getByteBuffer(16 + 4 + 2 + 4 + tag_list_size);
     		data_length += buffer.limit();
     		buffer.position(0);
     		buffer.put(sFile.getFileHash().getHash());
@@ -484,9 +484,11 @@ public class PacketFactory {
     			buffer.putInt(0); 
     			buffer.putShort((short)0); 
     		}
-    		buffer.putInt(2);//Insert tag count
-    		buffer.put(tagFileName.getData());
-    		buffer.put(tagSize.getData());
+    		buffer.putInt(tag_list.getTagCount());//Insert tag count
+    		
+    		for(Tag tag : tag_list.values()) 
+    			buffer.put(tag.getData());
+    		
     		shared_files_data.add(buffer);
     	}
     	
