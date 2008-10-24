@@ -30,8 +30,8 @@ import java.util.Set;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:07:48 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:33:41 $$
  */
 public class E2DKConstants {
 
@@ -170,9 +170,9 @@ public class E2DKConstants {
 	public final static byte FILE_QUALITY_POOR				= 0x02;
 	public final static byte FILE_QUALITY_FAIR				= 0x03;
 	public final static byte FILE_QUALITY_GOOD				= 0x04;
-	public final static byte FILE_QUALITY_EXCELENT			= 0x05;
+	public final static byte FILE_QUALITY_EXCELLENT			= 0x05;
 	
-	public final static int SERVER_SEARCH_RATIO 			= 255 / FILE_QUALITY_EXCELENT;
+	public final static int SERVER_SEARCH_RATIO 			= 255 / FILE_QUALITY_EXCELLENT;
 
 	public final static byte[] TAG_NAME_SIZE 			= new byte[]{0x02};
 	public final static byte[] TAG_NAME_FILE_TYPE		= new byte[]{0x03};
