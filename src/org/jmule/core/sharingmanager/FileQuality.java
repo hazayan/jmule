@@ -22,7 +22,7 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_EXCELENT;
+import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_EXCELLENT;
 import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_FAIR;
 import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_FAKE;
 import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_GOOD;
@@ -32,16 +32,16 @@ import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_POOR;
 /**
  * Created on Oct 23, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/23 17:09:51 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:25:17 $
  */
 public enum FileQuality { 
-	NOTRATED { int getAsInt() { return FILE_QUALITY_NOTRATED; } },
-	FAKE 	 { int getAsInt() { return FILE_QUALITY_FAKE; } }, 
-	POOR 	 { int getAsInt() { return FILE_QUALITY_POOR; } }, 
-	FAIR 	 { int getAsInt() { return FILE_QUALITY_FAIR; } }, 
-	GOOD 	 { int getAsInt() { return FILE_QUALITY_GOOD; } }, 
-	EXCELENT { int getAsInt() { return FILE_QUALITY_EXCELENT; } };
+	NOTRATED { public int getAsInt() { return FILE_QUALITY_NOTRATED; } },
+	FAKE 	 { public int getAsInt() { return FILE_QUALITY_FAKE; } }, 
+	POOR 	 { public int getAsInt() { return FILE_QUALITY_POOR; } }, 
+	FAIR 	 { public int getAsInt() { return FILE_QUALITY_FAIR; } }, 
+	GOOD 	 { public int getAsInt() { return FILE_QUALITY_GOOD; } }, 
+	EXCELLENT { public int getAsInt() { return FILE_QUALITY_EXCELLENT; } };
 	
 	/**
 	 * Convert int value to FileQuality
@@ -54,7 +54,7 @@ public enum FileQuality {
 			case FILE_QUALITY_POOR : 	return POOR;
 			case FILE_QUALITY_FAIR : 	return FAIR;
 			case FILE_QUALITY_GOOD : 	return GOOD;
-			case FILE_QUALITY_EXCELENT : return EXCELENT;
+			case FILE_QUALITY_EXCELLENT : return EXCELLENT;
 		}
 		return NOTRATED;
 	}
@@ -63,5 +63,5 @@ public enum FileQuality {
 	 * Convert enum value into int
 	 * @return int value of enum
 	 */
-	abstract int getAsInt();
+	public abstract int getAsInt();
 };
