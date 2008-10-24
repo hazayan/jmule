@@ -24,12 +24,14 @@ package org.jmule.ui;
 
 import java.io.InputStream;
 
+import org.jmule.core.sharingmanager.FileQuality;
+
 
 /**
  * 
  * @author parg
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:55 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:24:36 $$
  */
 public class 
 UIImageRepository
@@ -42,5 +44,20 @@ UIImageRepository
 		if ( input_stream == null )
 			input_stream = (UIImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/image_not_found.png"));
 		return input_stream;
+	}
+	
+	public static String getImagePath(FileQuality fileQuality) {
+		String path="org/jmule/ui/resources/file_quality/";
+		String image="fq_not_rated.png";
+		
+		switch(fileQuality) {
+			case FAKE : image = "fq_fake.png"; break;
+			case POOR : image = "fq_poor.png"; break;
+			case FAIR : image = "fq_fair.png"; break;
+			case GOOD : image = "fq_good.png"; break;
+			case EXCELLENT : image = "fq_excellent.png"; break;
+		}
+		
+		return path+image;
 	}
 }
