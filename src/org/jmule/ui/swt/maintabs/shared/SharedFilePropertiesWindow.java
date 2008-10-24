@@ -29,11 +29,13 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.ui.JMuleUIComponent;
@@ -51,8 +53,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 18, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/02 06:11:28 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:27:28 $
  */
 public class SharedFilePropertiesWindow implements JMuleUIComponent {
 
@@ -60,6 +62,7 @@ public class SharedFilePropertiesWindow implements JMuleUIComponent {
 	private SharedFile shared_file;
 	private Label completed;
 	private Refreshable refresher = null;
+	private Combo file_quality_combo;
 	
 	public SharedFilePropertiesWindow(SharedFile sharedFile) {
 		shared_file = sharedFile;	
@@ -175,29 +178,74 @@ public class SharedFilePropertiesWindow implements JMuleUIComponent {
 			}
 		});
 		
+		label = new Label(shared_file_fields,SWT.NONE);
+		label.setFont(skin.getLabelFont());
+		label.setText(_._("sharedfilepropertieswindow.label.file_quality") + " : ");
+		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		file_quality_combo = new Combo(shared_file_fields,SWT.READ_ONLY);
+		file_quality_combo.setFont(skin.getDefaultFont());
+		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_not_rated"));
+		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_not_rated"), FileQuality.NOTRATED);
+		
+		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_fake"));
+		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_fake"), FileQuality.FAKE);
+		
+		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_poor"));
+		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_poor"), FileQuality.POOR);
+		
+		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_fair"));
+		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_fair"), FileQuality.FAIR);
+		
+		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_good"));
+		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_good"), FileQuality.GOOD);
+		
+		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_excellent"));
+		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_excellent"), FileQuality.EXCELLENT);
+		
+		switch(shared_file.getFileQuality()) {
+			case FAKE : file_quality_combo.select(1); break;
+			case POOR : file_quality_combo.select(2); break;
+			case FAIR : file_quality_combo.select(3); break;
+			case GOOD : file_quality_combo.select(4); break;
+			case EXCELLENT : file_quality_combo.select(5); break;
+			default : 	file_quality_combo.select(0); break; 
+		}
 		
 		Composite button_bar = new Composite(shell,SWT.NONE);
 		button_bar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		GridLayout layout = new GridLayout(2,false);
 		button_bar.setLayout(layout);
+
+		Button button_ok = new Button(button_bar,SWT.NONE);
+		button_ok.setFont(skin.getButtonFont());
+		button_ok.setText(_._("sharedfilepropertieswindow.button.ok"));
+		button_ok.setImage(skin.getButtonImage(SWTSkin.OK_BUTTON_IMAGE));
 		
-		
-		Button button = new Button(button_bar,SWT.NONE);
-		button.setFont(skin.getButtonFont());
-		button.setText(_._("sharedfilepropertieswindow.button.close"));
+		Button button_cancel = new Button(button_bar,SWT.NONE);
+		button_cancel.setFont(skin.getButtonFont());
+		button_cancel.setText(_._("sharedfilepropertieswindow.button.cancel"));
+		button_cancel.setImage(skin.getButtonImage(SWTSkin.CANCEL_BUTTON_IMAGE));
 		
 		GridData grid_data = new GridData();
 		grid_data.horizontalAlignment = GridData.END;
 		grid_data.widthHint = 60;
 		grid_data.grabExcessHorizontalSpace = true;
-		button.setLayoutData(grid_data);
-		
-		button.addSelectionListener(new SelectionAdapter() {
+		button_ok.setLayoutData(grid_data);
+		button_ok.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				if (refresher != null) {
-					GUIUpdater.getInstance().removeRefreshable(refresher);
-				}
+				String selection = file_quality_combo.getItem(file_quality_combo.getSelectionIndex());
+				FileQuality quality = (FileQuality) file_quality_combo.getData(selection);
+				shared_file.setFileQuality(quality);
+				remove_refreshable();
+				shell.close();
+			}
+		});
+		
+		button_cancel.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				remove_refreshable();
 				shell.close();
 			}
 		});
@@ -207,4 +255,9 @@ public class SharedFilePropertiesWindow implements JMuleUIComponent {
 		shell.open();
 	}
 
+	private void remove_refreshable() {
+		if (refresher != null) {
+			GUIUpdater.getInstance().removeRefreshable(refresher);
+		}
+	}
 }

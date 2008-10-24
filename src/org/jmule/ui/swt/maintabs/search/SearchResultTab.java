@@ -43,6 +43,7 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.searchmanager.SearchRequest;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultItem;
+import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTConstants;
@@ -58,12 +59,14 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:27:28 $
  */
 public class SearchResultTab {
 
 	private boolean hasResults = false;
+	
+	private SWTPreferences swt_preferences = null;
 	
 	private CTabItem search_tab;
 	
@@ -79,10 +82,9 @@ public class SearchResultTab {
 	private SearchResult search_result;
 	
 	private Color color_red = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
-	//private Color color_green = new Color(SWTThread.getDisplay(),0,139,0);
-	//private Color color_black = new Color(SWTThread.getDisplay(),0,0,0);
 	
 	public SearchResultTab(CTabFolder parent,SearchRequest searchRequest,JMuleCore core) {
+		swt_preferences = SWTPreferences.getInstance();
 		search_tab = new CTabItem(parent,SWT.CLOSE);
 		_core = core;
 		request = searchRequest;
@@ -106,6 +108,19 @@ public class SearchResultTab {
 				
 				if (columnID == SWTPreferences.SEARCH_FILESIZE_COLUMN_ID)
 					return Misc.compareAllObjects(object1, object2, "getFileSize", order);
+				
+				if (columnID == SWTPreferences.SEARCH_FILEQUALITY_COLUMN_ID) {
+					FileQuality q1 = object1.getFileQuality();
+					FileQuality q2 = object2.getFileQuality();
+					int result = 0;
+					if (q1.getAsInt()>q2.getAsInt())
+						result = 1; 
+						else
+							if (q1.getAsInt()<q2.getAsInt())
+								result = -1;
+					if (order) return result;
+					return Misc.reverse(result);
+				}
 				
 				if (columnID == SWTPreferences.SEARCH_AVAILABILITY_COLUMN_ID)
 					return Misc.compareAllObjects(object1, object2, "getFileAviability", order);
@@ -198,6 +213,9 @@ public class SearchResultTab {
 				Image file_icon = SWTImageRepository.getIconByExtension(object.getFileName());
 				setRowImage(object, SWTPreferences.SEARCH_FILENAME_COLUMN_ID, file_icon);
 				
+				Image file_quality_img = SWTImageRepository.getImage(object.getFileQuality());
+				setRowImage(object, SWTPreferences.SEARCH_FILEQUALITY_COLUMN_ID, file_quality_img);
+				
 				setRowText(object, SWTPreferences.SEARCH_FILESIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));
 				setRowText(object, SWTPreferences.SEARCH_AVAILABILITY_COLUMN_ID, object.getFileAviability()+"");
 				setRowText(object, SWTPreferences.SEARCH_COMPLETESRC_COLUMN_ID, object.getFileCompleteSrc()+"");
@@ -211,22 +229,25 @@ public class SearchResultTab {
 		};
 		int width;
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_FILENAME_COLUMN_ID); 
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILENAME_COLUMN_ID); 
 		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILENAME_COLUMN_ID, _._("mainwindow.searchtab.column.filename"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_FILESIZE_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILESIZE_COLUMN_ID);
 		search_results.addColumn(SWT.RIGHT, SWTConstants.SEARCH_FILESIZE_COLUMN_ID, _._("mainwindow.searchtab.column.filesize"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILEQUALITY_COLUMN_ID);
+		search_results.addColumn(SWT.CENTER, SWTConstants.SEARCH_FILEQUALITY_COLUMN_ID, "", _._("mainwindow.searchtab.column.desc.filequality"), width);
+		
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID);
 		search_results.addColumn(SWT.RIGHT,  SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID, _._("mainwindow.searchtab.column.availability"), "" , width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID);
 		search_results.addColumn(SWT.RIGHT,  SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID, _._("mainwindow.searchtab.column.completesrcs"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID);
 		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID, _._("mainwindow.searchtab.column.filetype"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.SEARCH_FILE_ID_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILE_ID_COLUMN_ID);
 		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILE_ID_COLUMN_ID, _._("mainwindow.searchtab.column.fileid"), "", width);
 		
 		search_results.updateColumnSettings();
@@ -250,7 +271,6 @@ public class SearchResultTab {
 			public void widgetSelected(SelectionEvent arg0) {
 				search_results.showColumnEditorWindow();
 			}
-			
 		});
 		
 		pop_up_menu = new Menu(search_results);
@@ -274,8 +294,6 @@ public class SearchResultTab {
 			}
 		});
 		
-
-		
 		MenuItem copy_ed2k_item = new MenuItem(pop_up_menu,SWT.PUSH);
 		copy_ed2k_item.setText(_._("mainwindow.searchtab.popupmenu.copy_ed2k_link"));
 		copy_ed2k_item.setImage(SWTImageRepository.getImage("ed2k_link.png"));
@@ -284,7 +302,6 @@ public class SearchResultTab {
 				copyED2KLinks();
 			}
 		});
-		
 		
 		MenuItem close_item = new MenuItem(pop_up_menu,SWT.PUSH);
 		close_item.setText(_._("mainwindow.searchtab.popupmenu.close"));
@@ -296,7 +313,6 @@ public class SearchResultTab {
 			
 		});
 
-		
 		MenuItem column_setup_item = new MenuItem(pop_up_menu,SWT.PUSH);
 		column_setup_item.setText(_._("mainwindow.searchtab.popupmenu.column_setup"));
 		column_setup_item.setImage(SWTImageRepository.getImage("columns_setup.png"));

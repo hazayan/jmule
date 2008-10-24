@@ -74,8 +74,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:27:28 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -222,7 +222,7 @@ public class SharedTab extends AbstractTab {
 		
 		shared_dir_list = new List (dir_list_content, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		shared_dir_list.setLayoutData(new GridData(GridData.FILL_BOTH));
-				
+		
 		shared_dir_list.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				String selected_dir = shared_dir_list.getSelection()[0];
@@ -449,10 +449,11 @@ public class SharedTab extends AbstractTab {
 		}
 	  });
 	  
-	  updateDirList(null);
+	  updateDirList(config_manager.getSharedFolders());
 	  
 	  refreshable = new Refreshable() {
 		public void refresh() {
+			if (isDisposed()) return;
 			String text = _._("mainwindow.sharedtab.group.shared_files");
 			SharedFile hashing_file = sharing_manager.getCurrentHashingFile();
 			if (hashing_file != null) {

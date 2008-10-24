@@ -48,8 +48,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 16, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 17:07:14 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:27:28 $
  */
 public class SearchPropertiesWindow implements JMuleUIComponent {
 
@@ -62,8 +62,9 @@ public class SearchPropertiesWindow implements JMuleUIComponent {
 			
 		    skin = (SWTSkin) JMuleUIManager.getJMuleUI().getSkin();
 		
-		}catch(Throwable t) {
-		}
+		}catch(Throwable t) {}
+		
+		GridLayout layout;
 		
 		search_result = item;
 		
@@ -160,10 +161,38 @@ public class SearchPropertiesWindow implements JMuleUIComponent {
 			}
 		});
 		
+		label = new Label(search_fields,SWT.NONE);
+		label.setFont(skin.getLabelFont());
+		label.setText(_._("searchpropertieswindow.label.filequality") + " : ");
+		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		Composite container1 = new Composite(search_fields,SWT.NONE);
+		container1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		layout = new GridLayout(2,false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		container1.setLayout(layout);
+		
+		label = new Label(container1,SWT.NONE);
+		label.setFont(skin.getDefaultFont());
+		label.setImage(SWTImageRepository.getImage(search_result.getFileQuality()));
+		
+		label = new Label(container1,SWT.NONE);
+		label.setFont(skin.getDefaultFont());
+		
+		switch(search_result.getFileQuality()) {
+			case FAKE : label.setText(_._("searchpropertieswindow.label.fq_fake")); break;
+			case POOR : label.setText(_._("searchpropertieswindow.label.fq_poor")); break;
+			case FAIR : label.setText(_._("searchpropertieswindow.label.fq_fair")); break;
+			case GOOD : label.setText(_._("searchpropertieswindow.label.fq_good")); break;
+			case EXCELLENT : label.setText(_._("searchpropertieswindow.label.fq_excellent")); break;
+			default : label.setText(_._("searchpropertieswindow.label.fq_not_rated")); break;
+		}
+		
 		Composite button_bar = new Composite(shell,SWT.NONE);
 		button_bar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		GridLayout layout = new GridLayout(2,false);
+		layout = new GridLayout(2,false);
 		button_bar.setLayout(layout);
 	
 		Button button = new Button(button_bar,SWT.NONE);
