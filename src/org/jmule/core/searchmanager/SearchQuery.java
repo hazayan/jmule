@@ -22,37 +22,37 @@
  */
 package org.jmule.core.searchmanager;
 
+import org.jmule.core.searchmanager.tree.Node;
+import org.jmule.core.searchmanager.tree.NodeValue;
+import org.jmule.core.searchmanager.tree.Tree;
+import org.jmule.core.sharingmanager.FileType;
+
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:09 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:08:50 $$
  */
 public class SearchQuery {
 
-	private String query;
-
-	/**
-	 * Constructs an empty search query
-	 */
-	public SearchQuery() {
-		
-	}
-	
+	private Tree search_tree;
 	/**
 	 * Constructs an search query based on the given search string
 	 * @param searchStr the given search string
 	 */
 	public SearchQuery(String searchStr) {
-		this.query = searchStr;
+		search_tree = new Tree(searchStr);
 	}
+	
 	
 	/**
 	 * Gets the search string
 	 * @return the search string
 	 */
 	public String getQuery() {
-		return query;
+		Node n = search_tree.getNode(NodeValue.FILE_NAME);
+		return (String)n.getKey().getValue(Tree.DATA_KEY);
+		
 	}
 
 	/**
@@ -60,7 +60,60 @@ public class SearchQuery {
 	 * @param searchStr the new search string
 	 */
 	public void setQuery(String searchStr) {
-		this.query = searchStr;
+		Node n = search_tree.getNode(NodeValue.FILE_NAME);
+		n.getKey().setValue(Tree.DATA_KEY, searchStr);
 	}
 	
+	
+	public void setMinimalSize(long minimalSize) {
+		NodeValue value = NodeValue.MINSIZE;
+		value.setValue(minimalSize);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setMaximalSize(long maximalSize) {
+		NodeValue value = NodeValue.MAXSIZE;
+		value.setValue(maximalSize);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setMinCompleteSources(long completeSources) {
+		NodeValue value = NodeValue.MINCOMPLETESRC;
+		value.setValue(completeSources);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setMaxCompleteSources(long completeSources) {
+		NodeValue value = NodeValue.MAXCOMPLETESRC;
+		value.setValue(completeSources);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setMinAvailability(long availability) {
+		NodeValue value = NodeValue.MINAVAILABILITY;
+		value.setValue(availability);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setMaxAvailability(long availability) {
+		NodeValue value = NodeValue.MAXAVAILABILITY;
+		value.setValue(availability);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setExtension(String extension) {
+		NodeValue value = NodeValue.EXTENSION;
+		value.setValue(extension);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public void setFileType(FileType type) {
+		NodeValue value = NodeValue.FILETYPE;
+		value.setValue(type);
+		search_tree.addNodeIfNeed(value);
+	}
+	
+	public Tree getSearchTree() {
+		return search_tree;
+	}
 }
