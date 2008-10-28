@@ -30,8 +30,8 @@ import java.util.Set;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:33:41 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:04:55 $$
  */
 public class E2DKConstants {
 
@@ -162,7 +162,12 @@ public class E2DKConstants {
 	public final static byte CAP_ZLIB 					= (byte)0x0001;
 		
 	// Search constants
-	public final static byte SEARCH_BYNAME 				= (byte) 0x01;
+	public final static byte[] SEARCH_BY_NAME			= new byte[] {0x01};
+	public final static byte[] SEARCH_BY_META			= new byte[] {0x02};
+	public final static byte[] SEARCH_BY_LIMIT			= new byte[] {0x03};
+	public final static byte[] LIMIT_MIN				= new byte[] {0x01};
+	public final static byte[] LIMIT_MAX				= new byte[] {0x02};
+	
 	public final static byte[] FT_FILERATING			= new byte[]{(byte)0xF7};
 	
 	public final static byte FILE_QUALITY_NOTRATED			= 0x00;
@@ -174,8 +179,13 @@ public class E2DKConstants {
 	
 	public final static int SERVER_SEARCH_RATIO 			= 255 / FILE_QUALITY_EXCELLENT;
 
+	public final static byte[] SEARCH_AND 				= new byte[]{ 0x00, 0x00 };
+	public final static byte[] SEARCH_OR 				= new byte[]{ 0x00, 0x01 };
+	public final static byte[] SEARCH_NOT 				= new byte[]{ 0x00, 0x02 };
+	
 	public final static byte[] TAG_NAME_SIZE 			= new byte[]{0x02};
 	public final static byte[] TAG_NAME_FILE_TYPE		= new byte[]{0x03};
+	public final static byte[] TAG_NAME_FORMAT		 	= new byte[]{0x04};
 	public final static byte[] TAG_NAME_AVIABILITY 		= new byte[]{0x15};
 	public final static byte[] TAG_NAME_COMPLETESRC 	= new byte[]{0x30};
 	
@@ -184,9 +194,10 @@ public class E2DKConstants {
 	public final static byte[] TAG_FILE_TYPE_IMAGE	 	= "Image".getBytes();
 	public final static byte[] TAG_FILE_TYPE_DOC	 	= "Doc".getBytes();
 	public final static byte[] TAG_FILE_TYPE_PROGRAM 	= "Pro".getBytes();
-	public final static byte[] TAG_FILE_TYPE_ARC	 	= "Arc".getBytes();
-	public final static byte[] TAG_FILE_TYPE_ISO	 	= "Iso".getBytes();
-	public final static byte[] TAG_FILE_TYPE_UNKNOWN 	= "Unknown".getBytes(); // Internal usage
+	public final static byte[] TAG_FILE_TYPE_COLLECTION	= "EmuleCollection".getBytes();
+	public final static byte[] TAG_FILE_TYPE_ARC	 	= "Arc".getBytes(); // internal usage
+	public final static byte[] TAG_FILE_TYPE_ISO	 	= "Iso".getBytes(); // internal usage
+	public final static byte[] TAG_FILE_TYPE_UNKNOWN 	= "Unknown".getBytes(); // internal usage
 	
 	public final static Set<String> audio_extensions	= new HashSet<String>(); 
 	public final static Set<String> video_extensions	= new HashSet<String>();
