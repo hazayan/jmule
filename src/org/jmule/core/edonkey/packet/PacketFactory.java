@@ -46,7 +46,6 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.ProtocolVersion;
-import static org.jmule.core.edonkey.E2DKConstants.SEARCH_BYNAME;
 import static org.jmule.core.edonkey.E2DKConstants.SUPPORTED_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.ServerSoftwareVersion;
 import static org.jmule.core.edonkey.E2DKConstants.SoftwareVersion;
@@ -76,6 +75,8 @@ import org.jmule.core.edonkey.packet.impl.StandardPacket;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagFactory;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.searchmanager.SearchQuery;
+import org.jmule.core.searchmanager.tree.NodeValue;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -85,8 +86,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:26:13 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:05:58 $$
  */
 public class PacketFactory {
 	
@@ -305,14 +306,23 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static Packet getSearchPacket(String searchQuery){
-		Packet packet=new StandardPacket(1+2+searchQuery.length());
+	public static Packet getSearchPacket(SearchQuery query){
+		List<byte[]> data = new LinkedList<byte[]>();
+		int total_size = 0;
+		List<NodeValue> nodes = query.getSearchTree().traverse();
+		for(NodeValue value : nodes) {
+			byte[] tmp = value.getBytes();
+			data.add(tmp);
+			total_size += tmp.length;
+		}
+		Packet packet=new StandardPacket(total_size);
 		
 		packet.setCommand(OP_SEARCHREQUEST);
-		packet.insertData(SEARCH_BYNAME);
-		packet.insertData((short)searchQuery.length());
-		packet.insertData(searchQuery.getBytes());
+
+		//packet.insertData(Convert.intToShort(total_size));
 		
+		for(byte[] b : data)
+			packet.insertData(b);
 		return packet;
 	}
 
