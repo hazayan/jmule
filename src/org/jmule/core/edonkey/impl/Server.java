@@ -84,8 +84,8 @@ import org.jmule.util.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:05:18 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:09:32 $$
  */
 public class Server extends JMConnection {
 	
@@ -191,7 +191,7 @@ public class Server extends JMConnection {
 				
 				failed_count = 0;
 				
-				Packet searchQueryPacket = PacketFactory.getSearchPacket(nextSearchQuery.getSearchQuery().getQuery());
+				Packet searchQueryPacket = PacketFactory.getSearchPacket(nextSearchQuery.getSearchQuery());
 				
 				lastSearchQuery = nextSearchQuery;
 
