@@ -48,7 +48,6 @@ import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.ProtocolVersion;
 import static org.jmule.core.edonkey.E2DKConstants.SUPPORTED_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.ServerSoftwareVersion;
-import static org.jmule.core.edonkey.E2DKConstants.SoftwareVersion;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS1;
@@ -66,6 +65,7 @@ import java.util.List;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.FileChunk;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
@@ -86,8 +86,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:05:58 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/30 13:57:56 $$
  */
 public class PacketFactory {
 	
@@ -621,7 +621,7 @@ public class PacketFactory {
         byte[] tagMiscOptions1=TagFactory.getDWORDTag(0, TAG_NAME_MISC_OPTIONS1).getData();
         byte[] tagMiscOptions2=TagFactory.getDWORDTag(0, TAG_NAME_MISC_OPTIONS2).getData();
         byte[] tagProtocolVersion=TagFactory.getDWORDTag(ProtocolVersion,TAG_NAME_PROTOCOLVERSION).getData();//Version tag
-        byte[] tageMuleVer=TagFactory.getDWORDTag(SoftwareVersion, TAG_NAME_CLIENTVER).getData();
+        byte[] tageMuleVer=TagFactory.getDWORDTag(E2DKConstants.getSoftwareVersion(), TAG_NAME_CLIENTVER).getData();
         byte[] tagUDPPort = TagFactory.getDWORDTag(ConfigurationManagerFactory.getInstance().getUDP(), TAG_NAME_UDP_PORT_PEER).getData();
         
         Packet packet=new StandardPacket(1+16+4+2+4+tagUserName.length+tagMiscOptions1.length+tagMiscOptions2.length+tagProtocolVersion.length+tageMuleVer.length+tagUDPPort.length+4+2);
@@ -696,7 +696,7 @@ public class PacketFactory {
 		byte[] tagMiscOptions1=TagFactory.getDWORDTag(0, TAG_NAME_MISC_OPTIONS1).getData();
 	    byte[] tagMiscOptions2=TagFactory.getDWORDTag(0, TAG_NAME_MISC_OPTIONS2).getData();
 		byte[] tagProtocolVersion=TagFactory.getDWORDTag(ProtocolVersion,TAG_NAME_PROTOCOLVERSION).getData();//Version tag
-		byte[] tageMuleVer=TagFactory.getDWORDTag(SoftwareVersion, TAG_NAME_CLIENTVER).getData();
+		byte[] tageMuleVer=TagFactory.getDWORDTag(E2DKConstants.getSoftwareVersion(), TAG_NAME_CLIENTVER).getData();
 		byte[] tagUDPPort = TagFactory.getDWORDTag(ConfigurationManagerFactory.getInstance().getUDP(), TAG_NAME_UDP_PORT_PEER).getData();
 		
 		Packet packet=new StandardPacket(1+1+16+4+2+4+4+2+tagUserName.length+2+tagMiscOptions1.length+tagMiscOptions2.length+tagProtocolVersion.length+tageMuleVer.length+4+2);

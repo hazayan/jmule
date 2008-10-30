@@ -27,19 +27,30 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jmule.core.JMConstants;
+
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:04:55 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/30 13:57:56 $$
  */
 public class E2DKConstants {
 
 	public final static int ClientSoftware 				= E2DKConstants.SO_JMULE;// JMule client identification!
-	public final static int SoftwareVersionMajor 		= 0x00;
-	public final static int SoftwareVersionMinor 		= 40;
-	public final static int SoftwareVersionUpdate 		= 0x00;
-	public final static int SoftwareVersion 			= ((ClientSoftware<<24) | (SoftwareVersionMajor<<17) | (SoftwareVersionMinor<<10) | (SoftwareVersionUpdate<<7));
+	private static int SoftwareVersionMajor		 		= 0x00;
+	private static int SoftwareVersionMinor 			= 40;
+	private static int SoftwareVersionUpdate 			= 0x00;
+	
+	public static int getSoftwareVersion() { return ((ClientSoftware<<24) | (SoftwareVersionMajor<<17) | (SoftwareVersionMinor<<10) | (SoftwareVersionUpdate<<7)); }
+	
+	static {
+		String[] versions = JMConstants.JMULE_VERSION.split("\\.");
+		int count = 3;
+		if (versions.length<3) count = versions.length;
+		for(int i = 0;i<count;i++)
+			SoftwareVersionMajor = Integer.parseInt(versions[i]);
+	}
 	
 	public final static int ServerClientSoftware 		= E2DKConstants.SO_JMULE;
 	public final static int ServerSoftwareVersionMajor 	= 0x00;
