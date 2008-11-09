@@ -57,8 +57,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary256_ $ on $Date: 2008/11/09 19:13:02 $
  */
 public class StatusBar extends Composite {
 
@@ -166,7 +166,7 @@ public class StatusBar extends Composite {
 			public void uploadLimitChanged(long uploadLimit) {
 				String up_limit = "";
 				if (uploadLimit!=0)
-					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"]";
+					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"] ";
 				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
 				upspeed_label.setText(up_limit + up_speed);
 				layout();
@@ -175,7 +175,7 @@ public class StatusBar extends Composite {
 			public void downloadLimitChanged(long downloadLimit) {
 				String down_limit = "";
 				if (downloadLimit!=0)
-					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"]";
+					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"] ";
 				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
 				downspeed_label.setText(down_limit + down_speed);
 				layout();
@@ -188,10 +188,10 @@ public class StatusBar extends Composite {
 				if (isDisposed()) return ;
 				String down_limit = "";
 				if (config_manager.getDownloadLimit()!=0)
-					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"]";
+					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"] ";
 				String up_limit = "";
 				if (config_manager.getUploadLimit()!=0)
-					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"]";
+					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"] ";
 				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
 				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
 				
