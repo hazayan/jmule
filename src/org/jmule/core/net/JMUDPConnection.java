@@ -40,16 +40,17 @@ import org.jmule.core.edonkey.packet.UDPPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
 import org.jmule.util.Average;
 
+import static org.jmule.core.net.JMUDPConnection.UDPSocketStatus.*;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 14:55:47 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:38:09 $$
  */
 public class JMUDPConnection {
 	
-	public static final int UDP_SOCKET_OPENED = 0x01;
-	public static final int UDP_SOCKET_CLOSED = 0x00;
+	public enum UDPSocketStatus { OPEN, CLOSED};
 	
 	private JMuleCore _core;
 	
@@ -69,7 +70,7 @@ public class JMUDPConnection {
 	
 	private PacketProcessorThread packetProcessorThread = new PacketProcessorThread();
 	
-	private int connectionStatus = UDP_SOCKET_CLOSED;
+	private UDPSocketStatus connectionStatus = CLOSED;
 	
 	public static JMUDPConnection getInstance(){
 		if (singleton == null)
@@ -121,20 +122,21 @@ public class JMUDPConnection {
 			packetSenderThread = new PacketSenderThread();
 			packetSenderThread.start();
 			
-			connectionStatus = UDP_SOCKET_OPENED;
+			connectionStatus = OPEN;
 		} catch (Throwable t) {
+			t.printStackTrace();
 			throw new JMUDPConnectionException(t);
 		}
 	}
 	
 	public boolean isOpen() {
-		return connectionStatus ==  UDP_SOCKET_OPENED;
+		return connectionStatus ==  OPEN;
 	}
 	
 	public void close() throws JMUDPConnectionException {		
 		if (!isOpen()) return;
 		try {
-			connectionStatus = UDP_SOCKET_CLOSED;
+			connectionStatus = CLOSED;
 			wrongPacketChekingThread.JMStop();
 			udpListenThread.JMStop();
 			packetSenderThread.JMStop();
@@ -167,13 +169,8 @@ public class JMUDPConnection {
 			
 	}
 	
-	
-
-	
 	private void ban() {
 	}
-	
-	
 	
 	/** Packet listener **/
 	private class UDPListenThread extends JMThread {
@@ -242,7 +239,9 @@ public class JMUDPConnection {
 		
 		public void JMStop() {
 			stop = true;
-			interrupt();
+			synchronized (this) {
+				notify();
+			}
 		}
 		
 		public boolean isSleeping() {
@@ -293,7 +292,7 @@ public class JMUDPConnection {
 		public void JMStop() {
 			stop = true;
 			synchronized (this) {
-				interrupt();
+				notify();
 			}
 		}
 		
