@@ -22,9 +22,24 @@
  */
 package org.jmule.core.edonkey;
 
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AICHVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.PeerCache;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Ver;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportPreview;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportSecIdent;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UnicodeSupport;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jmule.core.JMConstants;
@@ -32,24 +47,25 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/30 13:57:56 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 13:55:04 $$
  */
 public class E2DKConstants {
 
-	public final static int ClientSoftware 				= E2DKConstants.SO_JMULE;// JMule client identification!
-	private static int SoftwareVersionMajor		 		= 0x00;
-	private static int SoftwareVersionMinor 			= 40;
-	private static int SoftwareVersionUpdate 			= 0x00;
+	public final static int ClientSoftware 				= E2DKConstants.SO_JMULE;// JMule client identification!	
+	public final static int ClientVersion[]					= new int[3];
 	
-	public static int getSoftwareVersion() { return ((ClientSoftware<<24) | (SoftwareVersionMajor<<17) | (SoftwareVersionMinor<<10) | (SoftwareVersionUpdate<<7)); }
+	public static int getSoftwareVersion() {
+		return ((ClientSoftware << 24) | (ClientVersion[0] << 17) | (ClientVersion[1] << 10) | (ClientVersion[2] << 7)); 
+	}
 	
 	static {
 		String[] versions = JMConstants.JMULE_VERSION.split("\\.");
 		int count = 3;
-		if (versions.length<3) count = versions.length;
-		for(int i = 0;i<count;i++)
-			SoftwareVersionMajor = Integer.parseInt(versions[i]);
+		if (versions.length < count)
+			count = versions.length;
+		for (int i = 0; i < count; i++)
+			ClientVersion[i] = Integer.parseInt(versions[i]);
 	}
 	
 	public final static int ServerClientSoftware 		= E2DKConstants.SO_JMULE;
@@ -76,7 +92,9 @@ public class E2DKConstants {
 	public final static int SO_COMPAT_UNK				= 0xFF;
 	
 	public final static int ProtocolVersion 			= 60;
-		
+	
+	public final static int KEY_LENGTH					= 608;
+	
 	public final static int SUPPORTED_FLAGS 			= E2DKConstants.CAP_ZLIB | E2DKConstants.CAP_UNICODE | E2DKConstants.CAP_LARGEFILES ;
 	
 	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
@@ -136,6 +154,41 @@ public class E2DKConstants {
 	public final static byte OP_EMULEHELLOANSWER 		= (byte) 0x02;
 	public final static byte OP_REQUESTSOURCES 			= (byte) 0x81;
 	public final static byte OP_ANSWERSOURCES 			= (byte) 0x82;
+	public final static byte OP_SECIDENTSTATE 			= (byte) 0x87;
+	public final static byte OP_PUBLICKEY 				= (byte) 0x85;
+	public final static byte OP_SIGNATURE 				= (byte) 0x86;
+	
+	public enum PeerFeatures { 
+		UDPVer,
+		DataCompVer,
+		SupportSecIdent,
+		SourceExchange1Ver,
+		ExtendedRequestsVer,
+		AcceptCommentVer,
+		NoViewSharedFiles,
+		MultiPacket,
+		SupportPreview,
+		PeerCache,
+		UnicodeSupport,
+		AICHVer
+	}
+	
+	public static final Map<PeerFeatures, Integer> DefaultJMuleFeatures = new HashMap<PeerFeatures, Integer> (); 
+	static {
+		DefaultJMuleFeatures.put(AICHVer, 0);
+		DefaultJMuleFeatures.put(UnicodeSupport, 1);
+		DefaultJMuleFeatures.put(UDPVer, 4);
+		DefaultJMuleFeatures.put(DataCompVer, 1);
+		DefaultJMuleFeatures.put(SupportSecIdent, 1);
+		DefaultJMuleFeatures.put(SourceExchange1Ver, 0);
+		DefaultJMuleFeatures.put(ExtendedRequestsVer,0);
+		DefaultJMuleFeatures.put(AcceptCommentVer, 0);
+		DefaultJMuleFeatures.put(PeerCache, 0);
+		DefaultJMuleFeatures.put(NoViewSharedFiles, 0);
+		DefaultJMuleFeatures.put(MultiPacket, 0);
+		DefaultJMuleFeatures.put(SupportPreview, 0);
+		
+	}
 	//UDP
 	//Server <-> Peer 
 	public final static byte OP_GLOBSERVRSTATREQ 		= (byte) 0x96;
@@ -299,4 +352,6 @@ public class E2DKConstants {
 	// Clients.Met
 	public final static byte CREDITFILE_VERSION 		= (byte) 0x12;
 	public final static byte CREDITFILE_VERSION29 		= (byte) 0x11;
+	
+	
 }
