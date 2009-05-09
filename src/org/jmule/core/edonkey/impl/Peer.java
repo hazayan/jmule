@@ -24,11 +24,16 @@ package org.jmule.core.edonkey.impl;
 
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NICKNAME;
+import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.*;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 
 import org.jmule.core.JMRunnable;
@@ -45,6 +50,7 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
 import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.net.JMConnection;
 import org.jmule.core.net.JMuleSocketChannel;
 import org.jmule.core.net.PacketScanner;
@@ -54,8 +60,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/09 09:32:07 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:02:11 $$
  */
 public class Peer extends JMConnection {
 	
@@ -85,6 +91,8 @@ public class Peer extends JMConnection {
 	private long connectTime = 0;
 	
 	private JMThread disconnect_waiting;
+	
+	private Map<PeerFeatures,Integer> peer_features = new Hashtable<PeerFeatures, Integer>();
 
 	public Peer(JMuleSocketChannel remoteConnection,Server connectedServer) {
 		
@@ -279,14 +287,14 @@ public class Peer extends JMConnection {
 				connectedServer.getClientID(), ConfigurationManagerFactory.getInstance().getTCP(),
 				connectedServer.getServerIPAddress(), 
 				connectedServer.getPort(), 
-				ConfigurationManagerFactory.getInstance().getNickName()));
+				ConfigurationManagerFactory.getInstance().getNickName(), E2DKConstants.DefaultJMuleFeatures));
 		
 		else
 			
 			super.sendPacket(PacketFactory.getPeerHelloPacket(ConfigurationManagerFactory.getInstance().getUserHash(),
 					null, ConfigurationManagerFactory.getInstance().getTCP(),
 					null, 0, 
-					ConfigurationManagerFactory.getInstance().getNickName()));
+					ConfigurationManagerFactory.getInstance().getNickName(),E2DKConstants.DefaultJMuleFeatures));
 		
 	}
 
@@ -337,8 +345,10 @@ public class Peer extends JMConnection {
 			
 			peerTags = sPacket.getTagList();
 			
+			loadPeerFeatures();
+			
 			clientID = sPacket.getClientID();
-						
+			
 			int tcp_port = sPacket.getTCPPort();
 			
 			if (getPort() != tcp_port) 
@@ -372,7 +382,7 @@ public class Peer extends JMConnection {
 						null, 
 						ConfigurationManagerFactory.getInstance().getTCP(), 
 						ConfigurationManagerFactory.getInstance().getNickName(),
-						null,0);
+						null,0, E2DKConstants.DefaultJMuleFeatures);
 			
 				else
 					
@@ -381,7 +391,7 @@ public class Peer extends JMConnection {
 						connectedServer.getClientID(), 
 						ConfigurationManagerFactory.getInstance().getTCP(), 
 						ConfigurationManagerFactory.getInstance().getNickName(),
-						connectedServer.getRemoteIPAddress(),connectedServer.getPort());
+						connectedServer.getRemoteIPAddress(),connectedServer.getPort(), E2DKConstants.DefaultJMuleFeatures);
 			
 			super.sendPacket(answerPacket);
 			
@@ -398,6 +408,8 @@ public class Peer extends JMConnection {
 			userHash = sPacket.getUserHash();
 			
 			peerTags = sPacket.getTagList();
+			
+			loadPeerFeatures();
 			
 			clientID = sPacket.getClientID();
 			
@@ -440,6 +452,16 @@ public class Peer extends JMConnection {
 		
 		sessionList.processPacket(packet);
 		
+	}
+	
+	private void loadPeerFeatures() {
+		if (peerTags.hasTag(TAG_NAME_MISC_OPTIONS1))  {
+			try {
+				int raw_data = peerTags.getDWORDTag(TAG_NAME_MISC_OPTIONS1);
+				peer_features = Utils.IntToMiscOptions1(raw_data);
+			} catch (TagException e) {
+			}
+		}
 	}
 	
 	public int hashCode() {
