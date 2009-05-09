@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.downloadmanager.DownloadSession.DownloadStatus;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -52,8 +53,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/05/09 11:31:06 $
  */
 public class DownloadGeneralTab extends CTabItem implements Refreshable {
 
@@ -91,7 +92,7 @@ public class DownloadGeneralTab extends CTabItem implements Refreshable {
 		download_status = new Label(transfer_group,SWT.NONE);
 		download_status.setFont(skin.getLabelFont());
 		download_status.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		download_status.setText(download_session.getStatus()==DownloadSession.STATUS_STARTED ? Localizer._("mainwindow.transferstab.downloads.column.status.started") : Localizer._("mainwindow.transferstab.downloads.column.status.stopped") );
+		download_status.setText(download_session.getStatus()==DownloadStatus.STARTED ? Localizer._("mainwindow.transferstab.downloads.column.status.started") : Localizer._("mainwindow.transferstab.downloads.column.status.stopped") );
 
 		label = new Label(transfer_group,SWT.NONE);
 		label.setText(Localizer._("downloadinfowindow.tab.general.label.totalprogress")+" : ");
@@ -237,7 +238,7 @@ public class DownloadGeneralTab extends CTabItem implements Refreshable {
 		if (isDisposed()) return ;
 		if (!getParent().getSelection().equals(this)) return ;
 		part_status.setText(download_session.getPartCount()+"; "+Localizer._("downloadinfowindow.tab.general.label.parts_available")+" : "+download_session.getAvailablePartCount());
-		download_status.setText(download_session.getStatus()==DownloadSession.STATUS_STARTED ? Localizer._("mainwindow.transferstab.downloads.column.status.started") : Localizer._("mainwindow.transferstab.downloads.column.status.stopped") );
+		download_status.setText(download_session.getStatus()==DownloadStatus.STARTED ? Localizer._("mainwindow.transferstab.downloads.column.status.started") : Localizer._("mainwindow.transferstab.downloads.column.status.stopped") );
 		
 		total_progress.redraw();
 		

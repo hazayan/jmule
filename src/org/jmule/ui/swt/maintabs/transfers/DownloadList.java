@@ -37,6 +37,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerListener;
 import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.downloadmanager.DownloadSession.DownloadStatus;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.uploadmanager.UploadManager;
@@ -61,8 +62,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:30:08 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -102,7 +103,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.download_speed"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, _._("mainwindow.transferstab.downloads.column.upload_speed"),"", width);
 		
 		width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID);
@@ -437,7 +438,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		String time = TimeFormatter.formatColon(session.getETA());
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID,time);
 		String status;
-		if (session.getStatus() == DownloadSession.STATUS_STARTED)
+		if (session.getStatus() == DownloadStatus.STARTED)
 			status = _._("mainwindow.transferstab.downloads.column.status.started");
 		else
 			status = _._("mainwindow.transferstab.downloads.column.status.stopped");
@@ -471,14 +472,14 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		}
 		List<DownloadSession> list = getSelectedObjects();
 		for(DownloadSession downloadSession : list)
-			if (downloadSession.getStatus() == DownloadSession.STATUS_STOPPED)
+			if (downloadSession.getStatus() == DownloadStatus.STOPPED)
 				download_manager.startDownload(downloadSession.getFileHash());
 	}
 	
 	private void stopSelectedDownloads() {
 		List<DownloadSession> list = getSelectedObjects();
 		for(DownloadSession downloadSession : list)
-			if (downloadSession.getStatus() == DownloadSession.STATUS_STARTED)
+			if (downloadSession.getStatus() == DownloadStatus.STARTED)
 				download_manager.stopDownload(downloadSession.getFileHash());
 	}
 	
