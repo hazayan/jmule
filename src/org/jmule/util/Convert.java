@@ -30,8 +30,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:55:49 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:04:06 $$
  */
 public class Convert {
 	
@@ -195,6 +195,16 @@ public class Convert {
 		for(int i = 0;i < bytes.length; i++)
 			value =value+ byteSeparator + Convert.byteToHex(bytes[i]);
 		return value;
+	}
+	
+	public static byte[] hexStringToByte(String string, String byteSeparator) {
+		String bytes[] = string.split(byteSeparator);
+		byte result[] = new byte[bytes.length-1];
+		
+		for(int i = 1;i<bytes.length;i++)
+			result[i-1] = (byte) Integer.parseInt(bytes[i], 16);
+		
+		return result;
 	}
 	
 	/** Convert 0xAA Hex value to int value */
