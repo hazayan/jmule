@@ -26,11 +26,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.program.Program;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -41,8 +44,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:44:00 $$
  */
 public class Utils {
 	
@@ -179,6 +182,12 @@ public class Utils {
 			else
 				row.setBackgrounColor(JMTable.ROW_ALTERNATE_COLOR_1);
 		}
+	}
+	
+	public static void formatAsLink(Label label, final MouseListener listener ) {
+		label.setForeground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		label.setCursor(new Cursor(SWTThread.getDisplay(),SWT.CURSOR_HAND));
+		label.addMouseListener(listener);
 	}
 	
 	
