@@ -25,6 +25,7 @@ package org.jmule.core.edonkey.packet;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.impl.EMuleExtendedTCPPacket;
@@ -34,8 +35,8 @@ import org.jmule.util.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:32 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:09:23 $$
  */
 public class EMulePacketFactory{
 
@@ -202,6 +203,35 @@ public class EMulePacketFactory{
 		packet.setCommand(OP_REQUESTSOURCES);
 		packet.insertData(fileHash.getHash());
 		
+		return packet;
+	}
+	
+	public static EMuleExtendedTCPPacket getSecureIdentificationPacket(byte[] challenge, boolean isPublicKeyNeeded) {
+		EMuleExtendedTCPPacket packet = new EMuleExtendedTCPPacket(5);
+		packet.setCommand(OP_SECIDENTSTATE);
+		if (isPublicKeyNeeded)
+			packet.insertData((byte)2);
+		else
+			packet.insertData((byte)1);
+		packet.insertData(challenge);
+		return packet;
+	}
+	
+	public static EMuleExtendedTCPPacket getPublicKeyPacket(byte[] publicKey) {
+		EMuleExtendedTCPPacket packet = new EMuleExtendedTCPPacket(1+76);
+		
+		packet.setCommand(OP_PUBLICKEY);
+		packet.insertData((byte)publicKey.length);
+		packet.insertData(publicKey);
+		
+		return packet;
+	}
+	
+	public static EMuleExtendedTCPPacket getSignaturePacket(byte[] signature) {
+		EMuleExtendedTCPPacket packet = new EMuleExtendedTCPPacket(1 + 48);
+		packet.setCommand(OP_SIGNATURE);
+		packet.insertData((byte)signature.length);
+		packet.insertData(signature);
 		return packet;
 	}
 	
