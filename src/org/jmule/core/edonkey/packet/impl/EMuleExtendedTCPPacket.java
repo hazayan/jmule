@@ -22,6 +22,7 @@
  */
 package org.jmule.core.edonkey.packet.impl;
 
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 
@@ -41,8 +42,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:11:59 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:33:46 $$
  */
 public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 
@@ -68,17 +69,55 @@ public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 			throw new EMulePacketException("Wrong packet type");
 		
 		short queueRanking=0;
-		int iPos = packet_data.position();
 		packet_data.position(1+4+1);
 		queueRanking = packet_data.getShort();
-		packet_data.position(iPos);
 		return queueRanking;
 	}
+	
+	public boolean isPublicKeyNeeded() throws EMulePacketException {
+		if (getCommand() != OP_SECIDENTSTATE)
+			throw new EMulePacketException("Wrong packet type");
+		packet_data.position(1+4+1);
+		byte data = packet_data.get();
+		if (data == 2) return true;
+		return false;
+	}
+	
+	public byte[] getChallenge() throws EMulePacketException {
+		if (getCommand() != OP_SECIDENTSTATE)
+			throw new EMulePacketException("Wrong packet type");
+		packet_data.position(1 + 4 + 1 + 1);
+		byte[] result = new byte[4];
+		packet_data.get(result);
+		
+		return result;
+	}
+	
+	public byte[] getPublicKey() throws EMulePacketException {
+		if (getCommand() != OP_PUBLICKEY)
+			throw new EMulePacketException("Wrong packet type");
+		
+		packet_data.position(1 + 4 + 1);
+		byte key_length = packet_data.get();
+		byte key[] = new byte[key_length];
+		packet_data.get(key);
+		return key;
+	}
+	
+	public byte[] getSignature() throws EMulePacketException {
+		if (getCommand() != OP_SIGNATURE)
+			throw new EMulePacketException("Wrong packet type");
+		packet_data.position(1 + 4 + 1);
+		byte signature_length = packet_data.get();
+		byte signature[] = new byte[signature_length];
+		packet_data.get(signature);
+		return signature;
+	}
 
-	 public void addData(ByteBuffer data){
+	public void addData(ByteBuffer data){
 			byte[] defaultData = data.array();
 			this.insertData(5,defaultData);
-	  }
+	}
 		
 	/**
 	 * Read packet from connection
