@@ -23,19 +23,15 @@
 package org.jmule.core.edonkey.packet.tag;
 
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_EXSTRING_LONG;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
-import java.nio.ByteBuffer;
-
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:51:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:20:43 $$
  */
 public class TagFactory {
 	/**
