@@ -63,8 +63,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:10:47 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 15:28:48 $$
  */
 public abstract class SharedFile {
 	
@@ -144,12 +144,10 @@ public abstract class SharedFile {
 	
 	public boolean equals(Object object){
 		if (object == null) return false;
-		if (hashSet==null) {
-			SharedFile shared_file = (SharedFile) object;
-			return getFile().equals(shared_file.getFile());
-		}
-			
-		return object.hashCode()==this.hashCode();
+		if (!(object instanceof SharedFile)) return false;
+		SharedFile shared_file = (SharedFile) object;
+		return getFile().equals(shared_file.getFile());
+		
 	}
 	
 	public FileHash getFileHash() {
