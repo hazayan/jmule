@@ -31,8 +31,8 @@ import org.jmule.ui.localizer._;
 /**
  * Created on Aug 16, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/05/09 11:17:40 $
  */
 public class FileFormatter {
 
@@ -47,7 +47,7 @@ public class FileFormatter {
 		        + "."
 		        + ((n % (1024 * 1024)) / (103 * 1024))
 		        + " MB";
-		    if (n < 1024l * 1024l * 1024l * 1024l)
+		    if (n <= 1024l * 1024l * 1024l * 1024l)
 		      return (n / (1024l * 1024l * 1024l))
 		        + "."
 		        + ((n % (1024l * 1024l * 1024l)) / (103l * 1024l * 1024l))
