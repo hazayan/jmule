@@ -198,6 +198,7 @@ public class SharingManagerImpl implements SharingManager {
 			     known_file_list = known_met.loadFile();
 			     known_met.close();
 		     } catch (Throwable e) {
+		    	 e.printStackTrace();
 			     known_file_list = new Hashtable<String,KnownMetEntity>();
 		     }
 
@@ -232,6 +233,7 @@ public class SharingManagerImpl implements SharingManager {
 		    			 try {
 							shared_completed_file.setHashSet(known_met_entity.getPartHashSet());
 						} catch (SharedFileException e) {
+							e.printStackTrace();
 						}
 		    			 shared_completed_file.setTagList(known_met_entity.getTagList());
 		    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
@@ -247,6 +249,7 @@ public class SharingManagerImpl implements SharingManager {
 	    	 // hash new files from the file system
 		     boolean need_to_write_metadata = files_needed_to_hash.size() != 0;
 	    	 for(CompletedFile shared_completed_file : files_needed_to_hash) {
+	    		 current_hashing_file = null;
 	    		 if( stop ) return;
 	    		 try {
 	    			 current_hashing_file = shared_completed_file;
@@ -266,14 +269,15 @@ public class SharingManagerImpl implements SharingManager {
 	    			 
 	    			 notifyCompletedFileAdded(shared_completed_file);
 	    		 } catch( Throwable t ) {
-	    		 		t.printStackTrace(); 
+	    			current_hashing_file = null;
+	    		 	t.printStackTrace(); 
 	    		 }
 	    	 }
+	    	 current_hashing_file = null;
 	    	 // write our files in known.met
 	    	 if ( need_to_write_metadata ) {
 	    		 writeMetadata();
 	    	 } 
-	    	 
 	    	 isDone = true;
 		}
 		
