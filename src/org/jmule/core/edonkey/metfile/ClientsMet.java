@@ -103,8 +103,8 @@ import org.jmule.util.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:27 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:03:50 $$
  */
 public class ClientsMet extends MetFile {
 
@@ -114,9 +114,9 @@ public class ClientsMet extends MetFile {
 			throw new ClientsMetException("Failed to open "+fileName);
 	}
 
-	public Hashtable<UserHash,ClientCredit> loadFile() throws FileNotFoundException,IOException,ClientsMetException {
+	public Hashtable<UserHash,ClientCreditInfo> loadFile() throws FileNotFoundException,IOException,ClientsMetException {
 		fileChannel.position(0);
-		Hashtable<UserHash,ClientCredit> result = new Hashtable<UserHash,ClientCredit>();
+		Hashtable<UserHash,ClientCreditInfo> result = new Hashtable<UserHash,ClientCreditInfo>();
 		ByteBuffer data;
 		
 		data = Misc.getByteBuffer(1);
@@ -176,13 +176,13 @@ public class ClientsMet extends MetFile {
 			data.position(0);
 			data.get(abySecureIdent);
 			
-			ClientCredit cc = new ClientCredit(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
+			ClientCreditInfo cc = new ClientCreditInfo(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
 			result.put(cc.getUserHash(), cc);
 		}
 		return result;
 	}
 	
-	public void writeFile(Collection<ClientCredit> clientsCredit) throws IOException {
+	public void writeFile(Collection<ClientCreditInfo> clientsCredit) throws IOException {
 		fileChannel.position(0);
 		ByteBuffer data;
 		
@@ -196,7 +196,7 @@ public class ClientsMet extends MetFile {
 		data.position(0);
 		fileChannel.write(data);
 		
-		for(ClientCredit credit : clientsCredit) {
+		for(ClientCreditInfo credit : clientsCredit) {
 			data = Misc.getByteBuffer(16);
 			data.put(credit.getUserHash().getUserHash());
 			data.position(0);
