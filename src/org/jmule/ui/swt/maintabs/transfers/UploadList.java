@@ -54,8 +54,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/05/09 11:28:36 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -75,22 +75,22 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		
 		int width;
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID);
 		addColumn(SWT.LEFT, SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.filename"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.filesize"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploadspeed"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.peers"), "", width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID); 
+		width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID); 
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.eta"), _._("mainwindow.transferstab.uploads.column.eta.desc"), width);
 		
-		width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID);
+		width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID);
 		addColumn(SWT.RIGHT, SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID, Localizer._("mainwindow.transferstab.uploads.column.uploaded"), "", width);
 		
 		updateColumnOrder();

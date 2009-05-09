@@ -57,8 +57,8 @@ import org.jmule.util.Misc;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/05/09 11:27:50 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -118,27 +118,27 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			int width;
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.nickname"), "",	SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID));
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID);
 			addColumn(SWT.CENTER, SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID, 		_._("uploadinfowindow.tab.peerlist.column.country_code"), "", 		width );
 			if (CountryLocator.getInstance().isServiceDown())
 				disableColumn(SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID);
 			
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID, 		_._("uploadinfowindow.tab.peerlist.column.flag"), "", 		width );
 			if (CountryLocator.getInstance().isServiceDown())
 				disableColumn(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID, 			_._("uploadinfowindow.tab.peerlist.column.address"), "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID);
 			addColumn(SWT.RIGHT, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.up_speed"), "", width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.software"), "", 	width);
 			
-			width = SWTPreferences.getInstance().getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID);
+			width = swt_preferences.getColumnWidth(SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID, _._("uploadinfowindow.tab.peerlist.column.status"), "", width);
 
 			updateColumnVisibility();
