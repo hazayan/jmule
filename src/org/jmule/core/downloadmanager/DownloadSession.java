@@ -83,14 +83,12 @@ import org.jmule.util.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 07:16:33 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 13:44:33 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
-	public final static int STATUS_STARTED = 0x01;
-	
-	public final static int STATUS_STOPPED = 0x02;
+	public enum DownloadStatus { STARTED, STOPPED};
 	
 	private final static int PEER_MONITOR_INTERVAL =  1000;
 	
@@ -98,7 +96,7 @@ public class DownloadSession implements JMTransferSession {
 
 	private FilePartStatus partStatus;
 	
-	private int sessionStatus = STATUS_STOPPED;
+	private DownloadStatus sessionStatus = DownloadStatus.STOPPED;
 	
 	private DownloadStrategy downloadStrategy = new DownloadStrategyImpl();
 	
@@ -197,7 +195,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	public void startDownload() {
 		
-		this.setStatus(STATUS_STARTED);
+		this.setStatus(DownloadStatus.STARTED);
 		
 		List<Peer> peer_list = PeerManagerFactory.getInstance().getPeers(getFileHash());
 		
@@ -255,13 +253,13 @@ public class DownloadSession implements JMTransferSession {
 		}
 		connecting_peers.clear();
 		
-		setStatus(STATUS_STOPPED);
+		setStatus(DownloadStatus.STOPPED);
 		
 	}
 	
 	public void cancelDownload() {
 		
-		if (getStatus()==STATUS_STARTED) {
+		if (isStarted()) {
 			
 			stopDownload();
 		}
@@ -309,7 +307,7 @@ public class DownloadSession implements JMTransferSession {
 			return ; 
 		}
 		
-		if (this.getStatus() == STATUS_STOPPED) return ;
+		if (this.getStatus() == DownloadStatus.STOPPED) return ;
 				
 		
 		if (connecting_peers.contains(peer)) {
@@ -363,7 +361,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	public void  processPacket(Peer sender, ScannedPacket packet,PeerSessionList packetRouter) {		
-		if (getStatus() == STATUS_STOPPED)
+		if (getStatus() == DownloadStatus.STOPPED)
 			return;
 		
 		if (packet instanceof JMPeerFileRequestAnswerSP ) {
@@ -748,19 +746,19 @@ public class DownloadSession implements JMTransferSession {
 		return str;
 	}
 	
-	public int getStatus() {
+	public DownloadStatus getStatus() {
 		
-		return this.sessionStatus;
+		return sessionStatus;
 		
 	}
 	
 	public boolean isStarted() {
-		return sessionStatus==STATUS_STARTED;
+		return sessionStatus==DownloadStatus.STARTED;
 	}
 	
-	private void setStatus(int newStatus) {
+	private void setStatus(DownloadStatus status) {
 		
-		this.sessionStatus = newStatus;
+		this.sessionStatus = status;
 	}
 	
 	public int hashCode() {
