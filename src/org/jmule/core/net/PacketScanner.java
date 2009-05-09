@@ -22,6 +22,7 @@
  */
 package org.jmule.core.net;
 
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
@@ -79,9 +80,12 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusAnswerSP
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerPublicKeySP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSecureIdentificationSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSignatureSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotReleaseSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
@@ -102,8 +106,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:36:45 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:36:55 $$
  */
 public class PacketScanner {
 	
@@ -167,7 +171,7 @@ public class PacketScanner {
 		case PACKET_CALLBACKFAILED : {
 			
 			scannedPacket = new JMServerCallbackFailed();
-
+			break;
 		}
 		
 		/** Peer <-> Peer **/
@@ -304,6 +308,25 @@ public class PacketScanner {
 
 			break;
 		}
+		
+		case OP_SECIDENTSTATE : {
+			EMuleExtendedTCPPacket sPacket = (EMuleExtendedTCPPacket) packet;
+			scannedPacket = new JMPeerSecureIdentificationSP(sPacket.getChallenge(), sPacket.isPublicKeyNeeded());
+			break;
+		}
+		
+		case OP_PUBLICKEY : {
+			EMuleExtendedTCPPacket sPacket = (EMuleExtendedTCPPacket) packet;
+			scannedPacket = new JMPeerPublicKeySP(sPacket.getPublicKey());
+			break;
+		}
+		
+		case OP_SIGNATURE : {
+			EMuleExtendedTCPPacket sPacket = (EMuleExtendedTCPPacket) packet;
+			scannedPacket = new JMPeerSignatureSP(sPacket.getChallenge());
+			break;
+		}
+		
 		}
 		
 		return scannedPacket;
