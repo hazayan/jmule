@@ -30,8 +30,8 @@ import org.jmule.core.sharingmanager.FileType;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:08:50 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 15:38:29 $$
  */
 public class SearchQuery {
 
@@ -61,7 +61,7 @@ public class SearchQuery {
 	 */
 	public void setQuery(String searchStr) {
 		Node n = search_tree.getNode(NodeValue.FILE_NAME);
-		n.getKey().setValue(Tree.DATA_KEY, searchStr);
+		n.getKey().setValue(searchStr);
 	}
 	
 	
@@ -70,7 +70,7 @@ public class SearchQuery {
 		value.setValue(minimalSize);
 		search_tree.addNodeIfNeed(value);
 	}
-	
+		
 	public void setMaximalSize(long maximalSize) {
 		NodeValue value = NodeValue.MAXSIZE;
 		value.setValue(maximalSize);
