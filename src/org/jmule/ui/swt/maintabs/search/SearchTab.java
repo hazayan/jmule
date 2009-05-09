@@ -29,6 +29,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -44,20 +46,23 @@ import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.searchmanager.SearchManager;
+import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.SearchRequest;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultListener;
+import org.jmule.core.sharingmanager.FileType;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.mainwindow.MainWindow;
+import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/11 18:29:16 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 10:56:28 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -69,13 +74,20 @@ public class SearchTab extends AbstractTab{
 	
 	private List<SearchResultTab> search_tabs = new LinkedList<SearchResultTab>();
 	
+	private Label advanced_info_search_label;
+	private Label clear_advanced_options;
+	
+	private long minFileSize = 0,maxFileSize = 1024, availableSources, completedSources;
+	private String extension="";
+	private FileType fileType;
+	
+	private boolean show_advanced_options = false;
+	
 	public SearchTab(Composite parent, JMuleCore core) {
 		super(parent);
-	
+		GridLayout layout;
 		_core = core;
-		
 		_core.getSearchManager().addSeachResultListener(new SearchResultListener() {
-
 			public void resultArrived(final SearchResult searchResult) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
@@ -88,41 +100,86 @@ public class SearchTab extends AbstractTab{
 					}
 				}); 
 			}
-			
 		});
-		
 		setLayout(new GridLayout(1,true));
 		
 		Composite search_bar_composite = new Composite(this,SWT.NONE);
 		search_bar_composite.setLayout(new FillLayout());
 		search_bar_composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Group search_bar = new Group(search_bar_composite,SWT.NONE);
-		search_bar.setLayout(new GridLayout(1,false));
+		search_bar.setLayout(new GridLayout(1,true));
 		
-		Composite controls = new Composite(search_bar,SWT.NONE);
-		controls.setLayout(new GridLayout(3,false));
+		Composite basic_search_controls = new Composite(search_bar,SWT.NONE);
 		GridData layout_data = new GridData();
-		layout_data.horizontalAlignment = GridData.CENTER;
 		layout_data.grabExcessHorizontalSpace = true;
-		controls.setLayoutData(layout_data);
-		Label label = new Label(controls,SWT.NONE);
+		layout_data.horizontalAlignment = GridData.CENTER;
+		basic_search_controls.setLayoutData(layout_data);
+		
+		layout = new GridLayout(5,false);
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		basic_search_controls.setLayout(layout);
+		
+		Label label = new Label(basic_search_controls,SWT.NONE);
 		label.setText(_._("mainwindow.searchtab.label.search") + " : ");
-		search_query = new Text(controls,SWT.SINGLE | SWT.BORDER);
+		
+		search_query = new Text(basic_search_controls,SWT.SINGLE | SWT.BORDER);
 		layout_data = new GridData();
 		layout_data.widthHint = 300;
 		search_query.setLayoutData(layout_data);
 		
-		Button search_button = new Button(controls,SWT.PUSH);
+		Button search_button = new Button(basic_search_controls,SWT.PUSH);
 		
 		search_button.setText(Localizer._("mainwindow.searchtab.button.search"));
 		search_button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				search();
 			}
-			
 		});
 		
+		Label adv_search = new Label(basic_search_controls,SWT.NONE);
+		adv_search.setText(_._("mainwindow.searchtab.label.advanced"));
+
+		Utils.formatAsLink(adv_search, new MouseAdapter() {
+			public void mouseUp(MouseEvent arg0) {
+				if (show_advanced_options) {
+					new AdvancedSearchWindow(minFileSize,maxFileSize,fileType,extension,availableSources,completedSources){
+						public void save(long minSize, long maxSize,
+								FileType fileType, String extension,
+								long availableSources, long completedSources) {	
+								maxFileSize = maxSize;
+								minFileSize = minSize;
+								
+								SearchTab.this.availableSources = availableSources;
+								SearchTab.this.completedSources = completedSources;
+								SearchTab.this.fileType = fileType;
+								SearchTab.this.extension = extension;
+								
+								showAdvancedOptions();
+						}
+					};
+				}else {
+					new AdvancedSearchWindow(){
+						public void save(long minSize, long maxSize,
+								FileType fileType, String extension,
+								long availableSources, long completedSources) {	
+								maxFileSize = maxSize;
+								minFileSize = minSize;
+								
+								SearchTab.this.availableSources = availableSources;
+								SearchTab.this.completedSources = completedSources;
+								SearchTab.this.fileType = fileType;
+								SearchTab.this.extension = extension;
+								
+								showAdvancedOptions();
+						}
+					};
+					
+				}
+			}
+		});
+				
 		search_query.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent arg0) {
 				if (arg0.keyCode == SWT.CR) {
@@ -130,6 +187,30 @@ public class SearchTab extends AbstractTab{
 				}
 			}
 		} );
+		
+		clear_advanced_options = new Label(basic_search_controls,SWT.NONE);
+		clear_advanced_options.setText(_._("mainwindow.searchtab.label.clear"));
+		clear_advanced_options.setVisible(false);
+		
+		Utils.formatAsLink(clear_advanced_options, new MouseAdapter() {
+			public void mouseUp(MouseEvent arg0) {
+				hideAdvancedOptions();
+			}				
+		});
+		
+		Composite advanced_options = new Composite(search_bar,SWT.NONE);
+		layout_data = new GridData();
+		layout_data.grabExcessHorizontalSpace = true;
+		layout_data.horizontalAlignment = GridData.FILL;
+		advanced_options.setLayoutData(layout_data);
+		advanced_options.setLayout(new GridLayout(1,false));
+		
+		advanced_info_search_label = new Label(advanced_options,SWT.NONE);
+		layout_data = new GridData();
+		layout_data.horizontalAlignment = GridData.CENTER;
+		layout_data.grabExcessHorizontalSpace = true;
+		advanced_info_search_label.setLayoutData(layout_data);
+		advanced_info_search_label.setVisible(false);
 		
 		search_query_tab_list = new CTabFolder(this, SWT.BORDER);
 		search_query_tab_list.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -187,10 +268,27 @@ public class SearchTab extends AbstractTab{
 		search_query.setText("");
 		
 		if (query.length()==0) return ;
+	
 		
+		SearchQuery search_query = new SearchQuery(query);
 		
+		if (show_advanced_options) {
+			if (fileType != fileType.ANY)
+				search_query.setFileType(fileType);
+			if (extension.length()!=0)
+				search_query.setExtension(extension);
+			if (availableSources!=0)
+				search_query.setMinAvailability(availableSources);
+			if (completedSources!=0)
+				search_query.setMinCompleteSources(completedSources);
+			if ((minFileSize!=0)||(maxFileSize!=0)) {
+				search_query.setMinimalSize(minFileSize);
+				search_query.setMaximalSize(maxFileSize);
+			}
+				
+		}
 		
-		SearchRequest request = new SearchRequest(query);
+		SearchRequest request = new SearchRequest(search_query);
 		
 		SearchManager manager = _core.getSearchManager();
 		manager.search(request);
@@ -207,6 +305,44 @@ public class SearchTab extends AbstractTab{
 			}		
 		});
 		
+	}
+	
+	private void showAdvancedOptions() {
+		
+		String text = "";
+		if ((minFileSize != 0)||(maxFileSize!=0))
+			text = " "+_._("mainwindow.searchtab.label.min_file_size")+" : "+FileFormatter.formatFileSize(minFileSize)+" "
+			+_._("mainwindow.searchtab.label.max_file_size")+" : "+ FileFormatter.formatFileSize(maxFileSize)+" ";
+		if (extension.length()!=0)
+			text += _._("mainwindow.searchtab.label.file_extension") + " : "+extension+" ";
+		
+		if (availableSources!=0)
+			text +=_._("mainwindow.searchtab.label.file_availability") + " : " + availableSources+" ";
+		
+		if (completedSources!=0)
+			text+=_._("mainwindow.searchtab.label.file_sources") + " : "+completedSources + " ";
+		if (fileType != FileType.ANY)
+			text += _._("mainwindow.searchtab.label.file_type") + " : " + fileType + " ";
+		if (text.length()!=0) 
+			show_advanced_options = true;
+		else 
+			show_advanced_options = false;
+		if (show_advanced_options) {
+			advanced_info_search_label.setText(text);
+			advanced_info_search_label.setVisible(true);
+			clear_advanced_options.setVisible(true);
+			advanced_info_search_label.getParent().layout();
+			clear_advanced_options.getParent().layout();
+		}
+	}
+	
+	private void hideAdvancedOptions() {
+		show_advanced_options = false;
+		advanced_info_search_label.setVisible(false);
+		clear_advanced_options.setVisible(false);
+		
+		advanced_info_search_label.getParent().layout();
+		clear_advanced_options.getParent().layout();
 	}
 	
 
