@@ -40,6 +40,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.jmule.core.JMRunnable;
+import org.jmule.core.JMThread;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -55,8 +57,8 @@ import sun.management.ManagementFactory;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:32:16 $$
  */
 public class StatisticsTab extends AbstractTab{
 
@@ -105,17 +107,16 @@ public class StatisticsTab extends AbstractTab{
 		filesize_formatter.add(JMuleCoreStats.ST_DISK_SHARED_FILES_COMPLETE_BYTES);
 		
 		refreshable = new Refreshable() {
-			
+			Map<String,Object> stats = null;
 			public void refresh() {
-				Map<String,Object> stats = JMuleCoreStats.getStats(types);
+				stats = JMuleCoreStats.getStats(types);
+				
 				for(String key : stats.keySet()) {
 					Number value = (Number)stats.get(key);
 					Label label = stats_fields.get(key);
 					String str = value+"";
-					
 					if (filesize_formatter.contains(key))
 						str = FileFormatter.formatFileSize((Long) value);
-					
 					
 					label.setText(str);
 				}

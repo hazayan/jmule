@@ -74,8 +74,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:27:28 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:35:04 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -114,7 +114,7 @@ public class SharedTab extends AbstractTab {
 		
 		_core = core;
 		sharing_manager = _core.getSharingManager();
-		config_manager = _core.getConfigurationManager();;
+		config_manager = _core.getConfigurationManager();
 		SWTSkin skin = null;
 		try {
 		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
@@ -336,8 +336,7 @@ public class SharedTab extends AbstractTab {
 				if (hashing_file != null)
 					if (object.getFile().equals(hashing_file.getFile()))
 						status = HASHING;
-				
-				
+
 				Image icon = SWTImageRepository.getIconByExtension(object.getSharingName());
 				setRowImage(object, SWTConstants.SHARED_LIST_FILE_NAME_COLUMN_ID, icon);
 				
@@ -355,9 +354,7 @@ public class SharedTab extends AbstractTab {
 				}
 				if (status == HASHED) {
 				    setRowText(object,SWTConstants.SHARED_LIST_COMPLETED_COLUMN_ID,FileFormatter.formatProgress(percent_completed));
-				}
-				if (status == HASHED) {
-					setRowText(object,SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID, object.getFileHash().getAsString());
+				    setRowText(object,SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID, object.getFileHash().getAsString());
 				} else
 					if (status == HASHING)
 						setRowText(object,SWTConstants.SHARED_LIST_FILE_ID_COLUMN_ID, _._("mainwindow.sharedtab.label.hashing"));
@@ -457,7 +454,7 @@ public class SharedTab extends AbstractTab {
 			String text = _._("mainwindow.sharedtab.group.shared_files");
 			SharedFile hashing_file = sharing_manager.getCurrentHashingFile();
 			if (hashing_file != null) {
-				text +="  Hashing [";
+				text +=" Hashing [";
 				DecimalFormat formatter = new DecimalFormat("0.00");
 				String file_name = hashing_file.getSharingName();
 				if (file_name.length()>20)
@@ -465,7 +462,6 @@ public class SharedTab extends AbstractTab {
 				text +=file_name+" : " + formatter.format(sharing_manager.getCurrentHashingFilePercent())+"%";
 				text +="]";
 			}
-			
 			
 			shared_files_group.setText(text);
 			
@@ -542,7 +538,6 @@ public class SharedTab extends AbstractTab {
 	private void removeFromDisk() {
 		if (!Utils.showConfirmMessage(getShell(), _._("mainwindow.sharedtab.confirm_remove_from_disk_title"), 
 									 _._("mainwindow.sharedtab.confirm_remove_from_disk"))) return ;
-		SharingManager sharing_manager = _core.getSharingManager();
 		for(SharedFile shared_file : shared_files_table.getSelectedObjects()) {
 			FileUtils.deleteQuietly(shared_file.getFile());
 			sharing_manager.removeSharedFile(shared_file.getFileHash());
@@ -554,16 +549,12 @@ public class SharedTab extends AbstractTab {
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
 				shared_dir_list.removeAll();
-//				java.util.List<File> directoryList2 = null;
 				shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.incoming"));
 				shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.partial"));
 				shared_dir_list.add(_._("mainwindow.sharedtab.shared_dirs.all"));
 				clear_button.setEnabled(false);
 				if (directoryList == null)
 					return ;
-					//directoryList2 = _core.getConfigurationManager().getSharedFolders();
-//				else
-	//				return ;
 				
 				for(File file : directoryList) {
 					shared_dir_list.add(file.getAbsolutePath());
@@ -599,63 +590,67 @@ public class SharedTab extends AbstractTab {
 					public void JMRun() {
 						shared_files_table.clear();
 				}});
+				
+				if (dir.equals(_._("mainwindow.sharedtab.shared_dirs.partial"))) {			
+					final java.util.List<PartialFile> partial_file_list = sharing_manager.getPartialFiles();
+							for(final SharedFile partial_file : partial_file_list ) {
+								if (stop) return ;
+								SWTThread.getDisplay().syncExec(new JMRunnable() {
+									public void JMRun() {
+										shared_files_table.addRow(partial_file);
+									}}); 
+								}
+							return ;
+					}
+				
 				if (dir.equals(_._("mainwindow.sharedtab.shared_dirs.incoming"))) 
-					shared_dir = new File(ConfigurationManager.INCOMING_DIR);
-				else
-					if (dir.equals(_._("mainwindow.sharedtab.shared_dirs.partial"))) {
-							
-						SharingManager manager = _core.getSharingManager();
-						final java.util.List<PartialFile> partial_file_list = manager.getPartialFiles();
-								for(final SharedFile partial_file : partial_file_list ) {
-									if (stop) return ;
-									SWTThread.getDisplay().syncExec(new JMRunnable() {
-										public void JMRun() {
-											shared_files_table.addRow(partial_file);
-										}}); 
-									}
-							
-								return ;
-						}
-					if (!dir.equals(_._("mainwindow.sharedtab.shared_dirs.all"))) {
+					shared_dir = new File(ConfigurationManager.INCOMING_DIR);	
+					
+				if (!dir.equals(_._("mainwindow.sharedtab.shared_dirs.all"))) {
 						// files from selected dir
 						if (shared_dir == null)
 							shared_dir = new File(dir);
-						
-						
 						Iterator<File> i = FileUtils.iterateFiles(shared_dir, null, true);
+						if (stop) return ;
 						while(i.hasNext()) {
 							if (stop) return ;
 							File shared_file = i.next();
 							if (shared_file.isDirectory()) continue;
 							final SharedFile file = sharing_manager.getSharedFile(shared_file);
 							if (file!=null)
-								SWTThread.getDisplay().syncExec(new JMRunnable() {
+								SWTThread.getDisplay().asyncExec(new JMRunnable() {
 									public void JMRun() {
 										shared_files_table.addRow(file);
 									}
 								});
+							
 							java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
 							if (unhashed_file_list == null) continue ;
 							for(final SharedFile unhashed_file : unhashed_file_list) {
-								if (unhashed_file.getFile().equals(shared_file))
+								if (stop) return ;
+								if (unhashed_file.getFile().equals(shared_file)) {
 									SWTThread.getDisplay().syncExec(new JMRunnable() {
 										  public void JMRun() {
 											shared_files_table.addRow(unhashed_file);
-									 }}); 
-
+									}});
+									break;
+								}
 							}
 						}
 					} else { // all files
-						SWTThread.getDisplay().syncExec(new JMRunnable() {
-							public void JMRun() {
-								java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
-								if (unhashed_file_list == null) return ;
-								for(SharedFile file : unhashed_file_list) {
-										shared_files_table.addRow(file);
+						java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
+						if (unhashed_file_list == null) return ;
+						for(final SharedFile file : unhashed_file_list) {
+							SWTThread.getDisplay().syncExec(new JMRunnable() {
+								public void JMRun() {
+									if (isDisposed()) return ;
+									if (stop) return;
+									shared_files_table.addRow(file);
 								}
-							}});
-						SharingManager manager = _core.getSharingManager();
-						final JMIterable<SharedFile> shared_files = manager.getSharedFiles();
+							});
+						}
+						if (stop) return ;
+						final JMIterable<SharedFile> shared_files = sharing_manager.getSharedFiles();
 						for(final SharedFile file : shared_files) {
 							if (stop) return ;
 							SWTThread.getDisplay().syncExec(new JMRunnable() {
