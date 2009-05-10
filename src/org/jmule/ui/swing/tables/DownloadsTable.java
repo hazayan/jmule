@@ -59,6 +59,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.downloadmanager.DownloadSession.DownloadStatus;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
@@ -81,8 +82,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 18:03:14 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/10 07:39:07 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -361,8 +362,8 @@ public class DownloadsTable extends JMTable {
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			this.setHorizontalAlignment(SwingConstants.LEFT);
-			if( session.getStatus() == DownloadSession.STATUS_STARTED ) this.setText(" started");
-			else if( session.getStatus() == DownloadSession.STATUS_STOPPED ) this.setText(" stopped");
+			if( session.getStatus() == DownloadStatus.STARTED ) this.setText(" started");
+			else if( session.getStatus() == DownloadStatus.STOPPED ) this.setText(" stopped");
 			return this;
 		}
 	}
@@ -564,7 +565,7 @@ public class DownloadsTable extends JMTable {
 				 start_download.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						for(DownloadSession session : getSelectedDownloadSessions()) 
-						  if(session.getStatus() == DownloadSession.STATUS_STOPPED)	
+						  if(session.getStatus() == DownloadStatus.STOPPED)	
 							session.startDownload();
 					}
 				 });
@@ -573,7 +574,7 @@ public class DownloadsTable extends JMTable {
 				 stop_download.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						for(DownloadSession session : getSelectedDownloadSessions()) 
-						  if(session.getStatus() == DownloadSession.STATUS_STARTED)	
+						  if(session.getStatus() == DownloadStatus.STARTED)	
 							session.stopDownload();
 					}
 				 });
@@ -814,13 +815,13 @@ public class DownloadsTable extends JMTable {
 		DownloadSession[] download_sessions = getSelectedDownloadSessions();
 		
 		if( ( download_sessions.length == 1 ) && 
-			( download_sessions[0].getStatus() == DownloadSession.STATUS_STARTED ) )
+			( download_sessions[0].getStatus() == DownloadStatus.STARTED ) )
 			return ConditionType.A;
 		
 		if( download_sessions.length > 1) {
 			boolean b = true;
 			for(DownloadSession session : download_sessions) {
-				if( session.getStatus() != DownloadSession.STATUS_STARTED ) {
+				if( session.getStatus() != DownloadStatus.STARTED ) {
 					b = false;
 					break;
 				}
@@ -829,13 +830,13 @@ public class DownloadsTable extends JMTable {
 		}
 		
 		if( ( download_sessions.length == 1 ) &&
-			( download_sessions[0].getStatus() == DownloadSession.STATUS_STOPPED ) )
+			( download_sessions[0].getStatus() == DownloadStatus.STOPPED ) )
 			return ConditionType.C;
 		
 		if( download_sessions.length > 1 ) {
 			boolean b = true;
 			for(DownloadSession session : download_sessions) {
-				if( session.getStatus() != DownloadSession.STATUS_STOPPED ) { 
+				if( session.getStatus() != DownloadStatus.STOPPED ) { 
 					 b = false;
 					 break;
 				}
@@ -849,8 +850,8 @@ public class DownloadsTable extends JMTable {
 			boolean some_started = false;
 			boolean some_stopped = false;
 			for(DownloadSession session : download_sessions) {
-				if(session.getStatus() == DownloadSession.STATUS_STARTED) some_started = true;
-				if(session.getStatus() == DownloadSession.STATUS_STOPPED) some_stopped = true;
+				if(session.getStatus() == DownloadStatus.STARTED) some_started = true;
+				if(session.getStatus() == DownloadStatus.STOPPED) some_stopped = true;
 			}
 			if( some_started && some_stopped ) 
 				return ConditionType.F;

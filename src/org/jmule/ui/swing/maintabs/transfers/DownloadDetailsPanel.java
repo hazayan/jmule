@@ -49,8 +49,8 @@ import org.jmule.util.Misc;
  *
  * Created on Oct 5, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:15 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/05/10 07:39:07 $
  */
 public class DownloadDetailsPanel extends JPanel {
 
@@ -230,10 +230,10 @@ public class DownloadDetailsPanel extends JPanel {
 		part_met_file_value.setText(session.getTempFileName());
 		part_met_file_value.setToolTipText(session.getMetFilePath());
 		file_hash_value.setText(session.getFileHash().getAsString());
-		switch(session.getStatus()) {
-		    case DownloadSession.STATUS_STARTED : status_value.setText("Started"); break;
-		    case DownloadSession.STATUS_STOPPED : status_value.setText("Stopped");
-		}
+		if (session.isStarted())
+			status_value.setText("Started");
+		else
+			status_value.setText("Stopped");
 		file_size_value.setText(FileFormatter.formatFileSize(session.getFileSize()));
 		parts_value.setText(session.getPartCount() + ", available " + session.getAvailablePartCount());
 	}
