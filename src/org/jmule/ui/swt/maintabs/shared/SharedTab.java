@@ -24,11 +24,9 @@ package org.jmule.ui.swt.maintabs.shared;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -56,6 +54,7 @@ import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.utils.FileUtils;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.GUIUpdater;
@@ -74,8 +73,8 @@ import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:35:04 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:04:23 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -539,7 +538,7 @@ public class SharedTab extends AbstractTab {
 		if (!Utils.showConfirmMessage(getShell(), _._("mainwindow.sharedtab.confirm_remove_from_disk_title"), 
 									 _._("mainwindow.sharedtab.confirm_remove_from_disk"))) return ;
 		for(SharedFile shared_file : shared_files_table.getSelectedObjects()) {
-			FileUtils.deleteQuietly(shared_file.getFile());
+			shared_file.getFile().delete();
 			sharing_manager.removeSharedFile(shared_file.getFileHash());
 			shared_files_table.removeRow(shared_file);
 		}
@@ -610,11 +609,13 @@ public class SharedTab extends AbstractTab {
 						// files from selected dir
 						if (shared_dir == null)
 							shared_dir = new File(dir);
-						Iterator<File> i = FileUtils.iterateFiles(shared_dir, null, true);
+						//Iterator<File> i = FileUtils.iterateFiles(shared_dir, null, true);
+						java.util.List<File> list_of_files = FileUtils.traverseDirAndReturnListOfFiles( shared_dir );
 						if (stop) return ;
-						while(i.hasNext()) {
+						//while(i.hasNext()) {
+						for(File shared_file : list_of_files) {
 							if (stop) return ;
-							File shared_file = i.next();
+							//File shared_file = i.next();
 							if (shared_file.isDirectory()) continue;
 							final SharedFile file = sharing_manager.getSharedFile(shared_file);
 							if (file!=null)
@@ -636,7 +637,8 @@ public class SharedTab extends AbstractTab {
 									break;
 								}
 							}
-						}
+						  } 
+						//}
 					} else { // all files
 						java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
 						if (unhashed_file_list == null) return ;
