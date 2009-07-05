@@ -32,7 +32,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -51,7 +50,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
 
-import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
@@ -60,6 +58,7 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.utils.FileUtils;
 import org.jmule.ui.swing.ImgRep;
 import org.jmule.ui.swing.Refreshable;
 import org.jmule.ui.swing.SwingGUIUpdater;
@@ -72,8 +71,8 @@ import org.jmule.ui.utils.NumberFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:12:11 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -375,7 +374,8 @@ public class SharedTab extends AbstractTab {
 					   shared_files_scroll_pane.setViewportView(shared_files_table);
 					}
 				});
-				Iterator<File> i = null;
+				//Iterator<File> i = null;
+				List<File> list_of_files = null;
 				boolean is_iterator = false;
 				if(object instanceof FilesCategory) {
 					FilesCategory files_category = (FilesCategory)object;
@@ -386,22 +386,26 @@ public class SharedTab extends AbstractTab {
 					    case INCOMPLETE_FILES   : for(PartialFile partial_file : _sharing_manager.getPartialFiles())
 					    	                            shared_files.add(partial_file);
 					    	                      break;  
-					    case INCOMING_FILES     : i = FileUtils.iterateFiles(new File(ConfigurationManager.INCOMING_DIR), null, true);
+					    case INCOMING_FILES     : list_of_files = FileUtils.traverseDirAndReturnListOfFiles( new File(ConfigurationManager.INCOMING_DIR ));
+					    	                      //i = FileUtils.iterateFiles(new File(ConfigurationManager.INCOMING_DIR), null, true);
 					                              is_iterator = true;
 					}
 				} else if( object instanceof File ) {
-					i = FileUtils.iterateFiles((File)object, null, true);
+					//i = FileUtils.iterateFiles((File)object, null, true);
+					list_of_files = FileUtils.traverseDirAndReturnListOfFiles( (File)object );
 					is_iterator = true;
 				}
 				
 				if(is_iterator) {
-				  while(i.hasNext()) {
+				  //while(i.hasNext()) {
+					for(File file : list_of_files) {
 					  if(stop) return;
-					  File file = i.next();
+					 // File file = i.next();
 					  if(file.isDirectory()) continue;
 					  SharedFile shared_file = _sharing_manager.getSharedFile(file);
 					  if(shared_file != null) shared_files.add(shared_file);
-				  }
+					}
+				  //}
 				}
 				nr_of_files = "Shared files(" + shared_files.size() + ")";
 		    }
