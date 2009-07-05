@@ -23,21 +23,22 @@
 package org.jmule.core.sharingmanager;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.nio.channels.FileChannel;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Logger;
 
-import org.apache.commons.io.FileUtils;
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
@@ -54,6 +55,8 @@ import org.jmule.core.uploadmanager.UploadSession;
 
 public class SharingManagerImpl implements SharingManager {
 	
+	private Logger log = Logger.getLogger(SharingManagerImpl.class.toString());
+	
 	private Map<FileHash,SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
 	private LoadPartialFiles load_partial_files;
@@ -66,6 +69,9 @@ public class SharingManagerImpl implements SharingManager {
 	private TimerTask rescan_dirs_task;
 	
 	public void initialize() {
+
+		log.info("Initialize method");
+		
 		sharing_manager_timer = new Timer();
 	    sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
 	     
@@ -117,6 +123,66 @@ public class SharingManagerImpl implements SharingManager {
 	     }});
 	}
 	
+	/**
+	 * A set of actions that are applied on the given file
+	 * This interface is meant to be used in conjunction with traverseDir method
+	 * @see {@link #traverseDir(File, boolean, WorkOnFiles) traverseDir}
+	 * @author javajox
+	 */
+	private interface WorkOnFiles {
+		/**
+		 * A set of actions that are applied on the given file
+		 * @param file
+		 */
+		public void doWork(File file);
+		
+		/**
+		 * Tells if we still need to traverse the directory
+		 * This method is very important, if we need to interrupt the "traverse process" without side effects we MUST
+		 * call this method
+		 */
+		public boolean stopTraverseDir();
+	}
+	
+	/**
+	 * Traverse a directory in a non-recursive mode
+	 * @param dir the directory that we have to traverse
+	 * @param with_part_met_extension has a role of filter, if given, only files with part.met at the end of file name are permitted  
+	 * @param work_on_files the actions that are applied on the found file
+	 */
+	private void traverseDir(File dir, boolean with_part_met_extension, WorkOnFiles work_on_files) {
+		log.info("Traverse : " + dir + ", with_part_met_extension = " + with_part_met_extension);
+		Queue<File> list_of_dirs = new LinkedList<File>();
+		File[] list_of_files;
+		File current_dir;
+		
+		list_of_dirs.offer( dir );
+		while( list_of_dirs.size() != 0 ) {
+			if( work_on_files.stopTraverseDir() ) return;
+			current_dir = list_of_dirs.poll();
+			if( with_part_met_extension )
+			   list_of_files = current_dir.listFiles( new FileFilter() {
+				   @Override
+				   public boolean accept(File file) {
+                       if( file.isDirectory() ) return true;
+                       if( file.getName().endsWith( PART_MET_EXTENSION ) ) return true;
+                       return false;
+				   }
+				   
+			   });
+			else
+				list_of_files = current_dir.listFiles();
+			for(File file : list_of_files) {
+				if( work_on_files.stopTraverseDir() ) return;
+				if( file.isDirectory() ) list_of_dirs.offer( file );
+				else {
+					log.info("Do work on file > " + file.getName());
+					work_on_files.doWork( file );
+				}
+			}
+		}
+	}
+	
 	public void start() {
 		rescan_dirs_task = new TimerTask() {
 			public void run() {
@@ -141,25 +207,29 @@ public class SharingManagerImpl implements SharingManager {
         return load_partial_files.isDone();
 	}
 	
-	private class LoadPartialFiles extends JMFileTask {
-		
+	private class LoadPartialFiles extends JMFileTask {		
 		public void run() {
 			isDone = false;
 			File shared_dir = new File(ConfigurationManager.TEMP_DIR);
-			Iterator<File> i = FileUtils.iterateFiles(shared_dir, new String[]{"part.met"}, false);
-		    while(i.hasNext()) {
-		    	if( stop ) return;
-		    	try {
-		    		PartMet part_met = new PartMet(i.next());
-		    
-		    		part_met.loadFile();
-		    		PartialFile partial_shared_file = new PartialFile(part_met);
-		    		sharedFiles.put(partial_shared_file.getFileHash(), partial_shared_file);
-		    		new_files.add(partial_shared_file);
-		    		JMuleCoreFactory.getSingleton().getDownloadManager().addDownload(partial_shared_file);
-		    		
-		    	}catch(Throwable t) { t.printStackTrace();}
-		    }
+			traverseDir(shared_dir, true, new WorkOnFiles() {
+				  @Override
+				  public void doWork(File file) {
+				    	try {
+				    		PartMet part_met = new PartMet(file);				    
+				    		part_met.loadFile();
+				    		PartialFile partial_shared_file = new PartialFile(part_met);
+				    		sharedFiles.put(partial_shared_file.getFileHash(), partial_shared_file);
+				    		new_files.add(partial_shared_file);
+				    		JMuleCoreFactory.getSingleton().getDownloadManager().addDownload(partial_shared_file);				    		
+				    	}catch(Throwable t) { t.printStackTrace();}
+				  }
+				@Override
+				public boolean stopTraverseDir() {
+
+					return stop;
+				}
+				  
+			});
 		    isDone = true;
 		}
 		
@@ -174,6 +244,9 @@ public class SharingManagerImpl implements SharingManager {
 		private FileHashing file_hashing;
 		private List<CompletedFile> files_needed_to_hash;
 		
+	    Map<String,KnownMetEntity> known_file_list;
+	    Set<FileHash> files_hash_set = new HashSet<FileHash>();
+		
 		public void JMStop() {
 			
 			super.JMStop();
@@ -186,8 +259,6 @@ public class SharingManagerImpl implements SharingManager {
 			isDone = false;
 			String knownFilePath = ConfigurationManager.KNOWN_MET;
 			
-		     Map<String,KnownMetEntity> known_file_list;
-		     Set<FileHash> files_hash_set = new HashSet<FileHash>();
 		     // new files from user's shared dirs that need to be hashed
 		     files_needed_to_hash = new CopyOnWriteArrayList<CompletedFile>();
 		     files_hash_set.addAll(sharedFiles.keySet());
@@ -209,38 +280,43 @@ public class SharingManagerImpl implements SharingManager {
 		     shared_dirs.add(incoming_dir);
 		     
 		     for(File dir : shared_dirs) {
-		    	 if( stop ) return;
-		    	 Iterator<File> i = FileUtils.iterateFiles(dir, null, true);
-		    	 
-		    	 String file_name;
-		    	 long file_size;
-		    	 KnownMetEntity known_met_entity = null;
-		    	 // checks out if the files from file system are stored in known.met, they need to be hashed otherwise
-		    	 while(i.hasNext()) {
-		    		 if( stop ) return;
-		    		 File f = i.next();
-		    		 file_name = f.getName(); 
-		    		 file_size = f.length();
-		    		 known_met_entity = known_file_list.get(file_name + file_size);
-		    		 if( known_met_entity == null) {
-		    			 files_needed_to_hash.add(new CompletedFile(f));
-		    		 } else {
-		    			 FileHash hash = known_met_entity.getFileHash();
-		    			 if (files_hash_set.contains(hash))
-		    				 files_hash_set.remove(hash);
-		    			 if (sharedFiles.get(hash)!= null) continue; // file already in list
-		    			 CompletedFile shared_completed_file = new CompletedFile(f);
-		    			 try {
-							shared_completed_file.setHashSet(known_met_entity.getPartHashSet());
-						} catch (SharedFileException e) {
-							e.printStackTrace();
-						}
-		    			 shared_completed_file.setTagList(known_met_entity.getTagList());
-		    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
-		    			 new_files.add(shared_completed_file);
-		    		 }
-		    		 known_met_entity = null;
-		    	 }  
+		    	 if( stop ) return;		    	 	    	 
+		    	 traverseDir(dir, false, new WorkOnFiles() {
+			    	String file_name;
+			    	long file_size;
+			    	KnownMetEntity known_met_entity = null;
+					@Override
+					public void doWork(File file) {
+			    		 file_name = file.getName(); 
+			    		 file_size = file.length();
+			    		 known_met_entity = known_file_list.get(file_name + file_size);
+			    		 if( known_met_entity == null) {
+			    			 files_needed_to_hash.add(new CompletedFile(file));
+			    		 } else {
+			    			 FileHash hash = known_met_entity.getFileHash();
+			    			 if (files_hash_set.contains(hash))
+			    				 files_hash_set.remove(hash);
+			    			 if (sharedFiles.get(hash)!= null) return; // file already in list
+			    			 CompletedFile shared_completed_file = new CompletedFile(file);
+			    			 try {
+								shared_completed_file.setHashSet(known_met_entity.getPartHashSet());
+							} catch (SharedFileException e) {
+								e.printStackTrace();
+							}
+			    			 shared_completed_file.setTagList(known_met_entity.getTagList());
+			    			 sharedFiles.put(shared_completed_file.getFileHash(), shared_completed_file);
+			    			 new_files.add(shared_completed_file);
+			    		 }
+			    		 known_met_entity = null;
+					}
+					@Override
+					public boolean stopTraverseDir() {
+						
+						return stop;
+					}		    		 
+		    	 });
+
+		    	 System.out.println("Finished");
 		      }
 		     for(FileHash file_hash : files_hash_set) {
 		    	 sharedFiles.remove(file_hash);
@@ -386,7 +462,9 @@ public class SharingManagerImpl implements SharingManager {
 				UploadSession upload_sessison = upload_manager.getUpload(fileHash);
 				synchronized(upload_sessison.getSharedFile()) {
 					sharedFiles.remove(fileHash);
-					FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
+					log.info("Moving " + shared_partial_file.getFile() + " to " + completed_file);
+					//FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
+					shared_partial_file.getFile().renameTo( shared_partial_file.getFile() );
 					CompletedFile shared_completed_file = new CompletedFile(completed_file);
 					shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 					sharedFiles.put(fileHash, shared_completed_file);
@@ -394,7 +472,9 @@ public class SharingManagerImpl implements SharingManager {
 				}
 			} else {
 				sharedFiles.remove(fileHash);
-				FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
+				log.info("Moving " + shared_partial_file.getFile() + " to " + completed_file);
+				//FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
+				shared_partial_file.getFile().renameTo( shared_partial_file.getFile() );
 				CompletedFile shared_completed_file = new CompletedFile(completed_file);
 				shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 				sharedFiles.put(fileHash, shared_completed_file);

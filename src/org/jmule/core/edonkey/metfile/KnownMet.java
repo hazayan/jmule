@@ -101,8 +101,8 @@ import org.jmule.util.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:05:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
  */
 public class KnownMet extends MetFile {
 
@@ -122,8 +122,8 @@ public class KnownMet extends MetFile {
 		
 		data = Misc.getByteBuffer(1);
 		fileChannel.read(data);
-		if (data.get(0)!=KNOWN_VERSION) 
-				throw new KnownMetException("Unsupported file version");
+		//if (data.get(0)!=KNOWN_VERSION) 
+		//		throw new KnownMetException("Unsupported file version");
 		
 		data = Misc.getByteBuffer(4);
 		fileChannel.read(data);

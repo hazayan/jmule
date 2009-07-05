@@ -31,10 +31,13 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:11:43 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
  */
 public interface SharingManager extends JMuleManager {
+	
+	public static final String PART_MET_EXTENSION = "part.met"; 
+	
 	/**
 	 * Loads the completed shared files from shared folders. This is a long time process 
 	 * that eats a lot of CPU cycles. Can be interrupted with stopLoadingCompletedFiles()

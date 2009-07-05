@@ -47,7 +47,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import org.apache.commons.io.FileUtils;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -63,8 +62,8 @@ import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 15:28:48 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
  */
 public abstract class SharedFile {
 	
@@ -100,7 +99,7 @@ public abstract class SharedFile {
 	}
 	
 	public void delete() {
-		FileUtils.deleteQuietly(file);
+		file.delete();
 	}
 	
 	public String getSharingName() {
