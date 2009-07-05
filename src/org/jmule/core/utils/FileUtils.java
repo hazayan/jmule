@@ -24,17 +24,22 @@ package org.jmule.core.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.logging.Logger;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/28 09:04:41 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:02:02 $$
  */
 public class FileUtils {
 
+	private Logger log = Logger.getLogger(FileUtils.class.toString());
+	
 	 /**
      * Checks, whether the child directory is a subdirectory of the base directory.
      *
@@ -79,6 +84,30 @@ public class FileUtils {
 			else already_existed_folders.add( f1 );
 		}
     	return already_existed_folders;
+    }
+    
+    /**
+     * 
+     * @param dir
+     * @return a list of files
+     */
+    public static List<File> traverseDirAndReturnListOfFiles(File dir) {
+    	List<File> result_as_list = new ArrayList<File>();
+    	Queue<File> list_of_dirs = new LinkedList<File>();
+    	File[] list_of_files;
+    	File current_dir;
+    	
+    	list_of_dirs.offer( dir );
+    	while( list_of_dirs.size() != 0 ) {
+    		current_dir = list_of_dirs.poll(); 
+    		list_of_files = current_dir.listFiles();
+    		for(File file : list_of_files) {
+    			if( file.isDirectory() ) list_of_dirs.offer( file );
+    			else result_as_list.add( file );
+    		}
+    	}
+    	
+    	return result_as_list;    	
     }
 	
 }
