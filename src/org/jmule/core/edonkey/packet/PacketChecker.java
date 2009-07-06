@@ -32,15 +32,26 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:05:08 $$
  */
 public class PacketChecker {
 
-	public static boolean checkPacket(Packet packet) {
+	public static boolean checkServerPacket(Packet packet) {
 		ScannedPacket scannedPacket;
 		try {
-			scannedPacket = PacketScanner.scanPacket(packet);
+			scannedPacket = PacketScanner.scanServerPacket(packet);
+			return checkPacket(scannedPacket);
+		} catch (Exception e) {
+			return false;
+		} 
+		
+	}
+	
+	public static boolean checkPeerPacket(Packet packet) {
+		ScannedPacket scannedPacket;
+		try {
+			scannedPacket = PacketScanner.scanPeerPacket(packet);
 			return checkPacket(scannedPacket);
 		} catch (Exception e) {
 			return false;
