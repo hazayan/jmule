@@ -28,21 +28,26 @@ import org.jmule.core.edonkey.impl.Server;
  *
  * Created on Aug 9, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:22:56 $
+ * @author binary256
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:28:18 $
  */
 public class SearchResult {
 
 	SearchResultItemList searchResultItemList;
-	SearchRequest searchRequest;
+	SearchQuery searchQuery;
 	Server server;
 	
-	public SearchResult(SearchResultItemList searchResultItemList, SearchRequest searchRequest, Server server) {
+	public SearchResult(SearchResultItemList searchResultItemList, SearchQuery searchRequest, Server server) {
 	     
 		 this.searchResultItemList = searchResultItemList;
-		 this.searchRequest = searchRequest;
+		 this.searchQuery = searchRequest;
 		 this.server = server;
 		
+	}
+	
+	public SearchResult(SearchResultItemList searchResultItemList, SearchQuery searchRequest) {
+	     this(searchResultItemList, searchRequest,null);
 	}
 	
 	public SearchResultItemList getSearchResultItemList() {
@@ -54,12 +59,12 @@ public class SearchResult {
 	}
 
 
-	public SearchRequest getSearchRequest() {
-		return searchRequest;
+	public SearchQuery getSearchQuery() {
+		return searchQuery;
 	}
 
-	public void setSearchRequest(SearchRequest searchRequest) {
-		this.searchRequest = searchRequest;
+	public void setSearchQuery(SearchQuery searchQuery) {
+		this.searchQuery = searchQuery;
 	}
 
 	public Server getServer() {
