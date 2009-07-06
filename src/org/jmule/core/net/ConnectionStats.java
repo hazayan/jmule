@@ -24,13 +24,13 @@ package org.jmule.core.net;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.util.Average;
+import org.jmule.core.utils.Average;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:27:10 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:15:37 $$
  */
 public class ConnectionStats {
 

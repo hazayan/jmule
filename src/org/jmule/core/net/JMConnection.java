@@ -32,15 +32,15 @@ import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketReader;
-import org.jmule.util.Average;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Average;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:23:13 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:15:37 $$
  */
 public abstract class JMConnection{
 	
