@@ -43,6 +43,7 @@ import org.jmule.core.downloadmanager.DownloadManagerFactory;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.jkad.JKad;
 import org.jmule.core.net.JMConnectionWaiter;
 import org.jmule.core.net.JMUDPConnection;
 import org.jmule.core.peermanager.PeerManager;
@@ -59,8 +60,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:23:45 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 15:03:31 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -289,7 +290,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		notifyComponentStarted(search_manager);
 		
-
+		if  (configuration_manager.isJKadEnabled())
+			JKad.getInstance().initialize();
 		
 		/** Enable Debug thread!**/	
 		// debugThread = new DebugThread();
@@ -340,6 +342,10 @@ public class JMuleCoreImpl implements JMuleCore {
 			t.printStackTrace();
 			
 		}
+		
+		JKad jkad = JKad.getInstance();
+
+		jkad.disconnect();
 		
 		Server server = ServerManagerFactory.getInstance().getConnectedServer();
 		
