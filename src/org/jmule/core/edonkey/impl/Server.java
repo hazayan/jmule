@@ -74,18 +74,18 @@ import org.jmule.core.net.PacketScanner;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.searchmanager.SearchManagerFactory;
-import org.jmule.core.searchmanager.SearchRequest;
+import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.core.sharingmanager.SharingManager;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/28 21:09:32 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:01:54 $$
  */
 public class Server extends JMConnection {
 	
@@ -112,9 +112,9 @@ public class Server extends JMConnection {
 	
 	// Search
 	
-	private volatile SearchRequest lastSearchQuery;
+	private volatile SearchQuery lastSearchQuery;
 	
-	private volatile SearchRequest nextSearchQuery;
+	private volatile SearchQuery nextSearchQuery;
 	
 	private volatile boolean allowSearch = false;
 	
@@ -191,7 +191,7 @@ public class Server extends JMConnection {
 				
 				failed_count = 0;
 				
-				Packet searchQueryPacket = PacketFactory.getSearchPacket(nextSearchQuery.getSearchQuery());
+				Packet searchQueryPacket = PacketFactory.getSearchPacket(nextSearchQuery);
 				
 				lastSearchQuery = nextSearchQuery;
 
@@ -287,7 +287,7 @@ public class Server extends JMConnection {
 		
 	}
 
-	public void searchFiles(SearchRequest searchQuery) {
+	public void searchFiles(SearchQuery searchQuery) {
 		
 		nextSearchQuery = searchQuery;
 		
@@ -776,7 +776,7 @@ public class Server extends JMConnection {
 					
 					raw_packet = getReceivedPacket();
 					
-					packet = PacketScanner.scanPacket(raw_packet);
+					packet = PacketScanner.scanServerPacket(raw_packet);
 					
 					processPacket(packet);
 					
