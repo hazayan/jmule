@@ -23,10 +23,8 @@
 package org.jmule.core.edonkey.impl;
 
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
+import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS1;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NICKNAME;
-import static org.jmule.core.edonkey.E2DKConstants.*;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.*;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
@@ -41,6 +39,7 @@ import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ServerManagerFactory;
+import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketChecker;
 import org.jmule.core.edonkey.packet.PacketFactory;
@@ -60,10 +59,12 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:02:11 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:00:51 $$
  */
 public class Peer extends JMConnection {
+	
+	public enum PeerSource {SERVER, KAD}
 	
 	private static final int PEER_DISCONNECT_WAIT_TIME = 1000;
 	private static final int PEER_DISCONNECT_CHECK_WAIT_INTERVAL = 100;
@@ -94,6 +95,10 @@ public class Peer extends JMConnection {
 	
 	private Map<PeerFeatures,Integer> peer_features = new Hashtable<PeerFeatures, Integer>();
 
+	private PeerSource peerSource = PeerSource.SERVER;
+	
+	
+
 	public Peer(JMuleSocketChannel remoteConnection,Server connectedServer) {
 		
 		super(remoteConnection);
@@ -118,6 +123,11 @@ public class Peer extends JMConnection {
 		
 		PeerManagerFactory.getInstance().addUnknownPeer(this);
 		
+	}
+	
+	public Peer(String remoteAddress, int remotePort,PeerSource peerSource) {
+		this(remoteAddress,remotePort,(Server)null);
+		this.peerSource = peerSource;
 	}
 	
 	public Peer(ClientID clientID,int remotePort,Server connectedServer){
@@ -152,6 +162,10 @@ public class Peer extends JMConnection {
 	
 	public SocketChannel getConnection() {
 		return remoteConnection.getChannel();
+	}
+	
+	public PeerSource getPeerSource() {
+		return peerSource;
 	}
 	
 	protected void processPackets() {
@@ -518,10 +532,10 @@ public class Peer extends JMConnection {
 					
 					try {
 						
-						packet = PacketScanner.scanPacket(raw_packet);
+						packet = PacketScanner.scanPeerPacket(raw_packet);
 						
 					} catch (Throwable e) {
-						
+						e.printStackTrace();
 						continue;
 						
 					}
