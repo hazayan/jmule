@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 13:55:04 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:57:40 $$
  */
 public class E2DKConstants {
 
@@ -141,7 +141,8 @@ public class E2DKConstants {
 	public final static byte OP_SLOTGIVEN 				= (byte) 0x55;
 	public final static byte OP_SLOTRELEASE 			= (byte) 0x56;
 	public final static byte OP_REQUESTPARTS 			= (byte) 0x47;
-	public final static byte OP_SENDINGPART 			= (byte) 0x46; 
+	public final static byte OP_SENDINGPART 			= (byte) 0x46;
+	public final static byte OP_COMPRESSEDPART 			= (byte) 0x40;
 	public final static byte OP_HASHSETREQUEST 			= (byte) 0x51;
 	public final static byte OP_HASHSETANSWER 			= (byte) 0x52;
 	public final static byte OP_FILESTATUS 				= (byte) 0x50;
@@ -179,7 +180,7 @@ public class E2DKConstants {
 		DefaultJMuleFeatures.put(UnicodeSupport, 1);
 		DefaultJMuleFeatures.put(UDPVer, 4);
 		DefaultJMuleFeatures.put(DataCompVer, 1);
-		DefaultJMuleFeatures.put(SupportSecIdent, 1);
+		DefaultJMuleFeatures.put(SupportSecIdent, 0);
 		DefaultJMuleFeatures.put(SourceExchange1Ver, 0);
 		DefaultJMuleFeatures.put(ExtendedRequestsVer,0);
 		DefaultJMuleFeatures.put(AcceptCommentVer, 0);
