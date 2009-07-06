@@ -49,17 +49,19 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.sharingmanager.FileQuality;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:09:20 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:29:34 $$
  */
 public class SearchResultItem extends TagList {
 
+	private SearchQueryType resultType = SearchQueryType.SERVER;
+	
 	private FileHash fileHash;
 	private ClientID clientID;
 	private short clientPort;
@@ -69,6 +71,11 @@ public class SearchResultItem extends TagList {
 		this.fileHash = fileHash;
 		this.clientID = clientID;
 		this.clientPort = clientPort;
+	}
+	
+	public SearchResultItem(FileHash fileHash, ClientID clientID, short clientPort,SearchQueryType resultType) {
+		this(fileHash, clientID,clientPort);
+		this.resultType = resultType;
 	}
 	
 	public ED2KFileLink getAsED2KLink() {
@@ -81,6 +88,9 @@ public class SearchResultItem extends TagList {
 		return result;
 	}
 	
+	public SearchQueryType getResultType() {
+		return resultType;
+	}
 	
 	public String getFileName(){
 		try {
