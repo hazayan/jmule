@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 18:48:18 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:55:25 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -47,6 +47,10 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	List<ConfigurationListener> config_listeners = new LinkedList<ConfigurationListener>();
 	
 	Map<String,List<ConfigurationListener>> parameter_listeners = new Hashtable<String,List<ConfigurationListener>>();
+	
+	public ConfigurationManagerImp() {
+		
+	}
 	
 	public void addConfigurationListener(ConfigurationListener listener) {
 
@@ -123,11 +127,10 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public void load() {
 
 		try {
-			
 		   config_store.load(new FileInputStream(CONFIG_FILE));	
-			
+		 //  loadKeys();
 		} catch(Throwable t) {
-			
+			t.printStackTrace();
 		}
 		
 
@@ -424,6 +427,42 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public boolean hasParameter(String parameter) {
 		return config_store.containsKey(parameter);
 	}
+	
+/*	private void loadKeys() {
+		BigInteger public_key, private_key;
+		BigInteger public_exponent, private_exponent;
+		if (config_store.containsKey(PUBLIC_KEY_KEY)&&config_store.containsKey(PRIVATE_KEY_KEY)) {
+			private_key = new BigInteger(config_store.getProperty(PRIVATE_KEY_KEY),16);
+			private_exponent = new BigInteger(config_store.getProperty(PRIVATE_EXPONENT_KEY),16);
+			
+			public_key = new BigInteger(config_store.getProperty(PUBLIC_KEY_KEY),16);
+			public_exponent = new BigInteger(config_store.getProperty(PUBLIC_EXPONENT_KEY),16);
+			
+			JMuleRSA.getSingleton().setKeys(public_key, public_exponent, private_key, private_exponent);
+		} else {
+			JMuleRSA.getSingleton().genKeys();
+			setKeys();
+			
+			save();
+		}
+
+	}*/
+	
+/*	private void setKeys() {
+		BigInteger publicKey, publicExponent;
+		BigInteger privateKey, privateExponent;
+		
+		publicKey = JMuleRSA.getSingleton().getPublicKey();
+		publicExponent = JMuleRSA.getSingleton().getPublicExponent();
+		
+		privateKey = JMuleRSA.getSingleton().getPrivateKey();
+		privateExponent = JMuleRSA.getSingleton().getPrivateExponent();
+		
+		config_store.setProperty(PUBLIC_KEY_KEY, publicKey.toString(16));
+		config_store.setProperty(PUBLIC_EXPONENT_KEY, publicExponent.toString(16));
+		config_store.setProperty(PRIVATE_KEY_KEY, privateKey.toString(16));
+		config_store.setProperty(PRIVATE_EXPONENT_KEY, privateExponent.toString(16));
+	}*/
 	
 	private void notifyCustomPropertyChanged(String key, Object new_value) {
 		List<ConfigurationListener> listener_list = parameter_listeners.get(key);
