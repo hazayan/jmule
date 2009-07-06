@@ -69,6 +69,7 @@ import static org.jmule.core.utils.Convert.shortToInt;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.nio.ByteBuffer;
+import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMuleManager;
+import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.jkad.JKadConstants.RequestType;
@@ -122,8 +124,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:50:39 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -174,14 +176,14 @@ public class JKad implements JMuleManager {
 		
 		loadClientID();
 		
-		filesToPublishChecker = new Task() {
-
-			public void run() {
-			
-				
+		ConfigurationManagerFactory.getInstance().addConfigurationListener(new ConfigurationAdapter() {
+			public void jkadStatusChanged(boolean newStatus) {
+				if (newStatus == false)
+					if (isConnected()) disconnect();
+				if (newStatus==true)
+					if (getStatus() == DISCONNECTED) connect();
 			}
-			
-		};
+		});
 		
 	}
 	
