@@ -22,8 +22,8 @@
  */
 package org.jmule.core.net;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
@@ -36,10 +36,13 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_MESSAGE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLOANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_PUBLICKEY;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTPARTS;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SECIDENTSTATE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVERLIST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_ANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SIGNATURE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
@@ -84,6 +87,7 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerPublicKeySP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSecureIdentificationSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingCompressedPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSignatureSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotReleaseSP;
@@ -106,19 +110,19 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:36:55 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:23:06 $$
  */
 public class PacketScanner {
 	
-	public static ScannedPacket scanPacket(Packet packet) throws PacketException,EMulePacketException {
+	public static ScannedPacket scanServerPacket(Packet packet) throws PacketException,EMulePacketException {
 		
 		ScannedPacket scannedPacket = null;
 		
 		if (packet instanceof EMuleCompressedPacket ) {
 			((EMuleCompressedPacket)packet).decompressPacket();
 		}
-		
+		//System.out.println(Convert.byteToHex(packet.getCommand()));
 		switch (packet.getCommand()) {
 		/** Server <-> Peer **/
 		case PACKET_SRVIDCHANGE: {
@@ -172,8 +176,18 @@ public class PacketScanner {
 			
 			scannedPacket = new JMServerCallbackFailed();
 			break;
-		}
+		} }
+		return scannedPacket;
+	}
+	
+	public static ScannedPacket scanPeerPacket(Packet packet) throws PacketException,EMulePacketException {
+		ScannedPacket scannedPacket = null;
 		
+		if (packet instanceof EMuleCompressedPacket ) {
+			((EMuleCompressedPacket)packet).decompressPacket();
+		}
+				
+		switch (packet.getCommand()) {
 		/** Peer <-> Peer **/
 		case OP_PEERHELLO : {
 			StandardPacket sPacket = (StandardPacket) packet;
@@ -240,6 +254,12 @@ public class PacketScanner {
 		case OP_SENDINGPART : {
 			StandardPacket sPacket = (StandardPacket) packet;
 			scannedPacket = new JMPeerSendingPartSP(sPacket.getFileHash(),sPacket.getFileChunk());
+			break;
+		}
+		
+		case OP_COMPRESSEDPART : {
+			EMuleExtendedTCPPacket ePacket = (EMuleExtendedTCPPacket) packet;
+			scannedPacket = new JMPeerSendingCompressedPartSP(ePacket.getFileHash(),ePacket.getCompressedFileChunk());
 			break;
 		}
 		
@@ -326,9 +346,7 @@ public class PacketScanner {
 			scannedPacket = new JMPeerSignatureSP(sPacket.getChallenge());
 			break;
 		}
-		
 		}
-		
 		return scannedPacket;
 
 	}
