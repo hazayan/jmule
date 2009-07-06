@@ -27,15 +27,19 @@ import org.jmule.core.searchmanager.tree.NodeValue;
 import org.jmule.core.searchmanager.tree.Tree;
 import org.jmule.core.sharingmanager.FileType;
 
+
 /**
- * 
+ * @author binary256
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 15:38:29 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:26:15 $$
  */
 public class SearchQuery {
 
 	private Tree search_tree;
+	
+	private SearchQueryType query_type = SearchQueryType.SERVER;
+	
 	/**
 	 * Constructs an search query based on the given search string
 	 * @param searchStr the given search string
@@ -44,6 +48,19 @@ public class SearchQuery {
 		search_tree = new Tree(searchStr);
 	}
 	
+	public SearchQuery(String searchStr,SearchQueryType type) {
+		this(searchStr);
+		setQueryType(type);
+	}
+	
+	public SearchQueryType getQueryType() {
+		return query_type;
+	}
+
+
+	public void setQueryType(SearchQueryType queryType) {
+		query_type = queryType;
+	}
 	
 	/**
 	 * Gets the search string
@@ -116,4 +133,16 @@ public class SearchQuery {
 	public Tree getSearchTree() {
 		return search_tree;
 	}
+	
+	public int hashCode() {
+		return getQuery().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		if (object == null) return false;
+		if (!(object instanceof SearchQuery)) return false;
+		SearchQuery query = (SearchQuery)object;
+		return query.getQuery().equals(getQuery());
+	}
+	
 }
