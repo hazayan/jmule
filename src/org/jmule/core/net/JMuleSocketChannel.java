@@ -29,13 +29,13 @@ import java.nio.channels.SocketChannel;
 
 import org.jmule.core.speedmanager.BandwidthController;
 import org.jmule.core.speedmanager.SpeedManager;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:33:57 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:22:18 $$
  */
 public class JMuleSocketChannel {
 	private SocketChannel channel;
