@@ -27,6 +27,7 @@ import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_COMPRESSED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
+import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -39,15 +40,17 @@ import org.jmule.core.edonkey.packet.impl.EMuleExtendedTCPPacket;
 import org.jmule.core.edonkey.packet.impl.StandardPacket;
 import org.jmule.core.edonkey.packet.impl.UDPPeerPacket;
 import org.jmule.core.edonkey.packet.impl.UDPServerPacket;
+import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMuleSocketChannel;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:57 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:06:18 $$
  */
 public class PacketReader {
 
@@ -80,18 +83,30 @@ public class PacketReader {
 			return buffer;
 		}
 	
+	private static ByteBuffer packetBuffer = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE);
 	public static UDPPacket readPacket(DatagramChannel channel) {
 		InetSocketAddress packetSender;
-		ByteBuffer data = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE); 
-		
 		try {
-			packetSender = (InetSocketAddress) channel.receive(data);
-			data.flip();
+			packetBuffer.clear();
+			packetSender = (InetSocketAddress) channel.receive(packetBuffer);
+			ByteBuffer rawData = getByteBuffer(packetBuffer.position());
 			
-			if (data.get(0) == PROTO_EDONKEY_SERVER_UDP) 
-				return new UDPServerPacket(data,packetSender);
-			if (data.get(0) == PROTO_EDONKEY_PEER_UDP)
-				return new UDPPeerPacket(data,packetSender);
+			packetBuffer.limit(packetBuffer.position());
+			packetBuffer.position(0);
+			rawData.position(0);
+			rawData.put(packetBuffer);
+
+			rawData.position(0);
+			
+			if (rawData.get(0) == PROTO_EDONKEY_SERVER_UDP) 
+				return new UDPServerPacket(rawData,packetSender);
+			if (rawData.get(0) == PROTO_EDONKEY_PEER_UDP)
+				return new UDPPeerPacket(rawData,packetSender);
+			if (rawData.get(0) == JKadConstants.PROTO_KAD_UDP)
+				return new KadPacket(rawData,packetSender);
+			if (rawData.get(0) == JKadConstants.PROTO_KAD_COMPRESSED_UDP)
+				return new KadPacket(rawData,packetSender);
+			
 		} catch (Throwable t) {
 			return null;
 		}
