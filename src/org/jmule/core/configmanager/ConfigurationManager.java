@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/14 19:21:21 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:53:41 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -46,6 +46,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       KNOWN_MET         				=     SETTINGS_DIR + File.separator + "known.met";
 	public static final String       SERVER_MET         			=     SETTINGS_DIR + File.separator + "server.met";
 	public static final String       GEOIP_DAT                      =     SETTINGS_DIR + File.separator + "geoip.dat";
+	
 	
 	public static final String       NICK_NAME       				=     "http://jmule.net";
 	
@@ -69,7 +70,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final long          DOWNLOAD_LIMIT     			=    1024 * 1024;
 	public static final long          UPLOAD_LIMIT       			=    1024 * 512;
 	
-	public static final long		  MAX_UDP_PACKET_SIZE			=    100*1024;
+	public static final long		  MAX_UDP_PACKET_SIZE			=    65534;
 	
 	public static final long          WRONG_PACKET_CHECK_INTERVAL	=     1000 * 5;
 	public static final long		  MAX_WRONG_PACKET_COUNT		=     50 ;
@@ -92,7 +93,15 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final String		 SERVER_LIST_UPDATE_ON_CONNECT_KEY	   =     "ServerListUpdateOnConnect";
 	
-	public static final String 		 CUSTOM_PARAMETER_KEY					   =     "CustomParameter";
+	public static final String 		 CUSTOM_PARAMETER_KEY				   =     "CustomParameter";
+	
+/*	public static final String		 PUBLIC_KEY_KEY						   =	 "PublicKey";
+	public static final String 		 PUBLIC_EXPONENT_KEY				   = 	 "PublicExponent";
+	public static final String 		 PRIVATE_KEY_KEY					   =     "PrivateKey";
+	public static final String		 PRIVATE_EXPONENT_KEY				   =	 "PrivateExponent";*/
+	
+	public static final String 		 JKAD_ID_KEY						   = 	"JKadID";
+	
 	// 
 	//public static final String       PEER_ACTIVITY_CHECK_TIME_KEY   	   =     "PeerActivityCheckTime";
 	//public static final String       SOURCES_QUERY_INTERVAL_KEY     	   =     "SourcesQueryInterval";
