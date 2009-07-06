@@ -24,15 +24,16 @@ package org.jmule.aspects;
 
 
 import java.util.logging.Logger;
+
 import org.jmule.core.sharingmanager.SharedFile;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 
 /**
  * Created on Oct 21, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/05/09 10:49:35 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 13:52:44 $
  */
 public privileged aspect SharedFileLogger {
 

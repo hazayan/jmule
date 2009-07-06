@@ -24,18 +24,21 @@ package org.jmule.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.downloadmanager.*;
+import org.jmule.core.JMThread;
+import org.jmule.core.downloadmanager.DownloadManagerFactory;
+import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.impl.JMuleCoreImpl;
-import org.jmule.core.peermanager.*;
-import org.jmule.core.uploadmanager.*;
-import org.jmule.util.Misc;
-import org.jmule.core.JMThread;
+import org.jmule.core.peermanager.PeerManagerFactory;
+import org.jmule.core.peermanager.PeerManagerImpl;
+import org.jmule.core.uploadmanager.UploadManagerFactory;
+import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:52:44 $$
  */
 public privileged aspect JMuleCoreImplLogger {
 	private Logger log = Logger.getLogger("org.jmule");

@@ -25,12 +25,12 @@ package org.jmule.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyImpl;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 /**
  * Created on Sep, 13 2008 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/14 11:50:13 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:52:44 $$
  */
 public aspect DownloadAlgorithmLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.algorithm.DownloadAlgorithmImpl");

@@ -25,14 +25,14 @@ package org.jmule.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.edonkey.metfile.PartMet;
-import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.edonkey.metfile.PartMetException;
-import org.jmule.util.Misc;
+import org.jmule.core.sharingmanager.PartialFile;
+import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:52:44 $$
  */
 public privileged aspect PartialFileLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartialFile");

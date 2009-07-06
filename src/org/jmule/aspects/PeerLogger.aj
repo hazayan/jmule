@@ -28,13 +28,13 @@ import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.net.JMConnection;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:25:41 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:52:44 $$
  */
 public privileged aspect PeerLogger {
 	
@@ -61,7 +61,7 @@ public privileged aspect PeerLogger {
 	before(ScannedPacket packet, Peer p) : target(p) && args(packet)&& execution (void Peer.processPacket(ScannedPacket)) {
 	}
 	
-	after(Peer p) returning(Packet packet) :target(p) && execution(Packet JMConnection.getReceivedPacket()) {
+	after(Peer p) returning(Packet packet) :target(p) && execution(KadPacket JMConnection.getReceivedPacket()) {
 		if (packet==null)
 			log.warning("Scanned Packet is null from client  : "+p);
 	}

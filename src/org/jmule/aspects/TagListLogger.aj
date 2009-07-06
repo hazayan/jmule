@@ -23,14 +23,15 @@
 package org.jmule.aspects;
 
 import java.util.logging.Logger;
+
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/18 08:51:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:52:44 $$
  */
 public aspect TagListLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.packet.tag.impl.TagList");
