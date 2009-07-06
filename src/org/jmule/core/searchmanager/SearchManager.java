@@ -27,8 +27,8 @@ import org.jmule.core.JMuleManager;
 /**
  * Created on 2007-Nov-07
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:20:14 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:24:55 $$
  */
 public interface SearchManager extends JMuleManager {
 
@@ -44,7 +44,7 @@ public interface SearchManager extends JMuleManager {
 	 */
 	public void removeResult(SearchResult searchResult);
 	
-	public void removeSearch(SearchRequest searchRequest);
+	public void removeSearch(SearchQuery searchQuery);
 	
 	/**
 	 * Starts a new search process based on the given search string
@@ -56,7 +56,7 @@ public interface SearchManager extends JMuleManager {
 	 * Starts a new search process based on the given search request
 	 * @param searchRequest the given search request
 	 */
-	public void search(SearchRequest searchRequest);
+	public void search(SearchQuery searchQuery);
 	
 	public void addSeachResultListener(SearchResultListener searchResultListener);
 }
