@@ -29,13 +29,13 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 17:09:28 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
  */
 public class KnownMetEntity {
 	private int date;

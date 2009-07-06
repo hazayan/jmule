@@ -29,14 +29,14 @@ import static org.jmule.core.edonkey.E2DKConstants.*;
 
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.impl.EMuleExtendedTCPPacket;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:09:23 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:03:52 $$
  */
 public class EMulePacketFactory{
 

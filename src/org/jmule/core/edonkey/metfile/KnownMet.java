@@ -40,8 +40,8 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.SharedFile;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Known.met file format.
@@ -101,8 +101,8 @@ import org.jmule.util.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
  */
 public class KnownMet extends MetFile {
 

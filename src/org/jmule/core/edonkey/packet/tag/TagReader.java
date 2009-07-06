@@ -40,13 +40,13 @@ import java.util.Set;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.packet.tag.impl.ExtendedTag;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/27 12:57:31 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:09:53 $
  */
 public class TagReader {
 

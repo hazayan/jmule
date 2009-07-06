@@ -22,13 +22,13 @@
  */
 package org.jmule.core.edonkey.impl;
 
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:11:06 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:58:18 $$
  */
 public class ClientID {
 	

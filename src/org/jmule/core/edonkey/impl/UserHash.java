@@ -25,13 +25,13 @@ package org.jmule.core.edonkey.impl;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:07:10 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:27 $$
  */
 public class UserHash {
 	

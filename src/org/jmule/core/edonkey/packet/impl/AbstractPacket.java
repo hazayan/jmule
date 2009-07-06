@@ -25,13 +25,13 @@ package org.jmule.core.edonkey.packet.impl;
 import java.nio.ByteBuffer;
 
 import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:07:49 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:06:40 $$
  */
 public class AbstractPacket {
 	

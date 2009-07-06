@@ -35,8 +35,8 @@ import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagReader;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 
 /**
@@ -93,8 +93,8 @@ import org.jmule.util.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:05:11 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
  */
 public class ServerMet extends MetFile {
 	

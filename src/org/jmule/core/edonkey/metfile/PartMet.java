@@ -48,8 +48,8 @@ import org.jmule.core.edonkey.packet.tag.TagReader;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * <table cellpadding="0" border="1" cellspacing="0" width="70%">
@@ -99,8 +99,8 @@ import org.jmule.util.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
  */
 public class PartMet extends MetFile {
 	

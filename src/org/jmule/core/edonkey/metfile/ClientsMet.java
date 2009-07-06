@@ -31,8 +31,8 @@ import java.util.Collection;
 import java.util.Hashtable;
 
 import org.jmule.core.edonkey.impl.UserHash;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 /**
  * Clients.met format
  * <table cellpadding="0" border="1" cellspacing="0" width="70%">
@@ -103,8 +103,8 @@ import org.jmule.util.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:03:50 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
  */
 public class ClientsMet extends MetFile {
 

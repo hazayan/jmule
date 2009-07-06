@@ -35,14 +35,14 @@ import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMFloodException;
 import org.jmule.core.net.JMuleSocketChannel;
-import org.jmule.util.JMuleZLib;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.JMuleZLib;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/03 17:19:11 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:07:39 $$
  */
 public class EMuleCompressedPacket extends StandardPacket implements Packet  {
 	

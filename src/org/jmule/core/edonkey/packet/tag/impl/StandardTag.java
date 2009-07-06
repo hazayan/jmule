@@ -30,7 +30,7 @@ import java.nio.ByteOrder;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagException;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
@@ -83,8 +83,8 @@ import org.jmule.util.Convert;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/27 13:02:50 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:10:11 $$
  */
 public class StandardTag extends AbstractTag implements Tag {
 

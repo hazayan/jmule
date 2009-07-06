@@ -73,14 +73,14 @@ import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.uploadmanager.FileChunkRequest;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/23 17:04:41 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:09:12 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 

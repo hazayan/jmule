@@ -33,13 +33,13 @@ import org.jmule.core.edonkey.packet.UDPPacket;
 import org.jmule.core.edonkey.packet.UDPPacketException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagReader;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:31:10 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:07:39 $$
  */
 public class UDPServerPacket extends UDPAbstractPacket implements UDPPacket {
 	

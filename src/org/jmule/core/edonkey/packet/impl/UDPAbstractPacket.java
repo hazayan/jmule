@@ -25,14 +25,14 @@ package org.jmule.core.edonkey.packet.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:45 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:09:12 $$
  */
 public abstract class UDPAbstractPacket {
 	protected ByteBuffer dataPacket = null;

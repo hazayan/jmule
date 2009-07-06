@@ -22,13 +22,13 @@
  */
 package org.jmule.core.edonkey.packet.tag.impl;
 
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:21:46 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:10:11 $$
  */
 public class MetaTag {
 

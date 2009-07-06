@@ -83,14 +83,14 @@ import org.jmule.core.searchmanager.tree.NodeValue;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.SharedFile;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:11:44 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:03:52 $$
  */
 public class PacketFactory {
 	

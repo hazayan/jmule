@@ -23,13 +23,13 @@
 package org.jmule.core.edonkey.metfile;
 
 import org.jmule.core.edonkey.impl.UserHash;
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:02:46 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
  */
 public class ClientCreditInfo {
 	private UserHash userHash;//16
