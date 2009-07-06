@@ -22,8 +22,11 @@
  */
 package org.jmule.core.edonkey.packet.impl;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
+import static org.jmule.core.edonkey.E2DKConstants.OP_PUBLICKEY;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SECIDENTSTATE;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SIGNATURE;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 
 import java.io.IOException;
@@ -31,19 +34,21 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.packet.EMulePacketException;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMFloodException;
 import org.jmule.core.net.JMuleSocketChannel;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:33:46 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:08:23 $$
  */
 public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 
@@ -118,6 +123,19 @@ public class EMuleExtendedTCPPacket extends AbstractPacket implements Packet {
 			byte[] defaultData = data.array();
 			this.insertData(5,defaultData);
 	}
+	
+    public FileChunk getCompressedFileChunk() throws PacketException {
+    	if (this.getCommand() != OP_COMPRESSEDPART) 
+    		throw new PacketException("No OP_COMPRESSEDPART packet "+this);
+    	packet_data.position(1+4+1+16);
+    	
+    	long chunkStart = Convert.intToLong(packet_data.getInt());
+    	long chunkEnd = Convert.intToLong(packet_data.getInt());
+    	long compressedSize = packet_data.capacity() - packet_data.position()-1;
+    	ByteBuffer data = Misc.getByteBuffer(compressedSize);
+    	packet_data.get(data.array());
+    	return new FileChunk(chunkStart,chunkEnd,data);
+    }
 		
 	/**
 	 * Read packet from connection
