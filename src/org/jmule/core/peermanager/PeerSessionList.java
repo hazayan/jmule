@@ -40,6 +40,7 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusAnswerSP
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerFileStatusRequestSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerRequestFilePartSP;
+import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingCompressedPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
 import org.jmule.core.sharingmanager.PartialFile;
@@ -132,6 +133,7 @@ public class PeerSessionList {
 		if (packet instanceof JMPeerFileHashSetAnswerSP ) packetType = 0;
 		
 		if (packet instanceof JMPeerSendingPartSP ) packetType = 0;
+		if (packet instanceof JMPeerSendingCompressedPartSP ) packetType = 0;
 		
 		if (packet instanceof JMPeerFileNotFoundSP ) packetType = 0;
 		
@@ -142,7 +144,6 @@ public class PeerSessionList {
 		if (packetType==0) { //Have Download Packet
 			
 			FileHash fileHash = null;
-			
 			if (packet instanceof JMPeerFileRequestAnswerSP )
 				
 				fileHash = ((JMPeerFileRequestAnswerSP)packet).getFileHash();
@@ -158,6 +159,10 @@ public class PeerSessionList {
 			if (packet instanceof JMPeerSendingPartSP )
 				
 				fileHash = ((JMPeerSendingPartSP)packet).getFileHash();
+			
+			if (packet instanceof JMPeerSendingCompressedPartSP)
+				
+				fileHash = ((JMPeerSendingCompressedPartSP)packet).getFileHash();
 			
 			if (packet instanceof JMPeerFileNotFoundSP )
 				
