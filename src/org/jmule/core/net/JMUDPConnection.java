@@ -22,6 +22,10 @@
  */
 package org.jmule.core.net;
 
+import static org.jmule.core.net.JMUDPConnection.UDPSocketStatus.CLOSED;
+import static org.jmule.core.net.JMUDPConnection.UDPSocketStatus.OPEN;
+import static org.jmule.core.utils.Convert.shortToInt;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
@@ -38,15 +42,16 @@ import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.edonkey.packet.UDPPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedUDPPacket;
-import org.jmule.util.Average;
-
-import static org.jmule.core.net.JMUDPConnection.UDPSocketStatus.*;
+import org.jmule.core.jkad.IPAddress;
+import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.net.packet.KadPacket;
+import org.jmule.core.utils.Average;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:38:09 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:21:16 $$
  */
 public class JMUDPConnection {
 	
@@ -84,7 +89,7 @@ public class JMUDPConnection {
 		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
 			public void UDPPortChanged(int udp) {
 				try {
-					reopen();
+					reOpenConnection();
 				} catch (JMUDPConnectionException e) {
 					e.printStackTrace();
 				}
@@ -93,7 +98,7 @@ public class JMUDPConnection {
 			public void isUDPEnabledChanged(boolean enabled) {
 				try {
 					if (enabled)
-						reopen();
+						reOpenConnection();
 					else
 						close();
 				} catch (JMUDPConnectionException e) {
@@ -147,7 +152,7 @@ public class JMUDPConnection {
 		}
 	}
 	
-	public void reopen() throws JMUDPConnectionException {
+	public void reOpenConnection() throws JMUDPConnectionException {
 		if (isOpen())
 			close();
 		open();
@@ -160,13 +165,22 @@ public class JMUDPConnection {
 			
 	}
 	
-	// Send UDP packet code 
 	public void sendPacket(UDPPacket packet ) {
 		if (!isOpen()) return ;
 		sendQueue.offer(packet);
 		if (packetSenderThread.isSleeping())
 			packetSenderThread.wakeUp();
 			
+	}
+	
+	public void sendPacket(KadPacket packet, IPAddress address, int port) {
+		InetSocketAddress ip_address = new InetSocketAddress(address.toString(), shortToInt((short)port));
+		sendPacket(packet, ip_address);
+	}
+	
+	public void sendPacket(KadPacket packet, InetSocketAddress destination) {
+		packet.setAddress(destination);
+		sendPacket(packet);
 	}
 	
 	private void ban() {
@@ -185,16 +199,20 @@ public class JMUDPConnection {
 			while(!stop){
 				UDPPacket packet = PacketReader.readPacket(listenChannel);
 				if (packet != null) {
+					if (packet instanceof KadPacket) {
+						JKad.getInstance().receivePacket((KadPacket)packet);
+					} else {
 					ScannedUDPPacket scanned_packet = PacketScanner.scanPacket(packet);
 					// scanned_packet == null is is not supported or decoding was failed
 					if (scanned_packet != null)
 						addReceivedPacket(scanned_packet);
 					else
 						currentlyWrongPackets++;
+					}
 				}
 				else {
 					if (stop) return ;
-					if (!listenChannel.isConnected()) break;
+					//if (!listenChannel.isConnected()) break;
 					currentlyWrongPackets++;
 				}
 			}
@@ -283,8 +301,9 @@ public class JMUDPConnection {
 					packet.getAsByteBuffer().position(0);
 					listenChannel.send(packet.getAsByteBuffer(), destination);
 				} catch (IOException e) {
+					e.printStackTrace();
 					if (stop) return;
-					if (!listenChannel.isConnected()) return;
+					//if (!listenChannel.isConnected()) return;
 				}
 			}
 		}
