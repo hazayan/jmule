@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:53:41 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:51:30 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -100,6 +100,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String 		 PRIVATE_KEY_KEY					   =     "PrivateKey";
 	public static final String		 PRIVATE_EXPONENT_KEY				   =	 "PrivateExponent";*/
 	
+	public static final String 		 JKAD_ENABLED_KEY					   = 	"JKadEnabled";
 	public static final String 		 JKAD_ID_KEY						   = 	"JKadID";
 	
 	// 
@@ -247,6 +248,10 @@ public interface ConfigurationManager extends JMuleManager {
      */
     public long getUploadBandwidth();
     
+    
+    public boolean isJKadEnabled();
+    
+    public void setJKadStatus(boolean newStatus);
     
     public Integer getIntParameter(String parameter, Integer defaultValue);
     

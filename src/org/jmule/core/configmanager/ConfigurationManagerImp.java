@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:55:25 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:51:30 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -373,6 +373,18 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		return result;
 	}
 	
+	public boolean isJKadEnabled() {
+		
+		return getBooleanParameter(JKAD_ENABLED_KEY, true);
+	}
+
+
+	public void setJKadStatus(boolean newStatus) {
+		setParameter(JKAD_ENABLED_KEY, newStatus+"");
+		notifyPropertyChanged(JKAD_ENABLED_KEY, newStatus);
+	}	
+
+	
 	public Boolean getBooleanParameter(String parameter, Boolean defaultValue) {
 		Boolean result;
 		try {
@@ -492,6 +504,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
 			    
 		   else if( property == UPLOAD_LIMIT_KEY) listener.uploadLimitChanged((Long)new_value);
+		   else if( property == JKAD_ENABLED_KEY) listener.jkadStatusChanged((Boolean)new_value);
 			
 		}
 		
@@ -504,6 +517,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 			parameter_listeners.put(parameter, listeners_list);
 		}
 		listeners_list.add(listener);
-	}	
+	}
+
 
 }

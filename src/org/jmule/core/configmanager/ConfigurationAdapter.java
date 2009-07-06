@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/08/27 05:44:38 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:51:30 $
  */
 public abstract class ConfigurationAdapter implements ConfigurationListener {
 
@@ -71,6 +71,10 @@ public abstract class ConfigurationAdapter implements ConfigurationListener {
 
 	public void parameterChanged(String parameter, Object newValue) {
 
+	}
+	
+	public void jkadStatusChanged(boolean newStatus) {
+		
 	}
 
 }

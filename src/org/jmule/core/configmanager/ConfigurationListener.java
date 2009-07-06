@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 05:46:03 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:51:30 $$
  */
 public interface ConfigurationListener {
 
@@ -50,6 +50,8 @@ public interface ConfigurationListener {
 	public void uploadLimitChanged(long uploadLimit);
 	
 	public void sharedDirectoriesChanged(List<File> sharedDirs);
+	
+	public void jkadStatusChanged(boolean newStatus);
 	
 	public void parameterChanged(String parameter,Object newValue);
 	
