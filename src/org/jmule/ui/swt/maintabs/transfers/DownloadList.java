@@ -42,6 +42,7 @@ import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
@@ -57,13 +58,12 @@ import org.jmule.ui.swt.tables.TableItemGapList;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
 import org.jmule.ui.utils.TimeFormatter;
-import org.jmule.util.Misc;
 
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:30:08 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:34:04 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 

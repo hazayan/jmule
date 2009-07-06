@@ -57,13 +57,13 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.utils.MD4FileHasher;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:42 $$
  */
 public abstract class SharedFile {
 	

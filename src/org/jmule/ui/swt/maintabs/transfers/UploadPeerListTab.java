@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
@@ -52,13 +53,12 @@ import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.swt.tables.TableItemCountryFlag;
 import org.jmule.ui.utils.PeerInfoFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
-import org.jmule.util.Misc;
 
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/05/09 11:27:50 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 

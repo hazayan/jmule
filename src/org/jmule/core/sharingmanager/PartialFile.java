@@ -42,16 +42,16 @@ import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.edonkey.metfile.PartMetException;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.MD4;
 import org.jmule.core.utils.MD4FileHasher;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/19 18:53:03 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:42 $$
  */
 public class PartialFile extends SharedFile {
 	

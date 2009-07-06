@@ -40,11 +40,12 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.searchmanager.SearchRequest;
+import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTConstants;
 import org.jmule.ui.swt.SWTImageRepository;
@@ -53,14 +54,13 @@ import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.utils.FileFormatter;
-import org.jmule.util.Misc;
 
 
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:27:28 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
  */
 public class SearchResultTab {
 
@@ -70,7 +70,7 @@ public class SearchResultTab {
 	
 	private CTabItem search_tab;
 	
-	private SearchRequest request;
+	private SearchQuery query;
 
 	private JMTable<SearchResultItem> search_results;
 	
@@ -83,13 +83,13 @@ public class SearchResultTab {
 	
 	private Color color_red = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
 	
-	public SearchResultTab(CTabFolder parent,SearchRequest searchRequest,JMuleCore core) {
+	public SearchResultTab(CTabFolder parent,SearchQuery searchRequest,JMuleCore core) {
 		swt_preferences = SWTPreferences.getInstance();
 		search_tab = new CTabItem(parent,SWT.CLOSE);
 		_core = core;
-		request = searchRequest;
-		search_tab.setText(getTabTitle(request.getSearchQuery().getQuery()));
-		search_tab.setToolTipText(request.getSearchQuery().getQuery());
+		query = searchRequest;
+		search_tab.setText(getTabTitle(query.getQuery()));
+		search_tab.setToolTipText(query.getQuery());
 		search_tab.setImage(SWTImageRepository.getImage("search_loading.png"));
 		
 		Composite content = new Composite(parent,SWT.NONE);
@@ -339,7 +339,7 @@ public class SearchResultTab {
 		
 		search_tab.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent arg0) {
-				_core.getSearchManager().removeSearch(request);
+				_core.getSearchManager().removeSearch(query);
 				if (search_result!=null)
 					_core.getSearchManager().removeResult(search_result);
 			}
@@ -348,8 +348,8 @@ public class SearchResultTab {
 
 	}
 	
-	public SearchRequest getSerchRequest() {
-		return request;
+	public SearchQuery getSerchQuery() {
+		return query;
 	}
 	
 	public CTabItem getSearchTab() {
@@ -362,7 +362,7 @@ public class SearchResultTab {
 		for(SearchResultItem item : searchResult.getSearchResultItemList()) {
 			search_results.addRow(item);
 		}
-		String query = searchResult.getSearchRequest().getSearchQuery().getQuery();
+		String query = searchResult.getSearchQuery().getQuery();
 		String title = getTabTitle(query)+" ("+searchResult.getSearchResultItemList().size()+")";
 		search_tab.setText(title);
 		search_tab.setImage(null);
@@ -386,10 +386,10 @@ public class SearchResultTab {
 	
 	private void retry() {
 		hasResults = false;
-		_core.getSearchManager().removeSearch(request);
+		_core.getSearchManager().removeSearch(query);
 		search_results.clear();
-		_core.getSearchManager().search(request);
-		search_tab.setText(getTabTitle(request.getSearchQuery().getQuery()));
+		_core.getSearchManager().search(query);
+		search_tab.setText(getTabTitle(query.getQuery()));
 		search_tab.setImage(SWTImageRepository.getImage("search_loading.png"));
 	}
 	

@@ -51,13 +51,13 @@ import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.uploadmanager.UploadQueue.UploadQueueElement;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:57:51 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:57 $$
  */
 public class UploadSession implements JMTransferSession {
 	

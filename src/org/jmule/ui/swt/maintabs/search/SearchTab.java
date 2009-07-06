@@ -47,7 +47,6 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.searchmanager.SearchQuery;
-import org.jmule.core.searchmanager.SearchRequest;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultListener;
 import org.jmule.core.sharingmanager.FileType;
@@ -61,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 10:56:28 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:34:04 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -91,11 +90,11 @@ public class SearchTab extends AbstractTab{
 			public void resultArrived(final SearchResult searchResult) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
-						SearchResultTab tab = getSearchResultTab(searchResult.getSearchRequest());
+						SearchResultTab tab = getSearchResultTab(searchResult.getSearchQuery());
 						if (tab != null) {
 							tab.addSearchResult(searchResult);
 							MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_search_result_arrived",
-									searchResult.getSearchRequest().getSearchQuery().getQuery(),searchResult.getSearchResultItemList().size()+""));
+									searchResult.getSearchQuery().getQuery(),searchResult.getSearchResultItemList().size()+""));
 						}
 					}
 				}); 
@@ -221,11 +220,11 @@ public class SearchTab extends AbstractTab{
 		
 	}
 	
-	private SearchResultTab getSearchResultTab(SearchRequest searchRequest){
+	private SearchResultTab getSearchResultTab(SearchQuery searchQuery){
 		SearchResultTab result = null;
 		
 		for(SearchResultTab tab : search_tabs) {
-			if (tab.getSerchRequest().equals(searchRequest))
+			if (tab.getSerchQuery().equals(searchQuery))
 				if (!tab.hasResults())
 					return tab;
 		}
@@ -288,12 +287,10 @@ public class SearchTab extends AbstractTab{
 				
 		}
 		
-		SearchRequest request = new SearchRequest(search_query);
-		
 		SearchManager manager = _core.getSearchManager();
-		manager.search(request);
+		manager.search(search_query);
 		
-		final SearchResultTab tab = new SearchResultTab(search_query_tab_list,request,_core);
+		final SearchResultTab tab = new SearchResultTab(search_query_tab_list,search_query,_core);
 		
 		search_query_tab_list.setSelection(tab.getSearchTab());
 		

@@ -43,6 +43,7 @@ import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
@@ -56,13 +57,12 @@ import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.swt.tables.TableItemCountryFlag;
 import org.jmule.ui.utils.PeerInfoFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
-import org.jmule.util.Misc;
 
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 

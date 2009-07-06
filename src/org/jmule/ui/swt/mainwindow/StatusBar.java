@@ -40,6 +40,7 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.utils.Convert;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -52,13 +53,12 @@ import org.jmule.ui.swt.common.SpeedScaleShell;
 import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.ui.utils.SpeedFormatter;
-import org.jmule.util.Convert;
 
 /**
  * 
  * @author binary
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/11/09 19:13:02 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
  */
 public class StatusBar extends Composite {
 

@@ -24,13 +24,13 @@ package org.jmule.core.sharingmanager;
 
 import java.util.BitSet;
 
-import org.jmule.util.Convert;
+import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/30 16:35:48 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:42 $$
  */
 public class JMuleBitSet extends BitSet {
 	private int partCount;

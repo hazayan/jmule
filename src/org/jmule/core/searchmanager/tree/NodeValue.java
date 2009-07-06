@@ -27,16 +27,16 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.jmule.core.sharingmanager.FileType;
-import org.jmule.util.Convert;
-import org.jmule.util.Misc;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
  * Tree node value.
  * Created on Oct 26, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/28 21:06:40 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:30:20 $
  */
 public enum NodeValue {
 	NOT { public byte[] getBytes() { return SEARCH_NOT; } },

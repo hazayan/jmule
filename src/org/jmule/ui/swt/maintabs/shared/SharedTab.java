@@ -55,6 +55,7 @@ import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.utils.FileUtils;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.GUIUpdater;
@@ -69,12 +70,11 @@ import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.utils.FileFormatter;
-import org.jmule.util.Misc;
 
 /**
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:04:23 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:34:04 $$
  */
 public class SharedTab extends AbstractTab {
 

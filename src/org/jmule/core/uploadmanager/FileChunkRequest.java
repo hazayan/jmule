@@ -25,8 +25,8 @@ package org.jmule.core.uploadmanager;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:48 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:58 $$
  */
 public class FileChunkRequest {
 
@@ -68,5 +68,9 @@ public class FileChunkRequest {
 		
 	}
 	
+	
+	public String toString() {
+		return "Chunk begin : " + chunkBegin + " Chunk end : " + chunkEnd;
+	}
 	
 }
