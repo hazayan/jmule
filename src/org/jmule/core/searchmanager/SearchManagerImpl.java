@@ -26,41 +26,44 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.indexer.Source;
+import org.jmule.core.jkad.net.packet.tag.Tag;
+import org.jmule.core.jkad.search.Search;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/18 08:52:40 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:25:30 $$
  */
 public class SearchManagerImpl implements SearchManager {
 
 	List<SearchResult> search_result_list = new LinkedList<SearchResult>();
-	List<SearchRequest> search_request_list = new LinkedList<SearchRequest>();
+	Queue<SearchQuery> server_search_request_queue = new LinkedList<SearchQuery>();
+	Queue<SearchQuery> kad_search_request_queue = new LinkedList<SearchQuery>();
 	ServerManager server_manager = ServerManagerFactory.getInstance();
+	Search jkad_search = Search.getSingleton();
+	JKad jkad = JKad.getInstance();
 	List<SearchResultListener> search_result_listeners = new LinkedList<SearchResultListener>();
 
 	private long searches_count = 0;
 	
 	public synchronized void addResult(SearchResult searchResult) {
-		search_request_list.remove(searchResult.getSearchRequest());
+		server_search_request_queue.remove(searchResult.getSearchQuery());
         search_result_list.add(searchResult);
         
         searchArrived(searchResult);
-        SearchRequest search_request;
-        if(!search_request_list.isEmpty()) {
-          search_request = ((LinkedList<SearchRequest>)search_request_list).removeLast();	
-          Server server = server_manager.getConnectedServer();
-          server.searchFiles(search_request);
-        }
-
+        processServerSearchRequest();
 	}
 
 	public synchronized void removeResult(SearchResult searchResult) {
@@ -68,21 +71,43 @@ public class SearchManagerImpl implements SearchManager {
 	}
 	
 
-	public synchronized void removeSearch(SearchRequest searchRequest) {
-		search_request_list.remove(searchRequest);
+	public synchronized void removeSearch(SearchQuery searchRequest) {
+		server_search_request_queue.remove(searchRequest);
+		kad_search_request_queue.remove(searchRequest);
 	}
 
 	public void search(String searchString) {
-		SearchRequest search_request = new SearchRequest(searchString);
+		SearchQuery search_request = new SearchQuery(searchString);
 		search(search_request);		
 	}
 
-	public synchronized void search(SearchRequest searchRequest) {
-		((LinkedList<SearchRequest>)search_request_list).addFirst(searchRequest);
-		if (search_request_list.size()==1) {
-			Server server = server_manager.getConnectedServer();
-	        server.searchFiles(searchRequest);
+	public synchronized void search(SearchQuery searchRequest) {
+		if (searchRequest.getQueryType()==SearchQueryType.SERVER) {
+			server_search_request_queue.add(searchRequest);
+			
+			if (server_search_request_queue.size()==1)
+				processServerSearchRequest();
 		}
+		if (searchRequest.getQueryType()==SearchQueryType.KAD) {
+			if (!jkad.isConnected()) return;
+			kad_search_request_queue.add(searchRequest);
+			if (kad_search_request_queue.size()==1)
+				processKadSearchRequest();
+		}
+		if (searchRequest.getQueryType()==SearchQueryType.SERVER_KAD) {
+			if (jkad.isConnected()) {
+			kad_search_request_queue.add(searchRequest);
+			if (kad_search_request_queue.size()==1)
+				processKadSearchRequest();
+			}
+			
+			server_search_request_queue.add(searchRequest);
+			if (server_search_request_queue.size()==1)
+				processServerSearchRequest();
+			
+			
+		}
+		
 		searches_count++;
 	}
 
@@ -122,4 +147,43 @@ public class SearchManagerImpl implements SearchManager {
 		
 	}
 
+	private void processServerSearchRequest() {
+		if (server_search_request_queue.isEmpty()) return ;
+		SearchQuery search_request;
+        search_request = server_search_request_queue.poll();
+        Server server = server_manager.getConnectedServer();
+        server.searchFiles(search_request);
+	}
+	
+	private void processKadSearchRequest() {
+		if (kad_search_request_queue.isEmpty()) return ;
+		final SearchQuery search_request;
+        search_request = kad_search_request_queue.poll();
+        final Int128 keyword_id = jkad_search.searchKeyword(search_request.getQuery(), new org.jmule.core.jkad.search.SearchResultListener() {
+        	
+        	SearchResultItemList result_list = new SearchResultItemList();
+        	SearchResult search_result = new SearchResult(result_list,search_request);
+        	public void processNewResults(List<Source> result) {
+        		result_list.clear();
+				for(Source source : result) {
+					SearchResultItem item = new SearchResultItem(source.getClientID().toFileHash(),null,(short)0,SearchQueryType.KAD);
+					for(Tag tag : source.getTagList()) {
+						item.addTag(tag);
+					}
+					result_list.add(item);
+				}
+				searchArrived(search_result);
+			}
+
+			public void searchFinished() {
+				processKadSearchRequest();
+			}
+
+			public void searchStarted() {
+				
+			}
+        	
+        });
+	}
+	
 }
