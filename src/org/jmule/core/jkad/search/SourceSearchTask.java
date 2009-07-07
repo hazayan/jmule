@@ -22,6 +22,7 @@
  */
 package org.jmule.core.jkad.search;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jmule.core.jkad.ContactAddress;
@@ -36,8 +37,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:30:01 $
  */
 public class SourceSearchTask extends SearchTask {
 
@@ -60,12 +61,15 @@ public class SourceSearchTask extends SearchTask {
 
 			public void processToleranceContacts(ContactAddress sender,
 					List<KadContact> results) {
-				
+				List<Source> newSources = new LinkedList<Source>();
 				for(KadContact contact : results) {
 					Source source = new Source(contact.getContactID(), contact.getIPAddress(), contact.getUDPPort(), contact.getTCPPort());
-					searchResults.add(source);
+					if(searchResults.contains(source)) continue;
+					newSources.add(source);
 					System.out.println("Source found : " + source);
 				}
+				if (newSources.size()!=0)
+					addSearchResult(newSources);
 			}
 			
 			public void stopLookup() {
