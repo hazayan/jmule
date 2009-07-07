@@ -69,7 +69,6 @@ import static org.jmule.core.utils.Convert.shortToInt;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.nio.ByteBuffer;
-import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -124,8 +123,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:50:39 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:38:39 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -175,45 +174,7 @@ public class JKad implements JMuleManager {
 		publisher = Publisher.getInstance();
 		
 		loadClientID();
-		
-		ConfigurationManagerFactory.getInstance().addConfigurationListener(new ConfigurationAdapter() {
-			public void jkadStatusChanged(boolean newStatus) {
-				if (newStatus == false)
-					if (isConnected()) disconnect();
-				if (newStatus==true)
-					if (getStatus() == DISCONNECTED) connect();
-			}
-		});
-		
-	}
 	
-
-	public void connect() {
-		status = CONNECTING;
-		routing_table.start();
-		bootStrap.BootStrap();
-		
-		lookup.start();
-		publisher.start();
-		search.start();
-		indexer.start();
-		
-		firewallChecker.start();
-	}
-	
-	public void connect(ContactAddress address) {
-		setStatus(CONNECTING);
-		routing_table.start();
-		bootStrap.start();
-		bootStrap.BootStrap(address.getAddress(), address.getUDPPort());
-		
-		lookup.start();
-		publisher.start();
-		search.start();
-		indexer.start();
-		
-		firewallChecker.start();
-		
 		filesToPublishChecker = new Task() {
 			public void run() {
 				SharingManager sharing_manager = SharingManagerFactory.getInstance();
@@ -250,13 +211,51 @@ public class JKad implements JMuleManager {
 						}
 				}
 			}			
-		};
+		};		
+		
+		ConfigurationManagerFactory.getInstance().addConfigurationListener(new ConfigurationAdapter() {
+			public void jkadStatusChanged(boolean newStatus) {
+				if (newStatus == false)
+					if (isConnected()) disconnect();
+				if (newStatus==true)
+					if (getStatus() == DISCONNECTED) connect();
+			}
+		});
+		
+	}
+	
+
+	public void connect() {
+		setStatus(CONNECTING);
+		routing_table.start();
+		
+		
+		lookup.start();
+		publisher.start();
+		search.start();
+		indexer.start();
+		
+		bootStrap.start();
 		
 		Timer.getSingleton().addTask(PUBLISHER_PUBLISH_CHECK_INTERVAL, filesToPublishChecker, true);
 	}
 	
-	public void disconnect() {
+	public void connect(ContactAddress address) {
+		setStatus(CONNECTING);
+		routing_table.start();
+
+		lookup.start();
+		publisher.start();
+		search.start();
+		indexer.start();
 		
+		bootStrap.start(address.getAddress(), address.getUDPPort());
+				
+		Timer.getSingleton().addTask(PUBLISHER_PUBLISH_CHECK_INTERVAL, filesToPublishChecker, true);
+	}
+	
+	public void disconnect() {
+		if (!isConnected()) return ;
 		Timer.getSingleton().removeTask(filesToPublishChecker);
 		
 		firewallChecker.stop();
@@ -273,7 +272,8 @@ public class JKad implements JMuleManager {
 	
 	private void setStatus(JKadStatus newStatus) {
 		if (status == CONNECTED) {
-			
+			if (!firewallChecker.isStarted())
+				firewallChecker.start();
 		}
 		status = newStatus;
 	}
