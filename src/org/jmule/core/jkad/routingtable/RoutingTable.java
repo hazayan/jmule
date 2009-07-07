@@ -68,8 +68,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:31:03 $
  */
 public class RoutingTable {
 
@@ -98,6 +98,7 @@ public class RoutingTable {
 	}
 	
 	public void start() {
+		loadContacts();
 		newContacts = 0;
 		
 		maintenanceTask = new Task() {
@@ -256,6 +257,9 @@ public class RoutingTable {
 		Timer.getSingleton().removeTask(routingTableSave);
 		Timer.getSingleton().removeTask(helloSender);
 		Timer.getSingleton().removeTask(contact_checker);
+		
+		tree_nodes.clear();
+		root = null;
 	}
 	
 	public void addContact(KadContact contact) {
