@@ -464,7 +464,7 @@ public class SharingManagerImpl implements SharingManager {
 					sharedFiles.remove(fileHash);
 					log.info("Moving " + shared_partial_file.getFile() + " to " + completed_file);
 					//FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
-					shared_partial_file.getFile().renameTo( shared_partial_file.getFile() );
+					shared_partial_file.getFile().renameTo( completed_file );
 					CompletedFile shared_completed_file = new CompletedFile(completed_file);
 					shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 					sharedFiles.put(fileHash, shared_completed_file);
@@ -474,7 +474,7 @@ public class SharingManagerImpl implements SharingManager {
 				sharedFiles.remove(fileHash);
 				log.info("Moving " + shared_partial_file.getFile() + " to " + completed_file);
 				//FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
-				shared_partial_file.getFile().renameTo( shared_partial_file.getFile() );
+				shared_partial_file.getFile().renameTo( completed_file );
 				CompletedFile shared_completed_file = new CompletedFile(completed_file);
 				shared_completed_file.setHashSet(shared_partial_file.getHashSet());
 				sharedFiles.put(fileHash, shared_completed_file);
