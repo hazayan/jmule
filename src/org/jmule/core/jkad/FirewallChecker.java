@@ -44,8 +44,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:39:49 $
  */
 public class FirewallChecker {
 	
@@ -96,6 +96,7 @@ public class FirewallChecker {
 			}
 		};
 		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL, firewallCheckTask, true);
+		firewallCheckTask.run();
 	}
 	
 	public void stop() {
