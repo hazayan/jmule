@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/08 16:48:26 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -48,7 +48,7 @@ public class JKadConstants {
 	
 	public static final int MAX_UDP_PACKET					= 65534;
 	public static final int MIN_UNPACKET_SIZE				= 100;
-	public static final int FIREWALL_CHECK_INTERVAL			= 1000 * 60;
+	public static final int FIREWALL_CHECK_INTERVAL			= 1000 * 60 * 60;
 	public static final int FIREWALLED_STATUS_CHANGE_INTERVAL = 1000 * 5;
 	public static final int FIREWALL_CHECK_CONTACTS			= 20;
 	

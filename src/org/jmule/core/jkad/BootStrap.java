@@ -42,8 +42,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/08 16:48:25 $
  */
 public class BootStrap {
 
@@ -74,7 +74,6 @@ public class BootStrap {
 	
 	public void start() {
 		isStarted = true;
-		routingTable.loadContacts();
 		List<KadContact> contactList = routingTable.getRandomContacts(BOOTSTRAP_CONTACTS);
 		
 		bootStrapNewContacts = 0;
@@ -89,13 +88,6 @@ public class BootStrap {
 			udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 		}
 		
-		
-	}
-	
-	/**
-	 * Bootstrap from known clients
-	 */
-	public void BootStrap() {
 		bootStrapTask = new Task() {
 			public void run() {
 				if (bootStrapNewContacts >= BOOTSTRAP_STOP_CONTACTS) {
@@ -143,7 +135,7 @@ public class BootStrap {
 	 * @param address
 	 * @param port
 	 */
-	public void BootStrap(IPAddress address, int port) {
+	public void start(IPAddress address, int port) {
 		KadPacket packet = PacketFactory.getBootStrap1ReqPacket();
 		udpConnection.sendPacket(packet, address, port);
 	}
