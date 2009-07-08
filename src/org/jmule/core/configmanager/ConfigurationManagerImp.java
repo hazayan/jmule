@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:51:30 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/08 17:18:44 $$
  */
 public class ConfigurationManagerImp implements ConfigurationManager {
 
@@ -388,6 +388,7 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 	public Boolean getBooleanParameter(String parameter, Boolean defaultValue) {
 		Boolean result;
 		try {
+			if (!config_store.containsKey(parameter)) return defaultValue;
 			result = Boolean.parseBoolean(config_store.getProperty(parameter));
 		}catch(Throwable e) {
 			return defaultValue;
