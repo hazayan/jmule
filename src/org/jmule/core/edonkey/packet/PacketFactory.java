@@ -89,8 +89,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:03:52 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/08 06:55:34 $$
  */
 public class PacketFactory {
 	
@@ -736,6 +736,9 @@ public class PacketFactory {
 			packet.insertData(clientID.getClientID());//insert user ID
 		
 		packet.insertData((short)myPort);//insert my active port
+		
+		packet.insertData(tag_list.size());
+		
 		for(Tag tag : tag_list)
 			packet.insertData(tag.getData());
 			
