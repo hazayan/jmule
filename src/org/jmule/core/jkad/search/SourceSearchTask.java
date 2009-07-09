@@ -22,26 +22,33 @@
  */
 package org.jmule.core.jkad.search;
 
+import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
+
 import java.util.LinkedList;
 import java.util.List;
 
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.indexer.Source;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
+import org.jmule.core.jkad.net.packet.KadPacket;
+import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.routingtable.KadContact;
 
 
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:30:01 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:51:51 $
  */
 public class SourceSearchTask extends SearchTask {
-
+	private List<KadContact> used_contacts = new LinkedList<KadContact>();
 	private LookupTask lookup_task = null;
 	
 	public SourceSearchTask(Int128 searchID) {
@@ -61,15 +68,20 @@ public class SourceSearchTask extends SearchTask {
 
 			public void processToleranceContacts(ContactAddress sender,
 					List<KadContact> results) {
-				List<Source> newSources = new LinkedList<Source>();
 				for(KadContact contact : results) {
-					Source source = new Source(contact.getContactID(), contact.getIPAddress(), contact.getUDPPort(), contact.getTCPPort());
-					if(searchResults.contains(source)) continue;
-					newSources.add(source);
-					System.out.println("Source found : " + source);
+					used_contacts.add(contact);
+					KadPacket hello = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+					udpConnecton.sendPacket(hello, contact.getIPAddress(), contact.getUDPPort());
+					
+					PacketListener listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
+						public void packetReceived(KadPacket packet) {
+							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID,true);
+							udpConnecton.sendPacket(responsePacket, packet.getAddress());
+							JKad.getInstance().removeListener(this);
+						}
+					};
+					JKad.getInstance().addPacketListener(listener);
 				}
-				if (newSources.size()!=0)
-					addSearchResult(newSources);
 			}
 			
 			public void stopLookup() {
