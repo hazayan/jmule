@@ -34,16 +34,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.logger.Logger;
+import org.jmule.core.jkad.net.packet.tag.IntTag;
+import org.jmule.core.jkad.net.packet.tag.ShortTag;
+import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
+import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.core.sharingmanager.SharingManagerFactory;
+import org.jmule.core.utils.Convert;
 
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:24:00 $
  */
 public class Indexer {
 	
@@ -160,6 +171,23 @@ public class Indexer {
 
 	public List<Source> getFileSources(Int128 targetID) {
 		Index indexer =  sources.get(targetID);
+		
+		FileHash fileHash = new FileHash(targetID.toByteArray());
+		if (SharingManagerFactory.getInstance().hasFile(fileHash)) {
+			if (indexer == null) indexer = new Index(targetID);
+			SharedFile file = SharingManagerFactory.getInstance().getSharedFile(fileHash);
+			JKad jkad = JKad.getInstance();
+			ConfigurationManager config_manager = ConfigurationManagerFactory.getInstance();
+			TagList tagList = new TagList();
+			tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP, Convert.byteToInt(jkad.getIPAddress().getAddress())));
+			tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEPORT, Convert.intToShort(config_manager.getTCP())));
+			tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEUPORT, Convert.intToShort(config_manager.getUDP())));
+			tagList.addTag(new IntTag(JKadConstants.TAG_FILESIZE, Convert.longToInt(file.length())));
+			Source my_source = new Source(jkad.getClientID(), tagList);
+			
+			indexer.addSource(my_source);
+		}
+		
 		if (indexer == null) return null;
 		return indexer.getSourceList();
 	}
