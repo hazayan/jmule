@@ -38,17 +38,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import org.jmule.core.utils.AddressUtils;
 import org.jmule.ui.maintabs.serverlist.INewServerDialog;
 import org.jmule.ui.swing.common.IPTextField;
 import org.jmule.ui.swing.common.PortTextField;
-import org.jmule.util.net.AddressUtils;
 
 /**
  *
  * Created on Sep 14, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 10:21:22 $
  */
 public class SNewServerDialog extends JDialog implements INewServerDialog<String, Integer> {
 
