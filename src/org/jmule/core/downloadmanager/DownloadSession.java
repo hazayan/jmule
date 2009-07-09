@@ -52,6 +52,7 @@ import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategy;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyImpl;
 import org.jmule.core.edonkey.ServerManagerFactory;
+import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
@@ -98,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:56:32 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/09 13:46:56 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -254,6 +255,8 @@ public class DownloadSession implements JMTransferSession {
 							String address = source.getAddress().toString();
 							int tcpPort = source.getTCPPort();
 							Peer peer = new Peer(address,tcpPort,PeerSource.KAD);
+							peer.setClientID(new ClientID(source.getAddress().getAddress()));
+							System.out.println(peer.hashCode());
 							peer_list.add(peer);
 						}
 						addDownloadPeers(peer_list);
@@ -270,6 +273,7 @@ public class DownloadSession implements JMTransferSession {
 			}
 		};
 		Timer.getSingleton().addTask(JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, kad_source_search, true);
+		kad_source_search.run();
 		}
 
 	}
