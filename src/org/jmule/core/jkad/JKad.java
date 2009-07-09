@@ -123,8 +123,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:38:39 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:43:22 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -424,6 +424,7 @@ public class JKad implements JMuleManager {
 				}
 				ClientID client_id = new ClientID(clientID);
 				Source source = new Source(client_id, tagList);
+				
 				source.setAddress(new IPAddress(packet.getAddress()));
 				source.setUDPPort(packet.getAddress().getPort());
 				

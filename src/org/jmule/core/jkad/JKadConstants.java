@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/08 16:48:26 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:43:22 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -203,6 +203,7 @@ public class JKadConstants {
 	public static final byte[] TAG_FILEDESCRIPTION			=  new byte[] { (byte)0x0B };
 	
 	public static final byte[] TAG_SOURCEPORT				=  new byte[] { (byte)0xFD };
+	public static final byte[] TAG_SOURCEUPORT				=  new byte[] { (byte)0xFC };
 	public static final byte[] TAG_SOURCEIP					=  new byte[] { (byte)0xFE };
 	
 	public static final byte[] TAG_SERVERIP					=  new byte[] { (byte)0xFB };

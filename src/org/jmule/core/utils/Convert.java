@@ -30,8 +30,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:32:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/09 13:43:22 $$
  */
 public class Convert {
 	
@@ -81,6 +81,16 @@ public class Convert {
 		data.putInt(value);
 		
 		return data.get(0);
+	}
+	
+	public static byte[] intToByteArray(int value) {
+		ByteBuffer data = ByteBuffer.allocate(4);
+		
+		data.order(ByteOrder.LITTLE_ENDIAN);
+		
+		data.putInt(value);
+		
+		return data.array();
 	}
 	
 	public static short intToShort(int value){
