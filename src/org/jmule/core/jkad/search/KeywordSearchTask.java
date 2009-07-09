@@ -43,8 +43,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:51:15 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
@@ -76,7 +76,7 @@ public class KeywordSearchTask extends SearchTask {
 					
 					PacketListener listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 						public void packetReceived(KadPacket packet) {
-							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID);
+							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID,false);
 							udpConnecton.sendPacket(responsePacket, packet.getAddress());
 							JKad.getInstance().removeListener(this);
 						}
@@ -93,6 +93,7 @@ public class KeywordSearchTask extends SearchTask {
 			}
 			
 		};
+		lookup_task.setTimeOut(1000 * 45);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		if (listener!=null)
 			listener.searchStarted();
