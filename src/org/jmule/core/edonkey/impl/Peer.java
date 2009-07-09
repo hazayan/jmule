@@ -59,8 +59,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:00:51 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/09 13:44:37 $$
  */
 public class Peer extends JMConnection {
 	
@@ -166,6 +166,10 @@ public class Peer extends JMConnection {
 	
 	public PeerSource getPeerSource() {
 		return peerSource;
+	}
+	
+	public void setClientID(ClientID newID) {
+		clientID = newID;
 	}
 	
 	protected void processPackets() {
