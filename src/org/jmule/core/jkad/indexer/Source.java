@@ -24,21 +24,25 @@ package org.jmule.core.jkad.indexer;
 
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.IPAddress;
+import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.net.packet.tag.IntTag;
+import org.jmule.core.jkad.net.packet.tag.ShortTag;
 import org.jmule.core.jkad.net.packet.tag.TagList;
+import org.jmule.core.utils.Convert;
 
 
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:32:22 $
  */
 public class Source {
 	private ClientID clientID;
 	
-	private IPAddress address;
-	private int udpPort;
-	private int tcpPort;
+	//private IPAddress address;
+	//private int udpPort;
+	//private int tcpPort;
 	private byte kadVersion;
 	private TagList tagList;
 	private long creationTime = System.currentTimeMillis();
@@ -50,14 +54,15 @@ public class Source {
 	
 	public Source(ClientID clientID, IPAddress address, int udpPort, int tcpPort) {
 		this.clientID = clientID;
-		this.address = address;
-		this.udpPort = udpPort;
-		this.tcpPort = tcpPort;
+		tagList = new TagList();
+		tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP,Convert.byteToInt(address.getAddress())));
+		tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEPORT,Convert.intToShort(tcpPort)));
+		tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEUPORT,Convert.intToShort(udpPort)));
 	}
 	
-	public Source(ClientID clientID) {
-		this.clientID = clientID;
-	}
+	//public Source(ClientID clientID) {
+//		this.clientID = clientID;
+//	}
 	
 
 	public ClientID getClientID() {
@@ -69,27 +74,31 @@ public class Source {
 	}
 
 	public IPAddress getAddress() {
-		return address;
+		Integer value = (Integer)tagList.getTag(JKadConstants.TAG_SOURCEIP).getValue();
+		return new IPAddress(Convert.intToByteArray(value));
 	}
 
 	public void setAddress(IPAddress address) {
-		this.address = address;
+		tagList.removeTag(JKadConstants.TAG_SOURCEIP);
+		tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP,Convert.byteToInt(address.getAddress())));
 	}
 
 	public int getUDPPort() {
-		return udpPort;
+		return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue());
 	}
 
 	public void setUDPPort(int udpPort) {
-		this.udpPort = udpPort;
+		tagList.removeTag(JKadConstants.TAG_SOURCEUPORT);
+		tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEUPORT,Convert.intToShort(udpPort)));
 	}
 
 	public int getTCPPort() {
-		return tcpPort;
+		return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue());
 	}
 
 	public void setTCPPort(int tcpPort) {
-		this.tcpPort = tcpPort;
+		tagList.removeTag(JKadConstants.TAG_SOURCEPORT);
+		tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEPORT,Convert.intToShort(tcpPort)));
 	}
 
 	public byte getKadVersion() {
@@ -130,8 +139,8 @@ public class Source {
 	
 	public String toString() {
 		String result = "";
-		result += "Address  : " + address + "\n";
-		result += "UDP Port : " + udpPort + "\nTCP Port : " + tcpPort + "\n";
+		result += "Address  : " + getAddress() + "\n";
+		result += "UDP Port : " + getUDPPort() + "\nTCP Port : " + getTCPPort() + "\n";
 		result += tagList;
 		return result;
 	}
