@@ -33,8 +33,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Dec 31, 2008 18:43:11
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:09:26 $
  */
 public abstract class Tag implements org.jmule.core.edonkey.packet.tag.Tag {
 	
@@ -114,7 +114,7 @@ public abstract class Tag implements org.jmule.core.edonkey.packet.tag.Tag {
 	}
 	
 	public int getDWORD() {
-		return Integer.parseInt(getValue()+"");
+		return Convert.longToInt(Long.parseLong(getValue()+""));
 	}
 	
 	public String getString() throws TagException {
