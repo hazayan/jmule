@@ -43,8 +43,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:36:50 $
  */
 public class SrcIndexDat {
 
@@ -73,7 +73,7 @@ public class SrcIndexDat {
 				data = getByteBuffer(16);
 				channel.read(data);
 				ClientID client_id = new ClientID(data.array());
-				data = getByteBuffer(4);
+				/*data = getByteBuffer(4);
 				channel.read(data);
 				IPAddress address = new IPAddress(data.array());
 				data = getByteBuffer(2);
@@ -82,16 +82,20 @@ public class SrcIndexDat {
 				
 				data = getByteBuffer(2);
 				channel.read(data);
-				int tcpPort = Convert.shortToInt(data.getShort(0));
-				Source source = new Source(client_id, address,udpPort, tcpPort);
+				int tcpPort = Convert.shortToInt(data.getShort(0));*/
+				
 				data = getByteBuffer(1);
 				channel.read(data);
 				int tagCount = data.get(0);
 				TagList tagList = new TagList();
+				
 				for(int k = 0;k<tagCount;k++) {
 					Tag tag = TagScanner.scanTag(channel);
-					tagList.addTag(tag);
+					
+					if (tag!=null)
+						tagList.addTag(tag);
 				}
+				Source source = new Source(client_id, tagList);
 				source.setTagList(tagList);
 				index.addSource(source);
 			}
@@ -138,7 +142,7 @@ public class SrcIndexDat {
 				data.position(0);
 				channel.write(data);
 				
-				data = getByteBuffer(4);
+				/*data = getByteBuffer(4);
 				data.put(source.getAddress().getAddress());
 				data.position(0);
 				channel.write(data);
@@ -151,7 +155,7 @@ public class SrcIndexDat {
 				data.position(0);
 				data.putShort(Convert.intToShort(source.getTCPPort()));
 				data.position(0);
-				channel.write(data);
+				channel.write(data);*/
 				
 				data = getByteBuffer(1);
 				data.put(Convert.intToByte(source.getTagList().size()));
