@@ -75,8 +75,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Dec 31, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:50:03 $
  */
 public class PacketFactory {
 
@@ -246,11 +246,12 @@ public class PacketFactory {
 		return packet;
 	}
 	
-	public static KadPacket getSearchReqPacket(Int128 targetID) {
-		KadPacket packet = new KadPacket(KADEMLIA_SEARCH_REQ, 16 + 1 + 1);
+	public static KadPacket getSearchReqPacket(Int128 targetID, boolean sourceSearch) {
+		KadPacket packet = new KadPacket(KADEMLIA_SEARCH_REQ, 16 + 1 +( sourceSearch ? 0 : 1));
 		packet.insertData(targetID.toByteArray());
-		packet.insertData((byte)0x00);
-		packet.insertData((byte)0x00);
+		packet.insertData(sourceSearch ? (byte)0x01 :(byte)0x00 );
+		if (!sourceSearch)
+			packet.insertData((byte)0x00);
 		return packet;
 	}
 	
