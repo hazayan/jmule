@@ -9,7 +9,6 @@
   if you experienced any issue submit a bug request on http://jmule.org/bugtracker
   The latest version can be found on http://jmule.org/?page=download
   This product includes software developed by :
-   - Apache Software Foundation, Apace License, http://www.apache.org 
    - Aelitis, The GNU General Public License, http://www.aelitis.com
    - The AspectJ Project, Common Public License, http://www.eclipse.org/aspectj
    - Sun Microsystems, Inc., Lesser General Public License, http://www.sun.com
@@ -22,7 +21,7 @@
   =========================
     System requirements
   =========================
-  JMule 0.4 requires Sun Java 1.5.x or newer to run, if you don't have the required Java
+  JMule 0.5 requires Sun Java 1.6.x or newer to run, if you don't have the required Java
   download it from http://java.sun.com
   
   Operating system : Windows NT, GNU/Linux
