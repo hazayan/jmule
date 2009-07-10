@@ -44,6 +44,7 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.downloadmanager.DownloadManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.metfile.KnownMet;
 import org.jmule.core.edonkey.metfile.KnownMetEntity;
@@ -261,7 +262,11 @@ public class SharingManagerImpl implements SharingManager {
 			
 		     // new files from user's shared dirs that need to be hashed
 		     files_needed_to_hash = new CopyOnWriteArrayList<CompletedFile>();
-		     files_hash_set.addAll(sharedFiles.keySet());
+		     
+		     files_hash_set.clear();
+		     for(FileHash fileHash : sharedFiles.keySet())
+		    	 if (!DownloadManagerFactory.getInstance().hasDownload(fileHash))
+		    		 	files_hash_set.add(fileHash);
 		     
 		     // load shared completed files
 		     try {
@@ -316,7 +321,7 @@ public class SharingManagerImpl implements SharingManager {
 					}		    		 
 		    	 });
 
-		    	 System.out.println("Finished");
+		    	 System.out.println("Finished ");
 		      }
 		     for(FileHash file_hash : files_hash_set) {
 		    	 sharedFiles.remove(file_hash);
