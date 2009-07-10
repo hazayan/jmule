@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.utils.AddressUtils;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -45,13 +46,12 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.skin.SWTSkin;
-import org.jmule.util.net.AddressUtils;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/02 06:11:28 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:27:36 $$
  */
 public class ServerAddWindow implements JMuleUIComponent {
 

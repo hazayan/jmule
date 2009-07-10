@@ -38,6 +38,7 @@ import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerException;
 import org.jmule.core.edonkey.impl.ED2KServerLink;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack.FlagSize;
 import org.jmule.ui.localizer.Localizer;
@@ -54,12 +55,11 @@ import org.jmule.ui.swt.tables.BufferedTableRow;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.swt.tables.TableItemCountryFlag;
 import org.jmule.ui.utils.NumberFormatter;
-import org.jmule.util.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:36:00 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:27:36 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
