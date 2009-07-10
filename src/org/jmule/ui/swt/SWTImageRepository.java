@@ -36,8 +36,8 @@ import org.jmule.ui.FlagPack.FlagSize;
 /**
  * Created on Aug 12, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:17:26 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/10 11:26:24 $
  */
 public class SWTImageRepository {
 
@@ -62,6 +62,7 @@ public class SWTImageRepository {
 			return new Image(SWTThread.getDisplay(),UIConstants.getIconByExtension(extension) );
 		
 		ImageData image_data = program.getImageData();
+		if (image_data == null) return getImage("image_not_found.png");
 		image_data = image_data.scaledTo(16, 16);
 		Image image = new Image(SWTThread.getDisplay(),image_data);
 		
