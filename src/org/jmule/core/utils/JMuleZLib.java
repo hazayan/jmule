@@ -31,8 +31,8 @@ import java.util.zip.Inflater;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:32:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:25:47 $$
  */
 public class JMuleZLib{
 
@@ -92,7 +92,7 @@ public class JMuleZLib{
 		
 		do {
 			
-			ByteBuffer tmpData = Misc.getByteBuffer(5000);
+			ByteBuffer tmpData = Misc.getByteBuffer(BLOCK_SIZE);
 			
 			byte_count = decompressor.inflate(tmpData.array());
 		
