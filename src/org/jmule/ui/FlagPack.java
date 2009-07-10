@@ -34,8 +34,8 @@ import org.jmule.countrylocator.CountryLocator;
  *
  * Created on Oct 6, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/09 16:48:55 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2009/07/10 19:26:34 $
  */
 public class FlagPack {
 	private static String FLAG_FILE_EXT 	   = ".png";
@@ -127,7 +127,11 @@ public class FlagPack {
 	}
 	
 	public static URL getFlagAsURLByIP(Object inetAddress, FlagSize flagSize) {
-        return 	getFlagAsURL(CountryLocator.getInstance().getCountryCode(inetAddress), flagSize);	
+		if( !CountryLocator.getInstance().isServiceDown() ) {
+			CountryLocator country_locator = CountryLocator.getInstance();
+			return 	getFlagAsURL(country_locator.getCountryCode(inetAddress), flagSize);
+		}
+        return null;	
 	}
 	
 	public static InputStream getFlagAsInputStreamByIP(Object inetAddress,FlagSize flagSize) {
