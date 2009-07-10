@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/09 13:46:56 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:21:25 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -256,7 +256,6 @@ public class DownloadSession implements JMTransferSession {
 							int tcpPort = source.getTCPPort();
 							Peer peer = new Peer(address,tcpPort,PeerSource.KAD);
 							peer.setClientID(new ClientID(source.getAddress().getAddress()));
-							System.out.println(peer.hashCode());
 							peer_list.add(peer);
 						}
 						addDownloadPeers(peer_list);
@@ -736,7 +735,7 @@ public class DownloadSession implements JMTransferSession {
 		try { 
 		  SharingManagerFactory.getInstance().makeCompletedFile(sharedFile.getFileHash());
 		}catch(Throwable t) {
-			
+			t.printStackTrace();
 		}
 	
 		DownloadManagerFactory.getInstance().removeDownload(getFileHash());
