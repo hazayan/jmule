@@ -2,6 +2,18 @@
   JMule CHANGELOG
  -----------------------
 
+ 2009.07.12 | JMule 0.5
+ 
+ BUGFIX:   Swing UI | The system doesn't crash when the geoip.dat file is not found in settings directory [javajox]
+ FEATURE:  Core     | Removed apache file utils library, the core works with our own functions [javajox]
+ FEATURE:  Core     | Experimental Kad support added !!! [binary256]
+ FEATURE:  SWT UI   | Kad view [binary256]
+ FEATURE:  Core     | eDonkey search by criterias [binary256] 
+ BUGFIX:   Core     | The file is moved from temp to incoming directory, when the download process is done,
+                    | in some rare cases downloaded file remains in temp directory [binary256]
+ FEATURE:  Core     | The core can process archived packets used by eMule [binary256]
+ BUGFIX:   Core     | Changed the way how JMule constructs eDonkey packets, so JMule can upload files to eMule (for 0.49c) [binary256] 
+
  2008.10.19 | JMule 0.4.1
 
  BUGFIX:  Swing UI | The icon is not shown on a ToolTip if the system is packed into a .jar file [javajox]
