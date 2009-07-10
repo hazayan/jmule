@@ -52,8 +52,8 @@ import org.jmule.ui.swing.maintabs.AbstractTab;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/10 17:18:47 $$
  */
 public class SearchTab extends AbstractTab implements SearchResultListener {
 
@@ -129,7 +129,7 @@ public class SearchTab extends AbstractTab implements SearchResultListener {
 	
 	public void resultArrived(SearchResult searchResult) { 
 		for(Object[] obj : search_results_panels ) {
-		    if(searchResult.getSearchRequest().
+		    if(searchResult.
 		       getSearchQuery().getQuery().
 		         equalsIgnoreCase((String)obj[0])) { 
                  if(Boolean.parseBoolean(obj[2].toString()) == false) {
