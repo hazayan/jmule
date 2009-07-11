@@ -32,8 +32,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 07-Nov-2007
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/29 17:52:09 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/11 08:47:49 $$
  */
 public class Main {
 
@@ -59,6 +59,10 @@ public class Main {
 
 			  try {
 			
+				   Class.forName("org.eclipse.swt.widgets.Display");
+				  
+				   Class.forName("org.jdesktop.swingx.JXFrame");
+				   
 		   	       final Class startupClass = Class.forName("org.jmule.main.Launcher");
 
 		           final Constructor constructor = startupClass.getConstructor(null);
@@ -68,13 +72,28 @@ public class Main {
 		            //});
 		           constructor.newInstance(null);
 
-		      } catch (Throwable t) {
-				
-				     t.printStackTrace();
+		      } catch (Throwable cause) {
+				  
+		    	     if( cause instanceof ClassNotFoundException ) {
+		    	    	 
+		    	    	 cause.printStackTrace();
+		    	    	 
+		    	    	 System.out.println("REMARK: It seems you don't have one of the following .jar files in classpath : swt.jar, swingx.jar\n" +
+		    	    			            "        you can found these jars on http://www.eclipse.org/swt and http://swingx.dev.java.net \n" +
+		    	    			            "        If you need open support don't hesitate to contact us on http://forum.jmule.org");
+		    	    	 
+		    	    	 JOptionPane.showMessageDialog(null, cause, "Class not found", JOptionPane.ERROR_MESSAGE);
+
+		    	    	 System.exit( 0 );
+		    	     }
+		    	  
+				     cause.printStackTrace();
+				     
+				     System.out.println("REMARK: If you need open support don't hesitate to contact us on http://forum.jmule.org");
 		      }
 		} else if( choice == JOptionPane.NO_OPTION ) {
 			
-			System.exit(0);
+			System.exit( 0 );
 			
 		}
    }
