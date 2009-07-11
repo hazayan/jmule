@@ -43,8 +43,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:51:15 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:56:37 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
@@ -101,7 +101,7 @@ public class KeywordSearchTask extends SearchTask {
 	}
 
 	public void stopSearch() {
-		System.out.println("*** Stop Search ***");
+		System.out.println("Stop Search : " + searchID.toHexString());
 		Lookup.getSingleton().removeLookupTask(searchID);
 		isStarted = false;
 		if (listener!=null)
