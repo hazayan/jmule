@@ -56,8 +56,6 @@ import org.jmule.core.uploadmanager.UploadSession;
 
 public class SharingManagerImpl implements SharingManager {
 	
-	private Logger log = Logger.getLogger(SharingManagerImpl.class.toString());
-	
 	private Map<FileHash,SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
 	private LoadPartialFiles load_partial_files;
@@ -70,8 +68,6 @@ public class SharingManagerImpl implements SharingManager {
 	private TimerTask rescan_dirs_task;
 	
 	public void initialize() {
-
-		log.info("Initialize method");
 		
 		sharing_manager_timer = new Timer();
 	    sharedFiles = new ConcurrentHashMap<FileHash,SharedFile>();
@@ -152,7 +148,6 @@ public class SharingManagerImpl implements SharingManager {
 	 * @param work_on_files the actions that are applied on the found file
 	 */
 	private void traverseDir(File dir, boolean with_part_met_extension, WorkOnFiles work_on_files) {
-		log.info("Traverse : " + dir + ", with_part_met_extension = " + with_part_met_extension);
 		Queue<File> list_of_dirs = new LinkedList<File>();
 		File[] list_of_files;
 		File current_dir;
@@ -177,7 +172,6 @@ public class SharingManagerImpl implements SharingManager {
 				if( work_on_files.stopTraverseDir() ) return;
 				if( file.isDirectory() ) list_of_dirs.offer( file );
 				else {
-					log.info("Do work on file > " + file.getName());
 					work_on_files.doWork( file );
 				}
 			}
@@ -467,7 +461,6 @@ public class SharingManagerImpl implements SharingManager {
 				UploadSession upload_sessison = upload_manager.getUpload(fileHash);
 				synchronized(upload_sessison.getSharedFile()) {
 					sharedFiles.remove(fileHash);
-					log.info("Moving " + shared_partial_file.getFile() + " to " + completed_file);
 					//FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
 					shared_partial_file.getFile().renameTo( completed_file );
 					CompletedFile shared_completed_file = new CompletedFile(completed_file);
@@ -477,7 +470,6 @@ public class SharingManagerImpl implements SharingManager {
 				}
 			} else {
 				sharedFiles.remove(fileHash);
-				log.info("Moving " + shared_partial_file.getFile() + " to " + completed_file);
 				//FileUtils.moveFile(shared_partial_file.getFile(), completed_file);
 				shared_partial_file.getFile().renameTo( completed_file );
 				CompletedFile shared_completed_file = new CompletedFile(completed_file);
