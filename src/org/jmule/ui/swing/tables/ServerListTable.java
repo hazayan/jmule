@@ -68,6 +68,7 @@ import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.ED2KServerLink;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.utils.GeneralComparator;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack;
 import org.jmule.ui.IDialog;
@@ -81,14 +82,13 @@ import org.jmule.ui.swing.maintabs.serverlist.SNewServerDialog;
 import org.jmule.ui.swing.maintabs.serverlist.ServerDetailsDialog;
 import org.jmule.ui.swing.models.ServerListTableModel;
 import org.jmule.ui.utils.NumberFormatter;
-import org.jmule.util.GeneralComparator;
 
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:46 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:09:57 $$
  */
 public class ServerListTable extends JMTable {
 

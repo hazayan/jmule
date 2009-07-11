@@ -34,18 +34,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
 import org.jmule.ui.utils.TimeFormatter;
-import org.jmule.util.Misc;
 
 /**
  *
  * Created on Oct 11, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/19 17:47:14 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:07:21 $
  */
 public class UploadDetailsPanel extends JPanel {
 

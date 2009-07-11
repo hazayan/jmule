@@ -27,8 +27,8 @@ package org.jmule.ui.swing.common;
  * @author javajox
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/gui/common/IPTextField.java?view=log
  * @see phex.gui.common.IPTextField
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 12:30:19 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:07:34 $$
  */
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -36,11 +36,18 @@ import java.awt.Insets;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.text.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.SimpleAttributeSet;
 
-import org.jmule.util.net.AddressUtils;
+import org.jmule.core.utils.AddressUtils;
 
 public class IPTextField extends JPanel
 {

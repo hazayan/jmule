@@ -39,18 +39,18 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.swing.common.PiecesPanel;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
-import org.jmule.util.Misc;
 
 /**
  *
  * Created on Oct 5, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/05/10 07:39:07 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:07:21 $
  */
 public class DownloadDetailsPanel extends JPanel {
 

@@ -65,6 +65,8 @@ import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.GeneralComparator;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.swing.ImgRep;
 import org.jmule.ui.swing.SwingGUIUpdater;
@@ -75,15 +77,13 @@ import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.NumberFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
 import org.jmule.ui.utils.TimeFormatter;
-import org.jmule.util.GeneralComparator;
-import org.jmule.util.Misc;
 
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/10 07:39:07 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:09:57 $$
  */
 public class DownloadsTable extends JMTable {
 

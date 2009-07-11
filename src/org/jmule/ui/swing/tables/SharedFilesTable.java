@@ -38,19 +38,19 @@ import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.core.utils.GeneralComparator;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.swing.models.SharedFilesTableModel;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.NumberFormatter;
-import org.jmule.util.GeneralComparator;
-import org.jmule.util.Misc;
 
 /**
  *
  * Created on Oct 2, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/19 17:58:37 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
  */
 public class SharedFilesTable extends JMTable {
 	

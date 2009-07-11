@@ -56,6 +56,8 @@ import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.utils.GeneralComparator;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swing.ImgRep;
@@ -63,16 +65,14 @@ import org.jmule.ui.swing.SwingPreferences;
 import org.jmule.ui.swing.maintabs.search.SearchResultPanel;
 import org.jmule.ui.swing.models.SearchResultTableModel;
 import org.jmule.ui.utils.FileFormatter;
-import org.jmule.util.GeneralComparator;
-import org.jmule.util.Misc;
 
 
 /**
  *
  * Created on Sep 10, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/19 18:01:34 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
  */
 public class SearchResultTable extends JMTable {
 

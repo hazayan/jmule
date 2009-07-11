@@ -35,20 +35,20 @@ import javax.swing.SwingConstants;
 
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.utils.GeneralComparator;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.swing.models.DownloadPeersModel;
 import org.jmule.ui.utils.PeerInfoFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
-import org.jmule.util.GeneralComparator;
 
 /**
  *
  * Created on Oct 6, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/19 18:03:56 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
  */
 public class DownloadPeersTable extends JMTable {
 

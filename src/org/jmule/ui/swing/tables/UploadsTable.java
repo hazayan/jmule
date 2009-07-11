@@ -40,6 +40,8 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.utils.GeneralComparator;
+import org.jmule.core.utils.Misc;
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.swing.ImgRep;
 import org.jmule.ui.swing.SwingUtils;
@@ -48,14 +50,12 @@ import org.jmule.ui.swing.models.UploadTableModel;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
 import org.jmule.ui.utils.TimeFormatter;
-import org.jmule.util.GeneralComparator;
-import org.jmule.util.Misc;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 18:00:41 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:09:57 $$
  */
 public class UploadsTable extends JMTable {
 
