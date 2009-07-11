@@ -34,22 +34,23 @@ import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
 import org.jmule.core.jkad.net.packet.tag.Tag;
 import org.jmule.core.jkad.net.packet.tag.TagList;
+import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 import org.jmule.core.jkad.routingtable.KadContact;
 
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:47:27 $
  */
 public class PublishKeywordTask extends PublishTask {
 
 	private TagList tagList;
 	private LookupTask lookup_task;
 	
-	public PublishKeywordTask(Int128 publishID, List<Tag> tagList) {
-		super(publishID);
+	public PublishKeywordTask(PublishTaskListener listener,Int128 publishID, List<Tag> tagList) {
+		super(publishID,listener);
 		this.tagList = new TagList(tagList);
 	}
 
@@ -60,14 +61,16 @@ public class PublishKeywordTask extends PublishTask {
 		toleranceZone.setBit(127, true);
 		isStarted = true;
 		lookup_task = new LookupTask(RequestType.STORE, publishID, toleranceZone) {
+						
 			public void lookupTimeout() {
+				System.out.println("Keyword task " + targetID.toHexString() + " timeout");
 				isStarted = false;
 				updatePublishTime();
+				task_listener.taskTimeOut(task_instance);
 			}
 
 			public void processToleranceContacts(ContactAddress sender,
 					List<KadContact> results) {
-				
 				for(KadContact contact : results) {
 					KadPacket packet = PacketFactory.getPublishReqPacket(targetID, JKad.getInstance().getClientID(), tagList);
 					udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
@@ -76,12 +79,15 @@ public class PublishKeywordTask extends PublishTask {
 			
 			public void stopLookup() {
 				super.stopLookup();
+				isStarted = false;
 				updatePublishTime();
+				task_listener.taskStopped(task_instance);
 			}
 			
 		};
 		
 		Lookup.getSingleton().addLookupTask(lookup_task);
+		task_listener.taskStarted(task_instance);
 	}
 
 	public void stop() {

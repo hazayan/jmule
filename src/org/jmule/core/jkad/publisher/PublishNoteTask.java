@@ -34,22 +34,23 @@ import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
 import org.jmule.core.jkad.net.packet.tag.Tag;
 import org.jmule.core.jkad.net.packet.tag.TagList;
+import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 import org.jmule.core.jkad.routingtable.KadContact;
 
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:47:27 $
  */
 public class PublishNoteTask extends PublishTask {
 
 	private TagList tagList;
 	private LookupTask lookup_task;
 	
-	public PublishNoteTask(Int128 publishID, List<Tag> tagList) {
-		super(publishID);
+	public PublishNoteTask(PublishTaskListener listener, Int128 publishID, List<Tag> tagList) {
+		super(publishID, listener);
 		this.tagList = new TagList(tagList);
 	}
 
@@ -65,6 +66,7 @@ public class PublishNoteTask extends PublishTask {
 			public void lookupTimeout() {
 				isStarted = false;
 				updatePublishTime();
+				task_listener.taskTimeOut(task_instance);
 			}
 
 			public void processToleranceContacts(ContactAddress sender,
@@ -79,12 +81,13 @@ public class PublishNoteTask extends PublishTask {
 			public void stopLookup() {
 				super.stopLookup();
 				updatePublishTime();
+				task_listener.taskStopped(task_instance);
 			}
 			
 		};
 		
 		Lookup.getSingleton().addLookupTask(lookup_task);
-		
+		task_listener.taskStarted(task_instance);
 	}
 
 	public void stop() {

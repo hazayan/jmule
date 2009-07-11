@@ -27,12 +27,15 @@ import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_NOTES;
 import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_SOURCES;
 import static org.jmule.core.jkad.JKadConstants.PUBLISHER_MAINTENANCE_INTERVAL;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.lookup.Lookup;
+import org.jmule.core.jkad.lookup.LookupListener;
+import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.net.packet.tag.Tag;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
@@ -40,9 +43,10 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:47:27 $
  */
+
 public class Publisher {
 	private static Publisher singleton = null;
 	
@@ -50,7 +54,13 @@ public class Publisher {
 	private Map<Int128, PublishNoteTask>    noteTasks    = new ConcurrentHashMap<Int128, PublishNoteTask>();
 	private Map<Int128, PublishSourceTask>  sourceTasks  = new ConcurrentHashMap<Int128, PublishSourceTask>();
 	
+	private List<PublisherListener> listener_list = new LinkedList<PublisherListener>();
+	
 	private boolean isStarted = false;
+	
+	private PublishTaskListener keywordTaskListener;
+	private PublishTaskListener noteTaskListener;
+	private PublishTaskListener sourceTaskListener;
 	
 	public boolean isStarted() {
 		return isStarted;
@@ -65,6 +75,50 @@ public class Publisher {
 	private Task publisher_maintenance;
 	
 	private Publisher() {
+		keywordTaskListener = new PublishTaskListener() {
+			public void taskStarted(PublishTask task) {
+				
+			}
+
+			public void taskStopped(PublishTask task) {
+				
+			}
+
+			public void taskTimeOut(PublishTask task) {
+				removeKeywordTask(task.getPublishID());
+			}
+			
+		};
+		
+		noteTaskListener = new PublishTaskListener() {
+			public void taskStarted(PublishTask task) {
+				
+			}
+
+			public void taskStopped(PublishTask task) {
+				
+			}
+
+			public void taskTimeOut(PublishTask task) {
+				removeNoteTask(task.getPublishID());
+			}
+			
+		};
+		
+		sourceTaskListener = new PublishTaskListener() {
+			public void taskStarted(PublishTask task) {
+				
+			}
+
+			public void taskStopped(PublishTask task) {
+				
+			}
+
+			public void taskTimeOut(PublishTask task) {
+				removeSourceTask(task.getPublishID());
+			}
+			
+		};
 		
 	}
 	
@@ -75,22 +129,28 @@ public class Publisher {
 				for(PublishKeywordTask task : keywordTasks.values()){
 					if (Lookup.getSingleton().getLookupLoad()<INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
-					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval())
+					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
 						task.start();
+						notifyListeners(task, TaskStatus.STARTED);
+					}
 				}
 				
 				for(PublishNoteTask task : noteTasks.values()){
 					if (Lookup.getSingleton().getLookupLoad()<INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
-					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval())
+					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
 						task.start();
+						notifyListeners(task, TaskStatus.STARTED);
+					}
 				}
 				
 				for(PublishSourceTask task : sourceTasks.values()){
 					if (Lookup.getSingleton().getLookupLoad()<INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
-					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval())
+					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
 						task.start();
+						notifyListeners(task, TaskStatus.STARTED);
+					}
 				}
 				
 			}
@@ -101,8 +161,9 @@ public class Publisher {
 	}
 	
 	public void publishKeyword(Int128 fileID, List<Tag> tagList) {
-		PublishKeywordTask task = new PublishKeywordTask(fileID, tagList);
+		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID, tagList);
 		keywordTasks.put(fileID, task);
+		notifyListeners(task, TaskStatus.ADDED);
 	}
 	
 	public void stop() {
@@ -119,13 +180,15 @@ public class Publisher {
 	}
 		
 	public void publishSource(Int128 fileID, List<Tag> tagList)  {
-		PublishSourceTask task = new PublishSourceTask(fileID, tagList);
+		PublishSourceTask task = new PublishSourceTask(sourceTaskListener,fileID, tagList);
 		sourceTasks.put(fileID, task);
+		notifyListeners(task, TaskStatus.ADDED);
 	}
 	
 	public void publishNote(Int128 fileID, List<Tag> tagList) {
-		PublishNoteTask task = new PublishNoteTask(fileID, tagList);
+		PublishNoteTask task = new PublishNoteTask(noteTaskListener,fileID, tagList);
 		noteTasks.put(fileID, task);
+		notifyListeners(task, TaskStatus.ADDED);
 	}
 	
 	public void stopPublishKeyword(Int128 fileID) {
@@ -182,14 +245,48 @@ public class Publisher {
 	public boolean isPublishingSource(Int128 id) { return sourceTasks.containsKey(id); }
 	
 	void removeKeywordTask(Int128 id) {
+		PublishTask task = keywordTasks.get(id);
 		keywordTasks.remove(id);
+		notifyListeners(task, TaskStatus.REMOVED);
 	}
 	
 	void removeSourceTask(Int128 id) {
+		PublishTask task = sourceTasks.get(id);
 		sourceTasks.remove(id);
+		notifyListeners(task, TaskStatus.REMOVED);
 	}
 	
 	void removeNoteTask(Int128 id) {
+		PublishTask task = noteTasks.get(id);
 		noteTasks.remove(id);
+		notifyListeners(task, TaskStatus.REMOVED);
 	}
+	
+	public void addListener(PublisherListener listener) {
+		listener_list.add(listener);
+	}
+	
+	public void removeListener(PublisherListener listener) {
+		listener_list.remove(listener);
+	}
+	
+	private enum TaskStatus {ADDED, STARTED, REMOVED}
+	
+	private void notifyListeners(PublishTask task, TaskStatus status) {
+		for(PublisherListener listener : listener_list)
+			if (status == TaskStatus.ADDED)
+				listener.publishTaskAdded(task);
+			else
+				if (status == TaskStatus.STARTED)
+					listener.publishTaskStarted(task);
+				else
+					listener.publishTaskRemoved(task);
+	}
+	
+	interface PublishTaskListener{
+		public void taskStarted(PublishTask task);
+		public void taskTimeOut(PublishTask task);
+		public void taskStopped(PublishTask task);
+	}
+	
 }
