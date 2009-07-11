@@ -25,6 +25,7 @@ package org.jmule.core;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.edonkey.ServerManager;
+import org.jmule.core.jkad.JKad;
 import org.jmule.core.net.JMConnectionWaiter;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.searchmanager.SearchManager;
@@ -36,8 +37,8 @@ import org.jmule.core.uploadmanager.UploadManager;
  * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/12 07:03:07 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 17:10:47 $$
  */
 public interface JMuleCore {
 
@@ -74,6 +75,8 @@ public interface JMuleCore {
 	public ConfigurationManager getConfigurationManager();
 	
 	public SearchManager getSearchManager();
+	
+	public JKad getJKad();
 	
 	public boolean isFirstRun();
 	
