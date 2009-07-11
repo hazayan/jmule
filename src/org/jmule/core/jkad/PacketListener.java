@@ -32,8 +32,8 @@ import org.jmule.core.jkad.net.packet.KadPacket;
 /**
  * Created on Feb 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:26:21 $
  */
 public abstract class PacketListener {
 	private Byte packetOPCode;
@@ -46,6 +46,11 @@ public abstract class PacketListener {
 		this.packetOPCode = packetOPCode;
 	}
 
+	public PacketListener(Byte packetOPCode) {
+		super();
+		this.packetOPCode = packetOPCode;
+	}
+	
 	public abstract void packetReceived(KadPacket packet);
 
 	public long getTimeOut() {
@@ -73,6 +78,7 @@ public abstract class PacketListener {
 	}
 	
 	public boolean processAddress(InetSocketAddress address) {
+		if (sender == null) return true;
 		if (Arrays.equals(address.getAddress().getAddress(),sender.getAddress().getAddress()))
 			if (address.getPort() == sender.getPort()) return true;
 		return false;
