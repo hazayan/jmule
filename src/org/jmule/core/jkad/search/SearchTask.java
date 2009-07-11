@@ -22,6 +22,7 @@
  */
 package org.jmule.core.jkad.search;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -32,8 +33,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:54:38 $
  */
 public abstract class SearchTask {
 
@@ -75,8 +76,12 @@ public abstract class SearchTask {
 	}
 	
 	void addSearchResult(List<Source> result) {
-		searchResults.addAll(result);
+		List<Source> unicalList = new LinkedList<Source>();
+		for(Source s : result)
+			if (!searchResults.contains(s))
+				unicalList.add(s);
+		searchResults.addAll(unicalList);
 		if (listener != null)
-			listener.processNewResults(result);
+			listener.processNewResults(unicalList);
 	}
 }
