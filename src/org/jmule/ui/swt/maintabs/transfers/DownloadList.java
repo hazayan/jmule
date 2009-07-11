@@ -62,8 +62,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:34:04 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:06:33 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -466,10 +466,10 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	}
 	
 	private void startSelectedDownloads() {
-		if (_core.getServerManager().getConnectedServer()==null) {
-			Utils.showWarningMessage(getShell(), _._("mainwindow.transferstab.downloads.not_connected.title"), _._("mainwindow.transferstab.downloads.not_connected"));
-			return ;
-		}
+		//if (_core.getServerManager().getConnectedServer()==null) {
+		//	Utils.showWarningMessage(getShell(), _._("mainwindow.transferstab.downloads.not_connected.title"), _._("mainwindow.transferstab.downloads.not_connected"));
+		//	return ;
+		//}
 		List<DownloadSession> list = getSelectedObjects();
 		for(DownloadSession downloadSession : list)
 			if (downloadSession.getStatus() == DownloadStatus.STOPPED)
