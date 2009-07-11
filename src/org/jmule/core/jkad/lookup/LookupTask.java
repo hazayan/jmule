@@ -50,8 +50,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:40:44 $
  */
 public abstract class LookupTask {
 	
@@ -238,5 +238,9 @@ public abstract class LookupTask {
 
 	public boolean isLookupStarted() {
 		return lookupStarted;
+	}
+
+	public RequestType getRequestType() {
+		return requestType;
 	}
 }
