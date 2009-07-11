@@ -22,6 +22,8 @@
  */
 package org.jmule.core.jkad;
 
+import org.jmule.core.edonkey.impl.FileHash;
+
 import static org.jmule.core.jkad.JKad.JKadStatus.CONNECTED;
 import static org.jmule.core.jkad.JKad.JKadStatus.CONNECTING;
 import static org.jmule.core.jkad.JKad.JKadStatus.DISCONNECTED;
@@ -69,10 +71,12 @@ import static org.jmule.core.utils.Convert.shortToInt;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.nio.ByteBuffer;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -123,8 +127,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:43:22 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:31:52 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -147,6 +151,8 @@ public class JKad implements JMuleManager {
 	private JKadStatus status = DISCONNECTED;
 	
 	private Map<Byte, List<PacketListener>> packetListeners = new ConcurrentHashMap<Byte, List<PacketListener>>();
+	
+	private List<JKadListener> listener_list = new LinkedList<JKadListener>();
 	
 	private Task filesToPublishChecker;
 	
@@ -176,14 +182,21 @@ public class JKad implements JMuleManager {
 		loadClientID();
 	
 		filesToPublishChecker = new Task() {
+			Set<FileHash> publishedFiles = new HashSet<FileHash>();
 			public void run() {
 				SharingManager sharing_manager = SharingManagerFactory.getInstance();
 				Publisher publisher = Publisher.getInstance();
 				ConfigurationManager config_manager = ConfigurationManagerFactory.getInstance();
 				Iterable<SharedFile> shared_files = sharing_manager.getSharedFiles();
+				long filesToPublish = 0;
 				for(SharedFile file : shared_files) {
+					if (publishedFiles.contains(file.getFileHash())) continue;
+					if (filesToPublish > JKadConstants.ITERATION_MAX_PUBLISH_FILES) break;
+					publishedFiles.add(file.getFileHash());
+					
 					Int128 id = new Int128(file.getFileHash());
 					if (!publisher.isPublishingSource(id)) {
+						filesToPublish++;
 						List<Tag> tagList = new LinkedList<Tag>();
 						tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 						tagList.add(new IntTag(TAG_FILESIZE, (int)file.length()));
@@ -193,6 +206,7 @@ public class JKad implements JMuleManager {
 						publisher.publishSource(id, tagList);
 					}
 					if (!publisher.isPublishingKeyword(id)) {
+						filesToPublish++;
 						List<Tag> tagList = new LinkedList<Tag>();
 						tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 						tagList.add(new IntTag(TAG_FILESIZE, (int)file.length()));
@@ -202,6 +216,7 @@ public class JKad implements JMuleManager {
 					
 					if (file.getTagList().hasTag(TAG_FILERATING)) 
 						if (!publisher.isPublishingNote(id)) {
+							filesToPublish++;
 							List<Tag> tagList = new LinkedList<Tag>();
 							tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 							tagList.add(new IntTag(TAG_FILESIZE, (int)file.length()));
@@ -216,9 +231,9 @@ public class JKad implements JMuleManager {
 		ConfigurationManagerFactory.getInstance().addConfigurationListener(new ConfigurationAdapter() {
 			public void jkadStatusChanged(boolean newStatus) {
 				if (newStatus == false)
-					if (isConnected()) disconnect();
-				if (newStatus==true)
-					if (getStatus() == DISCONNECTED) connect();
+					if (!isDisconnected()) disconnect();
+				//if (newStatus==true)
+					//if (getStatus() == DISCONNECTED) connect();
 			}
 		});
 		
@@ -255,7 +270,7 @@ public class JKad implements JMuleManager {
 	}
 	
 	public void disconnect() {
-		if (!isConnected()) return ;
+		if (isDisconnected()) return ;
 		Timer.getSingleton().removeTask(filesToPublishChecker);
 		
 		firewallChecker.stop();
@@ -275,11 +290,15 @@ public class JKad implements JMuleManager {
 			if (!firewallChecker.isStarted())
 				firewallChecker.start();
 		}
+		
+		if (status != newStatus)
+			notifyListeners(newStatus);
+		
 		status = newStatus;
 	}
 	
 	private void processPacket(KadPacket packet) throws UnknownPacketOPCodeException, CorruptedPacketException, UnknownPacketType {
-		
+		if (isDisconnected()) return;
 		if (packet.isCompressed())
 			packet.decompress();
 		
@@ -831,6 +850,32 @@ public class JKad implements JMuleManager {
 		return status == CONNECTED;
 	}
 	
+	public boolean isDisconnected() {
+		return status == DISCONNECTED;
+	}
+	
+	public boolean isConnecting() {
+		return status == CONNECTING;
+	}
+	
+	public void addListener(JKadListener listener) {
+		listener_list.add(listener);
+	}
+	
+	private void notifyListeners(JKadStatus newStatus) {
+		for(JKadListener listener : listener_list)
+			if (newStatus == JKadStatus.CONNECTED)
+				listener.JKadIsConnected();
+			else
+				if (newStatus == JKadStatus.CONNECTING)
+					listener.JKadIsConnecting();
+				else
+					if (newStatus == JKadStatus.DISCONNECTED)
+						listener.JKadIsDisconnected();
+	}
+	
+
+	
 	private void loadClientID() {
 		ConfigurationManager config_manager = ConfigurationManagerFactory.getInstance();
 		String client_id = config_manager.getStringParameter(ConfigurationManager.JKAD_ID_KEY, null);
@@ -875,7 +920,27 @@ public class JKad implements JMuleManager {
 		this.connect();
 	}
 
+	public RoutingTable getRoutingTable() {
+		return routing_table;
+	}
 	
+	public BootStrap getBootStrap() {
+		return bootStrap;
+	}
 	
+	public FirewallChecker getFirewallChecker() {
+		return firewallChecker;
+	}
 	
+	public Indexer getIndexer() {
+		return indexer;
+	}
+	
+	public Lookup getLookup() {
+		return lookup;
+	}
+	
+	public Publisher getPublisher() {
+		return publisher;
+	}
 }
