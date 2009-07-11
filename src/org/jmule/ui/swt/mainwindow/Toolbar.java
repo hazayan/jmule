@@ -42,8 +42,8 @@ import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/19 12:23:42 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:05:17 $$
  */
 public class Toolbar extends ToolBar {
 
@@ -53,9 +53,11 @@ public class Toolbar extends ToolBar {
 	
 	private static final String 	DATA_KEY		=  "DataKey";
 	
+	private  static Toolbar toolBarInstance = null;
+	
 	public Toolbar(Composite shell,JMuleCore core, MainWindow mainWindow) {
 		super(shell, SWT.FLAT);
-		
+		toolBarInstance = this;
 		main_window = mainWindow;
 		
 		grid_data = new GridData(GridData.FILL_HORIZONTAL);
@@ -77,6 +79,17 @@ public class Toolbar extends ToolBar {
 		servers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				main_window.setTab(JMULE_TABS.SERVERLIST);
+			}
+		});
+		
+		ToolItem kad_item = new ToolItem(this, SWT.CHECK);
+		kad_item.setText(Localizer._("mainwindow.toolbar.kad_item"));
+		kad_item.setData(DATA_KEY, JMULE_TABS.KAD);
+		kad_item.setImage(SWTImageRepository.getImage("kad.png"));
+		button_list.add(kad_item);
+		kad_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				main_window.setTab(JMULE_TABS.KAD);
 			}
 		});
 		
@@ -141,6 +154,10 @@ public class Toolbar extends ToolBar {
 		});	
 	}
 
+	public static Toolbar getInstance() {
+		return toolBarInstance;
+	}
+	
 	public void setSelection(JMULE_TABS tabs) {
 		for(ToolItem item : button_list) {
 			JMULE_TABS tab = (JMULE_TABS) item.getData(DATA_KEY);

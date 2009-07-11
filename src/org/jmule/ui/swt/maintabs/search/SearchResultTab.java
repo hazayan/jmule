@@ -59,8 +59,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:04:57 $
  */
 public class SearchResultTab {
 
@@ -363,7 +363,8 @@ public class SearchResultTab {
 			search_results.addRow(item);
 		}
 		String query = searchResult.getSearchQuery().getQuery();
-		String title = getTabTitle(query)+" ("+searchResult.getSearchResultItemList().size()+")";
+		
+		String title = getTabTitle(query)+" ("+(search_results.getItemCount()+searchResult.getSearchResultItemList().size())+")";
 		search_tab.setText(title);
 		search_tab.setImage(null);
 		

@@ -46,8 +46,8 @@ import org.jmule.ui.swt.SWTPreferences;
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:05:30 $
  */
 public class GeneralTab extends AbstractTab {
 
@@ -55,6 +55,7 @@ public class GeneralTab extends AbstractTab {
 	private Button prompt_on_exit_check, server_list_update;
 	private Button show_nightly_build_warning = null;
 	private Button connect_at_startup = null;
+	private Button kad_enabled = null;
 	
 	private ConfigurationManager config_manager;
 	private SWTPreferences swt_preferences;
@@ -136,6 +137,13 @@ public class GeneralTab extends AbstractTab {
 		layout_data.horizontalSpan = 2;
 		connect_at_startup.setLayoutData(layout_data);
 		connect_at_startup.setSelection(swt_preferences.isConnectAtStartup());
+		
+		kad_enabled = new Button(content,SWT.CHECK);
+		kad_enabled.setText(_._("settingswindow.tab.general.checkbox.enable_kad"));
+		layout_data = new GridData(GridData.FILL_HORIZONTAL);
+		layout_data.horizontalSpan = 2;
+		kad_enabled.setLayoutData(layout_data);
+		kad_enabled.setSelection(config_manager.isJKadEnabled());
 		
 		
 		if (JMConstants.IS_NIGHTLY_BUILD) {
@@ -455,6 +463,7 @@ public class GeneralTab extends AbstractTab {
 		}
 		config_manager.setDownloadBandwidth(download_c*1024);
 		config_manager.setUploadBandwidth(upload_c*1024);
+		config_manager.setJKadStatus(kad_enabled.getSelection());
 	}
 
 	private void updateUDPControls() {

@@ -52,8 +52,8 @@ import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:05:17 $$
  */
 public class MainMenu extends Menu{
 
@@ -150,6 +150,16 @@ public class MainMenu extends Menu{
 		servers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				main_window.setTab(JMULE_TABS.SERVERLIST);
+			}
+		});
+		
+		MenuItem kad_item = new MenuItem (tabs_menu, SWT.RADIO);
+		kad_item.setText(Localizer._("mainwindow.mainmenu.view.tabs.kad"));
+		tab_map.put(JMULE_TABS.KAD,kad_item);
+		
+		kad_item.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				main_window.setTab(JMULE_TABS.KAD);
 			}
 		});
 		

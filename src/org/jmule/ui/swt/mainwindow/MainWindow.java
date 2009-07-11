@@ -56,6 +56,7 @@ import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.common.NightlyBuildWarningWindow;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
+import org.jmule.ui.swt.maintabs.kad.KadTab;
 import org.jmule.ui.swt.maintabs.logs.LogsTab;
 import org.jmule.ui.swt.maintabs.search.SearchTab;
 import org.jmule.ui.swt.maintabs.serverlist.ServerListTab;
@@ -69,8 +70,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:05:17 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -130,6 +131,7 @@ public class MainWindow implements JMuleUIComponent {
             	logger = logs_tab;
             	tab_list.add(logs_tab);
             	tab_list.add(new ServerListTab(window_content,_core));
+            	tab_list.add(new KadTab(window_content,_core));
             	tab_list.add(new TransfersTab(window_content,_core));
             	tab_list.add(new SearchTab(window_content,_core));
             	tab_list.add(new SharedTab(window_content,_core));

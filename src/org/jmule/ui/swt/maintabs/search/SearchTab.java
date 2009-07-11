@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
@@ -47,6 +48,7 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.searchmanager.SearchQuery;
+import org.jmule.core.searchmanager.SearchQueryType;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultListener;
 import org.jmule.core.sharingmanager.FileType;
@@ -60,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:34:04 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:04:57 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -79,7 +81,7 @@ public class SearchTab extends AbstractTab{
 	private long minFileSize = 0,maxFileSize = 1024, availableSources, completedSources;
 	private String extension="";
 	private FileType fileType;
-	
+	private Combo searchType;
 	private boolean show_advanced_options = false;
 	
 	public SearchTab(Composite parent, JMuleCore core) {
@@ -91,6 +93,7 @@ public class SearchTab extends AbstractTab{
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
 						SearchResultTab tab = getSearchResultTab(searchResult.getSearchQuery());
+						
 						if (tab != null) {
 							tab.addSearchResult(searchResult);
 							MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_search_result_arrived",
@@ -115,7 +118,7 @@ public class SearchTab extends AbstractTab{
 		layout_data.horizontalAlignment = GridData.CENTER;
 		basic_search_controls.setLayoutData(layout_data);
 		
-		layout = new GridLayout(5,false);
+		layout = new GridLayout(6,false);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		basic_search_controls.setLayout(layout);
@@ -136,6 +139,12 @@ public class SearchTab extends AbstractTab{
 				search();
 			}
 		});
+		
+		searchType = new Combo (basic_search_controls, SWT.READ_ONLY);
+		searchType.add("Server");
+		searchType.add("Kad");
+		searchType.add("Both");
+		searchType.select(0);
 		
 		Label adv_search = new Label(basic_search_controls,SWT.NONE);
 		adv_search.setText(_._("mainwindow.searchtab.label.advanced"));
@@ -254,13 +263,27 @@ public class SearchTab extends AbstractTab{
 
 
 	private void search() {
-		if (!_core.getServerManager().isConnected()) {
+		if ((searchType.getSelectionIndex()==0)&&(!_core.getServerManager().isConnected())) {
 			
 			Utils.showWarningMessage(getShell(), Localizer._("mainwindow.searchtab.not_connected_to_server_title"), Localizer._("mainwindow.searchtab.not_connected_to_server"));
 			
 			return;
 		}
+		
+		if ((searchType.getSelectionIndex()==1)&&(!_core.getJKad().isConnected())) {
 			
+			Utils.showWarningMessage(getShell(), "Not connected to Kad","Error");
+			
+			return;
+		}		
+		
+		if ((searchType.getSelectionIndex()==2)&&(!_core.getJKad().isConnected()) &&(!_core.getServerManager().isConnected())) {
+			
+			Utils.showWarningMessage(getShell(), "Not connected to server and kad","Error");
+			
+			return;
+		}	
+		
 		
 		String query = search_query.getText();
 		
@@ -268,8 +291,16 @@ public class SearchTab extends AbstractTab{
 		
 		if (query.length()==0) return ;
 	
+		SearchQuery search_query = new SearchQuery(query+"");
 		
-		SearchQuery search_query = new SearchQuery(query);
+		if ((searchType.getSelectionIndex()==0))
+			search_query.setQueryType(SearchQueryType.SERVER);
+		
+		if ((searchType.getSelectionIndex()==1))
+			search_query.setQueryType(SearchQueryType.KAD);
+		
+		if ((searchType.getSelectionIndex()==2))
+			search_query.setQueryType(SearchQueryType.SERVER_KAD);
 		
 		if (show_advanced_options) {
 			if (fileType != fileType.ANY)
