@@ -68,8 +68,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/07 18:31:03 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:49:09 $
  */
 public class RoutingTable {
 
@@ -105,7 +105,6 @@ public class RoutingTable {
 			private List<KadContact> maintenanceContacts = new CopyOnWriteArrayList<KadContact>();
 			private LookupTask lookup_new_contacts = null;
 			public void run() {
-				
 				if (getTotalContacts() < ROUTING_TABLE_DIFICIT_CONTACTS) {
 					if ((lookup_new_contacts == null)||(!lookup_new_contacts.isLookupStarted())) {
 						Int128 toleranceZone = new Int128();
@@ -259,7 +258,8 @@ public class RoutingTable {
 		Timer.getSingleton().removeTask(contact_checker);
 		
 		tree_nodes.clear();
-		root = null;
+		allContactsRemoved();
+		root = new Node(null, new Int128(new byte[]{0x00}), 0, new KBucket());
 	}
 	
 	public void addContact(KadContact contact) {
@@ -479,6 +479,11 @@ public class RoutingTable {
 	private void contactRemoved(KadContact contact) {
 		for(RoutingTableListener listener : listener_list)
 			listener.contactRemoved(contact);
+	}
+	
+	private void allContactsRemoved() {
+		for(RoutingTableListener listener : listener_list)
+			listener.allContactsRemoved();
 	}
 	
 }
