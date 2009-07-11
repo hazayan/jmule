@@ -25,13 +25,13 @@ package org.jmule.core.jkad.routingtable;
 /**
  * Created on May 30, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:51:53 $
  */
 public interface RoutingTableListener {
 
 	public void contactAdded(KadContact contact);
 	public void contactRemoved(KadContact contact);
 	public void contactUpdated(KadContact contact);
-	
+	public void allContactsRemoved();
 }
