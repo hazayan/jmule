@@ -28,12 +28,12 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:41:59 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:03:58 $$
  */
 public abstract class AbstractTab extends Composite{
 
-	public static enum JMULE_TABS { SERVERLIST, TRANSFERS, SEARCH, SHARED, STATISTICS, LOGS };
+	public static enum JMULE_TABS { SERVERLIST,KAD, TRANSFERS, SEARCH, SHARED, STATISTICS, LOGS };
 	
 	public AbstractTab(Composite shell) {
 		super(shell, SWT.NONE);
