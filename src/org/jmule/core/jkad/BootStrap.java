@@ -22,7 +22,7 @@
  */
 package org.jmule.core.jkad;
 
-import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_CHECK_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.*;
 import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_CONTACTS;
 import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_REMOVE_TIME;
 import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_STOP_CONTACTS;
@@ -32,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
 import org.jmule.core.jkad.utils.timer.Task;
@@ -42,8 +43,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/08 16:48:25 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:20:59 $
  */
 public class BootStrap {
 
@@ -54,11 +55,11 @@ public class BootStrap {
 	
 	private List<KadContact> bootStrapContacts = new CopyOnWriteArrayList<KadContact>();
 	private List<KadContact> usedContacts 	   = new CopyOnWriteArrayList<KadContact>();
-	private int bootStrapNewContacts = 0;
+	private int bootStrapResponses = 0;
 	private Task bootStrapTask;
 	
 	private boolean isStarted = false;
-	
+	private PacketListener bootStrapResponseListener;
 
 
 	public static BootStrap getInstance() {
@@ -76,7 +77,7 @@ public class BootStrap {
 		isStarted = true;
 		List<KadContact> contactList = routingTable.getRandomContacts(BOOTSTRAP_CONTACTS);
 		
-		bootStrapNewContacts = 0;
+		bootStrapResponses = 0;
 		bootStrapContacts.clear();
 		bootStrapContacts.addAll(contactList);
 		
@@ -84,14 +85,24 @@ public class BootStrap {
 		usedContacts.addAll(contactList);
 		
 		for(KadContact contact : contactList) {
-			KadPacket packet = PacketFactory.getBootStrap1ReqPacket();
-			udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+			bootStrapContacts.add(contact);
+			usedContacts.add(contact);
+			if (routingTable.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {					
+				KadPacket packet = PacketFactory.getBootStrap1ReqPacket();
+				udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+			} else {
+				KadPacket packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+				udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+			}
 		}
 		
 		bootStrapTask = new Task() {
 			public void run() {
-				if (bootStrapNewContacts >= BOOTSTRAP_STOP_CONTACTS) {
+				if (bootStrapResponses >= BOOTSTRAP_STOP_CONTACTS) {
 					System.out.println("BootStrap completed!");
+					
+					JKad.getInstance().removeListener(bootStrapResponseListener);
+					
 					// stop task if already have enough contacts
 					Timer.getSingleton().removeTask(this);
 					FirewallChecker.getSingleton().startNowFirewallCheck();
@@ -114,13 +125,31 @@ public class BootStrap {
 				for(KadContact contact : contactList) {
 					bootStrapContacts.add(contact);
 					usedContacts.add(contact);
-										
-					KadPacket packet = PacketFactory.getBootStrap1ReqPacket();
-					udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					if (routingTable.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {					
+						KadPacket packet = PacketFactory.getBootStrap1ReqPacket();
+						udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					} else {
+						KadPacket packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+						udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					}
 				}
 			}
 		};
 		Timer.getSingleton().addTask(BOOTSTRAP_CHECK_INTERVAL, bootStrapTask, true);
+	
+		bootStrapResponseListener = new PacketListener(JKadConstants.KADEMLIA2_HELLO_RES) {
+			public void packetReceived(KadPacket packet) {
+				IPAddress address= new IPAddress(packet.getAddress());
+				for(KadContact c : usedContacts)
+					if (c.getContactAddress().getAddress().equals(address)) {
+						bootStrapResponses++;
+						return ;
+					}
+			}
+			
+		};
+		
+		JKad.getInstance().addPacketListener(bootStrapResponseListener);
 		
 	}
 	
@@ -153,7 +182,7 @@ public class BootStrap {
 	public void processBootStrapRes(List<KadContact> contactList) {
 		for(KadContact contact : contactList) {
 			if (!routingTable.hasContact(contact)) {
-				bootStrapNewContacts++;
+				bootStrapResponses++;
 				bootStrapContacts.remove(contact);
 				
 				routingTable.addContact(contact);
