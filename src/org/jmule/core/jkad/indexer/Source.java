@@ -34,8 +34,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:32:22 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:34:53 $
  */
 public class Source {
 	private ClientID clientID;
@@ -84,7 +84,7 @@ public class Source {
 	}
 
 	public int getUDPPort() {
-		return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue());
+		return Integer.parseInt(tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue()+"");
 	}
 
 	public void setUDPPort(int udpPort) {
@@ -93,7 +93,8 @@ public class Source {
 	}
 
 	public int getTCPPort() {
-		return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue());
+		return Integer.parseInt(tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue()+"");
+		//return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue());
 	}
 
 	public void setTCPPort(int tcpPort) {
