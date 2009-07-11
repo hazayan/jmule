@@ -27,8 +27,8 @@ import java.util.StringTokenizer;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 18:18:41 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/11 09:38:40 $$
  */
 public class JMConstants {
      
@@ -45,7 +45,7 @@ public class JMConstants {
 	  public static final String[] JMULE_DOMAINS 		   = { "jmule.org", "jmule.net" };
 	  
 	  public static final String JMULE_NAME                = "JMule";
-	  public static final String JMULE_VERSION             = "0.4.1";
+	  public static final String JMULE_VERSION             = "0.5";
 	  public static final boolean IS_BETA                  = true;
 	  public static final boolean IS_NIGHTLY_BUILD         = false;
 	  
@@ -78,11 +78,12 @@ public class JMConstants {
 	  
 	  public static final String	JAVA_VERSION = System.getProperty("java.version");
 	  public static final boolean   isJava1_4    = JAVA_VERSION.startsWith("1.4");
-	  public static final boolean   isJava1_5    = JAVA_VERSION.startsWith("1.5");   //our platform
-	  public static final boolean   isJava1_6    = JAVA_VERSION.startsWith("1.6");
+	  public static final boolean   isJava1_5    = JAVA_VERSION.startsWith("1.5");   
+	  public static final boolean   isJava1_6    = JAVA_VERSION.startsWith("1.6");   //our platform
+	  public static final boolean   isJava1_7    = JAVA_VERSION.startsWith("1.7");
 	  
 	  // minimal java version required for JMule
-	  public static final float JMULE_JAVA_VERSION = 1.5f;
+	  public static final float JMULE_JAVA_VERSION = 1.6f;
 	  /**
 	    * <p>Gets the Java version as a <code>String</code> trimming leading letters.</p>
 	    *

@@ -23,7 +23,7 @@
 
 <!--
   Author : javajox
-  Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:59:25 $$
+  Last changed by $$Author: javajox $$ on $$Date: 2009/07/11 09:39:55 $$
 -->
 
 <project name="JMule" default="standard" basedir=".">
@@ -91,7 +91,7 @@
 	  Compiling the JMule sources
   </echo>
 
-  <iajc destdir="${bin}" source="1.5" srcdir="./src">
+  <iajc destdir="${bin}" source="1.6" srcdir="./src">
      <classpath>
 	    <pathelement location="${lib}/aspectjrt.jar"/>
 	    <pathelement location="${lib}/swt-linux/swt.jar"/>
