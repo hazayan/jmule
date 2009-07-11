@@ -27,34 +27,37 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jmule.core.searchmanager.tree.NodeValue.NodeType;
+
+import static org.jmule.core.searchmanager.tree.NodeValue.NodeType.*;
 /**
  * Created on Oct 26, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/28 21:06:40 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:00:32 $
  */
-public class Tree {
+public class Tree implements Cloneable{
 
 	public static final String DATA_KEY = "Data1";
 
 	private Node root = null;
 	private Node last_node = null;
 	
-	private Map<NodeValue, Node> nodes = new HashMap<NodeValue,Node>();
+	private Map<NodeType, Node> nodes = new HashMap<NodeType,Node>();
 	
 	public Tree(String searchString) {
-		NodeValue value = NodeValue.FILE_NAME;
+		NodeValue value = new NodeValue(FILE_NAME);
 		value.setValue(DATA_KEY, searchString);
 		root = new Node(value);
 		last_node = root;
-		nodes.put(root.getKey(), root);
+		nodes.put(root.getKey().getType(), root);
 	}
 	/**
 	 * Add node to tree only if node not exist or update node key if node exist
 	 * @param value
 	 */
 	public void addNodeIfNeed(NodeValue value) {
-		Node n = getNode(value);
+		Node n = getNode(value.getType());
 		if (n != null)
 			n.setKey(value);
 		else 
@@ -65,19 +68,19 @@ public class Tree {
 		Node r_node = new Node(last_node.getKey());
 		
 		nodes.remove(r_node.getKey());
-		nodes.put(r_node.getKey(), r_node);
+		nodes.put(r_node.getKey().getType(), r_node);
 		
 		last_node.setLeftChild(r_node);
-		last_node.setKey(NodeValue.AND);
+		last_node.setKey(new NodeValue(AND));
 		Node new_node = new Node(value);
 		
-		nodes.put(new_node.getKey(), new_node);
+		nodes.put(new_node.getKey().getType(), new_node);
 		
 		last_node.setRightChild(new_node);
 		last_node = new_node;
 	}
 
-	public Node getNode(NodeValue value) {
+	public Node getNode(NodeType value) {
 		return nodes.get(value);
 	}
 	
@@ -103,4 +106,9 @@ public class Tree {
 		
 		return list;
 	}
+	
+	public Object clone() {
+		return null;
+	}
+	
 }
