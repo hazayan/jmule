@@ -70,8 +70,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:02:50 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -187,7 +187,7 @@ public class AboutWindow implements JMuleUIComponent {
 		jmule_version.setFont(bold_font);
 		
 		Label copyright = new Label(container1,SWT.LEFT);
-		copyright.setText("Copyright (C) 2007-2008 JMule Team");
+		copyright.setText("Copyright (C) 2007-2009 JMule Team");
 		copyright.setFont(bold_font);
 		
 		new Label(container1,SWT.NONE);
