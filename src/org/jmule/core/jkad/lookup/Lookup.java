@@ -29,11 +29,13 @@ import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CONTACT_COUNT;
 import static org.jmule.core.jkad.JKadConstants.SEARCH_CONTACTS;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
@@ -50,8 +52,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:39:02 $
  */
 public class Lookup {
 
@@ -68,6 +70,8 @@ public class Lookup {
 	
 	private boolean isStarted = false;
 	
+	private List<LookupListener> listenerList = new CopyOnWriteArrayList<LookupListener>();
+	
 	public boolean isStarted() {
 		return isStarted;
 	}
@@ -81,6 +85,8 @@ public class Lookup {
 	private Lookup() {
 		
 	}
+	
+	public Map<Int128,LookupTask> getLookupTasks() { return lookupTasks; }
 	
 	public void start() {
 		isStarted = true;
@@ -96,6 +102,7 @@ public class Lookup {
 						task.lookupTimeout();
 						task.stopLookup();
 						lookupTasks.remove(key);
+						notifyListeners(task, LookupStatus.REMOVED);
 						if (currentRunningTasks>0)
 							currentRunningTasks--;
 						runNextTask();
@@ -114,17 +121,21 @@ public class Lookup {
 		for(Int128 key : lookupTasks.keySet()) {
 			LookupTask task = lookupTasks.get(key);
 			lookupTasksToRun.remove(task);
-			if (task.isLookupStarted()) { task.stopLookup();
+			if (task.isLookupStarted()) {
+				task.stopLookup();
 			if (currentRunningTasks>0)
 				currentRunningTasks--;
 			}
+			
 			lookupTasks.remove(key);
+			notifyListeners(task, LookupStatus.REMOVED);
 		}
 		Timer.getSingleton().removeTask(lookupCleaner);
 	}
 
 	public void addLookupTask(LookupTask task) {		
 		lookupTasks.put(task.getTargetID(), task);
+		notifyListeners(task, LookupStatus.ADDED);
 		runTask(task);
 	}
 	
@@ -136,6 +147,7 @@ public class Lookup {
 			if (currentRunningTasks>0)
 				currentRunningTasks--;}
 			lookupTasks.remove(targetID);
+			notifyListeners(task, LookupStatus.REMOVED);
 			runNextTask();
 		}
 		
@@ -149,6 +161,7 @@ public class Lookup {
 		if (currentRunningTasks<CONCURENT_LOOKUP_COUNT) {
 			currentRunningTasks++;
 			task.startLookup();
+			notifyListeners(task, LookupStatus.STARTED);
 		}else
 			lookupTasksToRun.add(task);
 	}
@@ -159,6 +172,7 @@ public class Lookup {
 		if (task == null) return ;
 		currentRunningTasks++;
 		task.startLookup();
+		notifyListeners(task, LookupStatus.STARTED);
 	}
 	
 	public int getLookupLoad() {
@@ -210,6 +224,27 @@ public class Lookup {
 		listener.processResults(new ContactAddress(sender), contactList);
 	}
 	
+	public void addListener(LookupListener listener) {
+		listenerList.add(listener);
+	}
+	
+	public void removeListener(LookupListener listener) {
+		listenerList.remove(listener);
+	}
+	
+	private enum LookupStatus { ADDED, STARTED, REMOVED}
+	
+	private void notifyListeners(LookupTask lookup, LookupStatus status) {
+		
+		for(LookupListener listener : listenerList) {
+			if (status == LookupStatus.ADDED)
+				listener.taskAdded(lookup);
+			if (status == LookupStatus.STARTED)
+				listener.taskStarted(lookup);
+			if (status == LookupStatus.REMOVED)
+				listener.taskRemoved(lookup);
+		}
+	}
 	
 	
 }
