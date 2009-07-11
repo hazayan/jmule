@@ -32,8 +32,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 07-Nov-2007
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/11 08:47:49 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/11 09:16:02 $$
  */
 public class Main {
 
@@ -47,7 +47,7 @@ public class Main {
 			String message = "You are using Java " + JMConstants.JAVA_VERSION +
 			                 " the minimal recommended version of java for " + JMConstants.JMULE_FULL_NAME + "\n" +
 			                 "is " + JMConstants.JMULE_JAVA_VERSION + 
-			                 " but a greater Java version is a better choice.\n\n" +
+			                 " a greater Java version is a better choice.\n\n" +
 			                 "You should manually download the latest version of Java from http://java.sun.com\n\n" +
 			                 "Do you want to continue to use Java " + JMConstants.JAVA_VERSION + " ?\n\n";
 			    choice = JOptionPane.showOptionDialog(null, message, "Warning", JOptionPane.DEFAULT_OPTION, 
