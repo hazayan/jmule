@@ -44,8 +44,8 @@ import org.jmule.ui.swing.common.GradientPanel;
  *
  * Created on Sep 4, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/07/11 09:39:39 $
  */
 public class AboutDialog  extends javax.swing.JDialog {
 
@@ -266,7 +266,7 @@ public class AboutDialog  extends javax.swing.JDialog {
 
         jmule_version.setText("JMule " + JMConstants.CURRENT_JMULE_VERSION);
 
-        copyright_team.setText("Copyright (c) 2007-2008 JMule Team");
+        copyright_team.setText("Copyright (c) 2007-2009 JMule Team");
 
         text_pane.setBackground(new java.awt.Color(238, 238, 238));
         text_pane.setText("JMule - Java multi-platform file sharing client for eDonkey 2000 networks, licensed unde the GNU General Public License. The client is completely free and allows you to share files with anybody in the world.\n");
