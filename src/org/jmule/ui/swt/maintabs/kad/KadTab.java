@@ -60,8 +60,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:04:35 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/12 09:14:50 $
  */
 public class KadTab extends AbstractTab {
 
@@ -93,11 +93,11 @@ public class KadTab extends AbstractTab {
 		tab_content.setLayoutData(new GridData(GridData.FILL_BOTH));
 		tab_content.setLayout(new FormLayout());
 		
-		routing_table_container = new Group(tab_content,SWT.BORDER);
-		Group kad_tasks_container = new Group(tab_content,SWT.BORDER);
+		routing_table_container = new Group(tab_content,SWT.NONE);
+		Group kad_tasks_container = new Group(tab_content,SWT.NONE);
 		routing_table_container.setText("Kad nodes");
 		kad_tasks_container.setText("Kad tasks");
-		SashControl.createHorizontalSash(20, 80, tab_content, routing_table_container, kad_tasks_container);
+		SashControl.createHorizontalSash(30, 80, tab_content, routing_table_container, kad_tasks_container);
 		GridLayout grid_layout = new GridLayout(1,false);
 		grid_layout.marginWidth = 0;
 		grid_layout.marginHeight = 0;
@@ -212,7 +212,7 @@ public class KadTab extends AbstractTab {
 		contact_list.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		contact_list.addColumn(SWT.LEFT, CLIENT_ID_COLUMN, "Contact ID", "128 bit client identifier", 300);
-		contact_list.addColumn(SWT.LEFT, CLIENT_DISTANCE_COLUMN, "Contact distance", "Distance from JMule to client", 500);
+		contact_list.addColumn(SWT.LEFT, CLIENT_DISTANCE_COLUMN, "Contact distance", "Distance from JMule to client", 400);
 		
 		_core.getJKad().getRoutingTable().addListener(new RoutingTableListener() {
 			public void contactAdded(final KadContact contact) {
@@ -291,7 +291,7 @@ public class KadTab extends AbstractTab {
 		};
 		
 		kad_task_list.addColumn(SWT.LEFT, TASK_LOOKUP_TYPE, "Type", "Kad lookup type", 300);
-		kad_task_list.addColumn(SWT.LEFT, TASK_LOOKUP_HASH, "Lookup hash", "Hash value which is used in lookup", 500);
+		kad_task_list.addColumn(SWT.LEFT, TASK_LOOKUP_HASH, "Lookup hash", "Hash value which is used in lookup", 400);
 		_core.getJKad().getLookup().addListener(new LookupListener() {
 			public void taskAdded(final LookupTask task) {
 				Display.getDefault().asyncExec(new Runnable() {
