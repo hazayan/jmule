@@ -99,14 +99,15 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:21:25 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/12 08:46:51 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
 	public enum DownloadStatus { STARTED, STOPPED};
 	
 	private final static int PEER_MONITOR_INTERVAL =  1000;
+	private final static long PEER_RESEND_PACKET_INTERVAL = 1000*10;
 	
 	private PartialFile sharedFile;
 
@@ -1113,7 +1114,7 @@ public class DownloadSession implements JMTransferSession {
 					continue;
 				}
 				
-				List<PeerDownloadStatus> frenzed_list = download_status_list.getPeersWithInactiveTime(PeerDownloadStatus.ACTIVE,1000*60 * 3);
+				List<PeerDownloadStatus> frenzed_list = download_status_list.getPeersWithInactiveTime(PeerDownloadStatus.ACTIVE,PEER_RESEND_PACKET_INTERVAL);
 				
 				for(PeerDownloadStatus status : frenzed_list) {
 					
