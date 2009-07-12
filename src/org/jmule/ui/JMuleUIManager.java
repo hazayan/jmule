@@ -30,8 +30,8 @@ import org.jmule.ui.swt.JMuleSWTUI;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:12 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/07/12 14:44:54 $$
  */
 public class JMuleUIManager {
 
@@ -39,7 +39,7 @@ public class JMuleUIManager {
 	public static String SWING_UI     =    "SWING";
 	public static String CONSOLE_UI   =    "CONSOLE";
 	
-	public static String DEFAULT_UI   =     SWING_UI;
+	public static String DEFAULT_UI   =     SWT_UI;
 	
 	private static JMuleUIManager singleton = null;
 	
