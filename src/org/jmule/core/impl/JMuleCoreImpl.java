@@ -60,8 +60,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 17:14:27 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/12 12:09:44 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -290,7 +290,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		notifyComponentStarted(search_manager);
 		JKad.getInstance().initialize();
-		
+		if (configuration_manager.isJKadEnabled()) 
+			JKad.getInstance().connect();
 		
 		/** Enable Debug thread!**/	
 		// debugThread = new DebugThread();
