@@ -30,8 +30,8 @@ import java.nio.ByteBuffer;
 /**
  * Created on May 24, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/12 14:34:37 $
  */
 public class LongTag extends Tag{
 
@@ -51,7 +51,7 @@ public class LongTag extends Tag{
 		return result;
 	}
 
-	public Object getValue() {
+	public Long getValue() {
 		return tagValue;
 	}
 
