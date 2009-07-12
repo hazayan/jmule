@@ -26,6 +26,7 @@ import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.net.packet.tag.IntTag;
+import org.jmule.core.jkad.net.packet.tag.LongTag;
 import org.jmule.core.jkad.net.packet.tag.ShortTag;
 import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.utils.Convert;
@@ -34,8 +35,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:34:53 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/12 09:16:41 $
  */
 public class Source {
 	private ClientID clientID;
@@ -84,6 +85,19 @@ public class Source {
 	}
 
 	public int getUDPPort() {
+		Object object = tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue();
+		if (object instanceof ShortTag) {
+			ShortTag st = (ShortTag) object;
+			return Convert.shortToInt(st.getValue());
+		}
+		if (object instanceof IntTag) {
+			IntTag st = (IntTag) object;
+			return st.getValue();
+		}
+		if (object instanceof LongTag) {
+			LongTag st = (LongTag) object;
+			return Convert.longToInt(st.getValue());
+		}
 		return Integer.parseInt(tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue()+"");
 	}
 
@@ -93,6 +107,20 @@ public class Source {
 	}
 
 	public int getTCPPort() {
+		Object object = tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue();
+		if (object instanceof ShortTag) {
+			ShortTag st = (ShortTag) object;
+			return Convert.shortToInt(st.getValue());
+		}
+		if (object instanceof IntTag) {
+			IntTag st = (IntTag) object;
+			return st.getValue();
+		}
+		if (object instanceof LongTag) {
+			LongTag st = (LongTag) object;
+			return Convert.longToInt(st.getValue());
+		}
+		
 		return Integer.parseInt(tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue()+"");
 		//return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue());
 	}
