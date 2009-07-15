@@ -37,7 +37,7 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.edonkey.packet.tag.TagReader;
+import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.utils.Convert;
@@ -101,8 +101,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class KnownMet extends MetFile {
 
@@ -162,15 +162,15 @@ public class KnownMet extends MetFile {
 			int tagCount = data.getInt(0);
 			TagList tagList = new TagList();
 			for(int i = 0;i<tagCount;i++) {
-				Tag tag = TagReader.readTag(fileChannel);
+				Tag tag = TagScanner.scanTag(fileChannel);
 				if (tag != null)
 					tagList.addTag(tag);
 			}
 			known_met_entity.setTagList(tagList);
 		
 			try {
-				String file_name = known_met_entity.getTagList().getStringTag(FT_FILENAME);
-				long file_size = Convert.intToLong(known_met_entity.getTagList().getDWORDTag(FT_FILESIZE));
+				String file_name = (String)known_met_entity.getTagList().getTag(FT_FILENAME).getValue();
+				long file_size = Convert.intToLong((Integer)known_met_entity.getTagList().getTag(FT_FILESIZE).getValue());
 				String key = file_name + file_size;
 				if(repeated_keys.contains(key)) continue;
 				KnownMetEntity known_file = knownFiles.get(key);
@@ -231,15 +231,11 @@ public class KnownMet extends MetFile {
 			data.putInt(tagList.size());
 			data.position(0);
 			fileChannel.write(data);
-			
-			for(int a = 0;a<tagList.size();a++) {
-				Tag t = tagList.getRawTag(a);
-				data = Misc.getByteBuffer(t.getSize());
-				data.put(t.getData());
-				data.position(0);
-				
-				fileChannel.write(data);
+			for(Tag tag : tagList) {
+				ByteBuffer raw_tag = tag.getAsByteBuffer();
+				fileChannel.write(raw_tag);
 			}
+			
 		}
 		
 	}
@@ -291,14 +287,9 @@ public class KnownMet extends MetFile {
 		data.position(0);
 		fileChannel.write(data);
 		
-		for(int a = 0;a<tagList.size();a++) {
-			Tag t = tagList.getRawTag(a);
-			data = Misc.getByteBuffer(t.getSize());
-			data.put(t.getData());
-			data.position(0);
-			
-			fileChannel.write(data);
+		for(Tag tag : tagList) {
+			ByteBuffer raw_tag = tag.getAsByteBuffer();
+			fileChannel.write(raw_tag);
 		}
-		
 	}
 }

@@ -74,8 +74,9 @@ import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.edonkey.packet.impl.EMuleCompressedPacket;
 import org.jmule.core.edonkey.packet.impl.StandardPacket;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.TagFactory;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.searchmanager.SearchQuery;
@@ -89,8 +90,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/08 06:55:34 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class PacketFactory {
 	
@@ -179,26 +180,25 @@ public class PacketFactory {
 	public static Packet getServerLoginPacket(UserHash userHash, int clientPort,
 			String userNickName) {
 		
-		List<Tag> tag_list = new LinkedList<Tag>();
-		tag_list.add(TagFactory.getStringTag( userNickName , TAG_NAME_NAME ));
-		tag_list.add(TagFactory.getDWORDTag( ProtocolVersion , TAG_NAME_PROTOCOLVERSION));
-		tag_list.add(TagFactory.getDWORDTag(ServerSoftwareVersion, TAG_NAME_CLIENTVER));//eMule client version
-		tag_list.add(TagFactory.getDWORDTag( SUPPORTED_FLAGS, TAG_NAME_FLAGS));
-		tag_list.add(TagFactory.getDWORDTag(ConfigurationManagerFactory.getInstance().getUDP(), TAG_NAME_UDP_PORT));
+		TagList tagList = new TagList();
+		tagList.addTag(new StringTag(TAG_NAME_NAME, userNickName));
+		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
+		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
+		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT, ConfigurationManagerFactory.getInstance().getUDP()));
+	
+		int tag_list_size = tagList.getByteSize();
 		
-		int tag_length = 0;
-		for(Tag tag : tag_list)
-			tag_length += tag.getSize();
-		
-		Packet packet = new StandardPacket(16 + 4 + 2 + 4 + tag_length);
+		Packet packet = new StandardPacket(16 + 4 + 2 + 4 + tag_list_size);
 		packet.setCommand(OP_LOGINREQUEST);//Insert LOGIN_COMMAND
 		packet.insertData(userHash.getUserHash());//Insert user Hash
 		packet.insertData(new byte[]{0,0,0,0});//Insert default user ID
 		packet.insertData((short)clientPort);//Insert user port
 
-		packet.insertData(tag_list.size());//Insert tag count
-		for(Tag tag : tag_list)
-			packet.insertData(tag.getData());
+		packet.insertData(tagList.size());//Insert tag count
+		for(Tag tag : tagList) {
+			packet.insertData(tag.getAsByteBuffer());
+		}
 		
 		return packet;
 
@@ -489,7 +489,7 @@ public class PacketFactory {
     		i++;
     		unshared_files.remove(sFile);
     		TagList tag_list = sFile.getTagList();
-    		int tag_list_size = tag_list.getTotalSize();
+    		int tag_list_size = tag_list.getByteSize();
     		ByteBuffer buffer = Misc.getByteBuffer(16 + 4 + 2 + 4 + tag_list_size);
     		data_length += buffer.limit();
     		buffer.position(0);
@@ -502,10 +502,10 @@ public class PacketFactory {
     			buffer.putInt(0); 
     			buffer.putShort((short)0); 
     		}
-    		buffer.putInt(tag_list.getTagCount());//Insert tag count
+    		buffer.putInt(tag_list.size());//Insert tag count
     		
-    		for(Tag tag : tag_list.values()) 
-    			buffer.put(tag.getData());
+    		for(Tag tag : tag_list) 
+    			buffer.put(tag.getAsByteBuffer());
     		
     		shared_files_data.add(buffer);
     	}
@@ -627,19 +627,20 @@ public class PacketFactory {
 			byte[] serverIP,int serverPort,String userName, Map<PeerFeatures, Integer> clientFeatures){
 		List<Tag> tag_list = new LinkedList<Tag>();
 		
-        tag_list.add(TagFactory.getStringTag(userName, TAG_NAME_NAME));
-        
-        int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
-        
-        tag_list.add(TagFactory.getDWORDTag(misc_optins1, TAG_NAME_MISC_OPTIONS1));
-        tag_list.add(TagFactory.getDWORDTag(0, TAG_NAME_MISC_OPTIONS2));
-        tag_list.add(TagFactory.getDWORDTag(ProtocolVersion,TAG_NAME_PROTOCOLVERSION));
-        tag_list.add(TagFactory.getDWORDTag(E2DKConstants.getSoftwareVersion(), TAG_NAME_CLIENTVER));
-        tag_list.add(TagFactory.getDWORDTag(ConfigurationManagerFactory.getInstance().getUDP(), TAG_NAME_UDP_PORT_PEER));
-
-        int tag_list_size = 0;
-		for (Tag tag : tag_list)
-			tag_list_size += tag.getSize();
+		int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
+		
+		TagList tagList = new TagList();
+		tagList.addTag(new StringTag(TAG_NAME_NAME, userName));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS1,misc_optins1 ));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,0 ));
+		
+		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
+		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
+		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerFactory.getInstance().getUDP()));
+	
+		int tag_list_size = tagList.getByteSize();
+		
         
         Packet packet = new StandardPacket(1 + 16 + 4 + 2 + 4 + tag_list_size + 4 + 2);
        
@@ -654,7 +655,7 @@ public class PacketFactory {
         packet.insertData(tag_list.size());//insert tag count
         
         for(Tag tag : tag_list)
-        	packet.insertData(tag.getData());
+        	packet.insertData(tag.getAsByteBuffer());
         
         if (serverIP==null) 
         		packet.insertData(new byte[] { 0, 0, 0, 0 });
@@ -709,23 +710,20 @@ public class PacketFactory {
 	public static Packet getPeerHelloAnswerPacket(UserHash userHash,ClientID clientID,
 			int myPort,String userName,byte[] serverIP, int serverPort, Map<PeerFeatures, Integer> clientFeatures){
 		
-		List<Tag> tag_list = new LinkedList<Tag>();
-		
-		tag_list.add(TagFactory.getStringTag(userName, TAG_NAME_NAME));
-		
 		int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
 		
+		TagList tagList = new TagList();
+		tagList.addTag(new StringTag(TAG_NAME_NAME, userName));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS1,misc_optins1 ));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,0 ));
 		
-		tag_list.add(TagFactory.getDWORDTag(misc_optins1, TAG_NAME_MISC_OPTIONS1));
-		tag_list.add(TagFactory.getDWORDTag(0, TAG_NAME_MISC_OPTIONS2));
-		tag_list.add(TagFactory.getDWORDTag(ProtocolVersion,TAG_NAME_PROTOCOLVERSION));
-		tag_list.add(TagFactory.getDWORDTag(E2DKConstants.getSoftwareVersion(), TAG_NAME_CLIENTVER));
-		tag_list.add(TagFactory.getDWORDTag(ConfigurationManagerFactory.getInstance().getUDP(), TAG_NAME_UDP_PORT_PEER));
-
-		int tag_list_size = 0;
-		for(Tag tag : tag_list)
-			tag_list_size += tag.getSize();
-		
+		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
+		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
+		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerFactory.getInstance().getUDP()));
+	
+		int tag_list_size = tagList.getByteSize();
+			
 		Packet packet=new StandardPacket(1+1+16+4+2+4+4+2+2+tag_list_size+4+2);
 		packet.setCommand(OP_PEERHELLOANSWER);//hello answer tag
 		
@@ -737,10 +735,10 @@ public class PacketFactory {
 		
 		packet.insertData((short)myPort);//insert my active port
 		
-		packet.insertData(tag_list.size());
+		packet.insertData(tagList.size());
 		
-		for(Tag tag : tag_list)
-			packet.insertData(tag.getData());
+		for(Tag tag : tagList)
+			packet.insertData(tag.getAsByteBuffer());
 			
 		if (serverIP!=null)
 			packet.insertData(serverIP);

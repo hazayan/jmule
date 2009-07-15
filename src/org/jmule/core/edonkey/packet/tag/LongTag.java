@@ -22,17 +22,42 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
-import org.jmule.core.JMException;
+import java.nio.ByteBuffer;
 
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
- * 
+ * Created on Jul 15, 2009
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:51:15 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
-public class TagException extends JMException {
+public class LongTag extends StandartTag {
+	private long tagValue;
 
-	public TagException(String msg) {
-		super(msg);
+	public LongTag(byte[] tagName, long tagValue) {
+		super(TAGTYPE_UINT64, tagName);
+		this.tagValue = tagValue;
 	}
+	
+	ByteBuffer getValueAsByteBuffer() {
+		ByteBuffer result = Misc.getByteBuffer(8);
+		result.putLong(tagValue);
+		result.position(0);
+		return result;
+	}
+
+	int getValueLength() {
+		return 8;
+	}
+
+	public Object getValue() {
+		return Convert.longToInt(tagValue);
+	}
+
+	public void setValue(Object object) {
+		tagValue = (Long)object;
+	}
+	
 }

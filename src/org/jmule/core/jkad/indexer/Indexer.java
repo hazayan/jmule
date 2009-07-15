@@ -37,13 +37,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.ShortTag;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.logger.Logger;
-import org.jmule.core.jkad.net.packet.tag.IntTag;
-import org.jmule.core.jkad.net.packet.tag.ShortTag;
-import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -53,8 +53,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:24:00 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
 public class Indexer {
 	

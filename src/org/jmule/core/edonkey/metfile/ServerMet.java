@@ -34,7 +34,7 @@ import java.util.List;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.edonkey.packet.tag.TagReader;
+import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
@@ -93,8 +93,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -239,7 +239,7 @@ public class ServerMet extends MetFile {
 						
 		//Load tags....
 		for(int j = 0; j<tagCount; j++) {
-			Tag tag = TagReader.readTag(fileChannel);
+			Tag tag = TagScanner.scanTag(fileChannel);
 			if (tag != null)
 				tagList.addTag(tag);
 		}
@@ -270,15 +270,13 @@ public class ServerMet extends MetFile {
 		fileChannel.write(data);
 		
 		data = Misc.getByteBuffer(4);
-		data.putInt(server.getTagList().getTagCount());
+		data.putInt(server.getTagList().size());
 		data.position(0);
 		fileChannel.write(data);
 		
-		Collection<Tag> tagList = server.getTagList().getTags();
 		
-		for(Tag tag : tagList) {
-			data = Misc.getByteBuffer(tag.getData().length);
-			data.put(tag.getData());
+		for(Tag tag : server.getTagList()) {
+			data = tag.getAsByteBuffer();
 			data.position(0);
 			fileChannel.write(data);
 		}

@@ -20,52 +20,48 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.edonkey.packet.tag.impl;
+package org.jmule.core.edonkey.packet.tag;
+
+import java.nio.ByteBuffer;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 
 import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
- * 
+ * Created on Jul 15, 2009
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:10:11 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
-public class MetaTag {
+public class ByteTag extends StandartTag {
 
-	private byte[] metaTagName;
+	private byte tagValue = 0;
 	
-	public MetaTag() {
-		metaTagName = new byte[1];
+	public ByteTag(byte[] tagName, byte tagValue) {
+		super(TAGTYPE_UINT8, tagName);
+		this.tagValue = tagValue;
 	}
-	
-	public MetaTag(byte[] metaTagName){
-		this.metaTagName = metaTagName;
+
+	ByteBuffer getValueAsByteBuffer() {
+		ByteBuffer result = Misc.getByteBuffer(1);
+		result.put(tagValue);
+		result.position(0);
+		return result;
 	}
-	
-	public void setMetaTagName(byte[] metaTagName){
-		this.metaTagName = metaTagName;
+
+
+	int getValueLength() {
+		return 1;
 	}
-	
-	public byte[] getRawMetaTagName() {
-		return this.metaTagName;
+
+
+	public Object getValue() {
+		return Convert.byteToInt(tagValue);
 	}
-	
-	public int getMetaTagLength() {
-		return this.metaTagName.length;
+
+	public void setValue(Object object) {
+		tagValue = (Byte) object;
 	}
-	
-	public int hashCode() {
-		return Convert.byteToHexString(metaTagName, " ").hashCode();
-	}
-	
-	public boolean equals(Object object){
-		if (object==null) return false;
-		if (!(object instanceof MetaTag)) return false;
-		return this.hashCode()==object.hashCode();
-	}
-	
-	public String toString() {
-		return Convert.byteToHexString(metaTagName, " ");
-	}
-	
+
 }

@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2009 JMule Team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -20,47 +20,48 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.jkad.net.packet.tag;
-
-import static org.jmule.core.jkad.JKadConstants.TAGTYPE_UINT64;
-import static org.jmule.core.utils.Misc.getByteBuffer;
+package org.jmule.core.edonkey.packet.tag;
 
 import java.nio.ByteBuffer;
 
+import org.jmule.core.utils.Misc;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
- * Created on May 24, 2009
+ * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/12 14:34:37 $
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
-public class LongTag extends Tag{
+public class IntTag extends StandartTag {
 
-	private long tagValue;
+	private int tagValue;
 	
-	public LongTag(byte[] tagName, long value) {
-		super(TAGTYPE_UINT64, tagName);
-		tagValue = value;
-		
+	public IntTag(byte[] tagName, int tagValue) {
+		super(TAGTYPE_UINT32, tagName);
+		this.tagValue = tagValue;
 	}
 
-	public ByteBuffer getDataAsByteBuffer() {
-		ByteBuffer tagHeader = getTagHeader();
-		ByteBuffer result = getByteBuffer(tagHeader.capacity() + 8);
-		result.put(tagHeader);
-		result.putLong(tagValue);
+	ByteBuffer getValueAsByteBuffer() {
+		ByteBuffer result = Misc.getByteBuffer(4);
+		result.putInt(tagValue);
+		result.position(0);
 		return result;
 	}
 
-	public Long getValue() {
+
+	int getValueLength() {
+		return 4;
+	}
+
+
+	public Integer getValue() {
+
 		return tagValue;
 	}
+
 
 	public void setValue(Object object) {
 		tagValue = (Integer) object;
 	}
 
-	public String toString() {
-		return super.toString()+" "+tagValue;
-	}
-	
 }

@@ -47,7 +47,8 @@ import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerChatMessageSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloAnswerSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerHelloSP;
-import org.jmule.core.edonkey.packet.tag.TagException;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.net.JMConnection;
@@ -59,8 +60,8 @@ import org.jmule.core.peermanager.PeerSessionList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/09 13:44:37 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class Peer extends JMConnection {
 	
@@ -251,11 +252,11 @@ public class Peer extends JMConnection {
 	}
 	
 	public String getNickName() {
-		try {
-			return peerTags.getStringTag(TAG_NAME_NICKNAME);
-		} catch (TagException e) {
-			return getAddress();
-		}
+		Tag tag = peerTags.getTag(TAG_NAME_NICKNAME);
+		if (tag!=null)
+			return (String)tag.getValue();
+		return getAddress();
+
 	}
 	
 	public PeerSessionList getSessionList() {
@@ -474,11 +475,8 @@ public class Peer extends JMConnection {
 	
 	private void loadPeerFeatures() {
 		if (peerTags.hasTag(TAG_NAME_MISC_OPTIONS1))  {
-			try {
-				int raw_data = peerTags.getDWORDTag(TAG_NAME_MISC_OPTIONS1);
-				peer_features = Utils.IntToMiscOptions1(raw_data);
-			} catch (TagException e) {
-			}
+			IntTag tag = (IntTag) peerTags.getTag(TAG_NAME_MISC_OPTIONS1);
+			peer_features = Utils.IntToMiscOptions1((Integer)tag.getValue());
 		}
 	}
 	
@@ -600,7 +598,7 @@ public class Peer extends JMConnection {
 	public int getClientSoftware() {
 		int clientInfo;
 		try {
-			clientInfo = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
+			clientInfo = (Integer) peerTags.getTag(TAG_NAME_CLIENTVER).getValue();
 		}catch(Throwable e) {
 			return E2DKConstants.SO_COMPAT_UNK;
 		}
@@ -615,8 +613,7 @@ public class Peer extends JMConnection {
 		
 		int clientInfo;
 		try {
-			
-			clientInfo = peerTags.getDWORDTag(TAG_NAME_CLIENTVER);
+			clientInfo = (Integer) peerTags.getTag(TAG_NAME_CLIENTVER).getValue();
 		}catch(Throwable e) {
 			return new int[] {0,0,0,0};
 		}

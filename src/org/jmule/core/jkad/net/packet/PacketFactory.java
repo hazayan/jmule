@@ -63,20 +63,20 @@ import java.util.List;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.indexer.Source;
-import org.jmule.core.jkad.net.packet.tag.Tag;
-import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.routingtable.KadContact;
 
 /**
  * Created on Dec 31, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:50:03 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
 public class PacketFactory {
 
@@ -446,7 +446,7 @@ public class PacketFactory {
 		List<ByteBuffer> tag_list = new LinkedList<ByteBuffer>();
 		int total_tag_size = 0;
 		for(Tag tag : tagList) {
-			ByteBuffer t = tag.getDataAsByteBuffer();
+			ByteBuffer t = tag.getAsByteBuffer();
 			t.position(0);
 			total_tag_size += t.capacity();
 			tag_list.add(t);

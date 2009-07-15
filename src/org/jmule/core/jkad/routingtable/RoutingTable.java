@@ -49,6 +49,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
@@ -58,7 +59,6 @@ import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
-import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
@@ -68,8 +68,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:49:09 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
 public class RoutingTable {
 

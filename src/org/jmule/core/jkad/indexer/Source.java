@@ -22,21 +22,21 @@
  */
 package org.jmule.core.jkad.indexer;
 
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.LongTag;
+import org.jmule.core.edonkey.packet.tag.ShortTag;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.net.packet.tag.IntTag;
-import org.jmule.core.jkad.net.packet.tag.LongTag;
-import org.jmule.core.jkad.net.packet.tag.ShortTag;
-import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.utils.Convert;
 
 
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/12 09:16:41 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
 public class Source {
 	private ClientID clientID;
@@ -86,19 +86,7 @@ public class Source {
 
 	public int getUDPPort() {
 		Object object = tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue();
-		if (object instanceof ShortTag) {
-			ShortTag st = (ShortTag) object;
-			return Convert.shortToInt(st.getValue());
-		}
-		if (object instanceof IntTag) {
-			IntTag st = (IntTag) object;
-			return st.getValue();
-		}
-		if (object instanceof LongTag) {
-			LongTag st = (LongTag) object;
-			return Convert.longToInt(st.getValue());
-		}
-		return Integer.parseInt(tagList.getTag(JKadConstants.TAG_SOURCEUPORT).getValue()+"");
+		return (Integer)object;
 	}
 
 	public void setUDPPort(int udpPort) {
@@ -108,21 +96,7 @@ public class Source {
 
 	public int getTCPPort() {
 		Object object = tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue();
-		if (object instanceof ShortTag) {
-			ShortTag st = (ShortTag) object;
-			return Convert.shortToInt(st.getValue());
-		}
-		if (object instanceof IntTag) {
-			IntTag st = (IntTag) object;
-			return st.getValue();
-		}
-		if (object instanceof LongTag) {
-			LongTag st = (LongTag) object;
-			return Convert.longToInt(st.getValue());
-		}
-		
-		return Integer.parseInt(tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue()+"");
-		//return Convert.shortToInt((Short)tagList.getTag(JKadConstants.TAG_SOURCEPORT).getValue());
+		return (Integer)object;
 	}
 
 	public void setTCPPort(int tcpPort) {

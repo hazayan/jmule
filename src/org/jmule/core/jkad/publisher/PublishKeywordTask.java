@@ -24,6 +24,8 @@ package org.jmule.core.jkad.publisher;
 
 import java.util.List;
 
+import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
@@ -32,8 +34,6 @@ import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
-import org.jmule.core.jkad.net.packet.tag.Tag;
-import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 import org.jmule.core.jkad.routingtable.KadContact;
 
@@ -41,8 +41,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:47:27 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
  */
 public class PublishKeywordTask extends PublishTask {
 

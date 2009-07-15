@@ -22,8 +22,6 @@
  */
 package org.jmule.core.jkad;
 
-import org.jmule.core.edonkey.impl.FileHash;
-
 import static org.jmule.core.jkad.JKad.JKadStatus.CONNECTED;
 import static org.jmule.core.jkad.JKad.JKadStatus.CONNECTING;
 import static org.jmule.core.jkad.JKad.JKadStatus.DISCONNECTED;
@@ -62,7 +60,6 @@ import static org.jmule.core.jkad.JKadConstants.TAG_FILESIZE;
 import static org.jmule.core.jkad.JKadConstants.TAG_SOURCEIP;
 import static org.jmule.core.jkad.JKadConstants.TAG_SOURCEPORT;
 import static org.jmule.core.jkad.JKadConstants.TAG_SOURCETYPE;
-import static org.jmule.core.jkad.net.packet.tag.TagScanner.scanTag;
 import static org.jmule.core.jkad.utils.Utils.getRandomInt128;
 import static org.jmule.core.utils.Convert.byteToHexString;
 import static org.jmule.core.utils.Convert.byteToInt;
@@ -85,6 +82,12 @@ import org.jmule.core.JMuleManager;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.StringTag;
+import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.indexer.Indexer;
 import org.jmule.core.jkad.indexer.Source;
@@ -95,11 +98,6 @@ import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
 import org.jmule.core.jkad.net.packet.UnknownPacketOPCodeException;
 import org.jmule.core.jkad.net.packet.UnknownPacketType;
-import org.jmule.core.jkad.net.packet.tag.IntTag;
-import org.jmule.core.jkad.net.packet.tag.StringTag;
-import org.jmule.core.jkad.net.packet.tag.Tag;
-import org.jmule.core.jkad.net.packet.tag.TagList;
-import org.jmule.core.jkad.net.packet.tag.TagScanner;
 import org.jmule.core.jkad.publisher.Publisher;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
@@ -127,8 +125,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:31:52 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -612,7 +610,7 @@ public class JKad implements JMuleManager {
 				byte tag_count = rawData.get();
 				List<Tag> tag_list  = new LinkedList<Tag>() ;
 				for (byte i = 0; i < tag_count; i++) {
-					Tag tag = scanTag(rawData);
+					Tag tag = TagScanner.scanTag(rawData);
 					if (tag == null) throw new CorruptedPacketException();
 					tag_list.add(tag);
 				}
@@ -637,7 +635,7 @@ public class JKad implements JMuleManager {
 				List<Tag>tag_list  = new LinkedList<Tag>() ;
 				
 				for (byte i = 0; i < tag_count; i++) {
-					Tag tag = scanTag(rawData);
+					Tag tag = TagScanner.scanTag(rawData);
 					if (tag == null) throw new CorruptedPacketException();
 					tag_list.add(tag);
 				}
@@ -705,7 +703,7 @@ public class JKad implements JMuleManager {
 					byte tagCount = rawData.get();
 					TagList tag_list = new TagList();
 					for(int j = 0;j<tagCount;j++) {
-						Tag tag = scanTag(rawData);
+						Tag tag = TagScanner.scanTag(rawData);
 						if (tag == null) throw new CorruptedPacketException();
 						tag_list.addTag(tag);
 					}
@@ -739,7 +737,7 @@ public class JKad implements JMuleManager {
 				int tagCount = rawData.get();
 				TagList tag_list = new TagList();
 				for(int i = 0;i<tagCount;i++) {
-					Tag tag = scanTag(rawData);
+					Tag tag = TagScanner.scanTag(rawData);
 					if (tag == null) throw new CorruptedPacketException();
 					tag_list.addTag(tag);
 				}

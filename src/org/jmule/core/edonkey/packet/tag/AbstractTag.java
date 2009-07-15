@@ -20,52 +20,63 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.jkad.net.packet.tag;
+package org.jmule.core.edonkey.packet.tag;
 
-import static org.jmule.core.jkad.JKadConstants.TAGTYPE_UINT16;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.nio.ByteBuffer;
 
+import org.jmule.core.utils.Convert;
+
 /**
- * Created on Jan 1, 2009
+ * Created on Jul 15, 2009
  * @author binary256
  * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
  */
-public class ShortTag extends Tag {
-
-	private short tagValue;
+abstract class AbstractTag implements Tag{
+	protected byte tagType;
+	protected byte[] tagName;
 	
-	public ShortTag(byte[] tagName, short tagValue) {
-		super(TAGTYPE_UINT16, tagName);
-		setValue(tagValue);
+	public AbstractTag(byte tagType, byte[] tagName) {
+		super();
+		this.tagType = tagType;
+		this.tagName = tagName;
+	}
+
+	public byte getType() {
+		return tagType;
 	}
 	
-	public ByteBuffer getDataAsByteBuffer() {
-		ByteBuffer tagHeader = getTagHeader();
-		
-		ByteBuffer result = getByteBuffer(tagHeader.capacity() + 2);
-		result.put(tagHeader);
-		result.putShort(tagValue);
+	public void setType(byte tagType) {
+		this.tagType = tagType;
+	}
+	
+	public byte[] getTagName() {
+		return tagName;
+	}
+	public void setTagName(byte[] tagName) {
+		this.tagName = tagName;
+	}
+	
+	abstract ByteBuffer getValueAsByteBuffer();
+	abstract int getValueLength();
+	
+	public int getSize() {
+		return getHeaderSize() + getValueLength();
+	}
+	
+	public ByteBuffer getAsByteBuffer() {
+		ByteBuffer result = getByteBuffer(getSize());
+		result.put(getTagHeader());
+		result.put(getValueAsByteBuffer());
 
+		result.position(0);
 		return result;
 	}
-
-	public Short getValue() {
-		return tagValue;
-	}
-
-	public void setValue(short tagValue) {
-		this.tagValue = tagValue;
-	}
-
+	
 	public String toString() {
-		return super.toString() + " "+tagValue;
-	}
-
-	public void setValue(Object newValue) {
-		tagValue = (Short) newValue;
+		return "[ "+Convert.byteToHexString(getAsByteBuffer().array(), " 0x") + " ]";
 	}
 	
 }

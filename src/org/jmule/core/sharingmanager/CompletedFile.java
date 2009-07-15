@@ -24,19 +24,19 @@ package org.jmule.core.sharingmanager;
 
 import static org.jmule.core.edonkey.E2DKConstants.FT_FILENAME;
 import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
 
 import java.io.File;
 
-import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.StringTag;
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:12 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:33 $$
  */
 public class CompletedFile extends SharedFile {
 
@@ -51,14 +51,12 @@ public class CompletedFile extends SharedFile {
 	}
 	
 	private void init() {
-		StandardTag tag = new StandardTag(TAG_TYPE_STRING,FT_FILENAME);
 		String fileName = this.getSharingName();
 		if (fileName==null) fileName = file.getName();
-		tag.insertString(fileName);
+		Tag tag = new StringTag(FT_FILENAME, fileName);
 		tagList.addTag(tag);
 
-		tag = new StandardTag(TAG_TYPE_DWORD,FT_FILESIZE);
-		tag.insertDWORD(Convert.longToInt(file.length()));
+		tag = new IntTag(FT_FILESIZE, Convert.longToInt(file.length()));
 		tagList.addTag(tag);
 	}
 

@@ -24,20 +24,18 @@ package org.jmule.core.jkad.utils;
 
 import static org.jmule.core.utils.Convert.byteToInt;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.net.packet.tag.Tag;
 import org.jmule.core.jkad.routingtable.KadContact;
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
 public class Utils {
 	
@@ -73,13 +71,8 @@ public class Utils {
 		return true;
 	}
 	
-	public static boolean containTag(List<Tag> tagList, byte[] tagName) {
-		for(Tag tag : tagList) {
-			if (Arrays.equals(tag.getTagName(), tagName) ) return true;
-		}
-		
-		return false;
-	}
+
+
 	
 	public static boolean inToleranceZone(Int128 target, Int128 source, Int128 toleranceZone) {
 		long distance = Math.abs(target.toLong() - source.toLong());

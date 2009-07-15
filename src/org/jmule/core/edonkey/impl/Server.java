@@ -32,8 +32,8 @@ import static org.jmule.core.edonkey.E2DKConstants.SL_SOFTFILES;
 import static org.jmule.core.edonkey.E2DKConstants.SL_SRVMAXUSERS;
 import static org.jmule.core.edonkey.E2DKConstants.SL_USERS;
 import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
+import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_STRING;
+import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -64,10 +64,10 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerStatusSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPDescSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPNewDescSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMServerUDPStatusSP;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.net.JMConnection;
 import org.jmule.core.net.JMUDPConnection;
 import org.jmule.core.net.PacketScanner;
@@ -84,8 +84,8 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:01:54 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class Server extends JMConnection {
 	
@@ -505,10 +505,8 @@ public class Server extends JMConnection {
 
 	private void setName(String newName) {
 		
-		Tag tag = new StandardTag(TAG_TYPE_STRING, SL_SERVERNAME);
-		
-		tag.insertString(newName);
-		
+		Tag tag = new StringTag(SL_SERVERNAME, newName);
+				
 		tagList.removeTag(SL_SERVERNAME);
 		
 		tagList.addTag(tag);
@@ -519,7 +517,7 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			String result = tagList.getStringTag(SL_SERVERNAME);
+			String result = (String)tagList.getTag(SL_SERVERNAME).getValue();
 			
 			result = result.trim();
 			
@@ -529,18 +527,15 @@ public class Server extends JMConnection {
 			
 			return getAddress();
 			
-		} catch (TagException e) {
+		} catch (Throwable t) {
 			
 			return getAddress();
 		}
 	}
 
 	private void setDesc(String serverDesc) {
-		
-		Tag tag = new StandardTag(TAG_TYPE_STRING, SL_DESCRIPTION);
-		
-		tag.insertString(serverDesc);
-		
+		Tag tag = new StringTag(SL_DESCRIPTION, serverDesc);
+				
 		tagList.removeTag(SL_DESCRIPTION);
 		
 		tagList.addTag(tag);
@@ -551,9 +546,9 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return tagList.getStringTag(SL_DESCRIPTION);
+			return (String)tagList.getTag(SL_DESCRIPTION).getValue();
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return "";
 		}
@@ -561,10 +556,8 @@ public class Server extends JMConnection {
 
 	private void setSoftLimit(int softLimit) {
 		
-		Tag tag = new StandardTag(TAG_TYPE_DWORD, SL_SOFTFILES);
-		
-		tag.insertDWORD(softLimit);
-		
+		Tag tag = new IntTag(SL_SOFTFILES, softLimit);
+			
 		tagList.removeTag(SL_SOFTFILES);
 		
 		tagList.addTag(tag);
@@ -572,22 +565,21 @@ public class Server extends JMConnection {
 	}
 
 	public int getSoftLimit() {
-		
+		if (!tagList.hasTag(SL_SOFTFILES)) return 0;
 		try {
 			
-			return tagList.getDWORDTag(SL_SOFTFILES);
+			return (Integer)tagList.getTag(SL_SOFTFILES).getValue();
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
+			
 			return 0;
 		}
 	}
 
 	private void setHardLimit(int hardLimit) {
 		
-		Tag tag = new StandardTag(TAG_TYPE_DWORD, SL_HARDFILES);
-		
-		tag.insertDWORD(hardLimit);
-		
+		Tag tag = new IntTag(SL_HARDFILES, hardLimit);
+				
 		tagList.removeTag(SL_HARDFILES);
 		
 		tagList.addTag(tag);
@@ -598,9 +590,9 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return tagList.getDWORDTag(SL_HARDFILES);
+			return (Integer)tagList.getTag(SL_HARDFILES).getValue();
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return 0;
 			
@@ -609,9 +601,7 @@ public class Server extends JMConnection {
 
 	private void setPing(long ping) {
 		
-		Tag tag = new StandardTag(TAG_TYPE_DWORD, SL_PING);
-		
-		tag.insertDWORD(Convert.longToInt(ping));
+		Tag tag = new IntTag(SL_PING,Convert.longToInt(ping));
 		
 		tagList.removeTag(SL_PING);
 		
@@ -623,9 +613,9 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return Convert.longToInt(tagList.getDWORDTag(SL_PING));
+			return Convert.longToInt((Integer)tagList.getTag(SL_PING).getValue());
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return 0;
 			
@@ -636,7 +626,7 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			long version = tagList.getDWORDTag(SL_VERSION);
+			long version = (Integer)tagList.getTag(SL_VERSION).getValue();
 			
 			long major = version >> 16;
 			
@@ -644,7 +634,7 @@ public class Server extends JMConnection {
 			
 			return major+"."+minor;
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return "";
 		}
@@ -654,9 +644,9 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return Convert.intToLong(tagList.getDWORDTag(SL_FILES));
+			return Convert.intToLong((Integer)tagList.getTag(SL_FILES).getValue());
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return 0;
 			
@@ -668,9 +658,9 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return Convert.intToLong(tagList.getDWORDTag(SL_SRVMAXUSERS));
+			return Convert.intToLong((Integer)tagList.getTag(SL_SRVMAXUSERS).getValue());
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return 0;
 			
@@ -681,9 +671,9 @@ public class Server extends JMConnection {
 		
 		try {
 			
-			return Convert.intToLong(tagList.getDWORDTag(SL_USERS));
+			return Convert.intToLong((Integer)tagList.getTag(SL_USERS).getValue());
 			
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			
 			return 0;
 			
@@ -692,9 +682,7 @@ public class Server extends JMConnection {
 	
 	private void setNumUsers(long numUsers) {
 		
-		Tag tag = new StandardTag(TAG_TYPE_DWORD, SL_USERS);
-		
-		tag.insertDWORD(Convert.longToInt(numUsers));
+		Tag tag = new IntTag(SL_USERS, Convert.longToInt(numUsers));
 		
 		tagList.removeTag(SL_USERS);
 		
@@ -704,10 +692,8 @@ public class Server extends JMConnection {
 
 	private void setNumFiles(long numFiles) {
 		
-		Tag tag = new StandardTag(TAG_TYPE_DWORD, SL_FILES);
-		
-		tag.insertDWORD(Convert.longToInt(numFiles));
-		
+		Tag tag = new IntTag(SL_FILES, Convert.longToInt(numFiles));
+				
 		tagList.removeTag(SL_FILES);
 		
 		tagList.addTag(tag);

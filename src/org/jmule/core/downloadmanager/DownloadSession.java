@@ -34,8 +34,8 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTTAKEN;
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
+import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_STRING;
+import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -71,8 +71,10 @@ import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerQueueRankingSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingCompressedPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSendingPartSP;
 import org.jmule.core.edonkey.packet.scannedpacket.impl.JMPeerSlotTakenSP;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.StringTag;
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadConstants;
@@ -99,8 +101,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/12 08:46:51 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -162,17 +164,15 @@ public class DownloadSession implements JMTransferSession {
 		try {
 
 			TagList tagList = new TagList();
-		
-			StandardTag tag = new StandardTag(TAG_TYPE_STRING,FT_FILENAME);
-		
-			tag.insertString(fileLink.getFileName());
-		
+			
+			Tag tag;
+			
+			tag = new StringTag(FT_FILENAME,fileLink.getFileName());
+			
 			tagList.addTag(tag);
 		
-			tag = new StandardTag(TAG_TYPE_DWORD,FT_FILESIZE);
-		
-			tag.insertDWORD(Convert.longToInt((fileLink.getFileSize())));
-		
+			tag = new IntTag(FT_FILESIZE, Convert.longToInt((fileLink.getFileSize())));
+				
 			tagList.addTag(tag);
 		
 			createDownloadFiles(fileLink.getFileName(),fileLink.getFileSize(),fileLink.getFileHash(),null,tagList);

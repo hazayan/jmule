@@ -32,14 +32,14 @@ import java.nio.ByteBuffer;
 import org.jmule.core.edonkey.packet.UDPPacket;
 import org.jmule.core.edonkey.packet.UDPPacketException;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.edonkey.packet.tag.TagReader;
+import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:07:39 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class UDPServerPacket extends UDPAbstractPacket implements UDPPacket {
 	
@@ -213,7 +213,7 @@ public class UDPServerPacket extends UDPAbstractPacket implements UDPPacket {
 		int tagCount = dataPacket.getInt();
 		try {
 		for(int i = 0;i<tagCount;i++) 
-			tagList.addTag(TagReader.readTag(dataPacket));
+			tagList.addTag(TagScanner.scanTag(dataPacket));
 		}catch(RuntimeException e) {
 			e.printStackTrace();
 		}

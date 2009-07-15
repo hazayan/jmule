@@ -32,19 +32,18 @@ import java.nio.channels.FileChannel;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.jkad.ClientID;
-import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.net.packet.tag.Tag;
-import org.jmule.core.jkad.net.packet.tag.TagList;
-import org.jmule.core.jkad.net.packet.tag.TagScanner;
 import org.jmule.core.utils.Convert;
 
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/09 13:36:50 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
 public class SrcIndexDat {
 
@@ -162,7 +161,7 @@ public class SrcIndexDat {
 				data.position(0);
 				channel.write(data);
 				for(Tag tag : source.getTagList()) {
-					ByteBuffer buffer = tag.getDataAsByteBuffer();
+					ByteBuffer buffer = tag.getAsByteBuffer();
 					buffer.position(0);
 					channel.write(buffer);
 				}

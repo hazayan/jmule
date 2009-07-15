@@ -62,10 +62,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketReader;
 import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.edonkey.packet.tag.TagReader;
-import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
+import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.net.JMEndOfStreamException;
 import org.jmule.core.net.JMFloodException;
 import org.jmule.core.net.JMuleSocketChannel;
@@ -79,8 +77,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:09:12 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class StandardPacket extends AbstractPacket implements Packet {
 
@@ -299,19 +297,19 @@ public class StandardPacket extends AbstractPacket implements Packet {
 			int tagCount = packet_data.getInt();
 			
 			for(int j=0;j<tagCount;j++) {
-				Tag tag = TagReader.readTag(packet_data);
+				Tag tag = TagScanner.scanTag(packet_data);	
 				result.addTag(tag);
 			}
 
 			// transform Server's file rating into eMule file rating
 			if (result.hasTag(FT_FILERATING)) {
-				Tag tag = result.getRawTag(FT_FILERATING);
+				Tag tag = result.getTag(FT_FILERATING);
 				try {
-					int data = tag.getDWORD();
+					int data = (Integer)tag.getValue();
 					data = Convert.byteToInt(Misc.getByte(data, 0));
 					int rating_value = data / SERVER_SEARCH_RATIO;
-					tag.insertDWORD(rating_value);
-				} catch (TagException e) {e.printStackTrace();}
+					tag.setValue(rating_value);
+				} catch (Throwable e) {e.printStackTrace();}
 			}
 
 			searchResults.add(result);
@@ -640,14 +638,14 @@ public class StandardPacket extends AbstractPacket implements Packet {
     
     /** Get all tags from current position **/
 	public TagList getTags() {
+		
 	    int tagCount = this.packet_data.getInt();
-	    TagList TagList = new TagList();
+	    TagList tagList = new TagList();
 	    for(int i = 0;i<tagCount;i++) {
-	    	StandardTag Tag = new StandardTag();
-	    	Tag.extractTag(this.packet_data);
-	    	TagList.addTag(Tag);
+	    	Tag Tag = TagScanner.scanTag(packet_data);
+	    	tagList.addTag(Tag);
 	    }
-		return TagList;
+		return tagList;
 	}
 
 	 public void addData(ByteBuffer data){

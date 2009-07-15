@@ -20,51 +20,46 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.core.jkad.net.packet.tag;
-
-import static org.jmule.core.jkad.JKadConstants.TAGTYPE_UINT8;
-import static org.jmule.core.utils.Misc.getByteBuffer;
+package org.jmule.core.edonkey.packet.tag;
 
 import java.nio.ByteBuffer;
 
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
- * Created on Jan 1, 2009
+ * Created on Jul 15, 2009
  * @author binary256
  * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
-public class ByteTag extends Tag {
+public class ShortTag extends StandartTag {
 
-	private byte tagValue;
+	private short tagValue;
 	
-	public ByteTag(byte[] tagName, byte tagValue) {
-		super(TAGTYPE_UINT8, tagName);
-		this.tagValue = tagValue;
-
-	}
-
-	public Byte getValue() {
-		return tagValue;
-	}
-	
-	public void setValue(byte tagValue) {
+	public ShortTag(byte[] tagName, short tagValue) {
+		super(TAGTYPE_UINT16, tagName);
 		this.tagValue = tagValue;
 	}
-	
-	public ByteBuffer getDataAsByteBuffer() {
-		ByteBuffer tagHeader = getTagHeader();
-		ByteBuffer result = getByteBuffer(tagHeader.capacity() + 1);
-		result.put(tagHeader);
-		result.put(tagValue);
+
+	ByteBuffer getValueAsByteBuffer() {
+		ByteBuffer result = Misc.getByteBuffer(2);
+		result.putShort(tagValue);
+		result.position(0);
 		return result;
 	}
 
-	public String toString() {
-		return super.toString() + " " +tagValue;
+
+	int getValueLength() {
+		return 2;
 	}
 
-	public void setValue(Object newValue) {
-		tagValue = (Byte) newValue;
+	public Object getValue() {
+		return Convert.shortToInt(tagValue);
 	}
-	
+
+	public void setValue(Object object) {
+		tagValue = (Short) object;
+	}
+
 }

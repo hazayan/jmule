@@ -32,10 +32,10 @@ import java.util.Set;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.indexer.Source;
-import org.jmule.core.jkad.net.packet.tag.Tag;
 import org.jmule.core.jkad.search.Search;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
@@ -43,8 +43,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 17:57:37 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class SearchManagerImpl implements SearchManager {
 

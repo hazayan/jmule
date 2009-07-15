@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:29:15 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -189,13 +189,7 @@ public class JKadConstants {
 	#define	TAGTYPE_BSOB			0x0A
 	#define	TAGTYPE_UINT64			0x0B
 	*/
-	public static final byte TAGTYPE_HASH					= (byte) 0x01;
-	public static final byte TAGTYPE_STRING					= (byte) 0x02;
-	public static final byte TAGTYPE_UINT64					= (byte) 0x0B;
-	public static final byte TAGTYPE_UINT32					= (byte) 0x03;
-	public static final byte TAGTYPE_UINT16					= (byte) 0x08;
-	public static final byte TAGTYPE_UINT8					= (byte) 0x09;
-	public static final byte TAGTYPE_BSOB					= (byte) 0x0A;
+
 	
 	public static final byte[] TAG_SOURCETYPE				=  new byte[] { (byte)0xFF };
 	

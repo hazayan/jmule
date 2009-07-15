@@ -24,41 +24,27 @@ package org.jmule.core.edonkey.packet.tag;
 
 import java.nio.ByteBuffer;
 
-import org.jmule.core.edonkey.packet.tag.impl.MetaTag;
-
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/27 16:52:47 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public interface Tag {
 	
-	public MetaTag getMetaTag();
+	public ByteBuffer getTagHeader();
+	public int getHeaderSize();
 	
-	public int getMetaNameLength();
-	
-	public void clear();
-	
-	public byte getType() ;
-	
+	public byte getType();
 	public void setType(byte tagType);
 	
-	public int getSize() ;
+	public byte[] getTagName();
+	public void setTagName(byte[] tagName);
 	
-	public byte[] getData();
+	public ByteBuffer getAsByteBuffer();
+	public Object getValue();
+	public void setValue(Object object);
 	
-	public String toString();
-	
-	public String getString() throws TagException;
-	
-	public int getDWORD() throws TagException; 
-	
-	public void  insertString(String stringData);
-	
-	public void insertDWORD(int dwordData);
-		
-	public void extractTag(ByteBuffer data);
-	
+	public int getSize();
 }

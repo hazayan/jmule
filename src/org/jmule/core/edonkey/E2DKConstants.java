@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:57:40 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class E2DKConstants {
 
@@ -201,8 +201,13 @@ public class E2DKConstants {
 	//Peer <-> Peer
 	public final static byte OP_REASKFILEPING 			= (byte)(0x90);
 	// Tag types
-	public final static byte TAG_TYPE_STRING 			= (byte) 0x02;
-	public final static byte TAG_TYPE_DWORD 			= (byte) 0x03;
+	public static final byte TAGTYPE_HASH				= (byte) 0x01;
+	public final static byte TAGTYPE_STRING 			= (byte) 0x02;
+	public final static byte TAGTYPE_UINT32 			= (byte) 0x03;
+	public static final byte TAGTYPE_UINT16				= (byte) 0x08;
+	public static final byte TAGTYPE_UINT8				= (byte) 0x09;
+	public static final byte TAGTYPE_BSOB				= (byte) 0x0A;
+	public static final byte TAGTYPE_UINT64				= (byte) 0x0B;
 	//Extended tag Types
 	public final static byte TAG_TYPE_EXSTRING_SHORT_BEGIN = (byte) 0x90;
 	public final static byte TAG_TYPE_EXSTRING_SHORT_END = (byte) (TAG_TYPE_EXSTRING_SHORT_BEGIN + 15);

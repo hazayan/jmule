@@ -50,8 +50,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:42 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:33 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -186,8 +186,8 @@ public class PartialFile extends SharedFile {
 			partFile.writeFile();
 			
 		} catch (PartMetException e) {
-			
-			throw new SharedFileException("Failed to write part.met file");
+			e.printStackTrace();
+			throw new SharedFileException("Failed to write part.met file\n"+Misc.getStackTrace(e));
 		}
 
 	}
@@ -210,7 +210,8 @@ public class PartialFile extends SharedFile {
 		partFile.writeFile();
 		
 		}catch(PartMetException e) {
-			
+			e.printStackTrace();
+			throw new SharedFileException("Failed to save part.met file\n"+Misc.getStackTrace(e));
 		}
 	}
 	
@@ -294,10 +295,12 @@ public class PartialFile extends SharedFile {
 				try {
 					partFile.writeFile();
 				} catch (PartMetException e) {
+					e.printStackTrace();
 					throw new SharedFileException("Failed to save part.met file\n"+Misc.getStackTrace(e));
 				}
 				checkFilePartsIntegrity();
 			}catch(Throwable t) {
+				t.printStackTrace();
 				throw new SharedFileException("Failed to write data\n"+Misc.getStackTrace(t));
 			}
 		
@@ -507,7 +510,7 @@ public class PartialFile extends SharedFile {
 		
 		try {
 			
-			return Convert.intToLong(tagList.getDWORDTag(FT_FILESIZE));
+			return Convert.intToLong((Integer)tagList.getTag(FT_FILESIZE).getValue());
 			
 		} catch (Throwable e) {
 			return 0; }
@@ -593,8 +596,8 @@ public class PartialFile extends SharedFile {
 						partFile.writeFile();
 						
 					} catch (PartMetException e) {
-						
-						throw new SharedFileException("Failed to save part.met file");
+						e.printStackTrace();
+						throw new SharedFileException("Failed to save part.met file\n"+Misc.getStackTrace(e));
 						
 					}
 					System.out.println("D");

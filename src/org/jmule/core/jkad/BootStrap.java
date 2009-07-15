@@ -22,17 +22,18 @@
  */
 package org.jmule.core.jkad;
 
-import static org.jmule.core.jkad.JKadConstants.*;
+import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_CHECK_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_CONTACTS;
 import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_REMOVE_TIME;
 import static org.jmule.core.jkad.JKadConstants.BOOTSTRAP_STOP_CONTACTS;
+import static org.jmule.core.jkad.JKadConstants.MIN_CONTACTS_TO_SEND_BOOTSTRAP;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
-import org.jmule.core.jkad.net.packet.tag.TagList;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
 import org.jmule.core.jkad.utils.timer.Task;
@@ -43,8 +44,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:20:59 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
  */
 public class BootStrap {
 
@@ -91,7 +92,7 @@ public class BootStrap {
 				KadPacket packet = PacketFactory.getBootStrap1ReqPacket();
 				udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 			} else {
-				KadPacket packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+				KadPacket packet = PacketFactory.getHello2ReqPacket(org.jmule.core.edonkey.packet.tag.TagList.EMPTY_TAG_LIST);
 				udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 			}
 		}

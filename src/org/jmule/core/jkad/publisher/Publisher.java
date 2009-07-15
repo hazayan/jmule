@@ -32,19 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.lookup.Lookup;
-import org.jmule.core.jkad.lookup.LookupListener;
-import org.jmule.core.jkad.lookup.LookupTask;
-import org.jmule.core.jkad.net.packet.tag.Tag;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:47:27 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
  */
 
 public class Publisher {

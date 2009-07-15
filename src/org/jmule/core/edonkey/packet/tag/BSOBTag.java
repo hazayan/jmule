@@ -22,39 +22,42 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_DWORD;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_TYPE_STRING;
+import java.nio.ByteBuffer;
 
-import org.jmule.core.edonkey.packet.tag.impl.StandardTag;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 
 /**
- * 
+ * Created on Jul 15, 2009
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 16:20:43 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
  */
-public class TagFactory {
-	/**
-	 * Create String Tag with Special Tag value
-	 * @param Str String value
-	 * @param tagName name of tag
-	 */
-	public static Tag getStringTag(String Str,byte[] metaTagName) {
-		Tag result=(Tag)new StandardTag(TAG_TYPE_STRING,metaTagName);
-		result.insertString(Str);
-		
-		return result;
-	}
+public class BSOBTag extends StandartTag {
 	
-	/**
-	 * Create DWORD tag 
-	 * @param Data Data value
-	 * @param tagName name of tag
-	 */
-	public static Tag getDWORDTag(int Data,byte[] tagName) {
-		Tag result=(Tag)new StandardTag(TAG_TYPE_DWORD,tagName);
-		result.insertDWORD(Data);
-		return result;
+	private ByteBuffer tagValue;
+	
+	public BSOBTag(byte[] tagName, ByteBuffer tagValue) {
+		super(TAGTYPE_BSOB, tagName);
+		this.tagValue = tagValue;
+	}
+
+	
+	ByteBuffer getValueAsByteBuffer() {
+		return tagValue;
+	}
+
+
+	int getValueLength() {
+		return tagValue.capacity();
+	}
+
+
+	public Object getValue() {
+		return tagValue;
+	}
+
+	public void setValue(Object object) {
+		tagValue = (ByteBuffer) object;
 	}
 
 }

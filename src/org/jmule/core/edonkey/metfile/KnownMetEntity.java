@@ -27,15 +27,14 @@ import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
 
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
-import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class KnownMetEntity {
 	private int date;
@@ -68,8 +67,8 @@ public class KnownMetEntity {
 
 	public String toString() {
 		try {
-			String result =  "File Name : "+tagList.getStringTag(FT_FILENAME)+
-			" Size : "+tagList.getDWORDTag(FT_FILESIZE)
+			String result =  "File Name : "+tagList.getTag(FT_FILENAME)+
+			" Size : "+tagList.getTag(FT_FILESIZE)
 			+" Hash : "+this.partHashSet.getFileHash()+" Part count : "+
 			+this.partHashSet.size()+ " Hash sets :\n";
 			
@@ -79,7 +78,7 @@ public class KnownMetEntity {
 			}
 				
 			return result;
-		} catch (TagException e) {
+		} catch (Throwable e) {
 			return "";
 		}
 		

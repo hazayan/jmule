@@ -46,7 +46,6 @@ import static org.jmule.core.edonkey.E2DKConstants.video_extensions;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
 import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.packet.tag.TagException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.core.utils.Convert;
@@ -55,8 +54,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:29:34 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
  */
 public class SearchResultItem extends TagList {
 
@@ -94,42 +93,44 @@ public class SearchResultItem extends TagList {
 	
 	public String getFileName(){
 		try {
-			return super.getStringTag(TAG_NAME_NAME);
-		} catch (TagException e) {
+			return (String)super.getTag(TAG_NAME_NAME).getValue();
+		} catch (Throwable e) {
 			return null;
 		}
 	}
 	
 	public long getFileSize() {
 		try {
-			return Convert.intToLong(super.getDWORDTag(TAG_NAME_SIZE));
-		} catch (TagException e) {
+			return Convert.intToLong((Integer)super.getTag(TAG_NAME_SIZE).getValue());
+		} catch (Throwable e) {
+			e.printStackTrace();
 			return 0;
 		}
 	}
 	
 	public int getFileAviability() {
 		try {
-			return super.getDWORDTag(TAG_NAME_AVIABILITY);
-		} catch (TagException e) {
+			return (Integer)super.getTag(TAG_NAME_AVIABILITY).getValue();
+		} catch (Throwable e) {
+			e.printStackTrace();
 			return 0;
 		}
 	}
 	
 	public int getFileCompleteSrc() {
 		try {
-			return super.getDWORDTag(TAG_NAME_COMPLETESRC);
-		} catch (TagException e) {
+			return (Integer)super.getTag(TAG_NAME_COMPLETESRC).getValue();
+		} catch (Throwable e) {
 			return 0;
 		}
 	}
 	
 	public FileQuality getFileQuality() {
+		if (!hasTag(FT_FILERATING)) return FileQuality.NOTRATED;
 		try {
-			int quality = super.getDWORDTag(FT_FILERATING);
+			int quality = (Integer)super.getTag(FT_FILERATING).getValue();
 			return FileQuality.getAsFileQuality(quality);
-		} catch (TagException e) {
-			e.printStackTrace();
+		} catch (Throwable e) {
 			return FileQuality.NOTRATED;
 		}
 	}
