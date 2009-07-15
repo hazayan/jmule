@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:10:49 $$
  */
 public class PartMet extends MetFile {
 	
@@ -284,11 +284,7 @@ public class PartMet extends MetFile {
 			fileChannel.write(data);
 			
 			data = Misc.getByteBuffer(tagList.getByteSize());
-			System.out.println("Write tag list : \n");
-			for(Tag tag : tagList) {
-				System.out.println("Tag : " + Convert.byteToHexString(tag.getAsByteBuffer().array(), " "));
-			}
-			
+						
 			for(Tag tag : tagList) {
 				data.put(tag.getAsByteBuffer());
 			}
