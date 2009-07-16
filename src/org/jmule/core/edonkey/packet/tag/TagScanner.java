@@ -42,8 +42,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/16 09:34:00 $
  */
 public class TagScanner {
 	
@@ -193,7 +193,19 @@ public class TagScanner {
 				data =  getByteBuffer(8);
 				file.read(data);
 				return new LongTag(tagName, data.getLong(0));
+			case TAGTYPE_BSOB : 
+				ByteBuffer t = getByteBuffer(1);
+				file.read(t);
+				byte size = t.get(0);
+				ByteBuffer content = getByteBuffer(size);
+				file.read(content);
+				ByteBuffer raw_data = getByteBuffer(size+1);
+				raw_data.put(size);
+				content.position(0);
+				raw_data.put(content);
+				return new BSOBTag(tagName, raw_data);
 		}
+		
 		return null;
 	}
 }
