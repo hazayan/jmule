@@ -42,8 +42,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/16 09:34:00 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/17 14:27:51 $
  */
 public class TagScanner {
 	
@@ -53,7 +53,7 @@ public class TagScanner {
 		byte[] tagName;
 		
 		tagType = data.get();
-		if (tagType >=Convert.byteToInt(E2DKConstants.TAG_TYPE_EXDWORD))
+		if (Convert.byteToInt(tagType) >=Convert.byteToInt(E2DKConstants.TAG_TYPE_EXSTRING_LONG))
 				tagNameLength = 1;
 			else
 				tagNameLength = data.getShort();
@@ -63,7 +63,7 @@ public class TagScanner {
 		
 		// analize extended tags
 		boolean isExtendedCompressedStringTag = false;
-		int oldTagType = tagType;
+		int oldTagType = Convert.byteToInt(tagType);
 		int ivalue = Convert.byteToInt(tagType);
 		if (ivalue>=Convert.byteToInt(E2DKConstants.TAG_TYPE_EXSTRING_SHORT_BEGIN)) {
 			tagType = TAGTYPE_STRING;
@@ -96,7 +96,7 @@ public class TagScanner {
 	
 			case TAGTYPE_STRING :
 				if (isExtendedCompressedStringTag) {
-					int str_length = oldTagType - 0x90;
+					int str_length = (oldTagType) - 0x90;
 					byte str_data[] = new byte[str_length];
 					data.get(str_data);
 					String str = new String(str_data);
