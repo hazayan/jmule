@@ -33,8 +33,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 13:52:44 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/17 08:19:33 $$
  */
 public privileged aspect PeerLogger {
 	
@@ -59,10 +59,5 @@ public privileged aspect PeerLogger {
 	}
 	
 	before(ScannedPacket packet, Peer p) : target(p) && args(packet)&& execution (void Peer.processPacket(ScannedPacket)) {
-	}
-	
-	after(Peer p) returning(Packet packet) :target(p) && execution(KadPacket JMConnection.getReceivedPacket()) {
-		if (packet==null)
-			log.warning("Scanned Packet is null from client  : "+p);
 	}
 }
