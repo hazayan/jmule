@@ -101,8 +101,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:34:53 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -205,6 +205,9 @@ public class DownloadSession implements JMTransferSession {
 		
 		partStatus = new FilePartStatus(partCount);
 		
+		if (partialFile.isDownloadStarted()) 
+			startDownload();
+		
 	}
 
 	private void createDownloadFiles(String fileName,long fileSize,FileHash fileHash,
@@ -275,11 +278,16 @@ public class DownloadSession implements JMTransferSession {
 		Timer.getSingleton().addTask(JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, kad_source_search, true);
 		kad_source_search.run();
 		}
+		
+		sharedFile.markDownloadStarted();
 
 	}
 	
 	public void stopDownload() {
-		
+		stopDownload(true);
+	}
+	
+	public void stopDownload(boolean saveDownloadStatus) {
 		compressedFileChunks.clear();
 		
 		if (queryThread!=null)
@@ -319,14 +327,15 @@ public class DownloadSession implements JMTransferSession {
 		connecting_peers.clear();
 		
 		setStatus(DownloadStatus.STOPPED);
-		
+		if (saveDownloadStatus)
+			sharedFile.markDownloadStopped();
 	}
 	
 	public void cancelDownload() {
 		
 		if (isStarted()) {
 			
-			stopDownload();
+			stopDownload(false);
 		}
 		
 		SharingManagerFactory.getInstance().removeSharedFile(sharedFile.getFileHash());

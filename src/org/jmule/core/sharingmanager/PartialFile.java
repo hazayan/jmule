@@ -41,6 +41,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.PartHashSet;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.edonkey.metfile.PartMetException;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.MD4;
@@ -50,8 +52,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:33 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:32:19 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -88,7 +90,9 @@ public class PartialFile extends SharedFile {
 		}
 		
 		this.partFile = partFile;
-		this.tagList = partFile.getTagList();
+		this.tagList = new TagList(partFile.getTagList().getAsList());
+		tagList.removeTag(E2DKConstants.JMuleInternalTags);
+		
 		tempFileName = tempDir + File.separator + partFile.getTempFileName();
 		
 		metFileName = tempDir + File.separator + partFile.getName();
@@ -523,6 +527,35 @@ public class PartialFile extends SharedFile {
 		
 		partFile.close();
 		super.closeFile();
+	}
+	
+	public void markDownloadStarted() {
+		IntTag tag = new IntTag(E2DKConstants.FT_NAME_STATUS, 0x00);
+		partFile.getTagList().addTag(tag, true);
+		try {
+			partFile.writeFile();
+		} catch (PartMetException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void markDownloadStopped() {
+		IntTag tag = new IntTag(E2DKConstants.FT_NAME_STATUS, 0x01);
+		partFile.getTagList().addTag(tag, true);
+		try {
+			partFile.writeFile();
+		} catch (PartMetException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean isDownloadStarted() {
+		Tag tag = partFile.getTagList().getTag(E2DKConstants.FT_NAME_STATUS);
+		if (tag == null) 
+			return true;
+		int value = (Integer)tag.getValue();
+		if (value==0x00) return true;
+		return false;
 	}
 	
 	
