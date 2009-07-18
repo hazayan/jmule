@@ -22,7 +22,7 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_BSOB;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_HASH;
 import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_STRING;
 import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT16;
@@ -38,12 +38,13 @@ import java.nio.channels.FileChannel;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/17 14:27:51 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:06:02 $
  */
 public class TagScanner {
 	
@@ -53,7 +54,7 @@ public class TagScanner {
 		byte[] tagName;
 		
 		tagType = data.get();
-		if (Convert.byteToInt(tagType) >=Convert.byteToInt(E2DKConstants.TAG_TYPE_EXSTRING_LONG))
+		if (Convert.byteToInt(tagType) >=Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_LONG))
 				tagNameLength = 1;
 			else
 				tagNameLength = data.getShort();
@@ -65,24 +66,24 @@ public class TagScanner {
 		boolean isExtendedCompressedStringTag = false;
 		int oldTagType = Convert.byteToInt(tagType);
 		int ivalue = Convert.byteToInt(tagType);
-		if (ivalue>=Convert.byteToInt(E2DKConstants.TAG_TYPE_EXSTRING_SHORT_BEGIN)) {
+		if (ivalue>=Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_SHORT_BEGIN)) {
 			tagType = TAGTYPE_STRING;
 			isExtendedCompressedStringTag = true;
 		}
-		if (ivalue==Convert.byteToInt(E2DKConstants.TAG_TYPE_EXSTRING_LONG)) {
+		if (ivalue==Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_LONG)) {
 			tagType = TAGTYPE_STRING;
 		}
 		
-		if (ivalue == Convert.byteToInt(E2DKConstants.TAG_TYPE_EXBYTE)) {
+		if (ivalue == Convert.byteToInt(E2DKConstants.TAGTYPE_EXBYTE)) {
 			int value = Convert.byteToInt(data.get());
 			return new IntTag(tagName, value);
 		}
 		
-		if (ivalue == Convert.byteToInt(E2DKConstants.TAG_TYPE_EXWORD)) {
+		if (ivalue == Convert.byteToInt(E2DKConstants.TAGTYPE_EXWORD)) {
 			int value = Convert.shortToInt(data.getShort());
 			return new IntTag(tagName, value);
 		}
-		if (ivalue == Convert.byteToInt(E2DKConstants.TAG_TYPE_EXDWORD)) {
+		if (ivalue == Convert.byteToInt(E2DKConstants.TAGTYPE_EXDWORD)) {
 			int value = data.getInt();
 			return new IntTag(tagName, value);
 		}
@@ -96,7 +97,7 @@ public class TagScanner {
 	
 			case TAGTYPE_STRING :
 				if (isExtendedCompressedStringTag) {
-					int str_length = (oldTagType) - 0x90;
+					int str_length = (oldTagType) - TAGTYPE_EXSTRING_SHORT_BEGIN;
 					byte str_data[] = new byte[str_length];
 					data.get(str_data);
 					String str = new String(str_data);
@@ -131,6 +132,24 @@ public class TagScanner {
 				raw_data.put(size);
 				data.get(raw_data.array(), 1, size);
 				return new BSOBTag(tagName, raw_data);
+				
+			case TAGTYPE_FLOAT32 : 
+				float value = data.getFloat();
+				return new FloatTag(tagName, value);
+			case TAGTYPE_BOOL :
+				byte boolValue = data.get();
+				return new BoolTag(tagName, boolValue == 1 ? true : false );
+			case TAGTYPE_BOOLARRAY : 
+				short boolArraySize = data.getShort();
+				byte[] boolArray = new byte[(boolArraySize+7)/8];
+				data.get(boolArray);
+				return new BoolArrayTag(tagName, boolArray);
+			case TAGTYPE_BLOB : 
+				int blobSize = data.getInt();
+				byte[] blobData = new byte[blobSize];
+				data.get(blobData);
+				return new BlobTag(tagName, blobData);
+				
 		}
 		return null;
 	}
@@ -204,8 +223,33 @@ public class TagScanner {
 				content.position(0);
 				raw_data.put(content);
 				return new BSOBTag(tagName, raw_data);
+				
+			case TAGTYPE_FLOAT32 :
+				ByteBuffer tfloat = Misc.getByteBuffer(3);
+				file.read(tfloat);
+				float value = tfloat.getFloat(0);
+				return new FloatTag(tagName, value);
+			case TAGTYPE_BOOL :
+				ByteBuffer tbool = Misc.getByteBuffer(1);
+				file.read(tbool);
+				byte boolValue = tbool.get(0);
+				return new BoolTag(tagName, boolValue == 1 ? true : false );
+			case TAGTYPE_BOOLARRAY : 
+				ByteBuffer tboolArraySize = Misc.getByteBuffer(2);
+				file.read(tboolArraySize);
+				short boolArraySize = tboolArraySize.getShort(0);
+				ByteBuffer boolArray = Misc.getByteBuffer((boolArraySize+7)/8);
+				file.read(boolArray);
+				return new BoolArrayTag(tagName, boolArray.array());
+			case TAGTYPE_BLOB : 
+				ByteBuffer tblobSize = Misc.getByteBuffer(4);
+				file.read(tblobSize);
+				int blobSize = tblobSize.getInt(0);
+				ByteBuffer blobData = Misc.getByteBuffer(blobSize);
+				file.read(blobData);
+				return new BlobTag(tagName, blobData.array());
 		}
-		
+		System.out.println("Unknown tag opcode : " + Convert.byteToHex(tagType));
 		return null;
 	}
 }

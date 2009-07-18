@@ -22,44 +22,47 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
+import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_BOOLARRAY;
+
 import java.nio.ByteBuffer;
 
+import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
-import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
- * Created on Jul 15, 2009
+ * Created on Jul 18, 2009
  * @author binary256
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:06:02 $
  */
-public class StringTag extends StandartTag {
-	private String tagValue;
+public class BoolArrayTag extends StandartTag {
+
+	private JMuleBitSet boolArray;
 	
-	public StringTag(byte[] tagName, String tagValue) {
-		super(TAGTYPE_STRING, tagName);
-		this.tagValue = tagValue;
+	public BoolArrayTag(byte[] tagName,byte[] boolArray) {
+		super(TAGTYPE_BOOLARRAY, tagName);
+		this.boolArray = Convert.byteToBitset(boolArray);
 	}
-	
+
 	ByteBuffer getValueAsByteBuffer() {
-		ByteBuffer result = Misc.getByteBuffer(2 + tagValue.getBytes().length);
-		result.putShort(Convert.intToShort(tagValue.getBytes().length));
-		result.put(tagValue.getBytes());
+		byte[] array = Convert.bitSetToBytes(boolArray);
+		ByteBuffer result = Misc.getByteBuffer(array.length);
+		result.put(array);
 		result.position(0);
 		return result;
 	}
 
 	int getValueLength() {
-		return tagValue.getBytes().length + 2;
+		return Convert.bitSetToBytes(boolArray).length;
 	}
 
 	public Object getValue() {
-		return tagValue;
+
+		return boolArray;
 	}
 
-
 	public void setValue(Object object) {
-		tagValue = (String)object;
+		boolArray = (JMuleBitSet) object;
 	}
 
 }
