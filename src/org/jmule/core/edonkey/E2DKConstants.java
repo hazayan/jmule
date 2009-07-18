@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 08:03:36 $$
  */
 public class E2DKConstants {
 
@@ -204,17 +204,21 @@ public class E2DKConstants {
 	public static final byte TAGTYPE_HASH				= (byte) 0x01;
 	public final static byte TAGTYPE_STRING 			= (byte) 0x02;
 	public final static byte TAGTYPE_UINT32 			= (byte) 0x03;
+	public final static byte TAGTYPE_FLOAT32 			= (byte) 0x04;
+	public final static byte TAGTYPE_BOOL	 			= (byte) 0x05;
+	public final static byte TAGTYPE_BOOLARRAY	 		= (byte) 0x06;
+	public final static byte TAGTYPE_BLOB		 		= (byte) 0x07;
 	public static final byte TAGTYPE_UINT16				= (byte) 0x08;
 	public static final byte TAGTYPE_UINT8				= (byte) 0x09;
 	public static final byte TAGTYPE_BSOB				= (byte) 0x0A;
 	public static final byte TAGTYPE_UINT64				= (byte) 0x0B;
 	//Extended tag Types
-	public final static byte TAG_TYPE_EXSTRING_SHORT_BEGIN = (byte) 0x90;
-	public final static byte TAG_TYPE_EXSTRING_SHORT_END = (byte) (TAG_TYPE_EXSTRING_SHORT_BEGIN + 15);
-	public final static byte TAG_TYPE_EXSTRING_LONG 	= (byte) 0x82; 
-	public final static byte TAG_TYPE_EXBYTE			= (byte) 0x89; 
-	public final static byte TAG_TYPE_EXWORD 			= (byte) 0x88;
-	public final static byte TAG_TYPE_EXDWORD 			= (byte) 0x83;
+	public final static byte TAGTYPE_EXSTRING_SHORT_BEGIN = (byte) 0x90;
+	public final static byte TAGTYPE_EXSTRING_SHORT_END = (byte) (TAGTYPE_EXSTRING_SHORT_BEGIN + 15);
+	public final static byte TAGTYPE_EXSTRING_LONG 		= (byte) 0x82; 
+	public final static byte TAGTYPE_EXBYTE				= (byte) 0x89; 
+	public final static byte TAGTYPE_EXWORD 			= (byte) 0x88;
+	public final static byte TAGTYPE_EXDWORD 			= (byte) 0x83;
 	// Meta tag Name
 	public final static byte[] TAG_NAME_NAME 			= new byte[]{0x01};
 	public final static byte[] TAG_NAME_NICKNAME		= new byte[]{0x01};
