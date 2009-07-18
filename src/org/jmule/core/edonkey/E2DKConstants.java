@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 08:03:36 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:34:39 $$
  */
 public class E2DKConstants {
 
@@ -229,6 +229,20 @@ public class E2DKConstants {
 	public final static byte[] TAG_NAME_MISC_OPTIONS2 	= new byte[]{(byte)0xfe};
 	public final static byte[] TAG_NAME_UDP_PORT 		= new byte[] {0x21};
 	public final static byte[] TAG_NAME_UDP_PORT_PEER 	= new byte[] {(byte)0xF9};
+	public final static byte[] TAG_NAME_SIZE 			= new byte[]{0x02};
+	public final static byte[] TAG_NAME_FILE_TYPE		= new byte[]{0x03};
+	public final static byte[] TAG_NAME_FORMAT		 	= new byte[]{0x04};
+	public final static byte[] TAG_NAME_AVIABILITY 		= new byte[]{0x15};
+	public final static byte[] TAG_NAME_COMPLETESRC 	= new byte[]{0x30};
+	
+	public final static byte[] FT_NAME_STATUS			= new byte[]{0x14};
+	
+	public final static List<byte[]> JMuleInternalTags		= new LinkedList<byte[]>();
+	
+	static {
+		JMuleInternalTags.add(FT_NAME_STATUS);
+	}
+	
 	// FLAGS Values 
 	public final static byte CAP_NEWTAGS 				= (byte)0x0008;
 	public final static byte CAP_LARGEFILES 			= (byte)0x0100;
@@ -256,12 +270,6 @@ public class E2DKConstants {
 	public final static byte[] SEARCH_AND 				= new byte[]{ 0x00, 0x00 };
 	public final static byte[] SEARCH_OR 				= new byte[]{ 0x00, 0x01 };
 	public final static byte[] SEARCH_NOT 				= new byte[]{ 0x00, 0x02 };
-	
-	public final static byte[] TAG_NAME_SIZE 			= new byte[]{0x02};
-	public final static byte[] TAG_NAME_FILE_TYPE		= new byte[]{0x03};
-	public final static byte[] TAG_NAME_FORMAT		 	= new byte[]{0x04};
-	public final static byte[] TAG_NAME_AVIABILITY 		= new byte[]{0x15};
-	public final static byte[] TAG_NAME_COMPLETESRC 	= new byte[]{0x30};
 	
 	public final static byte[] TAG_FILE_TYPE_AUDIO	 	= "Audio".getBytes();
 	public final static byte[] TAG_FILE_TYPE_VIDEO	 	= "Video".getBytes();
