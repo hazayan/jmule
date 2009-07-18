@@ -23,7 +23,6 @@
 package org.jmule.core.jkad.indexer;
 
 import org.jmule.core.edonkey.packet.tag.IntTag;
-import org.jmule.core.edonkey.packet.tag.LongTag;
 import org.jmule.core.edonkey.packet.tag.ShortTag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ClientID;
@@ -35,8 +34,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:08:29 $
  */
 public class Source {
 	private ClientID clientID;
@@ -46,14 +45,20 @@ public class Source {
 	//private int tcpPort;
 	private byte kadVersion;
 	private TagList tagList;
-	private long creationTime = System.currentTimeMillis();
+	private long creationTime;
 	
 	public Source(ClientID clientID, TagList tagList) {
+		this(clientID, tagList, System.currentTimeMillis());
+	}
+	
+	public Source(ClientID clientID, TagList tagList, long creationTime) {
 		this.clientID = clientID;
 		this.tagList = tagList;
+		this.creationTime = creationTime;
 	}
 	
 	public Source(ClientID clientID, IPAddress address, int udpPort, int tcpPort) {
+		creationTime = System.currentTimeMillis();
 		this.clientID = clientID;
 		tagList = new TagList();
 		tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP,Convert.byteToInt(address.getAddress())));
