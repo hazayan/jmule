@@ -42,8 +42,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:07:51 $
  */
 public class SrcIndexDat {
 
@@ -82,19 +82,26 @@ public class SrcIndexDat {
 				data = getByteBuffer(2);
 				channel.read(data);
 				int tcpPort = Convert.shortToInt(data.getShort(0));*/
-				
+				data = getByteBuffer(8);
+				channel.read(data);
+				long creation_time = data.getLong(0);
 				data = getByteBuffer(1);
 				channel.read(data);
+			//	System.out.println("position before read : " + channel.position());
 				int tagCount = data.get(0);
+			//	System.out.println("Count : "  + tagCount);
 				TagList tagList = new TagList();
 				
 				for(int k = 0;k<tagCount;k++) {
+					long p = channel.position();
 					Tag tag = TagScanner.scanTag(channel);
 					
 					if (tag!=null)
 						tagList.addTag(tag);
+					else 
+						System.out.println("NULL Tag ! start at : " + p);
 				}
-				Source source = new Source(client_id, tagList);
+				Source source = new Source(client_id, tagList,creation_time);
 				source.setTagList(tagList);
 				index.addSource(source);
 			}
@@ -138,6 +145,11 @@ public class SrcIndexDat {
 			for(Source source : index.getSourceList()) {
 				data = getByteBuffer(16);
 				data.put(source.getClientID().toByteArray());
+				data.position(0);
+				channel.write(data);
+				
+				data = getByteBuffer(8);
+				data.putLong(0, source.getCreationTime());
 				data.position(0);
 				channel.write(data);
 				
