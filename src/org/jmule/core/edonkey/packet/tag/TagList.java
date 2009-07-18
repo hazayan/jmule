@@ -32,8 +32,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:33:26 $$
  */
 public class TagList implements Iterable<Tag> {
 
@@ -70,6 +70,12 @@ public class TagList implements Iterable<Tag> {
 		tagList.add(tag);
 	}
 	
+	public void addTag(Tag tag, boolean removeIfExist) {
+		if (hasTag(tag.getTagName())) 
+			removeTag(tag.getTagName());
+		tagList.add(tag);
+	}
+	
 	public void addTag(Iterable<Tag> tagList, boolean removeIfExist) {
 		for(Tag tag : tagList) {
 			if (hasTag(tag.getTagName()))
@@ -84,6 +90,11 @@ public class TagList implements Iterable<Tag> {
 	
 	public int size() {
 		return tagList.size();
+	}
+	
+	public void removeTag(List<byte[]> tags) {
+		for(byte[] tag : tags)
+			removeTag(tag);
 	}
 	
 	public void removeTag(byte[] tagName) {
