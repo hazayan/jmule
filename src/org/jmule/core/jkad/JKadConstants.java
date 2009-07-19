@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/19 07:02:08 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -98,7 +98,11 @@ public class JKadConstants {
 	public static final int INDEX_MAX_KEYWORDS				= 60000;
 	public static final int INDEX_MAX_SOURCES				= 60000;
 	public static final int INDEX_MAX_NOTES					= 60000;
-	public static final int INDEXER_SAVE_DATA_INTERVAL		= 60000 * 2;
+	public static final int INDEXER_SAVE_DATA_INTERVAL		= 1000 * 60 * 2;
+	public static final int INDEXER_CLEAN_DATA_INTERVAL		= 1000 * 60 ;
+	
+	public static final long TIME_24_HOURS 					=  1000 * 60 * 60 * 24;
+	
 	
 	public static final long DEFAULT_PACKET_LISTENER_TIMEOUT = 5000;
 	
