@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:10:49 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/19 06:49:57 $$
  */
 public class PartMet extends MetFile {
 	
@@ -134,7 +134,7 @@ public class PartMet extends MetFile {
 		
 	}
 	
-	public void loadFile() throws PartMetException{
+	public synchronized void loadFile() throws PartMetException{
 		try {
 			
 			fileChannel.position(0);
@@ -182,8 +182,10 @@ public class PartMet extends MetFile {
 				Tag tag = TagScanner.scanTag(fileChannel);
 				if (tag != null)
 					tagList.addTag(tag);
-				else
+				else {
 					System.out.println("Null tag!");
+					throw new PartMetException("Corrupted tag list in file : " + file.getName() );
+				}
 			}		
 			gapList = new GapList();
 			byte tag_id = E2DKConstants.GAP_OFFSET;
@@ -201,7 +203,7 @@ public class PartMet extends MetFile {
 					long end = Convert.intToLong((Integer)end_tag.getValue());
 					gapList.addGap(begin,end );
 				} catch (Throwable e) {
-					throw new PartMetException("Failed to extract gap positions form file ");
+					throw new PartMetException("Failed to extract gap positions form file : " + file.getName());
 				}
 				tag_id++;
 			}
@@ -214,7 +216,7 @@ public class PartMet extends MetFile {
 		}
 	}
 
-	public void writeFile() throws PartMetException {
+	public synchronized void writeFile() throws PartMetException {
 		try {
 			fileChannel.position(0);
 			ByteBuffer data;
