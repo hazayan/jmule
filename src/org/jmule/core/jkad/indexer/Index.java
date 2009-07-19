@@ -31,8 +31,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Apr 22, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/19 07:04:47 $
  */
 public class Index {
 
@@ -57,8 +57,28 @@ public class Index {
 	}
 	
 	public void addSource(Source source) {
-		if (sourceList.contains(source)) return ;
+		if (sourceList.contains(source)) {
+			for(Source s : sourceList) {
+				if (s.getClientID().equals(source.getClientID())) {
+					s.setCreationTime(System.currentTimeMillis());
+					return;
+				}
+			}
+			return ;
+		}
 		sourceList.add(source);
+	}
+	
+	public void removeContactsWithTimeOut(long timeOut) {
+		for(Source source : sourceList) {
+			long ctime = System.currentTimeMillis();
+			if (ctime - source.getCreationTime() >= timeOut)
+				sourceList.remove(source);
+		}
+	}
+	
+	public boolean isEmpty() {
+		return sourceList.isEmpty();
 	}
 	
 }
