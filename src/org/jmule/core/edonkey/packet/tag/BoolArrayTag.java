@@ -32,8 +32,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jul 18, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:06:02 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/19 06:52:31 $
  */
 public class BoolArrayTag extends StandartTag {
 
@@ -46,14 +46,15 @@ public class BoolArrayTag extends StandartTag {
 
 	ByteBuffer getValueAsByteBuffer() {
 		byte[] array = Convert.bitSetToBytes(boolArray);
-		ByteBuffer result = Misc.getByteBuffer(array.length);
+		ByteBuffer result = Misc.getByteBuffer(getValueLength());
+		result.putShort(Convert.intToShort(array.length));
 		result.put(array);
 		result.position(0);
 		return result;
 	}
 
 	int getValueLength() {
-		return Convert.bitSetToBytes(boolArray).length;
+		return 2+ Convert.bitSetToBytes(boolArray).length;
 	}
 
 	public Object getValue() {

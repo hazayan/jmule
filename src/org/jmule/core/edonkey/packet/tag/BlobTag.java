@@ -31,8 +31,8 @@ import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
  * Created on Jul 18, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:06:02 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/19 06:52:31 $
  */
 public class BlobTag extends StandartTag {
 
@@ -45,14 +45,15 @@ public class BlobTag extends StandartTag {
 
 	
 	ByteBuffer getValueAsByteBuffer() {
-		ByteBuffer result = Misc.getByteBuffer(tagValue.length);
+		ByteBuffer result = Misc.getByteBuffer(getValueLength());
+		result.putInt(tagValue.length);
 		result.put(tagValue);
 		result.position(0);
 		return result;
 	}
 
 	int getValueLength() {
-		return tagValue.length;
+		return tagValue.length + 4;
 	}
 
 	public Object getValue() {

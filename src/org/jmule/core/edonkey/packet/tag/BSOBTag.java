@@ -24,13 +24,16 @@ package org.jmule.core.edonkey.packet.tag;
 
 import java.nio.ByteBuffer;
 
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
+
 import static org.jmule.core.edonkey.E2DKConstants.*;
 
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/19 06:52:31 $
  */
 public class BSOBTag extends StandartTag {
 	
@@ -43,12 +46,17 @@ public class BSOBTag extends StandartTag {
 
 	
 	ByteBuffer getValueAsByteBuffer() {
-		return tagValue;
+		ByteBuffer result = Misc.getByteBuffer(getValueLength());
+		result.put(Convert.intToByte(tagValue.capacity()));
+		tagValue.position(0);
+		result.put(tagValue);
+		result.position(0);
+		return result;
 	}
 
 
 	int getValueLength() {
-		return tagValue.capacity();
+		return 1 + tagValue.capacity();
 	}
 
 
