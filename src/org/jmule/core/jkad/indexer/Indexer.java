@@ -22,7 +22,7 @@
  */
 package org.jmule.core.jkad.indexer;
 
-import static org.jmule.core.jkad.JKadConstants.INDEXER_SAVE_DATA_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.*;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_KEYWORDS;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_NOTES;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_SOURCES;
@@ -32,6 +32,7 @@ import static org.jmule.core.jkad.JKadConstants.SRC_INDEX_DAT;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -53,8 +54,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/19 07:08:04 $
  */
 public class Indexer {
 	
@@ -71,7 +72,7 @@ public class Indexer {
 	private Map<Int128, Index> sources = new ConcurrentHashMap<Int128, Index>();
 	
 	private Task saveDataTask;
-	
+	private Task cleanerTask;
 	private boolean isStarted = false;
 	
 	public boolean isStarted() {
@@ -98,35 +99,74 @@ public class Indexer {
 		
 		saveDataTask = new Task() {
 			public void run() {
-				try {
-					SrcIndexDat.writeFile(NOTE_INDEX_DAT, notes);
-				} catch (Throwable e) {
-					Logger.getSingleton().logException(e);
-					e.printStackTrace();
-				}
-				try {
-					SrcIndexDat.writeFile(KEY_INDEX_DAT, keywords);
-				} catch (Throwable e) {
-					Logger.getSingleton().logException(e);
-					e.printStackTrace();
-				}
-				try {
-						SrcIndexDat.writeFile(SRC_INDEX_DAT, sources);
-				} catch (Throwable e) {
-					Logger.getSingleton().logException(e);
-					e.printStackTrace();
+				synchronized (notes) {
+					try {
+						SrcIndexDat.writeFile(NOTE_INDEX_DAT, notes);
+					} catch (Throwable e) {
+						Logger.getSingleton().logException(e);
+						e.printStackTrace();
+					}
 				}
 				
+				synchronized (keywords) {
+					try {
+						SrcIndexDat.writeFile(KEY_INDEX_DAT, keywords);
+					} catch (Throwable e) {
+						Logger.getSingleton().logException(e);
+						e.printStackTrace();
+					}
+				}
+				synchronized (sources) {
+					try {
+							SrcIndexDat.writeFile(SRC_INDEX_DAT, sources);
+					} catch (Throwable e) {
+						Logger.getSingleton().logException(e);
+						e.printStackTrace();
+					}
+				}
 			}
 		};
 		
 		Timer.getSingleton().addTask(INDEXER_SAVE_DATA_INTERVAL, saveDataTask, true);
+		
+		cleanerTask = new Task() {
+			public void run() {
+				synchronized (notes) {
+					for(Int128 id : notes.keySet()) {
+						Index index = notes.get(id);
+						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
+						if (index.isEmpty()) notes.remove(index);
+					}
+				}
+				
+				synchronized (keywords) {
+					for(Int128 id : keywords.keySet()) {
+						Index index = keywords.get(id);
+						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
+						if (index.isEmpty()) keywords.remove(index);
+					}
+				}
+				
+				synchronized (sources) {
+					for(Int128 id : sources.keySet()) {
+						Index index = sources.get(id);
+						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
+						if (index.isEmpty()) sources.remove(index);
+					}
+				}
+				
+				
+				
+			}
+		};
+		Timer.getSingleton().addTask(INDEXER_CLEAN_DATA_INTERVAL, cleanerTask, true);
 		
 	}
 
 	public void stop() {
 		isStarted = false;
 		Timer.getSingleton().removeTask(saveDataTask);
+		Timer.getSingleton().removeTask(cleanerTask);
 	}
 	
 	public int getKeywordLoad() {
