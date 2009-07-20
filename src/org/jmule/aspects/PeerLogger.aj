@@ -25,16 +25,14 @@ package org.jmule.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.edonkey.impl.Peer;
-import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.scannedpacket.ScannedPacket;
-import org.jmule.core.net.JMConnection;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/17 08:19:33 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/20 17:13:49 $$
  */
 public privileged aspect PeerLogger {
 	
@@ -58,6 +56,7 @@ public privileged aspect PeerLogger {
 	before(Peer p) : target(p) && call( void Peer.connect()) {
 	}
 	
-	before(ScannedPacket packet, Peer p) : target(p) && args(packet)&& execution (void Peer.processPacket(ScannedPacket)) {
+	after(ScannedPacket packet, Peer p) throwing(Throwable t) : target(p) && args(packet)&& execution (void Peer.processPacket(ScannedPacket)) {
+		log.warning("Exception in processing peer packet : \n" + Misc.getStackTrace(t) + "\n Peer : " +p);
 	}
 }
