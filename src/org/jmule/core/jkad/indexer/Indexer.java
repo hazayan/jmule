@@ -54,8 +54,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/19 07:08:04 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/23 12:40:05 $
  */
 public class Indexer {
 	
@@ -135,7 +135,7 @@ public class Indexer {
 					for(Int128 id : notes.keySet()) {
 						Index index = notes.get(id);
 						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
-						if (index.isEmpty()) notes.remove(index);
+						if (index.isEmpty()) notes.remove(id);
 					}
 				}
 				
@@ -143,7 +143,7 @@ public class Indexer {
 					for(Int128 id : keywords.keySet()) {
 						Index index = keywords.get(id);
 						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
-						if (index.isEmpty()) keywords.remove(index);
+						if (index.isEmpty()) keywords.remove(id);
 					}
 				}
 				
@@ -151,7 +151,7 @@ public class Indexer {
 					for(Int128 id : sources.keySet()) {
 						Index index = sources.get(id);
 						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
-						if (index.isEmpty()) sources.remove(index);
+						if (index.isEmpty()) sources.remove(id);
 					}
 				}
 				
