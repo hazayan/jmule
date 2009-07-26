@@ -44,8 +44,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:22:56 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:37:31 $
  */
 public class FirewallChecker {
 	
@@ -69,19 +69,6 @@ public class FirewallChecker {
 	}
 
 	private FirewallChecker() {
-		
-	}
-	
-	public void startNowFirewallCheck() {
-		firewallCheckTask.run();
-	}
-
-	public boolean isStarted() {
-		return isStarted;
-	}
-	
-	public void start() {
-		isStarted = true;
 		routingTable = RoutingTable.getSingleton();
 		firewallCheckTask = new Task() {
 			public void run() {
@@ -94,6 +81,18 @@ public class FirewallChecker {
 				}
 			}
 		};
+	}
+	
+	public void startNowFirewallCheck() {
+		firewallCheckTask.run();
+	}
+
+	public boolean isStarted() {
+		return isStarted;
+	}
+	
+	public void start() {
+		isStarted = true;		
 		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL, firewallCheckTask, true);
 		firewallCheckTask.run();
 	}

@@ -125,8 +125,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:12:00 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:37:31 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -283,7 +283,7 @@ public class JKad implements JMuleManager {
 		setStatus(DISCONNECTED);
 	}
 	
-	private void setStatus(JKadStatus newStatus) {
+	void setStatus(JKadStatus newStatus) {
 		if (status == CONNECTED) {
 			if (!firewallChecker.isStarted())
 				firewallChecker.start();
@@ -338,7 +338,7 @@ public class JKad implements JMuleManager {
 			bootStrap.processBootStrapReq(new ClientID(client_id_raw), new IPAddress(address), udp_port);
 		} else 
 		if (packetOPCode == KADEMLIA_BOOTSTRAP_RES) {
-			setStatus(CONNECTED);
+			//setStatus(CONNECTED);
 			int contactCount = shortToInt(rawData.getShort());
 			List<KadContact> contact_list = new LinkedList<KadContact>();
 			for(int i = 0;i<contactCount;i++) {
@@ -375,7 +375,7 @@ public class JKad implements JMuleManager {
 			int tcp_port = shortToInt(rawData.getShort());
 			
 			KadContact contact = routing_table.getContact(new ClientID(client_id_raw));
-			setStatus(CONNECTED);
+			//setStatus(CONNECTED);
 			if (contact!= null) {
 				contact.setTCPPort(tcp_port);
 				contact.setUDPPort(udp_port);
@@ -643,7 +643,7 @@ public class JKad implements JMuleManager {
 				}
 				
 				KadContact contact = routing_table.getContact(clientID);
-				setStatus(CONNECTED);
+				//setStatus(CONNECTED);
 				if (contact!= null) {
 					contact.setTCPPort(tcpPort);
 					contact.setVersion(version);

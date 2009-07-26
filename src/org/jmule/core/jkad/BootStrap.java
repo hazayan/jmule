@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.jkad.JKad.JKadStatus;
 import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
 import org.jmule.core.jkad.routingtable.KadContact;
@@ -44,8 +45,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:11:27 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:37:31 $
  */
 public class BootStrap {
 
@@ -100,8 +101,7 @@ public class BootStrap {
 		bootStrapTask = new Task() {
 			public void run() {
 				if (bootStrapResponses >= BOOTSTRAP_STOP_CONTACTS) {
-					System.out.println("BootStrap completed!");
-					
+					JKad.getInstance().setStatus(JKadStatus.CONNECTED);					
 					JKad.getInstance().removePacketListener(bootStrapResponseListener);
 					
 					// stop task if already have enough contacts
