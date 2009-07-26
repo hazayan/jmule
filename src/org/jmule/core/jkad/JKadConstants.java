@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/19 07:02:08 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:12:42 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -42,9 +42,9 @@ public class JKadConstants {
 	
 	public static final byte SRC_INDEX_VERSION				= 0x09;
 	
-	public static final String		 KEY_INDEX_DAT			= 	  SETTINGS_DIR + File.separator + "key_index.dat";
-	public static final String		 SRC_INDEX_DAT			= 	  SETTINGS_DIR + File.separator + "src_index.dat";
-	public static final String		 NOTE_INDEX_DAT			= 	  SETTINGS_DIR + File.separator + "note_index.dat";
+	public static final String KEY_INDEX_DAT				= SETTINGS_DIR + File.separator + "key_index.dat";
+	public static final String SRC_INDEX_DAT				= SETTINGS_DIR + File.separator + "src_index.dat";
+	public static final String NOTE_INDEX_DAT				= SETTINGS_DIR + File.separator + "note_index.dat";
 	
 	public static final int MAX_UDP_PACKET					= 65534;
 	public static final int MIN_UNPACKET_SIZE				= 100;
@@ -64,9 +64,13 @@ public class JKadConstants {
 	public static final int INITIAL_SEARCH_CONTACT_COUNT	= 50;
 	public static final int PUBLISH_KEYWORD_CONTACT_COUNT	= 20;
 	
+	public static final long SEARCH_KEYWORD_TIMEOUT			= 1000 * 45;
+	public static final long SEARCH_NOTES_TIMEOUT			= 1000 * 45;
+	public static final long SEARCH_SOURCES_TIMEOUT			= 1000 * 45;
+	
 	public static final int  INITIAL_LOOKUP_CONTACTS 		= 50;
 	public static final long LOOKUP_TASK_CHECK_INTERVAL		= 5000;
-	public static final long LOOKUP_TASK_TIMEOUT			= 15000;
+	public static final long LOOKUP_TASK_DEFAULT_TIMEOUT	= 15000;
 	
 	public static final long CONCURENT_LOOKUP_COUNT			= 20;
 	public static final long LOOKUP_CONTACT_CHECK_INTERVAL	= 5000;
@@ -87,7 +91,7 @@ public class JKadConstants {
 	public static final long ROUTING_TABLE_CONTACTS_CHECK_INTERVAL	= 1000 * 60; 
 	public static final long ROUTING_TABLE_CONTACT_TIMEOUT  = 1000 * 60 * 2;
 	public static final long ROUTING_TABLE_CONTACT_ACCEP_TIME = 1000 * 60 * 2 - 1;
-	public static final long ROUTING_TABLE_CONTACT_IGNORE_TIME = 1000 * 60 * 2;
+	public static final long ROUTING_TABLE_CONTACT_IGNORE_TIME = 1000 * 60 * 2; 
 	public static final long ROUTING_TABLE_SAVE_INTERVAL	= 1000 * 60;
 	public static final long ROUTING_TABLE_DIFICIT_CONTACTS = 200;//200
 	public static final long ROUTING_TABLE_DIFICIT_CONTACTS_STOP = ROUTING_TABLE_DIFICIT_CONTACTS + 100;
@@ -103,10 +107,14 @@ public class JKadConstants {
 	
 	public static final long TIME_24_HOURS 					=  1000 * 60 * 60 * 24;
 	
-	
 	public static final long DEFAULT_PACKET_LISTENER_TIMEOUT = 5000;
 	
 	public static final long PUBLISHER_MAINTENANCE_INTERVAL	 = 1000 * 60;
+	
+	public static final long PUBLISHER_NOTE_PUBLISH_TIMEOUT  = 1000 * 100;
+	public static final long PUBLISHER_KEYWORD_PUBLISH_TIMEOUT  = 1000 * 140;
+	public static final long PUBLISHER_SOURCE_PUBLISH_TIMEOUT = 1000 * 140;
+	
 	public static final long INDEXTER_MAX_LOAD_TO_NOT_PUBLISH = 80;
 	
 	public static final int KAD_SOURCES_SEARCH_INTERVAL     =  1000 * 60 * 5;
