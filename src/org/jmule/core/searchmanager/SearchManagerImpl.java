@@ -22,6 +22,7 @@
  */
 package org.jmule.core.searchmanager;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,26 +44,31 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/26 14:19:52 $$
  */
 public class SearchManagerImpl implements SearchManager {
 
-	List<SearchResult> search_result_list = new LinkedList<SearchResult>();
-	Queue<SearchQuery> server_search_request_queue = new LinkedList<SearchQuery>();
-	Queue<SearchQuery> kad_search_request_queue = new LinkedList<SearchQuery>();
-	ServerManager server_manager = ServerManagerFactory.getInstance();
-	Search jkad_search = Search.getSingleton();
-	JKad jkad = JKad.getInstance();
-	List<SearchResultListener> search_result_listeners = new LinkedList<SearchResultListener>();
+	private List<SearchResult> search_result_list = new LinkedList<SearchResult>();
+	private Queue<SearchQuery> server_search_request_queue = new LinkedList<SearchQuery>();
+	private Queue<SearchQuery> kad_search_request_queue = new LinkedList<SearchQuery>();
+	private ServerManager server_manager = ServerManagerFactory.getInstance();
+	private Search jkad_search = Search.getSingleton();
+	private JKad jkad = JKad.getInstance();
+	private List<SearchResultListener> search_result_listeners = new LinkedList<SearchResultListener>();
 
+	private Map<SearchQuery,Int128> kad_searches = new HashMap<SearchQuery, Int128>();
+	
 	private long searches_count = 0;
 	
 	public synchronized void addResult(SearchResult searchResult) {
+		server_search_request_queue.peek(); // remove last request
+		
 		server_search_request_queue.remove(searchResult.getSearchQuery());
         search_result_list.add(searchResult);
         
-        searchArrived(searchResult);
+        notifySearchArrived(searchResult);
+        notifySearchCompleted(searchResult.searchQuery);
         processServerSearchRequest();
 	}
 
@@ -74,6 +80,12 @@ public class SearchManagerImpl implements SearchManager {
 	public synchronized void removeSearch(SearchQuery searchRequest) {
 		server_search_request_queue.remove(searchRequest);
 		kad_search_request_queue.remove(searchRequest);
+		if (kad_searches.containsKey(searchRequest)) {
+			synchronized (kad_searches) {
+				Int128 searchID = kad_searches.get(searchRequest);
+				jkad_search.cancelSearch(searchID);
+			}
+		}
 	}
 
 	public void search(String searchString) {
@@ -115,14 +127,24 @@ public class SearchManagerImpl implements SearchManager {
 		search_result_listeners.add(searchResultListener);
 	}
 	
-	private void searchArrived(SearchResult search_result) {
+	private void notifySearchArrived(SearchResult search_result) {
 		for(SearchResultListener listener : search_result_listeners) {
-			
 			listener.resultArrived(search_result);
-			
 		}
-		
 	}
+	
+	private void notifySearchStarted(SearchQuery query) {
+		for(SearchResultListener listener : search_result_listeners) {
+			listener.searchStarted(query);
+		}
+	}
+	
+	private void notifySearchCompleted(SearchQuery query) {
+		for(SearchResultListener listener : search_result_listeners) {
+			listener.searchCompleted(query);
+		}
+	}
+	
 	
 	public void initialize() {
 		Set<String> types = new HashSet<String>();
@@ -149,45 +171,51 @@ public class SearchManagerImpl implements SearchManager {
 	private void processServerSearchRequest() {
 		if (server_search_request_queue.isEmpty()) return ;
 		SearchQuery search_request;
-        search_request = server_search_request_queue.poll();
+        search_request = server_search_request_queue.peek(); // search request is removed after arrival of response
         Server server = server_manager.getConnectedServer();
         server.searchFiles(search_request);
+        notifySearchStarted(search_request);
 	}
 	SearchQuery search_request;
 	private void processKadSearchRequest() {
 		if (kad_search_request_queue.isEmpty()) return ;
 		search_request = (SearchQuery) kad_search_request_queue.poll();
         Int128 keyword_id;
-		try {
-			keyword_id = jkad_search.searchKeyword(search_request.getQuery(), new org.jmule.core.jkad.search.SearchResultListener() {
-				SearchQuery r = (SearchQuery) search_request.clone();
-				SearchResultItemList result_list = new SearchResultItemList();
-				SearchResult search_result = new SearchResult(result_list,r );		
-				
-				public void processNewResults(List<Source> result) {
-							
-							result_list.clear();
-							for(Source source : result) {
-								SearchResultItem item = new SearchResultItem(source.getClientID().toFileHash(),null,(short)0,SearchQueryType.KAD);
-								for(Tag tag : source.getTagList()) {
-									item.addTag(tag);
+			try {
+				keyword_id = jkad_search.searchKeyword(search_request.getQuery(), new org.jmule.core.jkad.search.SearchResultListener() {
+					SearchQuery r = (SearchQuery) search_request.clone();
+					SearchResultItemList result_list = new SearchResultItemList();
+					SearchResult search_result = new SearchResult(result_list,r );		
+					
+					public void processNewResults(List<Source> result) {
+								result_list.clear();
+								for(Source source : result) {
+									SearchResultItem item = new SearchResultItem(source.getClientID().toFileHash(),null,(short)0,SearchQueryType.KAD);
+									for(Tag tag : source.getTagList()) {
+										item.addTag(tag);
+									}
+									result_list.add(item);
 								}
-								result_list.add(item);
+								notifySearchArrived(search_result);
 							}
-							searchArrived(search_result);
-						}
 
-						public void searchFinished() {
-							processKadSearchRequest();
-						}
+							public void searchFinished() {
+								notifySearchCompleted(r);
+								processKadSearchRequest();
+								
+							}
 
-						public void searchStarted() {
-						}
-						
-					});
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
+							public void searchStarted() {
+								notifySearchStarted(r);
+							}
+							
+						});
+				kad_searches.put(search_request, keyword_id);
+				
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+		
 		
 	}
 	
