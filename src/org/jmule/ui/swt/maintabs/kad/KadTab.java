@@ -60,8 +60,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/12 09:14:50 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:43:41 $
  */
 public class KadTab extends AbstractTab {
 
@@ -252,6 +252,7 @@ public class KadTab extends AbstractTab {
 			public void allContactsRemoved() {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
+						if (isDisposed()) return;
 						contact_list.clear();
 					}
 					
