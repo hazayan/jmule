@@ -59,12 +59,12 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:04:57 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:22:03 $
  */
 public class SearchResultTab {
 
-	private boolean hasResults = false;
+	private boolean searchCompleted = false;
 	
 	private SWTPreferences swt_preferences = null;
 	
@@ -90,7 +90,7 @@ public class SearchResultTab {
 		query = searchRequest;
 		search_tab.setText(getTabTitle(query.getQuery()));
 		search_tab.setToolTipText(query.getQuery());
-		search_tab.setImage(SWTImageRepository.getImage("search_loading.png"));
+		search_tab.setImage(SWTImageRepository.getImage("search_queue.png"));
 		
 		Composite content = new Composite(parent,SWT.NONE);
 		
@@ -357,7 +357,6 @@ public class SearchResultTab {
 	}
 	
 	public void addSearchResult(SearchResult searchResult) {
-		hasResults = true;
 		search_result = searchResult;
 		for(SearchResultItem item : searchResult.getSearchResultItemList()) {
 			search_results.addRow(item);
@@ -366,8 +365,7 @@ public class SearchResultTab {
 		
 		String title = getTabTitle(query)+" ("+(search_results.getItemCount()+searchResult.getSearchResultItemList().size())+")";
 		search_tab.setText(title);
-		search_tab.setImage(null);
-		
+				
 	}
 
 	private void start_download() {
@@ -386,12 +384,12 @@ public class SearchResultTab {
 	}
 	
 	private void retry() {
-		hasResults = false;
+		searchCompleted = false;
 		_core.getSearchManager().removeSearch(query);
 		search_results.clear();
 		_core.getSearchManager().search(query);
 		search_tab.setText(getTabTitle(query.getQuery()));
-		search_tab.setImage(SWTImageRepository.getImage("search_loading.png"));
+		search_tab.setImage(SWTImageRepository.getImage("search_queue.png"));
 	}
 	
 	private void copyED2KLinks() {
@@ -412,8 +410,17 @@ public class SearchResultTab {
 		return result;
 	}
 
-	public boolean hasResults() {
-		return hasResults;
+	public boolean isSearchCompleted() {
+		return searchCompleted;
+	}
+	
+	public void searchStarted() {
+		search_tab.setImage(SWTImageRepository.getImage("search_loading.png"));
+	}
+	
+	public void completeSearch() {
+		search_tab.setImage(null);
+		searchCompleted = true;
 	}
 	
 }

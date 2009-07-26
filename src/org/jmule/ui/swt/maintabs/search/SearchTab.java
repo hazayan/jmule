@@ -62,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:04:57 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/26 14:22:03 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -102,6 +102,31 @@ public class SearchTab extends AbstractTab{
 					}
 				}); 
 			}
+
+			@Override
+			public void searchCompleted(final SearchQuery query) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						SearchResultTab tab = getSearchResultTab(query);
+						if (tab==null) return; // tab closed
+						System.out.println("Mark as completed : " + query.getQuery());
+						tab.completeSearch();
+					}
+				}); 
+			}
+
+			@Override
+			public void searchStarted(final SearchQuery query) {
+				SWTThread.getDisplay().asyncExec(new JMRunnable() {
+					public void JMRun() {
+						SearchResultTab tab = getSearchResultTab(query);
+						if (tab==null) return; // tab closed
+						System.out.println("Mark as started : " + query.getQuery());
+						tab.searchStarted();
+					}
+				}); 
+			}
+
 		});
 		setLayout(new GridLayout(1,true));
 		
@@ -230,16 +255,14 @@ public class SearchTab extends AbstractTab{
 	}
 	
 	private SearchResultTab getSearchResultTab(SearchQuery searchQuery){
-		SearchResultTab result = null;
-		
 		for(SearchResultTab tab : search_tabs) {
 			if (tab.getSerchQuery().equals(searchQuery))
-				if (!tab.hasResults())
+				if (!tab.isSearchCompleted())
+					if (tab.getSearchTab().isDisposed()) return null;
+					else
 					return tab;
 		}
-		
-		
-		return result;
+		return null;
 	}
 	
 	public JMULE_TABS getTabType() {
@@ -264,33 +287,21 @@ public class SearchTab extends AbstractTab{
 
 	private void search() {
 		if ((searchType.getSelectionIndex()==0)&&(!_core.getServerManager().isConnected())) {
-			
 			Utils.showWarningMessage(getShell(), Localizer._("mainwindow.searchtab.not_connected_to_server_title"), Localizer._("mainwindow.searchtab.not_connected_to_server"));
-			
 			return;
 		}
-		
 		if ((searchType.getSelectionIndex()==1)&&(!_core.getJKad().isConnected())) {
-			
 			Utils.showWarningMessage(getShell(), "Not connected to Kad","Error");
-			
 			return;
 		}		
-		
 		if ((searchType.getSelectionIndex()==2)&&(!_core.getJKad().isConnected()) &&(!_core.getServerManager().isConnected())) {
-			
 			Utils.showWarningMessage(getShell(), "Not connected to server and kad","Error");
-			
 			return;
 		}	
 		
-		
 		String query = search_query.getText();
-		
 		search_query.setText("");
-		
 		if (query.length()==0) return ;
-	
 		SearchQuery search_query = new SearchQuery(query+"");
 		
 		if ((searchType.getSelectionIndex()==0))
@@ -330,6 +341,8 @@ public class SearchTab extends AbstractTab{
 		tab.getSearchTab().addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event arg0) {
 				search_tabs.remove(tab);
+				SearchManager manager = _core.getSearchManager();
+				manager.removeSearch(tab.getSerchQuery());
 			}		
 		});
 		
