@@ -44,8 +44,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:11:27 $
  */
 public class BootStrap {
 
@@ -102,7 +102,7 @@ public class BootStrap {
 				if (bootStrapResponses >= BOOTSTRAP_STOP_CONTACTS) {
 					System.out.println("BootStrap completed!");
 					
-					JKad.getInstance().removeListener(bootStrapResponseListener);
+					JKad.getInstance().removePacketListener(bootStrapResponseListener);
 					
 					// stop task if already have enough contacts
 					Timer.getSingleton().removeTask(this);
