@@ -125,8 +125,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:12:00 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -321,10 +321,12 @@ public class JKad implements JMuleManager {
 					t.printStackTrace();
 					Logger.getSingleton().logException(t);
 				}
+				
 		byte packetOPCode = packet.getCommand();
 		ByteBuffer rawData = packet.getAsByteBuffer();
 		rawData.position(2);
-		;
+		
+		
 		if (packetOPCode == KADEMLIA_BOOTSTRAP_REQ) {
 			byte[] client_id_raw = new byte[16];
 			rawData.get(client_id_raw);
@@ -832,7 +834,7 @@ public class JKad implements JMuleManager {
 		list.add(listener);
 	}
 	
-	public void removeListener(PacketListener listener) {
+	public void removePacketListener(PacketListener listener) {
 		List<PacketListener> list = packetListeners.get(listener.getPacketOPCode());
 		if (list == null) return ;
 		list.remove(listener);
