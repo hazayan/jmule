@@ -26,11 +26,12 @@ package org.jmule.core.searchmanager;
  *
  * Created on Aug 9, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/08/12 07:20:13 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 13:49:19 $
  */
 public interface SearchResultListener {
-
+	public void searchStarted(SearchQuery query);
 	public void resultArrived(SearchResult searchResult);
+	public void searchCompleted(SearchQuery query);
 	
 }
