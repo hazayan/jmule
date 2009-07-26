@@ -29,6 +29,7 @@ import java.util.List;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
@@ -41,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:15:16 $
  */
 public class NoteSearchTask extends SearchTask {
 
@@ -75,7 +76,7 @@ public class NoteSearchTask extends SearchTask {
 						public void packetReceived(KadPacket packet) {
 							KadPacket responsePacket = PacketFactory.getNotesReq(searchID);
 							udpConnecton.sendPacket(responsePacket, packet.getAddress());
-							JKad.getInstance().removeListener(this);
+							JKad.getInstance().removePacketListener(this);
 						}
 					};
 					JKad.getInstance().addPacketListener(listener);
@@ -89,7 +90,7 @@ public class NoteSearchTask extends SearchTask {
 			}
 			
 		};
-		
+		lookup_task.setTimeOut(JKadConstants.SEARCH_NOTES_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		if (listener!=null)
 			listener.searchStarted();

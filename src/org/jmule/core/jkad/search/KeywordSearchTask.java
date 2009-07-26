@@ -31,6 +31,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
@@ -43,8 +44,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:15:16 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
@@ -78,7 +79,7 @@ public class KeywordSearchTask extends SearchTask {
 						public void packetReceived(KadPacket packet) {
 							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID,false);
 							udpConnecton.sendPacket(responsePacket, packet.getAddress());
-							JKad.getInstance().removeListener(this);
+							JKad.getInstance().removePacketListener(this);
 						}
 					};
 					JKad.getInstance().addPacketListener(listener);
@@ -93,7 +94,7 @@ public class KeywordSearchTask extends SearchTask {
 			}
 			
 		};
-		lookup_task.setTimeOut(1000 * 45);
+		lookup_task.setTimeOut(JKadConstants.SEARCH_KEYWORD_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		if (listener!=null)
 			listener.searchStarted();

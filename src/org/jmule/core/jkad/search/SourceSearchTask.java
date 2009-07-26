@@ -31,6 +31,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
@@ -43,8 +44,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:15:16 $
  */
 public class SourceSearchTask extends SearchTask {
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
@@ -63,6 +64,7 @@ public class SourceSearchTask extends SearchTask {
 		lookup_task = new LookupTask(RequestType.FIND_NODE, searchID, toleranceZone) {
 			public void lookupTimeout() {
 				isStarted = false;
+				timeOut = JKadConstants.SEARCH_SOURCES_TIMEOUT;
 			}
 
 			public void processToleranceContacts(ContactAddress sender,
@@ -76,7 +78,7 @@ public class SourceSearchTask extends SearchTask {
 						public void packetReceived(KadPacket packet) {
 							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID,true);
 							udpConnecton.sendPacket(responsePacket, packet.getAddress());
-							JKad.getInstance().removeListener(this);
+							JKad.getInstance().removePacketListener(this);
 						}
 					};
 					JKad.getInstance().addPacketListener(listener);
@@ -90,7 +92,7 @@ public class SourceSearchTask extends SearchTask {
 			}
 			
 		};
-		
+		lookup_task.setTimeOut(JKadConstants.SEARCH_SOURCES_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		if (listener!=null)
 			listener.searchStarted();

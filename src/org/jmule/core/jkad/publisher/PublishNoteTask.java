@@ -29,6 +29,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
@@ -41,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:13:45 $
  */
 public class PublishNoteTask extends PublishTask {
 
@@ -85,7 +86,7 @@ public class PublishNoteTask extends PublishTask {
 			}
 			
 		};
-		
+		lookup_task.setTimeOut(JKadConstants.PUBLISHER_NOTE_PUBLISH_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		task_listener.taskStarted(task_instance);
 	}
