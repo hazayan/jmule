@@ -26,7 +26,7 @@ import static org.jmule.core.jkad.JKadConstants.ALPHA;
 import static org.jmule.core.jkad.JKadConstants.INITIAL_LOOKUP_CONTACTS;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_CONTACT_CHECK_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_CONTACT_TIMEOUT;
-import static org.jmule.core.jkad.JKadConstants.LOOKUP_TASK_TIMEOUT;
+import static org.jmule.core.jkad.JKadConstants.LOOKUP_TASK_DEFAULT_TIMEOUT;
 import static org.jmule.core.jkad.utils.Utils.getNearestContact;
 import static org.jmule.core.jkad.utils.Utils.inToleranceZone;
 
@@ -50,8 +50,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:40:44 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:09:09 $
  */
 public abstract class LookupTask {
 	
@@ -59,7 +59,7 @@ public abstract class LookupTask {
 	protected long responseTime;
 	protected Int128 targetID;
 	protected Int128 toleranceZone;
-	protected long timeOut =  LOOKUP_TASK_TIMEOUT;
+	protected long timeOut =  LOOKUP_TASK_DEFAULT_TIMEOUT;
 	
 	protected List<KadContact> possibleContacts = new CopyOnWriteArrayList<KadContact> ();
 	protected List<KadContact> usedContacts = new CopyOnWriteArrayList<KadContact>();
