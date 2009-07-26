@@ -29,7 +29,6 @@ import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CONTACT_COUNT;
 import static org.jmule.core.jkad.JKadConstants.SEARCH_CONTACTS;
 
 import java.net.InetSocketAddress;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -52,8 +51,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:39:02 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:08:23 $
  */
 public class Lookup {
 
