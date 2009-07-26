@@ -40,8 +40,8 @@ import org.jmule.core.jkad.JKadConstants.ContactType;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:14:30 $
  */
 
 public class KadContact {
@@ -87,7 +87,7 @@ public class KadContact {
 	public String toString() {
 		String result = "";
 		
-		result += "Contact ID : " + contactID +"\n";
+		result += "Contact ID : " + contactID.toHexString() +"\n";
 		result += "Address : " + getIPAddress()+"\n";
 		result += "Type : " + getContactType()+"\n";
 	//	result += "Contact distance : " + contactDistance;
@@ -224,6 +224,7 @@ public class KadContact {
 			case Active2MoreHours : contactType = Active1Hour; return;
 			case Active1Hour : contactType = Active; return ;
 			case Active : contactType = JustAdded; return ;
+			case JustAdded : contactType = ScheduledForRemoval; return ;
 		}
 	}
 	
