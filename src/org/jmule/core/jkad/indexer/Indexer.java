@@ -54,8 +54,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/23 12:40:05 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:13:19 $
  */
 public class Indexer {
 	
@@ -167,6 +167,17 @@ public class Indexer {
 		isStarted = false;
 		Timer.getSingleton().removeTask(saveDataTask);
 		Timer.getSingleton().removeTask(cleanerTask);
+		
+		synchronized (notes) {
+			notes.clear();
+		}
+		synchronized (keywords) {
+			keywords.clear();
+		}
+		synchronized (sources) {
+			sources.clear();
+		}
+		
 	}
 	
 	public int getKeywordLoad() {
