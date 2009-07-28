@@ -36,8 +36,8 @@ import org.jmule.core.JMConstants;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/24 15:21:42 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/28 15:14:00 $$
  */
 
 public class UIConstants {
@@ -147,6 +147,13 @@ public class UIConstants {
 	public static final int NEW_SERVER_LIST_NAME_COLUMN_ID		 	  = 4800;
 	public static final int NEW_SERVER_LIST_PORT_COLUMN_ID		  	  = 4900;
 	
+	// kad
+	public static final int KAD_CLIENT_ID_COLUMN_ID				 	  = 5000;
+	public static final int KAD_CLIENT_DISTANCE_COLUMN_ID		  	  = 5100;
+	
+	public static final int KAD_TASK_TYPE_COLUMN_ID				  	  = 5200;
+	public static final int KAD_TASK_LOOKUP_HASH_COLUMN_ID		  	  = 5300;
+	
 	// Column UI nodes
 	protected static final String SERVER_LIST_NAME_NODE                      = "/server_list_name_column";
 	protected static final String SERVER_LIST_CC_NODE                        = "/server_list_cc_column";
@@ -222,6 +229,12 @@ public class UIConstants {
 	
 	protected static final String NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE	= "/new_server_list_name_column";
 	protected static final String NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE	= "/new_server_list_port_column";
+	
+	protected static final String KAD_CLIENT_ID_COLUMN_NAME_NODE			= "/kad_client_id";
+	protected static final String KAD_CLIENT_DISTANCE_COLUMN_NAME_NODE		= "/kad_client_distance";
+	
+	protected static final String KAD_TASK_TYPE_COLUMN_NAME_NODE			= "/kad_task_type";
+	protected static final String KAD_TASK_LOOKUP_HASH_COLUMN_NAME_NODE		= "/kad_lookup_hash";
 
 	protected static final String TOOL_BAR_NODE                             = "/tool_bar";
 	protected static final String STATUS_BAR_NODE                           = "/status_bar";
@@ -313,6 +326,13 @@ public class UIConstants {
 		default_values.put(NEW_SERVER_LIST_NAME_COLUMN_ID + VISIBILITY, 	 	 true);
 		default_values.put(NEW_SERVER_LIST_PORT_COLUMN_ID + VISIBILITY, 	 	 true);
 		
+		default_values.put(KAD_CLIENT_ID_COLUMN_ID + VISIBILITY, 			 	 true);
+		default_values.put(KAD_CLIENT_DISTANCE_COLUMN_ID + VISIBILITY,	 	 	 true);
+		
+		default_values.put(KAD_TASK_TYPE_COLUMN_ID + VISIBILITY, 			 	 true);
+		default_values.put(KAD_TASK_LOOKUP_HASH_COLUMN_ID + VISIBILITY, 	 	 true);
+
+		
 		// default table column's order
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + ORDER,               1);
 		default_values.put(SERVER_LIST_CC_COLUMN_ID + ORDER,                 2);
@@ -390,6 +410,12 @@ public class UIConstants {
 		default_values.put(NEW_SERVER_LIST_NAME_COLUMN_ID + ORDER, 	 		 1);
 		default_values.put(NEW_SERVER_LIST_PORT_COLUMN_ID + ORDER, 	 		 2);
 		
+		default_values.put(KAD_CLIENT_ID_COLUMN_ID + ORDER, 			 	 1);
+		default_values.put(KAD_CLIENT_DISTANCE_COLUMN_ID + ORDER,	 	 	 2);
+		
+		default_values.put(KAD_TASK_TYPE_COLUMN_ID + ORDER, 			 	 1);
+		default_values.put(KAD_TASK_LOOKUP_HASH_COLUMN_ID + ORDER, 	 	 	 2);
+		
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + WIDTH,              150);
 		default_values.put(SERVER_LIST_CC_COLUMN_ID + WIDTH,                 40);
 		default_values.put(SERVER_LIST_FLAG_COLUMN_ID + WIDTH,               40);
@@ -463,6 +489,12 @@ public class UIConstants {
 
 		default_values.put(NEW_SERVER_LIST_NAME_COLUMN_ID + WIDTH, 	 		 150);
 		default_values.put(NEW_SERVER_LIST_PORT_COLUMN_ID + WIDTH, 	 		 150);
+		
+		default_values.put(KAD_CLIENT_ID_COLUMN_ID + WIDTH, 			 	 300);
+		default_values.put(KAD_CLIENT_DISTANCE_COLUMN_ID + WIDTH,	 	 	 500);
+		
+		default_values.put(KAD_TASK_TYPE_COLUMN_ID + WIDTH, 			 	 300);
+		default_values.put(KAD_TASK_LOOKUP_HASH_COLUMN_ID + WIDTH, 	 	 	 500);
 		
 		default_values.put(TOOL_BAR_ID + VISIBILITY,                         true);
 		default_values.put(STATUS_BAR_ID + VISIBILITY,                       true);
@@ -555,6 +587,13 @@ public class UIConstants {
 
 		  	case NEW_SERVER_LIST_NAME_COLUMN_ID 		:  return NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE;
 		  	case NEW_SERVER_LIST_PORT_COLUMN_ID 		:  return NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE;
+		  	
+		  	case KAD_CLIENT_ID_COLUMN_ID 				:  return KAD_CLIENT_ID_COLUMN_NAME_NODE; 
+		  	case KAD_CLIENT_DISTANCE_COLUMN_ID			:  return KAD_CLIENT_ID_COLUMN_NAME_NODE;
+		  	
+		  	case KAD_TASK_TYPE_COLUMN_ID				:  return KAD_TASK_TYPE_COLUMN_NAME_NODE;
+		  	case KAD_TASK_LOOKUP_HASH_COLUMN_ID			:  return KAD_TASK_LOOKUP_HASH_COLUMN_NAME_NODE;
+		  	
 		  	
 		  	//case NIGHTLY_BUILD_WARNING_ID               :  return NIGHTLY_BUILD_WARNING_NODE;
 		  	//case NIGHTLY_BUILD_WARNING_JM_VER_ID        :  return NIGHTLY_BUILD_WARNING_JM_VER_NODE;
