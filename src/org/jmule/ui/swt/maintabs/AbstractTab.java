@@ -24,19 +24,23 @@ package org.jmule.ui.swt.maintabs;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.jmule.ui.swt.SWTPreferences;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:03:58 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/28 15:15:09 $$
  */
 public abstract class AbstractTab extends Composite{
 
 	public static enum JMULE_TABS { SERVERLIST,KAD, TRANSFERS, SEARCH, SHARED, STATISTICS, LOGS };
 	
+	protected static SWTPreferences swtPreferences;
+	
 	public AbstractTab(Composite shell) {
 		super(shell, SWT.NONE);
+		swtPreferences = SWTPreferences.getInstance();
 	}
 	
 	public abstract JMULE_TABS getTabType();
