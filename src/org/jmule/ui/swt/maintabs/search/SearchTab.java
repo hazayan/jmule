@@ -62,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/26 14:22:03 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/28 15:17:04 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -291,13 +291,18 @@ public class SearchTab extends AbstractTab{
 			return;
 		}
 		if ((searchType.getSelectionIndex()==1)&&(!_core.getJKad().isConnected())) {
-			Utils.showWarningMessage(getShell(), "Not connected to Kad","Error");
+			Utils.showWarningMessage(getShell(), _._("mainwindow.searchtab.not_connected_to_kad_title"),_._("mainwindow.searchtab.not_connected_to_kad"));
 			return;
 		}		
-		if ((searchType.getSelectionIndex()==2)&&(!_core.getJKad().isConnected()) &&(!_core.getServerManager().isConnected())) {
-			Utils.showWarningMessage(getShell(), "Not connected to server and kad","Error");
+		if ((searchType.getSelectionIndex()==2)&&(!_core.getJKad().isConnected())) {
+			Utils.showWarningMessage(getShell(), _._("mainwindow.searchtab.not_connected_to_kad_title"),_._("mainwindow.searchtab.not_connected_to_kad"));
 			return;
 		}	
+		
+		if ((searchType.getSelectionIndex()==2)&&(!_core.getServerManager().isConnected())) {
+			Utils.showWarningMessage(getShell(), Localizer._("mainwindow.searchtab.not_connected_to_server_title"), Localizer._("mainwindow.searchtab.not_connected_to_server"));
+			return;
+		}
 		
 		String query = search_query.getText();
 		search_query.setText("");
