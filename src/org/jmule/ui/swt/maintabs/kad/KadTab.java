@@ -22,6 +22,11 @@
  */
 package org.jmule.ui.swt.maintabs.kad;
 
+import static org.jmule.ui.UIConstants.KAD_CLIENT_DISTANCE_COLUMN_ID;
+import static org.jmule.ui.UIConstants.KAD_CLIENT_ID_COLUMN_ID;
+import static org.jmule.ui.UIConstants.KAD_TASK_LOOKUP_HASH_COLUMN_ID;
+import static org.jmule.ui.UIConstants.KAD_TASK_TYPE_COLUMN_ID;
+
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -48,10 +53,10 @@ import org.jmule.core.jkad.publisher.PublishKeywordTask;
 import org.jmule.core.jkad.publisher.PublishNoteTask;
 import org.jmule.core.jkad.publisher.PublishSourceTask;
 import org.jmule.core.jkad.publisher.PublishTask;
-import org.jmule.core.jkad.publisher.PublisherListener;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTableListener;
 import org.jmule.core.utils.Misc;
+import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.common.SashControl;
 import org.jmule.ui.swt.maintabs.AbstractTab;
@@ -60,17 +65,11 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:43:41 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/28 15:15:52 $
  */
 public class KadTab extends AbstractTab {
 
-	public static int CLIENT_ID_COLUMN = 1;
-	public static int CLIENT_DISTANCE_COLUMN = 2;
-	
-	public static int TASK_LOOKUP_TYPE = 1;
-	public static int TASK_LOOKUP_HASH = 2;
-	
 	private JMuleCore _core;
 	private JMTable<KadContact> contact_list;
 	private JMTable<KadTask> kad_task_list;
@@ -95,8 +94,8 @@ public class KadTab extends AbstractTab {
 		
 		routing_table_container = new Group(tab_content,SWT.NONE);
 		Group kad_tasks_container = new Group(tab_content,SWT.NONE);
-		routing_table_container.setText("Kad nodes");
-		kad_tasks_container.setText("Kad tasks");
+		routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes"));
+		kad_tasks_container.setText(_._("mainwindow.kadtab.kad_tasks"));
 		SashControl.createHorizontalSash(30, 80, tab_content, routing_table_container, kad_tasks_container);
 		GridLayout grid_layout = new GridLayout(1,false);
 		grid_layout.marginWidth = 0;
@@ -134,11 +133,11 @@ public class KadTab extends AbstractTab {
 		});
 		
 		if (_core.getJKad().isConnected())
-			setKadStatus.setText("Disconnect");
+			setKadStatus.setText(_._("mainwindow.kadtab.disconnect"));
 		if (_core.getJKad().isConnecting())
-			setKadStatus.setText("Stop");
+			setKadStatus.setText(_._("mainwindow.kadtab.stop_connecting"));
 		if (_core.getJKad().isDisconnected())
-			setKadStatus.setText("Connect");
+			setKadStatus.setText(_._("mainwindow.kadtab.connect"));
 		
 		_core.getJKad().addListener(new JKadListener() {
 			public void JKadIsConnected() {
@@ -146,7 +145,7 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						setKadStatus.setEnabled(true);
-						setKadStatus.setText("Disconnect");
+						setKadStatus.setText(_._("mainwindow.kadtab.disconnect"));
 					}
 				});
 			}
@@ -156,7 +155,7 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						setKadStatus.setEnabled(true);
-						setKadStatus.setText("Stop");
+						setKadStatus.setText(_._("mainwindow.kadtab.stop_connecting"));
 					}
 				});
 			}
@@ -166,8 +165,8 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						setKadStatus.setEnabled(true);
-						routing_table_container.setText("Kad nodes");
-						setKadStatus.setText("Connect");
+						routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes"));
+						setKadStatus.setText(_._("mainwindow.kadtab.connect"));
 						
 					}
 				});
@@ -179,10 +178,10 @@ public class KadTab extends AbstractTab {
 			protected int compareObjects(KadContact object1,
 					KadContact object2, int columnID, boolean order) {
 				int result = 0;
-				if (columnID == CLIENT_ID_COLUMN)
+				if (columnID == KAD_CLIENT_ID_COLUMN_ID)
 					result = object1.getContactID().toHexString().compareTo(object2.getContactID().toHexString());
 				
-				if (columnID == CLIENT_DISTANCE_COLUMN)
+				if (columnID == KAD_CLIENT_DISTANCE_COLUMN_ID)
 					result = object1.getContactDistance().toBinaryString().compareTo(object2.getContactDistance().toBinaryString());
 				
 				if (!order)
@@ -203,16 +202,16 @@ public class KadTab extends AbstractTab {
 				if (object.getContactType() == ContactType.Active) imageName="contact2.png";
 				if (object.getContactType() == ContactType.JustAdded) imageName="contact3.png";
 				if (object.getContactType() == ContactType.ScheduledForRemoval) imageName="contact4.png";
-				setRowImage(object, CLIENT_ID_COLUMN, SWTImageRepository.getImage(imageName));
-				setRowText(object, CLIENT_ID_COLUMN, object.getContactID().toHexString());
-				setRowText(object, CLIENT_DISTANCE_COLUMN, object.getContactDistance().toBinaryString());
+				setRowImage(object, KAD_CLIENT_ID_COLUMN_ID, SWTImageRepository.getImage(imageName));
+				setRowText(object, KAD_CLIENT_ID_COLUMN_ID, object.getContactID().toHexString());
+				setRowText(object, KAD_CLIENT_DISTANCE_COLUMN_ID, object.getContactDistance().toBinaryString());
 			}
 			
 		};
 		contact_list.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		contact_list.addColumn(SWT.LEFT, CLIENT_ID_COLUMN, "Contact ID", "128 bit client identifier", 300);
-		contact_list.addColumn(SWT.LEFT, CLIENT_DISTANCE_COLUMN, "Contact distance", "Distance from JMule to client", 400);
+		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_ID_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_id"), _._("mainwindow.kadtab.contact_list.column.contact_id.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_ID_COLUMN_ID));
+		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_DISTANCE_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_distance"), _._("mainwindow.kadtab.contact_list.column.contact_distance.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_DISTANCE_COLUMN_ID));
 		
 		_core.getJKad().getRoutingTable().addListener(new RoutingTableListener() {
 			public void contactAdded(final KadContact contact) {
@@ -220,7 +219,7 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						contact_list.addRow(contact);
-						routing_table_container.setText("Kad nodes (" + contact_list.getItemCount() +")");
+						routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes_number",contact_list.getItemCount()+""));
 					}
 					
 				});
@@ -232,7 +231,7 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						contact_list.removeRow(contact);
-						routing_table_container.setText("Kad nodes (" + contact_list.getItemCount() +")");
+						routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes_number",contact_list.getItemCount()+""));
 					}
 					
 				});
@@ -243,7 +242,7 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						contact_list.updateRow(contact);
-						routing_table_container.setText("Kad nodes (" + contact_list.getItemCount() +")");
+						routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes_number",contact_list.getItemCount()+""));
 					}
 					
 				});
@@ -264,7 +263,7 @@ public class KadTab extends AbstractTab {
 		for(KadContact contact : _core.getJKad().getRoutingTable().getContacts())
 			contact_list.addRow(contact);
 		
-		routing_table_container.setText("Kad nodes (" + contact_list.getItemCount() +")");
+		routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes_number",contact_list.getItemCount()+""));
 		
 		kad_tasks_container.setLayout(new FillLayout());
 		kad_task_list = new JMTable<KadTask>(kad_tasks_container,SWT.NONE) {
@@ -272,9 +271,9 @@ public class KadTab extends AbstractTab {
 			protected int compareObjects(KadTask object1, KadTask object2,
 					int columnID, boolean order) {
 				int result = 0;
-				if (columnID == TASK_LOOKUP_TYPE)
+				if (columnID == KAD_TASK_TYPE_COLUMN_ID)
 					result = object1.task_type.compareTo(object2.task_type);
-				if (columnID == TASK_LOOKUP_HASH)
+				if (columnID == KAD_TASK_LOOKUP_HASH_COLUMN_ID)
 					result = object1.task_id.compareTo(object2.task_id);
 				if (!order)
 					result = Misc.reverse(result);
@@ -286,13 +285,13 @@ public class KadTab extends AbstractTab {
 			}
 
 			public void updateRow(KadTask object) {
-				setRowText(object, TASK_LOOKUP_TYPE, object.task_type);
-				setRowText(object, TASK_LOOKUP_HASH, object.task_id);
+				setRowText(object, KAD_TASK_TYPE_COLUMN_ID, object.task_type);
+				setRowText(object, KAD_TASK_LOOKUP_HASH_COLUMN_ID, object.task_id);
 			}
 		};
 		
-		kad_task_list.addColumn(SWT.LEFT, TASK_LOOKUP_TYPE, "Type", "Kad lookup type", 300);
-		kad_task_list.addColumn(SWT.LEFT, TASK_LOOKUP_HASH, "Lookup hash", "Hash value which is used in lookup", 400);
+		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_TYPE_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_type"), _._("mainwindow.kadtab.task_list.column.task_type.desc"), swtPreferences.getColumnWidth(KAD_TASK_TYPE_COLUMN_ID));
+		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_LOOKUP_HASH_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_hash"), _._("mainwindow.kadtab.task_list.column.task_hash.desc"), swtPreferences.getColumnWidth(KAD_TASK_LOOKUP_HASH_COLUMN_ID));
 		_core.getJKad().getLookup().addListener(new LookupListener() {
 			public void taskAdded(final LookupTask task) {
 				Display.getDefault().asyncExec(new Runnable() {
@@ -442,11 +441,11 @@ public class KadTab extends AbstractTab {
 	private KadTask lookupTaskToKadTask(LookupTask task) {
 		KadTask kad_task = new KadTask();
 		if (task.getRequestType() == RequestType.FIND_NODE)
-			kad_task.task_type = "Node lookup";
+			kad_task.task_type = _._("mainwindow.kadtab.node_lookup");
 		if (task.getRequestType() == RequestType.FIND_VALUE)
-			kad_task.task_type = "Keyword search";
+			kad_task.task_type = _._("mainwindow.kadtab.keyword_search");
 		if (task.getRequestType() == RequestType.STORE)
-			kad_task.task_type = "Store";
+			kad_task.task_type = _._("mainwindow.kadtab.store");
 		
 		kad_task.task_id = task.getTargetID().toHexString();
 		return kad_task;
