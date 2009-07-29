@@ -42,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:15:16 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/07/29 06:54:29 $
  */
 public class NoteSearchTask extends SearchTask {
 
@@ -84,6 +84,7 @@ public class NoteSearchTask extends SearchTask {
 			}
 			
 			public void stopLookup() {
+				if (!isStarted) return;
 				super.stopLookup();
 				isStarted = false;
 				stopSearch();
@@ -97,6 +98,7 @@ public class NoteSearchTask extends SearchTask {
 	}
 
 	public void stopSearch() {
+		if (!isStarted) return;
 		isStarted = false;
 		if (listener!=null)
 			listener.searchFinished();
