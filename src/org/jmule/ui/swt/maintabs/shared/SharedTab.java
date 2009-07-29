@@ -73,8 +73,8 @@ import org.jmule.ui.utils.FileFormatter;
 
 /**
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:34:04 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/29 06:53:20 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -606,16 +606,17 @@ public class SharedTab extends AbstractTab {
 					shared_dir = new File(ConfigurationManager.INCOMING_DIR);	
 					
 				if (!dir.equals(_._("mainwindow.sharedtab.shared_dirs.all"))) {
+					
 						// files from selected dir
 						if (shared_dir == null)
 							shared_dir = new File(dir);
-						//Iterator<File> i = FileUtils.iterateFiles(shared_dir, null, true);
+						
 						java.util.List<File> list_of_files = FileUtils.traverseDirAndReturnListOfFiles( shared_dir );
 						if (stop) return ;
-						//while(i.hasNext()) {
+						
 						for(File shared_file : list_of_files) {
 							if (stop) return ;
-							//File shared_file = i.next();
+							
 							if (shared_file.isDirectory()) continue;
 							final SharedFile file = sharing_manager.getSharedFile(shared_file);
 							if (file!=null)
@@ -624,6 +625,7 @@ public class SharedTab extends AbstractTab {
 										shared_files_table.addRow(file);
 									}
 								});
+							
 							
 							java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
 							if (unhashed_file_list == null) continue ;
@@ -638,19 +640,21 @@ public class SharedTab extends AbstractTab {
 								}
 							}
 						  } 
-						//}
+						
 					} else { // all files
 						java.util.List<CompletedFile> unhashed_file_list = sharing_manager.getUnhashedFiles();
-						if (unhashed_file_list == null) return ;
-						for(final SharedFile file : unhashed_file_list) {
-							SWTThread.getDisplay().syncExec(new JMRunnable() {
-								public void JMRun() {
-									if (isDisposed()) return ;
-									if (stop) return;
-									shared_files_table.addRow(file);
-								}
-							});
+						if (unhashed_file_list != null) {
+							for(final SharedFile file : unhashed_file_list) {
+								SWTThread.getDisplay().syncExec(new JMRunnable() {
+									public void JMRun() {
+										if (isDisposed()) return ;
+										if (stop) return;
+										shared_files_table.addRow(file);
+									}
+								});
+							}
 						}
+						
 						if (stop) return ;
 						final JMIterable<SharedFile> shared_files = sharing_manager.getSharedFiles();
 						for(final SharedFile file : shared_files) {
