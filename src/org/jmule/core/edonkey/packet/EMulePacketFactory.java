@@ -22,21 +22,25 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
-import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
+import static org.jmule.core.edonkey.E2DKConstants.OP_PUBLICKEY;
+import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SECIDENTSTATE;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SIGNATURE;
 
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.impl.EMuleExtendedTCPPacket;
+import org.jmule.core.jkad.IPAddress;
+import org.jmule.core.jkad.Int128;
 import org.jmule.core.utils.Convert;
 
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:03:52 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/31 05:46:30 $$
  */
 public class EMulePacketFactory{
 
@@ -232,6 +236,16 @@ public class EMulePacketFactory{
 		packet.setCommand(OP_SIGNATURE);
 		packet.insertData((byte)signature.length);
 		packet.insertData(signature);
+		return packet;
+	}
+	
+	public static EMuleExtendedTCPPacket getKadCallBackRequest(Int128 clientID, FileHash fileHash,IPAddress ipAddress, short tcpPort) {
+		EMuleExtendedTCPPacket packet = new EMuleExtendedTCPPacket(16 + 16 + 4 + 2);
+		packet.setCommand(OP_KAD_CALLBACK);
+		packet.insertData(clientID.toByteArray());
+		packet.insertData(fileHash.getHash());
+		packet.insertData(ipAddress.getAddress());
+		packet.insertData(tcpPort);
 		return packet;
 	}
 	

@@ -66,7 +66,6 @@ import java.util.Map;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.FileChunk;
-import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -90,8 +89,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/31 05:46:30 $$
  */
 public class PacketFactory {
 	

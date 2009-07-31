@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:34:39 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/31 05:46:30 $$
  */
 public class E2DKConstants {
 
@@ -158,6 +158,8 @@ public class E2DKConstants {
 	public final static byte OP_SECIDENTSTATE 			= (byte) 0x87;
 	public final static byte OP_PUBLICKEY 				= (byte) 0x85;
 	public final static byte OP_SIGNATURE 				= (byte) 0x86;
+	
+	public final static byte OP_KAD_CALLBACK			= (byte) 0x99;
 	
 	public enum PeerFeatures { 
 		UDPVer,
