@@ -44,8 +44,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/29 06:54:29 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:15:17 $
  */
 public class SourceSearchTask extends SearchTask {
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
@@ -58,10 +58,7 @@ public class SourceSearchTask extends SearchTask {
 	public void startSearch() {
 		isStarted = true;
 		
-		Int128 toleranceZone = new Int128();
-		toleranceZone.setBit(127, true);
-		
-		lookup_task = new LookupTask(RequestType.FIND_NODE, searchID, toleranceZone) {
+		lookup_task = new LookupTask(RequestType.FIND_NODE, searchID, JKadConstants.searchTolerance) {
 			public void lookupTimeout() {
 				isStarted = false;
 				timeOut = JKadConstants.SEARCH_SOURCES_TIMEOUT;
@@ -86,9 +83,7 @@ public class SourceSearchTask extends SearchTask {
 			}
 			
 			public void stopLookup() {
-				if (!isStarted) return;
 				super.stopLookup();
-				isStarted = false;
 				stopSearch();
 			}
 			

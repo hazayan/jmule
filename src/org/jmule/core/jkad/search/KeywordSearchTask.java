@@ -44,8 +44,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/29 06:54:29 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:15:17 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
@@ -58,14 +58,9 @@ public class KeywordSearchTask extends SearchTask {
 	
 	public void startSearch() {
 		isStarted = true;
-		
-		Int128 toleranceZone = new Int128();
-		toleranceZone.setBit(127, true);
-		
-		lookup_task = new LookupTask(RequestType.FIND_VALUE, searchID, toleranceZone) {
-			public void lookupTimeout() {
-				isStarted = false;
-			}
+				
+		lookup_task = new LookupTask(RequestType.FIND_VALUE, searchID, JKadConstants.searchTolerance) {
+			public void lookupTimeout() {}
 
 			public void processToleranceContacts(ContactAddress sender,
 					List<KadContact> results) {
@@ -88,9 +83,7 @@ public class KeywordSearchTask extends SearchTask {
 			}
 		
 			public void stopLookup() {
-				if (!isStarted) return;
 				super.stopLookup();
-				isStarted = false;
 				stopSearch();
 			}
 			
