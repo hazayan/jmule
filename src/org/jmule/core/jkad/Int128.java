@@ -35,8 +35,8 @@ import org.jmule.core.edonkey.impl.FileHash;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:24:48 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:13:44 $
  */
 public class Int128 implements Cloneable {
 
@@ -102,6 +102,11 @@ public class Int128 implements Cloneable {
 		return bit_set.get(bit_set.size() - position -1 );
 	}
 	
+	/**
+	 * 
+	 * @param position position 0 is higher value, 127 is lower
+	 * @param value
+	 */
 	public void setBit(int position, boolean value) {
 		bit_set.set(bit_set.size() - position - 1, value);
 	}
@@ -119,15 +124,7 @@ public class Int128 implements Cloneable {
 	}
 	
 	public String toString() {
-		String result = "";
-		for(int i = 0 ; i < bit_set.size() ; i++ ) {
-			
-			if (bit_set.get(i)) 
-				result = "1" + result;
-			else 
-				result = "0" + result;
-		}
-		return result;
+		return toBinaryString();
 		
 	}
 	
@@ -136,9 +133,9 @@ public class Int128 implements Cloneable {
 		for(int i = 0 ; i < bit_set.size() ; i++ ) {
 			
 			if (bit_set.get(i)) 
-				result = "1" + result;
+				result =  "1" + result;
 			else 
-				result = "0" + result;
+				result = "0" + result ;
 		}
 		return result;
 		

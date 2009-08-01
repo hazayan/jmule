@@ -29,11 +29,13 @@ import static org.jmule.core.utils.Convert.reverseArray;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
+import org.jmule.core.utils.Convert;
+
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:13:44 $
  */
 public class IPAddress {
 	
@@ -51,6 +53,10 @@ public class IPAddress {
 	
 	public IPAddress(byte[] address) {
 		this.address = address;
+	}
+	
+	public IPAddress(String address) {
+		this.address = Convert.reverseArray(Convert.stringIPToArray(address));
 	}
 	
 	public byte[] getAddress() {
