@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:12:42 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:13:07 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -54,8 +54,8 @@ public class JKadConstants {
 	
 	public static final byte KAD_VERSION 					= 0x05; // KADEMLIA_VERSION5_48a	0x05 // -0.48a
 
-	public static final int MIN_CONTACTS_TO_SEND_BOOTSTRAP	= 100; 
-	public static final int BOOTSTRAP_CONTACTS				= 30;
+	public static final int MIN_CONTACTS_TO_SEND_BOOTSTRAP	= 150; 
+	public static final int BOOTSTRAP_CONTACTS				= 20;
 	public static final int BOOTSTRAP_STOP_CONTACTS			= 50;
 	public static final int BOOTSTRAP_CHECK_INTERVAL		= 5000;
 	public static final int BOOTSTRAP_REMOVE_TIME			= 10000;// 60000
@@ -83,21 +83,21 @@ public class JKadConstants {
 	public static final int MAX_PUBLISH_SOURCES				= 150; // keyword and sources
 	public static final int MAX_PUBLISH_NOTES				= 200; 
 	
-	public static final int  MAX_CONTACTS 					= 5000;
-	public static final long ROUTING_TABLE_HELLO_SEND_INTERVAL	= 1000 * 60 * 2; //60
-	public static final long ROUTING_TABLE_FAKE_LOOKUP_INTERVAL	= 1000 * 60 * 3; //60
-	public static final int  CONTACTS_SEND_HELLO				= 5;
-	public static final long ROUTING_TABLE_CHECK_INTERVAL	= 1000 * 30; //30
+	public static final int  MAX_CONTACTS 							= 5000;
+	public static final long ROUTING_TABLE_HELLO_SEND_INTERVAL		= 1000 * 60 * 2; //60
+	public static final long ROUTING_TABLE_FAKE_LOOKUP_INTERVAL		= 1000 * 60 * 3; //60
+	public static final int  CONTACTS_SEND_HELLO					= 5;
+	public static final long ROUTING_TABLE_CHECK_INTERVAL			= 1000 * 30; //30
 	public static final long ROUTING_TABLE_CONTACTS_CHECK_INTERVAL	= 1000 * 60; 
-	public static final long ROUTING_TABLE_CONTACT_TIMEOUT  = 1000 * 60 * 2;
-	public static final long ROUTING_TABLE_CONTACT_ACCEP_TIME = 1000 * 60 * 2 - 1;
-	public static final long ROUTING_TABLE_CONTACT_IGNORE_TIME = 1000 * 60 * 2; 
-	public static final long ROUTING_TABLE_SAVE_INTERVAL	= 1000 * 60;
-	public static final long ROUTING_TABLE_DIFICIT_CONTACTS = 200;//200
+	public static final long ROUTING_TABLE_CONTACT_TIMEOUT  		= 1000 * 60 * 2;
+	public static final long ROUTING_TABLE_CONTACT_ACCEP_TIME 		= 1000 * 60 * 2 - 1;
+	public static final long ROUTING_TABLE_CONTACT_IGNORE_TIME 		= 1000 * 60 * 2; 
+	public static final long ROUTING_TABLE_SAVE_INTERVAL			= 1000 * 60;
+	public static final long ROUTING_TABLE_DIFICIT_CONTACTS 		= 200;//200
 	public static final long ROUTING_TABLE_DIFICIT_CONTACTS_STOP = ROUTING_TABLE_DIFICIT_CONTACTS + 100;
 	
 	public static final int ROUTING_TABLE_MAINTENANCE_CONTACTS			= 10; //3
-	public static final int ROUTING_TABLE_MAX_MAINTENANCE_CONTACTS		= 30;
+	public static final int ROUTING_TABLE_MAX_MAINTENANCE_CONTACTS		= 50;
 	
 	public static final int INDEX_MAX_KEYWORDS				= 60000;
 	public static final int INDEX_MAX_SOURCES				= 60000;
@@ -123,9 +123,16 @@ public class JKadConstants {
 	
 	public static final long ITERATION_MAX_PUBLISH_FILES 	= 10;
 	
-	public static final int K 								= 10;
+	public static final int K 								= 10;//10
 	public static final int ALPHA 							= 3;//3;
 
+	public static final Int128 searchTolerance;
+	
+	static {
+		searchTolerance = new Int128();
+		searchTolerance.setBit(102, true);
+	}
+	
 	public static final byte PROTO_KAD_UDP 					= (byte) 0xE4;
 	public static final byte PROTO_KAD_COMPRESSED_UDP		= (byte) 0xE5;
 	
@@ -137,6 +144,8 @@ public class JKadConstants {
 	
 	public static final byte KADEMLIA_FIREWALLED_REQ		= (byte) 0x50;
 	public static final byte KADEMLIA_FIREWALLED_RES		= (byte) 0x58;
+	
+	public static final byte KADEMLIA_CALLBACK_REQ			= (byte) 0x52;
 	
 	public static final byte KADEMLIA_REQ					= (byte) 0x20;
 	public static final byte KADEMLIA_RES					= (byte) 0x28;
@@ -174,9 +183,7 @@ public class JKadConstants {
 	public static final byte KADEMLIA2_PUBLISH_KEY_REQ		= (byte) 0x43;
 	public static final byte KADEMLIA2_PUBLISH_SOURCE_REQ	= (byte) 0x44;
 	
-	
 	public static final byte KADEMLIA2_PUBLISH_RES			= (byte) 0x4B;
-	
 	
 	public static final byte FIND_VALUE 					= (byte) 0x02;
 	public static final byte STORE      					= (byte) 0x04;
