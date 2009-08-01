@@ -22,7 +22,7 @@
  */
 package org.jmule.core.jkad.net.packet;
 
-import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_BOOTSTRAP_REQ;
+import static org.jmule.core.jkad.JKadConstants.*;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_PUBLISH_KEY_REQ;
@@ -63,6 +63,7 @@ import java.util.List;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ClientID;
@@ -75,8 +76,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Dec 31, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:11:47 $
  */
 public class PacketFactory {
 
@@ -440,6 +441,14 @@ public class PacketFactory {
 		
 		return packet;
 		
+	}
+	
+	public static KadPacket getCallBackRequestPacket(ClientID clientID, FileHash fileHash, short tcpPort) {
+		KadPacket packet = new KadPacket(KADEMLIA_CALLBACK_REQ, 16 + 16 + 2);
+		packet.insertData(clientID.toByteArray());
+		packet.insertData(fileHash.getHash());
+		packet.insertData(tcpPort);
+		return packet;
 	}
 	
 	private static ByteBuffer tagsToByteBuffer(Iterable<Tag> tagList) {
