@@ -41,8 +41,8 @@ import org.jmule.core.utils.JMuleZLib;
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:10:19 $
  */
 public class KadPacket implements UDPPacket {
 	private InetSocketAddress sender;
@@ -179,7 +179,7 @@ public class KadPacket implements UDPPacket {
 		int udp_port = shortToInt(packet_data.getShort());
 		int tcp_port = shortToInt(packet_data.getShort());
 		byte client_version = packet_data.get();
-		return new KadContact(new ClientID(client_id_raw), new ContactAddress(address, udp_port), tcp_port,client_version, null);
+		return new KadContact(new ClientID(client_id_raw), new ContactAddress(address, udp_port), tcp_port,client_version, null, false);
 	}
 
 	public ByteBuffer getAsByteBuffer() {		

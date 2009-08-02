@@ -25,8 +25,8 @@ package org.jmule.core.jkad;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:10:19 $
  */
 public class JKadUDPKey {
 	
@@ -42,6 +42,22 @@ public class JKadUDPKey {
 		this.key = key;
 		this.address = new IPAddress(address);
 		
+	}
+
+	public byte[] getKey() {
+		return key;
+	}
+
+	public void setKey(byte[] key) {
+		this.key = key;
+	}
+
+	public IPAddress getAddress() {
+		return address;
+	}
+
+	public void setAddress(IPAddress address) {
+		this.address = address;
 	}
 	
 }
