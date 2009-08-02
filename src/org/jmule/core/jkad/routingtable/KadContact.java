@@ -35,13 +35,14 @@ import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadUDPKey;
+import org.jmule.core.jkad.JKad.JKadStatus;
 import org.jmule.core.jkad.JKadConstants.ContactType;
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:14:30 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:01:22 $
  */
 
 public class KadContact {
@@ -64,12 +65,14 @@ public class KadContact {
 	
 	private boolean connected = false;
 	
+	private boolean ipVerified = false;
+	
 	public KadContact() {
 	}
 	
 	public KadContact(ClientID contactID,
 			ContactAddress address, int tcpPort,
-			byte version, JKadUDPKey kadUDPKey) {
+			byte version, JKadUDPKey kadUDPKey, boolean isIPVerified) {
 		super();
 		this.contactID = contactID;
 		this.contactAddress = address;
@@ -82,6 +85,9 @@ public class KadContact {
 		
 		creation = System.currentTimeMillis();
 		expiration = 0;
+		
+		this.contactType = ContactType.JustAdded;
+		this.ipVerified = isIPVerified;
 	}
 	
 	public String toString() {
@@ -236,6 +242,14 @@ public class KadContact {
 			case JustAdded : contactType = Active; return ;
 			case ScheduledForRemoval : contactType = JustAdded; return ;
 		}
+	}
+	
+	public boolean isIPVerified() {
+		return ipVerified;
+	}
+	
+	public void setIPVerified(boolean ipVerified) {
+		this.ipVerified = ipVerified;
 	}
 	
 		

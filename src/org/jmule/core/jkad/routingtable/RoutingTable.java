@@ -71,8 +71,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:14:57 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:01:23 $
  */
 public class RoutingTable {
 
@@ -134,7 +134,7 @@ public class RoutingTable {
 						Lookup.getSingleton().addLookupTask(lookup_new_contacts);
 					}
 				}
-								
+							
 				for(MaintenanceContact maintenance_contact : maintenanceContacts.values()) {
 					KadContact contact = maintenance_contact.kadContact;
 					

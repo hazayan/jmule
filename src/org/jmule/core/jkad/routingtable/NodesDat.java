@@ -42,8 +42,8 @@ import org.jmule.core.jkad.utils.Utils;
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:01:23 $
  */
 public class NodesDat {
 
@@ -94,9 +94,16 @@ public class NodesDat {
 				channel.read(data2);
 				
 				JKadUDPKey udp_key = new JKadUDPKey(data.array(), data2.array());
+				
+				data = getByteBuffer(1);
+				channel.read(data);
+				
 				//System.out.println("*** IsGoodAddress ** disabled");
-				if (Utils.isGoodAddress(address))
-					result.add(new KadContact(contact_id, new ContactAddress(address, udp_port), tcp_port, contact_version, udp_key));
+				if (Utils.isGoodAddress(address)) {
+					KadContact contact = new KadContact(contact_id, new ContactAddress(address, udp_port), tcp_port, contact_version, udp_key, data.get(0)==1 ? true : false);
+					
+					result.add(contact);
+				}
 			}
 			
 			channel.close();
@@ -151,9 +158,22 @@ public class NodesDat {
 				channel.write(data);
 				
 				// write key
-				data  = getByteBuffer(4 + 4);
-				data.position(0);
-				channel.write(data);
+				JKadUDPKey key = contact.getKadUDPKey();
+				if (key == null) {
+					data  = getByteBuffer(4 + 4);
+					data.position(0);
+					channel.write(data);
+				} else {
+					data  = getByteBuffer(4 + 4);
+					data.put(key.getKey());
+					data.put(key.getAddress().getAddress());
+					data.position(0);
+					channel.write(data);
+				}
+				
+				data = getByteBuffer(1);
+				data.put((byte)(contact.isIPVerified() ? 1 : 0));
+				
 			}
 			
 			channel.close();
