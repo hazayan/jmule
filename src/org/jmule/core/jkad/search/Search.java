@@ -36,8 +36,8 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:04:04 $
  */
 public class Search {
 	
@@ -135,6 +135,13 @@ public class Search {
 	}
 
 	public void cancelSearch(Int128 searchID) {
+		if (!hasSearchTask(searchID)) return ;
 		searchTasks.get(searchID).stopSearch();
+		searchTasks.remove(searchID);
 	}
+	
+	void removeSearchID(Int128 searchID) {
+		searchTasks.remove(searchID);
+	}
+	
 }

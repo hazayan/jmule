@@ -44,8 +44,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/26 14:19:52 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/02 08:04:04 $$
  */
 public class SearchManagerImpl implements SearchManager {
 
@@ -179,7 +179,7 @@ public class SearchManagerImpl implements SearchManager {
 	SearchQuery search_request;
 	private void processKadSearchRequest() {
 		if (kad_search_request_queue.isEmpty()) return ;
-		search_request = (SearchQuery) kad_search_request_queue.poll();
+		search_request = (SearchQuery) kad_search_request_queue.peek(); // remove query from queue after complete search
         Int128 keyword_id;
 			try {
 				keyword_id = jkad_search.searchKeyword(search_request.getQuery(), new org.jmule.core.jkad.search.SearchResultListener() {
@@ -201,6 +201,7 @@ public class SearchManagerImpl implements SearchManager {
 
 							public void searchFinished() {
 								notifySearchCompleted(r);
+								kad_search_request_queue.poll();
 								processKadSearchRequest();
 								
 							}
