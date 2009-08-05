@@ -37,6 +37,7 @@ import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_SEARCH_NOTES_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_SEARCH_SOURCE_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA_BOOTSTRAP_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA_BOOTSTRAP_RES;
+import static org.jmule.core.jkad.JKadConstants.KADEMLIA_CALLBACK_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA_FINDBUDDY_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA_FIREWALLED_REQ;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA_FIREWALLED_RES;
@@ -78,11 +79,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleManager;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.edonkey.impl.Peer.PeerSource;
+import org.jmule.core.edonkey.packet.EMulePacketFactory;
+import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -103,6 +109,7 @@ import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
 import org.jmule.core.jkad.search.Search;
 import org.jmule.core.jkad.utils.Convert;
+import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 import org.jmule.core.net.JMUDPConnection;
@@ -125,8 +132,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:37:31 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:36:11 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -192,7 +199,10 @@ public class JKad implements JMuleManager {
 					if (filesToPublish > JKadConstants.ITERATION_MAX_PUBLISH_FILES) break;
 					publishedFiles.add(file.getFileHash());
 					
-					Int128 id = new Int128(file.getFileHash());
+					byte[] hash = file.getFileHash().getHash().clone();
+					Convert.updateSearchID(hash);
+					Int128 id = new Int128(hash);
+					
 					if (!publisher.isPublishingSource(id)) {
 						filesToPublish++;
 						List<Tag> tagList = new LinkedList<Tag>();
@@ -230,8 +240,8 @@ public class JKad implements JMuleManager {
 			public void jkadStatusChanged(boolean newStatus) {
 				if (newStatus == false)
 					if (!isDisconnected()) disconnect();
-				//if (newStatus==true)
-					//if (getStatus() == DISCONNECTED) connect();
+				if (newStatus==true)
+					if (getStatus() == DISCONNECTED) connect();
 			}
 		});
 		
@@ -308,6 +318,7 @@ public class JKad implements JMuleManager {
 		if (rcontact != null) {
 			rcontact.setLastResponse(System.currentTimeMillis());
 			rcontact.setConnected(true);	
+			rcontact.setIPVerified(true);
 		}
 		
 		// notify packet listeners
@@ -338,7 +349,7 @@ public class JKad implements JMuleManager {
 			bootStrap.processBootStrapReq(new ClientID(client_id_raw), new IPAddress(address), udp_port);
 		} else 
 		if (packetOPCode == KADEMLIA_BOOTSTRAP_RES) {
-			//setStatus(CONNECTED);
+			
 			int contactCount = shortToInt(rawData.getShort());
 			List<KadContact> contact_list = new LinkedList<KadContact>();
 			for(int i = 0;i<contactCount;i++) {
@@ -375,7 +386,7 @@ public class JKad implements JMuleManager {
 			int tcp_port = shortToInt(rawData.getShort());
 			
 			KadContact contact = routing_table.getContact(new ClientID(client_id_raw));
-			//setStatus(CONNECTED);
+			
 			if (contact!= null) {
 				contact.setTCPPort(tcp_port);
 				contact.setUDPPort(udp_port);
@@ -496,8 +507,7 @@ public class JKad implements JMuleManager {
 			for(int i = 0;i<resultCount;i++) {
 				byte[] clientID = new byte[16];
 				rawData.get(clientID);
-				Convert.updateSearchID(clientID);
-				
+				Convert.updateSearchID(clientID);			
 				int tagCount = shortToInt(rawData.get());
 				TagList tagList = new TagList();
 				for(int k = 0;k<tagCount;k++) {
@@ -643,7 +653,6 @@ public class JKad implements JMuleManager {
 				}
 				
 				KadContact contact = routing_table.getContact(clientID);
-				//setStatus(CONNECTED);
 				if (contact!= null) {
 					contact.setTCPPort(tcpPort);
 					contact.setVersion(version);
@@ -764,10 +773,31 @@ public class JKad implements JMuleManager {
 				rawData.get(receiver_id);
 				rawData.get(sender_id);
 				tcp_port = rawData.getShort();
+
+				Buddy buddy = Buddy.getInstance();
+				Logger.getSingleton().logMessage("Buddy request : " + packet.getAddress());
+				if (!buddy.isJKadUsedAsBuddy())  {
+					ClientID receiverID = new ClientID(receiver_id);
+					Int128 senderID = new Int128(sender_id);
+					
+					//if (getClientID().equals(receiverID)) {
+						buddy.setClientID(senderID);
+						buddy.setAddress(new IPAddress(packet.getAddress()));
+						buddy.setTCPPort(tcp_port);
+						buddy.setUDPPort(org.jmule.core.utils.Convert.intToShort(packet.getAddress().getPort()));
+						
+						buddy.setKadIsUsedAsBuddy(true);
+						
+						Logger.getSingleton().logMessage("New buddy : " + buddy.getAddress()+ " TCP : " + buddy.getTCPPort()+" UDP : " + buddy.getUDPPort()); 
+						
+						ConfigurationManager configManager = ConfigurationManagerFactory.getInstance();
+						KadPacket response = PacketFactory.getBuddyResPacket(new ClientID(sender_id), JKad.getInstance().getClientID(), (short)configManager.getTCP());
+						udpConnection.sendPacket(response, packet.getAddress());
+					//}
+					
+				}
 				
-				ConfigurationManager configManager = ConfigurationManagerFactory.getInstance();
-				KadPacket response = PacketFactory.getBuddyResPacket(new ClientID(sender_id), JKad.getInstance().getClientID(), (short)configManager.getTCP());
-				udpConnection.sendPacket(response, packet.getAddress());
+				
 			} else
 				if (packetOPCode == KADEMLIA2_SEARCH_KEY_REQ) {
 					byte targetID[] = new byte[16];
@@ -800,6 +830,57 @@ public class JKad implements JMuleManager {
 						KadPacket response = PacketFactory.getSearchRes2Packet(new Int128(targetID), source_list);
 						udpConnection.sendPacket(response, packet.getAddress());
 					}else
+						if (packetOPCode == KADEMLIA_CALLBACK_REQ) {
+							Buddy buddy = Buddy.getInstance();
+							if (buddy.isJKadUsedAsBuddy()) {
+							Logger.getSingleton().logMessage("KAD callback request");
+							byte[] cid = new byte[16];
+							rawData.get(cid);
+							final Int128 clientID = new Int128(cid);
+							byte[] fid = new byte[16];
+							rawData.get(fid);
+							final FileHash fileHash = new FileHash(fid);
+							final short port = rawData.getShort();
+							final IPAddress ipAddress = new IPAddress(packet.getAddress());
+							
+							final Peer peer = new Peer(buddy.getAddress().toString(), buddy.getTCPPort(), PeerSource.KAD);
+							Logger.getSingleton().logMessage("KAD callback request, Peer : " + peer);
+							JMRunnable task = new JMRunnable() {
+								public void JMRun() {
+									peer.connect();
+									long counter = 0;
+									while(!peer.isConnected()) {
+										counter++;
+										if (counter == 5) {
+											Logger.getSingleton().logMessage("KAD callback request, Peer : failed to connect");
+											return;
+										}
+										try {
+											Thread.sleep(5000);
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
+									}
+									Logger.getSingleton().logMessage("KAD callback request, Peer : connected & send packet to :  " + peer);
+																		
+									Packet callback_packet = EMulePacketFactory.getKadCallBackRequest(clientID, fileHash, ipAddress, port);
+									
+									peer.sendPacket(callback_packet);
+									
+									try {
+										Thread.sleep(500);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+									Logger.getSingleton().logMessage("KAD callback request : Disconnecting from  " + peer);
+									peer.disconnect();
+									
+									
+								}
+							};
+							new Thread(task).start();
+						}
+						}else
 				throw new UnknownPacketOPCodeException();
 	}
 	
