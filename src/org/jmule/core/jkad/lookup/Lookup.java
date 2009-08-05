@@ -51,8 +51,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:08:23 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:33:26 $
  */
 public class Lookup {
 
@@ -182,7 +182,7 @@ public class Lookup {
 	public void processRequest(InetSocketAddress sender, RequestType requestType, Int128 targetID, Int128 sourceID, int version ) {
 		switch(requestType) {
 		case FIND_NODE : {
-			List<KadContact> list = routing_table.getNearestRandomContacts(targetID,LOOKUP_NODE_CONTACTS);
+			List<KadContact> list = routing_table.getNearestContacts(targetID,LOOKUP_NODE_CONTACTS);
 			KadPacket response;
 			if (version==1)
 				response = PacketFactory.getResponsePacket(targetID, list);
@@ -193,7 +193,7 @@ public class Lookup {
 		}
 		
 		case FIND_VALUE : {
-			List<KadContact> list = routing_table.getNearestRandomContacts(targetID, SEARCH_CONTACTS);
+			List<KadContact> list = routing_table.getNearestContacts(targetID, SEARCH_CONTACTS);
 			KadPacket response;
 			if (version==1)
 				response = PacketFactory.getResponsePacket(targetID, list);
@@ -204,7 +204,7 @@ public class Lookup {
 		}
 		
 		case STORE : {
-			List<KadContact> list = routing_table.getNearestRandomContacts(targetID, PUBLISH_KEYWORD_CONTACT_COUNT);
+			List<KadContact> list = routing_table.getNearestContacts(targetID, PUBLISH_KEYWORD_CONTACT_COUNT);
 			
 			KadPacket response;
 			if (version==1)
