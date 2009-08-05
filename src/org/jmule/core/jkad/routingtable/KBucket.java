@@ -23,6 +23,7 @@
 package org.jmule.core.jkad.routingtable;
 
 import static org.jmule.core.jkad.JKadConstants.K;
+import static org.jmule.core.jkad.utils.Utils.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +37,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:27:50 $
  */
 public class KBucket {
 	
@@ -90,17 +91,33 @@ public class KBucket {
 		return list;
 	}
 	
+	/**
+	 * Get nearest contacts to target
+	 * @param targetID XOR distance
+	 * @param contactCount
+	 * @return
+	 */
+	public synchronized List<KadContact> getNearestContacts(Int128 targetID, int contactCount) {
+		List<KadContact> list = new LinkedList<KadContact>();
+		do {		
+			KadContact contact = getNearestContact(targetID, contact_list, list); 
+			if (contact == null) break;
+			list.add(contact);
+		}while(list.size()<contactCount);
+		return list;
+	}
+	
 	public void clear() {
 		contact_list.clear();
 	}
 	
 	public String toString() {
-		String result = "";
+		String result = " [ " + contact_list.size()+" :    ";
 		
 		for(KadContact contact : contact_list)
-			result += contact + "\n";
+			result += contact.getContactDistance().toBinaryString() + "  ";
 		
-		return result;
+		return result + " ]";
 	}
 	
 	public boolean isFull() {
