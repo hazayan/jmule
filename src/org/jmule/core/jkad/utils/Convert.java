@@ -24,23 +24,29 @@ package org.jmule.core.jkad.utils;
 
 import java.util.BitSet;
 
+import org.jmule.core.edonkey.utils.Utils;
+
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:22:50 $
  */
 public class Convert {
+	
 
 	public static Long bitSetToLong(BitSet bitSet) {
 		long result = 0l;
-		for(int i = 0;i<bitSet.length();i++) 
-			if (bitSet.get(i)) 
+		for(int i = 0;i<bitSet.length();i++)  {
+			int poz = bitSet.size() - i -1;
+			if (bitSet.get(poz)) 
 				result += Math.pow(2, i);
+		}
 		
 		return result;
 	}
+
 	
 	public static byte[] bitSetToByteArray(BitSet bitSet) {
 		 byte[] bytes = new byte[bitSet.size()% 8 == 0 ? bitSet.size() / 8 : bitSet.size() / 8 + 1];
@@ -59,6 +65,7 @@ public class Convert {
 				if ((b & 1 << j) != 0) {
                     //"byte" * 8 + "bit in byte" = i * 8 + j
 					bitSet.set((i << 3) + j);
+
 				}
 			}
 		}

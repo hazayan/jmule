@@ -24,6 +24,9 @@ package org.jmule.core.jkad.utils;
 
 import static org.jmule.core.utils.Convert.byteToInt;
 
+import java.nio.ByteBuffer;
+import java.util.BitSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -34,8 +37,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:22:50 $
  */
 public class Utils {
 	
@@ -74,35 +77,63 @@ public class Utils {
 
 
 	
-	public static boolean inToleranceZone(Int128 target, Int128 source, Int128 toleranceZone) {
-		long distance = Math.abs(target.toLong() - source.toLong());
-		return distance < toleranceZone.toLong();
+	public static boolean inToleranceZone(Int128 target, Int128 source, long toleranceZone) {
+		Int128 xorValue = XOR(target,source);
+		if (xorValue.get32Bit(0) > toleranceZone) 
+			return false;
+		return true;
 	}
 	
-	public static long XORDistance(Int128 a, Int128 b) {
-		Int128 tmp = new Int128(a);
-		tmp.XOR(b);
-		return tmp.toLong();
+	public static Int128 XOR(Int128 a, Int128 b) {
+		BitSet xor_bit_set = (BitSet) a.getBitSet().clone();
+		xor_bit_set.xor(b.getBitSet());
+		return new Int128(xor_bit_set);
 	}
 	
-	public static KadContact getNearestContact(Int128 targetID, List<KadContact> contactList) {
-		KadContact contact = null;
-		long distance = -1;
+	/**
+	 * Retrun bigger rang from bit set.
+	 * Example : 0101011000
+	 * Result is : 7   ^
+	 * @param bitSet
+	 * @return bigger rang
+	 */
+	public static int getBiggerRang(BitSet bitSet) {
+		 for(int i = bitSet.size()-1;i>=0;i--) {
+			 if (bitSet.get(i)) return i;
+		 }
+		 return 0;
+	}
+	
+	/**
+	 * Return nearest contact from contactList except contacts from exeptList
+	 * @param targetID  XOR distance from JKad to target
+	 * @param contactList
+	 * @param exceptList
+	 * @return nearest contact or null
+	 */
+	public static KadContact getNearestContact(Int128 targetID, List<KadContact> contactList, List<KadContact> exceptList) {
+		int result = -1;
+		int biggerRang = -1;
 		
-		for(KadContact c : contactList) {
-			if (distance == -1) {
-				distance = Utils.XORDistance(targetID, c.getContactID());
-				contact = c;
+		for(int i = 0;i<contactList.size();i++) {
+			KadContact contact = contactList.get(i);
+			if (exceptList.contains(contact)) continue;
+			Int128 distance = XOR(targetID, contact.getContactDistance());
+			if (result==-1) {
+				result = i;
+				biggerRang = getBiggerRang(distance.getBitSet());
 				continue;
 			}
-			
-			long d2 = Utils.XORDistance(targetID, c.getContactID());
-			if (d2 < distance) {
-				distance = d2;
-				contact = c;
+			int rang = getBiggerRang(distance.getBitSet());
+			if (rang<biggerRang) {
+				result = i;
+				biggerRang = rang;
 			}
+			
+			
 		}
-		return contact;
+		if (result ==-1) return null;
+		return contactList.get(result);
 	}
 	
 }
