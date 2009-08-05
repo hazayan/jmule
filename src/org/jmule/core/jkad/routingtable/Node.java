@@ -27,8 +27,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:24:49 $
  */
 public class Node {
 
@@ -65,13 +65,15 @@ public class Node {
 		subnet.add(contact);
 	}
 
+	/**
+	 * Split node into two sub nodes when KBucket is full
+	 */
 	private void splitNode() {
 		Int128 left_index = nodeIndex.clone();
-		left_index.shiftLeft(1);
+		left_index.setBit(nodeLevel, false);
 		
 		Int128 right_index = nodeIndex.clone();
-		right_index.shiftLeft(1);
-		right_index.setBit(127, true);
+		right_index.setBit(nodeLevel, true);
 		
 		KBucket left_subnet = new KBucket();
 		KBucket righ_subnet = new KBucket();
@@ -94,23 +96,48 @@ public class Node {
 		subnet = null;
 	}
 
+	String getIDAsString() {
+		String result = ""; 
+		for(int i=0;i<nodeLevel;i++) {
+			if (nodeIndex.getBit(i))
+				result+="1";
+			else
+				result += "0";
+		}
+		if (nodeLevel==0) result+="<root>";
+		return result;
+	}
+	
 	public String toString() {
 		String result = "";
-		if (parent != null) {
-			if (parent.getLeft() == this)
-				result += "Left Node\n";
-			else
-				result += "Right Node\n";
-		}
-		result = "Node index : " + nodeIndex +"\n";
-		//result += "Node level : " + nodeLevel + "\n";
 		
-		//result += "KBucket : \n" + subnet;
+		result = "Node index : "; 
+		for(int i=0;i<nodeLevel;i++) {
+			if (nodeIndex.getBit(i))
+				result+="1";
+			else
+				result += "0";
+				
+		}
+		if (nodeLevel==0) result+="<root>";
+		result += "\n";
+		result += "Level     : " + getLevel() + "\n"; 
+		if (getParent()!=null)
+		result += "Parent    : " + getParent().getIDAsString() + "\n";
+		else
+		result += "Parent    : null \n";
+		result += "KBucket   : " + getKBucket() +"\n";
+		
+		if (getLeft()!=null)
+			result += "Left      : " + getLeft().getIDAsString() + "\n";
+		
+		if (getRight()!=null)
+			result += "Right     : " + getRight().getIDAsString()+"\n";
 		
 		return result;
 	}
 	
-	public KBucket getSubnet() {
+	public KBucket getKBucket() {
 		return subnet;
 	}
 	
@@ -142,4 +169,19 @@ public class Node {
 		return nodeLevel;
 	}
 
+	public Node getParent() {
+		return parent;
+	}
+
+	public int hashCode() {
+		return getIDAsString().hashCode();
+	}
+	
+	public boolean equals(Object object) {
+		if (object == null) return false;
+		if (!(object instanceof Node)) return false;
+		Node node = (Node)object;
+		return node.hashCode() == hashCode();
+	}
+	
 }
