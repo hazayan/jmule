@@ -45,8 +45,10 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
@@ -71,8 +73,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:01:23 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:26:46 $
  */
 public class RoutingTable {
 
@@ -99,7 +101,7 @@ public class RoutingTable {
 	}
 	
 	private RoutingTable() {
-		root = new Node(null, new Int128(new byte[]{0x00}), 0, new KBucket());
+		root = new Node(null, new Int128(), 0, new KBucket());
 	}
 	
 	public void start() {
@@ -111,10 +113,9 @@ public class RoutingTable {
 			public void run() {
 				if (getTotalContacts() < ROUTING_TABLE_DIFICIT_CONTACTS) {
 					if ((lookup_new_contacts == null)||(!lookup_new_contacts.isLookupStarted())) {
-						Int128 toleranceZone = new Int128();
-						toleranceZone.setBit(127, true);
+						
 						Int128 fake_target = new Int128(Utils.getRandomInt128());
-						lookup_new_contacts = new LookupTask(RequestType.FIND_NODE, fake_target, toleranceZone) {
+						lookup_new_contacts = new LookupTask(RequestType.FIND_NODE, fake_target, JKadConstants.toleranceZone) {
 							public void lookupTimeout() {
 							}
 
@@ -160,7 +161,7 @@ public class RoutingTable {
 								continue;
 							}
 							contact.downgrateType();
-							contactUpdated(contact);
+							notifyContactUpdated(contact);
 							if (contact.getContactType()!=ContactType.ScheduledForRemoval)
 								maintenanceContacts.remove(contact.getContactAddress());
 							continue;
@@ -207,31 +208,31 @@ public class RoutingTable {
 					long contact_time = System.currentTimeMillis() - contact.getLastResponse();
 					if (contact_time >  Active2MoreHours.timeRequired()) {
 						if (contact.getContactType()==Active2MoreHours) continue;
-						contactUpdated(contact);
+						notifyContactUpdated(contact);
 						contact.setContactType(Active2MoreHours);
 					}
 					else
 					if (contact_time >  Active1Hour.timeRequired()) { 
 						if (contact.getContactType()==Active1Hour) continue;
-						contactUpdated(contact);
+						notifyContactUpdated(contact);
 						contact.setContactType(Active1Hour);
 					}
 						else
 						if (contact_time >  Active.timeRequired()) {
 							if (contact.getContactType()==Active) continue;
-							contactUpdated(contact);
+							notifyContactUpdated(contact);
 							contact.setContactType(Active);
 						}
 							else
 							if (contact_time >  JustAdded.timeRequired()) {
 								if (contact.getContactType()==JustAdded) continue;
-								contactUpdated(contact);
+								notifyContactUpdated(contact);
 								contact.setContactType(JustAdded);
 							}
 							else
 								if (contact_time >  ScheduledForRemoval.timeRequired()) {
 									if (contact.getContactType()==ScheduledForRemoval) continue;
-									contactUpdated(contact);
+									notifyContactUpdated(contact);
 									contact.setContactType(ScheduledForRemoval);
 								}
 					}
@@ -263,11 +264,11 @@ public class RoutingTable {
 		Timer.getSingleton().removeTask(contact_checker);
 		
 		tree_nodes.clear();
-		allContactsRemoved();
-		root = new Node(null, new Int128(new byte[]{0x00}), 0, new KBucket());
+		notifyAllContactsRemoved();
+		root = new Node(null, new Int128(), 0, new KBucket());
 	}
 	
-	public void addContact(KadContact contact) {
+	public synchronized void addContact(KadContact contact) {
 		// TODO : Create code to filter myself
 		if (!Utils.isGoodAddress(contact.getIPAddress())) {
 			Logger.getSingleton().logMessage("Filtered address : "+contact.getIPAddress());
@@ -281,29 +282,33 @@ public class RoutingTable {
 		if (getTotalContacts() >= MAX_CONTACTS) return ;
 		
 		newContacts++;
-		Node node = root;
-
+		
 		contact.setContactType(JustAdded);
 		
 		Int128 contact_distance = contact.getContactDistance();
+		
+		Node node = root;
 		while(!node.isLeaf()) {
 			int node_level = node.getLevel();
 			boolean direction = contact_distance.getBit(node_level);
-			if (direction)
+			if (direction) {
 				node = node.getRight();
-			else
+			}
+			else {
 				node = node.getLeft();
+			}
 		}
 		
 		node.addContact(contact);
+		
 		tree_nodes.add(contact);
 		
-		contactAdded(contact);
+		notifyContactAdded(contact);
 	}
 	
 	public boolean hasContact(KadContact contact) {
-		Node node = getNearestKBuket(contact.getContactDistance());
-		return node.getSubnet().hasContact(contact);
+		Node node = getNearestNode(contact.getContactDistance());
+		return node.getKBucket().hasContact(contact);
 	}
 	
 	public KadContact getContact(Int128 contactID) {
@@ -341,7 +346,7 @@ public class RoutingTable {
 	}
 	
 	/**
-	 * Use this method for FIND_NODE request
+	 * Usage in BootStrap and Firewall check
 	 * @param contactCount
 	 * @return
 	 */
@@ -370,8 +375,17 @@ public class RoutingTable {
 		return list;
 	}
 	
-	public List<KadContact> getNearestRandomContacts(Int128 target, int contactCount) {
+	/**
+	 * Return contactCount contacts nearest to the target
+	 * @param target ID of target, not XOR distance !
+	 * @param contactCount
+	 * @return
+	 */
+	public List<KadContact> getNearestContacts(Int128 searchTarget, int contactCount) {
 		Node node = root;
+		
+		Int128 target = Utils.XOR(searchTarget, JKad.getInstance().getClientID());
+		
 		while(!node.isLeaf()) {
 			int node_level = node.getLevel();
 			boolean direction = target.getBit(node_level);
@@ -381,10 +395,58 @@ public class RoutingTable {
 				node = node.getLeft();
 		}
 		
-		return node.getSubnet().getRandomContacts(contactCount);
+		if (node.getKBucket().size()>=contactCount)
+			return node.getKBucket().getNearestContacts(target, contactCount);
+		
+		List<KadContact> result = new LinkedList<KadContact>();
+				
+		Queue<Node> nodeQueue = new LinkedBlockingQueue<Node>();
+		List<Node>  usedNodes = new LinkedList<Node>();
+		nodeQueue.add(node);
+		usedNodes.add(node);
+		while(result.size()<contactCount) {
+			
+			if (nodeQueue.size()==0) {
+				break;
+			}
+			node = nodeQueue.poll();
+			
+			int count = contactCount - result.size();
+			if (node.getKBucket()!=null) {
+				List<KadContact> list = node.getKBucket().getNearestContacts(target,count);
+				result.addAll(list);
+			}
+			
+			Node leftNode = node.getLeft();
+			Node rightNode = node.getRight();
+			Node parentNode = node.getParent();
+			
+			if (leftNode != null) {
+				if (!usedNodes.contains(leftNode))  {
+					nodeQueue.add(leftNode);
+					usedNodes.add(leftNode);
+				}
+			}
+			
+			if (rightNode != null) {
+				if(!usedNodes.contains(rightNode)) {
+					nodeQueue.add(rightNode);
+					usedNodes.add(rightNode);
+				}
+			}
+			
+			if (parentNode!=null) {
+				if (!usedNodes.contains(parentNode))
+					nodeQueue.add(parentNode);
+					usedNodes.add(parentNode);
+			}
+						
+		}
+		
+		return result;
 	}
 	
-	private Node getNearestKBuket(Int128 contactDistance) {
+	private Node getNearestNode(Int128 contactDistance) {
 		Node node = root;
 		while(!node.isLeaf()) {
 			int node_level = node.getLevel();
@@ -408,6 +470,41 @@ public class RoutingTable {
 	public void storeContacts() {
 		NodesDat.writeFile(NODES_DAT, tree_nodes);
 	}
+
+	private void removeNode(KadContact contact) {
+		Int128 contactDistance = contact.getContactDistance();
+		Node node = root;
+		while(!node.isLeaf()) {
+			int node_level = node.getLevel();
+			boolean direction = contactDistance.getBit(node_level);
+			if (direction)
+				node = node.getRight();
+			else
+				node = node.getLeft();
+		}
+		node.getKBucket().remove(contact);
+		tree_nodes.remove(contact);
+		
+		notifyContactRemoved(contact);
+	}
+	
+	private List<KadContact> getContactsWithTimeout(long timeout) {
+		long currentTime = System.currentTimeMillis();
+		List<KadContact> list = new LinkedList<KadContact>();
+	
+		for(KadContact contact : tree_nodes) 
+			if (currentTime - contact.getLastResponse()>=timeout) 
+				list.add(contact);
+		
+		return list;
+	}
+	
+	public List<KadContact> getContacts() {
+		return tree_nodes;
+	}
+
+	
+	
 	
 	public String toString() {
 		String result =  "";
@@ -437,55 +534,24 @@ public class RoutingTable {
 		listener_list.remove(listener);
 	}
 	
-	private void removeNode(KadContact contact) {
-		Int128 contactDistance = contact.getContactDistance();
-		Node node = root;
-		while(!node.isLeaf()) {
-			int node_level = node.getLevel();
-			boolean direction = contactDistance.getBit(node_level);
-			if (direction)
-				node = node.getRight();
-			else
-				node = node.getLeft();
-		}
-		node.getSubnet().remove(contact);
-		tree_nodes.remove(contact);
-		
-		contactRemoved(contact);
-	}
 	
-	private List<KadContact> getContactsWithTimeout(long timeout) {
-		long currentTime = System.currentTimeMillis();
-		List<KadContact> list = new LinkedList<KadContact>();
-	
-		for(KadContact contact : tree_nodes) 
-			if (currentTime - contact.getLastResponse()>=timeout) 
-				list.add(contact);
-		
-		return list;
-	}
-	
-	public List<KadContact> getContacts() {
-		return tree_nodes;
-	}
-	
-	
-	private void contactUpdated(KadContact contact) {
-		for(RoutingTableListener listener : listener_list)
+	private void notifyContactUpdated(KadContact contact) {
+		for(RoutingTableListener listener : listener_list) 
 			listener.contactUpdated(contact);
+			
 	}
 	
-	private void contactAdded(KadContact contact) {
+	private void notifyContactAdded(KadContact contact) {
 		for(RoutingTableListener listener : listener_list)
 			listener.contactAdded(contact);
 	}
 	
-	private void contactRemoved(KadContact contact) {
+	private void notifyContactRemoved(KadContact contact) {
 		for(RoutingTableListener listener : listener_list)
 			listener.contactRemoved(contact);
 	}
 	
-	private void allContactsRemoved() {
+	private void notifyAllContactsRemoved() {
 		for(RoutingTableListener listener : listener_list)
 			listener.allContactsRemoved();
 	}
