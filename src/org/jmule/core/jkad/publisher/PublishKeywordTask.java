@@ -42,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:13:45 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:30:29 $
  */
 public class PublishKeywordTask extends PublishTask {
 
@@ -58,10 +58,8 @@ public class PublishKeywordTask extends PublishTask {
 	public void start() {
 		if (lookup_task!=null)
 			if (lookup_task.isLookupStarted()) return;
-		Int128 toleranceZone = new Int128();
-		toleranceZone.setBit(127, true);
 		isStarted = true;
-		lookup_task = new LookupTask(RequestType.STORE, publishID, toleranceZone) {
+		lookup_task = new LookupTask(RequestType.STORE, publishID, JKadConstants.toleranceZone) {
 				
 			public void lookupTimeout() {
 				System.out.println("Keyword task " + targetID.toHexString() + " timeout");
