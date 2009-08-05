@@ -34,8 +34,6 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTTAKEN;
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_STRING;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -101,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:34:53 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/05 13:40:47 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -248,9 +246,12 @@ public class DownloadSession implements JMTransferSession {
 		
 		if (jkad.isConnected()) {
 		kad_source_search = new Task() {
-			Int128 search_id = new Int128(sharedFile.getFileHash());
+			Int128 search_id;
 			Search search = Search.getSingleton();
 			public void run() {
+				byte[] hash = sharedFile.getFileHash().getHash().clone();
+				org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
+				search_id = new Int128(hash);
 				if (search.hasSearchTask(search_id)) return ;
 				Search.getSingleton().searchSources(search_id, new SearchResultListener() {
 					public void processNewResults(List<Source> result) {
