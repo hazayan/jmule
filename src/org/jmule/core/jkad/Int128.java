@@ -27,20 +27,25 @@ import static org.jmule.core.jkad.utils.Convert.bitSetToLong;
 import static org.jmule.core.jkad.utils.Convert.byteArrayToBitSet;
 import static org.jmule.core.utils.Convert.byteToHexString;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
 
 import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:13:44 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:38:52 $
  */
 public class Int128 implements Cloneable {
 
 	private BitSet bit_set;
+	
+	private int mark = -1;
 	
 	public Int128() {
 		bit_set = new BitSet(128);
@@ -51,10 +56,23 @@ public class Int128 implements Cloneable {
 		bit_set = bitSet;
 	}
 	
+	/**
+	 * 
+	 */
 	public Int128(byte[] byteArray) {
 		bit_set = new BitSet(128);
-			
-		byteArrayToBitSet(byteArray, bit_set);
+		
+		ByteBuffer reversed = Misc.getByteBuffer(16);
+		
+		ByteBuffer tmp = Misc.getByteBuffer(4);
+
+		for(int i = 0;i<16;i+=4) {
+			tmp.clear();
+			tmp.put(byteArray, i, 4);
+			reversed.put(Convert.reverseArray(tmp.array()));
+		}
+		
+		byteArrayToBitSet(reversed.array(), bit_set);
 	}
 	
 	public Int128(FileHash fileHash) {
@@ -65,41 +83,9 @@ public class Int128 implements Cloneable {
 		bit_set = (BitSet) int128.bit_set.clone();
 	}
 	
-	public void XOR(Int128 value) {
-		bit_set.xor(value.bit_set);
-	}
-	
-	public void shiftLeft(int count) {
-		int dest = bit_set.size() - 1;
-		int src = dest - count;
-		
-		while(src>=0) {
-			bit_set.set(dest, bit_set.get(src));
-			dest--;
-			src--;
-		}
-		while(dest>=0) {
-			bit_set.set(dest, false);
-			dest--;
-		}
-	}
-	
-	public void shiftRight(int count) {
-		int dest = 0;
-		int src = count;
-		while(src<bit_set.size()) {
-			bit_set.set(dest, bit_set.get(src));
-			src++;
-			dest++; 
-		}
-		while(dest<bit_set.size()) {
-			bit_set.set(dest,false);
-			dest++;
-		}
-	}
 
 	public boolean getBit(int position) {
-		return bit_set.get(bit_set.size() - position -1 );
+		return bit_set.get(position);
 	}
 	
 	/**
@@ -108,19 +94,84 @@ public class Int128 implements Cloneable {
 	 * @param value
 	 */
 	public void setBit(int position, boolean value) {
-		bit_set.set(bit_set.size() - position - 1, value);
+		bit_set.set(position, value);
 	}
 	
 	public long toLong() {
 		return bitSetToLong(bit_set);
 	}
 	
+	/**
+	 * Mark one bit 
+	 * @param mark
+	 */
+	public void mark(int mark) {
+		this.mark = mark;
+	}
+	
+	/**
+	 * Get marked bit
+	 * @return  marked bit or -1 ( no marked bit)
+	 */
+	public int mark() {
+		return mark;
+	}
+	
+	public void resetMark() {
+		mark = -1;
+	}
+	
+	public boolean isMarked() {
+		return mark != -1;
+	}
+	
 	public byte[] toByteArray() {
-       return bitSetToByteArray(bit_set);
+		return toByteArray(true);
     }
+	
+	/**
+	 * 
+	 * @param begin - begin position in bytes [0..16]
+	 * @return
+	 */
+	public long get32Bit(int begin) {
+		byte[] byteArray = bitSetToByteArray(bit_set);
+		ByteBuffer buffer = Misc.getByteBuffer(4);
+		buffer.put(byteArray, begin, 4);
+		buffer.position(0);
+		buffer.put(Convert.reverseArray(buffer.array()));
+		
+		return Convert.intToLong(buffer.getInt(0));
+	}
+
+	/**
+	 * Used in 'debug' situations
+	 * @param reverse
+	 * @return
+	 */
+	public byte[] toByteArray(boolean reverse) {
+		if (reverse) {
+			byte[] byteArray = bitSetToByteArray(bit_set);
+		
+			ByteBuffer reversed = Misc.getByteBuffer(16);
+			
+			ByteBuffer tmp = Misc.getByteBuffer(4);
+	
+			for(int i = 0;i<16;i+=4) {
+				tmp.clear();
+				tmp.put(byteArray, i, 4);
+				reversed.put(Convert.reverseArray(tmp.array()));
+			}
+			
+			return reversed.array();
+		}
+		return bitSetToByteArray(bit_set);
+    }
+	
+	
 
 	public String toHexString() {
-		return byteToHexString(toByteArray());
+		return byteToHexString(toByteArray(false));
 	}
 	
 	public String toString() {
@@ -130,15 +181,26 @@ public class Int128 implements Cloneable {
 	
 	public String toBinaryString() {
 		String result = "";
-		for(int i = 0 ; i < bit_set.size() ; i++ ) {
-			
-			if (bit_set.get(i)) 
-				result =  "1" + result;
-			else 
-				result = "0" + result ;
+		int length = mark();
+		if (length == -1)
+			length = bit_set.size();
+		else
+			length++;
+		for (int i = 0; i < length; i++) {
+
+			if (getBit(i))
+				result = result + "1" ;
+			else
+				result = result + "0" ;
 		}
+		
 		return result;
 		
+	}
+	
+	public int getInt(int beginValue) {
+	
+		return 0;
 	}
 	
 	public FileHash toFileHash() {
@@ -148,19 +210,16 @@ public class Int128 implements Cloneable {
 	public BitSet getBitSet() {
 		return bit_set;
 	}
-	
+
 	public Int128 clone() {
-		try {
-			super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
 		return new Int128((BitSet) bit_set.clone());
 	}
 	
 	public boolean equals(Object value) {
-		if (value == null) return false;
-		if (! (value instanceof Int128)) return false;
+		if (value == null)
+			return false;
+		if (!(value instanceof Int128))
+			return false;
 		return Arrays.equals(toByteArray(), ((Int128) value).toByteArray());
 	}
 	
