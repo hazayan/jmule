@@ -42,11 +42,16 @@ import org.jmule.core.jkad.utils.Utils;
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:01:23 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:28:40 $
  */
 public class NodesDat {
 
+	/**
+	 * 
+	 * @param fileName
+	 * @return
+	 */
 	public static List<KadContact> loadFile(String fileName) {
 		List<KadContact> result = new LinkedList<KadContact>();
 		
@@ -68,7 +73,6 @@ public class NodesDat {
 				data = getByteBuffer(16);
 				channel.read(data);
 				ClientID contact_id = new ClientID(data.array());
-				
 				data = getByteBuffer(4);
 				channel.read(data);
 				byte[] ip = data.array().clone();
@@ -114,6 +118,11 @@ public class NodesDat {
 		return result;
 	}
 	
+	/**
+	 * 
+	 * @param fileName
+	 * @param contactList
+	 */
 	public static void writeFile(String fileName, List<KadContact> contactList) {
 		try {
 			FileChannel channel = new FileOutputStream(fileName).getChannel();
@@ -173,7 +182,8 @@ public class NodesDat {
 				
 				data = getByteBuffer(1);
 				data.put((byte)(contact.isIPVerified() ? 1 : 0));
-				
+				data.position(0);
+				channel.write(data);
 			}
 			
 			channel.close();
