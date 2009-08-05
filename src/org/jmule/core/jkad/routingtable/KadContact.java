@@ -27,7 +27,6 @@ import static org.jmule.core.jkad.JKadConstants.ContactType.Active1Hour;
 import static org.jmule.core.jkad.JKadConstants.ContactType.Active2MoreHours;
 import static org.jmule.core.jkad.JKadConstants.ContactType.JustAdded;
 import static org.jmule.core.jkad.JKadConstants.ContactType.ScheduledForRemoval;
-import static org.jmule.core.utils.Convert.byteToHexString;
 
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.ContactAddress;
@@ -35,14 +34,14 @@ import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadUDPKey;
-import org.jmule.core.jkad.JKad.JKadStatus;
 import org.jmule.core.jkad.JKadConstants.ContactType;
+import org.jmule.core.jkad.utils.Utils;
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/02 08:01:22 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:29:51 $
  */
 
 public class KadContact {
@@ -80,8 +79,7 @@ public class KadContact {
 		this.version = version;
 		this.kadUDPKey = kadUDPKey;
 		
-		contactDistance = contactID.clone();
-		contactDistance.XOR(JKad.getInstance().getClientID());
+		contactDistance = Utils.XOR(contactID, JKad.getInstance().getClientID());
 		
 		creation = System.currentTimeMillis();
 		expiration = 0;
@@ -159,13 +157,11 @@ public class KadContact {
 	public boolean equals(Object object) {
 		if (object == null) return false;
 		if (!(object instanceof KadContact)) return false;
-		KadContact c = (KadContact) object;
-		//return Arrays.equals(contactID.toByteArray(), c.contactID.toByteArray());
-		return contactID.toString().equals(c.getContactID().toString());
+		return hashCode()==object.hashCode();
 	}
 	
 	public int hashCode() {
-		return byteToHexString(contactID.toByteArray()).hashCode();
+		return contactID.toBinaryString().hashCode();
 	}
 
 	public boolean isConnected() {
