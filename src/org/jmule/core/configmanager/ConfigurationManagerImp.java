@@ -35,8 +35,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:02:57 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/08/11 16:35:07 $$
  */
 public class ConfigurationManagerImp implements InternalConfigurationManager {
 
@@ -51,13 +51,13 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		
 	}
 
-	@Override
+	
 	public void addConfigurationListener(ConfigurationListener listener) {
 
 		  config_listeners.add( listener );
 	}
 
-	@Override
+	
 	public long getDownloadBandwidth() throws ConfigurationManagerException {
 		
 		String download_bandwidth = config_store.getProperty(DOWNLOAD_BANDWIDTH_KEY,DOWNLOAD_BANDWIDTH+"");
@@ -73,7 +73,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return value;
 	}
 
-	@Override
+	
 	public long getDownloadLimit() throws ConfigurationManagerException {
 		
 		String download_limit = config_store.getProperty(DOWNLOAD_LIMIT_KEY,DOWNLOAD_LIMIT+"");
@@ -91,7 +91,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		
 	}
 
-	@Override
+	
 	public String getNickName() throws ConfigurationManagerException {
         String nick_name = config_store.getProperty(NICK_NAME_KEY, NICK_NAME);
         
@@ -101,7 +101,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return nick_name;
 	}
 
-	@Override
+	
 	public int getTCP() throws ConfigurationManagerException {
 		
 		String tcp = config_store.getProperty(TCP_PORT_KEY,TCP_PORT+"");
@@ -118,7 +118,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return value;
 	}
 
-	@Override
+	
 	public int getUDP() throws ConfigurationManagerException {
 		
 		String udp = config_store.getProperty(UDP_PORT_KEY,UDP_PORT+"");
@@ -136,7 +136,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 
 	}
 
-	@Override
+	
 	public long getUploadBandwidth() throws ConfigurationManagerException  {
 		
 		String upload_bandwidth = config_store.getProperty(UPLOAD_BANDWIDTH_KEY, UPLOAD_BANDWIDTH + "");
@@ -153,7 +153,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return value;
 	}
 
-	@Override
+	
 	public long getUploadLimit() throws ConfigurationManagerException {
 		
 		String upload_limit = config_store.getProperty(UPLOAD_LIMIT_KEY, UPLOAD_LIMIT+"");
@@ -170,7 +170,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return value;
 	}
 	
-	@Override
+	
 	public UserHash getUserHash() throws ConfigurationManagerException {
 		
 		String user_hash_str = config_store.getProperty(USER_HASH_KEY);
@@ -199,7 +199,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		notifyPropertyChanged(USER_HASH_KEY, userHash);
 	}
 	
-	@Override
+	
 	public void load() throws ConfigurationManagerException {
 
 		try {
@@ -213,13 +213,13 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 	}
 
 
-	@Override
+	
 	public void removeConfigurationListener(ConfigurationListener listener) {
 		
         config_listeners.remove( listener );
 	}
 
-	@Override
+	
 	public void save() throws ConfigurationManagerException {
        try {
     	   
@@ -231,7 +231,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 
 	}
 
-	@Override
+	
 	public void setDownloadBandwidth(long downloadBandwidth) throws ConfigurationManagerException {
 		 if (downloadBandwidth <= 0)
 			 throw new ConfigurationManagerException("Download bandwidth can't be negative or 0, " + downloadBandwidth + " given");
@@ -240,7 +240,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		 notifyPropertyChanged( DOWNLOAD_BANDWIDTH_KEY, downloadBandwidth );
 	}
 	
-	@Override
+	
 	public void setDownloadBandwidth(String downloadBandwidth) throws ConfigurationManagerException  {
 		long bandwidth;
 		try {
@@ -251,7 +251,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		setDownloadBandwidth(bandwidth);
 	}
 
-	@Override
+	
 	public void setDownloadLimit(long downloadLimit) throws ConfigurationManagerException {
 		if ( downloadLimit < 0 )
 			throw new ConfigurationManagerException("Download limit can't be negative, " + downloadLimit + " given");
@@ -260,7 +260,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		notifyPropertyChanged( DOWNLOAD_LIMIT_KEY, downloadLimit );
 	}
 	
-	@Override
+	
 	public void setDownloadLimit(String downloadLimit) throws ConfigurationManagerException {
 		long download_limit;
 		try {
@@ -271,7 +271,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		setDownloadLimit(download_limit);
 	}
 
-	@Override
+	
 	public void setNickName(String nickName) throws ConfigurationManagerException  {
 		if( nickName.length() == 0 )
 			throw new ConfigurationManagerException("The nickname can't be 0 length");
@@ -284,7 +284,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
         notifyPropertyChanged( NICK_NAME_KEY, nickName ); 
 	}
 
-	@Override
+	
 	public void setSharedFolders(List<File> sharedFolders) throws ConfigurationManagerException {
 		// first remove old values
 		List<File> file_list = getSharedFolders();
@@ -304,7 +304,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		notifyPropertyChanged( SHARED_DIRECTORIES_KEY, sharedFolders );
 	}
 	
-	@Override
+	
 	public List<File> getSharedFolders() throws ConfigurationManagerException {
 		
 		int i = 0;
@@ -340,7 +340,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return shared_directories;
 	}
 
-	@Override
+	
 	public void setTCP(String tcp) throws ConfigurationManagerException {
 		int tcp_port;
 		try {
@@ -353,7 +353,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		setTCP( tcp_port );
 	}
 
-	@Override
+	
 	public void setTCP(int tcp) throws ConfigurationManagerException {
 		
 		if ( ! ( ( tcp >= 0 ) && ( tcp <= 65535 ) ) )
@@ -364,7 +364,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		notifyPropertyChanged( TCP_PORT_KEY, tcp );
 	}
 
-	@Override
+	
 	public void setUDP(String udp) throws ConfigurationManagerException  {	
 		
 		int udp_port;
@@ -380,7 +380,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		setUDP( udp_port );
 	}
 
-	@Override
+	
 	public void setUDP(int udp) throws ConfigurationManagerException  {
 		
 		if ( ! ( ( udp >= 0 ) && ( udp <= 65535 ) ) )
@@ -392,7 +392,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 
 	}
 
-	@Override
+	
 	public void setUploadBandwidth(long uploadBandwidth) throws ConfigurationManagerException {
 	   if (uploadBandwidth <= 0) {
 		   throw new ConfigurationManagerException("Upload bandwidth can't be negative or 0, " + uploadBandwidth + " given");
@@ -402,7 +402,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
        notifyPropertyChanged( UPLOAD_BANDWIDTH_KEY, uploadBandwidth );
 	}
 
-	@Override
+	
 	public void setUploadBandwidth(String uploadBandwidth) throws ConfigurationManagerException {
 		long upload_bandwidth;
 		try {
@@ -415,7 +415,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		
 	}
 
-	@Override
+	
 	public void setUploadLimit(long uploadLimit) throws ConfigurationManagerException {
 	   if ( uploadLimit < 0 ) 
 		   throw new ConfigurationManagerException("Upload limit can't be negative, " + uploadLimit + " given");
@@ -425,7 +425,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
        notifyPropertyChanged( UPLOAD_LIMIT_KEY, uploadLimit );
 	}
 	
-	@Override
+	
 	public void setUploadLimit(String uploadLimit) throws ConfigurationManagerException {
 		
 		long upload_limit;
@@ -439,12 +439,12 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		
 	}
 	
-	@Override
+	
 	public void initialize() {
 		config_store = new Properties();
 	}
 
-	@Override
+	
 	public void shutdown() {
 
 		 try {
@@ -454,7 +454,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		}
 	}
 
-	@Override
+	
 	public void start() {
 		
          try {
@@ -464,14 +464,14 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		}
 	}
 
-	@Override
+	
 	public void setUDPEnabled(boolean enabled) throws ConfigurationManagerException  {	
 		config_store.setProperty( UDP_ENABLED_KEY, enabled + "" );
 		save(); 
 		notifyPropertyChanged( UDP_ENABLED_KEY, enabled );
 	}
 	
-	@Override
+	
 	public boolean isUDPEnabled() throws ConfigurationManagerException  {
 		String udp_enabled = config_store.getProperty(UDP_ENABLED_KEY, UDP_ENABLED+"");
 		boolean is_udp_enabled;
@@ -484,7 +484,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return is_udp_enabled;
 	}
 	
-	@Override
+	
 	public boolean isJKadAutoconnectEnabled() throws ConfigurationManagerException {
 		String status = config_store.getProperty(JKAD_ENABLED_KEY, DEFAULT_TRUE);
 		boolean jkad_enabled;
@@ -496,7 +496,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return jkad_enabled;
 	}
 
-	@Override
+	
 	public void setAutoconnectJKad(boolean newStatus) throws ConfigurationManagerException {
 		config_store.setProperty(JKAD_ENABLED_KEY, newStatus+"");
 		save();
@@ -579,7 +579,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		
 	}
 
-	@Override
+	
 	public void setUpdateServerListAtConnect(boolean newStatus) throws ConfigurationManagerException {
 		config_store.setProperty(SERVER_LIST_UPDATE_ON_CONNECT_KEY, newStatus+"");
 		save();
@@ -587,7 +587,7 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		
 	}
 
-	@Override
+	
 	public boolean updateServerListAtConnect() throws ConfigurationManagerException {
 		String status = config_store.getProperty(SERVER_LIST_UPDATE_ON_CONNECT_KEY,DEFAULT_FALSE);
 		boolean update_server_list;
@@ -599,10 +599,12 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		return update_server_list;
 	}
 
+	
 	public String getJKadClientID()throws ConfigurationManagerException {
 		return config_store.getProperty(JKAD_ID_KEY, null);
 	}
 
+	
 	public void setJKadClientID(String newID) throws ConfigurationManagerException {
 		if (!Misc.isHexadecimalNumber(newID))
 			throw new ConfigurationManagerException("JKad ID must be hexadecimal string");
