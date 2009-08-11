@@ -41,6 +41,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.jmule.core.JMException;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
@@ -85,8 +86,8 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:14:30 $$
  */
 public class Server extends JMConnection {
 	
@@ -319,7 +320,11 @@ public class Server extends JMConnection {
 
 	private void offerFiles() {
 		
-		super.sendPacket(PacketFactory.getOfferFilesPacket(clientID));
+		try {
+			super.sendPacket(PacketFactory.getOfferFilesPacket(clientID));
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -498,7 +503,7 @@ public class Server extends JMConnection {
 		try {
 			sendPacket(PacketFactory.getServerLoginPacket(userHash, ConfigurationManagerFactory.getInstance().getTCP(), 
 					ConfigurationManagerFactory.getInstance().getNickName()));
-		} catch (ConfigurationManagerException e) {
+		} catch (JMException e) {
 			e.printStackTrace();
 		}
 	}

@@ -63,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jmule.core.JMException;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.FileChunk;
@@ -89,8 +90,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/31 05:46:30 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:14:30 $$
  */
 public class PacketFactory {
 	
@@ -177,7 +178,7 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getServerLoginPacket(UserHash userHash, int clientPort,
-			String userNickName) {
+			String userNickName) throws JMException {
 		
 		TagList tagList = new TagList();
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userNickName));
@@ -474,7 +475,7 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
      */
-    public static Packet getOfferFilesPacket(ClientID userID) {
+    public static Packet getOfferFilesPacket(ClientID userID) throws JMException  {
     	List<SharedFile> unshared_files = JMuleCoreFactory.getSingleton().getSharingManager().getUnsharedFiles();
     	int sharedCount = unshared_files.size();
     	if (sharedCount > MAX_OFFER_FILES)
@@ -623,7 +624,7 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getPeerHelloPacket(UserHash userHash,ClientID clientID,int myPort,
-			byte[] serverIP,int serverPort,String userName, Map<PeerFeatures, Integer> clientFeatures){
+			byte[] serverIP,int serverPort,String userName, Map<PeerFeatures, Integer> clientFeatures) throws JMException  {
 		List<Tag> tag_list = new LinkedList<Tag>();
 		
 		int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
@@ -707,7 +708,7 @@ public class PacketFactory {
 	 * </table>
      * */
 	public static Packet getPeerHelloAnswerPacket(UserHash userHash,ClientID clientID,
-			int myPort,String userName,byte[] serverIP, int serverPort, Map<PeerFeatures, Integer> clientFeatures){
+			int myPort,String userName,byte[] serverIP, int serverPort, Map<PeerFeatures, Integer> clientFeatures) throws JMException  {
 		
 		int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
 		

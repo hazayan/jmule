@@ -135,8 +135,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:14 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:14:30 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -343,7 +343,7 @@ public class JKad implements JMuleManager {
 		byte packetOPCode = packet.getCommand();
 		ByteBuffer rawData = packet.getAsByteBuffer();
 		rawData.position(2);
-		
+		boolean unknown_packet = false;
 		try {
 			if (packetOPCode == KADEMLIA_BOOTSTRAP_REQ) {
 				byte[] client_id_raw = new byte[16];
@@ -894,14 +894,18 @@ public class JKad implements JMuleManager {
 								};
 								new Thread(task).start();
 							}
-							}
+							} else
+								unknown_packet = true;
 					
 		}catch(Throwable cause) {
 			cause.printStackTrace();
 			if (cause instanceof ConfigurationManagerException)
 				JKad.getInstance().shutdown();
 		}
-		throw new UnknownPacketOPCodeException();
+		
+		if (unknown_packet)
+			throw new UnknownPacketOPCodeException();
+		
 	}
 	
 	public boolean isFirewalled() {

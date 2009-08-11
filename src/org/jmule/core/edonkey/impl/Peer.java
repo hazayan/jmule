@@ -34,6 +34,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.jmule.core.JMException;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManagerException;
@@ -62,8 +63,8 @@ import org.jmule.ui.utils.PeerInfoFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:14:30 $$
  */
 public class Peer extends JMConnection {
 	
@@ -311,7 +312,7 @@ public class Peer extends JMConnection {
 					connectedServer.getServerIPAddress(), 
 					connectedServer.getPort(), 
 					ConfigurationManagerFactory.getInstance().getNickName(), E2DKConstants.DefaultJMuleFeatures));
-			} catch (ConfigurationManagerException e) {
+			} catch (JMException e) {
 				e.printStackTrace();
 			}
 		else
@@ -320,7 +321,7 @@ public class Peer extends JMConnection {
 						null, ConfigurationManagerFactory.getInstance().getTCP(),
 						null, 0, 
 						ConfigurationManagerFactory.getInstance().getNickName(),E2DKConstants.DefaultJMuleFeatures));
-			} catch (ConfigurationManagerException e) {
+			} catch (JMException e) {
 				e.printStackTrace();
 			}
 		
@@ -411,7 +412,7 @@ public class Peer extends JMConnection {
 							ConfigurationManagerFactory.getInstance().getTCP(), 
 							ConfigurationManagerFactory.getInstance().getNickName(),
 							null,0, E2DKConstants.DefaultJMuleFeatures);
-				} catch (ConfigurationManagerException e) {
+				} catch (JMException e) {
 					e.printStackTrace();
 				}
 			else
@@ -423,7 +424,7 @@ public class Peer extends JMConnection {
 							ConfigurationManagerFactory.getInstance().getNickName(),
 							connectedServer.getRemoteIPAddress(),connectedServer.getPort(), E2DKConstants.DefaultJMuleFeatures);
 					super.sendPacket(answerPacket);
-				} catch (ConfigurationManagerException e) {
+				} catch (JMException e) {
 					
 					e.printStackTrace();
 				}
