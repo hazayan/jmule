@@ -1,7 +1,16 @@
 
   JMule CHANGELOG
  -----------------------
-
+            | JMule 0.5.3
+ FEATURE:  Core	   | Added new tag architecture which support more tag types [binary256]
+ BUGFIX:   Core	   | Updated tag scanner with new tag types [binary256]
+ FEATURE:  Core	   | Status of downloads (started/stopped) are saved in part.met files [binary256]
+ BUGFIX:   Core	   | Updated JKad routing table maintenance algorithm [binary256]
+ BUGFIX:   SWT UI  | Fixed NULL pointer exception in "Both" search type when server is not connected [binary256]
+ BUGFIX:   SWT UI  | Fixed displaying of all files in shared view [binary256]
+ BUGFIX:   Core    | Fixed Kad search stop notify for same IDs  [binary256]
+ FEATURE:  Core	   | Kad contacts IP verification [binary256]
+ 
  2009.07.12 | JMule 0.5
  
  BUGFIX:   Swing UI | The system doesn't crash when the geoip.dat file is not found in settings directory [javajox]
