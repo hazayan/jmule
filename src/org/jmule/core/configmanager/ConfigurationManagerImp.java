@@ -25,176 +25,267 @@ package org.jmule.core.configmanager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/08 17:18:44 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:02:57 $$
  */
-public class ConfigurationManagerImp implements ConfigurationManager {
+public class ConfigurationManagerImp implements InternalConfigurationManager {
 
-	Properties config_store;
+	private static final String 	DEFAULT_FALSE = "false";
+	private static final String 	DEFAULT_TRUE  = "true";
 	
-	List<ConfigurationListener> config_listeners = new LinkedList<ConfigurationListener>();
+	private Properties config_store;
 	
-	Map<String,List<ConfigurationListener>> parameter_listeners = new Hashtable<String,List<ConfigurationListener>>();
-	
+	private List<ConfigurationListener> config_listeners = new LinkedList<ConfigurationListener>();
+		
 	public ConfigurationManagerImp() {
 		
 	}
-	
+
+	@Override
 	public void addConfigurationListener(ConfigurationListener listener) {
 
 		  config_listeners.add( listener );
 	}
 
-	public long getDownloadBandwidth() {
+	@Override
+	public long getDownloadBandwidth() throws ConfigurationManagerException {
 		
-		String download_bandwidth = config_store.getProperty(DOWNLOAD_BANDWIDTH_KEY);
+		String download_bandwidth = config_store.getProperty(DOWNLOAD_BANDWIDTH_KEY,DOWNLOAD_BANDWIDTH+"");
+		long value;
+		try {
+			value = Long.parseLong( download_bandwidth );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
 		
-		return ( download_bandwidth == null ) ? DOWNLOAD_BANDWIDTH : Integer.parseInt(download_bandwidth);
+		if (value <= 0)
+			throw new ConfigurationManagerException("Download bandwidth can't be negative or 0, " + value + " given");
+		return value;
 	}
 
-	public long getDownloadLimit() {
+	@Override
+	public long getDownloadLimit() throws ConfigurationManagerException {
 		
-		String download_limit = config_store.getProperty(DOWNLOAD_LIMIT_KEY);
+		String download_limit = config_store.getProperty(DOWNLOAD_LIMIT_KEY,DOWNLOAD_LIMIT+"");
 		
-		return ( download_limit == null ) ? DOWNLOAD_LIMIT : Integer.parseInt(download_limit);
+		long value;
+		try {
+			value = Long.parseLong( download_limit );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		
+		if (value < 0)
+			throw new ConfigurationManagerException("Download limit can't be negative, " + value + " given");
+		return value;
+		
 	}
 
-	public String getNickName() {
+	@Override
+	public String getNickName() throws ConfigurationManagerException {
+        String nick_name = config_store.getProperty(NICK_NAME_KEY, NICK_NAME);
         
-		return config_store.getProperty(NICK_NAME_KEY, NICK_NAME);
+        if ( nick_name.length()==0 )
+        	throw new ConfigurationManagerException("The nickname can't be 0 length");
+        
+		return nick_name;
 	}
 
-	public int getTCP() {
+	@Override
+	public int getTCP() throws ConfigurationManagerException {
 		
-		String tcp = config_store.getProperty(TCP_PORT_KEY);
+		String tcp = config_store.getProperty(TCP_PORT_KEY,TCP_PORT+"");
 		
-		return ( tcp == null ) ? TCP_PORT : Integer.parseInt(tcp);
+		int value;
+		try {
+			value = Integer.parseInt( tcp );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		
+		if (! ( ( value >= 0 ) && ( value <= 65535 ) ) )
+			throw new ConfigurationManagerException("The port between 0 and 65535, " + value + " given");
+		return value;
+	}
+
+	@Override
+	public int getUDP() throws ConfigurationManagerException {
+		
+		String udp = config_store.getProperty(UDP_PORT_KEY,UDP_PORT+"");
+		
+		int value;
+		try {
+			value = Integer.parseInt( udp );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		
+		if (! ( ( value >= 0 ) && ( value <= 65535 ) ) )
+			throw new ConfigurationManagerException("The port between 0 and 65535, " + value + " given");
+		return value;
+
+	}
+
+	@Override
+	public long getUploadBandwidth() throws ConfigurationManagerException  {
+		
+		String upload_bandwidth = config_store.getProperty(UPLOAD_BANDWIDTH_KEY, UPLOAD_BANDWIDTH + "");
+		
+		long value;
+		try {
+			value = Long.parseLong( upload_bandwidth );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		
+		if (value <= 0)
+			throw new ConfigurationManagerException("Upload bandwidth can't be negative or 0, " + value + " given");
+		return value;
+	}
+
+	@Override
+	public long getUploadLimit() throws ConfigurationManagerException {
+		
+		String upload_limit = config_store.getProperty(UPLOAD_LIMIT_KEY, UPLOAD_LIMIT+"");
+		
+		long value;
+		try {
+			value = Long.parseLong( upload_limit );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		
+		if (value < 0)
+			throw new ConfigurationManagerException("Upload limit can't be negative, " + value + " given");
+		return value;
 	}
 	
-	public int getUDP() {
-		
-		String udp = config_store.getProperty(UDP_PORT_KEY);
-		
-		return ( udp == null ) ? UDP_PORT : Integer.parseInt(udp);
-	}
-
-	public long getUploadBandwidth() {
-		
-		String upload_bandwidth = config_store.getProperty(UPLOAD_BANDWIDTH_KEY);
-		
-		return ( upload_bandwidth == null ) ? UPLOAD_BANDWIDTH : Long.parseLong(upload_bandwidth);
-	}
-
-	public long getUploadLimit() {
-		
-		String upload_limit = config_store.getProperty(UPLOAD_LIMIT_KEY);
-		
-		return ( upload_limit == null ) ? UPLOAD_LIMIT : Long.parseLong(upload_limit); 
-	}
-	
-	public UserHash getUserHash() {
+	@Override
+	public UserHash getUserHash() throws ConfigurationManagerException {
 		
 		String user_hash_str = config_store.getProperty(USER_HASH_KEY);
 		
-		UserHash user_hash = new UserHash();
-		
 		if (user_hash_str==null) {
-			
-			user_hash = UserHash.genNewUserHash();
-			
-			config_store.setProperty(USER_HASH_KEY, user_hash.getAsString());
-			
-		} else
-			
-			user_hash.loadFromString(user_hash_str);
+			return null;
 		
-		return user_hash;
-		
+		} else {
+			
+			try {
+				UserHash user_hash = new UserHash();
+				user_hash.loadFromString(user_hash_str);
+				return user_hash;
+			}catch(Throwable cause) {
+				
+				throw new ConfigurationManagerException( cause );
+			}
+		}		
 	}
-
-	public void load() {
+	
+	public void setUserHash(String userHash) throws ConfigurationManagerException {
+		if (!Misc.isHexadecimalNumber(userHash))
+			throw new ConfigurationManagerException("User Hash must be hexadecimal string");
+		config_store.setProperty(USER_HASH_KEY, userHash);
+		save();
+		notifyPropertyChanged(USER_HASH_KEY, userHash);
+	}
+	
+	@Override
+	public void load() throws ConfigurationManagerException {
 
 		try {
-		   config_store.load(new FileInputStream(CONFIG_FILE));	
+		   config_store.load( new FileInputStream( CONFIG_FILE ) );	
 		 //  loadKeys();
-		} catch(Throwable t) {
-			t.printStackTrace();
+		} catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
 		}
 		
 
 	}
 
-	public void loadDefault() {
 
-	}
-
+	@Override
 	public void removeConfigurationListener(ConfigurationListener listener) {
 		
         config_listeners.remove( listener );
-        
-        for(List<ConfigurationListener> list : parameter_listeners.values())
-        	if (list.contains(listener)) 
-        		list.remove(listener);
 	}
 
-	public void save() {
-	
+	@Override
+	public void save() throws ConfigurationManagerException {
        try {
     	   
-    	   config_store.store(new FileOutputStream(CONFIG_FILE),"");
+    	   config_store.store( new FileOutputStream( CONFIG_FILE ),"" );
     	   
-       } catch(Throwable t) {
-    	   t.printStackTrace();
+       } catch(Throwable cause) {
+    	   throw new ConfigurationManagerException( cause );
        }
 
 	}
 
-	public void setDownloadBandwidth(long downloadBandwidth) {
-		
+	@Override
+	public void setDownloadBandwidth(long downloadBandwidth) throws ConfigurationManagerException {
+		 if (downloadBandwidth <= 0)
+			 throw new ConfigurationManagerException("Download bandwidth can't be negative or 0, " + downloadBandwidth + " given");
 		 config_store.setProperty( DOWNLOAD_BANDWIDTH_KEY, downloadBandwidth + "" );
 		 save();
 		 notifyPropertyChanged( DOWNLOAD_BANDWIDTH_KEY, downloadBandwidth );
 	}
 	
-	public void setDownloadBandwidth(String downloadBandwidth) {
-		
-		setDownloadBandwidth(Long.parseLong(downloadBandwidth));
+	@Override
+	public void setDownloadBandwidth(String downloadBandwidth) throws ConfigurationManagerException  {
+		long bandwidth;
+		try {
+			bandwidth = Long.parseLong( downloadBandwidth );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		setDownloadBandwidth(bandwidth);
 	}
 
-	public void setDownloadLimit(long downloadLimit) {
-		
+	@Override
+	public void setDownloadLimit(long downloadLimit) throws ConfigurationManagerException {
+		if ( downloadLimit < 0 )
+			throw new ConfigurationManagerException("Download limit can't be negative, " + downloadLimit + " given");
 		config_store.setProperty( DOWNLOAD_LIMIT_KEY, downloadLimit + "" );
 		save();	
 		notifyPropertyChanged( DOWNLOAD_LIMIT_KEY, downloadLimit );
 	}
 	
-	public void setDownloadLimit(String downloadLimit) {
-		
-		setDownloadLimit(Long.parseLong(downloadLimit));
-		
+	@Override
+	public void setDownloadLimit(String downloadLimit) throws ConfigurationManagerException {
+		long download_limit;
+		try {
+			download_limit = Long.parseLong(downloadLimit);
+		}catch ( Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
+		}
+		setDownloadLimit(download_limit);
 	}
 
-	public void setNickName(String nickName) {
-
+	@Override
+	public void setNickName(String nickName) throws ConfigurationManagerException  {
+		if( nickName.length() == 0 )
+			throw new ConfigurationManagerException("The nickname can't be 0 length");
+		
+		if( nickName.length() > 65535 )
+			throw new ConfigurationManagerException("The nickname length can't be more than 65535 chars");
+		
         config_store.setProperty(NICK_NAME_KEY, nickName);
 		save();
         notifyPropertyChanged( NICK_NAME_KEY, nickName ); 
 	}
 
-	public void setSharedFolders(List<File> sharedFolders) {
-		
+	@Override
+	public void setSharedFolders(List<File> sharedFolders) throws ConfigurationManagerException {
 		// first remove old values
 		List<File> file_list = getSharedFolders();
 		
@@ -213,7 +304,8 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		notifyPropertyChanged( SHARED_DIRECTORIES_KEY, sharedFolders );
 	}
 	
-	public List<File> getSharedFolders() {
+	@Override
+	public List<File> getSharedFolders() throws ConfigurationManagerException {
 		
 		int i = 0;
 		
@@ -238,8 +330,9 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 			
 			++i;
 			
-		  } catch( Throwable t ) {
-	
+		  } catch( Throwable cause ) {
+			  
+			  throw new ConfigurationManagerException( cause );
 		  }
 		  
 		}
@@ -247,199 +340,169 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		return shared_directories;
 	}
 
-	public void setTCP(String tcp) {
-	
-		setTCP(Integer.parseInt(tcp));
+	@Override
+	public void setTCP(String tcp) throws ConfigurationManagerException {
+		int tcp_port;
+		try {
+			tcp_port = Integer.parseInt( tcp );
+		}catch(Throwable cause) {
+			
+			throw new ConfigurationManagerException(cause);
+		}
+		
+		setTCP( tcp_port );
 	}
-	
-	public void setTCP(int tcp) {
+
+	@Override
+	public void setTCP(int tcp) throws ConfigurationManagerException {
+		
+		if ( ! ( ( tcp >= 0 ) && ( tcp <= 65535 ) ) )
+			throw new ConfigurationManagerException("The port between 0 and 65535, " + tcp + " given");
+		
 		config_store.setProperty( TCP_PORT_KEY, tcp + "" );
 		save(); 
 		notifyPropertyChanged( TCP_PORT_KEY, tcp );
-		
-	}
-	
-	public void setUDP(String udp) {	
-		
-		setUDP(Integer.parseInt(udp));
 	}
 
-	public void setUDP(int udp) {
+	@Override
+	public void setUDP(String udp) throws ConfigurationManagerException  {	
+		
+		int udp_port;
+		
+		try {
+			
+			udp_port = Integer.parseInt(udp);
+			
+		}catch( Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
+		}
+		
+		setUDP( udp_port );
+	}
+
+	@Override
+	public void setUDP(int udp) throws ConfigurationManagerException  {
+		
+		if ( ! ( ( udp >= 0 ) && ( udp <= 65535 ) ) )
+			throw new ConfigurationManagerException("The port between 0 and 65535, " + udp + " given");
+		
 		config_store.setProperty( UDP_PORT_KEY, udp + "" );
 		save(); 
 		notifyPropertyChanged( UDP_PORT_KEY, udp );
 
 	}
 
-	public void setUploadBandwidth(long downloadBandwidth) {
-		
-       config_store.setProperty( UPLOAD_BANDWIDTH_KEY, downloadBandwidth + "" );
+	@Override
+	public void setUploadBandwidth(long uploadBandwidth) throws ConfigurationManagerException {
+	   if (uploadBandwidth <= 0) {
+		   throw new ConfigurationManagerException("Upload bandwidth can't be negative or 0, " + uploadBandwidth + " given");
+	   }
+       config_store.setProperty( UPLOAD_BANDWIDTH_KEY, uploadBandwidth + "" );
        save(); 
-       notifyPropertyChanged( UPLOAD_BANDWIDTH_KEY, downloadBandwidth );
+       notifyPropertyChanged( UPLOAD_BANDWIDTH_KEY, uploadBandwidth );
 	}
-	
-	public void setUploadBandwidth(String uploadBandwidth) {
+
+	@Override
+	public void setUploadBandwidth(String uploadBandwidth) throws ConfigurationManagerException {
+		long upload_bandwidth;
+		try {
+			upload_bandwidth = Long.parseLong(uploadBandwidth);
+		}catch( Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
+		}
 		
-		setUploadBandwidth(Long.parseLong(uploadBandwidth));
+		setUploadBandwidth(upload_bandwidth);
 		
 	}
 
-	public void setUploadLimit(long uploadLimit) {
-		
+	@Override
+	public void setUploadLimit(long uploadLimit) throws ConfigurationManagerException {
+	   if ( uploadLimit < 0 ) 
+		   throw new ConfigurationManagerException("Upload limit can't be negative, " + uploadLimit + " given");
+	   
        config_store.setProperty( UPLOAD_LIMIT_KEY, uploadLimit + "" );
        save(); 
        notifyPropertyChanged( UPLOAD_LIMIT_KEY, uploadLimit );
 	}
 	
-	public void setUploadLimit(String uploadLimit) {
+	@Override
+	public void setUploadLimit(String uploadLimit) throws ConfigurationManagerException {
 		
-		setUploadLimit(Long.parseLong(uploadLimit));
+		long upload_limit;
+		try {
+			upload_limit = Long.parseLong(uploadLimit);
+		}catch( Throwable cause ) {
+			throw new ConfigurationManagerException ( cause );
+		}
+		
+		setUploadLimit(upload_limit);
 		
 	}
-
+	
+	@Override
 	public void initialize() {
 		config_store = new Properties();
 	}
 
+	@Override
 	public void shutdown() {
 
-		 this.save();
+		 try {
+			this.save();
+		} catch (ConfigurationManagerException cause) {
+			cause.printStackTrace();
+		}
 	}
 
+	@Override
 	public void start() {
 		
-         this.load();
+         try {
+			this.load();
+		} catch (ConfigurationManagerException cause) {
+			cause.printStackTrace();
+		}
 	}
 
-	public void setUDPEnabled(boolean enabled) {
-		
+	@Override
+	public void setUDPEnabled(boolean enabled) throws ConfigurationManagerException  {	
 		config_store.setProperty( UDP_ENABLED_KEY, enabled + "" );
 		save(); 
 		notifyPropertyChanged( UDP_ENABLED_KEY, enabled );
 	}
-
-	public boolean isUDPEnabled() {
-		String udp_enabled = config_store.getProperty(UDP_ENABLED_KEY);
-		return ( udp_enabled == null ) ? UDP_ENABLED : Boolean.parseBoolean(udp_enabled);
-	}
 	
-	public Integer getIntParameter(String parameter, Integer defaultValue) {
-		Integer result;
+	@Override
+	public boolean isUDPEnabled() throws ConfigurationManagerException  {
+		String udp_enabled = config_store.getProperty(UDP_ENABLED_KEY, UDP_ENABLED+"");
+		boolean is_udp_enabled;
 		try {
-			result = Integer.parseInt(config_store.getProperty(parameter));
-		}catch(Throwable e) {
-			return defaultValue;
+			is_udp_enabled = Boolean.parseBoolean(udp_enabled);
+		}catch(Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
 		}
-		return result;
-	}
-	
-	public Float getFloatParameter(String parameter, Float defaultValue) {
-		Float result;
-		try {
-			result = Float.parseFloat(config_store.getProperty(parameter));
-		}catch(Throwable e) {
-			return defaultValue;
-		}
-		return result;
-	}
-	
-	public Double getDoubleParameter(String parameter, Double defaultValue) {
-		Double result;
-		try {
-			result = Double.parseDouble(config_store.getProperty(parameter));
-		}catch(Throwable e) {
-			return defaultValue;
-		}
-		return result;
-	}
-
-	public Long getLongParameter(String parameter, Long defaultValue) {
-		Long result;
-		try {
-			result = Long.parseLong(config_store.getProperty(parameter));
-		}catch(Throwable e) {
-			return defaultValue;
-		}
-		return result;
-	}
-
-	public String getStringParameter(String parameter, String defaultValue) {
-		String result;
-		try {
-			result = config_store.getProperty(parameter);
-		}catch(Throwable e) {
-			return defaultValue;
-		}
-		return result;
-	}
-	
-	public boolean isJKadEnabled() {
 		
-		return getBooleanParameter(JKAD_ENABLED_KEY, true);
+		return is_udp_enabled;
+	}
+	
+	@Override
+	public boolean isJKadAutoconnectEnabled() throws ConfigurationManagerException {
+		String status = config_store.getProperty(JKAD_ENABLED_KEY, DEFAULT_TRUE);
+		boolean jkad_enabled;
+		try {
+			jkad_enabled = Boolean.parseBoolean(status);
+		}catch(Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
+		}
+		return jkad_enabled;
 	}
 
-
-	public void setJKadStatus(boolean newStatus) {
-		setParameter(JKAD_ENABLED_KEY, newStatus+"");
+	@Override
+	public void setAutoconnectJKad(boolean newStatus) throws ConfigurationManagerException {
+		config_store.setProperty(JKAD_ENABLED_KEY, newStatus+"");
+		save();
 		notifyPropertyChanged(JKAD_ENABLED_KEY, newStatus);
 	}	
 
-	
-	public Boolean getBooleanParameter(String parameter, Boolean defaultValue) {
-		Boolean result;
-		try {
-			if (!config_store.containsKey(parameter)) return defaultValue;
-			result = Boolean.parseBoolean(config_store.getProperty(parameter));
-		}catch(Throwable e) {
-			return defaultValue;
-		}
-		return result;
-	}
-
-	public void setParameter(String parameter, int value) {
-		config_store.put(parameter, value+"");
-		save(); 
-		notifyCustomPropertyChanged(parameter,value);
-	}
-
-	public void setParameter(String parameter, String value) {
-		config_store.put(parameter, value+"");
-		save(); 
-		notifyCustomPropertyChanged(parameter,value);
-	}
-
-	public void setParameter(String parameter, float value) {
-		config_store.put(parameter, value+"");
-		save(); 
-		notifyCustomPropertyChanged(parameter,value);
-	}
-
-	public void setParameter(String parameter, long value) {
-		config_store.put(parameter, value+"");
-		save(); 
-		notifyCustomPropertyChanged(parameter,value);
-	}
-
-	public void setParameter(String parameter, boolean value) {
-		config_store.put(parameter, value+"");
-		save(); 
-		notifyCustomPropertyChanged(parameter,value);
-	}
-	
-	public void setParameter(String parameter, double value) {
-		config_store.put(parameter, value+"");
-		save(); 
-		notifyCustomPropertyChanged(parameter,value);
-	}
-
-	public void removeParameter(String parameter) {
-		config_store.remove(parameter);
-		save(); 
-	}
-	
-	public boolean hasParameter(String parameter) {
-		return config_store.containsKey(parameter);
-	}
 	
 /*	private void loadKeys() {
 		BigInteger public_key, private_key;
@@ -477,47 +540,75 @@ public class ConfigurationManagerImp implements ConfigurationManager {
 		config_store.setProperty(PRIVATE_EXPONENT_KEY, privateExponent.toString(16));
 	}*/
 	
-	private void notifyCustomPropertyChanged(String key, Object new_value) {
-		List<ConfigurationListener> listener_list = parameter_listeners.get(key);
-		if (listener_list == null) return ;
-		for(ConfigurationListener listener : listener_list)
-			listener.parameterChanged(key, new_value);
-	}
+
 	
 	private void notifyPropertyChanged(String property, Object new_value) {
 		
 		for(ConfigurationListener listener : config_listeners) {
 			
-			    if( property == NICK_NAME_KEY ) listener.nickNameChanged((String)new_value); 
-			    
-		   else if( property == TCP_PORT_KEY ) listener.TCPPortChanged((Integer)new_value);
-			    
-		   else if( property == UDP_PORT_KEY ) listener.UDPPortChanged((Integer)new_value);
-			    
-		   else if( property == DOWNLOAD_BANDWIDTH_KEY ) listener.downloadBandwidthChanged((Long)new_value);
-			    
-		   else if( property == UPLOAD_BANDWIDTH_KEY ) listener.uploadBandwidthChanged((Long)new_value);
-			    
-		   else if( property == UDP_ENABLED_KEY ) listener.isUDPEnabledChanged((Boolean)new_value);
-			    
-		   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
-			    
-		   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
-			    
-		   else if( property == UPLOAD_LIMIT_KEY) listener.uploadLimitChanged((Long)new_value);
-		   else if( property == JKAD_ENABLED_KEY) listener.jkadStatusChanged((Boolean)new_value);
+			try {
+				    if( property == NICK_NAME_KEY ) listener.nickNameChanged((String)new_value); 
+				    
+			   else if( property == TCP_PORT_KEY ) listener.TCPPortChanged((Integer)new_value);
+				    
+			   else if( property == UDP_PORT_KEY ) listener.UDPPortChanged((Integer)new_value);
+				    
+			   else if( property == DOWNLOAD_BANDWIDTH_KEY ) listener.downloadBandwidthChanged((Long)new_value);
+				    
+			   else if( property == UPLOAD_BANDWIDTH_KEY ) listener.uploadBandwidthChanged((Long)new_value);
+				    
+			   else if( property == UDP_ENABLED_KEY ) listener.isUDPEnabledChanged((Boolean)new_value);
+				    
+			   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
+				    
+			   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
+				    
+			   else if( property == UPLOAD_LIMIT_KEY) listener.uploadLimitChanged((Long)new_value);
+				    
+			   else if( property == JKAD_ENABLED_KEY) listener.jkadStatusChanged((Boolean)new_value);
+				    
+			   else if( property == SERVER_LIST_UPDATE_ON_CONNECT_KEY) listener.updateServerListAtConnectChanged((Boolean)new_value);
+			   
+			   else if( property == JKAD_ID_KEY) listener.jkadIDChanged((String) new_value);
+				    
+			}catch(Throwable cause) {
+				cause.printStackTrace();
+			}
 			
 		}
 		
 	}
 
-	public void addConfigurationListener(ConfigurationListener listener, String parameter) {
-		List<ConfigurationListener> listeners_list = parameter_listeners.get(parameter);
-		if (listeners_list == null) {
-			listeners_list = new ArrayList<ConfigurationListener>();
-			parameter_listeners.put(parameter, listeners_list);
+	@Override
+	public void setUpdateServerListAtConnect(boolean newStatus) throws ConfigurationManagerException {
+		config_store.setProperty(SERVER_LIST_UPDATE_ON_CONNECT_KEY, newStatus+"");
+		save();
+		notifyPropertyChanged(SERVER_LIST_UPDATE_ON_CONNECT_KEY, newStatus);
+		
+	}
+
+	@Override
+	public boolean updateServerListAtConnect() throws ConfigurationManagerException {
+		String status = config_store.getProperty(SERVER_LIST_UPDATE_ON_CONNECT_KEY,DEFAULT_FALSE);
+		boolean update_server_list;
+		try {
+			update_server_list = Boolean.parseBoolean(status);
+		}catch( Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
 		}
-		listeners_list.add(listener);
+		return update_server_list;
+	}
+
+	public String getJKadClientID()throws ConfigurationManagerException {
+		return config_store.getProperty(JKAD_ID_KEY, null);
+	}
+
+	public void setJKadClientID(String newID) throws ConfigurationManagerException {
+		if (!Misc.isHexadecimalNumber(newID))
+			throw new ConfigurationManagerException("JKad ID must be hexadecimal string");
+		config_store.setProperty(JKAD_ID_KEY, newID);
+		save();
+		notifyPropertyChanged(JKAD_ID_KEY, newID);
 	}
 
 

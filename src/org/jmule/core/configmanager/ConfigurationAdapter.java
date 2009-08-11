@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:51:30 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:02:57 $
  */
 public abstract class ConfigurationAdapter implements ConfigurationListener {
 
@@ -68,13 +68,17 @@ public abstract class ConfigurationAdapter implements ConfigurationListener {
 	public void uploadLimitChanged(long uploadLimit) {
 		
 	}
-
-	public void parameterChanged(String parameter, Object newValue) {
-
-	}
 	
 	public void jkadStatusChanged(boolean newStatus) {
 		
 	}
 
+	public void updateServerListAtConnectChanged(boolean newStatus) {
+		
+	}
+	
+	public void jkadIDChanged(String newID) {
+		
+	}
+	
 }

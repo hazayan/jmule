@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -22,39 +22,16 @@
  */
 package org.jmule.core.configmanager;
 
-import java.io.File;
-import java.util.List;
-
 /**
- * Created on 07-22-2008
- * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:02:57 $$
+ * Created on Aug 10, 2009
+ * @author binary256
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:02:57 $
  */
-public interface ConfigurationListener {
-
-	public void UDPPortChanged(int udp);
+public interface InternalConfigurationManager extends ConfigurationManager {
 	
-	public void TCPPortChanged(int tcp);
-	
-	public void isUDPEnabledChanged(boolean enabled);
-	
-	public void nickNameChanged(String nickName);
-	
-	public void downloadBandwidthChanged(long downloadBandwidth);
-	
-	public void uploadBandwidthChanged(long uploadBandwidth);
-	
-	public void downloadLimitChanged(long downloadLimit);
-	
-	public void uploadLimitChanged(long uploadLimit);
-	
-	public void sharedDirectoriesChanged(List<File> sharedDirs);
-	
-	public void jkadStatusChanged(boolean newStatus);
-	
-	public void updateServerListAtConnectChanged(boolean newStatus);
-	
-	public void jkadIDChanged(String newID);
+	 public void setJKadClientID(String newID) throws ConfigurationManagerException;
+	 
+	 public void setUserHash(String userHash) throws ConfigurationManagerException;
 
 }

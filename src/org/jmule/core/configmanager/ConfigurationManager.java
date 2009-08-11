@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:51:30 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:02:57 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -108,187 +108,157 @@ public interface ConfigurationManager extends JMuleManager {
 	//public static final String       SOURCES_QUERY_INTERVAL_KEY     	   =     "SourcesQueryInterval";
 	//public static final String       PEER_INACTIVITY_REMOVE_TIME_KEY       =     "PeerInactivityRemoveTime";
 	
-	
-	/**
-	 * Loads the default configuration
-	 */
-	public void loadDefault();
-	
 	/**
 	 * Loads the configuration from the repository
 	 */
-	public void load();
+	public void load() throws ConfigurationManagerException ;
 	
 	/**
 	 * Save the configuration to the repository
 	 */
-	public void save();
+	public void save() throws ConfigurationManagerException ;
 	
 	/**
 	 * Sets the nick name that is used in the client
 	 * @param nickName the given nick name
 	 */
-	public void setNickName(String nickName);
+	public void setNickName(String nickName) throws ConfigurationManagerException ;
 	
 	/**
 	 * Sets the tcp port to the given value
 	 * @param tcp the given value of the tcp port
 	 */
-	public void setTCP(int tcp);
+	public void setTCP(int tcp) throws ConfigurationManagerException;
 	
-	public void setTCP(String tcp);
+	public void setTCP(String tcp) throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the udp port to the given value
 	 * @param udp the given value of the udp port
 	 */
-	public void setUDP(int udp);
+	public void setUDP(int udp) throws ConfigurationManagerException;
 	
-	public void setUDP(String udp);
+	public void setUDP(String udp) throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the list of shared folders 
 	 * @param sharedFolders the given list of folders
 	 */
-	public void setSharedFolders(List<File> sharedFolders);
+	public void setSharedFolders(List<File> sharedFolders) throws ConfigurationManagerException;
 	
 	/**
 	 * 
 	 * @return the list of shared folders
 	 */
-	public List<File> getSharedFolders();
+	public List<File> getSharedFolders() throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the download limit
 	 * @param downloadLimit the given download limit
 	 */
-	public void setDownloadLimit(long downloadLimit);
+	public void setDownloadLimit(long downloadLimit) throws ConfigurationManagerException;
 	
-	public void setDownloadLimit(String downloadLimit);
+	public void setDownloadLimit(String downloadLimit) throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the upload limit
 	 * @param uploadLimit the given upload limit
 	 */
-	public void setUploadLimit(long uploadLimit);
+	public void setUploadLimit(long uploadLimit) throws ConfigurationManagerException;
 	
-	public void setUploadLimit(String uploadLimit);
+	public void setUploadLimit(String uploadLimit) throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the download bandwidth for the connection that the client will use
 	 * @param downloadBandwidth
 	 */
-	public void setDownloadBandwidth(long downloadBandwidth);
+	public void setDownloadBandwidth(long downloadBandwidth) throws ConfigurationManagerException;
 	
-	public void setDownloadBandwidth(String downloadBandwidth);
+	public void setDownloadBandwidth(String downloadBandwidth) throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the upload bandwidth for the connection that the client will use
 	 * @param uploadBandwidth
 	 */
-	public void setUploadBandwidth(long uploadBandwidth);
+	public void setUploadBandwidth(long uploadBandwidth) throws ConfigurationManagerException;
 	
-	public void setUploadBandwidth(String uploadBandwidth);
+	public void setUploadBandwidth(String uploadBandwidth) throws ConfigurationManagerException;
 	
 	/**
 	 * @return the nick name
 	 */
-	public String getNickName();
+	public String getNickName() throws ConfigurationManagerException;
 	
 	/**
 	 * 
 	 * @return the tcp port
 	 */
-	public int getTCP();
+	public int getTCP() throws ConfigurationManagerException;
 	
 	/**
 	 * 
 	 * @return the udp port
 	 */
-	public int getUDP();
+	public int getUDP() throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the status of the UDP port 
 	 * @param enabled
 	 */
-	public void setUDPEnabled(boolean enabled);
+	public void setUDPEnabled(boolean enabled) throws ConfigurationManagerException;
 	
 	/**
 	 * Tells if the UDP port is enabled
 	 * @return true if the UDP port is enabled, false otherwise
 	 */
-	public boolean isUDPEnabled();
+	public boolean isUDPEnabled() throws ConfigurationManagerException;
     
     /**
      * 
      * @return download limit
      */
-    public long getDownloadLimit();
+    public long getDownloadLimit() throws ConfigurationManagerException;
     
     /**
      * 
      * @return upload limit
      */
-    public long getUploadLimit();
+    public long getUploadLimit() throws ConfigurationManagerException;
     
     /**
      * 
      * @return user hash
      */
-    public UserHash getUserHash();
+    public UserHash getUserHash() throws ConfigurationManagerException;
     /**
      * 
      * @return download bandwidth
      */
-    public long getDownloadBandwidth();
+    public long getDownloadBandwidth() throws ConfigurationManagerException;
     
     /**
      * 
      * @return upload bandwidth
      */
-    public long getUploadBandwidth();
+    public long getUploadBandwidth() throws ConfigurationManagerException;
     
     
-    public boolean isJKadEnabled();
+    public boolean isJKadAutoconnectEnabled() throws ConfigurationManagerException;
     
-    public void setJKadStatus(boolean newStatus);
+    public void setAutoconnectJKad(boolean newStatus) throws ConfigurationManagerException;
     
-    public Integer getIntParameter(String parameter, Integer defaultValue);
+    public boolean updateServerListAtConnect() throws ConfigurationManagerException;
     
-    public String getStringParameter(String parameter, String defaultValue);
+    public void setUpdateServerListAtConnect(boolean newStatus) throws ConfigurationManagerException;
     
-    public Float getFloatParameter(String parameter, Float defaultValue);
-    
-    public Double getDoubleParameter(String parameter, Double defaultValue);
-    
-    public Long getLongParameter(String parameter, Long defaultValue);
-    
-    public Boolean getBooleanParameter(String parameter, Boolean defaultValue);
-    
-    public void setParameter(String parameter, int value);
-    
-    public void setParameter(String parameter,String value);
-    
-    public void setParameter(String parameter,float value);
-    
-    public void setParameter(String parameter,double value);
-    
-    public void setParameter(String parameter,long value);
-    
-    public void setParameter(String parameter,boolean value);
-    
-    public void removeParameter(String parameter);
-    
-    public boolean hasParameter(String parameter);
-    
-	/**
+    public String getJKadClientID() throws ConfigurationManagerException;
+        
+    /**
 	 * Adds a configuration listener
 	 * @param listener the given configuration listener
 	 */
 	public void addConfigurationListener(ConfigurationListener listener);
-	
-	public void addConfigurationListener(ConfigurationListener listener, String parameter);
-	
+		
 	/**
 	 * Removes a configuration listener
 	 * @param listener the given configuration listener
