@@ -159,7 +159,6 @@ public class SharingManagerImpl implements SharingManager {
 			current_dir = list_of_dirs.poll();
 			if( with_part_met_extension )
 			   list_of_files = current_dir.listFiles( new FileFilter() {
-				   @Override
 				   public boolean accept(File file) {
                        if( file.isDirectory() ) return true;
                        if( file.getName().endsWith( PART_MET_EXTENSION ) ) return true;
@@ -208,7 +207,6 @@ public class SharingManagerImpl implements SharingManager {
 			isDone = false;
 			File shared_dir = new File(ConfigurationManager.TEMP_DIR);
 			traverseDir(shared_dir, true, new WorkOnFiles() {
-				  @Override
 				  public void doWork(File file) {
 				    	try {
 				    		PartMet part_met = new PartMet(file);				    
@@ -219,7 +217,6 @@ public class SharingManagerImpl implements SharingManager {
 				    		JMuleCoreFactory.getSingleton().getDownloadManager().addDownload(partial_shared_file);				    		
 				    	}catch(Throwable t) { t.printStackTrace();}
 				  }
-				@Override
 				public boolean stopTraverseDir() {
 
 					return stop;
@@ -291,7 +288,6 @@ public class SharingManagerImpl implements SharingManager {
 			    	String file_name;
 			    	long file_size;
 			    	KnownMetEntity known_met_entity = null;
-					@Override
 					public void doWork(File file) {
 			    		 file_name = file.getName(); 
 			    		 file_size = file.length();
@@ -315,7 +311,6 @@ public class SharingManagerImpl implements SharingManager {
 			    		 }
 			    		 known_met_entity = null;
 					}
-					@Override
 					public boolean stopTraverseDir() {
 						
 						return stop;

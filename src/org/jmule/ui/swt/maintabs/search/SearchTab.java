@@ -62,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/08/11 16:41:00 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -103,7 +103,6 @@ public class SearchTab extends AbstractTab{
 				}); 
 			}
 
-			@Override
 			public void searchCompleted(final SearchQuery query) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
@@ -114,7 +113,6 @@ public class SearchTab extends AbstractTab{
 				}); 
 			}
 
-			@Override
 			public void searchStarted(final SearchQuery query) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
