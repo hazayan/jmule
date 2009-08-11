@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ServerManagerFactory;
@@ -56,12 +57,13 @@ import org.jmule.core.net.JMuleSocketChannel;
 import org.jmule.core.net.PacketScanner;
 import org.jmule.core.peermanager.PeerManagerFactory;
 import org.jmule.core.peermanager.PeerSessionList;
+import org.jmule.ui.utils.PeerInfoFormatter;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class Peer extends JMConnection {
 	
@@ -237,6 +239,8 @@ public class Peer extends JMConnection {
 		
 		result += "  " + userHash;
 		
+		result += " " + PeerInfoFormatter.formatPeerSoftware(this);
+		
 		return result;
 		
 	}
@@ -301,19 +305,24 @@ public class Peer extends JMConnection {
 			connectedServer = ServerManagerFactory.getInstance().getConnectedServer();
 		
 		if (connectedServer!=null)
-			
-			super.sendPacket(PacketFactory.getPeerHelloPacket(ConfigurationManagerFactory.getInstance().getUserHash(),
-				connectedServer.getClientID(), ConfigurationManagerFactory.getInstance().getTCP(),
-				connectedServer.getServerIPAddress(), 
-				connectedServer.getPort(), 
-				ConfigurationManagerFactory.getInstance().getNickName(), E2DKConstants.DefaultJMuleFeatures));
-		
+			try {
+				super.sendPacket(PacketFactory.getPeerHelloPacket(ConfigurationManagerFactory.getInstance().getUserHash(),
+					connectedServer.getClientID(), ConfigurationManagerFactory.getInstance().getTCP(),
+					connectedServer.getServerIPAddress(), 
+					connectedServer.getPort(), 
+					ConfigurationManagerFactory.getInstance().getNickName(), E2DKConstants.DefaultJMuleFeatures));
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+			}
 		else
-			
-			super.sendPacket(PacketFactory.getPeerHelloPacket(ConfigurationManagerFactory.getInstance().getUserHash(),
-					null, ConfigurationManagerFactory.getInstance().getTCP(),
-					null, 0, 
-					ConfigurationManagerFactory.getInstance().getNickName(),E2DKConstants.DefaultJMuleFeatures));
+			try {
+				super.sendPacket(PacketFactory.getPeerHelloPacket(ConfigurationManagerFactory.getInstance().getUserHash(),
+						null, ConfigurationManagerFactory.getInstance().getTCP(),
+						null, 0, 
+						ConfigurationManagerFactory.getInstance().getNickName(),E2DKConstants.DefaultJMuleFeatures));
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+			}
 		
 	}
 
@@ -395,24 +404,31 @@ public class Peer extends JMConnection {
 			Packet answerPacket;
 			
 			if (this.connectedServer == null)
-				
-				answerPacket = PacketFactory.getPeerHelloAnswerPacket(
-						ConfigurationManagerFactory.getInstance().getUserHash(),
-						null, 
-						ConfigurationManagerFactory.getInstance().getTCP(), 
-						ConfigurationManagerFactory.getInstance().getNickName(),
-						null,0, E2DKConstants.DefaultJMuleFeatures);
-			
-				else
+				try {
+					answerPacket = PacketFactory.getPeerHelloAnswerPacket(
+							ConfigurationManagerFactory.getInstance().getUserHash(),
+							null, 
+							ConfigurationManagerFactory.getInstance().getTCP(), 
+							ConfigurationManagerFactory.getInstance().getNickName(),
+							null,0, E2DKConstants.DefaultJMuleFeatures);
+				} catch (ConfigurationManagerException e) {
+					e.printStackTrace();
+				}
+			else
+				try {
+					answerPacket = PacketFactory.getPeerHelloAnswerPacket(
+							ConfigurationManagerFactory.getInstance().getUserHash(),
+							connectedServer.getClientID(), 
+							ConfigurationManagerFactory.getInstance().getTCP(), 
+							ConfigurationManagerFactory.getInstance().getNickName(),
+							connectedServer.getRemoteIPAddress(),connectedServer.getPort(), E2DKConstants.DefaultJMuleFeatures);
+					super.sendPacket(answerPacket);
+				} catch (ConfigurationManagerException e) {
 					
-				answerPacket = PacketFactory.getPeerHelloAnswerPacket(
-						ConfigurationManagerFactory.getInstance().getUserHash(),
-						connectedServer.getClientID(), 
-						ConfigurationManagerFactory.getInstance().getTCP(), 
-						ConfigurationManagerFactory.getInstance().getNickName(),
-						connectedServer.getRemoteIPAddress(),connectedServer.getPort(), E2DKConstants.DefaultJMuleFeatures);
+					e.printStackTrace();
+				}
 			
-			super.sendPacket(answerPacket);
+			
 			
 			return ;
 			

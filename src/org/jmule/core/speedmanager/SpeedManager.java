@@ -25,12 +25,13 @@ package org.jmule.core.speedmanager;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.JMuleManager;
 import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 
 /**
  *
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 18:08:57 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class SpeedManager implements JMuleManager {
 	
@@ -83,11 +84,21 @@ public class SpeedManager implements JMuleManager {
 
 	public void start() {
 		
-		long uploadLimit = JMuleCoreFactory.getSingleton().getConfigurationManager().getUploadLimit();
+		long uploadLimit = 0;
+		try {
+			uploadLimit = JMuleCoreFactory.getSingleton().getConfigurationManager().getUploadLimit();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		
 		uploadController = BandwidthController.acquireBandwidthController("Upload bandwidth controller", uploadLimit);
 		
-		long downloadLimit = JMuleCoreFactory.getSingleton().getConfigurationManager().getDownloadLimit();
+		long downloadLimit = 0;
+		try {
+			downloadLimit = JMuleCoreFactory.getSingleton().getConfigurationManager().getDownloadLimit();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		
 		downloadController = BandwidthController.acquireBandwidthController("Download bandwidth controller", downloadLimit);
 	

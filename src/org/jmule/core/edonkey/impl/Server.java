@@ -45,6 +45,7 @@ import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ServerManager;
@@ -84,14 +85,14 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class Server extends JMConnection {
 	
 	private ClientID clientID = new ClientID(new byte[] { 0, 0, 0, 0 });
 
-	private UserHash userHash = ConfigurationManagerFactory.getInstance().getUserHash();
+	private UserHash userHash;
 
 	private TagList tagList = new TagList();
 	
@@ -127,19 +128,19 @@ public class Server extends JMConnection {
 	public Server() {
 		
 		super();
-
+		
 	}
 
 	public Server(String IPAddress, int port) {
 
 		super(IPAddress, port);
+		initializeUserHash();
 
 	}
 	
-	public Server(ED2KServerLink serverLink) {
-		
+	public Server(ED2KServerLink serverLink) {		
 		super(serverLink.getServerAddress(),serverLink.getServerPort());
-
+		initializeUserHash();
 	}
 
 	public Server(String IPAddress, int port, TagList tagList) {
@@ -147,7 +148,7 @@ public class Server extends JMConnection {
 		super(IPAddress, port);
 
 		this.tagList = tagList;
-	
+		initializeUserHash();
 	}
 
 	public void start() {
@@ -159,6 +160,14 @@ public class Server extends JMConnection {
 		
 	}
 
+	private void initializeUserHash() {
+		try {
+			userHash = ConfigurationManagerFactory.getInstance().getUserHash();
+		} catch (ConfigurationManagerException cause) {
+			cause.printStackTrace();
+		}
+	}
+	
 	private void startSearchTask() {
 		
 		search_task = new TimerTask() {
@@ -336,8 +345,12 @@ public class Server extends JMConnection {
 			
 			core.getSharingManager().resetUnsharedFiles();
 			
-			boolean update_server_list = core.getConfigurationManager().getBooleanParameter(
-										 ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, false);
+			boolean update_server_list;
+			try {
+				update_server_list = core.getConfigurationManager().updateServerListAtConnect();
+			} catch (ConfigurationManagerException e) {
+				update_server_list = false;
+			}
 			
 			if (update_server_list)
 				sendPacket(PacketFactory.getGetServerListPacket());
@@ -482,8 +495,12 @@ public class Server extends JMConnection {
 	
 	protected void onConnect() {
 		
-		sendPacket(PacketFactory.getServerLoginPacket(userHash, ConfigurationManagerFactory.getInstance().getTCP(), 
-				ConfigurationManagerFactory.getInstance().getNickName()));
+		try {
+			sendPacket(PacketFactory.getServerLoginPacket(userHash, ConfigurationManagerFactory.getInstance().getTCP(), 
+					ConfigurationManagerFactory.getInstance().getNickName()));
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected void onDisconnect() {

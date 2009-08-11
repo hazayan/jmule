@@ -37,12 +37,15 @@ import org.jmule.core.JMuleCoreComponent;
 import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreLifecycleListener;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerFactory;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.ServerManagerFactory;
 import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.jkad.JKad;
 import org.jmule.core.net.JMConnectionWaiter;
 import org.jmule.core.net.JMUDPConnection;
@@ -60,8 +63,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/12 12:09:44 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -188,6 +191,17 @@ public class JMuleCoreImpl implements JMuleCore {
 		configuration_manager.initialize();
 		
 		configuration_manager.start();
+		
+		try {
+			if (configuration_manager.getUserHash() == null) {
+				UserHash user_hash = new UserHash();
+				user_hash = UserHash.genNewUserHash();
+				((InternalConfigurationManager)configuration_manager).setUserHash(user_hash.getAsString());
+			}
+		} catch (Throwable cause) {
+			throw new JMuleCoreException( cause );
+		
+		}
 
 		Logger log = Logger.getLogger("org.jmule");
 		
@@ -250,15 +264,20 @@ public class JMuleCoreImpl implements JMuleCore {
 		connectionWaiter.start();
 		
 		udp_connection = JMUDPConnection.getInstance();
-		if (configuration_manager.isUDPEnabled()) {
-			try {
-				
-				udp_connection.open();
-				
-			} catch (Throwable t) {
-				
-				t.printStackTrace();
+		try {
+			if (configuration_manager.isUDPEnabled()) {
+				try {
+					
+					udp_connection.open();
+					
+				} catch (Throwable t) {
+					
+					t.printStackTrace();
+				}
 			}
+		} catch (ConfigurationManagerException e) {
+			
+			e.printStackTrace();
 		}
 		
 		
@@ -290,11 +309,15 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		notifyComponentStarted(search_manager);
 		JKad.getInstance().initialize();
-		if (configuration_manager.isJKadEnabled()) 
-			JKad.getInstance().connect();
+		try {
+			if (configuration_manager.isJKadAutoconnectEnabled()) 
+				JKad.getInstance().connect();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		
 		/** Enable Debug thread!**/	
-		// debugThread = new DebugThread();
+		 debugThread = new DebugThread();
 		
 		Runtime.getRuntime().addShutdownHook( new JMThread("Shutdown Hook") {
 			
@@ -342,12 +365,9 @@ public class JMuleCoreImpl implements JMuleCore {
 			t.printStackTrace();
 			
 		}
-		
-		if (ConfigurationManagerFactory.getInstance().isJKadEnabled()) {
-			JKad jkad = JKad.getInstance();
-	
+		JKad jkad = JKad.getInstance();
+		if (!jkad.isDisconnected())
 			jkad.disconnect();
-		}
 		Server server = ServerManagerFactory.getInstance().getConnectedServer();
 		
 		if (server!=null)

@@ -28,16 +28,18 @@ import java.nio.channels.ServerSocketChannel;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.Peer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:23:13 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:14 $$
  */
 public class JMConnectionWaiter{
 	
@@ -92,7 +94,16 @@ public class JMConnectionWaiter{
 			
 			listenSocket = ServerSocketChannel.open();
 			
-			listenSocket.socket().bind(new InetSocketAddress( ConfigurationManagerFactory.getInstance().getTCP() ));
+			try {
+				listenSocket.socket().bind(new InetSocketAddress( ConfigurationManagerFactory.getInstance().getTCP() ));
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+				try {
+					JMuleCoreFactory.getSingleton().stop();
+				} catch (JMuleCoreException e1) {
+					e1.printStackTrace();
+				}
+			}
 			
 			connectionListenerThread = new ConnectionListenerThread();
 			

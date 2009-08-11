@@ -43,6 +43,7 @@ import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.DownloadManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
@@ -273,7 +274,13 @@ public class SharingManagerImpl implements SharingManager {
 		     }
 
 		     File incoming_dir = new File(ConfigurationManager.INCOMING_DIR);
-		     List<File> shared_dirs = ConfigurationManagerFactory.getInstance().getSharedFolders();
+		     List<File> shared_dirs = null;
+			try {
+				shared_dirs = ConfigurationManagerFactory.getInstance().getSharedFolders();
+			} catch (ConfigurationManagerException e1) {
+				
+				e1.printStackTrace();
+			}
 		     if (shared_dirs==null)
 		    	 shared_dirs = new LinkedList<File>(); 
 		     shared_dirs.add(incoming_dir);

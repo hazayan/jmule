@@ -36,6 +36,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.packet.tag.IntTag;
@@ -54,8 +55,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 06:13:19 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class Indexer {
 	
@@ -231,8 +232,18 @@ public class Indexer {
 			ConfigurationManager config_manager = ConfigurationManagerFactory.getInstance();
 			TagList tagList = new TagList();
 			tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP, Convert.byteToInt(jkad.getIPAddress().getAddress())));
-			tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEPORT, Convert.intToShort(config_manager.getTCP())));
-			tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEUPORT, Convert.intToShort(config_manager.getUDP())));
+			try {
+				tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEPORT, Convert.intToShort(config_manager.getTCP())));
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+				jkad.disconnect();
+			}
+			try {
+				tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEUPORT, Convert.intToShort(config_manager.getUDP())));
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+				jkad.disconnect();
+			}
 			tagList.addTag(new IntTag(JKadConstants.TAG_FILESIZE, Convert.longToInt(file.length())));
 			Source my_source = new Source(jkad.getClientID(), tagList);
 			

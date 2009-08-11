@@ -33,22 +33,25 @@ import java.util.Random;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.routingtable.KadContact;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:22:50 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class Utils {
 	
 	private static Random random = new Random();
 
 	public static byte[] getRandomInt128() {
-		byte[] data = new byte[16];
-		random.nextBytes(data);
-		
-		return data;
+		ByteBuffer result = Misc.getByteBuffer(16);
+		result.putInt(random.nextInt());
+		result.putInt(random.nextInt());
+		result.putInt(random.nextInt());
+		result.putInt(random.nextInt());
+		return result.array();
 	}
 	
 	public static int getRandom(int range) {

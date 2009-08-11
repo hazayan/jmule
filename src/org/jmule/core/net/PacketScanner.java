@@ -22,7 +22,7 @@
  */
 package org.jmule.core.net;
 
-import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
@@ -110,8 +110,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:23:06 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:14 $$
  */
 public class PacketScanner {
 	
@@ -186,6 +186,8 @@ public class PacketScanner {
 		if (packet instanceof EMuleCompressedPacket ) {
 			((EMuleCompressedPacket)packet).decompressPacket();
 		}
+		
+		
 				
 		switch (packet.getCommand()) {
 		/** Peer <-> Peer **/

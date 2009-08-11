@@ -54,8 +54,8 @@ import org.jmule.ui.swing.common.PortTextField;
  *
  * Created on Sep 21, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/18 12:30:19 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class SettingsDialog extends JDialog implements IDialog {
 
@@ -508,7 +508,7 @@ public class SettingsDialog extends JDialog implements IDialog {
 		this.setCheckForUpdatesEnabled(_ui_pref.isCheckForUpdatesAtStartup());
 		this.setPromptOnExitEnabled(_ui_pref.isPromptOnExitEnabled());
 		//this.setNightlyBuildWarningEnabled(_ui_pref.  setNightlyBuildWarningEnabled(SwingConstants.SWING_ROOT)));
-		this.setUpdateServerListEnabled(_config.getBooleanParameter(ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, true));
+		this.setUpdateServerListEnabled(_config.updateServerListAtConnect());
 		if(JMConstants.IS_NIGHTLY_BUILD)
 			this.setNightlyBuildWarningEnabled(_ui_pref.isNightlyBuildWarning());
 	}
@@ -526,7 +526,7 @@ public class SettingsDialog extends JDialog implements IDialog {
 		else _config.setDownloadLimit(0);
 		if( this.isUploadLimitEnabled() ) _config.setUploadLimit(getUploadLimit());
 		else _config.setUploadLimit(0);
-		_config.setParameter(ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, isUpdateServerListOnConnect());
+		_config.setUpdateServerListAtConnect(isUpdateServerListOnConnect());
 		
 		// swing ui settings
 		//if(_ui_pref.is)

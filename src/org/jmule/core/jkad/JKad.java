@@ -79,11 +79,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jmule.core.JMException;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleManager;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.edonkey.impl.FileHash;
 import org.jmule.core.edonkey.impl.Peer;
 import org.jmule.core.edonkey.impl.Peer.PeerSource;
@@ -132,8 +135,8 @@ import org.jmule.core.sharingmanager.SharingManagerFactory;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:36:11 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:14 $
  */
 public class JKad implements JMuleManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -209,7 +212,11 @@ public class JKad implements JMuleManager {
 						tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 						tagList.add(new IntTag(TAG_FILESIZE, (int)file.length()));
 						tagList.add(new IntTag(TAG_SOURCEIP,org.jmule.core.utils.Convert.byteToInt(JKad.getInstance().getIPAddress().getAddress())));
-						tagList.add(new IntTag(TAG_SOURCEPORT,config_manager.getTCP()));
+						try {
+							tagList.add(new IntTag(TAG_SOURCEPORT,config_manager.getTCP()));
+						} catch (ConfigurationManagerException e) {
+							e.printStackTrace();
+						}
 						
 						publisher.publishSource(id, tagList);
 					}
@@ -337,335 +344,69 @@ public class JKad implements JMuleManager {
 		ByteBuffer rawData = packet.getAsByteBuffer();
 		rawData.position(2);
 		
-		
-		if (packetOPCode == KADEMLIA_BOOTSTRAP_REQ) {
-			byte[] client_id_raw = new byte[16];
-			rawData.get(client_id_raw);
-			byte[] address = new byte[4];
-			rawData.get(address);
-			int udp_port = shortToInt(rawData.getShort());
-			int tcp_port = shortToInt(rawData.getShort());
-			
-			bootStrap.processBootStrapReq(new ClientID(client_id_raw), new IPAddress(address), udp_port);
-		} else 
-		if (packetOPCode == KADEMLIA_BOOTSTRAP_RES) {
-			
-			int contactCount = shortToInt(rawData.getShort());
-			List<KadContact> contact_list = new LinkedList<KadContact>();
-			for(int i = 0;i<contactCount;i++) {
-				contact_list.add(packet.getContact());
-			}
-			
-			bootStrap.processBootStrapRes(contact_list);
-		} else 
-		if (packetOPCode == KADEMLIA_HELLO_REQ) {
-			byte[] client_id_raw = new byte[16];
-			rawData.get(client_id_raw);
-			byte[] address = new byte[4];
-			rawData.get(address);
-			int udp_port = shortToInt(rawData.getShort());
-			int tcp_port = shortToInt(rawData.getShort());
-			
-			KadContact contact = routing_table.getContact(new ClientID(client_id_raw));
-			if (contact!= null) {
-				contact.setTCPPort(tcp_port);
-				contact.setUDPPort(udp_port);
-				
-			}
-			
-			KadPacket response = PacketFactory.getHello1ResPacket();
-			udpConnection.sendPacket(response, packet.getAddress());
-			
-		} else 
-		if (packetOPCode == KADEMLIA_HELLO_RES) {
-			byte[] client_id_raw = new byte[16];
-			rawData.get(client_id_raw);
-			byte address[] = new byte[4];
-			rawData.get(address);
-			int udp_port = shortToInt(rawData.getShort());
-			int tcp_port = shortToInt(rawData.getShort());
-			
-			KadContact contact = routing_table.getContact(new ClientID(client_id_raw));
-			
-			if (contact!= null) {
-				contact.setTCPPort(tcp_port);
-				contact.setUDPPort(udp_port);
-			}
-			// if contact is not in routing table ignore message
-			/*KadContact add_contact = new KadContact(new ClientID(client_id_raw), new ContactAddress(new IPAddress(address),udp_port), tcp_port, (byte)0, null);
-			routing_table.addContact(add_contact);
-			
-			add_contact.setConnected(true);*/
-			
-		}  else
-		if (packetOPCode == KADEMLIA_REQ) {
-			byte type = rawData.get();
-			
-			byte[] client_id_raw = new byte[16];
-			rawData.get(client_id_raw);
-			ClientID targetClientID = new ClientID(client_id_raw);
-			
-			client_id_raw = new byte[16];
-			rawData.get(client_id_raw);
-			ClientID receiverClientID = new ClientID(client_id_raw);
-			RequestType requestType = RequestType.FIND_VALUE;
-			switch(type) {
-				case JKadConstants.FIND_VALUE : 
-					requestType = RequestType.FIND_VALUE;
-					break;
-					
-				case JKadConstants.STORE : 
-					requestType = RequestType.STORE;
-					break;
-					
-				case JKadConstants.FIND_NODE : 
-					requestType = RequestType.FIND_NODE;
-					break;
-			}
-			lookup.processRequest(packet.getAddress(), requestType, targetClientID, receiverClientID,1);
-		} else 
-		if (packetOPCode == KADEMLIA_RES) {	
-			byte[] client_id_raw = new byte[16];
-			rawData.get(client_id_raw);
-			int contactCount = byteToInt(rawData.get());
-			List<KadContact> contact_list = new LinkedList<KadContact>();
-			for(int i = 0;i<contactCount;i++) {
-				contact_list.add(packet.getContact());
-			}
-			
-			lookup.processResponse(packet.getAddress(), new ClientID(client_id_raw), contact_list);
-		} else
-		if (packetOPCode == KADEMLIA_PUBLISH_REQ){
-			byte target_id[] = new byte[16];
-			rawData.get(target_id);
-			Int128 targetID = new Int128(target_id);
-			int clientCount = shortToInt(rawData.getShort());
-			
-			List<Source> list = new LinkedList<Source>();
-			
-			for(int i = 0 ;i<clientCount;i++) {
-				byte clientID[] = new byte[16];
-				rawData.get(clientID);
-				int tagCount = shortToInt(rawData.get());
-				TagList tagList = new TagList();
-				for(int k = 0;k<tagCount;k++) {
-					Tag tag = TagScanner.scanTag(rawData);
-					tagList.addTag(tag);
-				}
-				ClientID client_id = new ClientID(clientID);
-				Source source = new Source(client_id, tagList);
-				
-				source.setAddress(new IPAddress(packet.getAddress()));
-				source.setUDPPort(packet.getAddress().getPort());
-				
-				KadContact contact = routing_table.getContact(client_id);
-				if (contact != null)
-					source.setTCPPort(contact.getTCPPort());
-				
-				list.add(source);
-			}
-			
-			boolean source_load = false;
-			
-			for(Source source : list) {
-				boolean isSourcePublish = false;
-				isSourcePublish = source.getTagList().hasTag(TAG_SOURCETYPE);
-				if (isSourcePublish) {
-					indexer.addFileSource(targetID, source);
-					source_load = true;
-				}
-				else
-					indexer.addFileSource(targetID, source);
-			}
-			KadPacket response = null;
-			if (source_load)
-				response = PacketFactory.getPublishResPacket(targetID, indexer.getFileSourcesLoad());
-			else
-				response = PacketFactory.getPublishResPacket(targetID, indexer.getKeywordLoad());
-			udpConnection.sendPacket(response, packet.getAddress());
-			
-		}else
-		if (packetOPCode == KADEMLIA_PUBLISH_RES){
-			byte targetID[] = new byte[16];
-			rawData.get(targetID);
-			int load = byteToInt(rawData.get());
-			publisher.processGenericResponse(new ClientID(targetID),load);
-		} else
-		if (packetOPCode == KADEMLIA_SEARCH_NOTES_REQ){
-			byte[] targetID = new byte[16];
-			rawData.get(targetID);
-			List<Source> source_list = indexer.getNoteSources(new Int128(targetID));
-			KadPacket response = PacketFactory.getNotesRes(new Int128(targetID), source_list);
-			udpConnection.sendPacket(response, packet.getAddress());
-		} else
-		if (packetOPCode == KADEMLIA_SEARCH_NOTES_RES) {
-			byte[] noteID = new byte[16];
-			rawData.get(noteID);
-			int resultCount = shortToInt(rawData.getShort());
-			List<Source> sourceList = new LinkedList<Source>();
-
-			for(int i = 0;i<resultCount;i++) {
-				byte[] clientID = new byte[16];
-				rawData.get(clientID);
-				Convert.updateSearchID(clientID);			
-				int tagCount = shortToInt(rawData.get());
-				TagList tagList = new TagList();
-				for(int k = 0;k<tagCount;k++) {
-					Tag tag = TagScanner.scanTag(rawData);
-					tagList.addTag(tag);
-				}
-				Source source = new Source(new ClientID(clientID),tagList);
-				source.setAddress(new IPAddress(packet.getAddress()));
-				source.setUDPPort(packet.getAddress().getPort());
-				KadContact contact = RoutingTable.getSingleton().getContact(new ClientID(clientID));
-				if (contact!=null)
-					source.setTCPPort(contact.getTCPPort());
-				sourceList.add(source);
-			}
-			search.processResults(packet.getAddress(), new Int128(noteID), sourceList);
-		} else
-		if (packetOPCode == KADEMLIA_PUBLISH_NOTES_REQ) {
-			byte[] noteID = new byte[16];
-			rawData.get(noteID);
-			byte[] publisherID = new byte[16];
-			rawData.get(publisherID);
-			int tagCount = byteToInt(rawData.get());
-			TagList tagList = new TagList(); 
-			for(int i = 0;i<tagCount;i++) {
-				Tag tag = TagScanner.scanTag(rawData);
-				tagList.addTag(tag);
-			}
-			ClientID publisher_id = new ClientID(publisherID);
-			Source source = new Source(publisher_id, tagList);
-			source.setAddress(new IPAddress(packet.getAddress()));
-			source.setUDPPort(packet.getAddress().getPort());
-			
-			KadContact contact = routing_table.getContact(publisher_id);
-			if (contact != null)
-				source.setTCPPort(contact.getTCPPort());
-			
-			indexer.addNoteSource(new Int128(noteID), source);
-			KadPacket response = PacketFactory.getPublishNotesRes(new Int128(noteID), indexer.getNoteLoad());
-			udpConnection.sendPacket(response, packet.getAddress());
-			
-		} else
-		if (packetOPCode == KADEMLIA_PUBLISH_NOTES_RES) {
-			byte[] noteID = new byte[16];
-			rawData.get(noteID);
-			int load = byteToInt(rawData.get());
-			publisher.processNoteResponse(new Int128(noteID),load);
-		} else
-		if (packetOPCode == KADEMLIA_SEARCH_REQ) {
-			byte targetID[] = new byte[16];
-			rawData.get(targetID);
-			boolean sourceSearch = false;
-			if (rawData.limit() == 17)
-				if (rawData.get() == 1)
-					sourceSearch = true;
-			List<Source> source_list;
-			
-			if (sourceSearch) 
-				source_list = indexer.getFileSources(new Int128(targetID));
-			else
-				source_list = indexer.getKeywordSources(new Int128(targetID));
-			KadPacket response = PacketFactory.getSearchResPacket(new Int128(targetID), source_list);
-			udpConnection.sendPacket(response, packet.getAddress());
-		} else 
-		if (packetOPCode == KADEMLIA_SEARCH_RES) {
-			byte targetID[] = new byte[16];
-			rawData.get(targetID);
-			int resultCount = shortToInt(rawData.getShort());
-			
-			List<Source> sourceList = new LinkedList<Source>();
-							
-			for(int i = 0;i<resultCount;i++) {
-				byte[] contactID = new byte[16];
-				rawData.get(contactID);
-				int tagCount = byteToInt(rawData.get());
-				TagList tagList = new TagList();
-				for(int k = 0;k<tagCount;k++) {
-					try {
-					Tag tag = TagScanner.scanTag(rawData);
-					if (tag == null) continue;
-					
-					tagList.addTag(tag);
-					}catch(Throwable t) {
-						t.printStackTrace();
-					}
-				}
-				ClientID client_id = new ClientID(contactID);
-				Source source = new Source(client_id, tagList);
-				KadContact contact = routing_table.getContact(client_id);
-				if (contact != null) {
-					source.setUDPPort(contact.getUDPPort());
-					source.setTCPPort(contact.getTCPPort());
-				}
-				sourceList.add(source);
-			}
-			search.processResults(packet.getAddress(), new Int128(targetID), sourceList);
-		}else 
-		if (packetOPCode == KADEMLIA_FIREWALLED_REQ) {
-			int tcpPort = shortToInt(rawData.getShort());
-			firewallChecker.processFirewallRequest(packet.getAddress(), tcpPort);
-		} else 
-		if (packetOPCode == KADEMLIA_FIREWALLED_RES) { 
-			byte[] address = new byte[4];
-			rawData.get(address);
-			firewallChecker.porcessFirewallResponse(packet.getAddress(), new IPAddress(address));
-		}else 
-			if (packetOPCode == KADEMLIA2_HELLO_REQ) {
+		try {
+			if (packetOPCode == KADEMLIA_BOOTSTRAP_REQ) {
 				byte[] client_id_raw = new byte[16];
 				rawData.get(client_id_raw);
-				ClientID clientID = new ClientID(client_id_raw);
-				int tcpPort = shortToInt(rawData.getShort());
-				byte version = rawData.get();
-				byte tag_count = rawData.get();
-				List<Tag> tag_list  = new LinkedList<Tag>() ;
-				for (byte i = 0; i < tag_count; i++) {
-					Tag tag = TagScanner.scanTag(rawData);
-					if (tag == null) throw new CorruptedPacketException();
-					tag_list.add(tag);
+				byte[] address = new byte[4];
+				rawData.get(address);
+				int udp_port = shortToInt(rawData.getShort());
+				int tcp_port = shortToInt(rawData.getShort());
+				
+				bootStrap.processBootStrapReq(new ClientID(client_id_raw), new IPAddress(address), udp_port);
+			} else 
+			if (packetOPCode == KADEMLIA_BOOTSTRAP_RES) {
+				
+				int contactCount = shortToInt(rawData.getShort());
+				List<KadContact> contact_list = new LinkedList<KadContact>();
+				for(int i = 0;i<contactCount;i++) {
+					contact_list.add(packet.getContact());
 				}
 				
-				KadContact contact = routing_table.getContact(clientID);
+				bootStrap.processBootStrapRes(contact_list);
+			} else 
+			if (packetOPCode == KADEMLIA_HELLO_REQ) {
+				byte[] client_id_raw = new byte[16];
+				rawData.get(client_id_raw);
+				byte[] address = new byte[4];
+				rawData.get(address);
+				int udp_port = shortToInt(rawData.getShort());
+				int tcp_port = shortToInt(rawData.getShort());
+				
+				KadContact contact = routing_table.getContact(new ClientID(client_id_raw));
 				if (contact!= null) {
-					contact.setTCPPort(tcpPort);
-					contact.setUDPPort(packet.getAddress().getPort());
-					contact.setVersion(version);
+					contact.setTCPPort(tcp_port);
+					contact.setUDPPort(udp_port);
+					
 				}
 				
-				KadPacket response = PacketFactory.getHello2ResPacket(TagList.EMPTY_TAG_LIST);
+				KadPacket response;
+				response = PacketFactory.getHello1ResPacket();
 				udpConnection.sendPacket(response, packet.getAddress());
-			}else 
-			if (packetOPCode == KADEMLIA2_HELLO_RES) {
+				
+			} else 
+			if (packetOPCode == KADEMLIA_HELLO_RES) {
 				byte[] client_id_raw = new byte[16];
 				rawData.get(client_id_raw);
-				ClientID clientID = new ClientID(client_id_raw);
-				int tcpPort = shortToInt(rawData.getShort());
-				byte version = rawData.get();
-				byte tag_count = rawData.get();
-				List<Tag>tag_list  = new LinkedList<Tag>() ;
+				byte address[] = new byte[4];
+				rawData.get(address);
+				int udp_port = shortToInt(rawData.getShort());
+				int tcp_port = shortToInt(rawData.getShort());
 				
-				for (byte i = 0; i < tag_count; i++) {
-					Tag tag = TagScanner.scanTag(rawData);
-					if (tag == null) throw new CorruptedPacketException();
-					tag_list.add(tag);
-				}
+				KadContact contact = routing_table.getContact(new ClientID(client_id_raw));
 				
-				KadContact contact = routing_table.getContact(clientID);
 				if (contact!= null) {
-					contact.setTCPPort(tcpPort);
-					contact.setVersion(version);
+					contact.setTCPPort(tcp_port);
+					contact.setUDPPort(udp_port);
 				}
-				// ignore message if contact is not in routing table
-				/*ContactAddress address = new ContactAddress(new IPAddress(packet.getSender()),packet.getSender().getPort());
-				KadContact add_contact = new KadContact(clientID, address, tcpPort,version, null);
+				// if contact is not in routing table ignore message
+				/*KadContact add_contact = new KadContact(new ClientID(client_id_raw), new ContactAddress(new IPAddress(address),udp_port), tcp_port, (byte)0, null);
 				routing_table.addContact(add_contact);
 				
 				add_contact.setConnected(true);*/
 				
-			} else 
-			if (packetOPCode == KADEMLIA2_REQ) {
+			}  else
+			if (packetOPCode == KADEMLIA_REQ) {
 				byte type = rawData.get();
 				
 				byte[] client_id_raw = new byte[16];
@@ -689,10 +430,9 @@ public class JKad implements JMuleManager {
 						requestType = RequestType.FIND_NODE;
 						break;
 				}
-				
-				lookup.processRequest(packet.getAddress(), requestType, targetClientID, receiverClientID,2);
-			} else
-			if (packetOPCode == KADEMLIA2_RES) {
+				lookup.processRequest(packet.getAddress(), requestType, targetClientID, receiverClientID,1);
+			} else 
+			if (packetOPCode == KADEMLIA_RES) {	
 				byte[] client_id_raw = new byte[16];
 				rawData.get(client_id_raw);
 				int contactCount = byteToInt(rawData.get());
@@ -700,188 +440,468 @@ public class JKad implements JMuleManager {
 				for(int i = 0;i<contactCount;i++) {
 					contact_list.add(packet.getContact());
 				}
+				
 				lookup.processResponse(packet.getAddress(), new ClientID(client_id_raw), contact_list);
-			}
-			else 
-			if (packetOPCode == KADEMLIA2_PUBLISH_KEY_REQ) {
-				byte[] client_id = new byte[16];
-				rawData.get(client_id);
-				ClientID clientID = new ClientID(client_id);
-				int count = rawData.getShort();
-				for(int i = 0;i<count;i++) {
-					byte[] hash = new byte[16];
-					rawData.get(hash);
-					byte tagCount = rawData.get();
-					TagList tag_list = new TagList();
-					for(int j = 0;j<tagCount;j++) {
+			} else
+			if (packetOPCode == KADEMLIA_PUBLISH_REQ){
+				byte target_id[] = new byte[16];
+				rawData.get(target_id);
+				Int128 targetID = new Int128(target_id);
+				int clientCount = shortToInt(rawData.getShort());
+				
+				List<Source> list = new LinkedList<Source>();
+				
+				for(int i = 0 ;i<clientCount;i++) {
+					byte clientID[] = new byte[16];
+					rawData.get(clientID);
+					int tagCount = shortToInt(rawData.get());
+					TagList tagList = new TagList();
+					for(int k = 0;k<tagCount;k++) {
 						Tag tag = TagScanner.scanTag(rawData);
-						if (tag == null) throw new CorruptedPacketException();
-						tag_list.addTag(tag);
+						tagList.addTag(tag);
 					}
-					Source source = new Source(clientID, tag_list);
+					ClientID client_id = new ClientID(clientID);
+					Source source = new Source(client_id, tagList);
+					
 					source.setAddress(new IPAddress(packet.getAddress()));
 					source.setUDPPort(packet.getAddress().getPort());
 					
-					KadContact contact = routing_table.getContact(clientID);
+					KadContact contact = routing_table.getContact(client_id);
 					if (contact != null)
 						source.setTCPPort(contact.getTCPPort());
 					
-					indexer.addKeywordSource(new Int128(hash), source);
+					list.add(source);
 				}
-				KadPacket response = PacketFactory.getPublishRes2Packet(clientID, indexer.getKeywordLoad());
+				
+				boolean source_load = false;
+				
+				for(Source source : list) {
+					boolean isSourcePublish = false;
+					isSourcePublish = source.getTagList().hasTag(TAG_SOURCETYPE);
+					if (isSourcePublish) {
+						indexer.addFileSource(targetID, source);
+						source_load = true;
+					}
+					else
+						indexer.addFileSource(targetID, source);
+				}
+				KadPacket response = null;
+				if (source_load)
+					response = PacketFactory.getPublishResPacket(targetID, indexer.getFileSourcesLoad());
+				else
+					response = PacketFactory.getPublishResPacket(targetID, indexer.getKeywordLoad());
 				udpConnection.sendPacket(response, packet.getAddress());
 				
 			}else
-			if (packetOPCode == KADEMLIA2_PUBLISH_RES) {
+			if (packetOPCode == KADEMLIA_PUBLISH_RES){
 				byte targetID[] = new byte[16];
 				rawData.get(targetID);
 				int load = byteToInt(rawData.get());
 				publisher.processGenericResponse(new ClientID(targetID),load);
-			}else
-			if (packetOPCode == KADEMLIA2_PUBLISH_SOURCE_REQ) {
-				byte[] client_id = new byte[16];
-				byte[] source_id = new byte[16];
-				
-				rawData.get(client_id);
-				rawData.get(source_id);
-				
-				int tagCount = rawData.get();
-				TagList tag_list = new TagList();
+			} else
+			if (packetOPCode == KADEMLIA_SEARCH_NOTES_REQ){
+				byte[] targetID = new byte[16];
+				rawData.get(targetID);
+				List<Source> source_list = indexer.getNoteSources(new Int128(targetID));
+				KadPacket response = PacketFactory.getNotesRes(new Int128(targetID), source_list);
+				udpConnection.sendPacket(response, packet.getAddress());
+			} else
+			if (packetOPCode == KADEMLIA_SEARCH_NOTES_RES) {
+				byte[] noteID = new byte[16];
+				rawData.get(noteID);
+				int resultCount = shortToInt(rawData.getShort());
+				List<Source> sourceList = new LinkedList<Source>();
+	
+				for(int i = 0;i<resultCount;i++) {
+					byte[] clientID = new byte[16];
+					rawData.get(clientID);
+					Convert.updateSearchID(clientID);			
+					int tagCount = shortToInt(rawData.get());
+					TagList tagList = new TagList();
+					for(int k = 0;k<tagCount;k++) {
+						Tag tag = TagScanner.scanTag(rawData);
+						tagList.addTag(tag);
+					}
+					Source source = new Source(new ClientID(clientID),tagList);
+					source.setAddress(new IPAddress(packet.getAddress()));
+					source.setUDPPort(packet.getAddress().getPort());
+					KadContact contact = RoutingTable.getSingleton().getContact(new ClientID(clientID));
+					if (contact!=null)
+						source.setTCPPort(contact.getTCPPort());
+					sourceList.add(source);
+				}
+				search.processResults(packet.getAddress(), new Int128(noteID), sourceList);
+			} else
+			if (packetOPCode == KADEMLIA_PUBLISH_NOTES_REQ) {
+				byte[] noteID = new byte[16];
+				rawData.get(noteID);
+				byte[] publisherID = new byte[16];
+				rawData.get(publisherID);
+				int tagCount = byteToInt(rawData.get());
+				TagList tagList = new TagList(); 
 				for(int i = 0;i<tagCount;i++) {
 					Tag tag = TagScanner.scanTag(rawData);
-					if (tag == null) throw new CorruptedPacketException();
-					tag_list.addTag(tag);
+					tagList.addTag(tag);
 				}
-				Source source = new Source(new ClientID(client_id), tag_list);
+				ClientID publisher_id = new ClientID(publisherID);
+				Source source = new Source(publisher_id, tagList);
 				source.setAddress(new IPAddress(packet.getAddress()));
 				source.setUDPPort(packet.getAddress().getPort());
 				
-				KadContact contact = routing_table.getContact(new ClientID(client_id));
+				KadContact contact = routing_table.getContact(publisher_id);
 				if (contact != null)
 					source.setTCPPort(contact.getTCPPort());
 				
-				indexer.addFileSource(new Int128(source_id), source);
-				
-				KadPacket response = PacketFactory.getPublishRes2Packet(new ClientID(client_id), indexer.getFileSourcesLoad());
+				indexer.addNoteSource(new Int128(noteID), source);
+				KadPacket response = PacketFactory.getPublishNotesRes(new Int128(noteID), indexer.getNoteLoad());
 				udpConnection.sendPacket(response, packet.getAddress());
-			}else
-			if (packetOPCode == KADEMLIA_FINDBUDDY_REQ) {
-				byte[] receiver_id = new byte[16];
-				byte[] sender_id   = new byte[16];
-				short tcp_port;
-				
-				rawData.get(receiver_id);
-				rawData.get(sender_id);
-				tcp_port = rawData.getShort();
-
-				Buddy buddy = Buddy.getInstance();
-				Logger.getSingleton().logMessage("Buddy request : " + packet.getAddress());
-				if (!buddy.isJKadUsedAsBuddy())  {
-					ClientID receiverID = new ClientID(receiver_id);
-					Int128 senderID = new Int128(sender_id);
-					
-					//if (getClientID().equals(receiverID)) {
-						buddy.setClientID(senderID);
-						buddy.setAddress(new IPAddress(packet.getAddress()));
-						buddy.setTCPPort(tcp_port);
-						buddy.setUDPPort(org.jmule.core.utils.Convert.intToShort(packet.getAddress().getPort()));
-						
-						buddy.setKadIsUsedAsBuddy(true);
-						
-						Logger.getSingleton().logMessage("New buddy : " + buddy.getAddress()+ " TCP : " + buddy.getTCPPort()+" UDP : " + buddy.getUDPPort()); 
-						
-						ConfigurationManager configManager = ConfigurationManagerFactory.getInstance();
-						KadPacket response = PacketFactory.getBuddyResPacket(new ClientID(sender_id), JKad.getInstance().getClientID(), (short)configManager.getTCP());
-						udpConnection.sendPacket(response, packet.getAddress());
-					//}
-					
-				}
-				
 				
 			} else
-				if (packetOPCode == KADEMLIA2_SEARCH_KEY_REQ) {
-					byte targetID[] = new byte[16];
-					rawData.get(targetID);
-					List<Source> source_list;
-					
+			if (packetOPCode == KADEMLIA_PUBLISH_NOTES_RES) {
+				byte[] noteID = new byte[16];
+				rawData.get(noteID);
+				int load = byteToInt(rawData.get());
+				publisher.processNoteResponse(new Int128(noteID),load);
+			} else
+			if (packetOPCode == KADEMLIA_SEARCH_REQ) {
+				byte targetID[] = new byte[16];
+				rawData.get(targetID);
+				boolean sourceSearch = false;
+				if (rawData.limit() == 17)
+					if (rawData.get() == 1)
+						sourceSearch = true;
+				List<Source> source_list;
+				
+				if (sourceSearch) 
+					source_list = indexer.getFileSources(new Int128(targetID));
+				else
 					source_list = indexer.getKeywordSources(new Int128(targetID));
-					KadPacket response = PacketFactory.getSearchRes2Packet(new Int128(targetID), source_list);
+				KadPacket response = PacketFactory.getSearchResPacket(new Int128(targetID), source_list);
+				udpConnection.sendPacket(response, packet.getAddress());
+			} else 
+			if (packetOPCode == KADEMLIA_SEARCH_RES) {
+				byte targetID[] = new byte[16];
+				rawData.get(targetID);
+				int resultCount = shortToInt(rawData.getShort());
+				
+				List<Source> sourceList = new LinkedList<Source>();
+								
+				for(int i = 0;i<resultCount;i++) {
+					byte[] contactID = new byte[16];
+					rawData.get(contactID);
+					int tagCount = byteToInt(rawData.get());
+					TagList tagList = new TagList();
+					for(int k = 0;k<tagCount;k++) {
+						try {
+						Tag tag = TagScanner.scanTag(rawData);
+						if (tag == null) continue;
+						
+						tagList.addTag(tag);
+						}catch(Throwable t) {
+							t.printStackTrace();
+						}
+					}
+					ClientID client_id = new ClientID(contactID);
+					Source source = new Source(client_id, tagList);
+					KadContact contact = routing_table.getContact(client_id);
+					if (contact != null) {
+						source.setUDPPort(contact.getUDPPort());
+						source.setTCPPort(contact.getTCPPort());
+					}
+					sourceList.add(source);
+				}
+				search.processResults(packet.getAddress(), new Int128(targetID), sourceList);
+			}else 
+			if (packetOPCode == KADEMLIA_FIREWALLED_REQ) {
+				int tcpPort = shortToInt(rawData.getShort());
+				firewallChecker.processFirewallRequest(packet.getAddress(), tcpPort);
+			} else 
+			if (packetOPCode == KADEMLIA_FIREWALLED_RES) { 
+				byte[] address = new byte[4];
+				rawData.get(address);
+				firewallChecker.porcessFirewallResponse(packet.getAddress(), new IPAddress(address));
+			}else 
+				if (packetOPCode == KADEMLIA2_HELLO_REQ) {
+					byte[] client_id_raw = new byte[16];
+					rawData.get(client_id_raw);
+					ClientID clientID = new ClientID(client_id_raw);
+					int tcpPort = shortToInt(rawData.getShort());
+					byte version = rawData.get();
+					byte tag_count = rawData.get();
+					List<Tag> tag_list  = new LinkedList<Tag>() ;
+					for (byte i = 0; i < tag_count; i++) {
+						Tag tag = TagScanner.scanTag(rawData);
+						if (tag == null) throw new CorruptedPacketException();
+						tag_list.add(tag);
+					}
+					
+					KadContact contact = routing_table.getContact(clientID);
+					if (contact!= null) {
+						contact.setTCPPort(tcpPort);
+						contact.setUDPPort(packet.getAddress().getPort());
+						contact.setVersion(version);
+					}
+					
+					KadPacket response = PacketFactory.getHello2ResPacket(TagList.EMPTY_TAG_LIST);
 					udpConnection.sendPacket(response, packet.getAddress());
+				}else 
+				if (packetOPCode == KADEMLIA2_HELLO_RES) {
+					byte[] client_id_raw = new byte[16];
+					rawData.get(client_id_raw);
+					ClientID clientID = new ClientID(client_id_raw);
+					int tcpPort = shortToInt(rawData.getShort());
+					byte version = rawData.get();
+					byte tag_count = rawData.get();
+					List<Tag>tag_list  = new LinkedList<Tag>() ;
+					
+					for (byte i = 0; i < tag_count; i++) {
+						Tag tag = TagScanner.scanTag(rawData);
+						if (tag == null) throw new CorruptedPacketException();
+						tag_list.add(tag);
+					}
+					
+					KadContact contact = routing_table.getContact(clientID);
+					if (contact!= null) {
+						contact.setTCPPort(tcpPort);
+						contact.setVersion(version);
+					}
+					// ignore message if contact is not in routing table
+					/*ContactAddress address = new ContactAddress(new IPAddress(packet.getSender()),packet.getSender().getPort());
+					KadContact add_contact = new KadContact(clientID, address, tcpPort,version, null);
+					routing_table.addContact(add_contact);
+					
+					add_contact.setConnected(true);*/
+					
+				} else 
+				if (packetOPCode == KADEMLIA2_REQ) {
+					byte type = rawData.get();
+					
+					byte[] client_id_raw = new byte[16];
+					rawData.get(client_id_raw);
+					ClientID targetClientID = new ClientID(client_id_raw);
+					
+					client_id_raw = new byte[16];
+					rawData.get(client_id_raw);
+					ClientID receiverClientID = new ClientID(client_id_raw);
+					RequestType requestType = RequestType.FIND_VALUE;
+					switch(type) {
+						case JKadConstants.FIND_VALUE : 
+							requestType = RequestType.FIND_VALUE;
+							break;
+							
+						case JKadConstants.STORE : 
+							requestType = RequestType.STORE;
+							break;
+							
+						case JKadConstants.FIND_NODE : 
+							requestType = RequestType.FIND_NODE;
+							break;
+					}
+					
+					lookup.processRequest(packet.getAddress(), requestType, targetClientID, receiverClientID,2);
+				} else
+				if (packetOPCode == KADEMLIA2_RES) {
+					byte[] client_id_raw = new byte[16];
+					rawData.get(client_id_raw);
+					int contactCount = byteToInt(rawData.get());
+					List<KadContact> contact_list = new LinkedList<KadContact>();
+					for(int i = 0;i<contactCount;i++) {
+						contact_list.add(packet.getContact());
+					}
+					lookup.processResponse(packet.getAddress(), new ClientID(client_id_raw), contact_list);
+				}
+				else 
+				if (packetOPCode == KADEMLIA2_PUBLISH_KEY_REQ) {
+					byte[] client_id = new byte[16];
+					rawData.get(client_id);
+					ClientID clientID = new ClientID(client_id);
+					int count = rawData.getShort();
+					for(int i = 0;i<count;i++) {
+						byte[] hash = new byte[16];
+						rawData.get(hash);
+						byte tagCount = rawData.get();
+						TagList tag_list = new TagList();
+						for(int j = 0;j<tagCount;j++) {
+							Tag tag = TagScanner.scanTag(rawData);
+							if (tag == null) throw new CorruptedPacketException();
+							tag_list.addTag(tag);
+						}
+						Source source = new Source(clientID, tag_list);
+						source.setAddress(new IPAddress(packet.getAddress()));
+						source.setUDPPort(packet.getAddress().getPort());
+						
+						KadContact contact = routing_table.getContact(clientID);
+						if (contact != null)
+							source.setTCPPort(contact.getTCPPort());
+						
+						indexer.addKeywordSource(new Int128(hash), source);
+					}
+					KadPacket response = PacketFactory.getPublishRes2Packet(clientID, indexer.getKeywordLoad());
+					udpConnection.sendPacket(response, packet.getAddress());
+					
 				}else
-				if (packetOPCode == KADEMLIA2_SEARCH_SOURCE_REQ) {
+				if (packetOPCode == KADEMLIA2_PUBLISH_RES) {
 					byte targetID[] = new byte[16];
 					rawData.get(targetID);
-					short start_pos;
-					start_pos = rawData.getShort();
-					long fileSize = rawData.getLong();
-					List<Source> source_list;
-						
-					source_list = indexer.getFileSources(new Int128(targetID), start_pos, fileSize);
-					KadPacket response = PacketFactory.getSearchRes2Packet(new Int128(targetID), source_list);
+					int load = byteToInt(rawData.get());
+					publisher.processGenericResponse(new ClientID(targetID),load);
+				}else
+				if (packetOPCode == KADEMLIA2_PUBLISH_SOURCE_REQ) {
+					byte[] client_id = new byte[16];
+					byte[] source_id = new byte[16];
+					
+					rawData.get(client_id);
+					rawData.get(source_id);
+					
+					int tagCount = rawData.get();
+					TagList tag_list = new TagList();
+					for(int i = 0;i<tagCount;i++) {
+						Tag tag = TagScanner.scanTag(rawData);
+						if (tag == null) throw new CorruptedPacketException();
+						tag_list.addTag(tag);
+					}
+					Source source = new Source(new ClientID(client_id), tag_list);
+					source.setAddress(new IPAddress(packet.getAddress()));
+					source.setUDPPort(packet.getAddress().getPort());
+					
+					KadContact contact = routing_table.getContact(new ClientID(client_id));
+					if (contact != null)
+						source.setTCPPort(contact.getTCPPort());
+					
+					indexer.addFileSource(new Int128(source_id), source);
+					
+					KadPacket response = PacketFactory.getPublishRes2Packet(new ClientID(client_id), indexer.getFileSourcesLoad());
 					udpConnection.sendPacket(response, packet.getAddress());
 				}else
-					if (packetOPCode == KADEMLIA2_SEARCH_NOTES_REQ) {
+				if (packetOPCode == KADEMLIA_FINDBUDDY_REQ) {
+					byte[] receiver_id = new byte[16];
+					byte[] sender_id   = new byte[16];
+					short tcp_port;
+					
+					rawData.get(receiver_id);
+					rawData.get(sender_id);
+					tcp_port = rawData.getShort();
+	
+					Buddy buddy = Buddy.getInstance();
+					Logger.getSingleton().logMessage("Buddy request : " + packet.getAddress());
+					if (!buddy.isJKadUsedAsBuddy())  {
+						ClientID receiverID = new ClientID(receiver_id);
+						Int128 senderID = new Int128(sender_id);
+						
+						//if (getClientID().equals(receiverID)) {
+							buddy.setClientID(senderID);
+							buddy.setAddress(new IPAddress(packet.getAddress()));
+							buddy.setTCPPort(tcp_port);
+							buddy.setUDPPort(org.jmule.core.utils.Convert.intToShort(packet.getAddress().getPort()));
+							
+							buddy.setKadIsUsedAsBuddy(true);
+							
+							Logger.getSingleton().logMessage("New buddy : " + buddy.getAddress()+ " TCP : " + buddy.getTCPPort()+" UDP : " + buddy.getUDPPort()); 
+							
+							ConfigurationManager configManager = ConfigurationManagerFactory.getInstance();
+							KadPacket response;
+							try {
+								response = PacketFactory.getBuddyResPacket(new ClientID(sender_id), JKad.getInstance().getClientID(), (short)configManager.getTCP());
+								udpConnection.sendPacket(response, packet.getAddress());
+							} catch (ConfigurationManagerException e) {
+								e.printStackTrace();
+							}
+							
+						//}
+						
+					}
+					
+					
+				} else
+					if (packetOPCode == KADEMLIA2_SEARCH_KEY_REQ) {
 						byte targetID[] = new byte[16];
 						rawData.get(targetID);
-						long fileSize = rawData.getLong();
 						List<Source> source_list;
-							
-						source_list = indexer.getNoteSources(new Int128(targetID), fileSize);
+						
+						source_list = indexer.getKeywordSources(new Int128(targetID));
 						KadPacket response = PacketFactory.getSearchRes2Packet(new Int128(targetID), source_list);
 						udpConnection.sendPacket(response, packet.getAddress());
 					}else
-						if (packetOPCode == KADEMLIA_CALLBACK_REQ) {
-							Buddy buddy = Buddy.getInstance();
-							if (buddy.isJKadUsedAsBuddy()) {
-							Logger.getSingleton().logMessage("KAD callback request");
-							byte[] cid = new byte[16];
-							rawData.get(cid);
-							final Int128 clientID = new Int128(cid);
-							byte[] fid = new byte[16];
-							rawData.get(fid);
-							final FileHash fileHash = new FileHash(fid);
-							final short port = rawData.getShort();
-							final IPAddress ipAddress = new IPAddress(packet.getAddress());
+					if (packetOPCode == KADEMLIA2_SEARCH_SOURCE_REQ) {
+						byte targetID[] = new byte[16];
+						rawData.get(targetID);
+						short start_pos;
+						start_pos = rawData.getShort();
+						long fileSize = rawData.getLong();
+						List<Source> source_list;
 							
-							final Peer peer = new Peer(buddy.getAddress().toString(), buddy.getTCPPort(), PeerSource.KAD);
-							Logger.getSingleton().logMessage("KAD callback request, Peer : " + peer);
-							JMRunnable task = new JMRunnable() {
-								public void JMRun() {
-									peer.connect();
-									long counter = 0;
-									while(!peer.isConnected()) {
-										counter++;
-										if (counter == 5) {
-											Logger.getSingleton().logMessage("KAD callback request, Peer : failed to connect");
-											return;
+						source_list = indexer.getFileSources(new Int128(targetID), start_pos, fileSize);
+						KadPacket response = PacketFactory.getSearchRes2Packet(new Int128(targetID), source_list);
+						udpConnection.sendPacket(response, packet.getAddress());
+					}else
+						if (packetOPCode == KADEMLIA2_SEARCH_NOTES_REQ) {
+							byte targetID[] = new byte[16];
+							rawData.get(targetID);
+							long fileSize = rawData.getLong();
+							List<Source> source_list;
+								
+							source_list = indexer.getNoteSources(new Int128(targetID), fileSize);
+							KadPacket response = PacketFactory.getSearchRes2Packet(new Int128(targetID), source_list);
+							udpConnection.sendPacket(response, packet.getAddress());
+						}else
+							if (packetOPCode == KADEMLIA_CALLBACK_REQ) {
+								Buddy buddy = Buddy.getInstance();
+								if (buddy.isJKadUsedAsBuddy()) {
+								Logger.getSingleton().logMessage("KAD callback request");
+								byte[] cid = new byte[16];
+								rawData.get(cid);
+								final Int128 clientID = new Int128(cid);
+								byte[] fid = new byte[16];
+								rawData.get(fid);
+								final FileHash fileHash = new FileHash(fid);
+								final short port = rawData.getShort();
+								final IPAddress ipAddress = new IPAddress(packet.getAddress());
+								
+								final Peer peer = new Peer(buddy.getAddress().toString(), buddy.getTCPPort(), PeerSource.KAD);
+								Logger.getSingleton().logMessage("KAD callback request, Peer : " + peer);
+								JMRunnable task = new JMRunnable() {
+									public void JMRun() {
+										peer.connect();
+										long counter = 0;
+										while(!peer.isConnected()) {
+											counter++;
+											if (counter == 5) {
+												Logger.getSingleton().logMessage("KAD callback request, Peer : failed to connect");
+												return;
+											}
+											try {
+												Thread.sleep(5000);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
 										}
+										Logger.getSingleton().logMessage("KAD callback request, Peer : connected & send packet to :  " + peer);
+																			
+										Packet callback_packet = EMulePacketFactory.getKadCallBackRequest(clientID, fileHash, ipAddress, port);
+										
+										peer.sendPacket(callback_packet);
+										
 										try {
-											Thread.sleep(5000);
+											Thread.sleep(500);
 										} catch (InterruptedException e) {
 											e.printStackTrace();
 										}
+										Logger.getSingleton().logMessage("KAD callback request : Disconnecting from  " + peer);
+										peer.disconnect();
+										
+										
 									}
-									Logger.getSingleton().logMessage("KAD callback request, Peer : connected & send packet to :  " + peer);
-																		
-									Packet callback_packet = EMulePacketFactory.getKadCallBackRequest(clientID, fileHash, ipAddress, port);
-									
-									peer.sendPacket(callback_packet);
-									
-									try {
-										Thread.sleep(500);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-									Logger.getSingleton().logMessage("KAD callback request : Disconnecting from  " + peer);
-									peer.disconnect();
-									
-									
-								}
-							};
-							new Thread(task).start();
-						}
-						}else
-				throw new UnknownPacketOPCodeException();
+								};
+								new Thread(task).start();
+							}
+							}
+					
+		}catch(Throwable cause) {
+			cause.printStackTrace();
+			if (cause instanceof ConfigurationManagerException)
+				JKad.getInstance().shutdown();
+		}
+		throw new UnknownPacketOPCodeException();
 	}
 	
 	public boolean isFirewalled() {
@@ -958,11 +978,21 @@ public class JKad implements JMuleManager {
 
 	
 	private void loadClientID() {
-		ConfigurationManager config_manager = ConfigurationManagerFactory.getInstance();
-		String client_id = config_manager.getStringParameter(ConfigurationManager.JKAD_ID_KEY, null);
+		InternalConfigurationManager config_manager = (InternalConfigurationManager)ConfigurationManagerFactory.getInstance();
+		String client_id = null;
+		try {
+			client_id = config_manager.getJKadClientID();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		if (client_id == null) {
 			clientID = new ClientID(getRandomInt128());
-			config_manager.setParameter(ConfigurationManager.JKAD_ID_KEY, clientID.toHexString());
+			try {
+				config_manager.setJKadClientID(clientID.toHexString());
+			} catch (ConfigurationManagerException e) {
+				
+				e.printStackTrace();
+			}
 		} else {
 			clientID = new ClientID(hexStringToByte(client_id));
 		}

@@ -51,6 +51,7 @@ import org.jmule.core.JMConstants;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.edonkey.impl.ED2KFileLink;
@@ -75,8 +76,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Sep 16, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class NewWindow implements JMuleUIComponent {
 	public static enum WindowType { DOWNLOAD, SERVER, SHARED_DIR };
@@ -111,7 +112,12 @@ public class NewWindow implements JMuleUIComponent {
 			String directory = dir_dialog.open();
 			if (directory == null) return ;
 			
-			List<File> shared_dirs = config_manager.getSharedFolders();
+			List<File> shared_dirs = null;
+			try {
+				shared_dirs = config_manager.getSharedFolders();
+			} catch (ConfigurationManagerException e1) {
+				e1.printStackTrace();
+			}
 			List<File> newDirs = new LinkedList<File>();
 			if (shared_dirs == null)
 				shared_dirs = new CopyOnWriteArrayList<File>();
@@ -126,7 +132,11 @@ public class NewWindow implements JMuleUIComponent {
 				window.initUIComponents();
 			} 
 			shared_dirs.addAll(newDirs);
-			config_manager.setSharedFolders(shared_dirs);
+			try {
+				config_manager.setSharedFolders(shared_dirs);
+			} catch (ConfigurationManagerException e1) {
+				e1.printStackTrace();
+			}
 			
 			return ;
 		}

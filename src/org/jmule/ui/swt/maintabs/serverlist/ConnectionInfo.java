@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.utils.Convert;
 import org.jmule.ui.JMuleUIManager;
@@ -43,8 +44,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:27:36 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class ConnectionInfo extends CTabFolder implements Refreshable {
 
@@ -111,12 +112,20 @@ public class ConnectionInfo extends CTabFolder implements Refreshable {
 		my_info_nickname = new Label(my_info_content,SWT.NONE);
 		my_info_nickname.setFont(skin.getLabelFont());
 		my_info_nickname.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		my_info_nickname.setText(_core.getConfigurationManager().getNickName());
+		try {
+			my_info_nickname.setText(_core.getConfigurationManager().getNickName());
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
 			public void nickNameChanged(String nickName) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
-						my_info_nickname.setText(_core.getConfigurationManager().getNickName());
+						try {
+							my_info_nickname.setText(_core.getConfigurationManager().getNickName());
+						} catch (ConfigurationManagerException e) {
+							e.printStackTrace();
+						}
 					}
 				});
 			}

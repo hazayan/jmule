@@ -37,8 +37,8 @@ import java.nio.channels.FileChannel;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:32:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class Misc {
 	
@@ -206,5 +206,20 @@ public class Misc {
 		data.putInt(0, num);
 		return data.get(pos);
 	}
+	
+	public static boolean isHexadecimalNumber(String number) {
+		if(number.length() == 0) return false;
+		if(number.length() % 2 != 0) return false;
+		for(Character current_char : number.toCharArray()) {
+			char char_to_test = current_char.toUpperCase(current_char);
+			if ( '0' <= char_to_test && char_to_test <= '9' )
+				continue;
+			if ( 'A' <= char_to_test && char_to_test <= 'F' )
+				continue;
+			return false;
+		}
+		return true;
+	}
+	
 	
 }

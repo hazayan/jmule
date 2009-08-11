@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
@@ -46,8 +47,8 @@ import org.jmule.ui.swt.SWTPreferences;
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:05:30 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class GeneralTab extends AbstractTab {
 
@@ -106,7 +107,11 @@ public class GeneralTab extends AbstractTab {
 		layout_data = new GridData(GridData.FILL_HORIZONTAL);
 		nick_name_text.setLayoutData(layout_data);
 		
-		nick_name_text.setText(_core.getConfigurationManager().getNickName());
+		try {
+			nick_name_text.setText(_core.getConfigurationManager().getNickName());
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		
 		prompt_on_exit_check = new Button(content,SWT.CHECK);
 		prompt_on_exit_check.setText(_._("settingswindow.tab.general.checkbox.prompt_on_exit"));
@@ -121,7 +126,12 @@ public class GeneralTab extends AbstractTab {
 		layout_data = new GridData(GridData.FILL_HORIZONTAL);
 		layout_data.horizontalSpan = 2;
 		server_list_update.setLayoutData(layout_data);
-		boolean update = config_manager.getBooleanParameter(ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, false);
+		boolean update = false;
+		try {
+			update = config_manager.updateServerListAtConnect();
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		server_list_update.setSelection(update);
 
 		startup_update_check = new Button(content,SWT.CHECK);
@@ -143,7 +153,11 @@ public class GeneralTab extends AbstractTab {
 		layout_data = new GridData(GridData.FILL_HORIZONTAL);
 		layout_data.horizontalSpan = 2;
 		kad_enabled.setLayoutData(layout_data);
-		kad_enabled.setSelection(config_manager.isJKadEnabled());
+		try {
+			kad_enabled.setSelection(config_manager.isJKadAutoconnectEnabled());
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		
 		
 		if (JMConstants.IS_NIGHTLY_BUILD) {
@@ -172,7 +186,11 @@ public class GeneralTab extends AbstractTab {
 		tcp_port = new Spinner (ports, SWT.BORDER);
 		tcp_port.setMinimum(1);
 		tcp_port.setMaximum(65535);
-		tcp_port.setSelection(config_manager.getTCP());
+		try {
+			tcp_port.setSelection(config_manager.getTCP());
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		tcp_port.setIncrement(1);
 		tcp_port.setPageIncrement(100);
 
@@ -192,7 +210,11 @@ public class GeneralTab extends AbstractTab {
 		udp_port = new Spinner (container1, SWT.BORDER);
 		udp_port.setMinimum(1);
 		udp_port.setMaximum(65535);
-		udp_port.setSelection(config_manager.getUDP());
+		try {
+			udp_port.setSelection(config_manager.getUDP());
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		udp_port.setIncrement(1);
 		udp_port.setPageIncrement(100);
 		
@@ -204,7 +226,11 @@ public class GeneralTab extends AbstractTab {
 			}
 			
 		});
-		enable_udp.setSelection(config_manager.isUDPEnabled());
+		try {
+			enable_udp.setSelection(config_manager.isUDPEnabled());
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		
 		updateUDPControls();
 		
@@ -234,7 +260,11 @@ public class GeneralTab extends AbstractTab {
 		layout_data = new GridData();
 		layout_data.widthHint = EDIT_FIELD_WIDTH;
 		download_limit.setLayoutData(layout_data);
-		download_limit.setText((config_manager.getDownloadLimit()/1024)+"");
+		try {
+			download_limit.setText((config_manager.getDownloadLimit()/1024)+"");
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		
 		new Label(container2,SWT.NONE).setText(_._("settingswindow.tab.connection.label.kb_s"));
 		
@@ -265,7 +295,11 @@ public class GeneralTab extends AbstractTab {
 		layout_data = new GridData();
 		layout_data.widthHint = EDIT_FIELD_WIDTH;
 		upload_limit.setLayoutData(layout_data);
-		upload_limit.setText((config_manager.getUploadLimit()/1024)+"");
+		try {
+			upload_limit.setText((config_manager.getUploadLimit()/1024)+"");
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		
 		new Label(container3,SWT.NONE).setText(_._("settingswindow.tab.connection.label.kb_s"));
 		
@@ -277,11 +311,19 @@ public class GeneralTab extends AbstractTab {
 			}
 		});
 		
-		boolean enable;
-		enable = config_manager.getDownloadLimit()==0 ? false : true;
+		boolean enable = false;
+		try {
+			enable = config_manager.getDownloadLimit()==0 ? false : true;
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		enable_download_limit.setSelection(enable);
 		
-		enable = config_manager.getUploadLimit() == 0 ? false : true;
+		try {
+			enable = config_manager.getUploadLimit() == 0 ? false : true;
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 		enable_upload_limit.setSelection(enable);
 		
 		updateDownloadLimitControls();
@@ -370,8 +412,16 @@ public class GeneralTab extends AbstractTab {
 			}
 		});
 		
-		download_capacity.setText((config_manager.getDownloadBandwidth()/1024)+"");
-		upload_capacity.setText((config_manager.getUploadBandwidth()/1024)+"");
+		try {
+			download_capacity.setText((config_manager.getDownloadBandwidth()/1024)+"");
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			upload_capacity.setText((config_manager.getUploadBandwidth()/1024)+"");
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
 
 		
 	}
@@ -414,13 +464,21 @@ public class GeneralTab extends AbstractTab {
 		
 		
 		if (download_c==0) {
-			download_capacity.setText(config_manager.getDownloadBandwidth()+"");
+			try {
+				download_capacity.setText(config_manager.getDownloadBandwidth()+"");
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+			}
 			kbyte_selected = true;
 			kbyte_button.setSelection(true);
 			kbit_button.setSelection(false);
 		}
 		if (upload_c==0) {
-			upload_capacity.setText(config_manager.getUploadBandwidth()+"");
+			try {
+				upload_capacity.setText(config_manager.getUploadBandwidth()+"");
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+			}
 			kbyte_selected = true;
 			kbyte_button.setSelection(true);
 			kbit_button.setSelection(false);
@@ -430,8 +488,16 @@ public class GeneralTab extends AbstractTab {
 	}
 
 	public void save() {
-		config_manager.setNickName(nick_name_text.getText());
-		config_manager.setParameter(ConfigurationManager.SERVER_LIST_UPDATE_ON_CONNECT_KEY, server_list_update.getSelection());
+		try {
+			config_manager.setNickName(nick_name_text.getText());
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			config_manager.setUpdateServerListAtConnect(server_list_update.getSelection());
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		
 		swt_preferences.setPromprtOnExit(prompt_on_exit_check.getSelection());
 		swt_preferences.setUpdateCheckAtStartup(startup_update_check.getSelection());
@@ -443,27 +509,31 @@ public class GeneralTab extends AbstractTab {
 		}
 		
 		int tcp = tcp_port.getSelection();
-		if (config_manager.getTCP() != tcp)
-			config_manager.setTCP(tcp);
-		int udp = udp_port.getSelection();
-		if (config_manager.getUDP()!=udp)
-			config_manager.setUDP(udp);
-		boolean udp_status = enable_udp.getSelection();
-		if (config_manager.isUDPEnabled() != udp_status)
-			config_manager.setUDPEnabled(udp_status);
-		long download_l = enable_download_limit.getSelection() ? Long.parseLong(download_limit.getText()) : 0;
-		config_manager.setDownloadLimit(download_l*1024);
-		long upload_l   = enable_upload_limit.getSelection() ? Long.parseLong(upload_limit.getText()) : 0;
-		config_manager.setUploadLimit(upload_l * 1024);
-		long download_c = Long.parseLong(download_capacity.getText());
-		long upload_c = Long.parseLong(download_capacity.getText());
-		if (kbit_button.getSelection()) {
-			download_c/=8;
-			upload_c/=8;
+		try {
+			if (config_manager.getTCP() != tcp)
+				config_manager.setTCP(tcp);
+			int udp = udp_port.getSelection();
+			if (config_manager.getUDP()!=udp)
+				config_manager.setUDP(udp);
+			boolean udp_status = enable_udp.getSelection();
+			if (config_manager.isUDPEnabled() != udp_status)
+				config_manager.setUDPEnabled(udp_status);
+			long download_l = enable_download_limit.getSelection() ? Long.parseLong(download_limit.getText()) : 0;
+			config_manager.setDownloadLimit(download_l*1024);
+			long upload_l   = enable_upload_limit.getSelection() ? Long.parseLong(upload_limit.getText()) : 0;
+			config_manager.setUploadLimit(upload_l * 1024);
+			long download_c = Long.parseLong(download_capacity.getText());
+			long upload_c = Long.parseLong(download_capacity.getText());
+			if (kbit_button.getSelection()) {
+				download_c/=8;
+				upload_c/=8;
+			}
+			config_manager.setDownloadBandwidth(download_c*1024);
+			config_manager.setUploadBandwidth(upload_c*1024);
+			config_manager.setAutoconnectJKad(kad_enabled.getSelection());
+		}catch(ConfigurationManagerException e) {
+			e.printStackTrace();
 		}
-		config_manager.setDownloadBandwidth(download_c*1024);
-		config_manager.setUploadBandwidth(upload_c*1024);
-		config_manager.setJKadStatus(kad_enabled.getSelection());
 	}
 
 	private void updateUDPControls() {

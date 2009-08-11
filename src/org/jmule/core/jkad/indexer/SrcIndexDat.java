@@ -42,8 +42,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:07:51 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class SrcIndexDat {
 
@@ -68,6 +68,8 @@ public class SrcIndexDat {
 			channel.read(data);
 			Index index = new Index(key_id);
 			int source_count = data.getInt(0);
+			System.out.println("Key          : " + key_id.toHexString());
+			System.out.println("Source count : " + source_count);
 			for(int j = 0;j<source_count;j++) {
 				data = getByteBuffer(16);
 				channel.read(data);
@@ -87,9 +89,8 @@ public class SrcIndexDat {
 				long creation_time = data.getLong(0);
 				data = getByteBuffer(1);
 				channel.read(data);
-			//	System.out.println("position before read : " + channel.position());
 				int tagCount = data.get(0);
-			//	System.out.println("Count : "  + tagCount);
+				System.out.println("Readed tagcount : "  + tagCount);
 				TagList tagList = new TagList();
 				
 				for(int k = 0;k<tagCount;k++) {

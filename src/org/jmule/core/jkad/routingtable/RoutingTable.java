@@ -50,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.jmule.core.JMException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
@@ -73,8 +74,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:26:46 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class RoutingTable {
 
@@ -143,8 +144,15 @@ public class RoutingTable {
 					if (contact_time >= ROUTING_TABLE_CONTACT_TIMEOUT) {
 						int rcount = maintenance_contact.requestCount;
 						if (rcount<=contact.getContactType().toByte()+1) {
-							KadPacket hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-							JMUDPConnection.getInstance().sendPacket(hello_packet, maintenance_contact.kadContact.getIPAddress(), maintenance_contact.kadContact.getUDPPort());
+							KadPacket hello_packet;
+							try {
+								hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+								JMUDPConnection.getInstance().sendPacket(hello_packet, maintenance_contact.kadContact.getIPAddress(), maintenance_contact.kadContact.getUDPPort());
+							} catch (JMException e) {
+								e.printStackTrace();
+								JKad.getInstance().shutdown();
+							}
+
 							maintenance_contact.requestCount++;
 							continue;
 						}
@@ -184,8 +192,14 @@ public class RoutingTable {
 					MaintenanceContact c = new MaintenanceContact(addContact);
 					maintenanceContacts.put(addContact.getContactAddress(), c);
 					
-					KadPacket hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-					JMUDPConnection.getInstance().sendPacket(hello_packet, addContact.getIPAddress(), addContact.getUDPPort());
+					KadPacket hello_packet;
+					try {
+						hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+						JMUDPConnection.getInstance().sendPacket(hello_packet, addContact.getIPAddress(), addContact.getUDPPort());
+					} catch (JMException e) {
+						e.printStackTrace();
+						JKad.getInstance().shutdown();
+					}
 					c.requestCount++;
 				}
 			}

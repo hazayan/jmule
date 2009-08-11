@@ -37,6 +37,7 @@ import org.jmule.core.JMConstants;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.edonkey.impl.ClientID;
 import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.peermanager.PeerManager;
@@ -57,8 +58,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author binary
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class StatusBar extends Composite {
 
@@ -166,7 +167,11 @@ public class StatusBar extends Composite {
 			public void uploadLimitChanged(long uploadLimit) {
 				String up_limit = "";
 				if (uploadLimit!=0)
-					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"] ";
+					try {
+						up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"] ";
+					} catch (ConfigurationManagerException e) {
+						e.printStackTrace();
+					}
 				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
 				upspeed_label.setText(up_limit + up_speed);
 				layout();
@@ -175,7 +180,11 @@ public class StatusBar extends Composite {
 			public void downloadLimitChanged(long downloadLimit) {
 				String down_limit = "";
 				if (downloadLimit!=0)
-					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"] ";
+					try {
+						down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"] ";
+					} catch (ConfigurationManagerException e) {
+						e.printStackTrace();
+					}
 				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
 				downspeed_label.setText(down_limit + down_speed);
 				layout();
@@ -187,11 +196,16 @@ public class StatusBar extends Composite {
 			public void refresh() {
 				if (isDisposed()) return ;
 				String down_limit = "";
-				if (config_manager.getDownloadLimit()!=0)
-					down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"] ";
 				String up_limit = "";
-				if (config_manager.getUploadLimit()!=0)
-					up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"] ";
+				try {
+					if (config_manager.getDownloadLimit()!=0)
+						down_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getDownloadLimit(),true))+"] ";
+					
+					if (config_manager.getUploadLimit()!=0)
+						up_limit = "["+(SpeedFormatter.formatByteCountToKiBEtcPerSec(config_manager.getUploadLimit(),true))+"] ";
+				}catch(ConfigurationManagerException e) {
+					e.printStackTrace();
+				}
 				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
 				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
 				
@@ -252,7 +266,12 @@ public class StatusBar extends Composite {
 	
 	private void showDownSpeedLimitScaleWindow() {
 		SpeedScaleShell speedScaleWidget = new SpeedScaleShell(_._("mainwindow.statusbar.speed_scale.download") + " :");
-		long down_limit = config_manager.getDownloadLimit() / 1024;
+		long down_limit = 0;
+		try {
+			down_limit = config_manager.getDownloadLimit() / 1024;
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 		speedScaleWidget.setMaxValue(down_limit+500);
 		speedScaleWidget.setMaxTextValue(down_limit+500);
 		speedScaleWidget.addOption(_._("mainwindow.statusbar.speed_scale.no_limit"), 0);
@@ -267,13 +286,23 @@ public class StatusBar extends Composite {
 		if (result) {
 			long value = speedScaleWidget.getValue();
 			value*=1024;
-			config_manager.setDownloadLimit(value);
+			try {
+				config_manager.setDownloadLimit(value);
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	private void showUpSpeedLimitScaleWindow() {
 		SpeedScaleShell speedScaleWidget = new SpeedScaleShell(_._("mainwindow.statusbar.speed_scale.upload") + " :");
-		long up_limit = config_manager.getUploadLimit() / 1024;
+		long up_limit = 0;
+		try {
+			up_limit = config_manager.getUploadLimit() / 1024;
+		} catch (ConfigurationManagerException e) {
+		
+			e.printStackTrace();
+		}
 		speedScaleWidget.setMaxValue(up_limit+500);
 		speedScaleWidget.setMaxTextValue(up_limit+500);
 		speedScaleWidget.addOption(_._("mainwindow.statusbar.speed_scale.no_limit"), 0);
@@ -288,7 +317,11 @@ public class StatusBar extends Composite {
 		if (result) {
 			long value = speedScaleWidget.getValue();
 			value*=1024;
-			config_manager.setUploadLimit(value);
+			try {
+				config_manager.setUploadLimit(value);
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

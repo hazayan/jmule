@@ -27,6 +27,7 @@ import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jmule.core.JMException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
@@ -44,8 +45,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:19:30 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class SourceSearchTask extends SearchTask {
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
@@ -68,8 +69,15 @@ public class SourceSearchTask extends SearchTask {
 					List<KadContact> results) {
 				for(KadContact contact : results) {
 					used_contacts.add(contact);
-					KadPacket hello = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-					udpConnecton.sendPacket(hello, contact.getIPAddress(), contact.getUDPPort());
+					KadPacket hello;
+					try {
+						hello = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+						udpConnecton.sendPacket(hello, contact.getIPAddress(), contact.getUDPPort());
+					} catch (JMException e) {
+						e.printStackTrace();
+						JKad.getInstance().shutdown();
+					}
+					
 					
 					PacketListener listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 						public void packetReceived(KadPacket packet) {

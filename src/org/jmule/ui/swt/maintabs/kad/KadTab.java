@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Menu;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadListener;
 import org.jmule.core.jkad.JKadConstants.ContactType;
@@ -65,8 +66,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/28 15:15:52 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class KadTab extends AbstractTab {
 
@@ -108,7 +109,12 @@ public class KadTab extends AbstractTab {
 		buttons_composite.setLayout(new GridLayout(1,false));
 		
 		final Button setKadStatus = new Button(buttons_composite, SWT.NONE);
-		setKadStatus.setEnabled(_core.getConfigurationManager().isJKadEnabled());
+		try {
+			setKadStatus.setEnabled(_core.getConfigurationManager().isJKadAutoconnectEnabled());
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+			setKadStatus.setEnabled(false);
+		}
 		g = new GridData();
 		g.widthHint = 150;
 		setKadStatus.setLayoutData(g);

@@ -62,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/28 15:17:04 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -109,7 +109,6 @@ public class SearchTab extends AbstractTab{
 					public void JMRun() {
 						SearchResultTab tab = getSearchResultTab(query);
 						if (tab==null) return; // tab closed
-						System.out.println("Mark as completed : " + query.getQuery());
 						tab.completeSearch();
 					}
 				}); 
@@ -121,7 +120,6 @@ public class SearchTab extends AbstractTab{
 					public void JMRun() {
 						SearchResultTab tab = getSearchResultTab(query);
 						if (tab==null) return; // tab closed
-						System.out.println("Mark as started : " + query.getQuery());
 						tab.searchStarted();
 					}
 				}); 

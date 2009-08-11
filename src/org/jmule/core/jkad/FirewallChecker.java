@@ -31,6 +31,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.jkad.net.packet.KadPacket;
 import org.jmule.core.jkad.net.packet.PacketFactory;
@@ -44,8 +45,8 @@ import org.jmule.core.net.JMUDPConnection;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:37:31 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:14 $
  */
 public class FirewallChecker {
 	
@@ -76,8 +77,14 @@ public class FirewallChecker {
 				List<KadContact> list = routingTable.getRandomContacts(FIREWALL_CHECK_CONTACTS);
 				ConfigurationManager configManager = ConfigurationManagerFactory.getInstance();
 				for(KadContact contact : list) {
-					KadPacket packet = PacketFactory.getFirewalled1Req(configManager.getTCP());
-					udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					KadPacket packet;
+					try {
+						packet = PacketFactory.getFirewalled1Req(configManager.getTCP());
+						udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					} catch (ConfigurationManagerException e) {
+						e.printStackTrace();
+					}
+					
 				}
 			}
 		};

@@ -50,6 +50,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationListener;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -73,8 +74,8 @@ import org.jmule.ui.utils.FileFormatter;
 
 /**
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/29 06:53:20 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -130,7 +131,13 @@ public class SharedTab extends AbstractTab {
 		
 		dir_list.setLayout(new FillLayout());
 		dir_list_content = new Group(dir_list,SWT.NONE);
-		java.util.List<File> dir = _core.getConfigurationManager().getSharedFolders();
+		java.util.List<File> dir = null;
+		try {
+			dir = _core.getConfigurationManager().getSharedFolders();
+		} catch (ConfigurationManagerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (dir != null)
 			dir_list_content.setText(_._("mainwindow.sharedtab.group.shared_dirs")+"("+dir.size()+")");
 		else
@@ -167,7 +174,12 @@ public class SharedTab extends AbstractTab {
 				DirectoryDialog dir_dialog = new DirectoryDialog (getShell(),SWT.MULTI | SWT.OPEN);
 				String directory = dir_dialog.open();
 				if (directory == null) return ;
-				java.util.List<File> shared_dirs = config_manager.getSharedFolders();
+				java.util.List<File> shared_dirs = null;
+				try {
+					shared_dirs = config_manager.getSharedFolders();
+				} catch (ConfigurationManagerException e) {
+					e.printStackTrace();
+				}
 				java.util.List<File> newDirs = new LinkedList<File>();
 				if (shared_dirs == null)
 					shared_dirs = new CopyOnWriteArrayList<File>();
@@ -182,7 +194,11 @@ public class SharedTab extends AbstractTab {
 					window.initUIComponents();
 				} 
 				shared_dirs.addAll(newDirs);
-				config_manager.setSharedFolders(shared_dirs);
+				try {
+					config_manager.setSharedFolders(shared_dirs);
+				} catch (ConfigurationManagerException e) {
+					e.printStackTrace();
+				}
 		} });
 		
 		
@@ -445,7 +461,11 @@ public class SharedTab extends AbstractTab {
 		}
 	  });
 	  
-	  updateDirList(config_manager.getSharedFolders());
+	  try {
+		updateDirList(config_manager.getSharedFolders());
+	} catch (ConfigurationManagerException e) {
+		e.printStackTrace();
+	}
 	  
 	  refreshable = new Refreshable() {
 		public void refresh() {
@@ -522,7 +542,11 @@ public class SharedTab extends AbstractTab {
 			if (i<=no_remove_id_end) continue;
 			shared_list.add(new File(shared_dir_list.getItem(i)));
 		}
-		_core.getConfigurationManager().setSharedFolders(shared_list);
+		try {
+			_core.getConfigurationManager().setSharedFolders(shared_list);
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void copyED2KLink() {

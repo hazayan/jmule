@@ -26,6 +26,7 @@ import static org.jmule.core.jkad.JKadConstants.KADEMLIA_HELLO_RES;
 
 import java.util.List;
 
+import org.jmule.core.JMException;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKad;
@@ -42,8 +43,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:19:30 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
  */
 public class NoteSearchTask extends SearchTask {
 
@@ -66,8 +67,15 @@ public class NoteSearchTask extends SearchTask {
 					List<KadContact> results) {
 				
 				for(KadContact contact : results) {
-					KadPacket packet = PacketFactory.getHello1ReqPacket();
-					udpConnecton.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					KadPacket packet;
+					try {
+						packet = PacketFactory.getHello1ReqPacket();
+						udpConnecton.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					} catch (JMException e) {
+						e.printStackTrace();
+						JKad.getInstance().shutdown();
+					}
+					
 					
 					PacketListener listener = new PacketListener(KADEMLIA_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 						public void packetReceived(KadPacket packet) {

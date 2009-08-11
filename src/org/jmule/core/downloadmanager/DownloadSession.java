@@ -46,6 +46,7 @@ import java.util.zip.DataFormatException;
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategy;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyImpl;
@@ -99,8 +100,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/05 13:40:47 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:14 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -754,7 +755,12 @@ public class DownloadSession implements JMTransferSession {
 	
 	private void fileChunkRequest(Peer peer) {
 				
-		long blockSize = ConfigurationManagerFactory.getInstance().getDownloadBandwidth();
+		long blockSize;
+		try {
+			blockSize = ConfigurationManagerFactory.getInstance().getDownloadBandwidth();
+		} catch (ConfigurationManagerException e) {
+			blockSize = BLOCKSIZE;
+		}
 				
 		if (blockSize > BLOCKSIZE)
 			

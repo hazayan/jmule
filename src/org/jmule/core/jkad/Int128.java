@@ -38,8 +38,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:38:52 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:14 $
  */
 public class Int128 implements Cloneable {
 
@@ -171,7 +171,7 @@ public class Int128 implements Cloneable {
 	
 
 	public String toHexString() {
-		return byteToHexString(toByteArray(false));
+		return byteToHexString(toByteArray(true));
 	}
 	
 	public String toString() {
