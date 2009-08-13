@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:02:57 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 06:37:01 $$
  */
 public interface ConfigurationListener {
 
@@ -56,5 +56,9 @@ public interface ConfigurationListener {
 	public void updateServerListAtConnectChanged(boolean newStatus);
 	
 	public void jkadIDChanged(String newID);
+	
+	public void nicNameChanged(String newNicName);
+	
+	public void nicIPChanged(String newNicIP);
 
 }

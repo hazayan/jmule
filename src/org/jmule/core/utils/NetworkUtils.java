@@ -33,8 +33,8 @@ import org.jmule.core.JMException;
 /**
  * Created on Aug 12, 2009
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/08/12 13:29:12 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 06:37:01 $$
  */
 public class NetworkUtils {
 
@@ -54,6 +54,13 @@ public class NetworkUtils {
 		return all_network_interfaces;
 	}
 	
+	public static boolean hasNicName(String nicName) throws JMException {
+		List<NetworkInterface> network_interfaces = getAllNetworkInterfaces();
+		for(NetworkInterface network_interface : network_interfaces) {
+			if (network_interface.getName().equals(nicName)) return true;
+		}
+		return false;
+	}
 	
 	
 	// for testing purpose only

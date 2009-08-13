@@ -29,14 +29,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.naming.ConfigurationException;
+
+import org.jmule.core.JMException;
 import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.utils.AddressUtils;
 import org.jmule.core.utils.Misc;
+import org.jmule.core.utils.NetworkUtils;
 
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/08/11 16:35:07 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 06:37:01 $$
  */
 public class ConfigurationManagerImp implements InternalConfigurationManager {
 
@@ -571,6 +576,10 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 			   
 			   else if( property == JKAD_ID_KEY) listener.jkadIDChanged((String) new_value);
 				    
+			   else if( property == NIC_NAME_KEY) listener.nicNameChanged((String) new_value);
+				    
+			   else if( property == NIC_IP_KEY) listener.nicIPChanged((String) new_value);
+				    
 			}catch(Throwable cause) {
 				cause.printStackTrace();
 			}
@@ -612,6 +621,53 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 		save();
 		notifyPropertyChanged(JKAD_ID_KEY, newID);
 	}
+	
+    public String getNicName() throws ConfigurationManagerException {
+    	if (!config_store.containsKey(NIC_NAME_KEY))
+    		return null;
+    	String nicName = config_store.getProperty(NIC_NAME_KEY);
+    	try {
+			if (!NetworkUtils.hasNicName(nicName))
+				throw new ConfigurationManagerException("The Nic "+nicName+" doesn't exists");
+		} catch (JMException cause) {
+			throw new ConfigurationManagerException(cause);
+		}
+    	return nicName;
+    }
+    
+    public void setNicName(String nicName) throws ConfigurationManagerException {
+    	try {
+			if (!NetworkUtils.hasNicName(nicName))
+				throw new ConfigurationManagerException("The Nic "+nicName+" doesn't exists");
+		} catch (JMException cause) {
+			throw new ConfigurationManagerException(cause);
+		}
+    	config_store.setProperty(NIC_NAME_KEY, nicName);
+    	save();
+		notifyPropertyChanged(NIC_NAME_KEY, nicName);
+    		
+    }
+    
+    public String getNicIP() throws ConfigurationManagerException {
+    	if (!config_store.containsKey(NIC_IP_KEY))
+    		return null;
+    	String nicIP = config_store.getProperty(NIC_IP_KEY);
+    	if (nicIP.length()==0)
+    		throw new ConfigurationManagerException("Nic IP length is 0");
+    	if (!AddressUtils.isValidIP(nicIP))
+    		throw new ConfigurationManagerException("Nic IP "+nicIP+" is not valid");
+    	return nicIP;
+    }
+    
+    public void setNicIP(String nicIP) throws ConfigurationManagerException {
+    	if (!AddressUtils.isValidIP(nicIP))
+    		throw new ConfigurationManagerException("Nic IP "+nicIP+" is not valid");
+    	if (nicIP.length()==0)
+    		throw new ConfigurationManagerException("Nic IP length is 0");
+    	config_store.setProperty(NIC_IP_KEY, nicIP);
+    	save();
+		notifyPropertyChanged(NIC_IP_KEY, nicIP);
+    }
 
 
 }

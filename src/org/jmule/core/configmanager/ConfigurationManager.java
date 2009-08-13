@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.impl.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:02:57 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 06:37:01 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -102,6 +102,9 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final String 		 JKAD_ENABLED_KEY					   = 	"JKadEnabled";
 	public static final String 		 JKAD_ID_KEY						   = 	"JKadID";
+	
+	public static final String		 NIC_NAME_KEY						   =    "NicName";
+	public static final String		 NIC_IP_KEY							   =    "NicIP";
 	
 	// 
 	//public static final String       PEER_ACTIVITY_CHECK_TIME_KEY   	   =     "PeerActivityCheckTime";
@@ -253,6 +256,14 @@ public interface ConfigurationManager extends JMuleManager {
     
     public String getJKadClientID() throws ConfigurationManagerException;
         
+    public String getNicName() throws ConfigurationManagerException;
+    
+    public void setNicName(String nicName) throws ConfigurationManagerException;
+    
+    public String getNicIP() throws ConfigurationManagerException;
+    
+    public void setNicIP(String nicIP) throws ConfigurationManagerException;
+    
     /**
 	 * Adds a configuration listener
 	 * @param listener the given configuration listener

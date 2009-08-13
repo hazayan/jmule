@@ -28,12 +28,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.NetworkInterface;
+import java.util.List;
+
+import org.jmule.core.JMException;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerFactory;
 import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.utils.Utils;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.NetworkUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,8 +47,8 @@ import org.junit.Test;
  * Created on Aug 10, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 12:06:48 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/13 06:37:01 $
  */
 public class ConfigurationManagerTest {
 
@@ -719,5 +725,74 @@ public class ConfigurationManagerTest {
 			fail(e+"");
 		}
 	}
+	
+	@Test
+	public void testGetNicName() { 
+		try {
+			List<NetworkInterface> network_interfaces = NetworkUtils.getAllNetworkInterfaces();
+			String nic_name = network_interfaces.get(0).getName();
+			
+			manager.setNicName(nic_name);
+			assertEquals(nic_name, manager.getNicName());
+		} catch (JMException e) {
+			fail(e+"");
+		}
+		
+	}
+	
+	@Test
+	public void testSetNicName() { 
+		try {
+			List<NetworkInterface> network_interfaces = NetworkUtils.getAllNetworkInterfaces();
+			String nic_name = network_interfaces.get(0).getName();
+			
+			manager.setNicName(nic_name);
+			assertEquals(nic_name, manager.getNicName());
+		} catch (JMException e) {
+			fail(e+"");
+		}
+		
+		try {
+			
+			manager.setNicName("test111 dd225 666 ");
+			assertTrue(false);
+		} catch (JMException e) {
+			assertTrue(true);
+		}
+		
+	}
+	
+	@Test
+	public void testGetNicIP() { 
+		try {
+			List<NetworkInterface> network_interfaces = NetworkUtils.getAllNetworkInterfaces();
+			String ip = Convert.IPtoString(network_interfaces.get(0).getInterfaceAddresses().get(1).getAddress().getAddress());
+			manager.setNicIP(ip);
+			assertEquals(ip, manager.getNicIP());
+		} catch (JMException e) {
+			fail(e+"");
+		}
+	}
+	
+	@Test
+	public void testSetNicIP() { 
+		try {
+			List<NetworkInterface> network_interfaces = NetworkUtils.getAllNetworkInterfaces();
+			String ip = Convert.IPtoString(network_interfaces.get(0).getInterfaceAddresses().get(1).getAddress().getAddress());
+			manager.setNicIP(ip);
+			assertEquals(ip, manager.getNicIP());
+		} catch (JMException e) {
+			fail(e+"");
+		}
+		
+		
+		try {
+			manager.setNicIP("111.4664");
+			assertTrue(false);
+		} catch (ConfigurationManagerException e) {
+			assertTrue(true);
+		}
+	}
+	
 
 }
