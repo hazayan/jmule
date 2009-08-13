@@ -37,8 +37,8 @@ import org.jmule.core.uploadmanager.UploadManager;
  * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 17:10:47 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 18:24:07 $$
  */
 public interface JMuleCore {
 
@@ -57,6 +57,10 @@ public interface JMuleCore {
 	 * @return true if the system is started, false otherwise
 	 */
 	public boolean isStarted();
+	
+	public boolean isStarting();
+	
+	public boolean isSopping();
 	
 	public JMConnectionWaiter getTCPConnectionListener();
 	

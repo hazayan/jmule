@@ -29,9 +29,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.naming.ConfigurationException;
-
 import org.jmule.core.JMException;
+import org.jmule.core.JMuleAbstractManager;
+import org.jmule.core.JMuleManagerException;
 import org.jmule.core.edonkey.impl.UserHash;
 import org.jmule.core.utils.AddressUtils;
 import org.jmule.core.utils.Misc;
@@ -40,10 +40,10 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 06:37:01 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 18:25:20 $$
  */
-public class ConfigurationManagerImp implements InternalConfigurationManager {
+public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
 	private static final String 	DEFAULT_FALSE = "false";
 	private static final String 	DEFAULT_TRUE  = "true";
@@ -446,12 +446,27 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 	
 	
 	public void initialize() {
+		
+		try {
+			super.initialize();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		
 		config_store = new Properties();
 	}
 
 	
 	public void shutdown() {
 
+		try {
+			super.shutdown();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		
 		 try {
 			this.save();
 		} catch (ConfigurationManagerException cause) {
@@ -461,6 +476,13 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
 
 	
 	public void start() {
+		
+		try {
+			super.start();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
 		
          try {
 			this.load();
@@ -668,6 +690,11 @@ public class ConfigurationManagerImp implements InternalConfigurationManager {
     	save();
 		notifyPropertyChanged(NIC_IP_KEY, nicIP);
     }
+
+	protected boolean iAmStoppable() {
+		
+		return false;
+	}
 
 
 }

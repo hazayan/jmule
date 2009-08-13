@@ -63,8 +63,8 @@ import org.jmule.core.uploadmanager.UploadManagerFactory;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 18:24:08 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -82,6 +82,10 @@ public class JMuleCoreImpl implements JMuleCore {
 	private boolean first_run = false; 
 	
 	private JMRawData core_params;
+	
+	private boolean is_starting = false;
+	
+	private boolean is_stopping = false; 
 	
 	private JMuleCoreImpl() {
 		// when the JMule core is created we must exactly know if this is the first start up
@@ -129,6 +133,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		System.out.println("Core starting process initiated");
 		
 		long start_time = System.currentTimeMillis();
+		
+		is_starting = true;
 		
 		File[] main_dirs = new File[4];
 		
@@ -334,6 +340,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		     }
 		 });
 		
+		is_starting = false;
+		
 		System.out.println("Total start up time = " + ( System.currentTimeMillis() - start_time ) );
 	}
 	
@@ -341,6 +349,15 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		return instance != null;
 		
+	}
+	
+	public boolean isSopping() {
+		return is_stopping;
+	}
+
+	
+	public boolean isStarting() {
+		return is_starting;
 	}
 	
 	public boolean isFirstRun() {
@@ -353,6 +370,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		System.out.println("Core stopping process initiated");
 		
 		long stop_time = System.currentTimeMillis();
+		
+		is_stopping = true;
 		
 		logEvent("Stop jMule");
 		
@@ -411,6 +430,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		if (debugThread != null)
 			debugThread.JMStop();
+		
+		is_stopping = false;
 		
 		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
 		
@@ -539,6 +560,8 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		lifecycle_listeners.remove( lifeCycleListener );
 	}
+
+
 
 	
 }
