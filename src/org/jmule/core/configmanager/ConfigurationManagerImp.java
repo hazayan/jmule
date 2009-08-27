@@ -40,8 +40,8 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 18:25:20 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/27 12:18:40 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
@@ -119,7 +119,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		}
 		
 		if (! ( ( value >= 0 ) && ( value <= 65535 ) ) )
-			throw new ConfigurationManagerException("The port between 0 and 65535, " + value + " given");
+			throw new ConfigurationManagerException("The port can be between 0 and 65535, not " + value + " ");
 		return value;
 	}
 
@@ -136,7 +136,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		}
 		
 		if (! ( ( value >= 0 ) && ( value <= 65535 ) ) )
-			throw new ConfigurationManagerException("The port between 0 and 65535, " + value + " given");
+			throw new ConfigurationManagerException("The port can be between 0 and 65535, not " + value + " ");
 		return value;
 
 	}
