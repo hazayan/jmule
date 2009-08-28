@@ -30,10 +30,10 @@ import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/28 10:14:07 $
  */
-public class ShortTag extends StandartTag {
+public class ShortTag extends StandartTag implements NumberTag {
 
 	private short tagValue;
 	
@@ -60,6 +60,14 @@ public class ShortTag extends StandartTag {
 
 	public void setValue(Object object) {
 		tagValue = (Short) object;
+	}
+	
+	public long getNumber() {
+		return Convert.shortToLong(tagValue);
+	}
+
+	public void setNumber(long value) {
+		this.tagValue = Convert.longToShort(value);
 	}
 
 }

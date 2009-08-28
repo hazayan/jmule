@@ -31,10 +31,10 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/08/28 10:14:07 $
  */
-abstract class AbstractTag implements Tag{
+abstract class AbstractTag implements Tag {
 	protected byte tagType;
 	protected byte[] tagName;
 	
@@ -76,7 +76,7 @@ abstract class AbstractTag implements Tag{
 	}
 	
 	public String toString() {
-		return "[ "+Convert.byteToHexString(getAsByteBuffer().array(), " 0x") + " ]";
+		return "[ "+Convert.byteToHexString(getAsByteBuffer().array(), " 0x") + " ] = [ " + getValue() +" ]";
 	}
 	
 }
