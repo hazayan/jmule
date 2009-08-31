@@ -1,0 +1,139 @@
+/*
+ *  JMule - Java file sharing client
+ *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *
+ *  Any parts of this program derived from other projects, or contributed
+ *  by third-party developers are copyrighted by their respective authors.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
+package org.jmule.core.networkmanager;
+
+import java.io.IOException;
+import java.net.BindException;
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
+
+import org.jmule.core.JMThread;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.configmanager.ConfigurationAdapter;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+
+/**
+ * 
+ * @author binary256
+ * @version $$Revision: 1.1 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/31 17:24:11 $$
+ */
+public class JMConnectionWaiter{
+	
+	public enum WaiterStatus { OPEN, CLOSED };
+	private ConnectionListenerThread connectionListenerThread = null;
+	private ServerSocketChannel listenSocket = null;
+	private WaiterStatus status;
+	private JMuleCore _core;
+	
+	JMConnectionWaiter() {
+		_core = JMuleCoreFactory.getSingleton();
+			
+		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
+			public void TCPPortChanged(int port) {		
+				restart();		
+			}
+		});
+		
+	}
+	
+
+	public void start() {
+		if (connectionListenerThread != null)
+			return;
+		
+		try {
+			listenSocket = ServerSocketChannel.open();
+			int tcp_port = 0;
+			try {			
+				tcp_port = ConfigurationManagerSingleton.getInstance().getTCP();
+				listenSocket.socket().bind(new InetSocketAddress( tcp_port ));
+			} catch (Throwable cause) {
+				if (cause instanceof BindException) {
+					System.out.println("Port " + tcp_port +" is already in use by other application");
+				}
+				cause.printStackTrace();
+			}
+			connectionListenerThread = new ConnectionListenerThread();
+			status = WaiterStatus.OPEN;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void stop() {
+		if (listenSocket != null){
+		try {
+			listenSocket.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} }
+		if (connectionListenerThread != null)
+			connectionListenerThread.JMStop();
+		else ;
+		connectionListenerThread = null;
+		status = WaiterStatus.CLOSED;
+		
+	}
+	
+	//TODO : Add code to throw exception on restarting stopped listener
+	public void restart() {
+		if (status == WaiterStatus.OPEN) {
+			stop();
+			start();
+		}
+	}
+	
+	public boolean isOpen() {
+		return status == WaiterStatus.OPEN;
+	}
+	
+	private class ConnectionListenerThread extends JMThread {
+		private boolean stop = false;
+	
+		public ConnectionListenerThread() {
+			super("Incoming TCP connections listener");
+			start();
+		}
+
+		
+		public void JMStop() {
+			stop = true;
+			interrupt();
+		}
+		
+		public void run() {
+			while (!stop) {
+				try {
+					JMPeerConnection newConnection = new JMPeerConnection(new JMuleSocketChannel(listenSocket.accept()));
+				} catch (IOException e) {
+					if (!listenSocket.isOpen()) return ;
+				}
+			}
+		}
+
+	}
+}
