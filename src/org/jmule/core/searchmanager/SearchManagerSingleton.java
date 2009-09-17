@@ -23,19 +23,19 @@
 package org.jmule.core.searchmanager;
 
 /**
- *
- * Created on Aug 9, 2008
+ * 
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:43 $
+ * @version $$Revision: 1.1 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:43 $$
  */
-public interface SearchResultListener {
-	public void searchStarted(SearchQuery query);
+public class SearchManagerSingleton {
 
-	public void resultArrived(SearchResult searchResult);
-
-	public void searchCompleted(SearchQuery query);
-
-	public void searchFailed(SearchQuery query);
+	private static SearchManager instance;
+	
+	public static SearchManager getInstance() {
+		if(instance == null) instance = new SearchManagerImpl();
+	    return instance;	
+	}
+	
 	
 }

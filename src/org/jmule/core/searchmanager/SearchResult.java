@@ -22,18 +22,17 @@
  */
 package org.jmule.core.searchmanager;
 
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.servermanager.Server;
 
 /**
  *
  * Created on Aug 9, 2008
  * @author javajox
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:28:18 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:43 $
  */
 public class SearchResult {
-
 	SearchResultItemList searchResultItemList;
 	SearchQuery searchQuery;
 	Server server;

@@ -43,9 +43,9 @@ import static org.jmule.core.edonkey.E2DKConstants.iso_extensions;
 import static org.jmule.core.edonkey.E2DKConstants.program_extensions;
 import static org.jmule.core.edonkey.E2DKConstants.video_extensions;
 
-import org.jmule.core.edonkey.impl.ClientID;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.ED2KFileLink;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.core.utils.Convert;
@@ -54,8 +54,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:43 $$
  */
 public class SearchResultItem extends TagList {
 

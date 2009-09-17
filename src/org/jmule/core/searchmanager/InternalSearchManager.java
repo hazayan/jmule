@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -23,19 +23,13 @@
 package org.jmule.core.searchmanager;
 
 /**
- * 
- * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:09 $$
+ * Created on Aug 29, 2009
+ * @author binary256
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:43 $
  */
-public class SearchManagerFactory {
-
-	private static SearchManager instance;
+public interface InternalSearchManager extends SearchManager {
 	
-	public static SearchManager getInstance() {
-		if(instance == null) instance = new SearchManagerImpl();
-	    return instance;	
-	}
-	
+	public void receivedServerSearchResult(SearchResultItemList resultList);
 	
 }
