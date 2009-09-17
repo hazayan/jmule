@@ -24,21 +24,21 @@ package org.jmule.core;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.jkad.JKad;
-import org.jmule.core.net.JMConnectionWaiter;
+import org.jmule.core.jkad.JKadManager;
+import org.jmule.core.networkmanager.NetworkManager;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.searchmanager.SearchManager;
+import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.sharingmanager.SharingManager;
-import org.jmule.core.speedmanager.SpeedManager;
+import org.jmule.core.speedmanager.SpeedManagerImpl;
 import org.jmule.core.uploadmanager.UploadManager;
 
 /**
  * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 18:24:07 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:38:23 $$
  */
 public interface JMuleCore {
 
@@ -62,7 +62,7 @@ public interface JMuleCore {
 	
 	public boolean isSopping();
 	
-	public JMConnectionWaiter getTCPConnectionListener();
+	public NetworkManager getNetworkManager();
 	
 	public DownloadManager getDownloadManager();
 	
@@ -74,13 +74,13 @@ public interface JMuleCore {
 	
 	public SharingManager getSharingManager();
 	
-	public SpeedManager getSpeedManager();
+	public SpeedManagerImpl getSpeedManager();
 	
 	public ConfigurationManager getConfigurationManager();
 	
 	public SearchManager getSearchManager();
 	
-	public JKad getJKad();
+	public JKadManager getJKadManager();
 	
 	public boolean isFirstRun();
 	
