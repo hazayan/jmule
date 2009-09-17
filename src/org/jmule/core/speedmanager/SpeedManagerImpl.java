@@ -31,14 +31,14 @@ import org.jmule.core.configmanager.ConfigurationManagerException;
 /**
  *
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:23:17 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:29:43 $$
  */
 public class SpeedManagerImpl extends JMuleAbstractManager implements InternalSpeedManager {
 
 	private BandwidthController uploadController;
 	private BandwidthController downloadController;
-
+	private boolean is_started = false;
 	SpeedManagerImpl() {
 
 	}
@@ -70,6 +70,7 @@ public class SpeedManagerImpl extends JMuleAbstractManager implements InternalSp
 			e.printStackTrace();
 			return;
 		}
+		is_started = false;
 	}
 
 	public void start() {
@@ -79,6 +80,7 @@ public class SpeedManagerImpl extends JMuleAbstractManager implements InternalSp
 			e1.printStackTrace();
 			return;
 		}
+		is_started = true;
 		long uploadLimit = 0;
 		try {
 			uploadLimit = JMuleCoreFactory.getSingleton()
@@ -120,7 +122,7 @@ public class SpeedManagerImpl extends JMuleAbstractManager implements InternalSp
 	}
 
 	public boolean isStarted() {
-		return false;
+		return is_started;
 	}
 
 }
