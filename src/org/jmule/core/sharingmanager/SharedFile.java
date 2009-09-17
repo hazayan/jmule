@@ -23,7 +23,6 @@
 package org.jmule.core.sharingmanager;
 
 import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ARC;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_AUDIO;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_DOC;
@@ -48,9 +47,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.jmule.core.downloadmanager.FileChunk;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.PartHashSet;
+import org.jmule.core.edonkey.ED2KFileLink;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
@@ -61,8 +60,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:33 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
  */
 public abstract class SharedFile {
 	
@@ -200,7 +199,7 @@ public abstract class SharedFile {
 		//System.out.println(""+tag);
 		tagList.addTag(tag);
 		
-		SharingManagerFactory.getInstance().writeMetadata();
+		SharingManagerSingleton.getInstance().writeMetadata();
 	}
 	
 	public FileQuality getFileQuality() {

@@ -26,9 +26,9 @@ package org.jmule.core.sharingmanager;
  * 
  * @author javajox
  * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:07 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
  */
-public class SharingManagerFactory {
+public class SharingManagerSingleton {
 
 	private static SharingManager instance;
 	

@@ -37,8 +37,8 @@ import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.E2DKConstants;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.PartHashSet;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.edonkey.metfile.PartMetException;
 import org.jmule.core.edonkey.packet.tag.IntTag;
@@ -52,8 +52,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:32:19 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
  */
 public class PartialFile extends SharedFile {
 	

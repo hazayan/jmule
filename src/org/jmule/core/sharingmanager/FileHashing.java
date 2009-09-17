@@ -32,15 +32,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.PartHashSet;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.utils.MD4;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:22:33 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
  */
 public class FileHashing extends JMFileTask {
 

@@ -27,12 +27,12 @@ import java.util.List;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleManager;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:15:26 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
  */
 public interface SharingManager extends JMuleManager {
 	
@@ -67,16 +67,6 @@ public interface SharingManager extends JMuleManager {
 	public boolean isLoadingPartialFileProcessRunning();
 	
 	/**
-	 * Return list with all unshared files 
-	 */
-	public List<SharedFile> getUnsharedFiles();
-	
-	/**
-	 * Mark all files as unshared
-	 */
-	public void resetUnsharedFiles();
-	
-	/**
 	 * Get the completed shared file identified by file hash
 	 * @param fileHash
 	 * @return Completed shared file
@@ -93,8 +83,6 @@ public interface SharingManager extends JMuleManager {
 	public double getCurrentHashingFilePercent();
 	
 	public SharedFile getCurrentHashingFile();
-	
-	public List<CompletedFile> getUnhashedFiles();
 	
 	/**
 	 * Move the completed file (identified by fileHash) from temp dir to incoming dir 
