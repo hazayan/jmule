@@ -38,22 +38,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.InternalJKadManager;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.JKadConstants.RequestType;
-import org.jmule.core.jkad.net.packet.KadPacket;
-import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
 import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
-import org.jmule.core.net.JMUDPConnection;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:32:09 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:07:02 $
  */
 public abstract class LookupTask {
 	
@@ -74,6 +76,9 @@ public abstract class LookupTask {
 	
 	protected boolean lookupStarted = false;
 	
+	protected InternalNetworkManager _network_manager;
+	protected InternalJKadManager 	 _jkad_manager;
+	
 	public LookupTask(RequestType requestType, Int128 targetID, long toleranceZone) {
 		this(requestType, targetID, toleranceZone, INITIAL_LOOKUP_CONTACTS);
 	}
@@ -86,6 +91,9 @@ public abstract class LookupTask {
 		this.initialLookupContacts = initialLookupContacts;
 		responseTime = System.currentTimeMillis();
 		routingTable = RoutingTable.getSingleton();
+		
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		_jkad_manager    = (InternalJKadManager) JKadManagerSingleton.getInstance();
 	}
 	
 	public void startLookup() {
@@ -97,7 +105,7 @@ public abstract class LookupTask {
 		int count = ALPHA;
 		if (count > possibleContacts.size()) count = possibleContacts.size();
 		for (int i = 0; i < count; i++) {
-			KadContact contact = getNearestContact(Utils.XOR(targetID,JKad.getInstance().getClientID()), possibleContacts,usedContacts);
+			KadContact contact = getNearestContact(Utils.XOR(targetID,_jkad_manager.getClientID()), possibleContacts,usedContacts);
 			
 			lookupContact(contact);
 		}
@@ -110,7 +118,7 @@ public abstract class LookupTask {
 					if (System.currentTimeMillis() - c.getRequestTime() > LOOKUP_CONTACT_TIMEOUT) {
 						requestedContacts.remove(address);
 						// lookup next
-						KadContact contact = getNearestContact(Utils.XOR(targetID,JKad.getInstance().getClientID()), possibleContacts,usedContacts);
+						KadContact contact = getNearestContact(Utils.XOR(targetID,_jkad_manager.getClientID()), possibleContacts,usedContacts);
 						if (contact == null) return;
 						lookupContact(contact);
 					}
@@ -139,7 +147,7 @@ public abstract class LookupTask {
 		for(KadContact contact : results) {
 			if (usedContacts.contains(contact)) continue;
 			if (possibleContacts.contains(contact)) continue;			
-			if (inToleranceZone(Utils.XOR(contact.getContactID(), JKad.getInstance().getClientID()), Utils.XOR(targetID, JKad.getInstance().getClientID()), toleranceZone)) {
+			if (inToleranceZone(Utils.XOR(contact.getContactID(), _jkad_manager.getClientID()), Utils.XOR(targetID, _jkad_manager.getClientID()), toleranceZone)) {
 
 				alpha.add(contact);
 			}
@@ -152,7 +160,7 @@ public abstract class LookupTask {
 		}
 		
 		requestedContacts.remove(sender);
-		KadContact contact = getNearestContact(Utils.XOR(targetID,JKad.getInstance().getClientID()), possibleContacts,usedContacts);
+		KadContact contact = getNearestContact(Utils.XOR(targetID, _jkad_manager.getClientID()), possibleContacts,usedContacts);
 		if (contact != null) lookupContact(contact);
 
 	}
@@ -168,8 +176,7 @@ public abstract class LookupTask {
 		//	packet = PacketFactory.getRequest2Packet(requestType, targetID, (Int128)contact.getContactID());
 		//else 
 			packet = PacketFactory.getRequestPacket(requestType, targetID, (Int128)contact.getContactID());
-		
-		JMUDPConnection.getInstance().sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+		_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 	}
 	
 	public long getResponseTime() {

@@ -37,22 +37,24 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.ContactAddress;
+import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants.RequestType;
-import org.jmule.core.jkad.net.packet.KadPacket;
-import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
-import org.jmule.core.net.JMUDPConnection;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 
 
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:33:26 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:07:02 $
  */
 public class Lookup {
 
@@ -63,7 +65,7 @@ public class Lookup {
 	private Queue<LookupTask> lookupTasksToRun = new ConcurrentLinkedQueue<LookupTask>();
 	
 	private RoutingTable routing_table = null;
-	private JMUDPConnection udpConnection = null;
+	private InternalNetworkManager _network_manager;
 	
 	private Task lookupCleaner;
 	
@@ -82,16 +84,6 @@ public class Lookup {
 	}
 	
 	private Lookup() {
-		
-	}
-	
-	public Map<Int128,LookupTask> getLookupTasks() { return lookupTasks; }
-	
-	public void start() {
-		isStarted = true;
-		routing_table = RoutingTable.getSingleton();
-		udpConnection = JMUDPConnection.getInstance();
-		
 		lookupCleaner  = new Task() {
 			public void run() {
 				runNextTask();
@@ -111,6 +103,14 @@ public class Lookup {
 			}
 			
 		};
+	}
+	
+	public Map<Int128,LookupTask> getLookupTasks() { return lookupTasks; }
+	
+	public void start() {
+		isStarted = true;
+		routing_table = RoutingTable.getSingleton();
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		
 		Timer.getSingleton().addTask(LOOKUP_TASK_CHECK_INTERVAL, lookupCleaner, true);
 	}
@@ -188,7 +188,7 @@ public class Lookup {
 				response = PacketFactory.getResponsePacket(targetID, list);
 			else
 				response = PacketFactory.getResponse2Packet(targetID, list);
-			udpConnection.sendPacket(response, sender);
+			_network_manager.sendKadPacket(response, new IPAddress(sender), sender.getPort());
 			break;
 		}
 		
@@ -199,7 +199,7 @@ public class Lookup {
 				response = PacketFactory.getResponsePacket(targetID, list);
 			else
 				response = PacketFactory.getResponse2Packet(targetID, list);
-			udpConnection.sendPacket(response, sender);
+			_network_manager.sendKadPacket(response, new IPAddress(sender), sender.getPort());
 			break;
 		}
 		
@@ -211,7 +211,7 @@ public class Lookup {
 				response = PacketFactory.getResponsePacket(targetID, list);
 			else
 				response = PacketFactory.getResponse2Packet(targetID, list);
-			udpConnection.sendPacket(response, sender);
+			_network_manager.sendKadPacket(response, new IPAddress(sender), sender.getPort());
 		}
 		
 		}

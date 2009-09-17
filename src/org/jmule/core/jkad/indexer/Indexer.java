@@ -22,7 +22,8 @@
  */
 package org.jmule.core.jkad.indexer;
 
-import static org.jmule.core.jkad.JKadConstants.*;
+import static org.jmule.core.jkad.JKadConstants.INDEXER_CLEAN_DATA_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.INDEXER_SAVE_DATA_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_KEYWORDS;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_NOTES;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_SOURCES;
@@ -32,31 +33,31 @@ import static org.jmule.core.jkad.JKadConstants.SRC_INDEX_DAT;
 
 import java.util.List;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.ShortTag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 import org.jmule.core.sharingmanager.SharedFile;
-import org.jmule.core.sharingmanager.SharingManagerFactory;
+import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.utils.Convert;
 
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:06:41 $
  */
 public class Indexer {
 	
@@ -72,20 +73,16 @@ public class Indexer {
 	private Map<Int128, Index> keywords = new ConcurrentHashMap<Int128, Index>();
 	private Map<Int128, Index> sources = new ConcurrentHashMap<Int128, Index>();
 	
-	private Task saveDataTask;
-	private Task cleanerTask;
-	private boolean isStarted = false;
-	
-	public boolean isStarted() {
-		return isStarted;
-	}
+	private Task save_data_task;
+	private Task cleaner_task;
+	private boolean is_started = false;
 
 	private Indexer() {
 		
 	}
 	
 	public void start() {
-		isStarted = true;
+		is_started = true;
 		try {
 			notes.putAll(SrcIndexDat.loadFile(NOTE_INDEX_DAT));
 			keywords.putAll(SrcIndexDat.loadFile(KEY_INDEX_DAT));
@@ -98,7 +95,7 @@ public class Indexer {
 		Logger.getSingleton().logMessage("Loaded keywords : " + keywords.size());
 		Logger.getSingleton().logMessage("Loaded sources : " + sources.size());
 		
-		saveDataTask = new Task() {
+		save_data_task = new Task() {
 			public void run() {
 				synchronized (notes) {
 					try {
@@ -128,9 +125,9 @@ public class Indexer {
 			}
 		};
 		
-		Timer.getSingleton().addTask(INDEXER_SAVE_DATA_INTERVAL, saveDataTask, true);
+		Timer.getSingleton().addTask(INDEXER_SAVE_DATA_INTERVAL, save_data_task, true);
 		
-		cleanerTask = new Task() {
+		cleaner_task = new Task() {
 			public void run() {
 				synchronized (notes) {
 					for(Int128 id : notes.keySet()) {
@@ -160,14 +157,14 @@ public class Indexer {
 				
 			}
 		};
-		Timer.getSingleton().addTask(INDEXER_CLEAN_DATA_INTERVAL, cleanerTask, true);
+		Timer.getSingleton().addTask(INDEXER_CLEAN_DATA_INTERVAL, cleaner_task, true);
 		
 	}
 
 	public void stop() {
-		isStarted = false;
-		Timer.getSingleton().removeTask(saveDataTask);
-		Timer.getSingleton().removeTask(cleanerTask);
+		is_started = false;
+		Timer.getSingleton().removeTask(save_data_task);
+		Timer.getSingleton().removeTask(cleaner_task);
 		
 		synchronized (notes) {
 			notes.clear();
@@ -179,6 +176,10 @@ public class Indexer {
 			sources.clear();
 		}
 		
+	}
+	
+	public boolean isStarted() {
+		return is_started;
 	}
 	
 	public int getKeywordLoad() {
@@ -225,27 +226,27 @@ public class Indexer {
 		Index indexer =  sources.get(targetID);
 		
 		FileHash fileHash = new FileHash(targetID.toByteArray());
-		if (SharingManagerFactory.getInstance().hasFile(fileHash)) {
+		if (SharingManagerSingleton.getInstance().hasFile(fileHash)) {
 			if (indexer == null) indexer = new Index(targetID);
-			SharedFile file = SharingManagerFactory.getInstance().getSharedFile(fileHash);
-			JKad jkad = JKad.getInstance();
-			ConfigurationManager config_manager = ConfigurationManagerFactory.getInstance();
+			SharedFile file = SharingManagerSingleton.getInstance().getSharedFile(fileHash);
+			InternalJKadManager _jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
+			ConfigurationManager config_manager = ConfigurationManagerSingleton.getInstance();
 			TagList tagList = new TagList();
-			tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP, Convert.byteToInt(jkad.getIPAddress().getAddress())));
+			tagList.addTag(new IntTag(JKadConstants.TAG_SOURCEIP, Convert.byteToInt(_jkad_manager.getIPAddress().getAddress())));
 			try {
 				tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEPORT, Convert.intToShort(config_manager.getTCP())));
 			} catch (ConfigurationManagerException e) {
 				e.printStackTrace();
-				jkad.disconnect();
+				_jkad_manager.disconnect();
 			}
 			try {
 				tagList.addTag(new ShortTag(JKadConstants.TAG_SOURCEUPORT, Convert.intToShort(config_manager.getUDP())));
 			} catch (ConfigurationManagerException e) {
 				e.printStackTrace();
-				jkad.disconnect();
+				_jkad_manager.disconnect();
 			}
 			tagList.addTag(new IntTag(JKadConstants.TAG_FILESIZE, Convert.longToInt(file.length())));
-			Source my_source = new Source(jkad.getClientID(), tagList);
+			Source my_source = new Source(_jkad_manager.getClientID(), tagList);
 			
 			indexer.addSource(my_source);
 		}
