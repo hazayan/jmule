@@ -27,9 +27,12 @@ import org.jmule.core.JMuleStoppableManager;
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:23:17 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:29:26 $
  */
 public interface SpeedManager extends JMuleStoppableManager {
 
+	public BandwidthController getUploadController();
+	public BandwidthController getDownloadController();
+	
 }
