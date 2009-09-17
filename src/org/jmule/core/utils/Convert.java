@@ -30,8 +30,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/09 13:43:22 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:31:45 $$
  */
 public class Convert {
 	
@@ -62,14 +62,16 @@ public class Convert {
 	}
 	
 	public static int shortToInt(short value){
-		
 		ByteBuffer data = ByteBuffer.allocate(4);
-		
-		data.order(ByteOrder.LITTLE_ENDIAN);
-		
+		data.order(ByteOrder.LITTLE_ENDIAN);		
 		data.putShort(value);
-		
 		return data.getInt(0);
+	}
+	
+	public static long shortToLong(short value) {
+		ByteBuffer data = Misc.getByteBuffer(8);
+		data.putShort(value);
+		return data.getLong(0);
 	}
 	
 	public static byte intToByte(int value){
@@ -137,10 +139,23 @@ public class Convert {
 	public static int longToInt(long value){
 		ByteBuffer data = ByteBuffer.allocate(8);
 		data.order(ByteOrder.LITTLE_ENDIAN);
+		data.putLong(value);
+		return data.getInt(0);
+	}
+	
+	public static byte longToByte(long value){
+		ByteBuffer data = ByteBuffer.allocate(8);
+		data.order(ByteOrder.LITTLE_ENDIAN);
 		
 		data.putLong(value);
 		
-		return data.getInt(0);
+		return data.get(0);
+	}
+	
+	public static short longToShort(long value) {
+		ByteBuffer data = Misc.getByteBuffer(8);
+		data.putLong(value);
+		return data.getShort(0);
 	}
 	
 	public static long byteToLong(byte value){
