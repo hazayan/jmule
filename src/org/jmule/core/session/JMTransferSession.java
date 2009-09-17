@@ -22,17 +22,18 @@
  */
 package org.jmule.core.session;
 
-import org.jmule.core.JMIterable;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.Peer;
+import java.util.List;
+
+import org.jmule.core.edonkey.ED2KFileLink;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.sharingmanager.SharedFile;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/26 19:15:46 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:19:34 $$
  */
 public interface JMTransferSession {
 
@@ -75,19 +76,9 @@ public interface JMTransferSession {
 	/**
 	 * Get all peers used by this session
 	 */
-	public JMIterable<Peer> getPeers();
-
-	/**
-	 * Get peers count 
-	 */
-	public int getPeersCount();
-
-	/**
-	 * Check if session has peer
-	 * @param peer checked peer
-	 * @return true - session has peer, false - session don't have peer
-	 */
-	public boolean hasPeer(Peer peer);
+	public List<Peer> getPeers();
+	
+	public int getPeerCount();
 	   
 	/**
 	 * Get ED2K link of processed file 
