@@ -32,7 +32,7 @@ import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.JKadUDPKey;
 import org.jmule.core.jkad.JKadConstants.ContactType;
 import org.jmule.core.jkad.utils.Utils;
@@ -40,8 +40,8 @@ import org.jmule.core.jkad.utils.Utils;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:29:51 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:09:16 $
  */
 
 public class KadContact {
@@ -79,7 +79,7 @@ public class KadContact {
 		this.version = version;
 		this.kadUDPKey = kadUDPKey;
 		
-		contactDistance = Utils.XOR(contactID, JKad.getInstance().getClientID());
+		contactDistance = Utils.XOR(contactID, JKadManagerSingleton.getInstance().getClientID());
 		
 		creation = System.currentTimeMillis();
 		expiration = 0;

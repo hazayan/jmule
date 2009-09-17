@@ -55,30 +55,33 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKad;
+import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.ContactType;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
-import org.jmule.core.jkad.net.packet.KadPacket;
-import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
-import org.jmule.core.net.JMUDPConnection;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:09:44 $
  */
 public class RoutingTable {
-
+	private InternalJKadManager    _jkad_manager;
+	private InternalNetworkManager _network_manager;
 	private static RoutingTable singleton = null;
 	
 	private Node root = null;
@@ -94,6 +97,8 @@ public class RoutingTable {
 	private Map<ContactAddress,MaintenanceContact> maintenanceContacts = new ConcurrentHashMap<ContactAddress,MaintenanceContact>();
 	private PacketListener helloListener;
 	
+	private boolean is_started = false;
+	
 	public static RoutingTable getSingleton() {
 		if (singleton == null)
 			singleton = new RoutingTable();
@@ -103,11 +108,6 @@ public class RoutingTable {
 	
 	private RoutingTable() {
 		root = new Node(null, new Int128(), 0, new KBucket());
-	}
-	
-	public void start() {
-		loadContacts();
-		newContacts = 0;
 		
 		maintenanceTask = new Task() {
 			private LookupTask lookup_new_contacts = null;
@@ -147,10 +147,9 @@ public class RoutingTable {
 							KadPacket hello_packet;
 							try {
 								hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-								JMUDPConnection.getInstance().sendPacket(hello_packet, maintenance_contact.kadContact.getIPAddress(), maintenance_contact.kadContact.getUDPPort());
+								_network_manager.sendKadPacket(hello_packet, maintenance_contact.kadContact.getIPAddress(), maintenance_contact.kadContact.getUDPPort());
 							} catch (JMException e) {
 								e.printStackTrace();
-								JKad.getInstance().shutdown();
 							}
 
 							maintenance_contact.requestCount++;
@@ -195,10 +194,9 @@ public class RoutingTable {
 					KadPacket hello_packet;
 					try {
 						hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-						JMUDPConnection.getInstance().sendPacket(hello_packet, addContact.getIPAddress(), addContact.getUDPPort());
+						_network_manager.sendKadPacket(hello_packet, addContact.getIPAddress(), addContact.getUDPPort());
 					} catch (JMException e) {
 						e.printStackTrace();
-						JKad.getInstance().shutdown();
 					}
 					c.requestCount++;
 				}
@@ -206,16 +204,12 @@ public class RoutingTable {
 			
 		};
 		
-		Timer.getSingleton().addTask(ROUTING_TABLE_CHECK_INTERVAL, maintenanceTask, true);
-		
 		routingTableSave = new Task() {
 			public void run() {
 				storeContacts();
 			}			
 		};
-		
-		Timer.getSingleton().addTask(ROUTING_TABLE_SAVE_INTERVAL, routingTableSave, true);
-		
+
 		contact_checker = new Task() {
 			public void run() {
 				for(KadContact contact : tree_nodes) {
@@ -253,8 +247,6 @@ public class RoutingTable {
 			}
 			
 		};
-		Timer.getSingleton().addTask(ROUTING_TABLE_CONTACTS_CHECK_INTERVAL, contact_checker, true);
-		
 		helloListener = new PacketListener(JKadConstants.KADEMLIA2_HELLO_RES) {
 			public void packetReceived(KadPacket packet) {
 				ContactAddress address = new ContactAddress(packet.getAddress());
@@ -265,12 +257,23 @@ public class RoutingTable {
 					
 			}		
 		};
+	}
+	
+	public void start() {
+		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		loadContacts();
+		newContacts = 0;
 		
-		JKad.getInstance().addPacketListener(helloListener);
+		Timer.getSingleton().addTask(ROUTING_TABLE_CHECK_INTERVAL, maintenanceTask, true);
+		Timer.getSingleton().addTask(ROUTING_TABLE_SAVE_INTERVAL, routingTableSave, true);
+		Timer.getSingleton().addTask(ROUTING_TABLE_CONTACTS_CHECK_INTERVAL, contact_checker, true);
+		_jkad_manager.addPacketListener(helloListener);
+		is_started = true;
 	}
 	
 	public void stop() {
-		JKad.getInstance().removePacketListener(helloListener);
+		_jkad_manager.removePacketListener(helloListener);
 		
 		Timer.getSingleton().removeTask(maintenanceTask);
 		Timer.getSingleton().removeTask(routingTableSave);
@@ -280,6 +283,11 @@ public class RoutingTable {
 		tree_nodes.clear();
 		notifyAllContactsRemoved();
 		root = new Node(null, new Int128(), 0, new KBucket());
+		is_started = false;
+	}
+	
+	public boolean isStarted() {
+		return is_started;
 	}
 	
 	public synchronized void addContact(KadContact contact) {
@@ -398,7 +406,7 @@ public class RoutingTable {
 	public List<KadContact> getNearestContacts(Int128 searchTarget, int contactCount) {
 		Node node = root;
 		
-		Int128 target = Utils.XOR(searchTarget, JKad.getInstance().getClientID());
+		Int128 target = Utils.XOR(searchTarget, _jkad_manager.getClientID());
 		
 		while(!node.isLeaf()) {
 			int node_level = node.getLevel();
