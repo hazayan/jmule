@@ -28,14 +28,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.PartHashSet;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.PartHashSet;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:34 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:32:25 $$
  */
 public class MD4FileHasher {
 	

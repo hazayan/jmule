@@ -34,11 +34,16 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
+import javax.management.JMException;
+
+import org.jmule.core.edonkey.packet.tag.NumberTag;
+import org.jmule.core.edonkey.packet.tag.Tag;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:32:25 $$
  */
 public class Misc {
 	
@@ -174,6 +179,14 @@ public class Misc {
 		return ByteBuffer.allocate(Convert.longToInt(BufferSize)).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
+	public static long extractNumberTag(Tag tag) throws JMException {
+		if (tag instanceof NumberTag) {
+			NumberTag ntag = (NumberTag) tag;
+			return ntag.getNumber();
+		}
+		throw new JMException("Tag is not number tag\n"+tag);
+	}
+	
 	/**
 	 * 
 	 * @param source
