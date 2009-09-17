@@ -22,14 +22,19 @@
  */
 package org.jmule.core.speedmanager;
 
-import org.jmule.core.JMuleStoppableManager;
-
 /**
- * Created on Aug 29, 2009
+ * Created on Sep 17, 2009
  * @author binary256
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:23:17 $
  */
-public interface SpeedManager extends JMuleStoppableManager {
+public class SpeedManagerSingleton {
+	private static SpeedManagerImpl speedManager = null;
+
+	public static SpeedManagerImpl getInstance() {
+		if (speedManager == null)
+			speedManager = new SpeedManagerImpl();
+		return speedManager;
+	}
 
 }
