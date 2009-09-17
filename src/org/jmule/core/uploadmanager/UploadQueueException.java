@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -22,24 +22,26 @@
  */
 package org.jmule.core.uploadmanager;
 
-/**
- * 
- * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:49 $$
- */
-public class UploadManagerFactory {
+import org.jmule.core.JMException;
 
-	private static UploadManager instance = null;
+/**
+ * Created on Sep 13, 2009
+ * @author binary256
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:30:12 $
+ */
+public class UploadQueueException extends JMException {
+
+	public UploadQueueException() {
+		super();
+	}
 	
-	public static UploadManager getInstance() {
-		
-		if (instance == null)
-			
-			instance = new UploadManagerImpl();
-		
-		return instance;
-		
+	public UploadQueueException(String cause) {
+		super(cause);
+	}
+	
+	public UploadQueueException(Throwable cause) {
+		super(cause);
 	}
 	
 }

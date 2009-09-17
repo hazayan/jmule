@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -22,27 +22,26 @@
  */
 package org.jmule.core.uploadmanager;
 
-import org.jmule.core.edonkey.FileHash;
-
+import org.jmule.core.JMException;
 
 /**
- * 
+ * Created on Sep 13, 2009
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:30:12 $
  */
-public interface UploadManagerListener {
-
-	/**
-	 * A has been upload added
-	 * @param fileHash
-	 */
-	public void uploadAdded(FileHash fileHash);
+public class UploadManagerException extends JMException {
 	
-	/**
-	 * Upload has been removed
-	 * @param fileHash
-	 */
-	public void uploadRemoved(FileHash fileHash); 
+	public UploadManagerException() {
+		super();
+	}
+	
+	public UploadManagerException(String cause) {
+		super(cause);
+	}
+
+	public UploadManagerException(Throwable cause) {
+		super(cause);
+	}
 	
 }

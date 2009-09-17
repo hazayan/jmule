@@ -22,29 +22,24 @@
  */
 package org.jmule.core.uploadmanager;
 
-import org.jmule.core.JMIterable;
+import java.util.List;
+
 import org.jmule.core.JMuleManager;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:57:51 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
  */
-public interface UploadManager extends JMuleManager{
-
-	public void addUpload(FileHash fileHash);
+public interface UploadManager extends JMuleManager {
 	
 	public boolean hasUpload(FileHash fileHash);
-	
-	public void removeUpload(FileHash fileHash);
 
-	public UploadSession getUpload(FileHash fileHash);
-	
-	public UploadSession getUpload(long i);
-	
-	public JMIterable<UploadSession> getUploads();
+	public UploadSession getUpload(FileHash fileHash) throws UploadManagerException;
+		
+	public List<UploadSession> getUploads();
 	
 	public int getUploadCount();
 	

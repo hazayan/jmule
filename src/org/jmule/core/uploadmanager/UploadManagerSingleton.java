@@ -22,27 +22,24 @@
  */
 package org.jmule.core.uploadmanager;
 
-import org.jmule.core.edonkey.FileHash;
-
-
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
+ * @version $$Revision: 1.1 $$
  * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
  */
-public interface UploadManagerListener {
+public class UploadManagerSingleton {
 
-	/**
-	 * A has been upload added
-	 * @param fileHash
-	 */
-	public void uploadAdded(FileHash fileHash);
+	private static UploadManager instance = null;
 	
-	/**
-	 * Upload has been removed
-	 * @param fileHash
-	 */
-	public void uploadRemoved(FileHash fileHash); 
+	public static UploadManager getInstance() {
+		
+		if (instance == null)
+			
+			instance = new UploadManagerImpl();
+		
+		return instance;
+		
+	}
 	
 }

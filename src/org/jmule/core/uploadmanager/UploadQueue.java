@@ -22,137 +22,166 @@
  */
 package org.jmule.core.uploadmanager;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMIterator;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.peermanager.Peer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:56:00 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
  */
 public class UploadQueue {
+	private static final String PEER_SEPARATOR 				=   ":";
+	private static UploadQueue instance = null;
 	
-	private Queue<UploadQueueElement> upload_queue = new ConcurrentLinkedQueue<UploadQueueElement>();
-	
-	public void addPeer(Peer peer) {
-		upload_queue.offer(new UploadQueueElement(peer));
+	public static UploadQueue getInstance() {
+		if (instance == null)
+			instance = new UploadQueue();
+		return instance;
 	}
 	
-	public Peer getLastPeer() {
-		UploadQueueElement element = upload_queue.peek();
-		if (element == null) return null;
-		return element.getPeer();
-		
+	private List<UploadQueueContainer> upload_queue = new CopyOnWriteArrayList<UploadQueueContainer>();
+	private Set<String> stored_peers = new ConcurrentSkipListSet<String>();
+	
+	enum PeerQueueStatus { SLOTGIVEN, SLOTTAKEN }
+	
+	private UploadQueue() {
 	}
 	
-	public Queue<UploadQueueElement> getQueue() {
-		return upload_queue;
+	void addPeer(Peer peer) throws UploadQueueException {
+		if (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE))
+			throw new UploadQueueException("Queue full");
+		stored_peers.add(peer.getIP() + PEER_SEPARATOR + peer.getPort());
+		upload_queue.add(new UploadQueueContainer(peer));
 	}
 	
-	public void clear() {
-		upload_queue.clear();
+	boolean isFull() {
+		return (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE));
 	}
 	
-	public boolean hasPeer(Peer peer) {
-		
-		for(UploadQueueElement queue_element : upload_queue)
-			
-			if (queue_element.getPeer().equals(peer))
-				
-				return true;
-		
-		return false;
-		
+	private List<UploadQueueContainer> getTopContainers() {
+		List<UploadQueueContainer> result = new LinkedList<UploadQueueContainer>();
+		if (size()<ConfigurationManager.UPLOAD_QUEUE_SLOTS)
+			for(UploadQueueContainer container : upload_queue)
+				result.add(container);
+		else {
+			for(int i = 0;i<ConfigurationManager.UPLOAD_QUEUE_SLOTS;i++) 
+				result.add(upload_queue.get(size()-i));
+		}
+		return result;
 	}
 	
-	public void setPeer(Peer peer) {
-		for(UploadQueueElement queue_element : upload_queue)
-			if (queue_element.getPeer().equals(peer))
-				queue_element.setPeer(peer);
+	List<Peer> getSlotPeers(PeerQueueStatus... status) {
+		List<UploadQueueContainer> containers =  getTopContainers();
+		List<Peer> peer_list = new LinkedList<Peer>();
+		for(UploadQueueContainer container : containers)
+			for(PeerQueueStatus s : status)
+				if (container.peer_status.contains(s)) {
+					peer_list.add(container.peer);
+					break;
+				}
+		return peer_list;
 	}
 	
-	public int getPeerQueueID(Peer peer) {
-		
-		int i = 0;
-		
-		for(UploadQueueElement queue_element : upload_queue)
-			
-			if (queue_element.getPeer().equals(peer))
-				return i;
-			else 
-				i++;
-		
+	void markSlotGiven(Peer peer) {
+		for(UploadQueueContainer container : upload_queue)
+			if (container.peer.equals(peer)) {
+				container.peer_status.remove(PeerQueueStatus.SLOTTAKEN);
+				container.peer_status.add(PeerQueueStatus.SLOTGIVEN);
+				return ;
+			}
+	}
+	
+	void markSlotTaken(Peer peer) {
+		for(UploadQueueContainer container : upload_queue)
+			if (container.peer.equals(peer)) {
+				container.peer_status.remove(PeerQueueStatus.SLOTGIVEN);
+				container.peer_status.add(PeerQueueStatus.SLOTGIVEN);
+				return ;
+			}
+	}
+	
+	boolean hasPeer(Peer peer) {
+		return stored_peers.contains(peer.getIP() + ":" + peer.getPort());
+	}
+	
+	boolean hasPeer(String peerIP, int peerPort) {
+		return stored_peers.contains(peerIP + ":" + peerPort);
+	}
+	
+	int getPeerQueueID(Peer peer) {
+		int id = 0;
+		for (UploadQueueContainer container : upload_queue) 
+			if (container.peer.equals(peer))
+				return id;
+			else
+				id++;
 		return -1;
 	}
 	
-	public void removePeer(Peer peer) {
-		
-		upload_queue.remove(peer);
-		
+	void removePeer(Peer peer) {
+		int id = getPeerQueueID(peer);
+		if (id == -1)
+			return;
+		upload_queue.remove(id);
+		stored_peers.remove(peer.getID() + ":" + peer.getPort());
+	}
+	
+	void moveToLast(Peer peer) {
+		int id = getPeerQueueID(peer);
+		UploadQueueContainer container = upload_queue.get(id);
+		upload_queue.remove(container);
+		upload_queue.add(container);
 	}
 	
 	public int size() {
-		
 		return upload_queue.size();
-		
 	}
 	
-	public Peer pool() {
-		
-		return upload_queue.poll().getPeer();
-		
+	void clear() {
+		upload_queue.clear();
+		stored_peers.clear();
 	}
+	
 			
 	public JMIterable<Peer> getPeers() {
 		List<Peer> list = new LinkedList<Peer>();
-		for(UploadQueueElement element : upload_queue)
-			list.add(element.getPeer());
+		for (UploadQueueContainer element : upload_queue)
+			list.add(element.peer);
 		return new JMIterable<Peer>(new JMIterator<Peer>(list.iterator()));
 	}
 	
 	public String toString() {
-		
-		String result="";
+		String result = "";
 		int id = 0;
-		for(Peer peer : getPeers()) {
-			
-			result += peer +" "+id+" \n";
+		for (Peer peer : getPeers()) {
+			result += peer + " " + id + " \n";
 			id++;
 		}
-		
 		return result;
 	}
 
-	public class UploadQueueElement {
-		
+	class UploadQueueContainer {
 		private Peer peer;
-		
 		private long addTime;
-		
-		public UploadQueueElement(Peer uploadPeer) {
+		private Set<PeerQueueStatus> peer_status = new HashSet<PeerQueueStatus>();
+
+		public UploadQueueContainer(Peer uploadPeer) {
 			peer = uploadPeer;
 			addTime = System.currentTimeMillis();
+			peer_status.add(PeerQueueStatus.SLOTTAKEN);
 		}
-		
-		public void setPeer(Peer peer) {
-			addTime = System.currentTimeMillis();
-			this.peer = peer;
-		}
-		
-		public Peer getPeer() {
-			return peer;
-		}
-		
-		public long getTime() {
-			return addTime;
-		}
+
 	}
 	
 }
