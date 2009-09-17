@@ -22,44 +22,131 @@
  */
 package org.jmule.core.edonkey.packet;
 
+import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_PEER_UDP;
+import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
+import static org.jmule.core.jkad.JKadConstants.PROTO_KAD_UDP;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:15 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
  */
-public interface UDPPacket {
+public class UDPPacket {
+	protected ByteBuffer packet_data = null;
+	protected InetSocketAddress sender;
+	
+	public UDPPacket(int packetLength,byte packetProtocol){
+		if (packetProtocol == PROTO_EDONKEY_SERVER_UDP) {
+			packet_data = Misc.getByteBuffer(packetLength);
+			this.setProtocol(packetProtocol);
+		}
+		if (packetProtocol == PROTO_KAD_UDP) {
+			packet_data = Misc.getByteBuffer(packetLength);
+			this.setProtocol(packetProtocol);
+		}
+		if (packetProtocol == PROTO_EDONKEY_PEER_UDP){
+			packet_data = Misc.getByteBuffer(packetLength+4);
+			this.setProtocol(packetProtocol);
+			packet_data.putInt(1, packetLength);
+		}
+	}
+	
+	public UDPPacket(){
+	}
+	
+	public InetSocketAddress getAddress() {
+		return sender;
+	}
 
-	public byte getProtocol();
+	public void setAddress(InetSocketAddress sender) {
+		this.sender = sender;
+	}
 	
-	public void setProtocol(byte protocol);
+	public byte getProtocol() {
+		return this.packet_data.get(0);
+	}
 	
-	public void setCommand(byte packetCommand);
+	public void setProtocol(byte protocol){
+		this.packet_data.put(0, protocol);
+	}
 	
-	public byte getCommand();
+	public void setCommand(byte packetCommand){
+		if (getProtocol()==PROTO_EDONKEY_SERVER_UDP) {
+			packet_data.position(1);
+			packet_data.put(packetCommand);
+		} else {
+			packet_data.position(5);
+			packet_data.put(packetCommand);
+		}
+	}
 	
-	public void insertData(byte[] insertData);
+	public byte getCommand(){
+		if (getProtocol()==PROTO_EDONKEY_SERVER_UDP) {
+			return packet_data.get(1);
+		} else {
+			return packet_data.get(5);
+		}
+	}
 	
-	public void insertData(int startPos, byte[] insertData);
+	public void insertData(ByteBuffer insertData) {
+		packet_data.put(insertData);	
+	}
 	
-	public void insertData(int insertData);
+	public void insertData(long insertData) {
+		packet_data.putLong(insertData);
+	}
 	
-	public void insertData(short insertData);
+	public void insertData(int insertData) {
+		packet_data.putInt(insertData);
+	}
 	
-	public void insertData(byte insertData);
+	public void insertData(byte[] insertData) {
+		packet_data.put(insertData);
+	}
+
+	public void insertData(short insertData) {
+		packet_data.putShort(insertData);
+	}
+
+	public void insertData(byte insertData) {
+		packet_data.put(insertData);
+	}
+
+	public void insertData(int startPos, byte[] insertData) {
+		packet_data.position(startPos);
+		packet_data.put(insertData);
+	}
 	
-	public byte[] getPacket();
+	public byte[] getPacket() {
+		return packet_data.array();
+	}
+
+	public ByteBuffer getAsByteBuffer() {
+		return packet_data;
+	}
+
+	public int getLength() {
+		return packet_data.limit();
+	}
 	
-	public ByteBuffer getAsByteBuffer();
+	public void clear() {
+		if (packet_data==null) return ;
+		packet_data.clear();
+		packet_data.compact();
+		packet_data.rewind();
+		packet_data.limit(0);
+	}
 	
-	public int getLength();
-	
-	public InetSocketAddress getAddress();
-	
-	public void setAddress(InetSocketAddress sender);
+	public String toString() {
+		return "From : " + sender.getAddress().getHostAddress() + " : " + sender.getPort()  + "\n"+Convert.byteToHexString(packet_data.array()," 0x");
+	}
 	
 }

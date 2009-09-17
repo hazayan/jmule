@@ -22,7 +22,8 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.MAX_OFFER_FILES;
+import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
@@ -33,18 +34,25 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_GETSERVERLIST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GETSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.OP_KAD_CALLBACK;
 import static org.jmule.core.edonkey.E2DKConstants.OP_LOGINREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_MESSAGE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_OFFERFILES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLOANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_PUBLICKEY;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTPARTS;
+import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SEARCHREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SECIDENTSTATE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SIGNATURE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
+import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.ProtocolVersion;
 import static org.jmule.core.edonkey.E2DKConstants.SUPPORTED_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.ServerSoftwareVersion;
@@ -58,40 +66,39 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT_PEER;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.jmule.core.JMException;
-import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.FileChunk;
+import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.PartHashSet;
+import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
-import org.jmule.core.edonkey.impl.ClientID;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.PartHashSet;
-import org.jmule.core.edonkey.impl.UserHash;
-import org.jmule.core.edonkey.packet.impl.EMuleCompressedPacket;
-import org.jmule.core.edonkey.packet.impl.StandardPacket;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
+import org.jmule.core.jkad.IPAddress;
+import org.jmule.core.jkad.Int128;
 import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.tree.NodeValue;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:14:30 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
  */
 public class PacketFactory {
 	
@@ -185,11 +192,11 @@ public class PacketFactory {
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
 		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
-		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT, ConfigurationManagerFactory.getInstance().getUDP()));
+		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT, ConfigurationManagerSingleton.getInstance().getUDP()));
 	
 		int tag_list_size = tagList.getByteSize();
 		
-		Packet packet = new StandardPacket(16 + 4 + 2 + 4 + tag_list_size);
+		Packet packet = new Packet(16 + 4 + 2 + 4 + tag_list_size, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_LOGINREQUEST);//Insert LOGIN_COMMAND
 		packet.insertData(userHash.getUserHash());//Insert user Hash
 		packet.insertData(new byte[]{0,0,0,0});//Insert default user ID
@@ -239,7 +246,7 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getGetServerListPacket(){
-		Packet packet=new StandardPacket(0);
+		Packet packet=new Packet(0, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_GETSERVERLIST);
 		return packet;
 	}
@@ -323,7 +330,7 @@ public class PacketFactory {
 			data.add(tmp);
 			total_size += tmp.length;
 		}
-		Packet packet=new StandardPacket(total_size);
+		Packet packet=new Packet(total_size, PROTO_EDONKEY_TCP);
 		
 		packet.setCommand(OP_SEARCHREQUEST);
 
@@ -384,7 +391,7 @@ public class PacketFactory {
 	 * </table>
      */
     public static Packet getSourcesRequestPacket(FileHash fileHash,long fileSize){
-        Packet packet=new StandardPacket(16+4);
+        Packet packet=new Packet(16+4, PROTO_EDONKEY_TCP);
 
         packet.setCommand(OP_GETSOURCES);
         packet.insertData(fileHash.getHash());
@@ -435,7 +442,7 @@ public class PacketFactory {
 	 * </table>
      */
     public static Packet getCallBackRequestPacket(ClientID clientID){
-    	Packet packet = new StandardPacket(4);
+    	Packet packet = new Packet(4, PROTO_EDONKEY_TCP);
     	packet.setCommand(PACKET_CALLBACKREQUEST);
     	packet.insertData(clientID.getClientID());
     	return packet;
@@ -475,19 +482,10 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
      */
-    public static Packet getOfferFilesPacket(ClientID userID) throws JMException  {
-    	List<SharedFile> unshared_files = JMuleCoreFactory.getSingleton().getSharingManager().getUnsharedFiles();
-    	int sharedCount = unshared_files.size();
-    	if (sharedCount > MAX_OFFER_FILES)
-    		sharedCount = MAX_OFFER_FILES;
-    	
-    	List<ByteBuffer> shared_files_data = new LinkedList<ByteBuffer>();
+    public static Packet getOfferFilesPacket(ClientID userID, List<SharedFile> sharedFiles) throws JMException  {
     	int data_length=0;
-    	int i = 0;
-    	for(SharedFile sFile : unshared_files) {
-    		if (i>sharedCount) break;
-    		i++;
-    		unshared_files.remove(sFile);
+    	List<ByteBuffer> shared_files_data = new LinkedList<ByteBuffer>();
+    	for(SharedFile sFile : sharedFiles) {
     		TagList tag_list = sFile.getTagList();
     		int tag_list_size = tag_list.getByteSize();
     		ByteBuffer buffer = Misc.getByteBuffer(16 + 4 + 2 + 4 + tag_list_size);
@@ -496,7 +494,7 @@ public class PacketFactory {
     		buffer.put(sFile.getFileHash().getHash());
     		if (userID.isHighID()) {
     			buffer.put(userID.getClientID());
-    			buffer.putShort((short)ConfigurationManagerFactory.getInstance().getTCP());
+    			buffer.putShort((short)ConfigurationManagerSingleton.getInstance().getTCP());
     		}
     		else { 
     			buffer.putInt(0); 
@@ -510,21 +508,14 @@ public class PacketFactory {
     		shared_files_data.add(buffer);
     	}
     	
-    	StandardPacket packet = new StandardPacket(4+data_length);
+    	Packet packet = new Packet(4+data_length, PROTO_EDONKEY_TCP);
     	packet.setCommand(OP_OFFERFILES);
-    	packet.insertData(sharedCount);
+    	packet.insertData(sharedFiles.size());
     	
     	for(ByteBuffer buffer : shared_files_data)
     		packet.insertData(buffer.array());
     	
-    	EMuleCompressedPacket compressed_packet = new EMuleCompressedPacket(packet);
-    	compressed_packet.compressPacket();
-    	if (packet.getLength()<compressed_packet.getLength()) {
-    		compressed_packet.clear();
-    		return packet;
-    	}
-    	packet.clear();
-    	return compressed_packet;
+    	return packet;
     }
     
 	 // =======================
@@ -625,9 +616,8 @@ public class PacketFactory {
 	 */
 	public static Packet getPeerHelloPacket(UserHash userHash,ClientID clientID,int myPort,
 			byte[] serverIP,int serverPort,String userName, Map<PeerFeatures, Integer> clientFeatures) throws JMException  {
-		List<Tag> tag_list = new LinkedList<Tag>();
-		
-		int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
+				
+		int misc_optins1 = Utils.peerFeaturesToInt(clientFeatures);
 		
 		TagList tagList = new TagList();
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userName));
@@ -637,12 +627,12 @@ public class PacketFactory {
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
 		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
-		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerFactory.getInstance().getUDP()));
+		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerSingleton.getInstance().getUDP()));
 	
 		int tag_list_size = tagList.getByteSize();
 		
         
-        Packet packet = new StandardPacket(1 + 16 + 4 + 2 + 4 + tag_list_size + 4 + 2);
+        Packet packet = new Packet(1 + 16 + 4 + 2 + 4 + tag_list_size + 4 + 2, PROTO_EDONKEY_TCP);
        
         packet.setCommand(OP_PEERHELLO);//hello 
         packet.insertData((byte)16);//Insert length of user Hash
@@ -652,10 +642,8 @@ public class PacketFactory {
         else 
         	packet.insertData(clientID.getClientID());//insert user ID
         packet.insertData((short)myPort);//insert my active port
-        packet.insertData(tag_list.size());//insert tag count
-        
-        for(Tag tag : tag_list)
-        	packet.insertData(tag.getAsByteBuffer());
+        packet.insertData(tagList.size());//insert tag count
+        packet.insertData(tagList.getAsByteBuffer());
         
         if (serverIP==null) 
         		packet.insertData(new byte[] { 0, 0, 0, 0 });
@@ -707,47 +695,50 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
      * */
-	public static Packet getPeerHelloAnswerPacket(UserHash userHash,ClientID clientID,
-			int myPort,String userName,byte[] serverIP, int serverPort, Map<PeerFeatures, Integer> clientFeatures) throws JMException  {
-		
-		int misc_optins1 = Utils.MiscOptions1ToInt(clientFeatures);
-		
+	public static Packet getPeerHelloAnswerPacket(UserHash userHash,
+			ClientID clientID, int myPort, String userName, byte[] serverIP,
+			int serverPort, Map<PeerFeatures, Integer> clientFeatures)
+			throws JMException {
+
+		int misc_optins1 = Utils.peerFeaturesToInt(clientFeatures);
+
 		TagList tagList = new TagList();
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userName));
-		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS1,misc_optins1 ));
-		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,0 ));
-		
-		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS1, misc_optins1));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2, 0));
+
+		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION, ProtocolVersion));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
 		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
-		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerFactory.getInstance().getUDP()));
-	
+		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER,
+				ConfigurationManagerSingleton.getInstance().getUDP()));
+
 		int tag_list_size = tagList.getByteSize();
-			
-		Packet packet=new StandardPacket(1+1+16+4+2+4+4+2+2+tag_list_size+4+2);
-		packet.setCommand(OP_PEERHELLOANSWER);//hello answer tag
-		
-		packet.insertData(userHash.getUserHash());//insert user hash
-		if (clientID==null)
-			packet.insertData(new byte[]{0,0,0,0});
-		else 
-			packet.insertData(clientID.getClientID());//insert user ID
-		
-		packet.insertData((short)myPort);//insert my active port
-		
+
+		Packet packet = new Packet(1 + 1 + 16 + 4 + 2 + 4 + 4 + 2 + 2
+				+ tag_list_size + 4 + 2, PROTO_EDONKEY_TCP);
+		packet.setCommand(OP_PEERHELLOANSWER);// hello answer tag
+
+		packet.insertData(userHash.getUserHash());// insert user hash
+		if (clientID == null)
+			packet.insertData(new byte[] { 0, 0, 0, 0 });
+		else
+			packet.insertData(clientID.getClientID());// insert user ID
+
+		packet.insertData((short) myPort);// insert my active port
+
 		packet.insertData(tagList.size());
-		
-		for(Tag tag : tagList)
-			packet.insertData(tag.getAsByteBuffer());
-			
-		if (serverIP!=null)
+
+		packet.insertData(tagList.getAsByteBuffer());
+
+		if (serverIP != null)
 			packet.insertData(serverIP);
 		else
-			packet.insertData(new byte[]{0,0,0,0});//Server IP
-		if (serverPort!=0)
-			packet.insertData((short)serverPort);
+			packet.insertData(new byte[] { 0, 0, 0, 0 });// Server IP
+		if (serverPort != 0)
+			packet.insertData((short) serverPort);
 		else
-			packet.insertData((short)0);//Server port
+			packet.insertData((short) 0);// Server port
 		return packet;
 	}
 	
@@ -800,7 +791,7 @@ public class PacketFactory {
 	 * </table>
 	 **/
 	public static Packet getMessagePacket(String message){
-		Packet packet = new StandardPacket(2+message.length());
+		Packet packet = new Packet(2 + message.length(), PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_MESSAGE);
 		packet.insertData(Convert.intToShort(message.length()));
 		packet.insertData(message.getBytes());
@@ -871,7 +862,7 @@ public class PacketFactory {
 	 * </table>
 	 * */
 	public static Packet getFileRequestPacket(FileHash fileHash){
-        Packet packet=new StandardPacket(16);
+        Packet packet=new Packet(16, PROTO_EDONKEY_TCP);
         packet.setCommand(OP_FILEREQUEST);
         packet.insertData(fileHash.getHash());
         return packet;
@@ -921,7 +912,7 @@ public class PacketFactory {
 	 * </table>
 	 */
     public static Packet getFileStatusRequestPacket(FileHash fileHash){
-            Packet packet=new StandardPacket(16);
+            Packet packet=new Packet(16, PROTO_EDONKEY_TCP);
             packet.setCommand(OP_FILESTATREQ);
             packet.insertData(fileHash.getHash());
             return packet;
@@ -972,7 +963,7 @@ public class PacketFactory {
 	 * </table>
      */
 	public static Packet getUploadReuqestPacket(FileHash fileHash){
-		Packet packet=new StandardPacket(16);
+		Packet packet=new Packet(16, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_SLOTREQUEST);
 		packet.insertData(fileHash.getHash());
 		return packet;
@@ -1062,30 +1053,30 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static Packet getPeerRequestFileParts(FileHash fileHash, long... partsData){
-		int partCount=partsData.length;
-		if (partCount % 2 == 0) {
-		Packet packet = new StandardPacket( 16 + ( 8 * 3 ) );
-		packet.setCommand(OP_REQUESTPARTS);
-		packet.insertData(fileHash.getHash());
-		ByteBuffer num = ByteBuffer.allocate(4);
-		num.order(ByteOrder.LITTLE_ENDIAN);
-		for ( int i = 0 ; i < partCount / 2 ; i++) {
-			num.clear();
-			num.rewind();
-			num.putInt(Convert.longToInt(partsData[i]) );
-			packet.insertData( num.array() );
-		}
-		for ( int i = partCount / 2 ; i < partCount ; i++) {
-			num.clear();
-			num.rewind();
-			num.putInt( Convert.longToInt(partsData[i]) );
-			packet.insertData( num.array() );
-		}
-		return packet;
-		} else {
-			return null;
-		}
+	public static Packet getPeerRequestFileParts(FileHash fileHash,
+			FileChunkRequest... partsData) {
+
+			Packet packet = new Packet(16 + (8 * 3), PROTO_EDONKEY_TCP);
+			packet.setCommand(OP_REQUESTPARTS);
+			packet.insertData(fileHash.getHash());
+			
+			ByteBuffer num = Misc.getByteBuffer(4);
+			
+			for(FileChunkRequest request : partsData) {
+				num.clear();
+				num.rewind();
+				num.putInt(Convert.longToInt(request.getChunkBegin()));
+				packet.insertData(num.array());
+			}
+			
+			for(FileChunkRequest request : partsData) {
+				num.clear();
+				num.rewind();
+				num.putInt(Convert.longToInt(request.getChunkEnd()));
+				packet.insertData(num.array());
+			}
+			
+			return packet;
 	}
 	
 	/**
@@ -1132,8 +1123,8 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static Packet getRequestPartHashSetPacket(FileHash fileHash){
-		Packet packet=new StandardPacket(16);
+	public static Packet getRequestPartHashSetPacket(FileHash fileHash) {
+		Packet packet = new Packet(16, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_HASHSETREQUEST);
 		packet.insertData(fileHash.getHash());
 		return packet;
@@ -1178,8 +1169,8 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static Packet getSlotReleasePacket(){
-		Packet packet = new StandardPacket(0);
+	public static Packet getSlotReleasePacket() {
+		Packet packet = new Packet(0, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_SLOTRELEASE);
 		return packet;
 	}
@@ -1229,8 +1220,8 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static Packet getEndOfDownloadPacket(FileHash fileHash){
-		Packet packet = new StandardPacket(16);
+	public static Packet getEndOfDownloadPacket(FileHash fileHash) {
+		Packet packet = new Packet(16, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_END_OF_DOWNLOAD);
 		packet.insertData(fileHash.getHash());
 		return packet;
@@ -1239,7 +1230,7 @@ public class PacketFactory {
 	/**
 	 * File request answer packet.
 	 * @param fileHash
-	 * @param fName
+	 * @param fileName
 	 * @return
 	 * <table cellspacing="0" border="1" cellpadding="0">
 	 *   <thead>
@@ -1300,18 +1291,19 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static Packet getFileRequestAnswerPacket(FileHash fileHash, String fName){
-		Packet packet = new StandardPacket( 16+2+fName.length() );
+	public static Packet getFileRequestAnswerPacket(FileHash fileHash,
+			String fileName) {
+		Packet packet = new Packet(16 + 2 + fileName.length(), PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_FILEREQANSWER);
 		packet.insertData(fileHash.getHash());
-		packet.insertData(Convert.intToShort(fName.length()));
-		packet.insertData(fName.getBytes());
+		packet.insertData(Convert.intToShort(fileName.length()));
+		packet.insertData(fileName.getBytes());
 		return packet;
 	}
 	
 	/**
 	 * File Status reply.
-	 * @param fSet
+	 * @param partHashSet
 	 * @param fileSize
 	 * @param fileGapList
 	 * @return
@@ -1367,20 +1359,20 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static Packet getFileStatusReplyPacket(PartHashSet fSet,long fileSize, GapList fileGapList){
+	public static Packet getFileStatusReplyPacket(PartHashSet partHashSet,long fileSize, GapList fileGapList){
 		JMuleBitSet bitSet = fileGapList.getBitSet(fileSize);
 		byte [] bitSetArray = bitSet.getAsByteArray();
-		Packet packet = new StandardPacket(16+2+bitSetArray.length);
+		Packet packet = new Packet(16 + 2 + bitSetArray.length, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_FILESTATUS);
-		packet.insertData(fSet.getFileHash().getHash());
-		packet.insertData((short)fSet.size());
+		packet.insertData(partHashSet.getFileHash().getHash());
+		packet.insertData((short)partHashSet.size());
 		packet.insertData(bitSetArray);
 		return packet;
 	}
 
 	/**
 	 * File hash set answer packet.
-	 * @param fSet
+	 * @param fileHashSet
 	 * @return
 	 * <table cellspacing="0" border="1" cellpadding="0">
 	 *   <thead>
@@ -1436,13 +1428,14 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static Packet getFileHashReplyPacket(PartHashSet fSet){
-		Packet packet = new StandardPacket(16+2+16*fSet.size());
+	public static Packet getFileHashReplyPacket(PartHashSet fileHashSet){
+		Packet packet = new Packet(16 + 2 + 16 * fileHashSet.size(),
+				PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_HASHSETANSWER);
-		packet.insertData(fSet.getFileHash().getHash());
-		packet.insertData(Convert.intToShort(fSet.size()));
-		for(int i = 0 ; i<fSet.size() ; i++)
-			packet.insertData(fSet.get(i));
+		packet.insertData(fileHashSet.getFileHash().getHash());
+		packet.insertData(Convert.intToShort(fileHashSet.size()));
+		for (int i = 0; i < fileHashSet.size(); i++)
+			packet.insertData(fileHashSet.get(i));
 		return packet;
 	}
 	
@@ -1485,11 +1478,10 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getAcceptUploadPacket(FileHash fileHash){
-		Packet packet = new StandardPacket(16);
+		Packet packet = new Packet(16, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_SLOTGIVEN);
 		packet.insertData(fileHash.getHash());
-		return packet;
-		
+		return packet;		
 	}
 
 	/**
@@ -1560,7 +1552,8 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getFilePartSendingPacket(FileHash fileHash,FileChunk fileChunk){
-		Packet packet = new StandardPacket(16+4+4+fileChunk.getChunkData().capacity());
+		Packet packet = new Packet(16 + 4 + 4 + fileChunk.getChunkData()
+				.capacity(), PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_SENDINGPART);
 		packet.insertData(fileHash.getHash());
 		packet.insertData(Convert.longToInt(fileChunk.getChunkStart()));
@@ -1615,9 +1608,217 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getFileNotFoundPacket(FileHash fileHash){
-		Packet packet = new StandardPacket(16);
+		Packet packet = new Packet(16, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_FILEREQANSNOFILE);
 		packet.insertData(fileHash.getHash());
 		return packet;
 	}
+	
+	
+	
+	/**
+	 * Create eMule hello answer packet.
+	 * 
+	 * <table cellspacing="0" border="1" cellpadding="0">
+	 *   <thead>
+	 *     <tr>
+	 *       <th>Name</th>
+	 *       <th>Size in bytes</th>
+	 *       <th>Default value</th>
+	 *       <th>Comment</th>
+	 *     </tr>
+	 *   </thead>
+	 *   <tbody>
+	 *     <tr>
+	 *       <td>Protocol</td>
+	 *       <td>1</td>
+	 *       <td>0xC5</td>
+	 *       <td>-</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Size</td>
+	 *       <td>4</td>
+	 *       <td>-</td>
+	 *       <td>The size of the message in bytes not including
+	 * the header and size fields
+	 * </td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Type</td>
+	 *       <td>1</td>
+	 *       <td>0x02</td>
+	 *       <td>The value of the OP EMULEINFOANSWER
+	 * opcode</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>eMule Info
+	 * fields</td>
+	 *       <td>&nbsp;</td>
+	 *       <td>&nbsp;</td>
+	 *       <td>This message has the same fields as an eMule
+	 * info message.</td>
+	 *     </tr>
+	 *   </tbody>
+	 * </table>
+	 */
+	public static Packet getEMulePeerHelloAnswerPacket() {
+		Packet packet = new Packet(1+1+4, PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_EMULEHELLOANSWER);
+
+		packet.insertData((byte)0x42);
+		packet.insertData((byte)0x42);
+		packet.insertData((int)0);
+		return packet;
+	}
+	
+	/**
+	 * Create Queue ranking packet.
+	 * @param position position in queue
+	 * 
+	 * <table cellspacing="0" border="1" cellpadding="0">
+	 *   <thead>
+	 *     <tr>
+	 *       <th>Name</th>
+	 *       <th>Size in bytes</th>
+	 *       <th>Default value</th>
+	 *       <th>Comment</th>
+	 *     </tr>
+	 *   </thead>
+	 *   <tbody>
+	 *     <tr>
+	 *       <td>Protocol</td>
+	 *       <td>1</td>
+	 *       <td>0xC5</td>
+	 *       <td>-</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Size</td>
+	 *       <td>4</td>
+	 *       <td>-</td>
+	 *       <td>The size of the message in bytes not including
+	 * the header and size fields
+	 * </td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Type</td>
+	 *       <td>1</td>
+	 *       <td>0x60</td>
+	 *       <td>The value of the OP_QUEUERANKING
+	 * opcode</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Queue position</td>
+	 *       <td>2</td>
+	 *       <td>NA</td>
+	 *       <td>The position of the client in the queue</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Buffer</td>
+	 *       <td>10</td>
+	 *       <td>0</td>
+	 *       <td>10 zero bytes, purpose unknown</td>
+	 *     </tr>
+	 *   </tbody>
+	 * </table>
+	 */
+	public static Packet getQueueRankingPacket(int position) {
+		Packet packet = new Packet(2+10, PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_EMULE_QUEUERANKING);
+		packet.insertData(Convert.intToShort(position));
+
+		byte ZArray[] = new byte[10];
+		for(int i = 0;i<ZArray.length;i++) ZArray[i] = 0;
+		packet.insertData(ZArray);
+		return packet;
+	}
+	
+	/**
+	 * Create sources request packet.
+	 * @param fileHash hash of file which sources are requested.
+	 * <table cellspacing="0" border="1" cellpadding="0">
+	 *   <thead>
+	 *     <tr>
+	 *       <th>Name</th>
+	 *       <th>Size in bytes</th>
+	 *       <th>Default value</th>
+	 *       <th>Comment</th>
+	 *     </tr>
+	 *   </thead>
+	 *   <tbody>
+	 *     <tr>
+	 *       <td>Protocol</td>
+	 *       <td>1</td>
+	 *       <td>0xC5</td>
+	 *       <td>-</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Size</td>
+	 *       <td>4</td>
+	 *       <td>-</td>
+	 *       <td>The size of the message in bytes not including
+	 * the header and size fields
+	 * </td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>Type</td>
+	 *       <td>1</td>
+	 *       <td>0x81</td>
+	 *       <td>The value of the OP_ REQUESTSOURCES
+	 * opcode</td>
+	 *     </tr>
+	 *     <tr>
+	 *       <td>File ID</td>
+	 *       <td>16</td>
+	 *       <td>NA</td>
+	 *       <td>The file ID of the required file</td>
+	 *     </tr>
+	 *   </tbody>
+	 */
+	public static Packet getSourcesRequestPacket(FileHash fileHash) {
+		Packet packet = new Packet(16, PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_REQUESTSOURCES);
+		packet.insertData(fileHash.getHash());
+		
+		return packet;
+	}
+	
+	public static Packet getSecureIdentificationPacket(byte[] challenge, boolean isPublicKeyNeeded) {
+		Packet packet = new Packet(5, PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_SECIDENTSTATE);
+		if (isPublicKeyNeeded)
+			packet.insertData((byte)2);
+		else
+			packet.insertData((byte)1);
+		packet.insertData(challenge);
+		return packet;
+	}
+	
+	public static Packet getPublicKeyPacket(byte[] publicKey) {
+		Packet packet = new Packet(1+76, PROTO_EMULE_EXTENDED_TCP);
+		
+		packet.setCommand(OP_PUBLICKEY);
+		packet.insertData((byte)publicKey.length);
+		packet.insertData(publicKey);
+		
+		return packet;
+	}
+	
+	public static Packet getSignaturePacket(byte[] signature) {
+		Packet packet = new Packet(1 + 48, PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_SIGNATURE);
+		packet.insertData((byte)signature.length);
+		packet.insertData(signature);
+		return packet;
+	}
+	
+	public static Packet getKadCallBackRequest(Int128 clientID, FileHash fileHash,IPAddress ipAddress, short tcpPort) {
+		Packet packet = new Packet(16 + 16 + 4 + 2, PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_KAD_CALLBACK);
+		packet.insertData(clientID.toByteArray());
+		packet.insertData(fileHash.getHash());
+		packet.insertData(ipAddress.getAddress());
+		packet.insertData(tcpPort);
+		return packet;
+	}
+	
 }

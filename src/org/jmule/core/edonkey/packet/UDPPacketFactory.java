@@ -27,18 +27,17 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSERVRSTATREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REASKFILEPING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_REQ;
+import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
 
 import java.net.InetSocketAddress;
 
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.packet.impl.UDPPeerPacket;
-import org.jmule.core.edonkey.packet.impl.UDPServerPacket;
+import org.jmule.core.edonkey.FileHash;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/02 15:18:32 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
  */
 public class UDPPacketFactory {
 
@@ -78,8 +77,8 @@ public class UDPPacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static UDPPacket getUDPStatusRequest(int clientTime,InetSocketAddress dest){
-		UDPServerPacket packet = new UDPServerPacket(4,dest);
+	public static UDPPacket getUDPStatusRequest(int clientTime){
+		UDPPacket packet = new UDPPacket(4,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBSERVRSTATREQ);
 		
 		packet.insertData(clientTime);
@@ -125,8 +124,8 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getUDPSourcesRequest(InetSocketAddress dest,FileHash... fileHashSet){
-		UDPServerPacket packet = new UDPServerPacket(fileHashSet.length*16,dest);
+	public static UDPPacket getUDPSourcesRequest(FileHash... fileHashSet){
+		UDPPacket packet = new UDPPacket(fileHashSet.length*16,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBGETSOURCES);
 		for(int i = 0; i < fileHashSet.length; i++){
 			packet.insertData(fileHashSet[i].getHash());
@@ -165,7 +164,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 */
 	public static UDPPacket getUDPServerDescRequest(InetSocketAddress dest){
-		UDPServerPacket packet = new UDPServerPacket(0,dest);
+		UDPPacket packet = new UDPPacket(0,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_SERVER_DESC_REQ);
 		return packet;
 	}
@@ -210,7 +209,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 */
 	public static UDPPacket getUDPSearchPacket(String searchString,InetSocketAddress dest){
-		UDPServerPacket packet = new UDPServerPacket(1+2+searchString.length(),dest);
+		UDPPacket packet = new UDPPacket(1+2+searchString.length(),PROTO_EDONKEY_SERVER_UDP);
 		
 		packet.setCommand(OP_GLOBSEARCHREQ);
 		
@@ -274,7 +273,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 */
 	public static UDPPacket getUDPReaskFilePacket(FileHash fileHash,InetSocketAddress dest){
-		UDPPeerPacket packet = new UDPPeerPacket(16,dest);
+		UDPPacket packet = new UDPPacket(16,PROTO_EDONKEY_SERVER_UDP);
 		
 		packet.setCommand(OP_REASKFILEPING);
 		

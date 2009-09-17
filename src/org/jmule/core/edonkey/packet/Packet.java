@@ -22,56 +22,101 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.net.JMEndOfStreamException;
-import org.jmule.core.net.JMFloodException;
-import org.jmule.core.net.JMuleSocketChannel;
+import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * 
- * @author javajox
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:45:14 $$
+ * @author javajox
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
  */
-public interface Packet {
+public class Packet {
 	
-	public void setCommand(byte packetCommand);
+	private ByteBuffer packet_data = null;
 	
-	public byte getCommand();
+	public Packet() {
+	}
 	
-	public void setProtocol(byte protocolType);
+	public Packet(int packetLength, byte protocol) {
+		packet_data= Misc.getByteBuffer(packetLength + 1 + 4 + 1);
+		packet_data.put(protocol);
+		packet_data.putInt(packetLength+1);//Put length +1 to write command byte
+		packet_data.put((byte)0);//Put default command
+	}
 	
-	public byte getProtocol();
+	public void setCommand(byte packetCommand) {
+		packet_data.put(5, packetCommand);
+	}
+
+	public byte getCommand() {
+		return packet_data.get(5);
+	}
 	
-	public void insertData(byte[] insertData);
+	public void setProtocol(byte packetType) {
+		packet_data.put(0,packetType);
+		
+	}
 	
-	public void insertData(int startPos, byte[] insertData);
+	public byte getProtocol() {
+		return packet_data.get(0);
+	}
 	
-	public void insertData(ByteBuffer insertData);
+	public void insertData(byte[] insertData) {
+		packet_data.put(insertData);	
+	}
+
+	public void insertData(int startPos, byte[] insertData) {	
+		packet_data.position(startPos);
+		packet_data.put(insertData);
+	}
 	
-	public void insertData(int startPos,ByteBuffer insertData);
+	public void insertData(ByteBuffer insertData) {
+		packet_data.put(insertData);	
+	}
 	
-	public void insertData(int insertData);
+	public void insertData(int startPos,ByteBuffer insertData) {
+		packet_data.position(startPos);
+		packet_data.put(insertData.array());
+	}
+
+	public void insertData(int insertData) {
+		packet_data.putInt(insertData);
+	}
+
+	public void insertData(short insertData) {
+		packet_data.putShort(insertData);
+	}
+
+	public void insertData(byte insertData) {
+		packet_data.put(insertData);
+	}
+
+	public byte[] getPacket() {
+		return packet_data.array();
+	}
+
+	public ByteBuffer getAsByteBuffer() {
+		return packet_data;
+	}
+
+	public int getLength() {
+		return packet_data.capacity();
+	}
 	
-	public void insertData(short insertData);
+	public void clear() {	
+		if (packet_data==null) return ;
+		packet_data.clear();
+		packet_data.compact();
+		packet_data.rewind();
+		packet_data.limit(0);
+	}
 	
-	public void insertData(byte insertData);
+	public String toString() {
+		return Convert.byteToHexString(packet_data.array()," 0x");
+	}
 	
-	public byte[] getPacket();
-	
-	public ByteBuffer getAsByteBuffer();
-	
-	public int getLength();
-	
-	public FileHash getFileHash();
-	
-    public void addData(ByteBuffer data);
-    
-    public void readPacket(JMuleSocketChannel connection) throws IOException,JMEndOfStreamException, InterruptedException,JMFloodException;
-    
-    public void clear();
 }
