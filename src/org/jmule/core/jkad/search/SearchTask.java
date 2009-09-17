@@ -28,20 +28,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.indexer.Source;
-import org.jmule.core.net.JMUDPConnection;
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:54:38 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:21 $
  */
 public abstract class SearchTask {
 
 	protected Int128 searchID;
 
 	protected List<Source> searchResults = new CopyOnWriteArrayList<Source>();
-	protected JMUDPConnection udpConnecton = null;
 	protected boolean isStarted = false;
 	
 	protected SearchResultListener listener = null;
@@ -49,7 +47,6 @@ public abstract class SearchTask {
 	public SearchTask(Int128 searchID) {
 		super();
 		this.searchID = searchID;
-		udpConnecton = JMUDPConnection.getInstance();
 	}
 
 	public abstract void startSearch();

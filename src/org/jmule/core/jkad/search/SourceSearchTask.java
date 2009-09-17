@@ -30,23 +30,23 @@ import java.util.List;
 import org.jmule.core.JMException;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
+import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
-import org.jmule.core.jkad.net.packet.KadPacket;
-import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.routingtable.KadContact;
 
 
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:21 $
  */
 public class SourceSearchTask extends SearchTask {
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
@@ -72,21 +72,19 @@ public class SourceSearchTask extends SearchTask {
 					KadPacket hello;
 					try {
 						hello = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-						udpConnecton.sendPacket(hello, contact.getIPAddress(), contact.getUDPPort());
+						_network_manager.sendKadPacket(hello, contact.getIPAddress(), contact.getUDPPort());
 					} catch (JMException e) {
 						e.printStackTrace();
-						JKad.getInstance().shutdown();
 					}
 					
 					
 					PacketListener listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 						public void packetReceived(KadPacket packet) {
 							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID,true);
-							udpConnecton.sendPacket(responsePacket, packet.getAddress());
-							JKad.getInstance().removePacketListener(this);
+							_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
 						}
 					};
-					JKad.getInstance().addPacketListener(listener);
+					_jkad_manager.addPacketListener(listener);
 				}
 			}
 			
