@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Hashtable;
 
-import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 /**
@@ -103,8 +103,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:02:49 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
  */
 public class ClientsMet extends MetFile {
 

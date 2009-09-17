@@ -36,15 +36,15 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.jmule.core.edonkey.E2DKConstants;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:06:02 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:53:27 $
  */
 public class TagScanner {
 	

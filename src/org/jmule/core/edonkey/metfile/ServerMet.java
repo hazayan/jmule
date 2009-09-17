@@ -27,11 +27,9 @@ import static org.jmule.core.edonkey.E2DKConstants.SERVERLIST_VERSION;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagScanner;
@@ -93,12 +91,14 @@ import org.jmule.core.utils.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
  */
 public class ServerMet extends MetFile {
 	
-	private List<Server> serverList;
+	private List<String> ip_list;
+	private List<Integer> port_list;
+	private List<TagList> tag_list;
 
 	
 	public ServerMet(String fileName) throws ServerMetException  {
@@ -113,8 +113,11 @@ public class ServerMet extends MetFile {
 			throw new ServerMetException("Failed to move at position 0 in server.met");
 		}
 		
+		ip_list = new LinkedList<String>();
+		port_list = new LinkedList<Integer>();
+		tag_list = new LinkedList<TagList>();
+		
 		byte serverListFormat;
-		serverList = new LinkedList<Server>();
 		ByteBuffer data;
 		
 		data = Misc.getByteBuffer(1);
@@ -133,8 +136,38 @@ public class ServerMet extends MetFile {
 			long serverCount = Convert.intToLong(data.getInt(0));
 			
 			for(long i = 0; i < serverCount; i++) {
-				Server server = readServer();
-				serverList.add(server);
+								
+				TagList tagList = new TagList();
+				//Read server IP
+				data = Misc.getByteBuffer(4);
+				fileChannel.read(data);
+				
+				String remonteAddress = Convert.IPtoString(data.array());
+				
+				//Read server port 
+				data = Misc.getByteBuffer(2);
+				fileChannel.read(data);
+				
+				int remontePort = (Convert.shortToInt(data.getShort(0)));
+				
+				//Read TagList count
+				data = Misc.getByteBuffer(4);
+				fileChannel.read(data);
+				
+				int tagCount = data.getInt(0);
+								
+				//Load tags....
+				for(int j = 0; j<tagCount; j++) {
+					Tag tag = TagScanner.scanTag(fileChannel);
+					if (tag != null)
+						tagList.addTag(tag);
+				}
+				
+				ip_list.add(remonteAddress);
+				port_list.add(remontePort);
+				tag_list.add(tagList);
+				
+				
 			}
 			
 		 } catch(Throwable exception) {
@@ -157,17 +190,15 @@ public class ServerMet extends MetFile {
 			data.position(0);
 			fileChannel.write(data);
 				
-			long count = 0;
+			long count = ip_list.size();
 			
-			for(Server server : serverList) 
-				if (server.isStatic()) count++;
+			//for(Server server : serverList) 
+			//	if (server.isStatic()) count++;
 			
 			setServersCount(count);
-		
-			for(Server server : serverList) 
-				if (server.isStatic())
-					writeServer(server);
-		
+			for (int i = 0; i < count; i++) {
+				writeServer(ip_list.get(i), port_list.get(i), tag_list.get(i));
+			}
 		}
 	
 		catch(IOException ioe) {
@@ -175,16 +206,6 @@ public class ServerMet extends MetFile {
 		  throw new ServerMetException("IOException : " + ioe);
 		}
 		
-	}
-	
-	public void appendFile(Server appendServer) throws IOException {
-		fileChannel.position(0);
-		long fileCount = getServersCount();
-		fileCount++;
-		setServersCount(fileCount);
-		
-		fileChannel.position(fileChannel.size());
-		writeServer(appendServer);
 	}
 	
 	/**
@@ -215,67 +236,32 @@ public class ServerMet extends MetFile {
 		fileChannel.write(data);
 	}
 	
-	private Server readServer() throws IOException {
-		ByteBuffer data;
-		
-		TagList tagList = new TagList();
-		//Read server IP
-		data = Misc.getByteBuffer(4);
-		fileChannel.read(data);
-		
-		String remonteAddress = Convert.IPtoString(data.array());
-		
-		//Read server port 
-		data = Misc.getByteBuffer(2);
-		fileChannel.read(data);
-		
-		int remontePort = (Convert.shortToInt(data.getShort(0)));
-		
-		//Read TagList count
-		data = Misc.getByteBuffer(4);
-		fileChannel.read(data);
-		
-		int tagCount = data.getInt(0);
-						
-		//Load tags....
-		for(int j = 0; j<tagCount; j++) {
-			Tag tag = TagScanner.scanTag(fileChannel);
-			if (tag != null)
-				tagList.addTag(tag);
-		}
-		
-		Server server = new Server(remonteAddress,remontePort,tagList);
-		server.setStatic(true);
-		return server;
-		
-	}
-	
 	/**
 	 * Write one Server object in fileChannel at current position.
 	 * @param fileChannel
 	 * @param server
 	 * @throws IOException
 	 */
-	private void writeServer(Server server) throws IOException {
+	private void writeServer(String serverIP, int serverPort, TagList tagList) throws IOException {
 		ByteBuffer data;
 		data = Misc.getByteBuffer(4);
 		
-		data.put(Convert.stringIPToArray(server.getAddress()));
+		data.put(Convert.stringIPToArray(serverIP));
 		data.position(0);
 		fileChannel.write(data);
 		
 		data = Misc.getByteBuffer(2);
-		data.putShort((short) server.getPort());
+		data.putShort(Convert.intToShort(serverPort));
 		data.position(0);
 		fileChannel.write(data);
 		
 		data = Misc.getByteBuffer(4);
-		data.putInt(server.getTagList().size());
+		data.putInt(tagList.size());
 		data.position(0);
 		fileChannel.write(data);
 		
 		
-		for(Tag tag : server.getTagList()) {
+		for(Tag tag : tagList) {
 			data = tag.getAsByteBuffer();
 			data.position(0);
 			fileChannel.write(data);
@@ -283,15 +269,27 @@ public class ServerMet extends MetFile {
 		
 	  }
 
-	public List<Server> getServerList() {
-		
-		return serverList;
+	public List<String> getIPList() {
+		return ip_list;
+	}
+	
+	public List<Integer> getPortList() {
+		return port_list;
+	}
+	
+	public List<TagList> getTagList() {
+		return tag_list;
+	}
+	
+	public void setIPList(List<String> ipList) {
+		this.ip_list = ipList;
 	}
 
-	public void setServerList(List<Server> serverList) {
-		
-		this.serverList = serverList;
+	public void setPortList(List<Integer> portList) {
+		this.port_list = portList;
 	}
-
-
+	
+	public void setTagList(List<TagList> tagList) {
+		this.tag_list = tagList;
+	}
 }

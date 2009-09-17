@@ -31,15 +31,15 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
 
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:14 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:58:14 $
  */
 public class Int128 implements Cloneable {
 
@@ -57,7 +57,7 @@ public class Int128 implements Cloneable {
 	}
 	
 	/**
-	 * 
+	 * Create Int128 from stored value
 	 */
 	public Int128(byte[] byteArray) {
 		bit_set = new BitSet(128);
@@ -146,7 +146,7 @@ public class Int128 implements Cloneable {
 
 	/**
 	 * Used in 'debug' situations
-	 * @param reverse
+	 * @param reverse true - show how is stored value, false - how is processed
 	 * @return
 	 */
 	public byte[] toByteArray(boolean reverse) {
@@ -170,8 +170,17 @@ public class Int128 implements Cloneable {
 	
 	
 
+	/**
+	 * 
+	 * @param reverse set true if you want to store string
+	 * @return
+	 */
+	public String toHexString(boolean reverse) {
+		return byteToHexString(toByteArray(reverse));
+	}
+	
 	public String toHexString() {
-		return byteToHexString(toByteArray(true));
+		return toHexString(false);
 	}
 	
 	public String toString() {

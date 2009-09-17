@@ -24,14 +24,14 @@ package org.jmule.core.edonkey.packet.tag;
 
 import java.nio.ByteBuffer;
 
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.utils.Misc;
 import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:52:04 $
  */
 public class HashTag extends StandartTag {
 

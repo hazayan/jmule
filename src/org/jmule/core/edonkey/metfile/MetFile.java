@@ -29,8 +29,8 @@ import java.nio.channels.FileChannel;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 14:06:01 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
  */
 public abstract class MetFile {
 
@@ -53,7 +53,9 @@ public abstract class MetFile {
 	public void close() {
 		try {
 			fileChannel.close();
-		}catch(Throwable t) {}
+		}catch(Throwable t) {
+			t.printStackTrace();
+		}
 	}
 	
 }
