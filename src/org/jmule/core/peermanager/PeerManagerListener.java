@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -23,23 +23,23 @@
 package org.jmule.core.peermanager;
 
 /**
- * 
+ * Created on Aug 30, 2009
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:36 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:04 $
  */
-public class PeerManagerFactory {
+public interface PeerManagerListener {
 
-	private static PeerManager instance = null;
+	public void newPeer(Peer peer);
 	
-	public static PeerManager getInstance() {
-		
-		if (instance == null)
-			
-			instance = new PeerManagerImpl();
-		
-		return instance;
-		
-	}
+	public void peerRemoved(Peer peer);
+	
+	public void peerConnecting(Peer peer);
+	
+	public void peerConnected(Peer peer);
+	
+	public void peerDisconnected(Peer peer);
+	
+	public void peerConnectingFailed(Peer peer, Throwable cause);
 	
 }

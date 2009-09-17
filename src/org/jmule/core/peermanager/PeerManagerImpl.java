@@ -22,314 +22,316 @@
  */
 package org.jmule.core.peermanager;
 
-import java.util.HashSet;
+import static org.jmule.core.JMConstants.KEY_SEPARATOR;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.jmule.core.JMIterable;
-import org.jmule.core.JMThread;
-import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.downloadmanager.DownloadManagerFactory;
-import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.core.edonkey.impl.ClientID;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.Peer;
-import org.jmule.core.statistics.JMuleCoreStats;
-import org.jmule.core.statistics.JMuleCoreStatsProvider;
-import org.jmule.core.uploadmanager.UploadManager;
-import org.jmule.core.uploadmanager.UploadManagerFactory;
-import org.jmule.core.uploadmanager.UploadSession;
+import org.jmule.core.JMuleAbstractManager;
+import org.jmule.core.JMuleManagerException;
+import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
+import org.jmule.core.peermanager.Peer.PeerSource;
+import org.jmule.core.peermanager.Peer.PeerStatus;
 
 /**
  * 
- * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/21 14:03:01 $$
+ * @author javajox
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
  */
-public class PeerManagerImpl implements PeerManager {
+public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
-	private int PEER_CLEANER_CHECK_INTERVAL			= 1000;
-	private int PEER_CLEANER_DISCONNECT_TIME        = 5000;
-
-	private List<Peer> peer_list = new CopyOnWriteArrayList<Peer>();
+	private Map<String, Peer> peers  = new Hashtable<String, Peer>();
+	private InternalNetworkManager _network_manager;
 	
-	private List<Peer> unknown_peer_list = new CopyOnWriteArrayList<Peer>();
+	private List<PeerManagerListener> listener_list = new LinkedList<PeerManagerListener>();
 	
-	private List<Peer> low_id_peer_list = new CopyOnWriteArrayList<Peer>();
-	
-	private PeerCleaner peer_cleaner;
-	
-	public void addPeer(Peer peer) {
-	    peer_list.add(peer);	
-    }
-	
-	public void addUnknownPeer(Peer peer) {
-	  unknown_peer_list.add(peer);
-	}
-
-	public JMIterable<Peer> getPeers() {
-         
-	  return new JMIterable<Peer>(peer_list.iterator());
+	PeerManagerImpl() {
 	}
 	
-	public boolean isReusedPeer(Peer peer) {
-		return peer_list.contains(peer);
-	}
-
-	public void makeKnownPeer(Peer peer) {
-		  if (!unknown_peer_list.contains(peer)) return ;
+	public void initialize() {
+		try {
+			super.initialize();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
 		
-		  unknown_peer_list.remove(peer);
-		  
-		  if (peer_list.contains(peer)) { // known peer connected
-			  
-			 for(Peer e_peer : peer_list) {
-				 if (e_peer.equals(peer)) {
-					 peer_list.remove(e_peer);
-					 peer.setSessionList(e_peer.getSessionList());
-					 e_peer.setSessionList(null);
-					 peer_list.add(peer);
-					 return ;
-				 }
-			 }
-		  }
-		  
-		  if (peer.isHighID()) {
-			  
-			  addPeer(peer);
-			  
-			  return ;
-		  }
-
-		  if (!low_id_peer_list.contains(peer)) { 
-			  	addPeer(peer);
-			  	return ;
-		  }
-		  
-		  Peer old_peer = getLowIDPeer(peer);
-		  if (old_peer == null) return ;
-		  low_id_peer_list.remove(old_peer);
-		  
-		  peer.reusePeer(old_peer);
-		  addPeer(peer);
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
+				.getInstance();
 	}
 
-	private Peer getLowIDPeer(Peer searchPeer) {
-		for(Peer peer : low_id_peer_list)
-			if (peer.equals(searchPeer))
-				return peer;
-		return null;
-	}
-	
-	public boolean hasPeer(Peer peer) {
 
-         return peer_list.contains(peer);
-	}
-
-	public boolean hasPeer(ClientID clientID) {
-		 for(Peer peer : peer_list)
-			 if (peer.getID().equals(clientID)) 
-				 return true;
-		 return false;
-	}
-
-	public void removePeer(Peer peer) {		
-		if (unknown_peer_list.contains(peer)) {
-			unknown_peer_list.remove(peer);
+	public void shutdown() {
+		try {
+			super.shutdown();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
 			return ;
 		}
 		
-		// remove peer when is not registred in any session
-		
-		PeerSessionList list = peer.getSessionList();
-		if (list == null)
-			peer_list.remove(peer);
-			else
-				if (peer.getSessionList().getSessionCount()==0)
-					peer_list.remove(peer);
+		for(Peer peer : peers.values()) {
+			try {
+				disconnect(peer);
+			}catch(PeerManagerException e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 
-	public void removePeer(ClientID clientID) {
 
-		if (clientID != null)
-			peer_list.remove(clientID);
+	public void start() {
+		try {
+			super.start();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
 	}
 
-	public List<Peer> getPeers(FileHash fileHash) {
-		
-		List<Peer> list = new LinkedList<Peer>();
-		
-		for(Peer peer : peer_list)
-			
-			if (peer.hasSharedFile(fileHash))
-				
-				list.add(peer);
-		
+	protected boolean iAmStoppable() {
+		return false;
+	}
+	
+	public List<Peer> getPeers() {
+		List<Peer> list = new ArrayList<Peer>();
+		list.addAll(peers.values());
 		return list;
 	}
 	
-	public JMIterable<Peer> getUnknownPeers() {
+	public Peer getPeer(String ip, int port) throws PeerManagerException {
+		Peer peer = peers.get(ip + KEY_SEPARATOR + port);
+		if (peer == null) 
+			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
+		notifyNewPeer(peer);
+		return peer;
+	}
+	
+	public Peer newPeer(String ip, int port, PeerSource source) throws PeerManagerException {
+		if (hasPeer(ip, port))
+			throw new PeerManagerException("Peer already exists");
 		
-		return new JMIterable<Peer>(unknown_peer_list.iterator());
+		Peer peer = new Peer(ip, port, source);
+		peers.put(ip + KEY_SEPARATOR + port, peer);
+		peer.setPeerStatus(PeerStatus.DISCONNECTED);
+		notifyNewPeer(peer);		
+		return peer;
+	}
+	
+	public void removePeer(Peer peer) throws PeerManagerException {
+		String ip = peer.getIP();
+		int port = peer.getPort();
+		if (! hasPeer(ip, port)) 
+			throw new PeerManagerException(" Peer " + ip + " : " + port + " not found");
+		if (peer.getStatus()!= PeerStatus.DISCONNECTED)
+			_network_manager.disconnectPeer(ip, port);
+		peers.remove(ip + KEY_SEPARATOR + port);
+		notifyPeerRemoved(peer);
+	}
+	
+	public Peer newIncomingPeer(String ip, int port) throws PeerManagerException {
+		if (hasPeer(ip, port))
+			throw new PeerManagerException("Peer already exists");
+		Peer peer = new Peer(ip, port, PeerSource.SERVER);
+		peers.put(ip + KEY_SEPARATOR + port, peer);
+		notifyNewPeer(peer);
+		return peer;
+		
+	}
+
+	public void helloAnswerFromPeer(String peerIP, int peerPort,
+			UserHash userHash, ClientID clientID, int peerPacketPort,
+			TagList tagList, String serverIP, int serverPort) {
+		Peer peer = null;
+		try {
+			peer = getPeer(peerIP, peerPort);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
+		peer.setPeerStatus(PeerStatus.CONNECTED);
+		peer.setUserHash(userHash);
+		peer.setClientID(clientID);
+		peer.setTagList(tagList);
+		peer.setServer(serverIP, serverPort);
+		
+		notifyPeerConnected(peer);
+	}
+
+	public void helloFromPeer(String peerIP, int peerPort, UserHash userHash,
+			ClientID clientID, int peerPacketPort, TagList tagList,
+			String serverIP, int serverPort) {
+		Peer peer = null;
+		try {
+			peer = getPeer(peerIP, peerPort);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
+		
+		peer.setPeerStatus(PeerStatus.CONNECTED);
+		peer.setUserHash(userHash);
+		peer.setClientID(clientID);
+		peer.setTagList(tagList);
+		peer.setServer(serverIP, serverPort);
+		
+		notifyPeerConnected(peer);
+	}
+	
+	public void connect(Peer peer) throws PeerManagerException {
+		String ip = peer.getIP();
+		int port  = peer.getPort();
+		if (!hasPeer(ip, port))
+			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
+		_network_manager.addPeer(ip, port);
+		peer.setPeerStatus(PeerStatus.CONNECTING);
+		notifyPeerConnecting(peer);	
+	}
+
+	public void disconnect(Peer peer) throws PeerManagerException {
+		String ip = peer.getIP();
+		int port  = peer.getPort(); 
+		if (!hasPeer(ip, port))
+			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
+		_network_manager.disconnectPeer(ip, port);
+		notifyPeerDisconnected(peer);
+	}
+	
+	public void peerConnectingFailed(String ip, int port, Throwable cause) {
+		Peer peer = null;
+		try {
+			peer = getPeer(ip, port);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
+		peer.setPeerStatus(PeerStatus.DISCONNECTED);
+		notifyPeerConnectingFailed(peer, cause);
+	}
+	
+	public void peerDisconnected(String ip, int port) {
+		Peer peer;
+		try {
+			peer = getPeer(ip, port);
+		} catch (PeerManagerException e) {			
+			e.printStackTrace();
+			return;
+		}
+		peer.setPeerStatus(PeerStatus.DISCONNECTED);
+		notifyPeerDisconnected(peer);
+	}
+
+	public boolean hasPeer(String ip, int port) {
+		return peers.containsKey(ip + KEY_SEPARATOR + port);
+	}
+
+	public void callBackRequestFailed() {
+	
+	}
+
+	public void receivedCallBackRequest(String ip, int port) {
+		try {
+			Peer peer = newPeer(ip, port, PeerSource.SERVER);
+			connect(peer);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	public void receivedEMuleHelloFromPeer(String ip, int port,
+			byte clientVersion, byte protocolVersion, TagList tagList) {
 		
 	}
 	
 	
-	public void initialize() {
-      //TODO create our own binary file format (.jmule)
-	   Set<String> types = new HashSet<String>();	
-	   types.add(JMuleCoreStats.ST_NET_PEERS_COUNT);
-	   JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
-		public void updateStats(Set<String> types, Map<String, Object> values) {
-			if (types.contains(JMuleCoreStats.ST_NET_PEERS_COUNT)) {
-				values.put(JMuleCoreStats.ST_NET_PEERS_COUNT, peer_list.size() + low_id_peer_list.size());
+	public void addPeerManagerListener(PeerManagerListener listener) {
+		listener_list.add(listener);
+	}
+	
+	public void removePeerManagerListener(PeerManagerListener listener) {
+		listener_list.remove(listener);
+	}
+	
+	public List<Peer> createPeerList(List<ClientID> peerIDList, List<Integer> peerPort, PeerSource peerSource) {
+		List<Peer> result = new ArrayList<Peer>();
+		
+		for (int i = 0; i < peerIDList.size(); i++) {
+			String client_id = peerIDList.get(i).toString();
+			int peer_port = peerPort.get(i);
+			if (hasPeer(client_id, peer_port)) continue;
+			try {
+				result.add(newPeer(client_id, peer_port, peerSource));
+			} catch (PeerManagerException e) {
+				e.printStackTrace();
 			}
 		}
-	   });
+		
+		return result;
 	}
 
-	public void shutdown() {
-		
-		for(Peer peer : this.getPeers()) {
-			if (peer.isConnected())
-				peer.disconnect();
-			
-		}
-		
-		peer_cleaner.JMStop();
-
-	}
-
-	public void start() {
-
-		peer_cleaner = new PeerCleaner();
-		
-		peer_cleaner.start();
-		
-	}
-	
-	public void addPeer(FileHash fileHash, List<Peer> peerList) {
-		
-		List<Peer> added_peers = new LinkedList<Peer>();
-		
-		for(Peer peer : peerList) {
-			
-			if (unknown_peer_list.contains(peer)) continue;
-			
-			if (peer_list.contains(peer)) continue;
-			
-			if (low_id_peer_list.contains(peer)) continue;
-			
-			added_peers.add(peer);
-				
-			if (!peer.isHighID()) {
-				if (!low_id_peer_list.contains(peer))
-					
-					low_id_peer_list.add(peer);
+	private void notifyNewPeer(Peer peer) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.newPeer(peer);
+			}catch(Throwable t) {
+				t.printStackTrace();
 			}
-			else {
-					addPeer(peer);
-				}
-			
-		}
-		
-		DownloadManagerFactory.getInstance().addDownloadPeers(fileHash, added_peers);
-		
-	}
-	
-	public float getDownloadSpeed() {
-		float speed = 0;
-		
-		DownloadManager download_manager = DownloadManagerFactory.getInstance();
-		
-		for(DownloadSession session : download_manager.getDownloads())
-			speed += session.getSpeed();
-		
-		return speed;
 	}
 
-	public float getUploadSpeed() {
-		float speed = 0;
-		
-		UploadManager upload_manager = UploadManagerFactory.getInstance();
-		
-		for(UploadSession session : upload_manager.getUploads())
-			speed += session.getSpeed();
-		
-		return speed;
-	}
 	
-	
-	private class PeerCleaner extends JMThread {
-
-		private boolean stop = false;
-		
-		public PeerCleaner() {
-			
-			super("Peer cleaner");
-		
-		} 
-
-		
-		public void JMStop() {
-			
-			stop = true;
-			interrupt();
-		
-		}
-
-		public void run() {
-			
-			while(!stop) {
-				
-				try {
-					
-					Thread.sleep(PEER_CLEANER_CHECK_INTERVAL);
-					
-				} catch (InterruptedException e) {
-					
-					if (stop) return;
-					
-					continue;
-					
-				}
-				
-				
-				for(Peer peer : peer_list) {
-					
-					if (peer.isConnected()) continue;
-					
-					if (System.currentTimeMillis()-peer.getConnectTime()>=PEER_CLEANER_DISCONNECT_TIME) {
-						PeerSessionList list = peer.getSessionList();
-						if (list == null)
-							peer.disconnect();
-							else
-								if (peer.getSessionList().getSessionCount()==0)
-									peer.disconnect();
-					}
-				}
-				
-				for(Peer peer : unknown_peer_list) {
-					
-					if (peer.isConnected()) continue;
-					
-					if (System.currentTimeMillis()-peer.getConnectTime()>=PEER_CLEANER_DISCONNECT_TIME) {
-						if (peer.getSessionList().getSessionCount()==0) 
-						peer.disconnect();
-						
-					}
-					
-				}
-				
+	private void notifyPeerRemoved(Peer peer) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerRemoved(peer);
+			}catch(Throwable t) {
+				t.printStackTrace();
 			}
-			
-		}
-		
 	}
-
+	
+	private void notifyPeerConnecting(Peer peer) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerConnecting(peer);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
+	private void notifyPeerConnected(Peer peer) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerConnected(peer);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
+	private void notifyPeerDisconnected(Peer peer) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerDisconnected(peer);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
+	private void notifyPeerConnectingFailed(Peer peer, Throwable cause) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerConnectingFailed(peer, cause);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
 }

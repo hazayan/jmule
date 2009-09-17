@@ -27,13 +27,20 @@ import org.jmule.core.JMException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:36 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
  */
 public class PeerManagerException extends JMException {
 
 	public PeerManagerException(String string) {
 		super(string);
+	}
+	
+	public PeerManagerException(Throwable cause) {
+		super(cause);
+	}
+	
+	public PeerManagerException() {
 	}
 
 }

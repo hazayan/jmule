@@ -22,41 +22,24 @@
  */
 package org.jmule.core.peermanager;
 
-
-import java.util.List;
-
-import org.jmule.core.JMuleManager;
-import org.jmule.core.peermanager.Peer.PeerSource;
-
 /**
  * 
- * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
+ * @version $$Revision: 1.1 $$
  * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
  */
-public interface PeerManager extends JMuleManager {
+public class PeerManagerSingleton {
 
-	/**
-	 * Adds a new peer to peer manager
-	 * @param peer the given peer
-	 */
-	public Peer newPeer(String ip, int port, PeerSource source) throws PeerManagerException;
+	private static PeerManager instance = null;
 	
-	public void removePeer(Peer peer) throws PeerManagerException;
-	
-	public Peer getPeer(String ip, int port) throws PeerManagerException;
-	
-	public boolean hasPeer(String ip, int port);
-	
-	public void connect(Peer peer) throws PeerManagerException;
-	
-	public void disconnect(Peer peer) throws PeerManagerException;
-
-	public void addPeerManagerListener(PeerManagerListener listener);
-
-	public void removePeerManagerListener(PeerManagerListener listener);
-
-	public List<Peer> getPeers();
+	public static PeerManager getInstance() {
+		
+		if (instance == null)
+			
+			instance = new PeerManagerImpl();
+		
+		return instance;
+		
+	}
 	
 }
