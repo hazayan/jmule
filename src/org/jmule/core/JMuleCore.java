@@ -30,15 +30,15 @@ import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.sharingmanager.SharingManager;
-import org.jmule.core.speedmanager.SpeedManagerImpl;
+import org.jmule.core.speedmanager.SpeedManager;
 import org.jmule.core.uploadmanager.UploadManager;
 
 /**
  * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:38:23 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:27:31 $$
  */
 public interface JMuleCore {
 
@@ -74,7 +74,7 @@ public interface JMuleCore {
 	
 	public SharingManager getSharingManager();
 	
-	public SpeedManagerImpl getSpeedManager();
+	public SpeedManager getSpeedManager();
 	
 	public ConfigurationManager getConfigurationManager();
 	

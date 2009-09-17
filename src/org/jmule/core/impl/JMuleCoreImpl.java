@@ -54,7 +54,8 @@ import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.sharingmanager.SharingManagerSingleton;
-import org.jmule.core.speedmanager.SpeedManagerImpl;
+import org.jmule.core.speedmanager.SpeedManager;
+import org.jmule.core.speedmanager.SpeedManagerSingleton;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
 
@@ -62,8 +63,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:05:18 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:27:31 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -245,9 +246,9 @@ public class JMuleCoreImpl implements JMuleCore {
 		// notifies that the upload manager has been started
 		notifyComponentStarted(UploadManagerSingleton.getInstance());
 		
-		SpeedManagerImpl.getInstance().initialize();
+		SpeedManagerSingleton.getInstance().initialize();
 		
-		SpeedManagerImpl.getInstance().start();
+		SpeedManagerSingleton.getInstance().start();
 		
 		// notifies that the speed manager has been started
 		notifyComponentStarted(UploadManagerSingleton.getInstance());
@@ -440,9 +441,9 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 	}
 	
-	public SpeedManagerImpl getSpeedManager() {
+	public SpeedManager getSpeedManager() {
 		
-		return SpeedManagerImpl.getInstance();
+		return SpeedManagerSingleton.getInstance();
 		
 	}
 	
