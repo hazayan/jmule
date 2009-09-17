@@ -37,45 +37,40 @@ import org.jmule.core.JMuleCoreComponent;
 import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreLifecycleListener;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.downloadmanager.DownloadManagerFactory;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.ServerManagerFactory;
-import org.jmule.core.edonkey.impl.Server;
-import org.jmule.core.edonkey.impl.UserHash;
-import org.jmule.core.jkad.JKad;
-import org.jmule.core.net.JMConnectionWaiter;
-import org.jmule.core.net.JMUDPConnection;
+import org.jmule.core.downloadmanager.DownloadManagerSingleton;
+import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.jkad.JKadManager;
+import org.jmule.core.jkad.JKadSingleton;
+import org.jmule.core.networkmanager.NetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.PeerManager;
-import org.jmule.core.peermanager.PeerManagerFactory;
+import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.searchmanager.SearchManager;
-import org.jmule.core.searchmanager.SearchManagerFactory;
+import org.jmule.core.searchmanager.SearchManagerSingleton;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.sharingmanager.SharingManager;
-import org.jmule.core.sharingmanager.SharingManagerFactory;
-import org.jmule.core.speedmanager.SpeedManager;
+import org.jmule.core.sharingmanager.SharingManagerSingleton;
+import org.jmule.core.speedmanager.SpeedManagerImpl;
 import org.jmule.core.uploadmanager.UploadManager;
-import org.jmule.core.uploadmanager.UploadManagerFactory;
+import org.jmule.core.uploadmanager.UploadManagerSingleton;
 
 /**
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 18:24:08 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:56:31 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
 	private static JMuleCoreImpl instance = null;
 	
 	private DebugThread debugThread ;
-	
-	private JMConnectionWaiter connectionWaiter;
-	
-	private JMUDPConnection udp_connection;
-	
+		
 	private List<JMuleCoreLifecycleListener> lifecycle_listeners = new LinkedList<JMuleCoreLifecycleListener>();
 	
 	// the first run flag is true when certain conditions have been met
@@ -192,7 +187,7 @@ public class JMuleCoreImpl implements JMuleCore {
 			
 		}
 		
-		ConfigurationManager configuration_manager = ConfigurationManagerFactory.getInstance();
+		ConfigurationManager configuration_manager = ConfigurationManagerSingleton.getInstance();
 		
 		configuration_manager.initialize();
 		
@@ -230,7 +225,7 @@ public class JMuleCoreImpl implements JMuleCore {
 		// notifies that the config manager has been started
 		notifyComponentStarted(configuration_manager);
 		
-		SharingManager sharingManager = SharingManagerFactory.getInstance();
+		SharingManager sharingManager = SharingManagerSingleton.getInstance();
 		
 		sharingManager.initialize();
 		
@@ -243,55 +238,37 @@ public class JMuleCoreImpl implements JMuleCore {
 		// notifies that the sharing manager has been started
 		notifyComponentStarted(sharingManager);
 		
-		UploadManagerFactory.getInstance().initialize();
+		UploadManagerSingleton.getInstance().initialize();
 		
-		UploadManagerFactory.getInstance().start();
+		UploadManagerSingleton.getInstance().start();
 		
 		// notifies that the upload manager has been started
-		notifyComponentStarted(UploadManagerFactory.getInstance());
+		notifyComponentStarted(UploadManagerSingleton.getInstance());
 		
-		SpeedManager.getInstance().initialize();
+		SpeedManagerImpl.getInstance().initialize();
 		
-		SpeedManager.getInstance().start();
+		SpeedManagerImpl.getInstance().start();
 		
 		// notifies that the speed manager has been started
-		notifyComponentStarted(UploadManagerFactory.getInstance());
+		notifyComponentStarted(UploadManagerSingleton.getInstance());
 		
-		PeerManagerFactory.getInstance().initialize();
+		PeerManagerSingleton.getInstance().initialize();
 		
-		PeerManagerFactory.getInstance().start();
+		PeerManagerSingleton.getInstance().start();
 		
 		// notifies that the peer manager has been started
-		notifyComponentStarted(PeerManagerFactory.getInstance());
-		
-		
-		connectionWaiter = JMConnectionWaiter.getInstance();
-		
-		connectionWaiter.start();
-		
-		udp_connection = JMUDPConnection.getInstance();
-		try {
-			if (configuration_manager.isUDPEnabled()) {
-				try {
-					
-					udp_connection.open();
-					
-				} catch (Throwable t) {
-					
-					t.printStackTrace();
-				}
-			}
-		} catch (ConfigurationManagerException e) {
-			
-			e.printStackTrace();
-		}
-		
-		
-		DownloadManagerFactory.getInstance().initialize();
+		notifyComponentStarted(PeerManagerSingleton.getInstance());
+
 		// notifies that the download manager has been started
-		notifyComponentStarted(DownloadManagerFactory.getInstance());
+		DownloadManagerSingleton.getInstance().initialize();
 		
-		ServerManager servers_manager = ServerManagerFactory.getInstance();
+		NetworkManagerSingleton.getInstance().initialize();
+		NetworkManagerSingleton.getInstance().start();
+		
+
+		notifyComponentStarted(DownloadManagerSingleton.getInstance());
+		
+		ServerManager servers_manager = ServerManagerSingleton.getInstance();
 		
 		servers_manager.initialize();
 			
@@ -307,44 +284,101 @@ public class JMuleCoreImpl implements JMuleCore {
 		// notifies that the download manager has been started
 		notifyComponentStarted(servers_manager);
 		
-		servers_manager.startUDPQuery();
+		//servers_manager.startUDPQuery();
 		
-		SearchManager search_manager = SearchManagerFactory.getInstance();
+		SearchManager search_manager = SearchManagerSingleton.getInstance();
 		
 		search_manager.initialize();
 		
 		notifyComponentStarted(search_manager);
-		JKad.getInstance().initialize();
-		try {
+		//JKadManagerImpl.getInstance().initialize();
+		/*try {
 			if (configuration_manager.isJKadAutoconnectEnabled()) 
-				JKad.getInstance().connect();
+				JKadManagerImpl.getInstance().connect();
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
-		}
+		}*/
 		
 		/** Enable Debug thread!**/	
 		 debugThread = new DebugThread();
 		
 		Runtime.getRuntime().addShutdownHook( new JMThread("Shutdown Hook") {
-			
-		    public void JMRun() {
-		    	
-		    	try {
-		    	
+
+			public void run() {
+				try {
 				   JMuleCoreImpl.this.stop();
-				
 		    	} catch(Throwable t) {
-		    		
+		    		t.printStackTrace();
 		    	}
-				
-		     }
+			}
 		 });
 		
 		is_starting = false;
 		
 		System.out.println("Total start up time = " + ( System.currentTimeMillis() - start_time ) );
 	}
-	
+
+	public void stop() throws JMuleCoreException {
+		
+		System.out.println("Core stopping process initiated");
+		
+		long stop_time = System.currentTimeMillis();
+		
+		is_stopping = true;
+		
+		logEvent("Stop jMule");
+		
+		NetworkManagerSingleton.getInstance().shutdown();
+		
+		JKadManager jkad = getJKadManager();
+		if (!jkad.isDisconnected())
+			jkad.disconnect();
+		
+		SearchManager search_manager = SearchManagerSingleton.getInstance();
+		
+		search_manager.shutdown();
+		
+		notifyComponentStopped(search_manager);
+		
+		ServerManagerSingleton.getInstance().shutdown();
+		
+		// notifies that the server manager has been stopped
+		notifyComponentStopped(ServerManagerSingleton.getInstance());
+		
+		PeerManagerSingleton.getInstance().shutdown();
+		
+		// notifies that the peer manager has been stopped
+		notifyComponentStopped(PeerManagerSingleton.getInstance());
+		
+		DownloadManagerSingleton.getInstance().shutdown();
+		
+		// notifies that the download manager has been stopped
+		notifyComponentStopped(DownloadManagerSingleton.getInstance());
+		
+		UploadManagerSingleton.getInstance().shutdown();
+		
+		// notifies that the upload manager has been stopped
+		notifyComponentStopped(UploadManagerSingleton.getInstance());
+		
+		SharingManagerSingleton.getInstance().shutdown();
+		
+		// notifies that the sharing manager has been stopped
+		notifyComponentStopped(SharingManagerSingleton.getInstance());
+		
+		ConfigurationManagerSingleton.getInstance().shutdown();
+		
+		notifyComponentStopped(ConfigurationManagerSingleton.getInstance());
+		
+		if (debugThread != null)
+			debugThread.JMStop();
+		
+		is_stopping = false;
+		
+		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
+		
+		System.exit( 0 );
+	}
+
 	public boolean isStarted() {
 		
 		return instance != null;
@@ -364,139 +398,63 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		return first_run;
 	}
-
-	public void stop() throws JMuleCoreException {
-		
-		System.out.println("Core stopping process initiated");
-		
-		long stop_time = System.currentTimeMillis();
-		
-		is_stopping = true;
-		
-		logEvent("Stop jMule");
-		
-		connectionWaiter.stop();
-		
-		try {
-			udp_connection.close();
-		} catch (Throwable t) {
-
-			t.printStackTrace();
-			
-		}
-		JKad jkad = JKad.getInstance();
-		if (!jkad.isDisconnected())
-			jkad.disconnect();
-		Server server = ServerManagerFactory.getInstance().getConnectedServer();
-		
-		if (server!=null)
-			
-			server.disconnect();
-		
-		SearchManager search_manager = SearchManagerFactory.getInstance();
-		
-		search_manager.shutdown();
-		
-		notifyComponentStopped(search_manager);
-		
-		ServerManagerFactory.getInstance().shutdown();
-		
-		// notifies that the server manager has been stopped
-		notifyComponentStopped(ServerManagerFactory.getInstance());
-		
-		PeerManagerFactory.getInstance().shutdown();
-		
-		// notifies that the peer manager has been stopped
-		notifyComponentStopped(PeerManagerFactory.getInstance());
-		
-		DownloadManagerFactory.getInstance().shutdown();
-		
-		// notifies that the download manager has been stopped
-		notifyComponentStopped(DownloadManagerFactory.getInstance());
-		
-		UploadManagerFactory.getInstance().shutdown();
-		
-		// notifies that the upload manager has been stopped
-		notifyComponentStopped(UploadManagerFactory.getInstance());
-		
-		SharingManagerFactory.getInstance().shutdown();
-		
-		// notifies that the sharing manager has been stopped
-		notifyComponentStopped(SharingManagerFactory.getInstance());
-		
-		ConfigurationManagerFactory.getInstance().shutdown();
-		
-		notifyComponentStopped(ConfigurationManagerFactory.getInstance());
-		
-		if (debugThread != null)
-			debugThread.JMStop();
-		
-		is_stopping = false;
-		
-		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
-		
-		System.exit( 0 );
-	}
-	
 	
 	public void logEvent(String event) {
 		//Check aspect
 	}
 	
-	public JKad getJKad() {
-		return JKad.getInstance();
+	public JKadManager getJKadManager() {
+		return JKadSingleton.getInstance();
+	}
+	
+	public NetworkManager getNetworkManager() {
+		return NetworkManagerSingleton.getInstance();
 	}
 	
 	public DownloadManager getDownloadManager() {
 		
-		return DownloadManagerFactory.getInstance();
+		return DownloadManagerSingleton.getInstance();
 		
 	}
 	
 	public UploadManager getUploadManager() {
 		
-		return UploadManagerFactory.getInstance();
+		return UploadManagerSingleton.getInstance();
 		
 	}
 	
 	public ServerManager getServerManager() {
 		
-		return ServerManagerFactory.getInstance();
+		return ServerManagerSingleton.getInstance();
 		
 	}
 	
 	public PeerManager getPeerManager() {
 		
-		return PeerManagerFactory.getInstance();
+		return PeerManagerSingleton.getInstance();
 	}
 	
 	public SharingManager getSharingManager() {
 		
-		return SharingManagerFactory.getInstance();
+		return SharingManagerSingleton.getInstance();
 		
 	}
 	
-	public SpeedManager getSpeedManager() {
+	public SpeedManagerImpl getSpeedManager() {
 		
-		return SpeedManager.getInstance();
-		
-	}
-	
-	public JMConnectionWaiter getTCPConnectionListener() {
-		
-		return connectionWaiter;
+		return SpeedManagerImpl.getInstance();
 		
 	}
 	
 	public ConfigurationManager getConfigurationManager() {
 		
-		return ConfigurationManagerFactory.getInstance();
+		return ConfigurationManagerSingleton.getInstance();
 		
 	}
 	
 	public SearchManager getSearchManager() {
 		
-		return SearchManagerFactory.getInstance();
+		return SearchManagerSingleton.getInstance();
 		
 	}
 
