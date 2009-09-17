@@ -24,7 +24,6 @@ package org.jmule.core.networkmanager;
 
 import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
-import java.net.InetSocketAddress;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +47,16 @@ import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketFactory;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.IPAddress;
+import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.networkmanager.JMConnection.ConnectionStatus;
 import org.jmule.core.peermanager.InternalPeerManager;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerException;
 import org.jmule.core.peermanager.PeerManagerSingleton;
+import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.searchmanager.InternalSearchManager;
 import org.jmule.core.searchmanager.SearchManagerSingleton;
 import org.jmule.core.searchmanager.SearchQuery;
@@ -73,8 +75,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:15:08 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	
@@ -281,7 +283,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 	
-	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, long... partsData) {
+	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... partsData) {
 		try {
 			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
 			Packet packet = PacketFactory.getPeerRequestFileParts(fileHash, partsData);
@@ -370,6 +372,28 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			cause.printStackTrace();
 		}
 	}
+	
+	public void sendQueueRanking(String peerIP, int peerPort, int queueRank) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getQueueRankingPacket(queueRank);
+			peer_connection.send(packet);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void sendCallBackRequest(String peerIP, int peerPort, Int128 clientID, FileHash fileHash, IPAddress buddyIP, short buddyPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getKadCallBackRequest(clientID, fileHash, buddyIP, buddyPort);
+			peer_connection.send(packet);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort, UserHash userHash,
 			ClientID clientID, int peerPacketPort, TagList tagList,
@@ -425,6 +449,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				serverIP, 
 				serverPort);		
 	}
+	
+
 
 	public void connectToServer(String ip, int port) throws NetworkManagerException {
 		if (server_connection != null)
@@ -529,7 +555,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void receivedSearchResult(SearchResultItemList resultList) {
-		_search_manager.receivedSearchResult(resultList);
+		_search_manager.receivedServerSearchResult(resultList);
 	}
 
 	public void receivedServerList(List<String> ipList, List<Integer> portList){
@@ -541,7 +567,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void receivedSourcesFromServer(FileHash fileHash, List<ClientID> clientIDList, List<Integer> portList) {
-		_download_manager.receivedSourcesFromServer(fileHash, clientIDList, portList);
+		List<Peer> peer_list = _peer_manager.createPeerList(clientIDList, portList, PeerSource.SERVER);
+		_download_manager.addDownloadPeers(fileHash, peer_list);
 	}
 
 	public void receivedCompressedFileChunkFromPeer(String peerIP, int peerPort,
@@ -570,7 +597,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 	public void receivedFileRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_download_manager.receivedFileRequestFromPeer(peerIP, peerPort, fileHash);
+		_upload_manager.receivedFileRequestFromPeer(peerIP, peerPort, fileHash);
 	}
 
 	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort,
@@ -591,7 +618,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 	public void receivedHashSetResponseFromPeer(String peerIP, int peerPort,
 			PartHashSet partHashSet) {
-		_download_manager.receivedHashSetResponseFromPeer(peerIP, peerPort, partHashSet);
+		_download_manager.receivedHashSetResponseFromPeer(peerIP, peerPort, partHashSet.getFileHash(), partHashSet);
 	}
 
 	public void receivedQueueRankFromPeer(String peerIP, int peerPort, int queueRank) {
@@ -603,8 +630,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		_download_manager.receivedRequestedFileChunkFromPeer(peerIP, peerPort, fileHash, chunk);
 	}
 
-	public void receivedSlotGivenFromPeer(String peerIP, int peerPort, FileHash fileHash) {
-		_download_manager.receivedSlotGivenFromPeer(peerIP, peerPort, fileHash);
+	public void receivedSlotGivenFromPeer(String peerIP, int peerPort) {
+		_download_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
+	}
+	
+	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort) {
+		_upload_manager.receivedSlotReleaseFromPeer(peerIP, peerPort);
 	}
 
 	public void receivedSlotRequestFromPeer(String peerIP, int peerPort,
