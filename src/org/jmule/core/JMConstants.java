@@ -27,8 +27,8 @@ import java.util.StringTokenizer;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/11 09:38:40 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:37:38 $$
  */
 public class JMConstants {
      
@@ -57,6 +57,8 @@ public class JMConstants {
 	  public static final String CURRENT_JMULE_VERSION     = IS_NIGHTLY_BUILD ? DEV_VERSION : ( JMULE_VERSION + ( IS_BETA ? " Beta" : "" ) );
 	  
 	  public static final String JMULE_FULL_NAME           = JMULE_NAME + " " + CURRENT_JMULE_VERSION; 
+	  
+	  public static final String KEY_SEPARATOR			   = ":";
 	  
 	  public static final String  OSName = System.getProperty("os.name");
 	  public static final String  OSVersion = System.getProperty("os.version");
