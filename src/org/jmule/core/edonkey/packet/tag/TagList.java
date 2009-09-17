@@ -22,18 +22,21 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.jmule.core.utils.Misc;
 
 
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/18 09:33:26 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:52:59 $$
  */
 public class TagList implements Iterable<Tag> {
 
@@ -126,6 +129,17 @@ public class TagList implements Iterable<Tag> {
 		int result = 0;
 		for(Tag tag : tagList)
 			result += tag.getSize();
+		return result;
+	}
+	
+	public ByteBuffer getAsByteBuffer() {
+		ByteBuffer result = Misc.getByteBuffer(getByteSize());
+		for(Tag tag : tagList) {
+			ByteBuffer b = tag.getAsByteBuffer();
+			b.position(0);
+			result.put(b);
+		}
+		result.position(0);
 		return result;
 	}
 	
