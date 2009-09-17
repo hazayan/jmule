@@ -22,7 +22,7 @@
  */
 package org.jmule.core.networkmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_HELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:16:38 $
  */
 public class PacketReader {
 
@@ -446,9 +446,11 @@ public class PacketReader {
 					}
 					
 					case OP_SLOTGIVEN : {
-						byte[] file_hash = new byte[16];
-						packet_data.get(file_hash);
-						_network_manager.receivedSlotGivenFromPeer(peerIP, peerPort, new FileHash(file_hash));
+						_network_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
+						break;
+					}
+					
+					case OP_SLOTRELEASE : { 
 						break;
 					}
 					
@@ -537,7 +539,7 @@ public class PacketReader {
 					
 					long chunkStart = Convert.intToLong(packet_data.getInt());
 			    	long chunkEnd = Convert.intToLong(packet_data.getInt());
-			    	long compressedSize = packet_data.capacity() - packet_data.position()-1;
+			    	long compressedSize = packet_data.capacity() - packet_data.position();
 			    	ByteBuffer data = Misc.getByteBuffer(compressedSize);
 			    	packet_data.get(data.array());
 			    	
