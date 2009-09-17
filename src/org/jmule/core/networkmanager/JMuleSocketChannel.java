@@ -29,14 +29,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.jmule.core.speedmanager.BandwidthController;
-import org.jmule.core.speedmanager.SpeedManagerImpl;
+import org.jmule.core.speedmanager.SpeedManagerSingleton;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/31 17:24:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:28:11 $$
  */
 public class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -61,8 +61,8 @@ public class JMuleSocketChannel {
 	}
 	
 	private void init() {
-		uploadController = SpeedManagerImpl.getInstance().getUploadController();
-		downloadController = SpeedManagerImpl.getInstance().getDownloadController();
+		uploadController = SpeedManagerSingleton.getInstance().getUploadController();
+		downloadController = SpeedManagerSingleton.getInstance().getDownloadController();
 	}
 
 	public void close() throws IOException {
