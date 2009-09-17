@@ -33,6 +33,7 @@ import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.IPAddress;
+import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.networkmanager.JMConnection.ConnectionStatus;
 import org.jmule.core.searchmanager.SearchQuery;
@@ -46,8 +47,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:13:04 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -109,7 +110,7 @@ public interface InternalNetworkManager extends NetworkManager {
 	
 	public void sendUploadRequest(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, long... partsData);
+	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... requestData);
 	
 	public void sendPartHashSetRequest(String peerIP, int peerPort, FileHash fileHash);
 	
@@ -126,6 +127,10 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void sendSlotGiven(String peerIP, int peerPort, FileHash fileHash);
 	
 	public void sendFileNotFound(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendQueueRanking(String peerIP, int peerPort, int queueRank);
+	
+	public void sendKallBackRequest(String peerIP, int peerPort, Int128 clientID, FileHash fileHash, IPAddress buddyIP, short buddyPort);
 	
 	public void receivedHelloFromPeerAndRespondTo(String peerIP, 
 			  int peerPort, 
@@ -157,7 +162,9 @@ public interface InternalNetworkManager extends NetworkManager {
 	
 	public void receivedSlotRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void receivedSlotGivenFromPeer(String peerIP, int peerPort, FileHash fileHash);
+	public void receivedSlotGivenFromPeer(String peerIP, int peerPort);
+	
+	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort);
 	
 	public void receivedSlotTakenFromPeer(String peerIP, int peerPort);
 	
