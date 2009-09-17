@@ -24,15 +24,15 @@ package org.jmule.core.downloadmanager.strategy;
 
 import org.jmule.core.downloadmanager.FilePartStatus;
 import org.jmule.core.downloadmanager.FileRequestList;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:47 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:44:02 $$
  */
 public interface DownloadStrategy {
 

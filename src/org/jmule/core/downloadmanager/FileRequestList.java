@@ -27,13 +27,13 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:07 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
  */
 public class FileRequestList extends Hashtable<Peer,FragmentList>{
 	
@@ -112,13 +112,13 @@ public class FileRequestList extends Hashtable<Peer,FragmentList>{
 	}
 	
 	public String toString() {
-		String result="{ ";
-		for(int i = 0;i<this.keySet().toArray().length;i++) {
-			Peer p = (Peer)this.keySet().toArray()[i];
+		String result = "{ ";
+		for (int i = 0; i < this.keySet().toArray().length; i++) {
+			Peer p = (Peer) this.keySet().toArray()[i];
 			FragmentList f = this.get(p);
-			result+=" "+p.getAddress()+" : "+p.getPort()+" : "+f+"";
+			result += " " + p.getIP() + " : " + p.getPort() + " : " + f + "";
 		}
-		result+=" }";
+		result += " }";
 		return result;
 	}
 

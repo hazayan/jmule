@@ -24,11 +24,9 @@ package org.jmule.core.downloadmanager;
 
 import java.util.List;
 
-import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleManager;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.FileHash;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.edonkey.ED2KFileLink;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.PartialFile;
 
@@ -36,44 +34,38 @@ import org.jmule.core.sharingmanager.PartialFile;
  * Created on 2008-Apr-20
  * @author javajox
  * @author binary
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:56:21 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
  */
 public interface DownloadManager extends JMuleManager {
-	
 
-	public void addDownload(SearchResultItem searchResult);
-	
-	public void addDownload(ED2KFileLink fileLink);
-	
-	public void addDownload(PartialFile partialFile);
+	public void addDownload(SearchResultItem searchResult)
+			throws DownloadManagerException;
 
-	public DownloadSession getDownload(FileHash fileHash);
-	
-	public DownloadSession getDownload(long i);
-	
+	public void addDownload(ED2KFileLink fileLink)
+			throws DownloadManagerException;
+
+	public void addDownload(PartialFile partialFile)
+			throws DownloadManagerException;
+
+	public DownloadSession getDownload(FileHash fileHash)
+			throws DownloadManagerException;
+
 	public int getDownloadCount();
-	
-	public void startDownload(FileHash fileHash);
-	
-	public void stopDownload(FileHash fileHash);
-	
-	public void removeDownload(FileHash fileHash);
-	
+
+	public void startDownload(FileHash fileHash)
+			throws DownloadManagerException;
+
+	public void stopDownload(FileHash fileHash) throws DownloadManagerException;
+
+	public void removeDownload(FileHash fileHash) throws DownloadManagerException;
+
 	public boolean hasDownload(FileHash fileHash);
 
-	public JMIterable<DownloadSession> getDownloads();
-	
-	/**
-	 * Add peers which have fileHash to the download session identified by fileHash
-	 * @param fileHash
-	 * @param peerList
-	 */
-	public void addDownloadPeers(FileHash fileHash, List<Peer> peerList);
-	
+	public List<DownloadSession> getDownloads();
 
 	public void addDownloadManagerListener(DownloadManagerListener listener);
-	
+
 	public void removeDownloadMangerListener(DownloadManagerListener listener);
 	
 }

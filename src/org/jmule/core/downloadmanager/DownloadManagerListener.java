@@ -22,14 +22,14 @@
  */
 package org.jmule.core.downloadmanager;
 
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 
 /**
  * Created on 07-10-2008
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/04 14:26:08 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
  */
 public interface DownloadManagerListener {
 

@@ -24,7 +24,7 @@ package org.jmule.core.downloadmanager;
 
 import java.util.Hashtable;
 
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 
 /**
@@ -32,8 +32,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * and count total availability of the file in the network.
  * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/30 16:42:43 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
  */
 public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 	private int partCount;
@@ -58,7 +58,7 @@ public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 		for(int i = 0;i <keySet().size();i++) {
 			Peer p = (Peer)keySet().toArray()[i];
 			result += "{ ";
-			result+= p.getAddress()+" : "+p.getPort()+" ";
+			result+= p.getIP()+" : "+p.getPort()+" ";
 			result+=" BitSet :  " +get(p);
 			result +=" } ";
 		}

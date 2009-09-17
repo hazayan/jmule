@@ -27,13 +27,21 @@ import org.jmule.core.JMException;
 /**
  * Created on 05-01-2008
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:09 $$
+ * @version $$Revision: 1.1 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
  */
-public class DownloadException extends JMException {
+public class DownloadManagerException extends JMException {
 
-	public DownloadException(String str) {
+	public DownloadManagerException() {
+		super();
+	}
+	
+	public DownloadManagerException(String str) {
 		super(str);
+	}
+	
+	public DownloadManagerException(Throwable t) {
+		super(t);
 	}
 	
 }
