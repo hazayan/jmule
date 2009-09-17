@@ -131,8 +131,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:01:40 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:15:47 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }	
@@ -933,7 +933,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 										}
 										Logger.getSingleton().logMessage("KAD callback request, Peer : connected & send packet to :  " + peer);
 												
-										_network_manager.sendKallBackRequest(peer.getIP(), peer.getPort(), clientID, fileHash, ipAddress, port);
+										_network_manager.sendCallBackRequest(peer.getIP(), peer.getPort(), clientID, fileHash, ipAddress, port);
 										try {
 											Thread.sleep(500);
 										} catch (InterruptedException e) {
