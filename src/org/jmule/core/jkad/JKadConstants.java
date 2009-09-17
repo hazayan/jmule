@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:34:23 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:59:12 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -170,6 +170,12 @@ public class JKadConstants {
 	public static final byte KADEMLIA2_HELLO_REQ			= (byte) 0x11;
 	public static final byte KADEMLIA2_HELLO_RES 			= (byte) 0x19;
 
+	public static final byte KADEMLIA2_HELLO_RES_ACK		= (byte) 0x22;
+	
+	public static final byte KADEMLIA_FIREWALLED2_REQ       = (byte) 0x53;
+	
+	public static final byte KADEMLIA2_FIREWALLUDP			= (byte) 0x62;
+	
 	public static final byte KADEMLIA2_SEARCH_KEY_REQ		= (byte) 0x33;
 	public static final byte KADEMLIA2_SEARCH_SOURCE_REQ	= (byte) 0x34;
 	public static final byte KADEMLIA2_SEARCH_NOTES_REQ		= (byte) 0x35;
@@ -178,8 +184,14 @@ public class JKadConstants {
 	
 	public static final byte KADEMLIA2_PUBLISH_KEY_REQ		= (byte) 0x43;
 	public static final byte KADEMLIA2_PUBLISH_SOURCE_REQ	= (byte) 0x44;
+	public static final byte KADEMLIA2_PUBLISH_NOTES_REQ	= (byte) 0x45;
 	
 	public static final byte KADEMLIA2_PUBLISH_RES			= (byte) 0x4B;
+
+	public static final byte KADEMLIA2_PUBLISH_RES_ACK		= (byte) 0x4C;
+	
+	public static final byte KADEMLIA2_PING					= (byte) 0x60;
+	public static final byte KADEMLIA2_PONG					= (byte) 0x61;
 	
 	public static final byte FIND_VALUE 					= (byte) 0x02;
 	public static final byte STORE      					= (byte) 0x04;
