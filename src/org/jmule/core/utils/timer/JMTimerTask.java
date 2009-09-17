@@ -27,9 +27,33 @@ import java.util.TimerTask;
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/06 17:53:40 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:33:10 $
  */
 public abstract class JMTimerTask extends TimerTask {
-
+	private boolean started = false;
+	private JMTimer timer;
+	
+	public JMTimerTask(JMTimer timer) {
+		this.timer = timer;
+	}
+	
+	public boolean isStarted() {
+		return started;
+	}
+	
+	void setStarted() {
+		started = true;
+	}
+	
+	void setStopped() {
+		started = false;
+	}
+	
+	public boolean cancel() {
+		setStopped();
+		timer.purge();
+		return super.cancel();
+	}
+	
 }

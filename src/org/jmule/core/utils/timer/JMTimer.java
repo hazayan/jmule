@@ -27,8 +27,8 @@ import java.util.Timer;
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/06 17:53:40 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:33:10 $
  */
 public class JMTimer {
 
@@ -39,11 +39,17 @@ public class JMTimer {
 	}
 	
 	public void addTask(JMTimerTask task, long startTime) {
+		task.setStarted();
 		timer.schedule(task, startTime);
 	}
 	
-	public void addTask(JMTimerTask task, long startTime, boolean repeat) {
-		timer.scheduleAtFixedRate(task, startTime, startTime);
+	public void addTask(JMTimerTask task, long delay, boolean repeat) {
+		task.setStarted();
+		timer.scheduleAtFixedRate(task, delay, delay);
+	}
+	
+	public void purge() {
+		timer.purge();
 	}
 	
 	public void stop() {
