@@ -26,13 +26,13 @@ import java.io.File;
 import java.util.List;
 
 import org.jmule.core.JMuleManager;
-import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.edonkey.UserHash;
 
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/13 06:37:01 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:40:37 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -60,6 +60,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
 	public static final int          UPLOAD_QUEUE_SIZE              =     200;
+	public static final int          UPLOAD_QUEUE_SLOTS             =     2;
 	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 30;
 	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;

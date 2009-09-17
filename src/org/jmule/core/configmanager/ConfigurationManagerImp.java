@@ -32,7 +32,7 @@ import java.util.Properties;
 import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
-import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.utils.AddressUtils;
 import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.NetworkUtils;
@@ -40,8 +40,8 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/27 12:18:40 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:40:37 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
