@@ -53,7 +53,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadSingleton;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.indexer.Source;
 import org.jmule.core.jkad.search.Search;
 import org.jmule.core.jkad.search.SearchResultListener;
@@ -86,8 +86,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.27 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
+ * @version $$Revision: 1.28 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:05:18 $$
  */
 public class DownloadSession implements JMTransferSession {
 	private final static int PEER_MONITOR_INTERVAL = 1000;
@@ -109,7 +109,7 @@ public class DownloadSession implements JMTransferSession {
 	private Map<String, Peer> peer_list = new ConcurrentHashMap<String, Peer>();
 	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
 	private DownloadStatusList download_status_list = new DownloadStatusList();
-	private InternalJKadManager jkad = (InternalJKadManager) JKadSingleton
+	private InternalJKadManager jkad = (InternalJKadManager) JKadManagerSingleton
 			.getInstance();
 
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton

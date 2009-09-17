@@ -26,7 +26,6 @@ import static org.jmule.core.utils.Convert.byteToInt;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -38,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:48 $
  */
 public class Utils {
 	

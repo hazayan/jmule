@@ -43,7 +43,7 @@ import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.jkad.JKadManager;
-import org.jmule.core.jkad.JKadSingleton;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.networkmanager.NetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.PeerManager;
@@ -62,8 +62,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:56:31 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:05:18 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -404,7 +404,7 @@ public class JMuleCoreImpl implements JMuleCore {
 	}
 	
 	public JKadManager getJKadManager() {
-		return JKadSingleton.getInstance();
+		return JKadManagerSingleton.getInstance();
 	}
 	
 	public NetworkManager getNetworkManager() {

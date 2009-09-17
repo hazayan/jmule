@@ -28,13 +28,12 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKad;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
-import org.jmule.core.jkad.net.packet.KadPacket;
-import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 import org.jmule.core.jkad.routingtable.KadContact;
 
@@ -42,8 +41,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:30:29 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:08:24 $
  */
 public class PublishSourceTask extends PublishTask {
 
@@ -72,8 +71,8 @@ public class PublishSourceTask extends PublishTask {
 					List<KadContact> results) {
 				
 				for(KadContact contact : results) {
-					KadPacket packet = PacketFactory.getPublishReqPacket(targetID, JKad.getInstance().getClientID(), tagList);
-					udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					KadPacket packet = PacketFactory.getPublishReqPacket(targetID, _jkad_manager.getClientID(), tagList);
+					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 				}
 			}
 			

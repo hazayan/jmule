@@ -27,13 +27,13 @@ import static org.jmule.core.jkad.JKadConstants.DEFAULT_PACKET_LISTENER_TIMEOUT;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
-import org.jmule.core.jkad.net.packet.KadPacket;
+import org.jmule.core.jkad.packet.KadPacket;
 
 /**
  * Created on Feb 8, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:26:21 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:06:05 $
  */
 public abstract class PacketListener {
 	private Byte packetOPCode;

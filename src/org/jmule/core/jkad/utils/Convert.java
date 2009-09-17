@@ -24,14 +24,12 @@ package org.jmule.core.jkad.utils;
 
 import java.util.BitSet;
 
-import org.jmule.core.edonkey.utils.Utils;
-
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:22:50 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:48 $
  */
 public class Convert {
 	

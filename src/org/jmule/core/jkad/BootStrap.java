@@ -47,8 +47,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:57:14 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:05:18 $
  */
 public class BootStrap {
 
@@ -79,7 +79,7 @@ public class BootStrap {
 	public void start() {
 		routingTable = RoutingTable.getSingleton();
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
-		_jkad_manager = (InternalJKadManager) JKadSingleton.getInstance();
+		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
 		isStarted = true;
 		List<KadContact> contactList = routingTable.getRandomContacts(BOOTSTRAP_CONTACTS);
 		

@@ -24,14 +24,14 @@ package org.jmule.core.jkad.publisher;
 
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
-import org.jmule.core.net.JMUDPConnection;
+import org.jmule.core.networkmanager.JMUDPConnection;
 
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:47:27 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:08:24 $
  */
 public abstract class PublishTask {
 
@@ -49,7 +49,6 @@ public abstract class PublishTask {
 	public PublishTask(Int128 publishID,PublishTaskListener listener) {
 		super();
 		this.publishID = publishID;
-		udpConnection = JMUDPConnection.getInstance();
 		lastpublishTime = 0;
 		task_listener = listener;
 		this.task_instance = this;

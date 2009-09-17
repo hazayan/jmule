@@ -46,8 +46,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:57:37 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:05:18 $
  */
 public class FirewallChecker {
 	
@@ -95,7 +95,7 @@ public class FirewallChecker {
 	public void start() {
 		is_started = true;
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
-		_jkad_manager = (InternalJKadManager) JKadSingleton.getInstance();
+		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
 		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL, firewall_check_task, true);
 		firewall_check_task.run();
 	}

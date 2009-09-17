@@ -41,8 +41,8 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:33 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:08:24 $
  */
 
 public class Publisher {
@@ -118,10 +118,6 @@ public class Publisher {
 			
 		};
 		
-	}
-	
-	public void start() {
-		isStarted = true;
 		publisher_maintenance = new Task() {
 			public void run() {
 				for(PublishKeywordTask task : keywordTasks.values()){
@@ -155,13 +151,11 @@ public class Publisher {
 			
 		};
 		
-		Timer.getSingleton().addTask(PUBLISHER_MAINTENANCE_INTERVAL, publisher_maintenance, true);
 	}
 	
-	public void publishKeyword(Int128 fileID, List<Tag> tagList) {
-		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID, tagList);
-		keywordTasks.put(fileID, task);
-		notifyListeners(task, TaskStatus.ADDED);
+	public void start() {
+		isStarted = true;
+		Timer.getSingleton().addTask(PUBLISHER_MAINTENANCE_INTERVAL, publisher_maintenance, true);
 	}
 	
 	public void stop() {
@@ -176,6 +170,14 @@ public class Publisher {
 		for(Int128 key : sourceTasks.keySet())
 			sourceTasks.get(key).stop();
 	}
+	
+	public void publishKeyword(Int128 fileID, List<Tag> tagList) {
+		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID, tagList);
+		keywordTasks.put(fileID, task);
+		notifyListeners(task, TaskStatus.ADDED);
+	}
+	
+
 		
 	public void publishSource(Int128 fileID, List<Tag> tagList)  {
 		PublishSourceTask task = new PublishSourceTask(sourceTaskListener,fileID, tagList);
