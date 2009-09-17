@@ -32,21 +32,22 @@ import java.util.List;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
-import org.jmule.core.jkad.net.packet.KadPacket;
-import org.jmule.core.jkad.net.packet.PacketFactory;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTable;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
-import org.jmule.core.net.JMUDPConnection;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:14 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:57:37 $
  */
 public class FirewallChecker {
 	
@@ -54,14 +55,15 @@ public class FirewallChecker {
 	
 	private boolean firewalled = true;
 	private long lastStateChange = System.currentTimeMillis();
-	
-	private JMUDPConnection udpConnection = JMUDPConnection.getInstance();
-	private RoutingTable routingTable = null;
-	private Task firewallCheckTask = null;
+
+	private InternalNetworkManager _network_manager;
+	private InternalJKadManager _jkad_manager;
+	private RoutingTable routing_table = null;
+	private Task firewall_check_task = null;
 	
 	private IPAddress my_ip_address = null;
 	
-	private boolean isStarted = false;
+	private boolean is_started = false;
 	
 	public static FirewallChecker getSingleton() {
 		if (singleton == null)
@@ -70,17 +72,17 @@ public class FirewallChecker {
 	}
 
 	private FirewallChecker() {
-		routingTable = RoutingTable.getSingleton();
-		firewallCheckTask = new Task() {
+		routing_table = RoutingTable.getSingleton();
+		firewall_check_task = new Task() {
 			public void run() {
-				if (!JKad.getInstance().isConnected()) {return ;}
-				List<KadContact> list = routingTable.getRandomContacts(FIREWALL_CHECK_CONTACTS);
-				ConfigurationManager configManager = ConfigurationManagerFactory.getInstance();
+				if (!_jkad_manager.isConnected()) {return ;}
+				List<KadContact> list = routing_table.getRandomContacts(FIREWALL_CHECK_CONTACTS);
+				ConfigurationManager configManager = ConfigurationManagerSingleton.getInstance();
 				for(KadContact contact : list) {
 					KadPacket packet;
 					try {
 						packet = PacketFactory.getFirewalled1Req(configManager.getTCP());
-						udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+						_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 					} catch (ConfigurationManagerException e) {
 						e.printStackTrace();
 					}
@@ -90,23 +92,25 @@ public class FirewallChecker {
 		};
 	}
 	
-	public void startNowFirewallCheck() {
-		firewallCheckTask.run();
-	}
-
-	public boolean isStarted() {
-		return isStarted;
-	}
-	
 	public void start() {
-		isStarted = true;		
-		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL, firewallCheckTask, true);
-		firewallCheckTask.run();
+		is_started = true;
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		_jkad_manager = (InternalJKadManager) JKadSingleton.getInstance();
+		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL, firewall_check_task, true);
+		firewall_check_task.run();
 	}
 	
 	public void stop() {
-		isStarted = false;
-		Timer.getSingleton().removeTask(firewallCheckTask);
+		is_started = false;
+		Timer.getSingleton().removeTask(firewall_check_task);
+	}
+	
+	public void startNowFirewallCheck() {
+		firewall_check_task.run();
+	}
+
+	public boolean isStarted() {
+		return is_started;
 	}
 	
 	public boolean isFirewalled() {
@@ -124,12 +128,12 @@ public class FirewallChecker {
 		data = reverseArray(data);
 		
 		KadPacket packet = PacketFactory.getFirewalled1Res(data);
-		udpConnection.sendPacket(packet, sender);
+		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender.getPort());
 	}
 	
 	public void sendFirewallRequest(InetSocketAddress sender, Int128 contactID) {
 		
-		KadContact contact = routingTable.getContact(contactID);
+		KadContact contact = routing_table.getContact(contactID);
 		if (contact == null) return ;
 		contact.setLastUDPFirewallResponse(System.currentTimeMillis());
 		
@@ -137,11 +141,11 @@ public class FirewallChecker {
 		contact.setUDPFirewallQueries(contact.getUDPFirewallQueries() + 1);
 		
 		KadPacket packet = PacketFactory.getFirewalled1Req(contact.getTCPPort());
-		udpConnection.sendPacket(packet, sender);
+		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender.getPort());
 	}
 	
 	public void porcessFirewallResponse(InetSocketAddress sender, IPAddress address) {
-		KadContact contact = routingTable.getContact(new IPAddress(sender));
+		KadContact contact = routing_table.getContact(new IPAddress(sender));
 		if (contact != null) {
 			contact.setLastUDPFirewallResponse(System.currentTimeMillis());
 			contact.setUDPFirewallResponses(contact.getUDPFirewallResponses() + 1);
