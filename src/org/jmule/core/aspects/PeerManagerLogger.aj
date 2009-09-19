@@ -30,8 +30,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
  */
 public privileged aspect PeerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.peermanager.PeerManager");
@@ -39,17 +39,6 @@ public privileged aspect PeerManagerLogger {
 	after() throwing (Throwable t): execution (* PeerManager.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
-	
-/*	before(Peer peer) : args(peer) && execution(void PeerManager.addUnknownPeer(Peer)) {
-	
-	}
-	
-	before(FileHash fileHash, List<Peer> peerList) : args(fileHash, peerList) && execution(void PeerManager.addPeer(FileHash,List)) {
-	}
-	
-	after(Peer p) returning(boolean result) : args(p) && execution(boolean PeerManager.hasPeer(Peer)) {
-	}*/
-
 	
 	
 }

@@ -30,12 +30,12 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Oct 10, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:36:56 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 06:42:26 $
  */
 public aspect SearchManagerLogger {
 
-	private Logger log = Logger.getLogger("org.jmule.core.edonkey.SearchManager");
+	private Logger log = Logger.getLogger("org.jmule.core.edonkey.searchmanager.SearchManager");
 	
 	after() throwing (Throwable t): execution (* SearchManager.*(..)) {
 		log.warning(Misc.getStackTrace(t));

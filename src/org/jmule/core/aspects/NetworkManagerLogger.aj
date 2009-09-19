@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -24,21 +24,18 @@ package org.jmule.core.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.utils.Misc;
-
+import org.jmule.core.networkmanager.NetworkManagerImpl;
 /**
- * 
+ * Created on Sep 18, 2009
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 06:42:26 $
  */
-public privileged aspect DownloadSessionLogger {
-
-	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.DownloadSession");
+public privileged aspect NetworkManagerLogger {
+	private Logger log = Logger.getLogger("org.jmule.core.networkmanager.NetworkManager");
 	
-	after() throwing (Throwable t): execution (* DownloadSession.*(..)) {
+	after() throwing (Throwable t): execution (* NetworkManagerImpl.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
-	
 }

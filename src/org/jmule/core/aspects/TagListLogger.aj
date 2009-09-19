@@ -30,11 +30,11 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
  */
 public aspect TagListLogger {
-	private Logger log = Logger.getLogger("org.jmule.core.edonkey.packet.tag.impl.TagList");
+	private Logger log = Logger.getLogger("org.jmule.core.edonkey.packet.tag.TagList");
 
 	after() throwing (Throwable t): execution (* TagList.*(..)) {
 		log.warning(Misc.getStackTrace(t));

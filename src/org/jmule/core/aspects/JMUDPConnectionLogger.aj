@@ -23,22 +23,20 @@
 package org.jmule.core.aspects;
 
 import java.util.logging.Logger;
-
-import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.networkmanager.*;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
+ * @version $$Revision: 1.1 $$
  * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
  */
-public privileged aspect DownloadSessionLogger {
-
-	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.DownloadSession");
+public privileged aspect JMUDPConnectionLogger {
+	private Logger log = Logger.getLogger("org.jmule.core.networkmanager.JMUDPConnection");
 	
-	after() throwing (Throwable t): execution (* DownloadSession.*(..)) {
+	after() throwing (Throwable t): execution (* JMUDPConnection.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
-	
+
 }

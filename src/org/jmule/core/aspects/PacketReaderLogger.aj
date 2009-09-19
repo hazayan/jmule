@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -22,32 +22,21 @@
  */
 package org.jmule.core.aspects;
 
-import java.io.IOException;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
 import java.util.logging.Logger;
-
+import org.jmule.core.networkmanager.PacketReader;
 import org.jmule.core.utils.Misc;
 
 /**
- * 
+ * Created on Sep 18, 2009
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * @version $Revision: 1.1 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 06:42:26 $
  */
-public privileged aspect UDPConnectionImplLogger {
-	private Logger log = Logger.getLogger("org.jmule.core.net.impl.UDPConnectionImpl");
-	
-	after() throwing (Throwable t): execution (* JMUDPConnection.*(..)) {
+public privileged aspect PacketReaderLogger {
+	private Logger log = Logger
+			.getLogger("org.jmule.core.networkmanager.PacketReader");
+
+	after() throwing (Throwable t): execution (* PacketReader.*(..)) {
 		log.warning(Misc.getStackTrace(t));
-	}
-	
-	after(SocketAddress s) throwing(IOException e) : args(*,s) && call(* DatagramChannel.send(ByteBuffer,SocketAddress)) {
-		log.warning("Failed to send UDP packet to "+s);
-	}
-	
-	before() : call (void JMUDPConnection.ban()) {
-		log.warning("UDP flood");
 	}
 }

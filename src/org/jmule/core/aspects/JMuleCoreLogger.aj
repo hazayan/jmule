@@ -37,10 +37,10 @@ import org.jmule.core.utils.Misc;
  * 
  * @author binary256
  * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
  */
-public privileged aspect JMuleCoreImplLogger {
-	private Logger log = Logger.getLogger("org.jmule");
+public privileged aspect JMuleCoreLogger {
+	private Logger log = Logger.getLogger("org.jmule.core");
 	
 	before() : call( JMuleCoreImpl.new()) {
 		log.info(" JMule Core creation ");

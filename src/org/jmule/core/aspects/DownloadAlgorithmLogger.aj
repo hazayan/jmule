@@ -29,11 +29,11 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Sep, 13 2008 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
  */
 public aspect DownloadAlgorithmLogger {
-	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.algorithm.DownloadAlgorithmImpl");
+	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.algorithm.DownloadAlgorithm");
 	
 	after() throwing (Throwable t): execution (* DownloadStrategyImpl.*(..)) {
 		log.warning(Misc.getStackTrace(t));

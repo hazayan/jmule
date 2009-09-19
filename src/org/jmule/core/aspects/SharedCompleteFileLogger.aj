@@ -24,21 +24,19 @@ package org.jmule.core.aspects;
 
 import java.util.logging.Logger;
 
+import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.utils.Misc;
-
 /**
  * 
  * @author binary256
  * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
  */
-public privileged aspect JMConnectionLogger {
+public aspect SharedCompleteFileLogger {
+	private Logger log = Logger.getLogger("org.jmule.core.sharedmanager.SharedCompleteFileImpl");
 	
-	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.Server");
-	
-	after() throwing (Throwable t): execution (* JMConnection.*(..)) {
+	after() throwing (Throwable t): execution (* CompletedFile.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
 	
-
 }
