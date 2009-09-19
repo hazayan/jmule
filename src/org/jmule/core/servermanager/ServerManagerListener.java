@@ -26,8 +26,8 @@ package org.jmule.core.servermanager;
 /**
  * Created on 2008-Jun-03
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:18:59 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:21:53 $$
  */
 public interface ServerManagerListener {
      	
@@ -79,9 +79,7 @@ public interface ServerManagerListener {
 	  * Auto connect process started.
 	  */
 	 public void autoConnectStarted();
-	 /**
-	  * Auto connect process stopped.
-	  */
-	 public void autoConnectStopped();
+	 
+	 public void autoConnectFailed();
 	 
 }
