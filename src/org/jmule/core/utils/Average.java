@@ -22,74 +22,60 @@
  */
 package org.jmule.core.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:32:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:02:49 $$
  */
-public class Average {
+public class Average<N extends Number> {
 
-	private float data[];
-	
+	private List<N> number_list;
+
 	private int pos;
-	
+
 	private boolean useAll = false;
-	
+
 	public Average(int size) {
-		
-		data = new float[size];
-		
+		number_list = new ArrayList<N>(size);
 		pos = 0;
-		
 	}
 	
-	public void add(float value) {
-		
-		if (pos >= data.length) {
-			
+	public void reset() {
+		number_list.clear();
+		pos = 0;
+	}
+
+	public void add(N value) {
+		if (pos >= number_list.size()) {
 			useAll = true;
-			
-			pos=0;
-			
+			pos = 0;
 		}
-		
-		data[pos++] = value;
+		number_list.set(pos++, value);
 	}
-	
+
 	public float getAverage() {
-		
 		float sum = 0;
-		
 		int max = pos;
-		
 		if (useAll)
-			max = data.length;
-		
-		for(int i = 0;i<max;i++)
-			
-			sum+=data[i];
-		
-		if (max!=0)
-			
-			return (float)((float)sum/(float)max);
-		
+			max = number_list.size();
+		for (int i = 0; i < max; i++)
+			sum += number_list.get(i).floatValue();
+		if (max != 0)
+			return (float) ((float) sum / (float) max);
 		return 0;
 	}
-	
+
 	public String toString() {
-		
-		String result="";
-		
-		result=" [ ";
-		
-		for(int i = 0;i<this.data.length;i++)
-			
-			result+=" "+data[i];
-		
-		result+=" ] ";
-		
+		String result = "";
+		result = " [ ";
+		for (N value : number_list)
+			result += " " + value;
+		result += " ] ";
 		return result;
 	}
-	
+
 }
