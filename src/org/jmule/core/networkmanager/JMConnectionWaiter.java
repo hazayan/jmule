@@ -36,11 +36,11 @@ import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/31 17:24:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:20:38 $$
  */
 public class JMConnectionWaiter{
-	
+
 	public enum WaiterStatus { OPEN, CLOSED };
 	private ConnectionListenerThread connectionListenerThread = null;
 	private ServerSocketChannel listenSocket = null;
@@ -118,7 +118,6 @@ public class JMConnectionWaiter{
 			super("Incoming TCP connections listener");
 			start();
 		}
-
 		
 		public void JMStop() {
 			stop = true;
@@ -128,7 +127,7 @@ public class JMConnectionWaiter{
 		public void run() {
 			while (!stop) {
 				try {
-					JMPeerConnection newConnection = new JMPeerConnection(new JMuleSocketChannel(listenSocket.accept()));
+					new JMPeerConnection(new JMuleSocketChannel(listenSocket.accept()));
 				} catch (IOException e) {
 					if (!listenSocket.isOpen()) return ;
 				}

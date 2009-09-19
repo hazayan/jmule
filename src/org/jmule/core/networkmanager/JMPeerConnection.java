@@ -28,6 +28,7 @@ import java.nio.channels.SocketChannel;
 import java.util.zip.DataFormatException;
 
 import org.jmule.core.JMThread;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.utils.Convert;
 
@@ -35,8 +36,8 @@ import org.jmule.core.utils.Convert;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 14:20:38 $
  */
 public class JMPeerConnection extends JMConnection {
 
@@ -95,7 +96,7 @@ public class JMPeerConnection extends JMConnection {
 				try {
 					connection_status = ConnectionStatus.CONNECTING;
 					jm_socket_channel = new JMuleSocketChannel(SocketChannel.open());
-					jm_socket_channel.connect(remote_inet_socket_address);
+					jm_socket_channel.connect(remote_inet_socket_address, ConfigurationManager.PEER_CONNECTING_TIMEOUT);
 					
 					connection_status = ConnectionStatus.CONNECTED;
 					
@@ -169,13 +170,10 @@ public class JMPeerConnection extends JMConnection {
 					} catch (JMEndOfStreamException e) {
 						notifyDisconnect();
 					} catch (UnknownPacketException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (DataFormatException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}

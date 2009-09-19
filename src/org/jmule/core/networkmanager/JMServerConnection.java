@@ -28,14 +28,15 @@ import java.nio.channels.SocketChannel;
 import java.util.zip.DataFormatException;
 
 import org.jmule.core.JMThread;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.packet.Packet;
 
 /**
  * Created on Aug 20, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 14:20:38 $
  */
 public class JMServerConnection extends JMConnection {
 
@@ -80,8 +81,11 @@ public class JMServerConnection extends JMConnection {
 			public void run() {			
 				try {
 					connection_status = ConnectionStatus.CONNECTING;
-					jm_socket_channel = new JMuleSocketChannel(SocketChannel.open());
-					jm_socket_channel.connect(remote_inet_socket_address);
+					SocketChannel channel = SocketChannel.open();
+					
+					jm_socket_channel = new JMuleSocketChannel(channel);
+					
+					jm_socket_channel.connect(remote_inet_socket_address, ConfigurationManager.SERVER_CONNECTING_TIMEOUT);
 					
 					connection_status = ConnectionStatus.CONNECTED;
 					
@@ -91,7 +95,7 @@ public class JMServerConnection extends JMConnection {
 					
 					_network_manager.serverConnected();
 					
-				} catch (IOException cause) {
+				} catch (Throwable cause) {
 					cause.printStackTrace();
 					connection_status = ConnectionStatus.DISCONNECTED;
 					_network_manager.serverConnectingFailed(cause);
