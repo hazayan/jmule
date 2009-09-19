@@ -35,8 +35,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:28:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:19:23 $$
  */
 public class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -51,6 +51,10 @@ public class JMuleSocketChannel {
 	
 	public void connect(InetSocketAddress address) throws IOException {
 		channel.connect(address);
+	}
+	
+	public void connect(InetSocketAddress address, int connectingTimeout) throws IOException {
+		channel.socket().connect(address,connectingTimeout);
 	}
 	
 	
