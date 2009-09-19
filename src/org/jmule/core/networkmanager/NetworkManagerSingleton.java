@@ -25,17 +25,17 @@ package org.jmule.core.networkmanager;
 /**
  * Created on Aug 19, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
  */
 public class NetworkManagerSingleton {
-	
+
 	private static NetworkManager instance = null;
-	
+
 	public static NetworkManager getInstance() {
 		if (instance == null)
 			instance = new NetworkManagerImpl();
 		return instance;
 	}
-	
+
 }

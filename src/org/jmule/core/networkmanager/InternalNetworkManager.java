@@ -47,99 +47,68 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:15:08 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
  */
 public interface InternalNetworkManager extends NetworkManager {
+	
+	public void addPeer(JMPeerConnection peerConnection);
+	
+	public void addPeer(String ip, int port);
+	
+	public void callBackRequest(ClientID clientID);
 	
 	public void connectToServer(String ip, int port) throws NetworkManagerException;
 	
 	public void disconnectFromServer() throws NetworkManagerException ;
 	
-	public ConnectionStatus getServerConnectionStatus();
-	
-	public void serverConnectingFailed(Throwable cause);
-	
-	public void serverDisconnected();
-	
-	public void serverConnected();
-	
-	public void offerFilesToServer(ClientID userID, List<SharedFile> filesToShare);
-	
-	public void serverListRequest();
+	public void disconnectPeer(String ip, int port);
 	
 	public void doSearchOnServer(SearchQuery searchQuery);
 	
-	public void requestSourcesFromServer(FileHash fileHash, long fileSize);
+	public float getPeerDownloadServiceSpeed(String peerIP, int peerPort);
 	
-	public void callBackRequest(ClientID clientID);
+	public float getPeerDownloadSpeed(String peerIP, int peerPort);
 	
-	public void receivedMessageFromServer(String message);
+	public float getPeerUploadServiceSpeed(String peerIP, int peerPort);
 	
-	public void receivedIDChangeFromServer(ClientID clientID, Set<ServerFeatures> serverFeatures);
+	public float getPeerUploadSpeed(String peerIP, int peerPort);
 	
-	public void receivedServerStatus(int userCount, int fileCount);
+	public ConnectionStatus getServerConnectionStatus();
 	
-	public void receivedServerList(List<String> ipList, List<Integer> portList);
+	public void offerFilesToServer(ClientID userID, List<SharedFile> filesToShare);
 	
-	public void receivedSearchResult(SearchResultItemList resultList);
-	
-	public void receivedSourcesFromServer(FileHash fileHash, List<ClientID> clientIDList, List<Integer> portList);
-	
-	public void receivedCallBackRequest(String ip, int port);
-	
-	public void receivedCallBackFailed();
-	
-	public void addPeer(String ip, int port);
-	
-	public void addPeer(JMPeerConnection peerConnection);
-	
-	public void disconnectPeer(String ip, int port);
+	public void peerConnected(String ip, int port);
 	
 	public void peerConnectingFailed(String ip, int port, Throwable cause);
 	
 	public void peerDisconnected(String ip, int port);
 	
-	public void peerConnected(String ip, int port);
+	public void receivedCallBackFailed();
 	
-	public void sendFileChunk(String peerIP, int peerPort, FileHash fileHash, FileChunk fileChunk);
+	public void receivedCallBackRequest(String ip, int port);
 	
-	public void sendFileRequest(String peerIP, int peerPort, FileHash fileHash);
+	public void receivedCompressedFileChunkFromPeer(String peerIP, int peerPort, FileHash fileHash, FileChunk compressedFileChunk);
 	
-	public void sendFileStatusRequest(String peerIP, int peerPort, FileHash fileHash);
+	public void receivedEMuleHelloFromPeer(String ip, int port,byte clientVersion, byte protocolVersion, TagList tagList);
 	
-	public void sendUploadRequest(String peerIP, int peerPort, FileHash fileHash);
+	public void receivedEndOfDownloadFromPeer(String peerIP, int peerPort);
 	
-	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... requestData);
+	public void receivedFileChunkRequestFromPeer(String peerIP, int peerPort, FileHash fileHash, List<FileChunkRequest> requestedChunks);
 	
-	public void sendPartHashSetRequest(String peerIP, int peerPort, FileHash fileHash);
+	public void receivedFileNotFoundFromPeer(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void sendSlotRelease(String peerIP, int peerPort);
+	public void receivedFileRequestAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, String fileName);
 	
-	public void sendEndOfDownload(String peerIP, int peerPort, FileHash fileHash);
+	public void receivedFileRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void sendFileRequestAnswer(String peerIP, int peerPort, FileHash fileHash, String fileName);
+	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void sendFileStatusAnswer(String peerIP, int peerPort, PartHashSet partHashSet, long fileSize, GapList gapList);
+	public void receivedFileStatusResponseFromPeer(String peerIP, int peerPort, FileHash fileHash, JMuleBitSet partStatus);
 	
-	public void sendFileHashSetAnswer(String peerIP, int peerPort, PartHashSet partHashSet);
+	public void receivedHashSetRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void sendSlotGiven(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void sendFileNotFound(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void sendQueueRanking(String peerIP, int peerPort, int queueRank);
-	
-	public void sendCallBackRequest(String peerIP, int peerPort, Int128 clientID, FileHash fileHash, IPAddress buddyIP, short buddyPort);
-	
-	public void receivedHelloFromPeerAndRespondTo(String peerIP, 
-			  int peerPort, 
-			  UserHash userHash, 
-			  ClientID clientID,  
-			  int peerPacketPort, 
-			  TagList tagList, 
-			  String serverIP, 
-			  int serverPort);
+	public void receivedHashSetResponseFromPeer(String peerIP, int peerPort, PartHashSet partHashSet);
 	
 	public void receivedHelloAnswerFromPeer(String peerIP, 
 			  int peerPort, 
@@ -150,48 +119,87 @@ public interface InternalNetworkManager extends NetworkManager {
 			  String serverIP, 
 			  int serverPort);
 	
-	public void receivedRequestedFileChunkFromPeer(String peerIP, int peerPort, FileHash fileHash, FileChunk chunk);
+	public void receivedHelloFromPeerAndRespondTo(String peerIP, 
+			  int peerPort, 
+			  UserHash userHash, 
+			  ClientID clientID,  
+			  int peerPacketPort, 
+			  TagList tagList, 
+			  String serverIP, 
+			  int serverPort);
 	
-	public void receivedFileChunkRequestFromPeer(String peerIP, int peerPort, FileHash fileHash, List<FileChunkRequest> requestedChunks);
+	public void receivedIDChangeFromServer(ClientID clientID, Set<ServerFeatures> serverFeatures);
 	
-	public void receivedEndOfDownloadFromPeer(String peerIP, int peerPort);
+	public void receivedMessageFromServer(String message);
 	
-	public void receivedHashSetRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void receivedHashSetResponseFromPeer(String peerIP, int peerPort, PartHashSet partHashSet);
-	
-	public void receivedSlotRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void receivedSlotGivenFromPeer(String peerIP, int peerPort);
-	
-	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort);
-	
-	public void receivedSlotTakenFromPeer(String peerIP, int peerPort);
-	
-	public void receivedFileRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void receivedFileRequestAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, String fileName);
-	
-	public void receivedFileNotFoundFromPeer(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
-	
-	public void receivedFileStatusResponseFromPeer(String peerIP, int peerPort, FileHash fileHash, JMuleBitSet partStatus);
-	
-	public void receivedCompressedFileChunkFromPeer(String peerIP, int peerPort, FileHash fileHash, FileChunk compressedFileChunk);
+	public void receivedNewServerDescription(String ip, int port, int challenge, TagList tagList);
 	
 	public void receivedQueueRankFromPeer(String peerIP, int peerPort, int queueRank);
-
-	public void sendKadPacket(KadPacket packet, IPAddress address, int port);
 	
-	public void receiveKadPacket(KadPacket packet);
+	public void receivedRequestedFileChunkFromPeer(String peerIP, int peerPort, FileHash fileHash, FileChunk chunk);
 	
-	public void receivedEMuleHelloFromPeer(String ip, int port,byte clientVersion, byte protocolVersion, TagList tagList);
-	
-	public void receivedServerStatus(String ip , int port, int challenge, long userCount, long fileCount, long softLimit, long hardLimit, Set<ServerFeatures> serverFeatures);
+	public void receivedSearchResult(SearchResultItemList resultList);
 	
 	public void receivedServerDescription(String ip, int port, String name, String description);
 	
-	public void receivedNewServerDescription(String ip, int port, int challenge, TagList tagList);
+	public void receivedServerList(List<String> ipList, List<Integer> portList);
+	
+	public void receivedServerStatus(int userCount, int fileCount);
+	
+	public void receivedServerStatus(String ip , int port, int challenge, long userCount, long fileCount, long softLimit, long hardLimit, Set<ServerFeatures> serverFeatures);
+
+	public void receivedSlotGivenFromPeer(String peerIP, int peerPort);
+
+	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort);
+
+	public void receivedSlotRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void receivedSlotTakenFromPeer(String peerIP, int peerPort);
+	
+	public void receivedSourcesFromServer(FileHash fileHash, List<ClientID> clientIDList, List<Integer> portList);
+	
+	public void receiveKadPacket(KadPacket packet);
+	
+	public void requestSourcesFromServer(FileHash fileHash, long fileSize);
+	
+	public void sendCallBackRequest(String peerIP, int peerPort, Int128 clientID, FileHash fileHash, IPAddress buddyIP, short buddyPort);
+	
+	public void sendEndOfDownload(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendFileChunk(String peerIP, int peerPort, FileHash fileHash, FileChunk fileChunk);
+	
+	public void sendFileHashSetAnswer(String peerIP, int peerPort, PartHashSet partHashSet);
+	
+	public void sendFileNotFound(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... requestData);
+	
+	public void sendFileRequest(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendFileRequestAnswer(String peerIP, int peerPort, FileHash fileHash, String fileName);
+	
+	public void sendFileStatusAnswer(String peerIP, int peerPort, PartHashSet partHashSet, long fileSize, GapList gapList);
+	
+	public void sendFileStatusRequest(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendKadPacket(KadPacket packet, IPAddress address, int port);
+	
+	public void sendPartHashSetRequest(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendQueueRanking(String peerIP, int peerPort, int queueRank);
+	
+	public void sendSlotGiven(String peerIP, int peerPort, FileHash fileHash);
+
+	public void sendSlotRelease(String peerIP, int peerPort);
+	
+	public void sendUploadRequest(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void serverConnected();
+	
+	public void serverConnectingFailed(Throwable cause);
+	
+	public void serverDisconnected();
+	
+	public void serverListRequest();
 	
 }

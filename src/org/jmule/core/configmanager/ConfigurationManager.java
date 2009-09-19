@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:20:38 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:01:50 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -67,6 +67,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
 	
 	public static final int 		 PEER_CONNECTING_TIMEOUT		= 	  1000 * 40;
+	
+	public static final int 		 CONNECTION_TRAFIC_AVERAGE_CHECKS= 	  20;
 	
 	// the network
 	public static final long          DOWNLOAD_BANDWIDTH            =     1024 * 10 * 256;

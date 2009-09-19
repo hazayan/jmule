@@ -75,99 +75,39 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:15:08 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
  */
-public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
-	
-	private Map<String, JMPeerConnection> peer_connections  = new Hashtable<String, JMPeerConnection>();
-	
+public class NetworkManagerImpl extends JMuleAbstractManager implements
+		InternalNetworkManager {
+
+	private Map<String, JMPeerConnection> peer_connections = new Hashtable<String, JMPeerConnection>();
+
 	private InternalPeerManager _peer_manager;
-	private InternalServerManager  _server_manager;
+	private InternalServerManager _server_manager;
 	private InternalConfigurationManager _config_manager;
 	private InternalDownloadManager _download_manager;
 	private InternalUploadManager _upload_manager;
 	private InternalJKadManager _jkad_manager;
 	private InternalSearchManager _search_manager;
-	
+
 	private JMServerConnection server_connection = null;
-	
+
 	private JMUDPConnection udp_connection;
 	private JMConnectionWaiter connection_waiter;
-	
-	NetworkManagerImpl() { }
-		
-	public void initialize() {
-		  try {
-			super.initialize();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		_peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
-		_server_manager = (InternalServerManager) ServerManagerSingleton.getInstance();
-		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton.getInstance();
-		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
-		_upload_manager = (InternalUploadManager) UploadManagerSingleton.getInstance();
-		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
-		_search_manager = (InternalSearchManager) SearchManagerSingleton.getInstance();
+
+	NetworkManagerImpl() {
 	}
-	  
-	public void start() {
-		 try {
-			super.start();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		udp_connection = new JMUDPConnection();
+
+	public void addPeer(JMPeerConnection peerConnection) {
+		peer_connections.put(peerConnection.getIPAddress() + KEY_SEPARATOR
+				+ peerConnection.getPort(), peerConnection);
 		try {
-			if (_config_manager.isUDPEnabled())
-				udp_connection.open();
-		} catch (ConfigurationManagerException e) {
-			e.printStackTrace();
+			_peer_manager.newIncomingPeer(peerConnection.getIPAddress(),
+					peerConnection.getPort());
+		} catch (PeerManagerException cause) {
+			cause.printStackTrace();
 		}
-		
-		connection_waiter = new JMConnectionWaiter();
-		connection_waiter.start();
-	}
-	  
-	public void shutdown() {
-		try {
-			super.shutdown();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		
-		try {
-			if (_config_manager.isUDPEnabled())
-				udp_connection.close();
-		} catch (ConfigurationManagerException e) {	
-			e.printStackTrace();
-		}	
-		connection_waiter.stop();
-		
-		for(JMPeerConnection connection : peer_connections.values())
-			try {
-				connection.disconnect();
-			} catch (NetworkManagerException e) {
-				e.printStackTrace();
-			}
-			
-		if (server_connection != null)
-			try {
-				server_connection.disconnect();
-			} catch (NetworkManagerException e) {
-				e.printStackTrace();
-			}
-			
-		
-	}
-	
-	
-	protected boolean iAmStoppable() {
-		return false;
 	}
 
 	public synchronized void addPeer(String ip, int port) {
@@ -175,16 +115,33 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		peer_connections.put(ip + KEY_SEPARATOR + port, connection);
 		connection.connect();
 	}
-	
-	public void addPeer(JMPeerConnection peerConnection) {
-		peer_connections.put(peerConnection.getIPAddress() + KEY_SEPARATOR + peerConnection.getPort(), peerConnection);
+
+	public void callBackRequest(ClientID clientID) {
+		Packet packet = PacketFactory.getCallBackRequestPacket(clientID);
 		try {
-			_peer_manager.newIncomingPeer(peerConnection.getIPAddress(), peerConnection.getPort());
-		} catch (PeerManagerException cause) {
+			server_connection.send(packet);
+		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
 	}
-	
+
+	public void connectToServer(String ip, int port)
+			throws NetworkManagerException {
+		if (server_connection != null)
+			throw new NetworkManagerException("Already connected to "
+					+ server_connection.getIPAddress() + " "
+					+ server_connection.getPort());
+		server_connection = new JMServerConnection(ip, port);
+		server_connection.connect();
+	}
+
+	public void disconnectFromServer() throws NetworkManagerException {
+		if (server_connection == null)
+			throw new NetworkManagerException("Not connected to server");
+		server_connection.disconnect();
+		server_connection = null;
+	}
+
 	public void disconnectPeer(String ip, int port) {
 		JMPeerConnection connection = null;
 		try {
@@ -200,316 +157,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 
-
-	public void peerConnectingFailed(String ip, int port, Throwable cause) {
-		_peer_manager.peerConnectingFailed(ip, port, cause);
-	}
-
-	public void peerConnected(String ip, int port) {
-		try {
-			JMPeerConnection connection = getPeerConnection(ip, port);
-			Server connected_server = _server_manager.getConnectedServer();
-			byte[] server_ip = null;
-			int server_port = 0;
-			ClientID client_id = null;
-			if (connected_server!=null) {
-				server_ip = connected_server.getAddressAsByte();
-				server_port = connected_server.getPort();
-				client_id = connected_server.getClientID();
-			}
-			Packet packet = PacketFactory.getPeerHelloPacket(_config_manager.getUserHash(), 
-					client_id, 
-					_config_manager.getTCP(), 
-					server_ip, server_port, 
-					_config_manager.getNickName(), 
-					E2DKConstants.DefaultJMuleFeatures);
-			connection.send(packet);
-
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-
-	public void peerDisconnected(String ip, int port) {
-		_peer_manager.peerDisconnected(ip, port);
-
-	}
-
-	private JMPeerConnection getPeerConnection(String peerIP, int peerPort) throws NetworkManagerException {
-		JMPeerConnection peer_connection = peer_connections.get(peerIP + KEY_SEPARATOR + peerPort);
-		if (peer_connection == null)
-			throw new NetworkManagerException("Peer " + peerIP + KEY_SEPARATOR + peerPort+" not found");
-		return peer_connection;
-	}
-	
-	public void sendFileChunk(String peerIP, int peerPort, FileHash fileHash, FileChunk fileChunk) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFilePartSendingPacket(fileHash, fileChunk);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-		
-	}
-	
-	public void sendFileRequest(String peerIP, int peerPort, FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFileRequestPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendFileStatusRequest(String peerIP, int peerPort, FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFileStatusRequestPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendUploadRequest(String peerIP, int peerPort, FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getUploadReuqestPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... partsData) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getPeerRequestFileParts(fileHash, partsData);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendPartHashSetRequest(String peerIP, int peerPort, FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getRequestPartHashSetPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendSlotRelease(String peerIP, int peerPort) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getSlotReleasePacket();
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendEndOfDownload(String peerIP, int peerPort,FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getEndOfDownloadPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendFileRequestAnswer(String peerIP, int peerPort, FileHash fileHash, String fileName) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFileRequestAnswerPacket(fileHash, fileName);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendFileStatusAnswer(String peerIP, int peerPort, PartHashSet partHashSet, long fileSize, GapList gapList) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFileStatusReplyPacket(partHashSet, fileSize, gapList);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendFileHashSetAnswer(String peerIP, int peerPort, PartHashSet partHashSet) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFileHashReplyPacket(partHashSet);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendSlotGiven(String peerIP, int peerPort, FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getAcceptUploadPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendFileNotFound(String peerIP, int peerPort, FileHash fileHash) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getFileNotFoundPacket(fileHash);
-			peer_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void sendQueueRanking(String peerIP, int peerPort, int queueRank) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getQueueRankingPacket(queueRank);
-			peer_connection.send(packet);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	public void sendCallBackRequest(String peerIP, int peerPort, Int128 clientID, FileHash fileHash, IPAddress buddyIP, short buddyPort) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
-			Packet packet = PacketFactory.getKadCallBackRequest(clientID, fileHash, buddyIP, buddyPort);
-			peer_connection.send(packet);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
-
-	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort, UserHash userHash,
-			ClientID clientID, int peerPacketPort, TagList tagList,
-			String serverIP, int serverPort) {
-		
-		_peer_manager.helloFromPeer(peerIP, 
-				peerPort, 
-				userHash, 
-				clientID, 
-				peerPort, 
-				tagList, 
-				serverIP, 
-				serverPort);
-		
-		try {
-			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
-			
-			Server connected_server = _server_manager.getConnectedServer();
-			byte[] server_ip = null;
-			int server_port = 0;
-			ClientID client_id = null;
-			if (connected_server!=null) {
-				server_ip = connected_server.getAddressAsByte();
-				server_port = connected_server.getPort();
-				client_id = connected_server.getClientID();
-			}
-			
-			Packet packet = PacketFactory.getPeerHelloAnswerPacket(_config_manager.getUserHash(), 
-					client_id,
-					_config_manager.getTCP(), 
-					_config_manager.getNickName(), 
-					server_ip, 
-					server_port, 
-					E2DKConstants.DefaultJMuleFeatures);
-			
-			connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-		
-	}
-
-	public void receivedHelloAnswerFromPeer(String peerIP, int peerPort,
-			UserHash userHash, ClientID clientID, int peerPacketPort,
-			TagList tagList, String serverIP, int serverPort) {
-	
-		_peer_manager.helloAnswerFromPeer(peerIP, 
-				peerPort, 
-				userHash, 
-				clientID, 
-				peerPort, 
-				tagList, 
-				serverIP, 
-				serverPort);		
-	}
-	
-
-
-	public void connectToServer(String ip, int port) throws NetworkManagerException {
-		if (server_connection != null)
-			throw new NetworkManagerException("Already connected to " + server_connection.getIPAddress() + " " + server_connection.getPort());
-		server_connection = new JMServerConnection(ip, port);
-		server_connection.connect();
-	}
-
-	public ConnectionStatus getServerConnectionStatus() {
-		if (server_connection == null)
-			return ConnectionStatus.DISCONNECTED;
-		return server_connection.getStatus();
-	}
-	
-	public void disconnectFromServer() throws NetworkManagerException {
-		if (server_connection == null)
-			throw new NetworkManagerException("Not connected to server");
-		server_connection.disconnect();
-		server_connection = null;
-	}
-	
-	public void serverConnected() {
-		try {
-			Packet login_packet = PacketFactory.getServerLoginPacket(_config_manager.getUserHash(), 
-					_config_manager.getTCP(), 
-					_config_manager.getNickName());
-			server_connection.send(login_packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-
-	public void serverConnectingFailed(Throwable cause) {
-		_server_manager.serverConnectingFailed(server_connection.getIPAddress(), server_connection.getPort(), cause);
-	}
-
-	public void serverDisconnected() {
-		_server_manager.serverDisconnected(server_connection.getIPAddress(), server_connection.getPort());
-				
-	}
-	
-	public void offerFilesToServer(ClientID userID, List<SharedFile> filesToShare) {
-		try {
-			Packet packet = PacketFactory.getOfferFilesPacket(userID, filesToShare);
-			server_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
-	public void serverListRequest() {
-		Packet packet = PacketFactory.getGetServerListPacket();
-		try {
-			server_connection.send(packet);
-		} catch (Throwable cause) {
-			cause.printStackTrace();
-		}
-	}
-	
 	public void doSearchOnServer(SearchQuery searchQuery) {
 		Packet search_packet = PacketFactory.getSearchPacket(searchQuery);
 		try {
@@ -518,25 +165,136 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			cause.printStackTrace();
 		}
 	}
-	
-	public void requestSourcesFromServer(FileHash fileHash, long fileSize) {
-		Packet packet = PacketFactory.getSourcesRequestPacket(fileHash, fileSize);
+
+	private JMPeerConnection getPeerConnection(String peerIP, int peerPort)
+			throws NetworkManagerException {
+		JMPeerConnection peer_connection = peer_connections.get(peerIP
+				+ KEY_SEPARATOR + peerPort);
+		if (peer_connection == null)
+			throw new NetworkManagerException("Peer " + peerIP + KEY_SEPARATOR
+					+ peerPort + " not found");
+		return peer_connection;
+	}
+
+	public float getPeerDownloadServiceSpeed(String peerIP, int peerPort) {
 		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getServiceDownloadSpeed();
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+			return 0f;
+		}
+	}
+
+	public float getPeerDownloadSpeed(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getDownloadSpeed();
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+			return 0f;
+		}
+	}
+
+	public float getPeerUploadServiceSpeed(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getServiceUploadSpeed();
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+			return 0f;
+		}
+	}
+
+	public float getPeerUploadSpeed(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getUploadSpeed();
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+			return 0f;
+		}
+	}
+
+	public ConnectionStatus getServerConnectionStatus() {
+		if (server_connection == null)
+			return ConnectionStatus.DISCONNECTED;
+		return server_connection.getStatus();
+	}
+
+	protected boolean iAmStoppable() {
+		return false;
+	}
+
+	public void initialize() {
+		try {
+			super.initialize();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager = (InternalPeerManager) PeerManagerSingleton
+				.getInstance();
+		_server_manager = (InternalServerManager) ServerManagerSingleton
+				.getInstance();
+		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton
+				.getInstance();
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton
+				.getInstance();
+		_upload_manager = (InternalUploadManager) UploadManagerSingleton
+				.getInstance();
+		_jkad_manager = (InternalJKadManager) JKadManagerSingleton
+				.getInstance();
+		_search_manager = (InternalSearchManager) SearchManagerSingleton
+				.getInstance();
+	}
+
+	public void offerFilesToServer(ClientID userID,
+			List<SharedFile> filesToShare) {
+		try {
+			Packet packet = PacketFactory.getOfferFilesPacket(userID,
+					filesToShare);
 			server_connection.send(packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
 	}
 	
-	public void callBackRequest(ClientID clientID) {
-		Packet packet = PacketFactory.getCallBackRequestPacket(clientID);
+	public void peerConnected(String ip, int port) {
 		try {
-			server_connection.send(packet);
+			JMPeerConnection connection = getPeerConnection(ip, port);
+			Server connected_server = _server_manager.getConnectedServer();
+			byte[] server_ip = null;
+			int server_port = 0;
+			ClientID client_id = null;
+			if (connected_server != null) {
+				server_ip = connected_server.getAddressAsByte();
+				server_port = connected_server.getPort();
+				client_id = connected_server.getClientID();
+			}
+			Packet packet = PacketFactory.getPeerHelloPacket(_config_manager
+					.getUserHash(), client_id, _config_manager.getTCP(),
+					server_ip, server_port, _config_manager.getNickName(),
+					E2DKConstants.DefaultJMuleFeatures);
+			connection.send(packet);
+
 		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
 	}
-	
+
+	public void peerConnectingFailed(String ip, int port, Throwable cause) {
+		_peer_manager.peerConnectingFailed(ip, port, cause);
+	}
+
+	public void peerDisconnected(String ip, int port) {
+		_peer_manager.peerDisconnected(ip, port);
+
+	}
 
 	public void receivedCallBackFailed() {
 		_peer_manager.callBackRequestFailed();
@@ -546,34 +304,25 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		_peer_manager.receivedCallBackRequest(ip, port);
 	}
 
-	public void receivedIDChangeFromServer(ClientID clientID, Set<ServerFeatures> serverFeatures) {
-		_server_manager.receivedIDChange(clientID, serverFeatures);
+	public void receivedCompressedFileChunkFromPeer(String peerIP,
+			int peerPort, FileHash fileHash, FileChunk compressedFileChunk) {
+		_download_manager.receivedCompressedFileChunk(peerIP, peerPort,
+				fileHash, compressedFileChunk);
 	}
 
-	public void receivedMessageFromServer(String message) {
-		_server_manager.receivedMessage(message);
-	}
+	public void receivedEMuleHelloFromPeer(String ip, int port,
+			byte clientVersion, byte protocolVersion, TagList tagList) {
+		try {
+			JMPeerConnection connection = getPeerConnection(ip, port);
+			Packet response = PacketFactory.getEMulePeerHelloAnswerPacket();
+			connection.send(response);
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager.receivedEMuleHelloFromPeer(ip, port, clientVersion,
+				protocolVersion, tagList);
 
-	public void receivedSearchResult(SearchResultItemList resultList) {
-		_search_manager.receivedServerSearchResult(resultList);
-	}
-
-	public void receivedServerList(List<String> ipList, List<Integer> portList){
-		_server_manager.receivedServerList(ipList, portList);
-	}
-
-	public void receivedServerStatus(int userCount, int fileCount) {
-		_server_manager.receivedServerStatus(userCount, fileCount);
-	}
-
-	public void receivedSourcesFromServer(FileHash fileHash, List<ClientID> clientIDList, List<Integer> portList) {
-		List<Peer> peer_list = _peer_manager.createPeerList(clientIDList, portList, PeerSource.SERVER);
-		_download_manager.addDownloadPeers(fileHash, peer_list);
-	}
-
-	public void receivedCompressedFileChunkFromPeer(String peerIP, int peerPort,
-			FileHash fileHash, FileChunk compressedFileChunk) {
-		_download_manager.receivedCompressedFileChunk(peerIP, peerPort, fileHash, compressedFileChunk);
 	}
 
 	public void receivedEndOfDownloadFromPeer(String peerIP, int peerPort) {
@@ -582,17 +331,20 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 	public void receivedFileChunkRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, List<FileChunkRequest> requestedChunks) {
-		_upload_manager.receivedFileChunkRequestFromPeer(peerIP, peerPort, fileHash, requestedChunks);
+		_upload_manager.receivedFileChunkRequestFromPeer(peerIP, peerPort,
+				fileHash, requestedChunks);
 	}
 
 	public void receivedFileNotFoundFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_download_manager.receivedFileNotFoundFromPeer(peerIP, peerPort, fileHash);
+		_download_manager.receivedFileNotFoundFromPeer(peerIP, peerPort,
+				fileHash);
 	}
 
 	public void receivedFileRequestAnswerFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, String fileName) {
-		_download_manager.receivedFileRequestAnswerFromPeer(peerIP, peerPort, fileHash, fileName);
+		_download_manager.receivedFileRequestAnswerFromPeer(peerIP, peerPort,
+				fileHash, fileName);
 	}
 
 	public void receivedFileRequestFromPeer(String peerIP, int peerPort,
@@ -602,38 +354,123 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_upload_manager.receivedFileStatusRequestFromPeer(peerIP, peerPort, fileHash);
-		
+		_upload_manager.receivedFileStatusRequestFromPeer(peerIP, peerPort,
+				fileHash);
+
 	}
 
 	public void receivedFileStatusResponseFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, JMuleBitSet partStatus) {
-		_download_manager.receivedFileStatusResponseFromPeer(peerIP, peerPort, fileHash, partStatus);
+		_download_manager.receivedFileStatusResponseFromPeer(peerIP, peerPort,
+				fileHash, partStatus);
 	}
 
 	public void receivedHashSetRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_upload_manager.receivedHashSetRequestFromPeer(peerIP, peerPort, fileHash);
+		_upload_manager.receivedHashSetRequestFromPeer(peerIP, peerPort,
+				fileHash);
 	}
 
 	public void receivedHashSetResponseFromPeer(String peerIP, int peerPort,
 			PartHashSet partHashSet) {
-		_download_manager.receivedHashSetResponseFromPeer(peerIP, peerPort, partHashSet.getFileHash(), partHashSet);
+		_download_manager.receivedHashSetResponseFromPeer(peerIP, peerPort,
+				partHashSet.getFileHash(), partHashSet);
 	}
 
-	public void receivedQueueRankFromPeer(String peerIP, int peerPort, int queueRank) {
-		_download_manager.receivedQueueRankFromPeer(peerIP, peerPort, queueRank);
+	public void receivedHelloAnswerFromPeer(String peerIP, int peerPort,
+			UserHash userHash, ClientID clientID, int peerPacketPort,
+			TagList tagList, String serverIP, int serverPort) {
+
+		_peer_manager.helloAnswerFromPeer(peerIP, peerPort, userHash, clientID,
+				peerPort, tagList, serverIP, serverPort);
+	}
+
+	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort,
+			UserHash userHash, ClientID clientID, int peerPacketPort,
+			TagList tagList, String serverIP, int serverPort) {
+
+		_peer_manager.helloFromPeer(peerIP, peerPort, userHash, clientID,
+				peerPort, tagList, serverIP, serverPort);
+
+		try {
+			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
+
+			Server connected_server = _server_manager.getConnectedServer();
+			byte[] server_ip = null;
+			int server_port = 0;
+			ClientID client_id = null;
+			if (connected_server != null) {
+				server_ip = connected_server.getAddressAsByte();
+				server_port = connected_server.getPort();
+				client_id = connected_server.getClientID();
+			}
+
+			Packet packet = PacketFactory.getPeerHelloAnswerPacket(
+					_config_manager.getUserHash(), client_id, _config_manager
+							.getTCP(), _config_manager.getNickName(),
+					server_ip, server_port, E2DKConstants.DefaultJMuleFeatures);
+
+			connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+
+	}
+
+	public void receivedIDChangeFromServer(ClientID clientID,
+			Set<ServerFeatures> serverFeatures) {
+		_server_manager.receivedIDChange(clientID, serverFeatures);
+	}
+
+	public void receivedMessageFromServer(String message) {
+		_server_manager.receivedMessage(message);
+	}
+
+	public void receivedNewServerDescription(String ip, int port,
+			int challenge, TagList tagList) {
+		_server_manager.receivedNewServerDescription(ip, port, tagList);
+	}
+
+	public void receivedQueueRankFromPeer(String peerIP, int peerPort,
+			int queueRank) {
+		_download_manager
+				.receivedQueueRankFromPeer(peerIP, peerPort, queueRank);
 	}
 
 	public void receivedRequestedFileChunkFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, FileChunk chunk) {
-		_download_manager.receivedRequestedFileChunkFromPeer(peerIP, peerPort, fileHash, chunk);
+		_download_manager.receivedRequestedFileChunkFromPeer(peerIP, peerPort,
+				fileHash, chunk);
+	}
+
+	public void receivedSearchResult(SearchResultItemList resultList) {
+		_search_manager.receivedServerSearchResult(resultList);
+	}
+
+	public void receivedServerDescription(String ip, int port, String name,
+			String description) {
+		_server_manager.receivedServerDescription(ip, port, name, description);
+	}
+
+	public void receivedServerList(List<String> ipList, List<Integer> portList) {
+		_server_manager.receivedServerList(ipList, portList);
+	}
+
+	public void receivedServerStatus(int userCount, int fileCount) {
+		_server_manager.receivedServerStatus(userCount, fileCount);
+	}
+
+	public void receivedServerStatus(String ip, int port, int challenge,
+			long userCount, long fileCount, long softLimit, long hardLimit,
+			Set<ServerFeatures> serverFeatures) {
+		_server_manager.receivedServerStatus(ip, port, challenge, userCount,
+				fileCount, softLimit, hardLimit, serverFeatures);
 	}
 
 	public void receivedSlotGivenFromPeer(String peerIP, int peerPort) {
 		_download_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
 	}
-	
+
 	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort) {
 		_upload_manager.receivedSlotReleaseFromPeer(peerIP, peerPort);
 	}
@@ -647,44 +484,295 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		_download_manager.receivedSlotTakenFromPeer(peerIP, peerPort);
 	}
 
-	public void sendKadPacket(KadPacket packet, IPAddress address, int port) {
-		udp_connection.sendPacket(packet, address, port);
+	public void receivedSourcesFromServer(FileHash fileHash,
+			List<ClientID> clientIDList, List<Integer> portList) {
+		List<Peer> peer_list = _peer_manager.createPeerList(clientIDList,
+				portList, PeerSource.SERVER);
+		_download_manager.addDownloadPeers(fileHash, peer_list);
 	}
-	
+
 	public void receiveKadPacket(KadPacket packet) {
 		_jkad_manager.receivePacket(packet);
 	}
 
-	public void receivedServerDescription(String ip, int port, String name,
-			String description) {
-		_server_manager.receivedServerDescription(ip, port, name, description);
-	}
-
-	public void receivedNewServerDescription(String ip, int port, int challenge,
-			TagList tagList) {
-		_server_manager.receivedNewServerDescription(ip, port, tagList);
-	}
-
-	public void receivedServerStatus(String ip, int port, int challenge,
-			long userCount, long fileCount, long softLimit, long hardLimit,
-			Set<ServerFeatures> serverFeatures) {
-		_server_manager.receivedServerStatus(ip, port, challenge, userCount, 
-				fileCount, softLimit, hardLimit, serverFeatures);
-	}
-
-	
-	public void receivedEMuleHelloFromPeer(String ip, int port,byte clientVersion, byte protocolVersion,
-			TagList tagList) {
+	public void requestSourcesFromServer(FileHash fileHash, long fileSize) {
+		Packet packet = PacketFactory.getSourcesRequestPacket(fileHash,
+				fileSize);
 		try {
-			JMPeerConnection connection = getPeerConnection(ip, port);
-			Packet response = PacketFactory.getEMulePeerHelloAnswerPacket();
-			connection.send(response);
+			server_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendCallBackRequest(String peerIP, int peerPort,
+			Int128 clientID, FileHash fileHash, IPAddress buddyIP,
+			short buddyPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getKadCallBackRequest(clientID,
+					fileHash, buddyIP, buddyPort);
+			peer_connection.send(packet);
 		} catch (Throwable e) {
 			e.printStackTrace();
-			return ;
 		}
-		_peer_manager.receivedEMuleHelloFromPeer(ip, port, clientVersion, protocolVersion, tagList);
-		
+	}
+
+	public void sendEndOfDownload(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getEndOfDownloadPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFileChunk(String peerIP, int peerPort, FileHash fileHash,
+			FileChunk fileChunk) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFilePartSendingPacket(fileHash,
+					fileChunk);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+
+	}
+
+	public void sendFileHashSetAnswer(String peerIP, int peerPort,
+			PartHashSet partHashSet) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFileHashReplyPacket(partHashSet);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFileNotFound(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFileNotFoundPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFilePartsRequest(String peerIP, int peerPort,
+			FileHash fileHash, FileChunkRequest... partsData) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getPeerRequestFileParts(fileHash,
+					partsData);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFileRequest(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFileRequestPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFileRequestAnswer(String peerIP, int peerPort,
+			FileHash fileHash, String fileName) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFileRequestAnswerPacket(fileHash,
+					fileName);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFileStatusAnswer(String peerIP, int peerPort,
+			PartHashSet partHashSet, long fileSize, GapList gapList) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFileStatusReplyPacket(partHashSet,
+					fileSize, gapList);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendFileStatusRequest(String peerIP, int peerPort,
+			FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getFileStatusRequestPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendKadPacket(KadPacket packet, IPAddress address, int port) {
+		udp_connection.sendPacket(packet, address, port);
+	}
+
+	public void sendPartHashSetRequest(String peerIP, int peerPort,
+			FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getRequestPartHashSetPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendQueueRanking(String peerIP, int peerPort, int queueRank) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getQueueRankingPacket(queueRank);
+			peer_connection.send(packet);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void sendSlotGiven(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getAcceptUploadPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendSlotRelease(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getSlotReleasePacket();
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void sendUploadRequest(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getUploadReuqestPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void serverConnected() {
+		try {
+			Packet login_packet = PacketFactory.getServerLoginPacket(
+					_config_manager.getUserHash(), _config_manager.getTCP(),
+					_config_manager.getNickName());
+			server_connection.send(login_packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void serverConnectingFailed(Throwable cause) {
+		JMServerConnection connection = server_connection;
+		server_connection = null;
+		_server_manager.serverConnectingFailed(connection.getIPAddress(),
+				connection.getPort(), cause);
+	}
+
+	public void serverDisconnected() {
+		JMServerConnection connection = server_connection;
+		server_connection = null;
+		_server_manager.serverDisconnected(connection.getIPAddress(),
+				connection.getPort());
+	}
+
+	public void serverListRequest() {
+		Packet packet = PacketFactory.getGetServerListPacket();
+		try {
+			server_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+
+	public void shutdown() {
+		try {
+			super.shutdown();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		try {
+			if (_config_manager.isUDPEnabled())
+				udp_connection.close();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
+		connection_waiter.stop();
+
+		for (JMPeerConnection connection : peer_connections.values())
+			try {
+				connection.disconnect();
+			} catch (NetworkManagerException e) {
+				e.printStackTrace();
+			}
+
+		if (server_connection != null)
+			try {
+				server_connection.disconnect();
+			} catch (NetworkManagerException e) {
+				e.printStackTrace();
+			}
+
+	}
+
+	public void start() {
+		try {
+			super.start();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		udp_connection = new JMUDPConnection();
+		try {
+			if (_config_manager.isUDPEnabled())
+				udp_connection.open();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
+
+		connection_waiter = new JMConnectionWaiter();
+		connection_waiter.start();
 	}
 
 }

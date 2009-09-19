@@ -39,14 +39,16 @@ import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:01:50 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD}
@@ -232,19 +234,27 @@ public class Peer {
 	}
 	
 	public float getDownloadSpeed() {
-		return 0;
+		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
+				.getInstance();
+		return network_manager.getPeerDownloadSpeed(getIP(), getPort());
 	}
-	
+
 	public float getUploadSpeed() {
-		return 0;
+		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
+				.getInstance();
+		return network_manager.getPeerUploadSpeed(getIP(), getPort());
 	}
-	
+
 	public float getDownloadServiceSpeed() {
-		return 0;
+		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
+				.getInstance();
+		return network_manager.getPeerDownloadServiceSpeed(getIP(), getPort());
 	}
-	
+
 	public float getUploadServiceSpeed() {
-		return 0;
+		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
+				.getInstance();
+		return network_manager.getPeerUploadServiceSpeed(getIP(), getPort());
 	}
 	
 }

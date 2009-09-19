@@ -35,8 +35,8 @@ import org.jmule.core.edonkey.packet.Packet;
  * Created on Aug 20, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 14:20:38 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
  */
 public class JMServerConnection extends JMConnection {
 
@@ -51,32 +51,32 @@ public class JMServerConnection extends JMConnection {
 		
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	
-	public JMServerConnection(String ipAddress, int port) {
+	JMServerConnection(String ipAddress, int port) {
 		remote_inet_socket_address = new InetSocketAddress(ipAddress, port);
 	}
 	
-	public JMServerConnection(InetSocketAddress remoteInetSocketAddress) {
+	JMServerConnection(InetSocketAddress remoteInetSocketAddress) {
 		remote_inet_socket_address = remoteInetSocketAddress;
 	}
 	
-	public String getIPAddress() {
+	String getIPAddress() {
 		return remote_inet_socket_address.getAddress().getHostAddress();
 	}
 	
-	public int getPort() {
+	int getPort() {
 		return remote_inet_socket_address.getPort();
 	}
 	
-	public ConnectionStatus getStatus() {
+	ConnectionStatus getStatus() {
 		return connection_status;
 	}
 	
-	public void send(Packet packet) throws Exception {
+	void send(Packet packet) throws Exception {
 		if(jm_socket_channel.write(packet.getAsByteBuffer()) == -1 )
 				notifyDisconnect();
 	}
 	
-	public void connect() {
+	void connect() {
 		connecting_thread = new JMThread() {
 			public void run() {			
 				try {
@@ -111,7 +111,7 @@ public class JMServerConnection extends JMConnection {
 		connecting_thread.start();
 	}
 	
-	public void disconnect() throws NetworkManagerException {
+	void disconnect() throws NetworkManagerException {
 		if (connection_status == ConnectionStatus.CONNECTED) {
 			receiver_thread.JMStop();
 			try {
@@ -145,9 +145,7 @@ public class JMServerConnection extends JMConnection {
 			 
 			private boolean stop_thread = false;
 			
-			
 			public void run() {
-				
 				while(!stop_thread) {
 					try {
 						PacketReader.readServerPacket(jm_socket_channel);

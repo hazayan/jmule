@@ -28,76 +28,108 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.speedmanager.BandwidthController;
 import org.jmule.core.speedmanager.SpeedManagerSingleton;
+import org.jmule.core.utils.Average;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:19:23 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:01:50 $$
  */
-public class JMuleSocketChannel {
+class JMuleSocketChannel {
 	private SocketChannel channel;
 	private BandwidthController uploadController, downloadController;
+
+	private Average<Integer> download_trafic 				= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	private Average<Integer> upload_trafic 					= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	private Average<Integer> service_download_trafic 		= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	private Average<Integer> service_upload_trafic 			= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
 	
-	public JMuleSocketChannel(SocketChannel channel) throws IOException{
+	JMuleSocketChannel(SocketChannel channel) throws IOException {
 		this.channel = channel;
 		this.channel.configureBlocking(true);
 		this.channel.socket().setKeepAlive(true);
 		init();
 	}
 	
-	public void connect(InetSocketAddress address) throws IOException {
-		channel.connect(address);
+	float getDownloadSpeed() {
+		return download_trafic.getAverage();
 	}
 	
-	public void connect(InetSocketAddress address, int connectingTimeout) throws IOException {
-		channel.socket().connect(address,connectingTimeout);
+	float getUploadSpeed() {
+		return upload_trafic.getAverage();
 	}
 	
-	
-	
-	
-	public SocketChannel getChannel() {
-		return channel;
+	float getServiceDownloadSpeed() {
+		return service_download_trafic.getAverage();
 	}
 	
-	private void init() {
-		uploadController = SpeedManagerSingleton.getInstance().getUploadController();
-		downloadController = SpeedManagerSingleton.getInstance().getDownloadController();
+	float getServiceUploadSpeed() {
+		return service_upload_trafic.getAverage();
 	}
 
-	public void close() throws IOException {
+	void connect(InetSocketAddress address) throws IOException {
+		channel.connect(address);
+	}
+
+	void connect(InetSocketAddress address, int connectingTimeout)
+			throws IOException {
+		channel.socket().connect(address, connectingTimeout);
+	}
+
+	SocketChannel getChannel() {
+		return channel;
+	}
+
+	private void init() {
+		uploadController = SpeedManagerSingleton.getInstance()
+				.getUploadController();
+		downloadController = SpeedManagerSingleton.getInstance()
+				.getDownloadController();
+	}
+
+	void close() throws IOException {
 		this.channel.close();
 	}
-	
-	public  int read(ByteBuffer dsts) throws IOException,JMEndOfStreamException{
-		if (downloadController.getThrottlingRate()==0) {
-				dsts.position(0);
-				return this.read(dsts, dsts.capacity());
+
+	int read(ByteBuffer packetBuffer) throws IOException, JMEndOfStreamException {
+		if (downloadController.getThrottlingRate() == 0) {
+			packetBuffer.position(0);
+			return this.read(packetBuffer, packetBuffer.capacity());
 		}
 		int totalReaded = 0;
-		int cacheLimit = (int) Math.max(downloadController.getThrottlingRate(), dsts.capacity());
+		int cacheLimit = (int) Math.max(downloadController.getThrottlingRate(),
+				packetBuffer.capacity());
 		ByteBuffer readCache = Misc.getByteBuffer(cacheLimit);
-		dsts.position(0);
+		packetBuffer.position(0);
 		do {
-			int mustRead = downloadController.getAvailableByteCount(dsts.remaining(),true);
+			int mustRead = downloadController.getAvailableByteCount(packetBuffer
+					.remaining(), true);
 			readCache.position(0);
 			readCache.limit(mustRead);
-			
-			read(readCache,mustRead);
+
+			read(readCache, mustRead);
 			int readedData = readCache.limit();
 			totalReaded += readedData;
 			downloadController.markBytesUsed(readedData);
-			dsts.put(readCache.array(),0,readedData);
-		}while(dsts.hasRemaining());
-	
+			packetBuffer.put(readCache.array(), 0, readedData);
+		} while (packetBuffer.hasRemaining());
+		
+		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
+			download_trafic.add(packetBuffer.capacity());
+		else
+			service_download_trafic.add(packetBuffer.capacity());
+
 		return totalReaded;
 	}
-	
-	private int read(ByteBuffer dsts,int bytes) throws IOException,JMEndOfStreamException {
+
+	private int read(ByteBuffer packetBuffer, int bytes) throws IOException,
+			JMEndOfStreamException {
 		ByteBuffer readCache = Misc.getByteBuffer(bytes);
 		int mustRead = bytes;
 		do {
@@ -105,75 +137,88 @@ public class JMuleSocketChannel {
 			readCache.position(0);
 			int readedData = 0;
 
-			readedData = channel.read(readCache); // return -1 if socket is closed
-			if (readedData==-1) {
-					throw new JMEndOfStreamException();
-				}
-						
-			mustRead-=readedData;
+			readedData = channel.read(readCache); // return -1 if socket is
+													// closed
+			if (readedData == -1) {
+				throw new JMEndOfStreamException();
+			}
+
+			mustRead -= readedData;
 			readCache.limit(readedData);
 			readCache.position(0);
-			dsts.put(readCache);
-		}while(mustRead>0);
+			packetBuffer.put(readCache);
+		} while (mustRead > 0);
+		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
+			download_trafic.add(packetBuffer.capacity());
+		else
+			service_download_trafic.add(packetBuffer.capacity());
 		return bytes;
-		
+
 	}
-	
-	public int write(ByteBuffer srcs) throws Exception {
+
+	int write(ByteBuffer srcs) throws Exception {
+		if (srcs.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
+			upload_trafic.add(srcs.capacity());
+		else
+			service_upload_trafic.add(srcs.capacity());
 		srcs.position(0);
 		int totalSended = 0;
-		
+
 		do {
 			int numBytes;
-			if (uploadController.getThrottlingRate()!=0)
-				numBytes = uploadController.getAvailableByteCount(srcs.remaining(),true);
-			else numBytes = srcs.remaining();
-		
+			if (uploadController.getThrottlingRate() != 0)
+				numBytes = uploadController.getAvailableByteCount(srcs
+						.remaining(), true);
+			else
+				numBytes = srcs.remaining();
+
 			int ipos = srcs.position();
 			ByteBuffer toSend = Misc.getByteBuffer(numBytes);
-			srcs.get(toSend.array(),0, numBytes);
+			srcs.get(toSend.array(), 0, numBytes);
 			toSend.position(0);
-		
+
 			int sended = channel.write(toSend);
-			if (sended==-1) {
+			if (sended == -1) {
 				return -1;
 			}
-		
-			srcs.position(ipos+sended);
-			totalSended+=sended;
-			if (uploadController.getThrottlingRate()!=0)
+
+			srcs.position(ipos + sended);
+			totalSended += sended;
+			if (uploadController.getThrottlingRate() != 0)
 				uploadController.markBytesUsed(sended);
-			}while(totalSended<srcs.capacity());
-		
+		} while (totalSended < srcs.capacity());
+
 		return totalSended;
 	}
 
-	public boolean isOpen() {
-		if (channel==null) return false;
+	boolean isOpen() {
+		if (channel == null)
+			return false;
 		return channel.isOpen();
 	}
-	
-	public Socket getSocket() {
-		if (channel==null) return null;
+
+	Socket getSocket() {
+		if (channel == null)
+			return null;
 		return channel.socket();
 	}
-	
-	public boolean isConnected() {
-		if (channel==null) return false;
+
+	boolean isConnected() {
+		if (channel == null)
+			return false;
 		return channel.isConnected();
 	}
-	
-	public void configureBlocking(boolean value) throws IOException{
+
+	void configureBlocking(boolean value) throws IOException {
 		channel.configureBlocking(value);
 	}
-	
-	public void disconnect(){
-		
+
+	void disconnect() {
 		try {
 			channel.socket().close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-		
+
 }
