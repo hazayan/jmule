@@ -27,7 +27,6 @@ import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -39,19 +38,16 @@ import org.jmule.core.JMIterator;
  * 
  * @author pola
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/30 13:31:14 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:37:35 $$
  */
 public class GapList {
 
-	//private List<Gap> gaps = new LinkedList<Gap>();
 	private List<Gap> gaps = new CopyOnWriteArrayList<Gap>();
 	private long byteSize = 0;
 
-	static final Comparator gapComparator = new Comparator() {
-		public int compare(Object o1, Object o2) throws ClassCastException {
-			Gap gap1 = (Gap) o1;
-			Gap gap2 = (Gap) o2;
+	static final Comparator<Gap> gapComparator = new Comparator<Gap>() {
+		public int compare(Gap gap1, Gap gap2) throws ClassCastException {
 			return (int) (gap1.start - gap2.start);
 		}
 	};
@@ -97,7 +93,7 @@ public class GapList {
 	 * 
 	 * @param gaps The gaps to be added.
 	 */
-	private void setGaps(ArrayList<Gap> gaps) {
+	private void setGaps(List<Gap> gaps) {
 		this.gaps = gaps;
 	}
 
@@ -111,12 +107,11 @@ public class GapList {
 	 * @return The gaps stored in the GapList that are completely inside a
 	 * a given range.
 	 */
-	public Collection getCoveredGaps(long start, long end) {
-		Gap gap = new Gap(start, end);
-		ArrayList result = new ArrayList();
-		for(Iterator i=this.gaps.iterator(); i.hasNext(); ) {
-			Gap currentGap = (Gap) i.next();
-			if(gap.covers(currentGap))
+	public Collection<Gap> getCoveredGaps(long start, long end) {
+		Gap full_gap = new Gap(start, end);
+		ArrayList<Gap> result = new ArrayList<Gap>();
+		for (Gap currentGap : gaps) {
+			if (full_gap.covers(currentGap))
 				result.add(currentGap);
 		}
 		return result;
@@ -130,23 +125,21 @@ public class GapList {
 	 * .
 	 * @return The gaps stored in the GapList that intersects a given range.
 	 */
-	public Collection getIntersectedGaps(long start, long end) {
-		Gap gap = new Gap(start, end);
-		ArrayList result = new ArrayList();
-		for(Iterator i=this.gaps.iterator(); i.hasNext(); ) {
-			Gap currentGap = (Gap) i.next();
-			if(gap.intersects(currentGap))
+	public Collection<Gap> getIntersectedGaps(long start, long end) {
+		Gap full_gap = new Gap(start, end);
+		ArrayList<Gap> result = new ArrayList<Gap>();
+		for (Gap currentGap : gaps) {
+			if (full_gap.intersects(currentGap))
 				result.add(currentGap);
+
 		}
 		return result;
 	}
 
 	public boolean contain(long pos) {
-		for(Iterator<Gap> i = this.gaps.iterator();i.hasNext();) {
-			Gap g = i.next();
-			if (g.contain(pos)) {
-					return true;
-			}
+		for(Gap gap : gaps) {
+			if (gap.contain(pos))
+				return true;
 		}
 		return false;
 	}
@@ -165,8 +158,7 @@ public class GapList {
      */
 	public Gap getFirstGapBefore(long position) {
 		Gap gap = null;
-		for(Iterator i = gaps.iterator(); i.hasNext(); ) {
-			Gap currentGap = (Gap) i.next();
+		for(Gap currentGap : gaps) {
 			if((currentGap.start <= position) && ((gap == null) || (currentGap.start > gap.start)))
 				gap = currentGap;
 		}
@@ -180,8 +172,7 @@ public class GapList {
      */
 	public Gap getFirstGapAfter(long position) {
 		Gap gap = null;
-		for(Iterator<Gap> i = gaps.iterator(); i.hasNext(); ) {
-			Gap currentGap = i.next();
+		for(Gap currentGap : gaps) {
 			if((currentGap.start >= position) && ((gap == null) || 
 					(currentGap.start < gap.start)))
 				gap = currentGap;
@@ -195,12 +186,10 @@ public class GapList {
      * @param end The gap end.
      */
 	public void addGap(long start, long end) {
-		Gap currentGap;
 		Gap gap = new Gap(start, end);
 		int gapsModifyed = 0;
 		
-		for(Iterator<Gap> i = gaps.iterator(); i.hasNext();) {
-			currentGap = i.next();
+		for(Gap currentGap : gaps) {
 			if(currentGap.intersects(gap)) {
 				gapsModifyed++;
 				byteSize += currentGap.merge(gap);
@@ -208,8 +197,7 @@ public class GapList {
 		}
 		// If we expand more than 1 gap, we must merge thos gaps together.
 		if(gapsModifyed > 1) {
-			for(Iterator<Gap> i = gaps.iterator(); i.hasNext();) {
-				currentGap = i.next();
+			for(Gap currentGap : gaps) {
 				if(currentGap.intersects(gap)) {
 					gaps.remove(currentGap);
 					byteSize -= currentGap.size();
@@ -232,12 +220,10 @@ public class GapList {
      * @param end The gap end.
      */
 	public void removeGap(long start, long end) {
-		Gap currentGap;
 		Gap newGap = null;
 		Gap gap = new Gap(start, end);
 		
-		for(Iterator<Gap> i = gaps.iterator(); i.hasNext();) {
-			currentGap = 	i.next();
+		for(Gap currentGap : gaps) {
 			if(currentGap.intersects(gap))
 				if(gap.covers(currentGap)) {
 					//i.remove();
@@ -275,10 +261,8 @@ public class GapList {
 		this.sort();
 
 		stringBuffer.append(" [");
-		for(Iterator i=gaps.iterator(); i.hasNext(); ) {
-			stringBuffer.append(i.next().toString());
-			if(i.hasNext()) 
-				stringBuffer.append(" ");
+		for(Gap currentGap : gaps) {
+			stringBuffer.append(currentGap.toString() + " ");
 		}
 		stringBuffer.append("]");
 		return stringBuffer.toString();
@@ -291,9 +275,9 @@ public class GapList {
      */
 	public Object clone() throws CloneNotSupportedException {
 		GapList result = (GapList) super.clone();
-		ArrayList newGapList = new ArrayList();
-		for(Iterator i=this.gaps.iterator(); i.hasNext(); ) 
-			newGapList.add(((Gap) i.next()).clone());
+		ArrayList<Gap> newGapList = new ArrayList<Gap>();
+		for(Gap currentGap : gaps) 
+			newGapList.add(currentGap.clone());
 		result.setGaps(newGapList);
 		return result;
 	}
@@ -311,9 +295,8 @@ public class GapList {
 		long size = 0;
 		Gap range = new Gap(start, end);
 		GapList result = new GapList();
-		ArrayList nGaps = new ArrayList();
-		for(Iterator i=this.gaps.iterator(); i.hasNext(); ) {
-			Gap gap = (Gap) i.next();
+		ArrayList<Gap> nGaps = new ArrayList<Gap>();
+		for(Gap gap : gaps) {
 			if(gap.intersects(range)) {
 				Gap nGap =  gap.intersect(range);
 				nGaps.add(nGap);
@@ -357,13 +340,9 @@ public class GapList {
 			if ((g.getStart()>=start)&&(g.getStart()<=end)) {
 				
 				if ((g.getEnd()>=start)&&(g.getEnd()<=end)) {
-					try {
-						Gap g1 = (Gap)g.clone();
-						if (g1.getStart()!=g1.getEnd())
-							gapList.add(g1);
-					} catch (CloneNotSupportedException e) {
-						continue;
-					}
+					Gap g1 = (Gap)g.clone();
+					if (g1.getStart()!=g1.getEnd())
+						gapList.add(g1);
 				}
 				
 				if ((g.getEnd()>end)) {

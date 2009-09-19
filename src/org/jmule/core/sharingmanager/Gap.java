@@ -25,8 +25,8 @@ package org.jmule.core.sharingmanager;
 /**
  * 
  * @author pola
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/08/11 15:20:39 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:37:35 $$
  */
 public class Gap implements Cloneable {
 
@@ -76,9 +76,6 @@ public class Gap implements Cloneable {
 		} catch (ClassCastException cce) {
 			// You should never get here :-)
 			return null;	
-		} catch (CloneNotSupportedException cnse) {
-			// You should never get here :-)
-			return null;	
 		}
 
 	}
@@ -87,8 +84,9 @@ public class Gap implements Cloneable {
 		return Long.toString(start) + ":" + Long.toString(end);
 	}
      
-	public Object clone() throws CloneNotSupportedException  {
-		return super.clone();	
+	public Gap clone() {
+		Gap gap = new Gap(getStart(), getEnd());
+		return gap;
 	}
 
 	public boolean contain(long pos){
