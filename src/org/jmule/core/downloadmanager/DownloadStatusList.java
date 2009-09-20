@@ -35,8 +35,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:43:39 $$
  */
 public class DownloadStatusList {
 
@@ -227,6 +227,10 @@ public class DownloadStatusList {
 		
 		public int getQueueRank() {
 			return queue_rank;
+		}
+		
+		public PeerDownloadStatus getStatus() {
+			return peerStatus;
 		}
 		
 		public String toString()  {
