@@ -31,26 +31,126 @@ import org.jmule.core.edonkey.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:02 $$
  */
 public interface SharingManager extends JMuleManager {
 	
 	public static final String PART_MET_EXTENSION = "part.met"; 
 	
+	public void addCompletedFileListener(CompletedFileListener listener);
+	
+	/**
+	 * Add partial file for sharing
+	 * @param partialFile
+	 */
+	public void addPartialFile(PartialFile partialFile);
+	
+	/**
+	 * Tells if the file identified by fileHash exists in the shared files hashtable and
+	 * also checks if the file exists in the file file system
+	 * @param fileHash the given file hash
+	 * @return true if the file exists in shared files hashtable and in the file system
+	 */
+	public boolean existsFile(FileHash fileHash);
+	
+	/**
+	 * Get the completed shared file identified by file hash
+	 * @param fileHash
+	 * @return Completed shared file
+	 */
+	public CompletedFile getCompletedFile(FileHash fileHash);
+	
+	/**
+	 * Get all completed files
+	 * @return 
+	 */
+	public List<CompletedFile> getCompletedFiles();
+	
+	public SharedFile getCurrentHashingFile();
+	
+	public double getCurrentHashingFilePercent();
+	
+	/**
+	 * Get number of total sharing files
+	 * @return
+	 */
+	public int getFileCount();
+	
+	/**
+	 * Get all partial files
+	 * @return
+	 */
+	public List<PartialFile> getPartialFiles();
+	
+	/**
+	 * Get the partial shared file identified by file hash
+	 * @param fileHash
+	 * @return
+	 */
+	public PartialFile getPartialFle(FileHash fileHash);
+	
+	/**
+	 * Get shared file by Java's file object.
+	 * @param file
+	 * @return
+	 */
+	public SharedFile getSharedFile(File file);
+	
+	/**
+	 * Get shared file by fileHash.
+	 * @param fileHash
+	 * @return
+	 */
+	public SharedFile getSharedFile(FileHash fileHash);
+	
+	/**
+	 * Used by PacketFactory in offer files packet creation.
+	 * @return
+	 */
+	public JMIterable<SharedFile> getSharedFiles();
+	
+	/**
+	 * Remove shared file identified by file hash
+	 * @param fileHash file hash
+	 */
+	
+	public List<CompletedFile> getUnhashedFiles();
+	
+	/**
+	 * Check if have file identified by fileHash.
+	 * @param fileHash
+	 * @return
+	 */
+	public boolean hasFile(FileHash fileHash);
+	
+	public boolean isLoadingCompletedFileProcessRunning();
+	
+	public boolean isLoadingPartialFileProcessRunning();
 	/**
 	 * Loads the completed shared files from shared folders. This is a long time process 
 	 * that eats a lot of CPU cycles. Can be interrupted with stopLoadingCompletedFiles()
 	 * @see org.jmule.core.sharingmanager.SharingManager#stopLoadingCompletedFiles()
 	 */
 	public void loadCompletedFiles();
-	
+
 	/**
 	 * Loads the partial files from the temp directory. This is a long time process
 	 * that eats a lot of CPU cycles. Can be interrupted with stopLoadingPartialFiles()
 	 * @see org.jmule.core.sharingmanager.SharingManager#stopLoadingPartialFiles()
 	 */
 	public void loadPartialFiles();
+	
+	/**
+	 * Move the completed file (identified by fileHash) from temp dir to incoming dir 
+	 * @param fileHash
+	 * @throws SharingManagerException
+	 */
+	public void makeCompletedFile(FileHash fileHash) throws SharingManagerException;
+	
+	public void removeCompletedFileListener(CompletedFileListener listener);
+	
+	public void removeSharedFile(FileHash fileHash);
 	
 	/**
 	 * Stops the loading process of completed files
@@ -62,105 +162,8 @@ public interface SharingManager extends JMuleManager {
 	 */
 	public void stopLoadingPartialFiles();
 	
-	public boolean isLoadingCompletedFileProcessRunning();
-	
-	public boolean isLoadingPartialFileProcessRunning();
-	
-	/**
-	 * Get the completed shared file identified by file hash
-	 * @param fileHash
-	 * @return Completed shared file
-	 */
-	public CompletedFile getCompletedFile(FileHash fileHash);
-	
-	/**
-	 * Get the partial shared file identified by file hash
-	 * @param fileHash
-	 * @return
-	 */
-	public PartialFile getPartialFle(FileHash fileHash);
-	
-	public double getCurrentHashingFilePercent();
-	
-	public SharedFile getCurrentHashingFile();
-	
-	/**
-	 * Move the completed file (identified by fileHash) from temp dir to incoming dir 
-	 * @param fileHash
-	 * @throws SharingManagerException
-	 */
-	public void makeCompletedFile(FileHash fileHash) throws SharingManagerException;
-	
-	/**
-	 * Add partial file for sharing
-	 * @param partialFile
-	 */
-	public void addPartialFile(PartialFile partialFile);
-	
-	/**
-	 * Get number of total sharing files
-	 * @return
-	 */
-	public int getFileCount();
-	
-	/**
-	 * Check if have file identified by fileHash.
-	 * @param fileHash
-	 * @return
-	 */
-	public boolean hasFile(FileHash fileHash);
-	
-	/**
-	 * Tells if the file identified by fileHash exists in the shared files hashtable and
-	 * also checks if the file exists in the file file system
-	 * @param fileHash the given file hash
-	 * @return true if the file exists in shared files hashtable and in the file system
-	 */
-	public boolean existsFile(FileHash fileHash);
-	
-	/**
-	 * Get shared file by fileHash.
-	 * @param fileHash
-	 * @return
-	 */
-	public SharedFile getSharedFile(FileHash fileHash);
-	
-	/**
-	 * Get shared file by Java's file object.
-	 * @param file
-	 * @return
-	 */
-	public SharedFile getSharedFile(File file);
-	/**
-	 * Used by PacketFactory in offer files packet creation.
-	 * @return
-	 */
-	public JMIterable<SharedFile> getSharedFiles();
-
-	/**
-	 * Get all partial files
-	 * @return
-	 */
-	public List<PartialFile> getPartialFiles();
-	
-	/**
-	 * Get all completed files
-	 * @return 
-	 */
-	public List<CompletedFile> getCompletedFiles();
-	
 	/**
 	 * Write the all meta-info about files from completed files hash table in known.met
 	 */
 	public void writeMetadata();
-	
-	/**
-	 * Remove shared file identified by file hash
-	 * @param fileHash file hash
-	 */
-	public void removeSharedFile(FileHash fileHash);
-	
-	public void addCompletedFileListener(CompletedFileListener listener);
-	
-	public void removeCompletedFileListener(CompletedFileListener listener);
 }

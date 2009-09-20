@@ -269,10 +269,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 							.put(fileHash, sharedFiles.get(fileHash));
 				}
 				if (files_to_share.size() == 0) return ;
-				System.out.println("Files to share : ");
-				for (SharedFile s : files_to_share)
-					System.out.println(s);
-				
+								
 				Server server = _server_manager.getConnectedServer();
 				_network_manager.offerFilesToServer(server.getClientID(),
 						files_to_share);
@@ -442,7 +439,6 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 					}
 				});
 
-				System.out.println("Finished ");
 			}
 			for (FileHash file_hash : files_hash_set) {
 				sharedFiles.remove(file_hash);
