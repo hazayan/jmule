@@ -86,8 +86,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.28 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:05:18 $$
+ * @version $$Revision: 1.29 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:45:02 $$
  */
 public class DownloadSession implements JMTransferSession {
 	private final static int PEER_MONITOR_INTERVAL = 1000;
@@ -696,7 +696,7 @@ public class DownloadSession implements JMTransferSession {
 		return time;
 	}
 
-	boolean hasPeer(Peer peer) {
+	public boolean hasPeer(Peer peer) {
 		boolean result = peer_list.containsValue(peer);
 		return result;
 	}
