@@ -25,10 +25,10 @@ package org.jmule.core;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:38:23 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:08:27 $$
  */
-public abstract class JMThread extends Thread {
+public class JMThread extends Thread {
 
 	public JMThread(String string) {
 		super(string);
@@ -45,8 +45,6 @@ public abstract class JMThread extends Thread {
 	public JMThread(JMRunnable runnable) {
 		super(runnable);
 	}
-
-	public abstract void run();
 	
 	public void JMStop() {
 		
