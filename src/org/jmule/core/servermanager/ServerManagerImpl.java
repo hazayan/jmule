@@ -50,8 +50,8 @@ import org.jmule.core.utils.Convert;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:21:53 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:01:14 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	
@@ -419,14 +419,16 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		server.setFeatures(serverFeatures);
 	}
 	
-	public void removeServer(Server server) throws ServerManagerException {
-		String ip = server.getAddress();
-		int port = server.getPort();
-		if (!hasServer(ip, port))
-			throw new ServerManagerException("Server " + ip + " : " + port + " not found");
-		int id = getServerID(ip, port);
-		notifyServerRemoved(server_list.get(id));
-		server_list.remove(id);
+	public void removeServer(Server... servers) throws ServerManagerException {
+		for(Server server : servers) {
+			String ip = server.getAddress();
+			int port = server.getPort();
+			if (!hasServer(ip, port))
+				throw new ServerManagerException("Server " + ip + " : " + port + " not found");
+			int id = getServerID(ip, port);
+			notifyServerRemoved(server_list.get(id));
+			server_list.remove(id);
+		}
 		
 	}
 	
