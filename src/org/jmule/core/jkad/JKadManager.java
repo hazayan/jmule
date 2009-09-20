@@ -32,8 +32,8 @@ import org.jmule.core.jkad.routingtable.RoutingTable;
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:01:12 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:48:49 $
  */
 public interface JKadManager extends JMuleStoppableManager  {
 
@@ -46,6 +46,7 @@ public interface JKadManager extends JMuleStoppableManager  {
 	
 	public boolean isConnected();
 	public boolean isDisconnected();
+	public boolean isConnecting();
 	
 	public IPAddress getIPAddress();
 	public ClientID getClientID();
