@@ -28,9 +28,13 @@ import org.jmule.core.JMuleManager;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:57:31 $
  */
 public interface NetworkManager extends JMuleManager {
 
+	public float getDownloadSpeed();
+	
+	public float getUploadSpeed();
+	
 }

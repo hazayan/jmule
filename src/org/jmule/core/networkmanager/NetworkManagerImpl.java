@@ -75,8 +75,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:58:53 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
@@ -97,6 +97,20 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	private JMConnectionWaiter connection_waiter;
 
 	NetworkManagerImpl() {
+	}
+	
+	public float getDownloadSpeed() {
+		float result = 0;
+		for (JMPeerConnection peer_connection : peer_connections.values())
+			result += peer_connection.getJMConnection().getDownloadSpeed();
+		return result;
+	}
+	
+	public float getUploadSpeed() {
+		float result = 0;
+		for (JMPeerConnection peer_connection : peer_connections.values())
+			result += peer_connection.getJMConnection().getUploadSpeed();
+		return result;
 	}
 
 	public void addPeer(JMPeerConnection peerConnection) {
