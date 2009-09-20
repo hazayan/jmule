@@ -66,8 +66,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
  */
 public class KadTab extends AbstractTab {
 
@@ -120,17 +120,17 @@ public class KadTab extends AbstractTab {
 		setKadStatus.setLayoutData(g);
 		setKadStatus.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				if (_core.getJKad().isConnected())
-					_core.getJKad().disconnect();
+				if (_core.getJKadManager().isConnected())
+					_core.getJKadManager().disconnect();
 				else
-					if (_core.getJKad().isConnecting())
-						_core.getJKad().disconnect();
+					if (_core.getJKadManager().isConnecting())
+						_core.getJKadManager().disconnect();
 					else
-						if (_core.getJKad().isDisconnected()) {
+						if (_core.getJKadManager().isDisconnected()) {
 							setKadStatus.setEnabled(false);
 							Display.getDefault().asyncExec(new Runnable() {
 								public void run() {
-									_core.getJKad().connect();
+									_core.getJKadManager().connect();
 								}
 							});
 						}
@@ -138,14 +138,14 @@ public class KadTab extends AbstractTab {
 			}
 		});
 		
-		if (_core.getJKad().isConnected())
+		if (_core.getJKadManager().isConnected())
 			setKadStatus.setText(_._("mainwindow.kadtab.disconnect"));
-		if (_core.getJKad().isConnecting())
+		if (_core.getJKadManager().isConnecting())
 			setKadStatus.setText(_._("mainwindow.kadtab.stop_connecting"));
-		if (_core.getJKad().isDisconnected())
+		if (_core.getJKadManager().isDisconnected())
 			setKadStatus.setText(_._("mainwindow.kadtab.connect"));
 		
-		_core.getJKad().addListener(new JKadListener() {
+		_core.getJKadManager().addJKadListener(new JKadListener() {
 			public void JKadIsConnected() {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
@@ -219,7 +219,7 @@ public class KadTab extends AbstractTab {
 		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_ID_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_id"), _._("mainwindow.kadtab.contact_list.column.contact_id.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_ID_COLUMN_ID));
 		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_DISTANCE_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_distance"), _._("mainwindow.kadtab.contact_list.column.contact_distance.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_DISTANCE_COLUMN_ID));
 		
-		_core.getJKad().getRoutingTable().addListener(new RoutingTableListener() {
+		_core.getJKadManager().getRoutingTable().addListener(new RoutingTableListener() {
 			public void contactAdded(final KadContact contact) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
@@ -266,7 +266,7 @@ public class KadTab extends AbstractTab {
 			
 		});
 		
-		for(KadContact contact : _core.getJKad().getRoutingTable().getContacts())
+		for(KadContact contact : _core.getJKadManager().getRoutingTable().getContacts())
 			contact_list.addRow(contact);
 		
 		routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes_number",contact_list.getItemCount()+""));
@@ -298,7 +298,7 @@ public class KadTab extends AbstractTab {
 		
 		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_TYPE_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_type"), _._("mainwindow.kadtab.task_list.column.task_type.desc"), swtPreferences.getColumnWidth(KAD_TASK_TYPE_COLUMN_ID));
 		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_LOOKUP_HASH_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_hash"), _._("mainwindow.kadtab.task_list.column.task_hash.desc"), swtPreferences.getColumnWidth(KAD_TASK_LOOKUP_HASH_COLUMN_ID));
-		_core.getJKad().getLookup().addListener(new LookupListener() {
+		_core.getJKadManager().getLookup().addListener(new LookupListener() {
 			public void taskAdded(final LookupTask task) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
@@ -334,7 +334,7 @@ public class KadTab extends AbstractTab {
 			
 		});
 		
-		Map<Int128,LookupTask> list = _core.getJKad().getLookup().getLookupTasks();
+		Map<Int128,LookupTask> list = _core.getJKadManager().getLookup().getLookupTasks();
 		for(LookupTask task : list.values()) {
 			KadTask kad_task = lookupTaskToKadTask(task);
 			kad_task_list.addRow(kad_task);

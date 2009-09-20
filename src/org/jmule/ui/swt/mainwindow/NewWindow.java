@@ -53,9 +53,12 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.ED2KServerLink;
+import org.jmule.core.downloadmanager.DownloadManagerException;
+import org.jmule.core.edonkey.ED2KFileLink;
+import org.jmule.core.edonkey.ED2KLinkMalformedException;
+import org.jmule.core.edonkey.ED2KServerLink;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.utils.FileUtils;
 import org.jmule.ui.JMuleUIComponent;
@@ -76,8 +79,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Sep 16, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
  */
 public class NewWindow implements JMuleUIComponent {
 	public static enum WindowType { DOWNLOAD, SERVER, SHARED_DIR };
@@ -311,11 +314,17 @@ public class NewWindow implements JMuleUIComponent {
 
 		public void paste() {
 			String clip_board_text = Utils.getClipboardText();
-			List<ED2KFileLink> link_list = ED2KFileLink.extractLinks(clip_board_text);
-			for(ED2KFileLink link : link_list) {
-				if (!hasObject(link))
-					addRow(link);
+			List<ED2KFileLink> link_list;
+			try {
+				link_list = ED2KFileLink.extractLinks(clip_board_text);
+				for(ED2KFileLink link : link_list) {
+					if (!hasObject(link))
+						addRow(link);
+				}
+			} catch (ED2KLinkMalformedException e) {
+				e.printStackTrace();
 			}
+			
 		}
 
 		public void save() {
@@ -324,7 +333,11 @@ public class NewWindow implements JMuleUIComponent {
 					int id = indexOf(item);
 					ED2KFileLink link = getData(id);
 					if (sharing_manager.hasFile(link.getFileHash())) continue;
-					download_manager.addDownload(link);
+					try {
+						download_manager.addDownload(link);
+					} catch (DownloadManagerException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}	
@@ -391,8 +404,12 @@ public class NewWindow implements JMuleUIComponent {
 				if (item.getChecked()) {
 					int id = indexOf(item);
 					ED2KServerLink link = getData(id);
-					if (!server_manager.hasServer(link)) {						
-						server_manager.addServer(link);
+					if (!server_manager.hasServer(link.getServerAddress(), link.getServerPort())) {						
+						try {
+							server_manager.newServer(link);
+						} catch (ServerManagerException e) {
+							e.printStackTrace();
+						}
 					}
 						
 				}

@@ -36,12 +36,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.jmule.core.JMIterable;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.PeerDownloadStatus;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerException;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
@@ -61,8 +61,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -99,15 +99,21 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 	public void refresh() {
 		if (isDisposed()) return ;
 		
-		JMIterable<Peer> upload_peers = null;
+		List<Peer> upload_peers = null;
 		UploadSession upload_session = null;
 		
 		if (upload_manager.hasUpload(download_session.getFileHash())) {
-			upload_session = upload_manager.getUpload(download_session.getFileHash());
-			upload_peers = upload_session.getPeers();
+			try {
+				upload_session = upload_manager.getUpload(download_session.getFileHash());
+				upload_peers = upload_session.getPeers();
+			} catch (UploadManagerException e) {
+				e.printStackTrace();
+				return ;
+			}
+			
 		}
 		
-		JMIterable<Peer> download_peers = download_session.getPeers();
+		List<Peer> download_peers = download_session.getPeers();
 		
 		for(Peer peer : shown_peers) {
 			boolean remove = false;
@@ -196,8 +202,8 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 				return Misc.compareAllObjects(object1,object2,"getUploadSpeed",order);
 
 			if (columnID == SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID) {
-				String cc1 = CountryLocator.getInstance().getCountryCode(object1.getAddress());
-				String cc2 = CountryLocator.getInstance().getCountryCode(object2.getAddress());
+				String cc1 = CountryLocator.getInstance().getCountryCode(object1.getIP());
+				String cc2 = CountryLocator.getInstance().getCountryCode(object2.getIP());
 				int result = cc1.compareTo(cc2);
 				if (order)
 					return result;
@@ -206,30 +212,64 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			}
 			
 			if (columnID == SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID) {
-				String country1 = CountryLocator.getInstance().getCountryName(object1.getAddress());
-				String country2 = CountryLocator.getInstance().getCountryName(object2.getAddress());
+				String country1 = CountryLocator.getInstance().getCountryName(object1.getIP());
+				String country2 = CountryLocator.getInstance().getCountryName(object2.getIP());
 				int result = country1.compareTo(country2);
 				if (order)
 					return result;
 				else
 					return Misc.reverse(result);
 			}
-			
-			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID) {
-				int id1 = download_session.getPeerDownloadStatus(object1).getPeerStatus();
-				int id2 = download_session.getPeerDownloadStatus(object2).getPeerStatus();
-				if ((id1==PeerDownloadStatus.IN_QUEUE)&&(id2==PeerDownloadStatus.IN_QUEUE)) {
-					id1 = download_session.getPeerDownloadStatus(object1).getQueueRank();
-					id2 = download_session.getPeerDownloadStatus(object2).getQueueRank();
+
+			if (columnID == SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID) {
+				int id1 = toInt(download_session.getPeerDownloadStatus(object1)
+						.getStatus());
+				int id2 = toInt(download_session.getPeerDownloadStatus(object2)
+						.getStatus());
+				if ((download_session.getPeerDownloadStatus(object1)
+						.getStatus() == PeerDownloadStatus.IN_QUEUE)
+						&& (download_session.getPeerDownloadStatus(object2)
+								.getStatus() == PeerDownloadStatus.IN_QUEUE)) {
+					id1 = download_session.getPeerDownloadStatus(object1)
+							.getQueueRank();
+					id2 = download_session.getPeerDownloadStatus(object2)
+							.getQueueRank();
 				}
 				int result = 0;
-				if (id1>id2) result = 1;
-				if (id1<id2) result = -1;
-				if (!order) return Misc.reverse(result);
+				if (id1 > id2)
+					result = 1;
+				if (id1 < id2)
+					result = -1;
+				if (!order)
+					return Misc.reverse(result);
 				return result;
-				
+
 			}
 			
+			return 0;
+		}
+		
+		private int toInt(PeerDownloadStatus object) {
+			if (object == PeerDownloadStatus.ACTIVE)
+				return -1;
+			if (object == PeerDownloadStatus.ACTIVE_UNUSED)
+				return -2;
+			if (object == PeerDownloadStatus.CONNECTED)
+				return -3;
+			if (object == PeerDownloadStatus.DISCONNECTED)
+				return -4;
+			if (object == PeerDownloadStatus.FILE_STATUS_REQUEST)
+				return -5;
+			if (object == PeerDownloadStatus.HASHSET_REQUEST)
+				return -6;
+			if (object == PeerDownloadStatus.IN_QUEUE)
+				return -7;
+			if (object == PeerDownloadStatus.INACTIVE)
+				return -8;
+			if (object == PeerDownloadStatus.SLOTREQUEST)
+				return -9;
+			if (object == PeerDownloadStatus.UPLOAD_REQUEST)
+				return -10;
 			return 0;
 		}
 
@@ -238,7 +278,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			
 			if (!CountryLocator.getInstance().isServiceDown()) {
 				
-				Image image = SWTImageRepository.getFlagByAddress(object.getAddress(),FlagSize.S25x15);
+				Image image = SWTImageRepository.getFlagByAddress(object.getIP(),FlagSize.S25x15);
 				
 				CountryFlagPainter painter = new CountryFlagPainter(image);
 				TableItemCountryFlag table_item_painter = new TableItemCountryFlag(SWTPreferences.getDefaultColumnOrder(SWTConstants.DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID),painter);
@@ -248,10 +288,10 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 		}
 		
 		public void updateRow(Peer object) {
-			String country_code = CountryLocator.getInstance().getCountryCode(object.getAddress());
+			String country_code = CountryLocator.getInstance().getCountryCode(object.getIP());
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID, country_code);
 			
-			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID, object.getAddress()+":"+object.getPort());
+			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID, object.getIP()+":"+object.getPort());
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID, object.getNickName());
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, PeerInfoFormatter.formatPeerSoftware(object));
 
@@ -260,23 +300,17 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			
 			if (download_session.hasPeer(object)) {
 				setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID, PeerInfoFormatter.formatPeerStatus(download_session.getPeerDownloadStatus(object)));
-			} else {
-				UploadSession upload_session = null;
-				if (upload_manager.hasUpload(download_session.getFileHash()))
-					upload_session = upload_manager.getUpload(download_session.getFileHash());
-				if (upload_session != null) {				
-					int rank = upload_session.getPeerPosition(object);
-					String str="";
-					if (rank!=0) {
-						str = Localizer.getString("downloadinfowindow.tab.peerlist.column.status.upload_queue",rank+"");
-					} else {
-						str = _._("downloadinfowindow.tab.peerlist.column.status.uploading");
-					}
+			} else {		
+				int rank = upload_manager.getUploadQueue().getPeerPosition(object);
+				String str="";
+				if (rank!=0) {
+					str = Localizer.getString("downloadinfowindow.tab.peerlist.column.status.upload_queue",rank+"");
+				} else {
+					str = _._("downloadinfowindow.tab.peerlist.column.status.uploading");
+				}
 					
-					setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID, str);
-				} 
-			}
-				
+				setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID, str);
+				}
 		}
 
 		protected Menu getPopUpMenu() {

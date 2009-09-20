@@ -38,9 +38,9 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.edonkey.impl.ClientID;
-import org.jmule.core.edonkey.impl.Server;
-import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.networkmanager.NetworkManager;
+import org.jmule.core.servermanager.Server;
 import org.jmule.core.utils.Convert;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -58,8 +58,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author binary
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
  */
 public class StatusBar extends Composite {
 
@@ -70,7 +70,7 @@ public class StatusBar extends Composite {
 	private JMuleCore _core;
 	
 	private ConfigurationManager config_manager ;
-	private PeerManager peer_manager ;
+	private NetworkManager network_manager ;
 	
 	public StatusBar(Composite parent,JMuleCore core) {
 		super(parent, SWT.NONE);
@@ -78,7 +78,7 @@ public class StatusBar extends Composite {
 		_core = core;
 		
 		config_manager = _core.getConfigurationManager();
-		peer_manager = _core.getPeerManager();
+		network_manager = _core.getNetworkManager();
 		
 		SWTServerListWrapper.getInstance().setStatusBar(this);
 		
@@ -172,7 +172,7 @@ public class StatusBar extends Composite {
 					} catch (ConfigurationManagerException e) {
 						e.printStackTrace();
 					}
-				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
+				String up_speed = SpeedFormatter.formatSpeed(network_manager.getUploadSpeed());
 				upspeed_label.setText(up_limit + up_speed);
 				layout();
 			}
@@ -185,7 +185,7 @@ public class StatusBar extends Composite {
 					} catch (ConfigurationManagerException e) {
 						e.printStackTrace();
 					}
-				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
+				String down_speed = SpeedFormatter.formatSpeed(network_manager.getDownloadSpeed());
 				downspeed_label.setText(down_limit + down_speed);
 				layout();
 			}
@@ -206,8 +206,8 @@ public class StatusBar extends Composite {
 				}catch(ConfigurationManagerException e) {
 					e.printStackTrace();
 				}
-				String down_speed = SpeedFormatter.formatSpeed(peer_manager.getDownloadSpeed());
-				String up_speed = SpeedFormatter.formatSpeed(peer_manager.getUploadSpeed());
+				String down_speed = SpeedFormatter.formatSpeed(network_manager.getDownloadSpeed());
+				String up_speed = SpeedFormatter.formatSpeed(network_manager.getUploadSpeed());
 				
 				downspeed_label.setText(down_limit + down_speed);
 				upspeed_label.setText(up_limit + up_speed);

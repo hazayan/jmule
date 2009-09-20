@@ -1,6 +1,6 @@
 /*
  *  JMule - Java file sharing client
- *  Copyright (C) 2007-2008 JMule team ( jmule@jmule.org / http://jmule.org )
+ *  Copyright (C) 2007-2009 JMule team ( jmule@jmule.org / http://jmule.org )
  *
  *  Any parts of this program derived from other projects, or contributed
  *  by third-party developers are copyrighted by their respective authors.
@@ -22,61 +22,40 @@
  */
 package org.jmule.ui.swt.settingswindow;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
-import org.jmule.core.JMuleCore;
-import org.jmule.core.JMuleCoreFactory;
-import org.jmule.ui.JMuleUIManager;
-import org.jmule.ui.swt.skin.SWTSkin;
+import org.eclipse.swt.widgets.Label;
 
 /**
- * Created on Aug 19, 2008
+ * Created on Aug 15, 2009
  * @author binary256
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
  */
-public abstract class AbstractTab {
+public class ProxyTab extends AbstractTab {
 
-	protected JMuleCore _core;
-	protected Group content;
-	protected SWTSkin skin;
-	
-	protected List<AbstractTab> child_tabs = null;
-	
-	public AbstractTab(Composite parent) {
-		content = new Group(parent, SWT.NONE);
-
-		_core = JMuleCoreFactory.getSingleton();
-				
-		skin = null;
-		try {
-		    skin = (SWTSkin)JMuleUIManager.getJMuleUI().getSkin();
-		}catch(Throwable t) {
-		}
-		
-		
-	}
-	
-	public List<AbstractTab> getChildTabs() {
-		return child_tabs;
-	}
-	
-	public abstract String getTabName();
-		
-	public abstract boolean checkFields();
-
-	public abstract void save();
-	
-	public abstract void reset();
-	
-	protected void checkSubclass() { }
-	
-	public Composite getTabContent() {
-		return content;
+	public ProxyTab(Composite parent) {
+		super(parent);
+		content.setLayout(new FillLayout());
+		new Label(content,SWT.NONE).setText("Proxy");
 	}
 
+	public boolean checkFields() {
+		
+		return false;
+	}
+
+	public String getTabName() {
+		return "Proxy";
+	}
+
+	public void reset() {
+		
+	}
+
+	public void save() {
+		
+	}
 
 }

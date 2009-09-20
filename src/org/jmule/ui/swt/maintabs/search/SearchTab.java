@@ -62,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/08/11 16:41:00 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:15 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -121,6 +121,10 @@ public class SearchTab extends AbstractTab{
 						tab.searchStarted();
 					}
 				}); 
+			}
+
+			public void searchFailed(SearchQuery query) {
+				
 			}
 
 		});
@@ -286,11 +290,11 @@ public class SearchTab extends AbstractTab{
 			Utils.showWarningMessage(getShell(), Localizer._("mainwindow.searchtab.not_connected_to_server_title"), Localizer._("mainwindow.searchtab.not_connected_to_server"));
 			return;
 		}
-		if ((searchType.getSelectionIndex()==1)&&(!_core.getJKad().isConnected())) {
+		if ((searchType.getSelectionIndex()==1)&&(!_core.getJKadManager().isConnected())) {
 			Utils.showWarningMessage(getShell(), _._("mainwindow.searchtab.not_connected_to_kad_title"),_._("mainwindow.searchtab.not_connected_to_kad"));
 			return;
 		}		
-		if ((searchType.getSelectionIndex()==2)&&(!_core.getJKad().isConnected())) {
+		if ((searchType.getSelectionIndex()==2)&&(!_core.getJKadManager().isConnected())) {
 			Utils.showWarningMessage(getShell(), _._("mainwindow.searchtab.not_connected_to_kad_title"),_._("mainwindow.searchtab.not_connected_to_kad"));
 			return;
 		}	

@@ -36,7 +36,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.core.utils.AddressUtils;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
@@ -50,13 +52,13 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:27:36 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
  */
 public class ServerAddWindow implements JMuleUIComponent {
 
 	private Shell shell;
-		
+	private JMuleCore _core = JMuleCoreFactory.getSingleton();
 	public ServerAddWindow() {
 		
 	}
@@ -173,8 +175,12 @@ public class ServerAddWindow implements JMuleUIComponent {
 					return ;
 				}
 				int server_port = Integer.parseInt(text_port.getText());
-				Server server = new Server(server_ip,server_port);
-				SWTServerListWrapper.getInstance().addServer(server);
+				try {
+					_core.getServerManager().newServer(server_ip, server_port);
+				} catch (ServerManagerException e) {
+					Utils.showWarningMessage(shell, "", e.getMessage());
+				}
+				
 				shell.close();
 		} });
 		

@@ -31,8 +31,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerException;
 import org.jmule.core.uploadmanager.UploadManagerListener;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
@@ -41,7 +42,6 @@ import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.SWTConstants;
 import org.jmule.ui.swt.SWTImageRepository;
-import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.mainwindow.MainWindow;
 import org.jmule.ui.swt.tables.BufferedTableRow;
@@ -54,8 +54,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -205,11 +205,17 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		if (SWTThread.getDisplay().isDisposed()) return;
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
-				UploadSession session = upload_manager.getUpload(fileHash);
-				if (session.sharingCompleteFile()) {
-					addRow(session);
-					MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_upload_added",session.getSharingName()));
+				UploadSession session;
+				try {
+					session = upload_manager.getUpload(fileHash);
+					if (session.sharingCompleteFile()) {
+						addRow(session);
+						MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_upload_added",session.getSharingName()));
+					}
+				} catch (UploadManagerException e) {
+					e.printStackTrace();
 				}
+
 			}
 		});
 	}

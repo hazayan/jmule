@@ -35,12 +35,15 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.downloadmanager.DownloadManager;
+import org.jmule.core.downloadmanager.DownloadManagerException;
 import org.jmule.core.downloadmanager.DownloadManagerListener;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.DownloadSession.DownloadStatus;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.ED2KFileLink;
+import org.jmule.core.edonkey.ED2KLinkMalformedException;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerException;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
 import org.jmule.ui.localizer._;
@@ -62,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:06:33 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -418,13 +421,23 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		
 		FileHash file_hash = session.getFileHash();
 		float upload_speed = 0;
-		if (upload_manager.hasUpload(file_hash)) 
-			upload_speed = upload_manager.getUpload(file_hash).getSpeed();
+		if (upload_manager.hasUpload(file_hash))
+			try {
+				upload_speed = upload_manager.getUpload(file_hash).getSpeed();
+			} catch (UploadManagerException e) {
+				e.printStackTrace();
+			}
 		
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID,SpeedFormatter.formatSpeed(upload_speed));
 		
-		int peerCount = session.getPeersCount();
-		UploadSession upload_session = upload_manager.getUpload(session.getFileHash());
+		int peerCount = session.getPeerCount();
+		UploadSession upload_session;
+		try {
+			upload_session = upload_manager.getUpload(session.getFileHash());
+		} catch (UploadManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
 		if (upload_session != null)
 			peerCount += upload_session.getPeersCount();
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID,peerCount+"");
@@ -473,14 +486,22 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		List<DownloadSession> list = getSelectedObjects();
 		for(DownloadSession downloadSession : list)
 			if (downloadSession.getStatus() == DownloadStatus.STOPPED)
-				download_manager.startDownload(downloadSession.getFileHash());
+				try {
+					download_manager.startDownload(downloadSession.getFileHash());
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+				}
 	}
 	
 	private void stopSelectedDownloads() {
 		List<DownloadSession> list = getSelectedObjects();
 		for(DownloadSession downloadSession : list)
 			if (downloadSession.getStatus() == DownloadStatus.STARTED)
-				download_manager.stopDownload(downloadSession.getFileHash());
+				try {
+					download_manager.stopDownload(downloadSession.getFileHash());
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+				}
 	}
 	
 	public void cancelSelectedDownloads() {
@@ -492,17 +513,31 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 			result = Utils.showConfirmMessage(getShell(), _._("mainwindow.transferstab.downloads.confirm_cancel.title") , _._("mainwindow.transferstab.downloads.confirm_cancel_multi"));
 		if (result)
 			for(DownloadSession downloadSession : list)
-				download_manager.removeDownload(downloadSession.getFileHash());
+				try {
+					download_manager.removeDownload(downloadSession.getFileHash());
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+				}
 	}
 	
 	private void pasteED2KLink() {
 		String clipboard_text = Utils.getClipboardText();
-		List<ED2KFileLink> links = ED2KFileLink.extractLinks(clipboard_text);
+		List<ED2KFileLink> links;
+		try {
+			links = ED2KFileLink.extractLinks(clipboard_text);
+		} catch (ED2KLinkMalformedException e) {
+			e.printStackTrace();
+			return ;
+		}
 		
 		String failed ="";
 		for(ED2KFileLink link : links) {
 			if (!download_manager.hasDownload(link.getFileHash()))
+				try {
 					download_manager.addDownload(link);
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+				}
 			else
 				failed+=link.getFileName()+"\n";
 		}
@@ -522,9 +557,15 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	public void downloadAdded(final FileHash fileHash) {
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
-				DownloadSession session = download_manager.getDownload(fileHash);
-				addDownlaodSession(session);
-				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_added",session.getSharingName()));
+				DownloadSession session;
+				try {
+					session = download_manager.getDownload(fileHash);
+					addDownlaodSession(session);
+					MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_added",session.getSharingName()));
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+				}
+				
 			}
 		});
 		
@@ -556,7 +597,13 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	public void downloadStarted(final FileHash fileHash) {
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
-				DownloadSession downloadSession = download_manager.getDownload(fileHash);
+				DownloadSession downloadSession;
+				try {
+					downloadSession = download_manager.getDownload(fileHash);
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+					return ;
+				}
 				updateRow(downloadSession);
 				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_started",downloadSession.getSharingName()));
 		}});
@@ -566,7 +613,13 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	public void downloadStopped(final FileHash fileHash) {
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
-				DownloadSession downloadSession = download_manager.getDownload(fileHash);
+				DownloadSession downloadSession;
+				try {
+					downloadSession = download_manager.getDownload(fileHash);
+				} catch (DownloadManagerException e) {
+					e.printStackTrace();
+					return ;
+				}
 				updateRow(downloadSession);
 				MainWindow.getLogger().fine(_._("mainwindow.logtab.message_download_stopped",downloadSession.getSharingName()));
 		}});

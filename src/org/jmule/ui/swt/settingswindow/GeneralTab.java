@@ -25,7 +25,6 @@ package org.jmule.ui.swt.settingswindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -37,18 +36,16 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMConstants;
-import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.ui.localizer._;
-import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
  */
 public class GeneralTab extends AbstractTab {
 
@@ -69,8 +66,8 @@ public class GeneralTab extends AbstractTab {
 	
 	private boolean kbyte_selected = true;
 	
-	public GeneralTab(Composite parent, JMuleCore core) {
-		super(parent, core);
+	public GeneralTab(Composite parent) {
+		super(parent);
 	
 		Listener number_filter = new Listener() {
 			public void handleEvent(Event e) {
@@ -426,11 +423,6 @@ public class GeneralTab extends AbstractTab {
 		
 	}
 
-	public Image getImage() {
-		return SWTImageRepository.getImage("general.png");
-	}
-
-
 	public String getTabName() {
 		return _._("settingswindow.tab.general.name");
 	}
@@ -534,6 +526,10 @@ public class GeneralTab extends AbstractTab {
 		}catch(ConfigurationManagerException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void reset() {
+		
 	}
 
 	private void updateUDPControls() {

@@ -33,7 +33,7 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.servermanager.Server;
 import org.jmule.core.utils.Convert;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
@@ -44,8 +44,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
  */
 public class ConnectionInfo extends CTabFolder implements Refreshable {
 

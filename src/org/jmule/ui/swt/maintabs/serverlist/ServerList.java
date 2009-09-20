@@ -34,10 +34,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.ServerManagerException;
-import org.jmule.core.edonkey.impl.ED2KServerLink;
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.edonkey.ED2KServerLink;
+import org.jmule.core.servermanager.Server;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack.FlagSize;
@@ -58,8 +59,8 @@ import org.jmule.ui.utils.NumberFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/10 11:27:36 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
@@ -738,10 +739,13 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 		new JMThread( new JMRunnable() {
 			public void JMRun() {
 				List<ED2KServerLink> server_links = ED2KServerLink.extractLinks(clipboard_content);
-				SWTServerListWrapper wrapper = SWTServerListWrapper.getInstance();
 				for(ED2KServerLink ed2k_link : server_links) {
-					Server server = new Server(ed2k_link);
-					wrapper.addServer(server);
+					try {
+						JMuleCoreFactory.getSingleton().getServerManager().newServer(ed2k_link);
+					} catch (ServerManagerException e) {
+						e.printStackTrace();
+					}
+					
 				}
 			}
 		}).start();

@@ -39,7 +39,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.downloadmanager.DownloadManagerException;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultItem;
@@ -59,233 +60,286 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/26 14:22:03 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
  */
 public class SearchResultTab {
 
 	private boolean searchCompleted = false;
-	
+
 	private SWTPreferences swt_preferences = null;
-	
+
 	private CTabItem search_tab;
-	
+
 	private SearchQuery query;
 
 	private JMTable<SearchResultItem> search_results;
-	
+
 	private Menu no_items_menu, pop_up_menu;
 	private MenuItem download_item;
 	private MenuItem properties_item;
 	private JMuleCore _core;
-	
+
 	private SearchResult search_result;
-	
-	private Color color_red = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
-	
-	public SearchResultTab(CTabFolder parent,SearchQuery searchRequest,JMuleCore core) {
+
+	private Color color_red = SWTThread.getDisplay().getSystemColor(
+			SWT.COLOR_RED);
+
+	public SearchResultTab(CTabFolder parent, SearchQuery searchRequest,
+			JMuleCore core) {
 		swt_preferences = SWTPreferences.getInstance();
-		search_tab = new CTabItem(parent,SWT.CLOSE);
+		search_tab = new CTabItem(parent, SWT.CLOSE);
 		_core = core;
 		query = searchRequest;
 		search_tab.setText(getTabTitle(query.getQuery()));
 		search_tab.setToolTipText(query.getQuery());
 		search_tab.setImage(SWTImageRepository.getImage("search_queue.png"));
-		
-		Composite content = new Composite(parent,SWT.NONE);
-		
+
+		Composite content = new Composite(parent, SWT.NONE);
+
 		search_tab.setControl(content);
 		content.setLayout(new FillLayout());
-		
+
 		search_results = new JMTable<SearchResultItem>(content, SWT.NONE) {
 
 			protected int compareObjects(SearchResultItem object1,
 					SearchResultItem object2, int columnID, boolean order) {
-				
+
 				if (columnID == SWTPreferences.SEARCH_FILENAME_COLUMN_ID) {
-					return Misc.compareAllObjects(object1, object2, "getFileName", order);
+					return Misc.compareAllObjects(object1, object2,
+							"getFileName", order);
 				}
-				
+
 				if (columnID == SWTPreferences.SEARCH_FILESIZE_COLUMN_ID)
-					return Misc.compareAllObjects(object1, object2, "getFileSize", order);
-				
+					return Misc.compareAllObjects(object1, object2,
+							"getFileSize", order);
+
 				if (columnID == SWTPreferences.SEARCH_FILEQUALITY_COLUMN_ID) {
 					FileQuality q1 = object1.getFileQuality();
 					FileQuality q2 = object2.getFileQuality();
 					int result = 0;
-					if (q1.getAsInt()>q2.getAsInt())
-						result = 1; 
-						else
-							if (q1.getAsInt()<q2.getAsInt())
-								result = -1;
-					if (order) return result;
+					if (q1.getAsInt() > q2.getAsInt())
+						result = 1;
+					else if (q1.getAsInt() < q2.getAsInt())
+						result = -1;
+					if (order)
+						return result;
 					return Misc.reverse(result);
 				}
-				
+
 				if (columnID == SWTPreferences.SEARCH_AVAILABILITY_COLUMN_ID)
-					return Misc.compareAllObjects(object1, object2, "getFileAviability", order);
-				
+					return Misc.compareAllObjects(object1, object2,
+							"getFileAviability", order);
+
 				if (columnID == SWTPreferences.SEARCH_COMPLETESRC_COLUMN_ID)
-					return Misc.compareAllObjects(object1, object2, "getFileCompleteSrc", order);
-				
+					return Misc.compareAllObjects(object1, object2,
+							"getFileCompleteSrc", order);
+
 				if (columnID == SWTPreferences.SEARCH_FILE_TYPE_COLUMN_ID) {
 					String type1 = new String(object1.getMimeType());
 					String type2 = new String(object2.getMimeType());
-					
+
 					int result = type1.compareTo(type2);
-					
-					if (order) return result;
-					
+
+					if (order)
+						return result;
+
 					return Misc.reverse(result);
 				}
-				
-				
+
 				if (columnID == SWTPreferences.SEARCH_FILE_ID_COLUMN_ID) {
 					String id1 = object1.getFileHash().getAsString();
 					String id2 = object2.getFileHash().getAsString();
 					int result = id1.compareTo(id2);
-					if (order) return result;
+					if (order)
+						return result;
 					return Misc.reverse(result);
 				}
-				
+
 				return 0;
 			}
 
-			final static int NO_FILE 		= 0x01;
-			final static int DOWNLOAD_FILE  = 0x02;
-			final static int SHARED_FILE 	= 0x03;
-			
+			final static int NO_FILE = 0x01;
+			final static int DOWNLOAD_FILE = 0x02;
+			final static int SHARED_FILE = 0x03;
+
 			protected Menu getPopUpMenu() {
-				if (getItemCount()==0) return no_items_menu;
+				if (getItemCount() == 0)
+					return no_items_menu;
 				int download_status = NO_FILE;
-				
-				SharingManager  sharing_manager  = _core.getSharingManager();
+
+				SharingManager sharing_manager = _core.getSharingManager();
 				DownloadManager download_manager = _core.getDownloadManager();
-				
-				for(SearchResultItem item : getSelectedObjects()) {
+
+				for (SearchResultItem item : getSelectedObjects()) {
 					if (download_manager.hasDownload(item.getFileHash())) {
-						if (!download_manager.getDownload(item.getFileHash()).isStarted()) {
-							download_status = DOWNLOAD_FILE;
-						} else  
-							download_status = SHARED_FILE;
+						try {
+							if (!download_manager.getDownload(
+									item.getFileHash()).isStarted()) {
+								download_status = DOWNLOAD_FILE;
+							} else
+								download_status = SHARED_FILE;
+						} catch (DownloadManagerException e) {
+							e.printStackTrace();
+						}
 						break;
 					}
 					if (sharing_manager.hasFile(item.getFileHash()))
 						download_status = SHARED_FILE;
 				}
-				
-				switch(download_status) {
-					case NO_FILE : {
-						download_item.setEnabled(true);
-						break;
-					}
-					
-					case SHARED_FILE : {
-						download_item.setEnabled(false);
-						break;
-					}
-				
-					case DOWNLOAD_FILE : {
-						download_item.setEnabled(true);
-						break;
-					}
+
+				switch (download_status) {
+				case NO_FILE: {
+					download_item.setEnabled(true);
+					break;
 				}
-				if (getSelectionCount()>1)
+
+				case SHARED_FILE: {
+					download_item.setEnabled(false);
+					break;
+				}
+
+				case DOWNLOAD_FILE: {
+					download_item.setEnabled(true);
+					break;
+				}
+				}
+				if (getSelectionCount() > 1)
 					properties_item.setEnabled(false);
 				else
 					properties_item.setEnabled(true);
-				
+
 				return pop_up_menu;
 			}
 
-
 			public void updateRow(SearchResultItem object) {
-				
+
 				FileHash fileHash = object.getFileHash();
 				if (_core.getDownloadManager().hasDownload(fileHash)) {
 					setForegroundColor(object, color_red);
 				}
-				/*else
-					if (_core.getSharingManager().hasFile(fileHash))
-						setForegroundColor(object, color_green);*/
-				
-				setRowText(object, SWTConstants.SEARCH_FILENAME_COLUMN_ID, object.getFileName());
-				Image file_icon = SWTImageRepository.getIconByExtension(object.getFileName());
-				setRowImage(object, SWTPreferences.SEARCH_FILENAME_COLUMN_ID, file_icon);
-				
-				Image file_quality_img = SWTImageRepository.getImage(object.getFileQuality());
-				setRowImage(object, SWTPreferences.SEARCH_FILEQUALITY_COLUMN_ID, file_quality_img);
-				
-				setRowText(object, SWTPreferences.SEARCH_FILESIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));
-				setRowText(object, SWTPreferences.SEARCH_AVAILABILITY_COLUMN_ID, object.getFileAviability()+"");
-				setRowText(object, SWTPreferences.SEARCH_COMPLETESRC_COLUMN_ID, object.getFileCompleteSrc()+"");
+				/*
+				 * else if (_core.getSharingManager().hasFile(fileHash))
+				 * setForegroundColor(object, color_green);
+				 */
+
+				setRowText(object, SWTConstants.SEARCH_FILENAME_COLUMN_ID,
+						object.getFileName());
+				Image file_icon = SWTImageRepository.getIconByExtension(object
+						.getFileName());
+				setRowImage(object, SWTPreferences.SEARCH_FILENAME_COLUMN_ID,
+						file_icon);
+
+				Image file_quality_img = SWTImageRepository.getImage(object
+						.getFileQuality());
+				setRowImage(object,
+						SWTPreferences.SEARCH_FILEQUALITY_COLUMN_ID,
+						file_quality_img);
+
+				setRowText(object, SWTPreferences.SEARCH_FILESIZE_COLUMN_ID,
+						FileFormatter.formatFileSize(object.getFileSize()));
+				setRowText(object,
+						SWTPreferences.SEARCH_AVAILABILITY_COLUMN_ID, object
+								.getFileAviability()
+								+ "");
+				setRowText(object, SWTPreferences.SEARCH_COMPLETESRC_COLUMN_ID,
+						object.getFileCompleteSrc() + "");
 				byte[] fileType = object.getMimeType();
-				
-				setRowText(object, SWTPreferences.SEARCH_FILE_TYPE_COLUMN_ID, FileFormatter.formatMimeType(fileType));
-				setRowText(object, SWTPreferences.SEARCH_FILE_ID_COLUMN_ID, object.getFileHash().getAsString());
-				
+
+				setRowText(object, SWTPreferences.SEARCH_FILE_TYPE_COLUMN_ID,
+						FileFormatter.formatMimeType(fileType));
+				setRowText(object, SWTPreferences.SEARCH_FILE_ID_COLUMN_ID,
+						object.getFileHash().getAsString());
+
 			}
-			
+
 		};
 		int width;
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILENAME_COLUMN_ID); 
-		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILENAME_COLUMN_ID, _._("mainwindow.searchtab.column.filename"), "", width);
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILESIZE_COLUMN_ID);
-		search_results.addColumn(SWT.RIGHT, SWTConstants.SEARCH_FILESIZE_COLUMN_ID, _._("mainwindow.searchtab.column.filesize"), "", width);
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILEQUALITY_COLUMN_ID);
-		search_results.addColumn(SWT.CENTER, SWTConstants.SEARCH_FILEQUALITY_COLUMN_ID, "", _._("mainwindow.searchtab.column.desc.filequality"), width);
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID);
-		search_results.addColumn(SWT.RIGHT,  SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID, _._("mainwindow.searchtab.column.availability"), "" , width);
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID);
-		search_results.addColumn(SWT.RIGHT,  SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID, _._("mainwindow.searchtab.column.completesrcs"), "", width);
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID);
-		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID, _._("mainwindow.searchtab.column.filetype"), "", width);
-		
-		width = swt_preferences.getColumnWidth(SWTConstants.SEARCH_FILE_ID_COLUMN_ID);
-		search_results.addColumn(SWT.LEFT,  SWTConstants.SEARCH_FILE_ID_COLUMN_ID, _._("mainwindow.searchtab.column.fileid"), "", width);
-		
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_FILENAME_COLUMN_ID);
+		search_results.addColumn(SWT.LEFT,
+				SWTConstants.SEARCH_FILENAME_COLUMN_ID, _
+						._("mainwindow.searchtab.column.filename"), "", width);
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_FILESIZE_COLUMN_ID);
+		search_results.addColumn(SWT.RIGHT,
+				SWTConstants.SEARCH_FILESIZE_COLUMN_ID, _
+						._("mainwindow.searchtab.column.filesize"), "", width);
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_FILEQUALITY_COLUMN_ID);
+		search_results.addColumn(SWT.CENTER,
+				SWTConstants.SEARCH_FILEQUALITY_COLUMN_ID, "", _
+						._("mainwindow.searchtab.column.desc.filequality"),
+				width);
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID);
+		search_results.addColumn(SWT.RIGHT,
+				SWTConstants.SEARCH_AVAILABILITY_COLUMN_ID, _
+						._("mainwindow.searchtab.column.availability"), "",
+				width);
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID);
+		search_results.addColumn(SWT.RIGHT,
+				SWTConstants.SEARCH_COMPLETESRC_COLUMN_ID, _
+						._("mainwindow.searchtab.column.completesrcs"), "",
+				width);
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID);
+		search_results.addColumn(SWT.LEFT,
+				SWTConstants.SEARCH_FILE_TYPE_COLUMN_ID, _
+						._("mainwindow.searchtab.column.filetype"), "", width);
+
+		width = swt_preferences
+				.getColumnWidth(SWTConstants.SEARCH_FILE_ID_COLUMN_ID);
+		search_results.addColumn(SWT.LEFT,
+				SWTConstants.SEARCH_FILE_ID_COLUMN_ID, _
+						._("mainwindow.searchtab.column.fileid"), "", width);
+
 		search_results.updateColumnSettings();
-		
+
 		no_items_menu = new Menu(search_results);
-		
-		MenuItem no_items_close_tab = new MenuItem(no_items_menu,SWT.PUSH);
+
+		MenuItem no_items_close_tab = new MenuItem(no_items_menu, SWT.PUSH);
 		no_items_close_tab.setText(_._("mainwindow.searchtab.popupmenu.close"));
 		no_items_close_tab.setImage(SWTImageRepository.getImage("cancel.png"));
 		no_items_close_tab.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				search_tab.dispose();
 			}
-			
+
 		});
-		
-		MenuItem no_items_column_setup_item = new MenuItem(no_items_menu,SWT.PUSH);
-		no_items_column_setup_item.setText(_._("mainwindow.searchtab.popupmenu.column_setup"));
-		no_items_column_setup_item.setImage(SWTImageRepository.getImage("columns_setup.png"));
+
+		MenuItem no_items_column_setup_item = new MenuItem(no_items_menu,
+				SWT.PUSH);
+		no_items_column_setup_item.setText(_
+				._("mainwindow.searchtab.popupmenu.column_setup"));
+		no_items_column_setup_item.setImage(SWTImageRepository
+				.getImage("columns_setup.png"));
 		no_items_column_setup_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				search_results.showColumnEditorWindow();
 			}
 		});
-		
+
 		pop_up_menu = new Menu(search_results);
-		
-		download_item = new MenuItem(pop_up_menu,SWT.PUSH);
+
+		download_item = new MenuItem(pop_up_menu, SWT.PUSH);
 		download_item.setText(_._("mainwindow.searchtab.popupmenu.download"));
-		download_item.setImage(SWTImageRepository.getImage("start_download.png"));
+		download_item.setImage(SWTImageRepository
+				.getImage("start_download.png"));
 		download_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				start_download();
 			}
 		});
-		
-		
-		MenuItem try_again = new MenuItem(pop_up_menu,SWT.PUSH);
+
+		MenuItem try_again = new MenuItem(pop_up_menu, SWT.PUSH);
 		try_again.setText(_._("mainwindow.searchtab.popupmenu.try_again"));
 		try_again.setImage(SWTImageRepository.getImage("refresh.png"));
 		try_again.addSelectionListener(new SelectionAdapter() {
@@ -293,96 +347,109 @@ public class SearchResultTab {
 				retry();
 			}
 		});
-		
-		MenuItem copy_ed2k_item = new MenuItem(pop_up_menu,SWT.PUSH);
-		copy_ed2k_item.setText(_._("mainwindow.searchtab.popupmenu.copy_ed2k_link"));
+
+		MenuItem copy_ed2k_item = new MenuItem(pop_up_menu, SWT.PUSH);
+		copy_ed2k_item.setText(_
+				._("mainwindow.searchtab.popupmenu.copy_ed2k_link"));
 		copy_ed2k_item.setImage(SWTImageRepository.getImage("ed2k_link.png"));
 		copy_ed2k_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				copyED2KLinks();
 			}
 		});
-		
-		MenuItem close_item = new MenuItem(pop_up_menu,SWT.PUSH);
+
+		MenuItem close_item = new MenuItem(pop_up_menu, SWT.PUSH);
 		close_item.setText(_._("mainwindow.searchtab.popupmenu.close"));
 		close_item.setImage(SWTImageRepository.getImage("cancel.png"));
 		close_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				search_tab.dispose();
 			}
-			
+
 		});
 
-		MenuItem column_setup_item = new MenuItem(pop_up_menu,SWT.PUSH);
-		column_setup_item.setText(_._("mainwindow.searchtab.popupmenu.column_setup"));
-		column_setup_item.setImage(SWTImageRepository.getImage("columns_setup.png"));
+		MenuItem column_setup_item = new MenuItem(pop_up_menu, SWT.PUSH);
+		column_setup_item.setText(_
+				._("mainwindow.searchtab.popupmenu.column_setup"));
+		column_setup_item.setImage(SWTImageRepository
+				.getImage("columns_setup.png"));
 		column_setup_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
 				search_results.showColumnEditorWindow();
 			}
-			
+
 		});
-		
-		new MenuItem(pop_up_menu,SWT.SEPARATOR);
-		
-		properties_item = new MenuItem(pop_up_menu,SWT.PUSH);
-		properties_item.setText(_._("mainwindow.searchtab.popupmenu.properties"));
+
+		new MenuItem(pop_up_menu, SWT.SEPARATOR);
+
+		properties_item = new MenuItem(pop_up_menu, SWT.PUSH);
+		properties_item.setText(_
+				._("mainwindow.searchtab.popupmenu.properties"));
 		properties_item.setImage(SWTImageRepository.getImage("info.png"));
 		properties_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				SearchPropertiesWindow window = new SearchPropertiesWindow(search_results.getSelectedObject());
+				SearchPropertiesWindow window = new SearchPropertiesWindow(
+						search_results.getSelectedObject());
 				window.getCoreComponents();
 				window.initUIComponents();
 			}
-			
+
 		});
-		
+
 		search_tab.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent arg0) {
 				_core.getSearchManager().removeSearch(query);
-				if (search_result!=null)
-					_core.getSearchManager().removeResult(search_result);
+				if (search_result != null)
+					_core.getSearchManager().removeSearch(query);
 			}
-			
+
 		});
 
 	}
-	
+
 	public SearchQuery getSerchQuery() {
 		return query;
 	}
-	
+
 	public CTabItem getSearchTab() {
 		return search_tab;
 	}
-	
+
 	public void addSearchResult(SearchResult searchResult) {
 		search_result = searchResult;
-		for(SearchResultItem item : searchResult.getSearchResultItemList()) {
+		for (SearchResultItem item : searchResult.getSearchResultItemList()) {
 			search_results.addRow(item);
 		}
 		String query = searchResult.getSearchQuery().getQuery();
-		
-		String title = getTabTitle(query)+" ("+(search_results.getItemCount()+searchResult.getSearchResultItemList().size())+")";
+
+		String title = getTabTitle(query)
+				+ " ("
+				+ (search_results.getItemCount() + searchResult
+						.getSearchResultItemList().size()) + ")";
 		search_tab.setText(title);
-				
+
 	}
 
 	private void start_download() {
 		List<SearchResultItem> list = search_results.getSelectedObjects();
 		DownloadManager download_manager = _core.getDownloadManager();
-		for(SearchResultItem item : list) {
-			if (download_manager.hasDownload(item.getFileHash())) {
-				if (!download_manager.getDownload(item.getFileHash()).isStarted())
-					download_manager.getDownload(item.getFileHash()).startDownload();
-				continue;
+		for (SearchResultItem item : list) {
+			try {
+				if (download_manager.hasDownload(item.getFileHash())) {
+					if (!download_manager.getDownload(item.getFileHash())
+							.isStarted())
+						download_manager.startDownload(item.getFileHash());
+					continue;
+				}
+				download_manager.addDownload(item);
+				download_manager.startDownload(item.getFileHash());
+				search_results.updateRow(item);
+			} catch (DownloadManagerException e) {
+				e.printStackTrace();
 			}
-			download_manager.addDownload(item);
-			download_manager.getDownload(item.getFileHash()).startDownload();
-			search_results.updateRow(item);
 		}
 	}
-	
+
 	private void retry() {
 		searchCompleted = false;
 		_core.getSearchManager().removeSearch(query);
@@ -391,36 +458,36 @@ public class SearchResultTab {
 		search_tab.setText(getTabTitle(query.getQuery()));
 		search_tab.setImage(SWTImageRepository.getImage("search_queue.png"));
 	}
-	
+
 	private void copyED2KLinks() {
 		List<SearchResultItem> list = search_results.getSelectedObjects();
 		String str = "";
 		String separator = System.getProperty("line.separator");
-		for(SearchResultItem item : list)
-			str+=item.getAsED2KLink().getAsString() + separator;
+		for (SearchResultItem item : list)
+			str += item.getAsED2KLink().getAsString() + separator;
 		Utils.setClipBoardText(str);
 	}
-	
+
 	private String getTabTitle(String query) {
 		String result = query;
-		
-		if (result.length()>10)
-			result = result.substring(0, 10)+"...";
-		
+
+		if (result.length() > 10)
+			result = result.substring(0, 10) + "...";
+
 		return result;
 	}
 
 	public boolean isSearchCompleted() {
 		return searchCompleted;
 	}
-	
+
 	public void searchStarted() {
 		search_tab.setImage(SWTImageRepository.getImage("search_loading.png"));
 	}
-	
+
 	public void completeSearch() {
 		search_tab.setImage(null);
 		searchCompleted = true;
 	}
-	
+
 }

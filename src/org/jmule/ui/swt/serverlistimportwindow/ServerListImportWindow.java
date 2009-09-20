@@ -38,8 +38,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.ServerManagerException;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -51,8 +51,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:01 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
  */
 public class ServerListImportWindow implements JMuleUIComponent{
 

@@ -26,11 +26,10 @@ import java.util.List;
 
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.edonkey.ServerListListener;
-import org.jmule.core.edonkey.ServerListener;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.ServerManagerException;
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.servermanager.Server;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerException;
+import org.jmule.core.servermanager.ServerManagerListener;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTThread;
@@ -41,8 +40,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
  */
 public class SWTServerListWrapper {
 	
@@ -69,9 +68,10 @@ public class SWTServerListWrapper {
 	
 	private SWTServerListWrapper(ServerManager serverManager) {
 		server_manager = serverManager;
-		server_manager.addServerListener(new ServerListener() {
+		server_manager.addServerListListener(new ServerManagerListener() {
 
 			public void connected(Server server) {
+								
 				if (is_autoconnect) {
 					is_autoconnect = false;
 					setUIConnected(server);
@@ -89,7 +89,6 @@ public class SWTServerListWrapper {
 			}
 
 			public void isconnecting(Server server) {
-				setUIConnecting(server);
 			}
 
 			public void serverMessage(Server server,final String message) {
@@ -99,10 +98,12 @@ public class SWTServerListWrapper {
 					}});
 			}
 
-			
-		});
-		
-		server_manager.addServerListListener(new ServerListListener() {
+			public void autoConnectFailed() {
+				if (is_autoconnect) {
+					is_autoconnect = false;
+					setUIDisconnected(null);
+				}
+			}
 
 			public void autoConnectStarted() {
 				if ( is_autoconnect == false ) {
@@ -111,11 +112,8 @@ public class SWTServerListWrapper {
 				}
 			}
 
-			public void autoConnectStopped() {
-				if (is_autoconnect) {
-					is_autoconnect = false;
-					setUIDisconnected(null);
-				}
+			public void isConnecting(Server server) {
+				setUIConnecting(server);
 			}
 
 			public void serverAdded(final Server server) {
@@ -125,6 +123,10 @@ public class SWTServerListWrapper {
 						server_list.addServer(server);
 						server_list_tab.setServerCount(server_manager.getServersCount());
 				}});
+			}
+
+			public void serverConnectingFailed(Server server, Throwable cause) {
+				
 			}
 
 			public void serverListCleared() {
@@ -144,6 +146,7 @@ public class SWTServerListWrapper {
 						server_list_tab.setServerCount(server_manager.getServersCount());
 				}});
 			}
+
 			
 		});
 	}
@@ -226,11 +229,19 @@ public class SWTServerListWrapper {
 			public void JMRun() {
 				if (is_autoconnect) {
 					is_autoconnect = false;
-					server_manager.stopAutoConnect();
+					try {
+						server_manager.disconnect();
+					} catch (ServerManagerException e) {
+						e.printStackTrace();
+					}
 				}
 				if (single_connect) {
 					single_connect = false;
-					connecting_server.disconnect();
+					try {
+						server_manager.disconnect();
+					} catch (ServerManagerException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -238,7 +249,11 @@ public class SWTServerListWrapper {
 	}
 	
 	public void disconnect() {
-		server_manager.getConnectedServer().disconnect();
+		try {
+			server_manager.disconnect();
+		} catch (ServerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void connectTo(Server server) {
@@ -255,16 +270,20 @@ public class SWTServerListWrapper {
 		return is_autoconnect;
 	}
 	
-	public void addServer(Server server) {
-		server_manager.addServer(server);
-	}
-	
 	public void removeServer(List<Server> servers) {
-		server_manager.removeServer(servers);
+		try {
+			server_manager.removeServer((Server[]) servers.toArray());
+		} catch (ServerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void removeServer(Server server) {
-		server_manager.removeServer(server);
+	public void removeServer(Server... server) {
+		try {
+			server_manager.removeServer(server);
+		} catch (ServerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void clearServerList() {

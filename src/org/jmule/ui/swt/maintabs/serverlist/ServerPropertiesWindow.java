@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.servermanager.Server;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
@@ -52,8 +52,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
  */
 public class ServerPropertiesWindow implements JMuleUIComponent,Refreshable {
 

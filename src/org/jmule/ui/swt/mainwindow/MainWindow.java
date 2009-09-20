@@ -42,7 +42,7 @@ import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.edonkey.ServerManagerException;
+import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.JMuleUIManagerException;
@@ -70,8 +70,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:05:17 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:15 $$
  */
 public class MainWindow implements JMuleUIComponent {
 

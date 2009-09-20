@@ -36,8 +36,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.jmule.core.JMIterable;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.peermanager.Peer;
+import org.jmule.core.uploadmanager.UploadQueue;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
@@ -57,11 +58,12 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:34:04 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
+	private UploadQueue _upload_queue;
 	private UploadSession upload_session;
 	private UploadPeerList peers_table;
 	private List<Peer> shown_peers = new LinkedList<Peer>();
@@ -69,7 +71,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 	
 	public UploadPeerListTab(CTabFolder tabFolder, UploadSession uploadSession) {
 		super(tabFolder, SWT.NONE);
-
+		_upload_queue = JMuleCoreFactory.getSingleton().getUploadManager().getUploadQueue();
 		upload_session = uploadSession;
 		
 		setText(Localizer._("uploadinfowindow.tab.peerlist.title"));
@@ -95,7 +97,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 	
 	public void refresh() {
 		if (isDisposed()) return ;
-		JMIterable<Peer> peers = upload_session.getPeers();
+		List<Peer> peers = upload_session.getPeers();
 
 		for(Peer peer : shown_peers) {
 			if (!upload_session.hasPeer(peer))
@@ -149,7 +151,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 		public void addRow(Peer object) {
 			super.addRow(object);
 			if (!CountryLocator.getInstance().isServiceDown()) {
-				Image image = SWTImageRepository.getFlagByAddress(object.getAddress(),FlagSize.S25x15);
+				Image image = SWTImageRepository.getFlagByAddress(object.getIP(),FlagSize.S25x15);
 				
 				CountryFlagPainter painter = new CountryFlagPainter(image);
 				TableItemCountryFlag table_item_painter = new TableItemCountryFlag(SWTPreferences.getDefaultColumnOrder(SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID),painter);
@@ -173,8 +175,8 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 				return Misc.compareAllObjects(object1,object2,"getClientSoftware",order);
 			
 			if (columnID == SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID) {
-				String country1 = CountryLocator.getInstance().getCountryCode(object1.getAddress());
-				String country2 = CountryLocator.getInstance().getCountryCode(object2.getAddress());
+				String country1 = CountryLocator.getInstance().getCountryCode(object1.getIP());
+				String country2 = CountryLocator.getInstance().getCountryCode(object2.getIP());
 				int result = country1.compareTo(country2);
 				if (order)
 					return result;
@@ -183,8 +185,8 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			}
 			
 			if (columnID == SWTConstants.UPLOAD_PEER_LIST_FLAG_COLUMN_ID) {
-				String country1 = CountryLocator.getInstance().getCountryName(object1.getAddress());
-				String country2 = CountryLocator.getInstance().getCountryName(object2.getAddress());
+				String country1 = CountryLocator.getInstance().getCountryName(object1.getIP());
+				String country2 = CountryLocator.getInstance().getCountryName(object2.getIP());
 				int result = country1.compareTo(country2);
 				if (order)
 					return result;
@@ -193,8 +195,8 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			}
 			
 			if (columnID == SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID) {
-				int id1 = upload_session.getPeerPosition(object1);
-				int id2 = upload_session.getPeerPosition(object2);
+				int id1 = _upload_queue.getPeerPosition(object1);
+				int id2 = _upload_queue.getPeerPosition(object2);
 				
 				int result = 0;
 				if (id1>id2) result = 1;
@@ -212,16 +214,22 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 		}
 
 		public void updateRow(Peer object) {
-			
-			String country_code = CountryLocator.getInstance().getCountryCode(object.getAddress());
-			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID, country_code);
-			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID, 		object.getAddress()+":"+object.getPort());
-			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID, object.getNickName());
-			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, PeerInfoFormatter.formatPeerSoftware(object));
+			String country_code = CountryLocator.getInstance().getCountryCode(
+					object.getIP());
+			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_CC_COLUMN_ID,
+					country_code);
+			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID,
+					object.getIP() + ":" + object.getPort());
+			setRowText(object,
+					SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID, object
+							.getNickName());
+			setRowText(object,
+					SWTConstants.UPLOAD_PEER_LIST_SOFTWARE_COLUMN_ID,
+					PeerInfoFormatter.formatPeerSoftware(object));
 			
 			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, SpeedFormatter.formatSpeed(object.getUploadSpeed()));
 			
-			int rank = upload_session.getPeerPosition(object);
+			int rank = _upload_queue.getPeerPosition(object);
 			String str="";
 			if (rank!=0) {
 				str = Localizer.getString("uploadinfowindow.tab.peerlist.column.status.queue",rank+"");
