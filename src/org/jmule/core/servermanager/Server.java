@@ -34,6 +34,7 @@ import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
 
 import java.util.Set;
 
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.ED2KServerLink;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
@@ -47,8 +48,8 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:18:59 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:00:25 $$
  */
 public class Server {
 	public static enum ServerStatus { CONNECTING, CONNECTED, DISCONNECTED }
@@ -63,6 +64,10 @@ public class Server {
 	
 	private Set<ServerFeatures> serverFeatures;
 	
+	private boolean is_static = false;
+	
+	private long last_udp_response;
+	
 	Server(String IPAddress, int port) {
 		this.serverIP = IPAddress;
 		this.serverPort = port;
@@ -72,8 +77,20 @@ public class Server {
 		this(serverLink.getServerAddress(),serverLink.getServerPort());
 	}
 	
+	public void setStatic(boolean status) {
+		is_static = status;
+	}
+	
+	public boolean isStatic() {
+		return is_static;
+	}
+	
 	public ServerStatus getStatus() {
 		return status;
+	}
+	
+	public boolean isConnected() {
+		return status ==ServerStatus.CONNECTED;
 	}
 	
 	public String getAddress() {
@@ -191,6 +208,7 @@ public class Server {
 	}
 
 	void setPing(long ping) {
+		last_udp_response = System.currentTimeMillis();
 		Tag tag = new IntTag(SL_PING,Convert.longToInt(ping));
 		tagList.removeTag(SL_PING);
 		tagList.addTag(tag);
@@ -242,17 +260,26 @@ public class Server {
 	}
 	
 	void setNumUsers(long numUsers) {
+		last_udp_response = System.currentTimeMillis();
 		Tag tag = new IntTag(SL_USERS, Convert.longToInt(numUsers));
 		tagList.removeTag(SL_USERS);
 		tagList.addTag(tag);
 	}
 
 	void setNumFiles(long numFiles) {
+		last_udp_response = System.currentTimeMillis();
 		Tag tag = new IntTag(SL_FILES, Convert.longToInt(numFiles));
 		tagList.removeTag(SL_FILES);
 		tagList.addTag(tag);
 		
 	}
+	
+	public boolean isDown() {
+		  if (isConnected()) return false;
+		  if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_DOWN_TIMEOUT)
+			  return true;
+		  return false;
+	  }
 
 	public int hashCode() {
 		return (getAddress()+" : "+getPort()).hashCode(); 
