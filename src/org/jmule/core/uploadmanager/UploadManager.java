@@ -30,10 +30,12 @@ import org.jmule.core.edonkey.FileHash;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:37 $$
  */
 public interface UploadManager extends JMuleManager {
+	
+	public UploadQueue getUploadQueue();
 	
 	public boolean hasUpload(FileHash fileHash);
 

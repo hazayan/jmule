@@ -45,8 +45,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:37 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -158,6 +158,10 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	
 	protected boolean iAmStoppable() {
 		return false;
+	}
+	
+	public UploadQueue getUploadQueue() {
+		return UploadQueue.getInstance();
 	}
 	
 	public void addUpload(FileHash fileHash) throws UploadManagerException {

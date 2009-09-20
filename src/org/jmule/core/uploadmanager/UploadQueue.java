@@ -37,14 +37,14 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:37 $$
  */
 public class UploadQueue {
 	private static final String PEER_SEPARATOR 				=   ":";
 	private static UploadQueue instance = null;
 	
-	public static UploadQueue getInstance() {
+	static UploadQueue getInstance() {
 		if (instance == null)
 			instance = new UploadQueue();
 		return instance;
@@ -56,6 +56,16 @@ public class UploadQueue {
 	enum PeerQueueStatus { SLOTGIVEN, SLOTTAKEN }
 	
 	private UploadQueue() {
+	}
+	
+	public int getPeerPosition(Peer peer) {
+		int position = 0;
+		for(UploadQueueContainer container : upload_queue)
+			if (container.peer.equals(peer))
+				return position;
+			else
+				position++;
+		return -1;
 	}
 	
 	void addPeer(Peer peer) throws UploadQueueException {
