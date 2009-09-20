@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:02:49 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:03:11 $$
  */
 public class Average<N extends Number> {
 
@@ -41,6 +41,8 @@ public class Average<N extends Number> {
 
 	public Average(int size) {
 		number_list = new ArrayList<N>(size);
+		for(int i = 0;i<size;i++)
+			number_list.add(null);
 		pos = 0;
 	}
 	
