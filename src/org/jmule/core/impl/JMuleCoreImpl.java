@@ -31,12 +31,12 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import org.jmule.core.JMRawData;
-import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreComponent;
 import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreLifecycleListener;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
@@ -63,8 +63,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:27:31 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:48:17 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -223,6 +223,9 @@ public class JMuleCoreImpl implements JMuleCore {
 			e.printStackTrace();
 		}
 		
+		NetworkManagerSingleton.getInstance().initialize();
+		NetworkManagerSingleton.getInstance().start();
+		
 		// notifies that the config manager has been started
 		notifyComponentStarted(configuration_manager);
 		
@@ -263,10 +266,7 @@ public class JMuleCoreImpl implements JMuleCore {
 		// notifies that the download manager has been started
 		DownloadManagerSingleton.getInstance().initialize();
 		
-		NetworkManagerSingleton.getInstance().initialize();
-		NetworkManagerSingleton.getInstance().start();
-		
-
+		DownloadManagerSingleton.getInstance().start();
 		notifyComponentStarted(DownloadManagerSingleton.getInstance());
 		
 		ServerManager servers_manager = ServerManagerSingleton.getInstance();
@@ -282,6 +282,8 @@ public class JMuleCoreImpl implements JMuleCore {
 			t.printStackTrace();
 		} 
 		
+		servers_manager.start();
+		
 		// notifies that the download manager has been started
 		notifyComponentStarted(servers_manager);
 		
@@ -291,28 +293,31 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		search_manager.initialize();
 		
+		search_manager.start();
+		
 		notifyComponentStarted(search_manager);
-		//JKadManagerImpl.getInstance().initialize();
-		/*try {
+		
+		JKadManagerSingleton.getInstance().initialize();
+		try {
 			if (configuration_manager.isJKadAutoconnectEnabled()) 
-				JKadManagerImpl.getInstance().connect();
+				JKadManagerSingleton.getInstance().connect();
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
-		}*/
+		}
 		
 		/** Enable Debug thread!**/	
 		 debugThread = new DebugThread();
 		
-		Runtime.getRuntime().addShutdownHook( new JMThread("Shutdown Hook") {
+/*		Runtime.getRuntime().addShutdownHook( new JMThread("Shutdown Hook") {
 
-			public void run() {
+			public void xrun() {
 				try {
 				   JMuleCoreImpl.this.stop();
 		    	} catch(Throwable t) {
 		    		t.printStackTrace();
 		    	}
 			}
-		 });
+		 });*/
 		
 		is_starting = false;
 		
