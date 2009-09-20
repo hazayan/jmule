@@ -39,8 +39,8 @@ import org.jmule.core.jkad.IPAddress;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/31 17:24:11 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:54:15 $$
  */
 public class JMUDPConnection {
 	
@@ -94,6 +94,7 @@ public class JMUDPConnection {
 		if (!isOpen()) return;
 		try {
 			connectionStatus = UDPConnectionStatus.CLOSED;
+			udpListenThread.JMStop();
 			listenChannel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -140,10 +141,10 @@ public class JMUDPConnection {
 			while(!stop){
 				try {
 					PacketReader.readUDPPacket(listenChannel);
-				} catch (NetworkManagerException e) {
-					e.printStackTrace();
-				} catch (UnknownPacketException e) {
-					e.printStackTrace();
+				}catch (Throwable cause) {
+					if (connectionStatus == UDPConnectionStatus.CLOSED) return ;			
+					cause.printStackTrace();
+					
 				}
 				
 			}
