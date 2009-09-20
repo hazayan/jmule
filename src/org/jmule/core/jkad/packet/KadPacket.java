@@ -37,13 +37,13 @@ import org.jmule.core.utils.JMuleZLib;
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:07:32 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:50:39 $
  */
 public class KadPacket extends UDPPacket {
 		
 	public KadPacket(byte packetOPCode, int length) {
-		super(length, PROTO_KAD_UDP);
+		super(length + 1 + 1, PROTO_KAD_UDP);
 		setCommand(packetOPCode);
 	}
 	
