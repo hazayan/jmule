@@ -131,19 +131,19 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:15:47 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:50:09 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }	
 	private ClientID clientID;
-	private RoutingTable routing_table = null;
-	private Indexer indexer = null;
-	private FirewallChecker firewallChecker = null;
-	private BootStrap bootStrap = null;
-	private Lookup lookup = null;
-	private Search search = null;
-	private Publisher publisher = null;
+	private RoutingTable routing_table 			= null;
+	private Indexer indexer 					= null;
+	private FirewallChecker firewallChecker 	= null;
+	private BootStrap bootStrap 				= null;
+	private Lookup lookup 						= null;
+	private Search search 						= null;
+	private Publisher publisher 				= null;
 	private JKadStatus status = DISCONNECTED;	
 	private Map<Byte, List<PacketListener>> packetListeners = new ConcurrentHashMap<Byte, List<PacketListener>>();
 	private Task filesToPublishChecker;
@@ -151,6 +151,8 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 	private InternalNetworkManager _network_manager = null;
 	
 	private List<JKadListener> listener_list = new LinkedList<JKadListener>();
+	
+	private boolean is_started = false;
 	
 	JKadManagerImpl() { }
 	
@@ -266,6 +268,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			e.printStackTrace();
 			return ;
 		}
+		is_started = false;
 		if (!isDisconnected())
 			disconnect();
 	}
@@ -277,6 +280,8 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			e.printStackTrace();
 			return ;
 		}
+		
+		is_started = true;
 		this.connect();
 	}
 	
@@ -331,7 +336,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 	}
 	
 	public boolean isStarted() {
-		return false;
+		return is_started;
 	}
 	
 	public void setStatus(JKadStatus newStatus) {
@@ -955,7 +960,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 		}
 		
 		if (unknown_packet)
-			throw new UnknownPacketOPCodeException();
+			throw new UnknownPacketOPCodeException(packetOPCode);
 		
 	}
 	
