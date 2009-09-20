@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:59:33 $
  */
 public class PacketReader {
 
@@ -643,7 +643,6 @@ public class PacketReader {
 						"Unknown UDP packet header : "
 								+ Convert.byteToHex(packet_content.get(0)));
 		} catch (Throwable cause) {
-			cause.printStackTrace();
 			throw new NetworkManagerException(cause);
 		}
 

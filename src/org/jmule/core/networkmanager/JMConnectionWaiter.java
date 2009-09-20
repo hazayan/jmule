@@ -36,8 +36,8 @@ import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:20:38 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:52:54 $$
  */
 public class JMConnectionWaiter{
 
@@ -84,6 +84,7 @@ public class JMConnectionWaiter{
 	}
 
 	public void stop() {
+		status = WaiterStatus.CLOSED;
 		if (listenSocket != null){
 		try {
 			listenSocket.close();
@@ -95,7 +96,7 @@ public class JMConnectionWaiter{
 			connectionListenerThread.JMStop();
 		else ;
 		connectionListenerThread = null;
-		status = WaiterStatus.CLOSED;
+		
 		
 	}
 	
