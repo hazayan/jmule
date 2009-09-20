@@ -22,21 +22,26 @@
  */
 package org.jmule.core.aspects;
 
+import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.logging.Logger;
+
 import org.jmule.core.networkmanager.PacketReader;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Sep 18, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 06:42:26 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:07:34 $
  */
 public privileged aspect PacketReaderLogger {
 	private Logger log = Logger
 			.getLogger("org.jmule.core.networkmanager.PacketReader");
 
 	after() throwing (Throwable t): execution (* PacketReader.*(..)) {
+		if ((t.getCause() instanceof AsynchronousCloseException)) return ;
+		if ((t.getCause() instanceof ClosedByInterruptException)) return ;
 		log.warning(Misc.getStackTrace(t));
 	}
 }
