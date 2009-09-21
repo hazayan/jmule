@@ -48,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/21 03:45:53 $$
  */
 public class UploadSession implements JMTransferSession {
 	private static final String PEER_SEPARATOR 				=   ":";
@@ -123,7 +123,7 @@ public class UploadSession implements JMTransferSession {
 			return Misc.INFINITY_AS_INT;
 	}
 	
-	public void endOfDownload(String peerIP, int peerPort) {
+	void endOfDownload(String peerIP, int peerPort) {
 		Peer sender;
 		try {
 			sender = peer_manager.getPeer(peerIP, peerPort);
@@ -140,7 +140,7 @@ public class UploadSession implements JMTransferSession {
 		}
 	}
 	
-	public void receivedFileChunkRequestFromPeer(String peerIP, int peerPort,
+	void receivedFileChunkRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, List<FileChunkRequest> requestedChunks) {
 		Peer sender;
 		try {
@@ -169,7 +169,7 @@ public class UploadSession implements JMTransferSession {
 		}
 	}
 	
-	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort,
+	void receivedFileStatusRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
 		if (sharedFile instanceof PartialFile){
 			PartialFile partialFile = (PartialFile) sharedFile;
@@ -179,12 +179,12 @@ public class UploadSession implements JMTransferSession {
 		}
 	}
 	
-	public void receivedHashSetRequestFromPeer(String peerIP, int peerPort,
+	void receivedHashSetRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
 		network_manager.sendFileHashSetAnswer(peerIP, peerPort, sharedFile.getHashSet());
 	}
 	
-	public void receivedFileRequestFromPeer(String peerIP, int peerPort,
+	void receivedFileRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
 		try {
 			Peer peer = peer_manager.getPeer(peerIP, peerPort);
@@ -196,7 +196,7 @@ public class UploadSession implements JMTransferSession {
 		network_manager.sendFileRequestAnswer(peerIP, peerPort, sharedFile.getFileHash(), sharedFile.getSharingName());	
 	}
 	
-	public void receivedSlotRequestFromPeer(String peerIP, int peerPort,
+	void receivedSlotRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
 		addIfNeedToUploadQueue(peerIP, peerPort);
 		Peer sender;
@@ -298,7 +298,7 @@ public class UploadSession implements JMTransferSession {
 		return sharedFile;
 	}
 
-	public void setSharedFile(SharedFile newFile) {
+	void setSharedFile(SharedFile newFile) {
 		sharedFile = newFile;
 	}
 }
