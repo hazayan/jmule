@@ -36,14 +36,14 @@ import org.jmule.core.utils.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:06:26 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/22 05:13:59 $$
  */
 public class UDPPacket {
 	protected ByteBuffer packet_data = null;
 	protected InetSocketAddress sender;
-	
-	public UDPPacket(int packetLength,byte packetProtocol){
+
+	public UDPPacket(int packetLength, byte packetProtocol) {
 		if (packetProtocol == PROTO_EDONKEY_SERVER_UDP) {
 			packet_data = Misc.getByteBuffer(packetLength);
 			this.setProtocol(packetProtocol);
@@ -52,16 +52,16 @@ public class UDPPacket {
 			packet_data = Misc.getByteBuffer(packetLength);
 			this.setProtocol(packetProtocol);
 		}
-		if (packetProtocol == PROTO_EDONKEY_PEER_UDP){
-			packet_data = Misc.getByteBuffer(packetLength+4);
+		if (packetProtocol == PROTO_EDONKEY_PEER_UDP) {
+			packet_data = Misc.getByteBuffer(packetLength + 4);
 			this.setProtocol(packetProtocol);
 			packet_data.putInt(1, packetLength);
 		}
 	}
-	
-	public UDPPacket(){
+
+	public UDPPacket() {
 	}
-	
+
 	public InetSocketAddress getAddress() {
 		return sender;
 	}
@@ -69,15 +69,15 @@ public class UDPPacket {
 	public void setAddress(InetSocketAddress sender) {
 		this.sender = sender;
 	}
-	
+
 	public byte getProtocol() {
 		return this.packet_data.get(0);
 	}
-	
-	public void setProtocol(byte protocol){
+
+	public void setProtocol(byte protocol) {
 		this.packet_data.put(0, protocol);
 	}
-	
+
 	public void setCommand(byte packetCommand) {
 		if ((getProtocol() == PROTO_EDONKEY_SERVER_UDP)
 				|| (getProtocol() == PROTO_KAD_UDP)) {
@@ -88,27 +88,30 @@ public class UDPPacket {
 			packet_data.put(packetCommand);
 		}
 	}
-	
-	public byte getCommand(){
-		if (getProtocol()==PROTO_EDONKEY_SERVER_UDP) {
+
+	public byte getCommand() {
+		if (getProtocol() == PROTO_EDONKEY_SERVER_UDP) {
+			return packet_data.get(1);
+		}
+		if (getProtocol() == PROTO_KAD_UDP) {
 			return packet_data.get(1);
 		} else {
 			return packet_data.get(5);
 		}
 	}
-	
+
 	public void insertData(ByteBuffer insertData) {
-		packet_data.put(insertData);	
+		packet_data.put(insertData);
 	}
-	
+
 	public void insertData(long insertData) {
 		packet_data.putLong(insertData);
 	}
-	
+
 	public void insertData(int insertData) {
 		packet_data.putInt(insertData);
 	}
-	
+
 	public void insertData(byte[] insertData) {
 		packet_data.put(insertData);
 	}
@@ -125,7 +128,7 @@ public class UDPPacket {
 		packet_data.position(startPos);
 		packet_data.put(insertData);
 	}
-	
+
 	public byte[] getPacket() {
 		return packet_data.array();
 	}
@@ -137,17 +140,20 @@ public class UDPPacket {
 	public int getLength() {
 		return packet_data.limit();
 	}
-	
+
 	public void clear() {
-		if (packet_data==null) return ;
+		if (packet_data == null)
+			return;
 		packet_data.clear();
 		packet_data.compact();
 		packet_data.rewind();
 		packet_data.limit(0);
 	}
-	
+
 	public String toString() {
-		return "From : " + sender.getAddress().getHostAddress() + " : " + sender.getPort()  + "\n"+Convert.byteToHexString(packet_data.array()," 0x");
+		return "From : " + sender.getAddress().getHostAddress() + " : "
+				+ sender.getPort() + "\n"
+				+ Convert.byteToHexString(packet_data.array(), " 0x");
 	}
-	
+
 }
