@@ -51,8 +51,8 @@ import org.jmule.ui.IDialog;
  *
  * Created on Sep 27, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class AdjustSpeedLimitsDialog extends JDialog implements IDialog {
 
@@ -173,10 +173,14 @@ public class AdjustSpeedLimitsDialog extends JDialog implements IDialog {
 					public void JMRun() {
 						float d_limit = _this.getDownloadLimit();
 						float u_limit = _this.getUploadLimit();
-						if( _config_manager.getDownloadLimit() != d_limit ) 
-							_config_manager.setDownloadLimit(Math.round(d_limit));
-				        if( _config_manager.getUploadLimit() != u_limit )
-						    _config_manager.setUploadLimit(Math.round(u_limit));
+						try {
+							if( _config_manager.getDownloadLimit() != d_limit ) 
+								_config_manager.setDownloadLimit(Math.round(d_limit));
+					        if( _config_manager.getUploadLimit() != u_limit )
+							    _config_manager.setUploadLimit(Math.round(u_limit));
+						}catch( Throwable cause ) {
+							cause.printStackTrace();
+						}
 					}
 				})).start();
 				_this.setVisible(false);
@@ -240,17 +244,21 @@ public class AdjustSpeedLimitsDialog extends JDialog implements IDialog {
     }
 	
 	private void setInitData() {
-		if(_config_manager.getDownloadLimit() == 0) 
-			setDownloadSpeedEnabled(false);
-		else {
-			setDownloadSpeedEnabled(true);
-			setDownloadLimit(_config_manager.getDownloadLimit() );
-		}
-		if(_config_manager.getUploadLimit() == 0) 
-			   setUploadSpeedEnabled(false);
-		else {
-			  setUploadSpeedEnabled(true);
-			  setUploadLimit(_config_manager.getUploadLimit());
+		try {
+		  if(_config_manager.getDownloadLimit() == 0) 
+			 setDownloadSpeedEnabled(false);
+		  else {
+			 setDownloadSpeedEnabled(true);
+			 setDownloadLimit(_config_manager.getDownloadLimit() );
+		  }
+		  if(_config_manager.getUploadLimit() == 0) 
+			setUploadSpeedEnabled(false);
+		  else {
+			 setUploadSpeedEnabled(true);
+			 setUploadLimit(_config_manager.getUploadLimit());
+		  }
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
 		}
 	}
 	

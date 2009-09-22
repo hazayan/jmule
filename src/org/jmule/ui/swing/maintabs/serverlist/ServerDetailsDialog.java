@@ -51,7 +51,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.servermanager.Server;
 import org.jmule.ui.swing.dialogs.RefreshableDialog;
 import org.jmule.ui.utils.NumberFormatter;
 
@@ -59,8 +59,8 @@ import org.jmule.ui.utils.NumberFormatter;
  *
  * Created on Oct 4, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:15 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class ServerDetailsDialog extends RefreshableDialog {
 	

@@ -41,17 +41,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.ED2KLink;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
-import org.jmule.core.edonkey.impl.ED2KServerLink;
+import org.jmule.core.edonkey.ED2KServerLink;
 import org.jmule.ui.IDialog;
 
 /**
  *
  * Created on Sep 17, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class NewED2KLinksPanel extends JDialog implements IDialog {
 

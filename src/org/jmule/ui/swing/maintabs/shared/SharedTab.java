@@ -71,8 +71,8 @@ import org.jmule.ui.utils.NumberFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/07/05 08:12:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -101,12 +101,24 @@ public class SharedTab extends AbstractTab {
             if(index == 0) return FilesCategory.INCOMING_FILES;
             if(index == 1) return FilesCategory.INCOMPLETE_FILES;
             if(index == 2) return FilesCategory.ALL_FILES;
-			return _config_manager.getSharedFolders().get(index-3);
+            Object result = null;
+            try {
+               result = _config_manager.getSharedFolders().get(index-3);
+            }catch( Throwable cause ) {
+            	cause.printStackTrace();
+            }
+			return result;
 		}
 
 		public int getSize() {
-			if(_config_manager.getSharedFolders() == null) return 3;
-			return _config_manager.getSharedFolders().size() + 3;
+		   int result = 0;
+		   try {	
+			 if(_config_manager.getSharedFolders() == null) result = 3;
+			 result = _config_manager.getSharedFolders().size() + 3;
+		   }catch( Throwable cause ) {
+			   cause.printStackTrace();
+		   }
+		   return result;
 		}
 		
 	}
@@ -223,7 +235,12 @@ public class SharedTab extends AbstractTab {
         		if(event.getActionCommand() == JFileChooser.APPROVE_SELECTION) {
         			chosen_folders = new ChosenFolders();
         	        
-        	        List<File> shared_folders = _config_manager.getSharedFolders();
+        			List<File> shared_folders = null;
+        			try {
+        	           shared_folders = _config_manager.getSharedFolders();
+        			}catch( Throwable cause ) {
+        				cause.printStackTrace();
+        			}
         	        
         	        if(shared_folders != null) {      	
         	        	for(File folder : shared_folders) {
@@ -256,8 +273,11 @@ public class SharedTab extends AbstractTab {
                     List<File> folders_for_config_mg = new LinkedList<File>();
         			for(File file : chosen_folders) 
         				folders_for_config_mg.add(file);
-        			
-        			_config_manager.setSharedFolders(folders_for_config_mg);
+        			try {
+        			   _config_manager.setSharedFolders(folders_for_config_mg);
+        			}catch( Throwable cause ) {
+        				cause.printStackTrace();
+        			}
         		}
         	}
         });
@@ -271,15 +291,23 @@ public class SharedTab extends AbstractTab {
         	public void actionPerformed(ActionEvent event) {
         		Object object = shared_folders_list.getSelectedValue();
         		if(object instanceof File) {
-        			List<File> shared_folders = _config_manager.getSharedFolders();
-                    shared_folders.remove(object);
-                    _config_manager.setSharedFolders(shared_folders);
+        		   try {	 
+        			 List<File> shared_folders = _config_manager.getSharedFolders();
+                     shared_folders.remove(object);
+                     _config_manager.setSharedFolders(shared_folders);
+        		   }catch( Throwable cause ) {
+        			   cause.printStackTrace();
+        		   }
         		}
         	}
         });
         top_panel.getClearButton().addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent event) {
-        		 _config_manager.setSharedFolders(null);
+        		try {
+        		  _config_manager.setSharedFolders(null);
+        		}catch( Throwable cause ) {
+        			cause.printStackTrace();
+        		}
         	}
         });
         top_panel.getRescanButton().addActionListener(new ActionListener() {

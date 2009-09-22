@@ -28,9 +28,9 @@ import javax.swing.table.TableModel;
 
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.edonkey.ServerListenerAdapter;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.impl.Server;
+import org.jmule.core.servermanager.Server;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerListener;
 import org.jmule.ui.swing.tables.MyInfoTable;
 import org.jmule.ui.swing.tables.ServerInfoTable;
 
@@ -38,8 +38,8 @@ import org.jmule.ui.swing.tables.ServerInfoTable;
  *
  * Created on Oct 1, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:14 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class Info extends JTabbedPane {
 	
@@ -51,7 +51,7 @@ public class Info extends JTabbedPane {
 	
 	public Info() {
 		init();
-		_server_manager.addServerListener(new ServerListenerAdapter() {
+		_server_manager.addServerListener(new ServerManagerListener() {
 			
 			 public void connected(Server server) {
 				 updateTables();

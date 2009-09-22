@@ -40,8 +40,8 @@ import org.jmule.ui.swt.SWTPreferences;
 /**
  * Created on 07-19-2008
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class GeneralSettings extends WizardPanel {
 
@@ -90,7 +90,11 @@ public class GeneralSettings extends WizardPanel {
 
         user_name_desc.setText("Please enter your user name:");
 
-        user_name.setText( _config.getNickName() );
+        try {
+          user_name.setText( _config.getNickName() );
+        }catch( Throwable cause ) {
+        	cause.printStackTrace();
+        }
 
         connect_at_start_up.setText("Enable this option if you want JMule to connect at start up");
 
@@ -134,27 +138,29 @@ public class GeneralSettings extends WizardPanel {
         );
 
         connection_panel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Connection"));
-
-        tcp_port_desc.setText("<html>This is the main port that must be available to<br> ensure functionality of JMule</html");
-
-        tcp_port_caption.setText("TCP port");
-
-        //tcp_port.setText("11132");
-        tcp_port.setText(_config.getTCP()+"");
-        
-        udp_port_caption.setText("UDP port");
-
-        //udp_port.setText("51985");
-        udp_port.setText(_config.getUDP()+"");
-
-        udp_port_desc.setText("<html>UDP port is used for additional functionalities<br>(for better work the port must be enabled and available)</html>");
-        
-        disable_udp_port.setText("Disable");
-        
-        disable_udp_port.setSelected(!_config.isUDPEnabled());
-        
-        udp_port.setEnabled( _config.isUDPEnabled() ); 
-        
+        try {
+	        tcp_port_desc.setText("<html>This is the main port that must be available to<br> ensure functionality of JMule</html");
+	
+	        tcp_port_caption.setText("TCP port");
+	
+	        //tcp_port.setText("11132");
+	        tcp_port.setText(_config.getTCP()+"");
+	        
+	        udp_port_caption.setText("UDP port");
+	
+	        //udp_port.setText("51985");
+	        udp_port.setText(_config.getUDP()+"");
+	
+	        udp_port_desc.setText("<html>UDP port is used for additional functionalities<br>(for better work the port must be enabled and available)</html>");
+	        
+	        disable_udp_port.setText("Disable");
+	        
+	        disable_udp_port.setSelected(!_config.isUDPEnabled());
+	        
+	        udp_port.setEnabled( _config.isUDPEnabled() ); 
+        }catch( Throwable cause ) {
+        	cause.printStackTrace();
+        }
         disable_udp_port.addMouseListener(new MouseAdapter() {
            	public void mouseClicked(MouseEvent evt) {
         		 if(disable_udp_port.isSelected()) udp_port.setEnabled(false);

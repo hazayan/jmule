@@ -46,8 +46,8 @@ import org.jmule.ui.swt.SWTPreferences;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:27:54 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class SetupWizard extends JDialog {
 	
@@ -143,27 +143,30 @@ public class SetupWizard extends JDialog {
 				public void JMRun() {   
 				 
 					ConfigurationManager _config = _core.getConfigurationManager();
-				 
-					_config.setSharedFolders(((SharedFoldersChooser)stage2).getChosenFolders().getFoldersList());	 
-				
-					GeneralSettings gs = (GeneralSettings)stage3;
-				 
-					_config.setNickName( gs.getNickName() );
-				 	
-					_config.setTCP( gs.getTCP() );
-				 
-					_config.setUDP( gs.getUDP() );
-				 
-					_config.setUDPEnabled( gs.isUDPEnabled() );
-				 
-					NetworkBandwidthSelection nbs = (NetworkBandwidthSelection)stage4;
-				 
-					_config.setDownloadBandwidth( nbs.getDownloadBandwidth() );
-				 
-					_config.setUploadBandwidth( nbs.getUploadBandwidth() );
+					GeneralSettings gs = null;
+				    try {
+						_config.setSharedFolders(((SharedFoldersChooser)stage2).getChosenFolders().getFoldersList());	 
 					
-					_config.save();
-				 
+						gs = (GeneralSettings)stage3;
+					 
+						_config.setNickName( gs.getNickName() );
+					 	
+						_config.setTCP( gs.getTCP() );
+					 
+						_config.setUDP( gs.getUDP() );
+					 
+						_config.setUDPEnabled( gs.isUDPEnabled() );
+					 
+						NetworkBandwidthSelection nbs = (NetworkBandwidthSelection)stage4;
+					 
+						_config.setDownloadBandwidth( nbs.getDownloadBandwidth() );
+					 
+						_config.setUploadBandwidth( nbs.getUploadBandwidth() );
+						
+						_config.save();
+				    }catch( Throwable cause ) {
+				    	cause.printStackTrace();
+				    }
 					CommonUIPreferences.getSingleton().setUIType( ((UIChooser)stage5).getChosenUI() );
 				 
 					//TODO modify this

@@ -26,14 +26,14 @@ import java.awt.Component;
 
 import javax.swing.JTable;
 
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 
 /**
  *
  * Created on Oct 7, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class UploadPeersTableCellRenderer extends JMTableCellRenderer {
 

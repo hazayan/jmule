@@ -34,8 +34,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
-import org.jmule.core.edonkey.impl.Server;
-import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.utils.GeneralComparator;
@@ -49,8 +47,8 @@ import org.jmule.ui.utils.NumberFormatter;
  *
  * Created on Oct 2, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class SharedFilesTable extends JMTable {
 	

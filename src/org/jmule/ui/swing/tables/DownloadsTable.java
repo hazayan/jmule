@@ -60,7 +60,7 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.DownloadSession.DownloadStatus;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
+import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.uploadmanager.UploadManager;
@@ -82,8 +82,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:09:57 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -115,9 +115,13 @@ public class DownloadsTable extends JMTable {
             String size = FileFormatter.formatFileSize(session.getFileSize());
             String d_speed = SpeedFormatter.formatSpeed(session.getSpeed());
             String u_speed = null;
-            if(_upload_manager.hasUpload(session.getFileHash())) 
+            try {
+              if(_upload_manager.hasUpload(session.getFileHash())) 
             	u_speed = SpeedFormatter.formatSpeed(_upload_manager.getUpload(session.getFileHash()).getSpeed());
-            else u_speed = SpeedFormatter.formatSpeed(0);
+              else u_speed = SpeedFormatter.formatSpeed(0);
+            }catch( Throwable cause ) {
+            	cause.printStackTrace();
+            }  
             String done = NumberFormatter.formatProgress(session.getPercentCompleted());
             String eta = TimeFormatter.format(session.getETA());
             
@@ -172,9 +176,13 @@ public class DownloadsTable extends JMTable {
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         	this.setHorizontalAlignment(SwingConstants.RIGHT);
-            if(_upload_manager.hasUpload(session.getFileHash())) 
+        	try {
+              if(_upload_manager.hasUpload(session.getFileHash())) 
             	this.setText(SpeedFormatter.formatSpeed(_upload_manager.getUpload(session.getFileHash()).getSpeed()) + " ");
-            else this.setText(SpeedFormatter.formatSpeed(0) + " ");
+              else this.setText(SpeedFormatter.formatSpeed(0) + " ");
+        	}catch(Throwable cause) {
+        		cause.printStackTrace();
+        	}
 			return this;
 		}
 	}

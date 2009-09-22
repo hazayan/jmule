@@ -41,11 +41,11 @@ import javax.swing.JTextField;
 
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
-import org.jmule.core.edonkey.ServerManager;
 import org.jmule.core.searchmanager.SearchManager;
 import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.SearchResult;
 import org.jmule.core.searchmanager.SearchResultListener;
+import org.jmule.core.servermanager.ServerManager;
 import org.jmule.ui.swing.common.CloseableTabbedPane;
 import org.jmule.ui.swing.common.CloseableTabbedPaneListener;
 import org.jmule.ui.swing.maintabs.AbstractTab;
@@ -53,8 +53,8 @@ import org.jmule.ui.swing.maintabs.AbstractTab;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/26 14:20:32 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class SearchTab extends AbstractTab implements SearchResultListener {
 
@@ -141,15 +141,20 @@ public class SearchTab extends AbstractTab implements SearchResultListener {
 		}
 	}
 
-	@Override
+
 	public void searchCompleted(SearchQuery query) {
-		// TODO Auto-generated method stub
+
 		
 	}
 
-	@Override
+
 	public void searchStarted(SearchQuery query) {
-		// TODO Auto-generated method stub
+
+		
+	}
+
+	public void searchFailed(SearchQuery query) {
+
 		
 	}
 }

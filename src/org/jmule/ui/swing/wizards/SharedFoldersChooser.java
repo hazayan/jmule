@@ -45,8 +45,8 @@ import org.jmule.ui.swing.UISwingImageRepository;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class SharedFoldersChooser extends WizardPanel {
 
@@ -85,8 +85,12 @@ public class SharedFoldersChooser extends WizardPanel {
         file_chooser.setMultiSelectionEnabled(true);
         
         chosen_folders = new ChosenFolders();
-        
-        List<File> shared_folders = _config.getSharedFolders();
+        List<File> shared_folders = null;
+        try {
+           shared_folders = _config.getSharedFolders();
+        }catch( Throwable cause ) {
+        	cause.printStackTrace();
+        }
         
         if(shared_folders != null) {      	
         	for(File folder : shared_folders) {

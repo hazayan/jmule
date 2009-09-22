@@ -54,8 +54,8 @@ import org.jmule.ui.swing.common.PortTextField;
  *
  * Created on Sep 21, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class SettingsDialog extends JDialog implements IDialog {
 
@@ -475,68 +475,69 @@ public class SettingsDialog extends JDialog implements IDialog {
 	}
 	
 	private void setInitData() {
-		
-		// core settings
-		this.setNickname(_config.getNickName());
-		this.setTCP(_config.getTCP());
-		this.setUDP(_config.getUDP());
-		this.enable_udp_checkbox.setSelected(_config.isUDPEnabled());
-		this.udp_text_field.setEnabled(_config.isUDPEnabled());
-		
-		this.setDownloadBandwidth(_config.getDownloadBandwidth()/1024);
-		this.setUploadBandwidth(_config.getUploadBandwidth()/1024);
-		
-		
-		if( _config.getDownloadLimit() != 0 ) {
-		    this.setDownloadLimitEnabled(true);
-		    this.setDownloadLimit(_config.getDownloadLimit()/1024);
-		} else {
-			this.setDownloadLimitEnabled(false);
-			this.setDownloadLimit(0);
+		try {
+		   // core settings
+		   this.setNickname(_config.getNickName());
+		   this.setTCP(_config.getTCP());
+		   this.setUDP(_config.getUDP());
+		   this.enable_udp_checkbox.setSelected(_config.isUDPEnabled());
+		   this.udp_text_field.setEnabled(_config.isUDPEnabled());			
+		   this.setDownloadBandwidth(_config.getDownloadBandwidth()/1024);
+		   this.setUploadBandwidth(_config.getUploadBandwidth()/1024);
+		   if( _config.getDownloadLimit() != 0 ) {
+			    this.setDownloadLimitEnabled(true);
+			    this.setDownloadLimit(_config.getDownloadLimit()/1024);
+		   } else {
+				this.setDownloadLimitEnabled(false);
+				this.setDownloadLimit(0);
+		   }
+		   if( _config.getUploadLimit() !=0 ) {
+				this.setUploadLimitEnabled(true);
+				this.setUploadLimit(_config.getUploadLimit()/1024);
+		   } else {
+				this.setUploadLimitEnabled(false);
+				this.setUploadLimit(0);
+		   }
+		   // ui settings
+		   //setUpdateServerListEnabled(_ui_pref.isUpdate)
+		   this.setCheckForUpdatesEnabled(_ui_pref.isCheckForUpdatesAtStartup());
+		   this.setPromptOnExitEnabled(_ui_pref.isPromptOnExitEnabled());
+		   //this.setNightlyBuildWarningEnabled(_ui_pref.  setNightlyBuildWarningEnabled(SwingConstants.SWING_ROOT)));
+		   this.setUpdateServerListEnabled(_config.updateServerListAtConnect());
+		   if(JMConstants.IS_NIGHTLY_BUILD)
+			  this.setNightlyBuildWarningEnabled(_ui_pref.isNightlyBuildWarning());
+		}catch(Throwable cause) {
+			cause.printStackTrace();
 		}
-		
-		if( _config.getUploadLimit() !=0 ) {
-			this.setUploadLimitEnabled(true);
-			this.setUploadLimit(_config.getUploadLimit()/1024);
-		} else {
-			this.setUploadLimitEnabled(false);
-			this.setUploadLimit(0);
-		}
-		
-		// ui settings
-		//setUpdateServerListEnabled(_ui_pref.isUpdate)
-		this.setCheckForUpdatesEnabled(_ui_pref.isCheckForUpdatesAtStartup());
-		this.setPromptOnExitEnabled(_ui_pref.isPromptOnExitEnabled());
-		//this.setNightlyBuildWarningEnabled(_ui_pref.  setNightlyBuildWarningEnabled(SwingConstants.SWING_ROOT)));
-		this.setUpdateServerListEnabled(_config.updateServerListAtConnect());
-		if(JMConstants.IS_NIGHTLY_BUILD)
-			this.setNightlyBuildWarningEnabled(_ui_pref.isNightlyBuildWarning());
 	}
 	
 	private void saveSettings() {
-		
-		// core settings
-		if( _config.getTCP() != this.getTCP() ) _config.setTCP(this.getTCP());
-		if( _config.getUDP() != this.getUDP() ) _config.setUDP(this.getUDP());
-		if( _config.isUDPEnabled() != this.isUDPEnabled() ) _config.setUDPEnabled(this.isUDPEnabled());
-		if( !_config.getNickName().equals(this.getNickname()) )  _config.setNickName(this.getNickname());
-		if( _config.getDownloadBandwidth() != this.getDownloadCapacity() )_config.setDownloadBandwidth(this.getDownloadCapacity());
-		if( _config.getUploadBandwidth() != this.getUploadCapacity()) _config.setUploadBandwidth(getUploadCapacity());
-		if( this.isDownloadLimitEnabled() ) _config.setDownloadLimit(getDownloadLimit());
-		else _config.setDownloadLimit(0);
-		if( this.isUploadLimitEnabled() ) _config.setUploadLimit(getUploadLimit());
-		else _config.setUploadLimit(0);
-		_config.setUpdateServerListAtConnect(isUpdateServerListOnConnect());
-		
-		// swing ui settings
-		//if(_ui_pref.is)
-		if( _ui_pref.isPromptOnExitEnabled() != isPromptOnExitEnabled() ) 
-			_ui_pref.setPromptOnExit(isPromptOnExitEnabled());
-		if( _ui_pref.isCheckForUpdatesAtStartup() != this.isCheckForUpdatesEnabled() ) 
-			_ui_pref.setCheckForUpdatesAtStartup(isCheckForUpdatesEnabled());
-	    if(JMConstants.IS_NIGHTLY_BUILD) 			
-			if( _ui_pref.isNightlyBuildWarning() != this.isNightlyBuildWarning() )
-				_ui_pref.setNightlyBuildWarning(this.isNightlyBuildWarning());	
+		try {
+			// core settings
+			if( _config.getTCP() != this.getTCP() ) _config.setTCP(this.getTCP());
+			if( _config.getUDP() != this.getUDP() ) _config.setUDP(this.getUDP());
+			if( _config.isUDPEnabled() != this.isUDPEnabled() ) _config.setUDPEnabled(this.isUDPEnabled());
+			if( !_config.getNickName().equals(this.getNickname()) )  _config.setNickName(this.getNickname());
+			if( _config.getDownloadBandwidth() != this.getDownloadCapacity() )_config.setDownloadBandwidth(this.getDownloadCapacity());
+			if( _config.getUploadBandwidth() != this.getUploadCapacity()) _config.setUploadBandwidth(getUploadCapacity());
+			if( this.isDownloadLimitEnabled() ) _config.setDownloadLimit(getDownloadLimit());
+			else _config.setDownloadLimit(0);
+			if( this.isUploadLimitEnabled() ) _config.setUploadLimit(getUploadLimit());
+			else _config.setUploadLimit(0);
+			_config.setUpdateServerListAtConnect(isUpdateServerListOnConnect());
+			
+			// swing ui settings
+			//if(_ui_pref.is)
+			if( _ui_pref.isPromptOnExitEnabled() != isPromptOnExitEnabled() ) 
+				_ui_pref.setPromptOnExit(isPromptOnExitEnabled());
+			if( _ui_pref.isCheckForUpdatesAtStartup() != this.isCheckForUpdatesEnabled() ) 
+				_ui_pref.setCheckForUpdatesAtStartup(isCheckForUpdatesEnabled());
+		    if(JMConstants.IS_NIGHTLY_BUILD) 			
+				if( _ui_pref.isNightlyBuildWarning() != this.isNightlyBuildWarning() )
+					_ui_pref.setNightlyBuildWarning(this.isNightlyBuildWarning());
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
+		}
 		
 	}
 

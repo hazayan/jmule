@@ -41,7 +41,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
-import org.jmule.core.edonkey.impl.ED2KFileLink;
+import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.ui.swing.tables.JMTableCellRenderer;
 import org.jmule.ui.utils.FileFormatter;
 
@@ -50,8 +50,8 @@ import org.jmule.ui.utils.FileFormatter;
  *
  * Created on Sep 18, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class NewFilesDialg extends NewED2KDialog {
 

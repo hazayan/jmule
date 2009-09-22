@@ -30,14 +30,14 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 
 /**
  *
  * Created on Oct 6, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class DownloadPeersModel extends AbstractTableModel {
 
@@ -83,11 +83,11 @@ public class DownloadPeersModel extends AbstractTableModel {
 
 	public int getRowCount() {
 
-		return session.getPeersAsList().size();
+		return session.getPeers().size();
 	}
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
-        List<Peer> peer_list = session.getPeersAsList();
+        List<Peer> peer_list = session.getPeers();
         Peer peer = peer_list.get(rowIndex);
         //ugly hack
         if(columnIndex == STATUS)

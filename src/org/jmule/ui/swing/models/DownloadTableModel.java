@@ -30,16 +30,15 @@ import javax.swing.table.AbstractTableModel;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadManager;
-import org.jmule.core.downloadmanager.DownloadManagerListener;
 import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.core.edonkey.impl.FileHash;
+import org.jmule.core.edonkey.FileHash;
 
 /**
  *
  * Created on Sep 28, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class DownloadTableModel extends AbstractTableModel {
 

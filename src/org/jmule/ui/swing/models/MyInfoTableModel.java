@@ -27,16 +27,16 @@ import javax.swing.table.AbstractTableModel;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.impl.ClientID;
+import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.sharingmanager.SharingManager;
 
 /**
  *
  * Created on Oct 1, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class MyInfoTableModel extends AbstractTableModel {
 
@@ -71,22 +71,26 @@ public class MyInfoTableModel extends AbstractTableModel {
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		
-		if( columnIndex == 0 ) {
-			return row_names[rowIndex];
-		}
-		
-		if( columnIndex == 1 ) {
-			switch(rowIndex) {
-			   case STATUS       : return _server_manager.isConnected() ? "Connected" : "Disconnected";
-			   case NICKNAME     : return _config_manager.getNickName();
-			   case IP           : return _server_manager.isConnected() ?
-			                              _server_manager.getConnectedServer().getClientID().getAsString() : " ";
-			   case ID           : boolean is_connected = _server_manager.isConnected();
-			                       ClientID client_id = is_connected ? _server_manager.getConnectedServer().getClientID() : null;
-				                   return  is_connected ?
-					                      ( client_id.toString() + (client_id.isHighID() ? " (High)" : " (Low)" )) : " ";
-			   case SHARED_FILES : return _sharing_manager.getFileCount() + " ";
+		try {
+			if( columnIndex == 0 ) {
+				return row_names[rowIndex];
 			}
+			
+			if( columnIndex == 1 ) {
+				switch(rowIndex) {
+				   case STATUS       : return _server_manager.isConnected() ? "Connected" : "Disconnected";
+				   case NICKNAME     : return _config_manager.getNickName();
+				   case IP           : return _server_manager.isConnected() ?
+				                              _server_manager.getConnectedServer().getClientID().getAsString() : " ";
+				   case ID           : boolean is_connected = _server_manager.isConnected();
+				                       ClientID client_id = is_connected ? _server_manager.getConnectedServer().getClientID() : null;
+					                   return  is_connected ?
+						                      ( client_id.toString() + (client_id.isHighID() ? " (High)" : " (Low)" )) : " ";
+				   case SHARED_FILES : return _sharing_manager.getFileCount() + " ";
+				}
+			}
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
 		}
 		
 		return null;

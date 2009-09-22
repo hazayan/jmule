@@ -71,8 +71,8 @@ import org.jmule.ui.utils.FileFormatter;
  *
  * Created on Sep 10, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class SearchResultTable extends JMTable {
 
@@ -248,8 +248,12 @@ public class SearchResultTable extends JMTable {
 					 public void actionPerformed(ActionEvent event) {
                          List<SearchResultItem> new_files = getFilesByStatus(FileStatus.NEW);
                          for(SearchResultItem result : new_files) {
+                        	try { 
                         	 _download_manager.addDownload(result);
                         	 _download_manager.startDownload(result.getFileHash());
+                        	}catch(Throwable cause) {
+                        		cause.printStackTrace();
+                        	}
                          }
 					 }
 				});

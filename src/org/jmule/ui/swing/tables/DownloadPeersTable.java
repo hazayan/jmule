@@ -34,7 +34,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
 import org.jmule.core.downloadmanager.DownloadSession;
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.utils.GeneralComparator;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack;
@@ -47,8 +47,8 @@ import org.jmule.ui.utils.SpeedFormatter;
  *
  * Created on Oct 6, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class DownloadPeersTable extends JMTable {
 
@@ -70,9 +70,9 @@ public class DownloadPeersTable extends JMTable {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			this.setHorizontalAlignment(SwingConstants.CENTER);
 			this.setText(!country_locator.isServiceDown() ? 
-				      country_locator.getCountryCode(peer.getAddress()) : "Unknown");
+				      country_locator.getCountryCode(peer.getIP()) : "Unknown");
 		    if( !country_locator.isServiceDown() )
-			  this.setToolTipText(country_locator.getCountryName(peer.getAddress()));
+			  this.setToolTipText(country_locator.getCountryName(peer.getIP()));
 			return this;
 		}
 	}
@@ -81,11 +81,11 @@ public class DownloadPeersTable extends JMTable {
 		public Component getTableCellRendererComponent(JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			Icon flag_icon = FlagPack.getFlagAsIconByIP(peer.getAddress(), FlagPack.FlagSize.S18x25);
+			Icon flag_icon = FlagPack.getFlagAsIconByIP(peer.getIP(), FlagPack.FlagSize.S18x25);
 			this.setHorizontalAlignment(SwingConstants.CENTER);
 			if( flag_icon != null ) this.setIcon(flag_icon);
 			if( !country_locator.isServiceDown() )
-				 this.setToolTipText(country_locator.getCountryName(peer.getAddress()));
+				 this.setToolTipText(country_locator.getCountryName(peer.getIP()));
 			return this;
 		}
 	}
@@ -95,7 +95,7 @@ public class DownloadPeersTable extends JMTable {
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			this.setHorizontalAlignment(SwingConstants.LEFT);
-			this.setText(" " + peer.getAddress() + " : " + peer.getPort());
+			this.setText(" " + peer.getIP() + " : " + peer.getPort());
 			return this;
 		}
 	}

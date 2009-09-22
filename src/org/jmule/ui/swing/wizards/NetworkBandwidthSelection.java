@@ -46,8 +46,8 @@ import org.jmule.core.configmanager.ConfigurationManager;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 16:10:38 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class NetworkBandwidthSelection extends WizardPanel {
 
@@ -259,8 +259,12 @@ public class NetworkBandwidthSelection extends WizardPanel {
     }
     
     private void initBandwidths() {
+      try {
     	true_download_bandwidth.setText( (_config.getDownloadBandwidth() * 8 / 1024) + "");
     	true_upload_bandwidth.setText( (_config.getUploadBandwidth() * 8 / 1024) + "");
+      }catch( Throwable cause ) {
+    	  cause.printStackTrace();
+      }
     }
     
     public long getDownloadBandwidth() {

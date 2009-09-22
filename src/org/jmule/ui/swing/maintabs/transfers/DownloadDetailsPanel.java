@@ -49,8 +49,8 @@ import org.jmule.ui.utils.SpeedFormatter;
  *
  * Created on Oct 5, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:07:21 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
  */
 public class DownloadDetailsPanel extends JPanel {
 
@@ -214,28 +214,32 @@ public class DownloadDetailsPanel extends JPanel {
 	}
 	
 	public void updateData() {
-		pieces_panel.repaint();
-		complete_sources_value.setText(session.getCompletedSources() + "");
-		partial_sources_value.setText(session.getPartialSources() + "");
-		transferred_value.setText(FileFormatter.formatFileSize(session.getTransferredBytes()));
-		remaining_value.setText(FileFormatter.formatFileSize(session.getFileSize() - 
-				                 session.getTransferredBytes()));
-		down_speed_value.setText(SpeedFormatter.formatSpeed(session.getSpeed()));
-		up_speed_value.setText(_upload_manager.hasUpload(session.getFileHash()) ?
-				                   SpeedFormatter.formatSpeed(_upload_manager.getUpload(session.getFileHash()).getSpeed()) :
-				            	   SpeedFormatter.formatSpeed(0) );
-		file_name_value.setText(session.getSharingName());
-		file_name_value.setToolTipText(session.getSharingName());
-		ed2k_link_value.setText(session.getED2KLink().getAsString());
-		part_met_file_value.setText(session.getTempFileName());
-		part_met_file_value.setToolTipText(session.getMetFilePath());
-		file_hash_value.setText(session.getFileHash().getAsString());
-		if (session.isStarted())
-			status_value.setText("Started");
-		else
-			status_value.setText("Stopped");
-		file_size_value.setText(FileFormatter.formatFileSize(session.getFileSize()));
-		parts_value.setText(session.getPartCount() + ", available " + session.getAvailablePartCount());
+		try {
+			pieces_panel.repaint();
+			complete_sources_value.setText(session.getCompletedSources() + "");
+			partial_sources_value.setText(session.getPartialSources() + "");
+			transferred_value.setText(FileFormatter.formatFileSize(session.getTransferredBytes()));
+			remaining_value.setText(FileFormatter.formatFileSize(session.getFileSize() - 
+					                 session.getTransferredBytes()));
+			down_speed_value.setText(SpeedFormatter.formatSpeed(session.getSpeed()));
+			up_speed_value.setText(_upload_manager.hasUpload(session.getFileHash()) ?
+					                   SpeedFormatter.formatSpeed(_upload_manager.getUpload(session.getFileHash()).getSpeed()) :
+					            	   SpeedFormatter.formatSpeed(0) );
+			file_name_value.setText(session.getSharingName());
+			file_name_value.setToolTipText(session.getSharingName());
+			ed2k_link_value.setText(session.getED2KLink().getAsString());
+			part_met_file_value.setText(session.getTempFileName());
+			part_met_file_value.setToolTipText(session.getMetFilePath());
+			file_hash_value.setText(session.getFileHash().getAsString());
+			if (session.isStarted())
+				status_value.setText("Started");
+			else
+				status_value.setText("Stopped");
+			file_size_value.setText(FileFormatter.formatFileSize(session.getFileSize()));
+			parts_value.setText(session.getPartCount() + ", available " + session.getAvailablePartCount());
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
+		}
 	}
 
 }

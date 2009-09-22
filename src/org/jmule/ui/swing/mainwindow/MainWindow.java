@@ -64,11 +64,10 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.edonkey.ServerListener;
-import org.jmule.core.edonkey.ServerManager;
-import org.jmule.core.edonkey.ServerManagerException;
-import org.jmule.core.edonkey.impl.Server;
 import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.servermanager.Server;
+import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -97,8 +96,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/19 17:48:05 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -823,6 +822,7 @@ public class MainWindow extends JFrame implements WindowListener  {
 		}
 		
 		public void refresh() {
+		  try {	
 			downloadSpeed = SpeedFormatter.formatSpeed( _peer_manager.getDownloadSpeed() );
 			uploadSpeed = SpeedFormatter.formatSpeed( _peer_manager.getUploadSpeed() );
 			download_speed.setText( ( download_speed_limit != "" ? "[" : "" ) + 
@@ -833,6 +833,9 @@ public class MainWindow extends JFrame implements WindowListener  {
 					             upload_speed_limit + 
 					              ( upload_speed_limit != "" ? "] " : "" ) + 
 					              uploadSpeed + " ");
+		  }catch( Throwable cause ) {
+			  cause.printStackTrace();
+		  }
 		}
 
 	}
@@ -843,8 +846,12 @@ public class MainWindow extends JFrame implements WindowListener  {
 		this.getContentPane().add(status_bar, BorderLayout.SOUTH);
 		_ui_updater.addRefreshable(status_bar);
 		
-		if( _config.getDownloadLimit() != 0 ) status_bar.setDownloadSpeedLimit(SpeedFormatter.formatSpeed(_config.getDownloadLimit()));
-		if( _config.getUploadLimit() != 0 ) status_bar.setUploadSpeedLimit(SpeedFormatter.formatSpeed(_config.getUploadLimit()));
+		try {
+		  if( _config.getDownloadLimit() != 0 ) status_bar.setDownloadSpeedLimit(SpeedFormatter.formatSpeed(_config.getDownloadLimit()));
+		  if( _config.getUploadLimit() != 0 ) status_bar.setUploadSpeedLimit(SpeedFormatter.formatSpeed(_config.getUploadLimit()));
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
+		}
 		
 		_config.addConfigurationListener(new ConfigurationAdapter() {
 			public void downloadLimitChanged(long downloadLimit) {
