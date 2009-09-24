@@ -26,14 +26,15 @@ import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.logging.Logger;
 
+import org.jmule.core.networkmanager.JMEndOfStreamException;
 import org.jmule.core.networkmanager.PacketReader;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Sep 18, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:07:34 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/24 04:51:56 $
  */
 public privileged aspect PacketReaderLogger {
 	private Logger log = Logger
@@ -42,6 +43,8 @@ public privileged aspect PacketReaderLogger {
 	after() throwing (Throwable t): execution (* PacketReader.*(..)) {
 		if ((t.getCause() instanceof AsynchronousCloseException)) return ;
 		if ((t.getCause() instanceof ClosedByInterruptException)) return ;
+		if ((t.getCause() instanceof JMEndOfStreamException)) return ;
+		if ((t instanceof JMEndOfStreamException)) return ;
 		log.warning(Misc.getStackTrace(t));
 	}
 }
