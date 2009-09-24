@@ -47,8 +47,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:05:18 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/09/24 05:07:24 $
  */
 public class BootStrap {
 
@@ -93,11 +93,12 @@ public class BootStrap {
 		for(KadContact contact : contactList) {
 			bootStrapContacts.add(contact);
 			usedContacts.add(contact);
+			InternalNetworkManager x = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 			if (routingTable.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {				
 				KadPacket packet;
 				try {
 					packet = PacketFactory.getBootStrap1ReqPacket();
-					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					x.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 				} catch (JMException e) {
 					e.printStackTrace();
 				}
@@ -106,7 +107,7 @@ public class BootStrap {
 				KadPacket packet;
 				try {
 					packet = PacketFactory.getHello2ReqPacket(org.jmule.core.edonkey.packet.tag.TagList.EMPTY_TAG_LIST);
-					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					x.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 				} catch (JMException e) {
 					e.printStackTrace();
 				}
@@ -191,7 +192,7 @@ public class BootStrap {
 		
 		// stop task if already have enough contacts
 		Timer.getSingleton().removeTask(bootStrapTask);
-		FirewallChecker.getSingleton().startNowFirewallCheck();
+		FirewallChecker.getSingleton().start();
 	}
 	
 	/**
