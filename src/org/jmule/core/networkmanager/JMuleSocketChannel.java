@@ -38,8 +38,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:55:20 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/24 05:11:41 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -119,7 +119,8 @@ class JMuleSocketChannel {
 			downloadController.markBytesUsed(readedData);
 			packetBuffer.put(readCache.array(), 0, readedData);
 		} while (packetBuffer.hasRemaining());
-		if (totalReaded<5) return totalReaded;
+		if (totalReaded <= 5)
+			return totalReaded;
 		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
 			download_trafic.add(packetBuffer.capacity());
 		else
@@ -148,7 +149,7 @@ class JMuleSocketChannel {
 			readCache.position(0);
 			packetBuffer.put(readCache);
 		} while (mustRead > 0);
-		if (bytes < 5)
+		if (bytes <= 5)
 			return bytes;
 		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
 			download_trafic.add(packetBuffer.capacity());
@@ -159,10 +160,12 @@ class JMuleSocketChannel {
 	}
 
 	int write(ByteBuffer srcs) throws Exception {
-		if (srcs.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
-			upload_trafic.add(srcs.capacity());
-		else
-			service_upload_trafic.add(srcs.capacity());
+		if (srcs.capacity() > 5) {
+			if (srcs.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
+				upload_trafic.add(srcs.capacity());
+			else
+				service_upload_trafic.add(srcs.capacity());
+		}
 		srcs.position(0);
 		int totalSended = 0;
 
