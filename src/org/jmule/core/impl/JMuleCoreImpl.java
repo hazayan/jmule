@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import org.jmule.core.JMRawData;
+import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreComponent;
 import org.jmule.core.JMuleCoreException;
@@ -63,8 +64,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:48:17 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/24 05:04:57 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -230,13 +231,10 @@ public class JMuleCoreImpl implements JMuleCore {
 		notifyComponentStarted(configuration_manager);
 		
 		SharingManager sharingManager = SharingManagerSingleton.getInstance();
-		
 		sharingManager.initialize();
-		
 		sharingManager.start();
 		
 		sharingManager.loadCompletedFiles();
-		
 		sharingManager.loadPartialFiles();
 		
 		// notifies that the sharing manager has been started
@@ -297,10 +295,12 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		notifyComponentStarted(search_manager);
 		
-		JKadManagerSingleton.getInstance().initialize();
+
 		try {
-			if (configuration_manager.isJKadAutoconnectEnabled()) 
-				JKadManagerSingleton.getInstance().connect();
+			if (configuration_manager.isJKadAutoconnectEnabled()) {
+				JKadManagerSingleton.getInstance().initialize();
+				JKadManagerSingleton.getInstance().start();
+			}
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
 		}
