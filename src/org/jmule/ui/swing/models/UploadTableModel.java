@@ -33,8 +33,8 @@ import org.jmule.core.uploadmanager.UploadSession;
  *
  * Created on Sep 28, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/27 14:20:00 $
  */
 public class UploadTableModel extends AbstractTableModel {
 
@@ -74,7 +74,7 @@ public class UploadTableModel extends AbstractTableModel {
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		
-		return _upload_manager.getUpload(rowIndex);
+		return _upload_manager.getUploads().get(rowIndex);
 	}
 	
 	public String getColumnName(int col) {

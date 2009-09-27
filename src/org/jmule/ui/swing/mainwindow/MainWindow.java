@@ -64,10 +64,12 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.networkmanager.NetworkManager;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.servermanager.Server;
 import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.servermanager.ServerManagerException;
+import org.jmule.core.servermanager.ServerManagerListener;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
@@ -96,8 +98,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/27 14:20:00 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -128,6 +130,7 @@ public class MainWindow extends JFrame implements WindowListener  {
 	private PeerManager _peer_manager = _core.getPeerManager();
 	private SwingPreferences _pref = SwingPreferences.getSingleton();
 	private ConfigurationManager _config = _core.getConfigurationManager(); 
+	private NetworkManager _network_manager = _core.getNetworkManager();
 	
 	private AbstractTab previous_panel;
 	
@@ -160,7 +163,7 @@ public class MainWindow extends JFrame implements WindowListener  {
         final ActionListener start_auto_connect_action = new ActionListener() {
         	public void actionPerformed(ActionEvent event) {
 				try {
-					_server_manager.startAutoConnect();
+					_server_manager.connect();
 				} catch (ServerManagerException e) {
 					e.printStackTrace();
 				}
@@ -170,7 +173,7 @@ public class MainWindow extends JFrame implements WindowListener  {
         final ActionListener stop_auto_connect_action = new ActionListener() {
         	public void actionPerformed(ActionEvent event) {
 				try {
-					_server_manager.stopAutoConnect();
+					_server_manager.disconnect();
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
@@ -180,14 +183,14 @@ public class MainWindow extends JFrame implements WindowListener  {
         final ActionListener disconnect_action = new ActionListener() {
         	public void actionPerformed(ActionEvent event) {
         		try {
-        			_server_manager.getConnectedServer().disconnect();
+        			_server_manager.disconnect();
         		}catch(Throwable t) {
         			t.printStackTrace();
         		}
         	}
         };
         
-		_server_manager.addServerListener(new ServerListener() {
+		_server_manager.addServerListListener(new ServerManagerListener() {
 
 			public void connected(Server server) {
 				LogTab.getLogInstance().addMessage("The system is connected to server = " + server);
@@ -224,6 +227,34 @@ public class MainWindow extends JFrame implements WindowListener  {
 
 			public void serverMessage(Server server, String message) {
 				server_list_tab.setServerMessage(message);
+			}
+
+			public void autoConnectFailed() {
+				
+			}
+
+			public void autoConnectStarted() {
+				
+			}
+
+			public void isConnecting(Server server) {
+				
+			}
+
+			public void serverAdded(Server server) {
+				
+			}
+
+			public void serverConnectingFailed(Server server, Throwable cause) {
+				
+			}
+
+			public void serverListCleared() {
+				
+			}
+
+			public void serverRemoved(Server server) {
+				
 			}
 			
 		});
@@ -823,8 +854,8 @@ public class MainWindow extends JFrame implements WindowListener  {
 		
 		public void refresh() {
 		  try {	
-			downloadSpeed = SpeedFormatter.formatSpeed( _peer_manager.getDownloadSpeed() );
-			uploadSpeed = SpeedFormatter.formatSpeed( _peer_manager.getUploadSpeed() );
+			downloadSpeed = SpeedFormatter.formatSpeed( _network_manager.getDownloadSpeed() );
+			uploadSpeed = SpeedFormatter.formatSpeed( _network_manager.getUploadSpeed() );
 			download_speed.setText( ( download_speed_limit != "" ? "[" : "" ) + 
 					                download_speed_limit + 
 					                ( download_speed_limit != "" ? "] " : "" ) + 

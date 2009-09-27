@@ -38,8 +38,8 @@ import org.jmule.ui.swing.tables.ServerInfoTable;
  *
  * Created on Oct 1, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/27 14:20:00 $
  */
 public class Info extends JTabbedPane {
 	
@@ -51,7 +51,7 @@ public class Info extends JTabbedPane {
 	
 	public Info() {
 		init();
-		_server_manager.addServerListener(new ServerManagerListener() {
+		_server_manager.addServerListListener(new ServerManagerListener() {
 			
 			 public void connected(Server server) {
 				 updateTables();
@@ -60,6 +60,38 @@ public class Info extends JTabbedPane {
 			 public void disconnected(Server server) {
 				 updateTables();
 			 }
+
+			public void autoConnectFailed() {
+				
+			}
+
+			public void autoConnectStarted() {
+			
+			}
+
+			public void isConnecting(Server server) {
+			
+			}
+
+			public void serverAdded(Server server) {
+	
+			}
+
+			public void serverConnectingFailed(Server server, Throwable cause) {
+
+			}
+
+			public void serverListCleared() {
+
+			}
+
+			public void serverMessage(Server server, String message) {
+	
+			}
+
+			public void serverRemoved(Server server) {
+	
+			}
 		});
 	}
 	

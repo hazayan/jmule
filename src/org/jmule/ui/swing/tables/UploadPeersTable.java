@@ -33,7 +33,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
-import org.jmule.core.edonkey.impl.Peer;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.peermanager.Peer;
+import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.GeneralComparator;
 import org.jmule.core.utils.Misc;
@@ -48,13 +51,15 @@ import org.jmule.ui.utils.SpeedFormatter;
  *
  * Created on Oct 7, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:09:57 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/27 14:20:00 $
  */
 public class UploadPeersTable extends JMTable {
 
 	CountryLocator country_locator = CountryLocator.getInstance();
 	UploadSession session;
+	JMuleCore _core = JMuleCoreFactory.getSingleton();
+	UploadManager _upload_manager = _core.getUploadManager();
 	
     class NickNameTableCellRenderer extends UploadPeersTableCellRenderer {
     	public Component getTableCellRendererComponent(JTable table, Object value,
@@ -71,8 +76,8 @@ public class UploadPeersTable extends JMTable {
     				boolean isSelected, boolean hasFocus, int row, int column) {
     		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     		this.setHorizontalAlignment(SwingConstants.CENTER);
-    		this.setText(country_locator.getCountryCode(peer.getAddress()));
-    		this.setToolTipText(country_locator.getCountryName(peer.getAddress()));
+    		this.setText(country_locator.getCountryCode(peer.getIP()));
+    		this.setToolTipText(country_locator.getCountryName(peer.getIP()));
     		return this;
     	}
     }  
@@ -82,8 +87,8 @@ public class UploadPeersTable extends JMTable {
     				boolean isSelected, boolean hasFocus, int row, int column) {
     		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			this.setHorizontalAlignment(SwingConstants.CENTER);
-    		this.setIcon(FlagPack.getFlagAsIconByIP(peer.getAddress(), FlagPack.FlagSize.S18x25));	
-    		this.setToolTipText(country_locator.getCountryName(peer.getAddress()));
+    		this.setIcon(FlagPack.getFlagAsIconByIP(peer.getIP(), FlagPack.FlagSize.S18x25));	
+    		this.setToolTipText(country_locator.getCountryName(peer.getIP()));
     		return this;
     	}
     }
@@ -93,7 +98,7 @@ public class UploadPeersTable extends JMTable {
     				boolean isSelected, boolean hasFocus, int row, int column) {
     		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     		this.setHorizontalAlignment(SwingConstants.LEFT);
-    		this.setText(" " + peer.getAddress() + " : " + peer.getPort());
+    		this.setText(" " + peer.getIP() + " : " + peer.getPort());
     		return this;
     	}
     }
@@ -134,7 +139,8 @@ public class UploadPeersTable extends JMTable {
     	    Object[] objects = (Object[])value;
     	    UploadSession session = (UploadSession)objects[0];
     	    Peer peer = (Peer)objects[1];
-    	    int peer_position = session.getPeerPosition(peer);
+    	    int peer_position = _upload_manager.
+    	                 getUploadQueue().getPeerPosition(peer);
     	    boolean is_uploading = (peer_position == 0)?true:false;
     	    this.setHorizontalAlignment(SwingConstants.LEFT);
     	    this.setText(" " + (is_uploading?"Uploading":"Position: " + peer_position));
@@ -148,8 +154,8 @@ public class UploadPeersTable extends JMTable {
 		public int compare(Object o1, Object o2) {
 			Peer peer1 = (Peer)o1;
             Peer peer2 = (Peer)o2;
-            String cc1 = country_locator.getCountryCode(peer1.getAddress());
-            String cc2 = country_locator.getCountryCode(peer2.getAddress());
+            String cc1 = country_locator.getCountryCode(peer1.getIP());
+            String cc2 = country_locator.getCountryCode(peer2.getIP());
 			return Misc.compareAllObjects(cc1, cc2, "toString", true);
 		}	
     }
@@ -241,8 +247,8 @@ public class UploadPeersTable extends JMTable {
 				Peer peer1 = (Peer)objects1[1];    
 				UploadSession session2 = (UploadSession)objects2[0];
 	    	    Peer peer2 = (Peer)objects2[1];
-	    	    int peer_position1 = session1.getPeerPosition(peer1);
-	    	    int peer_position2 = session2.getPeerPosition(peer2);
+	    	    int peer_position1 = _upload_manager.getUploadQueue().getPeerPosition(peer1);
+	    	    int peer_position2 = _upload_manager.getUploadQueue().getPeerPosition(peer2);
 	    	    boolean is_uploading1 = (peer_position1 == 0)?true:false;
 	    	    boolean is_uploading2 = (peer_position2 == 0)?true:false;
 	    	    String str1 = is_uploading1?"Uploading":"Position: " + peer_position1;

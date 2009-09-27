@@ -33,8 +33,8 @@ import org.jmule.core.uploadmanager.UploadSession;
  *
  * Created on Oct 7, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/27 14:20:00 $
  */
 public class UploadPeersModel extends AbstractTableModel {
 
@@ -76,8 +76,8 @@ public class UploadPeersModel extends AbstractTableModel {
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
         if(columnIndex==STATUS) 
-        	return new Object[] { session, session.getPeer(rowIndex) };
-		return session.getPeer(rowIndex);
+        	return new Object[] { session, session.getPeers().get(rowIndex) };
+		return session.getPeers().get(rowIndex);
 	}
 
 }

@@ -45,14 +45,15 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.servermanager.Server;
 import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerListener;
 import org.jmule.ui.swing.maintabs.AbstractTab;
 import org.jmule.ui.swing.tables.ServerListTable;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/27 14:20:00 $$
  */
 public class ServerListTab extends AbstractTab {
 
@@ -126,7 +127,7 @@ public class ServerListTab extends AbstractTab {
 	   //TitledBorder serverListScrollPaneBorder = javax.swing.BorderFactory.createTitledBorder("Servers");
 	   serverListScrollPane.setBorder(serverListScrollPaneBorder);
 	   
-	   _server_manager.addServerListListener(new ServerListListener() {
+	   _server_manager.addServerListListener(new ServerManagerListener() {
           public void autoConnectStarted() {}
           public void autoConnectStopped() {}
           public void serverAdded(Server server) {
@@ -149,6 +150,24 @@ public class ServerListTab extends AbstractTab {
        			       setServerListCount();
        		      }
        	      });
+		  }
+		  public void autoConnectFailed() {
+			
+		  }
+		  public void connected(Server server) {
+			
+		  }
+		  public void disconnected(Server server) {
+
+		  }
+		  public void isConnecting(Server server) {
+
+		  }
+		  public void serverConnectingFailed(Server server, Throwable cause) {
+
+		  }
+		  public void serverMessage(Server server, String message) {
+
 		  }
 	   });
 	   

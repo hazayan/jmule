@@ -67,6 +67,7 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.edonkey.ED2KServerLink;
 import org.jmule.core.servermanager.Server;
 import org.jmule.core.servermanager.ServerManager;
+import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.utils.GeneralComparator;
 import org.jmule.countrylocator.CountryLocator;
 import org.jmule.ui.FlagPack;
@@ -86,8 +87,8 @@ import org.jmule.ui.utils.NumberFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/27 14:20:00 $$
  */
 public class ServerListTable extends JMTable {
 
@@ -499,9 +500,12 @@ public class ServerListTable extends JMTable {
 							SwingUtils.setWindowLocationRelativeTo((JDialog)server_dialog,parent);
 							server_dialog.setVisible(true);
 							if(server_dialog.getDialogAction()==IDialog.DialogAction.OK) {
-								Server server = new Server(server_dialog.getServerIP(), 
-										                   server_dialog.getServerPort());
-								_server_manager.addServer(server);
+							   try {	
+									  _server_manager.newServer(server_dialog.getServerIP(), 
+										                        server_dialog.getServerPort());
+							   }catch(Throwable cause) {
+								   cause.printStackTrace();
+							   }
 							}
 						}
 					});
@@ -555,7 +559,7 @@ public class ServerListTable extends JMTable {
 							 List<ED2KServerLink> server_links = ED2KServerLink.extractLinks(clipboard_contents.toString());
 							 for(ED2KServerLink server_link : server_links) {
 								 //System.out.println(server_link);
-								 _server_manager.addServer(new Server(server_link));
+								 _server_manager.newServer(server_link);
 							 }
 						  }catch(Throwable t) {
 							  t.printStackTrace();
@@ -850,12 +854,16 @@ public class ServerListTable extends JMTable {
 				t.printStackTrace();
 			}
 		  }
-		  for(Server server : selected_servers) {	
+		  for(Server server : selected_servers) {
+			 try {
 			  switch( foperation ) {
 			    case MAKE_SELECTED_STATIC : if( !server.isStatic() ) server.setStatic(true); break;
 			    case MAKE_SELECTED_NON_STATIC : if( server.isStatic() ) server.setStatic(false); break;
 		        case REMOVE_SELECTED_FROM_LIST : _server_manager.removeServer(server); break;
 	          }
+			 }catch( Throwable cause ) {
+				 cause.printStackTrace();
+			 }
 	      }
 	      if( ( foperation == ServersOp.MAKE_SELECTED_STATIC ) || 
 	    	  ( foperation == ServersOp.MAKE_SELECTED_NON_STATIC ) ) {
@@ -953,7 +961,7 @@ public class ServerListTable extends JMTable {
 	 */    
 	
 	private ConditionType whichCondition() {
-		ServerManager _server_manager = ServerManagerFactory.getInstance();
+		ServerManager _server_manager = ServerManagerSingleton.getInstance();
 		Server connected_server = _server_manager.getConnectedServer();
 		int[] selected_rows = this.getSelectedRows();
 		Server[] servers = getServersByIndexes( selected_rows );

@@ -37,8 +37,8 @@ import org.jmule.core.edonkey.FileHash;
  *
  * Created on Sep 28, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2009/09/22 19:08:43 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2009/09/27 14:20:00 $
  */
 public class DownloadTableModel extends AbstractTableModel {
 
@@ -113,7 +113,7 @@ public class DownloadTableModel extends AbstractTableModel {
         	//return i + "";downloads_order.
         //	return downloads_order.indexOf(session.getFileHash()) + "";
        // }
-		return _download_manager.getDownload(rowIndex);
+		return _download_manager.getDownloads().get(rowIndex);
 	}
 	
 	public String getColumnName(int col) {

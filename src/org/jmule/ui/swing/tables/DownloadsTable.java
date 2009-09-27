@@ -82,8 +82,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/09/22 19:08:43 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/09/27 14:20:00 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -471,18 +471,23 @@ public class DownloadsTable extends JMTable {
 		upload_speed.setCellRenderer(new UploadSpeedTableCellRenderer());
 		upload_speed.setComparator(new Comparator() {
 			public int compare(Object o1, Object o2) {
-				DownloadSession d_session1 = (DownloadSession)o1;
-				DownloadSession d_session2 = (DownloadSession)o2;
-				UploadSession u_session1 = null;
-				UploadSession u_session2 = null;
-				if(_upload_manager.hasUpload(d_session1.getFileHash()))
-					u_session1 = _upload_manager.getUpload(d_session1.getFileHash());
-				if(_upload_manager.hasUpload(d_session2.getFileHash()))
-					u_session2 = _upload_manager.getUpload(d_session2.getFileHash());
-				Float u_speed1 = new Float((u_session1!=null)?u_session1.getSpeed():0.0f);
-				Float u_speed2 = new Float((u_session2!=null)?u_session2.getSpeed():0.0f);
-				
-				return Misc.compareAllObjects(u_speed1, u_speed2, "floatValue", true);
+				Float u_speed1 = null;
+				Float u_speed2 = null;
+				try {
+				  DownloadSession d_session1 = (DownloadSession)o1;
+				  DownloadSession d_session2 = (DownloadSession)o2;
+				  UploadSession u_session1 = null;
+				  UploadSession u_session2 = null;
+				  if(_upload_manager.hasUpload(d_session1.getFileHash()))
+						u_session1 = _upload_manager.getUpload(d_session1.getFileHash());
+				   if(_upload_manager.hasUpload(d_session2.getFileHash()))
+						u_session2 = _upload_manager.getUpload(d_session2.getFileHash());
+				   u_speed1 = new Float((u_session1!=null)?u_session1.getSpeed():0.0f);
+				   u_speed2 = new Float((u_session2!=null)?u_session2.getSpeed():0.0f);
+				}catch(Throwable cause) {
+					cause.printStackTrace();
+				}
+		 		return Misc.compareAllObjects(u_speed1, u_speed2, "floatValue", true);
 			}	
 		});
 		
@@ -574,7 +579,11 @@ public class DownloadsTable extends JMTable {
 					public void actionPerformed(ActionEvent e) {
 						for(DownloadSession session : getSelectedDownloadSessions()) 
 						  if(session.getStatus() == DownloadStatus.STOPPED)	
-							session.startDownload();
+							try {
+							  _download_manager.startDownload(session.getFileHash());
+							}catch(Throwable cause) {
+								cause.printStackTrace();
+							}
 					}
 				 });
 				 stop_download = new JMenuItem("Stop download");
@@ -583,7 +592,11 @@ public class DownloadsTable extends JMTable {
 					public void actionPerformed(ActionEvent e) {
 						for(DownloadSession session : getSelectedDownloadSessions()) 
 						  if(session.getStatus() == DownloadStatus.STARTED)	
-							session.stopDownload();
+						   try {
+							_download_manager.startDownload(session.getFileHash());
+						   }catch( Throwable cause ) {
+							   cause.printStackTrace();
+						   }
 					}
 				 });
 				 cancel_download = new JMenuItem("Cancel download");
@@ -591,7 +604,11 @@ public class DownloadsTable extends JMTable {
 				 cancel_download.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						for(DownloadSession session : getSelectedDownloadSessions())
+						  try {
 							_download_manager.removeDownload(session.getFileHash());
+						  }catch( Throwable cause ) {
+							  cause.printStackTrace();
+						  }
 					}
 				 });
 				 paste_ed2k_links = new JMenuItem("Paste ed2k link(s)");
