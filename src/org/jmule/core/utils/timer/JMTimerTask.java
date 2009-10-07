@@ -27,8 +27,8 @@ import java.util.TimerTask;
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:33:10 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/07 05:50:10 $
  */
 public abstract class JMTimerTask extends TimerTask {
 	private boolean started = false;
@@ -52,8 +52,9 @@ public abstract class JMTimerTask extends TimerTask {
 	
 	public boolean cancel() {
 		setStopped();
+		boolean result = super.cancel();
 		timer.purge();
-		return super.cancel();
+		return result;
 	}
 	
 }
