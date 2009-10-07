@@ -50,8 +50,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/07 06:14:01 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -146,6 +146,8 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			throw new DownloadManagerException("Download " + fileHash
 					+ " not found ");
 		DownloadSession download_session = session_list.get(fileHash);
+		if (download_session.isStarted())
+			throw new DownloadManagerException("Download " + fileHash+" is already started");
 		download_session.startDownload();
 		notifyDownloadStarted(fileHash);
 	}
@@ -155,6 +157,8 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			throw new DownloadManagerException("Download " + fileHash
 					+ " not found ");
 		DownloadSession download_session = session_list.get(fileHash);
+		if (!download_session.isStarted())
+			throw new DownloadManagerException("Download " + fileHash + " is already stopped");
 		download_session.stopDownload();
 		notifyDownloadStopped(fileHash);
 	}
