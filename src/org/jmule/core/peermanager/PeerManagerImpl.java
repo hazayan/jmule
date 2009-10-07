@@ -44,8 +44,8 @@ import org.jmule.core.peermanager.Peer.PeerStatus;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/07 06:05:34 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -139,8 +139,17 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	}
 	
 	public Peer newIncomingPeer(String ip, int port) throws PeerManagerException {
-		if (hasPeer(ip, port))
+		if (hasPeer(ip, port)) {
+			Peer peer = getPeer(ip, port);
+			if (!peer.isHighID())
+				if (!peer.isConnected()) {
+					peer.setPeerStatus(PeerStatus.CONNECTED);
+					notifyNewPeer(peer);
+					return peer;
+				}
 			throw new PeerManagerException("Peer already exists");
+		}
+			
 		Peer peer = new Peer(ip, port, PeerSource.SERVER);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		notifyNewPeer(peer);
@@ -266,7 +275,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		List<Peer> result = new ArrayList<Peer>();
 		
 		for (int i = 0; i < peerIDList.size(); i++) {
-			String client_id = peerIDList.get(i).toString();
+			String client_id = peerIDList.get(i).getAsString();
 			int peer_port = peerPort.get(i);
 			if (hasPeer(client_id, peer_port)) continue;
 			try {

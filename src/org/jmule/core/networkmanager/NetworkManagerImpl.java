@@ -75,8 +75,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:58:53 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/07 06:01:04 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
@@ -125,6 +125,20 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	}
 
 	public synchronized void addPeer(String ip, int port) {
+		
+		Peer peer;
+		try {
+			peer = _peer_manager.getPeer(ip, port);
+			if (!peer.isHighID()) 
+				if (server_connection!=null)
+					if (server_connection.getStatus() == ConnectionStatus.CONNECTED) {
+						callBackRequest(peer.getID());
+						return ;
+					}
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
 		JMPeerConnection connection = new JMPeerConnection(ip, port);
 		peer_connections.put(ip + KEY_SEPARATOR + port, connection);
 		connection.connect();
