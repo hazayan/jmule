@@ -40,8 +40,8 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:40:37 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/10/10 18:56:26 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
@@ -345,6 +345,26 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		return shared_directories;
 	}
 
+	public void setWorkingDir(File workDir) throws ConfigurationManagerException {
+		try {
+		    config_store.setProperty(WORKING_DIR_KEY, workDir.toString());
+		    save();
+		}catch( Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
+		}
+		this.notifyPropertyChanged(WORKING_DIR_KEY, workDir);
+	}
+	
+	public File getWorkingDir() throws ConfigurationManagerException {
+		File working_dir;
+		try {
+		   String dir_name = config_store.getProperty(WORKING_DIR_KEY);
+		   working_dir = new File( dir_name );
+		}catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
+		}
+		return working_dir;
+	}
 	
 	public void setTCP(String tcp) throws ConfigurationManagerException {
 		int tcp_port;
@@ -587,6 +607,8 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 			   else if( property == UDP_ENABLED_KEY ) listener.isUDPEnabledChanged((Boolean)new_value);
 				    
 			   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
+				    
+			   else if( property == WORKING_DIR_KEY ) listener.workingDirChanged((File)new_value);
 				    
 			   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
 				    

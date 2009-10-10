@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.UserHash;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:01:50 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/10/10 18:56:26 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -97,6 +97,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       DOWNLOAD_BANDWIDTH_KEY                =     "DownloadBandwidth";
 	public static final String       UPLOAD_BANDWIDTH_KEY                  =     "UploadBandwidth";
 	public static final String       SHARED_DIRECTORIES_KEY                =     "SharedDirectories";
+	public static final String       WORKING_DIR_KEY                       =     "WorkingDir";
 	
 	public static final String		 SERVER_LIST_UPDATE_ON_CONNECT_KEY	   =     "ServerListUpdateOnConnect";
 	
@@ -161,6 +162,10 @@ public interface ConfigurationManager extends JMuleManager {
 	 * @return the list of shared folders
 	 */
 	public List<File> getSharedFolders() throws ConfigurationManagerException;
+	
+	public void setWorkingDir(File workDir) throws ConfigurationManagerException;
+	
+	public File getWorkingDir() throws ConfigurationManagerException;
 	
 	/**
 	 * Sets the download limit

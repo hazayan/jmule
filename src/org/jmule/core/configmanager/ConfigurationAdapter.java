@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/13 18:25:20 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: javajox $ on $Date: 2009/10/10 18:56:26 $
  */
 public abstract class ConfigurationAdapter implements ConfigurationListener {
 
@@ -61,6 +61,10 @@ public abstract class ConfigurationAdapter implements ConfigurationListener {
 		
 	}
 
+	public void workingDirChanged(File newWorkingDir) {
+		
+	}
+	
 	public void uploadBandwidthChanged(long uploadBandwidth) {
 		
 	}
