@@ -242,7 +242,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 			return;
 		}
 
-		rescan_dirs_task = new JMTimerTask(sharing_manager_timer) {
+		rescan_dirs_task = new JMTimerTask() {
 			public void run() {
 				loadCompletedFiles();
 			}
@@ -256,7 +256,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	}
 	
 	public void startSharingFilesToServer() {
-		server_sharing_task = new JMTimerTask(sharing_manager_timer) {
+		server_sharing_task = new JMTimerTask() {
 			public void run() {
 				List<SharedFile> files_to_share = new LinkedList<SharedFile>();
 				for (FileHash fileHash : sharedFiles.keySet()) {
@@ -285,7 +285,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void stopSharingFilesToServer() {
-		server_sharing_task.cancel();
+		server_sharing_task.stopTask();
 		server_shared_files.clear();
 	}
 

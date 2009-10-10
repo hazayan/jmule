@@ -22,39 +22,25 @@
  */
 package org.jmule.core.utils.timer;
 
-import java.util.TimerTask;
-
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/07 05:50:10 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/10 07:47:53 $
  */
-public abstract class JMTimerTask extends TimerTask {
-	private boolean started = false;
-	private JMTimer timer;
+public abstract class JMTimerTask implements Runnable {
+	private boolean stop = false;
 	
-	public JMTimerTask(JMTimer timer) {
-		this.timer = timer;
+	public void stopTask() {
+		stop = true;
 	}
-	
+
+	public boolean mustStopTask () {
+		return stop;
+	}
+
 	public boolean isStarted() {
-		return started;
-	}
-	
-	void setStarted() {
-		started = true;
-	}
-	
-	void setStopped() {
-		started = false;
-	}
-	
-	public boolean cancel() {
-		setStopped();
-		boolean result = super.cancel();
-		timer.purge();
-		return result;
+		return !stop;
 	}
 	
 }

@@ -52,7 +52,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * 
  * @author javajox
- * @version $$Revision: 1.9 $$ Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:43 $$
+ * @version $$Revision: 1.10 $$ Last changed by $$Author: binary255 $$ on $$Date: 2009/10/10 07:47:53 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements
 		InternalSearchManager {
@@ -82,7 +82,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 	private SearchQuery kad_search_request;
 
 	SearchManagerImpl() {
-		server_search_task = new JMTimerTask(timer) {
+		server_search_task = new JMTimerTask() {
 			public void run() {
 				while (!server_search_request_queue.isEmpty()) {
 					server_search_request = server_search_request_queue.poll();
@@ -103,7 +103,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 								.remove(server_search_request);
 					}
 				}
-				this.cancel();
+				this.stopTask();
 			}
 		};
 	}

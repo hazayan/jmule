@@ -86,8 +86,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.29 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:45:02 $$
+ * @version $$Revision: 1.30 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/10 07:47:53 $$
  */
 public class DownloadSession implements JMTransferSession {
 	private final static int PEER_MONITOR_INTERVAL = 1000;
@@ -128,31 +128,7 @@ public class DownloadSession implements JMTransferSession {
 	private JMTimerTask queue_sources_task = null;
 
 	private DownloadSession() {
-		download_tasks = new JMTimer();
-		peer_monitor_task = new JMTimerTask(download_tasks) {
-			public void run() {
-				List<Peer> frenzed_list = download_status_list
-						.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL,
-								ACTIVE);
-				for (Peer peer : frenzed_list) {
-					System.out.println("Rerequest : " + peer);
-					fileRequestList.remove(peer);
-					fileChunkRequest(peer);
-					//resendFilePartsRequest(peer);
-				}
-				List<Peer> peer_list = download_status_list
-						.getPeersWithInactiveTime(UNUSED_PEER_ACTIVATION,
-								PeerDownloadStatus.ACTIVE_UNUSED);
-				for (Peer peer : peer_list) {
-					fileChunkRequest(peer);
-				}
-			}
-		};
-		queue_sources_task = new JMTimerTask(download_tasks) {
-			public void run() {
-				queueSources();
-			}
-		};
+		
 	}
 
 	DownloadSession(SearchResultItem searchResult) {
@@ -193,14 +169,16 @@ public class DownloadSession implements JMTransferSession {
 
 	DownloadSession(PartialFile partialFile) {
 		this();
+		System.out.println("Partial file " + partialFile.getFileHash());
 		this.sharedFile = partialFile;
 		this.sharedFile.getGapList().sort();
 		int partCount = (int) ((sharedFile.length() / PARTSIZE));
 		if (sharedFile.length() % PARTSIZE != 0)
 			partCount++;
 		partStatus = new FilePartStatus(partCount);
-		if (partialFile.isDownloadStarted())
+		if (partialFile.isDownloadStarted()) {
 			startDownload();
+		}
 	}
 
 	private void createDownloadFiles(String fileName, long fileSize,
@@ -211,14 +189,38 @@ public class DownloadSession implements JMTransferSession {
 		SharingManagerSingleton.getInstance().addPartialFile(sharedFile);
 	}
 
-	void startDownload() {
-		this.setStatus(DownloadStatus.STARTED);
+	synchronized void startDownload() {
+		download_tasks = new JMTimer();
+		peer_monitor_task = new JMTimerTask() {
+			public void run() {
+				List<Peer> frenzed_list = download_status_list
+						.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL,
+								ACTIVE);
+				for (Peer peer : frenzed_list) {
+					System.out.println("Rerequest : " + peer);
+					fileRequestList.remove(peer);
+					fileChunkRequest(peer);
+					//resendFilePartsRequest(peer);
+				}
+				List<Peer> peer_list = download_status_list
+						.getPeersWithInactiveTime(UNUSED_PEER_ACTIVATION,
+								PeerDownloadStatus.ACTIVE_UNUSED);
+				for (Peer peer : peer_list) {
+					fileChunkRequest(peer);
+				}
+			}
+		};
+		queue_sources_task = new JMTimerTask() {
+			public void run() {
+				queueSources();
+			}
+		};
 		download_tasks.addTask(peer_monitor_task, PEER_MONITOR_INTERVAL, true);
 		download_tasks.addTask(queue_sources_task,
 				ConfigurationManager.SOURCES_QUERY_INTERVAL, true);
 
 		if (jkad.isConnected()) {
-			kad_source_search_task = new JMTimerTask(download_tasks) {
+			kad_source_search_task = new JMTimerTask() {
 				Int128 search_id;
 				Search search = Search.getSingleton();
 
@@ -268,7 +270,7 @@ public class DownloadSession implements JMTransferSession {
 					JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, true);
 			kad_source_search_task.run();
 		}
-
+		this.setStatus(DownloadStatus.STARTED);
 		sharedFile.markDownloadStarted();
 
 		queueSources();
@@ -281,8 +283,9 @@ public class DownloadSession implements JMTransferSession {
 
 	void stopDownload(boolean saveDownloadStatus) {
 		compressedFileChunks.clear();
-		download_tasks.stop();
 
+		download_tasks.stop();
+		
 		for (Peer peer : peer_list.values())
 			if (peer.isConnected())
 				network_manager.sendEndOfDownload(peer.getIP(), peer.getPort(),

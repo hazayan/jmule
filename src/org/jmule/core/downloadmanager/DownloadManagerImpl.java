@@ -50,8 +50,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/07 06:14:01 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/10 07:47:53 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -101,30 +101,35 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	}
 	
 	public void addDownload(SearchResultItem searchResult) throws DownloadManagerException {
-		if (hasDownload(searchResult.getFileHash()))
-			throw new DownloadManagerException("Download "
-					+ searchResult.getFileHash() + " already exists");
-		DownloadSession download_session = new DownloadSession(searchResult);
-		session_list.put(searchResult.getFileHash(), download_session);
-		
+		synchronized(session_list) {
+			if (hasDownload(searchResult.getFileHash()))
+				throw new DownloadManagerException("Download "
+						+ searchResult.getFileHash() + " already exists");
+			DownloadSession download_session = new DownloadSession(searchResult);
+			session_list.put(searchResult.getFileHash(), download_session);
+		}
 		notifyDownloadAdded(searchResult.getFileHash());
 	}
 
 	public void addDownload(ED2KFileLink fileLink) throws DownloadManagerException {
-		if (hasDownload(fileLink.getFileHash()))
-			throw new DownloadManagerException("Download "
-					+ fileLink.getFileHash() + " already exists");
-		DownloadSession download_session = new DownloadSession(fileLink);
-		session_list.put(fileLink.getFileHash(), download_session);
+		synchronized(session_list) {
+			if (hasDownload(fileLink.getFileHash()))
+				throw new DownloadManagerException("Download "
+						+ fileLink.getFileHash() + " already exists");
+			DownloadSession download_session = new DownloadSession(fileLink);
+			session_list.put(fileLink.getFileHash(), download_session);
+		}
 		notifyDownloadAdded(fileLink.getFileHash());
 	}
 
 	public void addDownload(PartialFile partialFile) throws DownloadManagerException {
-		if (hasDownload(partialFile.getFileHash()))
-			throw new DownloadManagerException("Download "
-					+ partialFile.getFileHash() + " already exists");
-		DownloadSession download_session = new DownloadSession(partialFile);
-		session_list.put(partialFile.getFileHash(), download_session);
+		synchronized(session_list) {
+			if (hasDownload(partialFile.getFileHash()))
+				throw new DownloadManagerException("Download "
+						+ partialFile.getFileHash() + " already exists");
+			DownloadSession download_session = new DownloadSession(partialFile);
+			session_list.put(partialFile.getFileHash(), download_session);
+		}
 		notifyDownloadAdded(partialFile.getFileHash());
 	}
 
@@ -401,7 +406,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		for(DownloadSession session : session_list.values())
 			if (session.hasPeer(ip, port)) 
 				return session;
-		throw new DownloadManagerException("Session which have " + ip + ":" + port+" not found");
+		throw new DownloadManagerException("Downloadsession with " + ip + ":" + port+" not found");
 	}
 
 	public boolean hasPeer(Peer peer) {

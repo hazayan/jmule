@@ -22,39 +22,105 @@
  */
 package org.jmule.core.utils.timer;
 
-import java.util.Timer;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:33:10 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/10 07:47:53 $
  */
 public class JMTimer {
-
-	private Timer timer;
+	private Queue<TaskExecutor> taskList = new ConcurrentLinkedQueue<TaskExecutor>();
 	
 	public JMTimer() {
-		timer = new Timer();
-	}
-	
-	public void addTask(JMTimerTask task, long startTime) {
-		task.setStarted();
-		timer.schedule(task, startTime);
-	}
-	
-	public void addTask(JMTimerTask task, long delay, boolean repeat) {
-		task.setStarted();
-		timer.scheduleAtFixedRate(task, delay, delay);
-	}
-	
-	public void purge() {
-		timer.purge();
 	}
 	
 	public void stop() {
-		timer.cancel();
-		timer.purge();
+		for(TaskExecutor task : taskList)
+			task.stopTask();
+		taskList.clear();
 	}
 	
+	public void addTask(JMTimerTask task, long waitTime, boolean repeat) {
+		TaskExecutor executor = new TaskExecutor(waitTime, task, repeat);
+		taskList.add(executor);
+		executor.start();	
+	}
+	
+	public void addTask(JMTimerTask task, long waitTime) {
+		addTask(task, waitTime ,false);
+	}
+	
+	private void removeTask(TaskExecutor executor) {
+		taskList.remove(executor);
+	}
+	
+	public void removeTask(JMTimerTask removeTask) {
+		for(TaskExecutor task_executor : taskList) 
+			if (task_executor.getTask().equals(removeTask)) {
+				task_executor.stopTask();
+				taskList.remove(task_executor);
+				return ;
+			}
+	}
+	
+	public void cancelAllTasks() {
+		for(TaskExecutor task_executor : taskList) {
+			task_executor.stopTask();
+		}
+		taskList.clear();
+	}
+	
+	
+	private class TaskExecutor extends Thread {
+		private boolean stop = false;
+		private long waitTime;
+		private boolean repeatTask = false;
+		
+		private JMTimerTask task;
+		
+		public TaskExecutor(long waitTime, JMTimerTask task, boolean repeatTask) {
+			super("Task executor " +task);
+			this.waitTime = waitTime;
+			this.task = task;
+			this.repeatTask = repeatTask;
+		}
+		
+		public void run() {
+			do {
+				if (task.mustStopTask())
+					break;
+				try {
+					this.join(waitTime);
+				} catch (InterruptedException e) {
+					if (stop) {
+						break;
+					}
+				}
+
+				if (task.mustStopTask())
+					break;
+
+				try {
+					task.run();
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+
+			} while (repeatTask);
+			removeTask(this);
+		}
+
+		public JMTimerTask getTask() {
+			return task;
+		}
+		
+		public void stopTask() {
+			stop = true;
+			this.interrupt();
+		}
+	}
+
 }
