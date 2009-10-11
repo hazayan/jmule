@@ -66,8 +66,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/11 15:30:22 $
  */
 public class KadTab extends AbstractTab {
 
@@ -76,23 +76,16 @@ public class KadTab extends AbstractTab {
 	private JMTable<KadTask> kad_task_list;
 	
 	private Group routing_table_container;
-	public KadTab(Composite shell, JMuleCore core) {
-		
+	public KadTab(Composite shell, JMuleCore core) {		
 		super(shell);
 		_core = core;
-		
-		/*if (!_core.getConfigurationManager().isJKadEnabled()) {
-			setLayout(new FillLayout());
-			Label label = new Label(this,SWT.CENTER);
-			label.setText("Kad is disabled");
-			return ;
-		}*/
+
 		setLayout(new GridLayout(1,false));
 		
 		final Composite tab_content = new Composite(this,SWT.NONE);
 		tab_content.setLayoutData(new GridData(GridData.FILL_BOTH));
 		tab_content.setLayout(new FormLayout());
-		
+				
 		routing_table_container = new Group(tab_content,SWT.NONE);
 		Group kad_tasks_container = new Group(tab_content,SWT.NONE);
 		routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes"));
@@ -214,8 +207,8 @@ public class KadTab extends AbstractTab {
 			}
 			
 		};
+			
 		contact_list.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
 		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_ID_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_id"), _._("mainwindow.kadtab.contact_list.column.contact_id.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_ID_COLUMN_ID));
 		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_DISTANCE_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_distance"), _._("mainwindow.kadtab.contact_list.column.contact_distance.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_DISTANCE_COLUMN_ID));
 		

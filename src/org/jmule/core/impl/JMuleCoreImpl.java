@@ -64,8 +64,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/24 05:04:57 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 15:30:22 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -295,10 +295,9 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		notifyComponentStarted(search_manager);
 		
-
+		JKadManagerSingleton.getInstance().initialize();
 		try {
 			if (configuration_manager.isJKadAutoconnectEnabled()) {
-				JKadManagerSingleton.getInstance().initialize();
 				JKadManagerSingleton.getInstance().start();
 			}
 		} catch (ConfigurationManagerException e) {
