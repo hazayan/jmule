@@ -42,8 +42,8 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:32:25 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:14:42 $$
  */
 public class Misc {
 	
@@ -175,8 +175,12 @@ public class Misc {
 		return 0;
 	}
 	
-	public static ByteBuffer getByteBuffer(long BufferSize){
-		return ByteBuffer.allocate(Convert.longToInt(BufferSize)).order(ByteOrder.LITTLE_ENDIAN);
+	public static ByteBuffer getByteBuffer(long bufferSize) {
+		ByteBuffer data = ByteBuffer.allocate(8);
+		data.order(ByteOrder.LITTLE_ENDIAN);
+		data.putLong(bufferSize);
+		return ByteBuffer.allocate(data.getInt(0)).order(
+				ByteOrder.LITTLE_ENDIAN);
 	}
 
 	public static long extractNumberTag(Tag tag) throws JMException {
