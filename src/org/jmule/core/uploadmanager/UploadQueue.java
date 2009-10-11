@@ -37,8 +37,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:37 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:01:09 $$
  */
 public class UploadQueue {
 	private static final String PEER_SEPARATOR 				=   ":";
@@ -79,23 +79,29 @@ public class UploadQueue {
 		return (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE));
 	}
 	
-	private List<UploadQueueContainer> getTopContainers() {
+	List<UploadQueueContainer> getTopContainers() {
 		List<UploadQueueContainer> result = new LinkedList<UploadQueueContainer>();
-		if (size()<ConfigurationManager.UPLOAD_QUEUE_SLOTS)
-			for(UploadQueueContainer container : upload_queue)
+		if (size() <= ConfigurationManager.UPLOAD_QUEUE_SLOTS)
+			for (UploadQueueContainer container : upload_queue)
 				result.add(container);
 		else {
-			for(int i = 0;i<ConfigurationManager.UPLOAD_QUEUE_SLOTS;i++) 
-				result.add(upload_queue.get(size()-i));
+			for (int i = 1; i <= ConfigurationManager.UPLOAD_QUEUE_SLOTS; i++) {
+				int id = size() - i;
+				if (id>=0)
+					result.add(upload_queue.get(id));
+				else {
+					
+				}
+			}
 		}
 		return result;
 	}
 	
 	List<Peer> getSlotPeers(PeerQueueStatus... status) {
-		List<UploadQueueContainer> containers =  getTopContainers();
+		List<UploadQueueContainer> containers = getTopContainers();
 		List<Peer> peer_list = new LinkedList<Peer>();
-		for(UploadQueueContainer container : containers)
-			for(PeerQueueStatus s : status)
+		for (UploadQueueContainer container : containers)
+			for (PeerQueueStatus s : status)
 				if (container.peer_status.contains(s)) {
 					peer_list.add(container.peer);
 					break;
@@ -190,6 +196,10 @@ public class UploadQueue {
 			peer = uploadPeer;
 			addTime = System.currentTimeMillis();
 			peer_status.add(PeerQueueStatus.SLOTTAKEN);
+		}
+		
+		public String toString() {
+			return peer+" " + addTime;
 		}
 
 	}
