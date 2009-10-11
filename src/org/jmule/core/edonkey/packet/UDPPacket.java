@@ -36,8 +36,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/22 05:13:59 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:19:19 $$
  */
 public class UDPPacket {
 	protected ByteBuffer packet_data = null;
@@ -151,9 +151,15 @@ public class UDPPacket {
 	}
 
 	public String toString() {
-		return "From : " + sender.getAddress().getHostAddress() + " : "
-				+ sender.getPort() + "\n"
-				+ Convert.byteToHexString(packet_data.array(), " 0x");
+		String result = "";
+		if (sender!=null)
+			result += "From : " + sender.getAddress().getHostAddress() + " : "
+					+ sender.getPort();
+					else 
+					result += "From : null : null ";
+		result += "\n" + Convert.byteToHexString(packet_data.array(), " 0x"); 
+		return  result;
+				
 	}
 
 }
