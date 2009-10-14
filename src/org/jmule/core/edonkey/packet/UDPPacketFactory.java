@@ -36,8 +36,8 @@ import org.jmule.core.edonkey.FileHash;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:26:18 $$
  */
 public class UDPPacketFactory {
 
@@ -80,9 +80,7 @@ public class UDPPacketFactory {
 	public static UDPPacket getUDPStatusRequest(int clientTime){
 		UDPPacket packet = new UDPPacket(4,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBSERVRSTATREQ);
-		
 		packet.insertData(clientTime);
-		
 		return packet;
 	}
 
@@ -163,7 +161,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getUDPServerDescRequest(InetSocketAddress dest){
+	public static UDPPacket getUDPServerDescRequest(){
 		UDPPacket packet = new UDPPacket(0,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_SERVER_DESC_REQ);
 		return packet;
@@ -208,7 +206,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getUDPSearchPacket(String searchString,InetSocketAddress dest){
+	public static UDPPacket getUDPSearchPacket(String searchString){
 		UDPPacket packet = new UDPPacket(1+2+searchString.length(),PROTO_EDONKEY_SERVER_UDP);
 		
 		packet.setCommand(OP_GLOBSEARCHREQ);
@@ -272,7 +270,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getUDPReaskFilePacket(FileHash fileHash,InetSocketAddress dest){
+	public static UDPPacket getUDPReaskFilePacket(FileHash fileHash){
 		UDPPacket packet = new UDPPacket(16,PROTO_EDONKEY_SERVER_UDP);
 		
 		packet.setCommand(OP_REASKFILEPING);
