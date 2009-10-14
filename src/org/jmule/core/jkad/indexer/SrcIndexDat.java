@@ -42,8 +42,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:05:15 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/14 15:21:13 $
  */
 public class SrcIndexDat {
 
@@ -68,29 +68,18 @@ public class SrcIndexDat {
 			channel.read(data);
 			Index index = new Index(key_id);
 			int source_count = data.getInt(0);
-			System.out.println("Key          : " + key_id.toHexString());
-			System.out.println("Source count : " + source_count);
+		
 			for(int j = 0;j<source_count;j++) {
 				data = getByteBuffer(16);
 				channel.read(data);
 				ClientID client_id = new ClientID(data.array());
-				/*data = getByteBuffer(4);
-				channel.read(data);
-				IPAddress address = new IPAddress(data.array());
-				data = getByteBuffer(2);
-				channel.read(data);
-				int udpPort = Convert.shortToInt(data.getShort(0));
-				
-				data = getByteBuffer(2);
-				channel.read(data);
-				int tcpPort = Convert.shortToInt(data.getShort(0));*/
+
 				data = getByteBuffer(8);
 				channel.read(data);
 				long creation_time = data.getLong(0);
 				data = getByteBuffer(1);
 				channel.read(data);
 				int tagCount = data.get(0);
-				System.out.println("Readed tagcount : "  + tagCount);
 				TagList tagList = new TagList();
 				
 				for(int k = 0;k<tagCount;k++) {
@@ -99,8 +88,6 @@ public class SrcIndexDat {
 					
 					if (tag!=null)
 						tagList.addTag(tag);
-					else 
-						System.out.println("NULL Tag ! start at : " + p);
 				}
 				Source source = new Source(client_id, tagList,creation_time);
 				source.setTagList(tagList);
@@ -113,7 +100,6 @@ public class SrcIndexDat {
 	}
 	
 	public static void writeFile(String fileName, Map<Int128, Index> sourceData) throws Throwable {
-		//FileChannel channel = new RandomAccessFile(fileName,"rw").getChannel();
 		FileChannel channel = new FileOutputStream(fileName).getChannel();
 		ByteBuffer data = getByteBuffer(4);
 		
@@ -153,21 +139,6 @@ public class SrcIndexDat {
 				data.putLong(0, source.getCreationTime());
 				data.position(0);
 				channel.write(data);
-				
-				/*data = getByteBuffer(4);
-				data.put(source.getAddress().getAddress());
-				data.position(0);
-				channel.write(data);
-				
-				data = getByteBuffer(2);
-				data.putShort(Convert.intToShort(source.getUDPPort()));
-				data.position(0);
-				channel.write(data);
-				
-				data.position(0);
-				data.putShort(Convert.intToShort(source.getTCPPort()));
-				data.position(0);
-				channel.write(data);*/
 				
 				data = getByteBuffer(1);
 				data.put(Convert.intToByte(source.getTagList().size()));
