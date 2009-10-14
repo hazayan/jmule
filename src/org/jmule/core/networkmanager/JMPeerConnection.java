@@ -24,20 +24,24 @@ package org.jmule.core.networkmanager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.zip.DataFormatException;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.JMuleZLib;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 18:01:50 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/14 15:13:47 $
  */
 public class JMPeerConnection extends JMConnection {
 
@@ -179,6 +183,19 @@ public class JMPeerConnection extends JMConnection {
 	
 	
 	void send(Packet packet) throws Exception {
+		if (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS) {
+			byte op_code = packet.getCommand(); 
+			ByteBuffer raw_data = Misc.getByteBuffer(packet.getLength()-1-4-1);
+			ByteBuffer data = packet.getAsByteBuffer();
+			data.position(1 + 4 + 1);
+			raw_data.put(data);
+			raw_data.position(0);
+			raw_data = JMuleZLib.compressData(raw_data);
+			packet = new Packet(raw_data.capacity(), E2DKConstants.PROTO_EMULE_COMPRESSED_TCP);
+			packet.setCommand(op_code);
+			raw_data.position(0);
+			packet.insertData(raw_data);
+		}
 		if(jm_socket_channel.write(packet.getAsByteBuffer()) == -1 )
 				notifyDisconnect();
 	}

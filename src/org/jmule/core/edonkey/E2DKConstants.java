@@ -47,12 +47,12 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/02 18:59:48 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 15:13:47 $$
  */
 public class E2DKConstants {
 
-	public final static int ClientSoftware 				= E2DKConstants.SO_JMULE;// JMule client identification!	
+	public final static int ClientSoftware 				    = E2DKConstants.SO_JMULE;// JMule client identification!	
 	public final static int ClientVersion[]					= new int[3];
 	
 	public static int getSoftwareVersion() {
@@ -99,6 +99,8 @@ public class E2DKConstants {
 	
 	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
 	 
+	public final static long PACKET_SIZE_TO_COMPRESS	= 100;
+	
 	static {
 		SERVER_ERROR_MESSAGES.add("WARNING : This server is full.");
 		SERVER_ERROR_MESSAGES.add("ERROR : Connection refused. Your IP is currently blacklisted.");
@@ -212,8 +214,6 @@ public class E2DKConstants {
 		AICHVer
 	}
 	
-	
-	
 	public static final Map<PeerFeatures, Integer> DefaultJMuleFeatures = new HashMap<PeerFeatures, Integer> (); 
 	static {
 		DefaultJMuleFeatures.put(AICHVer, 0);
@@ -237,7 +237,7 @@ public class E2DKConstants {
 	public final static byte OP_GLOBGETSOURCES 			= (byte) 0x9A;
 	public final static byte OP_SERVER_DESC_REQ 		= (byte) 0xA2;
 	public final static byte OP_SERVER_DESC_ANSWER 		= (byte) 0xA3;
-	public final static byte OP_GLOBSEARCHREQ 			= (byte)0x98;
+	public final static byte OP_GLOBSEARCHREQ 			= (byte) 0x98;
 	//Peer <-> Peer
 	public final static byte OP_REASKFILEPING 			= (byte)(0x90);
 	// Tag types
