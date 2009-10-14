@@ -36,8 +36,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:19:19 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:25:32 $$
  */
 public class UDPPacket {
 	protected ByteBuffer packet_data = null;
@@ -45,7 +45,7 @@ public class UDPPacket {
 
 	public UDPPacket(int packetLength, byte packetProtocol) {
 		if (packetProtocol == PROTO_EDONKEY_SERVER_UDP) {
-			packet_data = Misc.getByteBuffer(packetLength);
+			packet_data = Misc.getByteBuffer(packetLength + 2);
 			this.setProtocol(packetProtocol);
 		}
 		if (packetProtocol == PROTO_KAD_UDP) {
