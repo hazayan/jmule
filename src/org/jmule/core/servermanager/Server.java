@@ -48,86 +48,93 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:00:25 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:24:43 $$
  */
 public class Server {
-	public static enum ServerStatus { CONNECTING, CONNECTED, DISCONNECTED }
-	
+	public static enum ServerStatus {
+		CONNECTING, CONNECTED, DISCONNECTED
+	}
+
 	private String serverIP;
 	private int serverPort;
-	
+
 	private ClientID clientID;
 	private TagList tagList = new TagList();
-	
+
 	private ServerStatus status = ServerStatus.DISCONNECTED;
-	
+
 	private Set<ServerFeatures> serverFeatures;
-	
+
 	private boolean is_static = false;
-	
-	private long last_udp_response;
+
+	private long last_udp_response = System.currentTimeMillis();
+
+	private int sended_challenge = 0;
 	
 	Server(String IPAddress, int port) {
 		this.serverIP = IPAddress;
 		this.serverPort = port;
 	}
-	
-	Server(ED2KServerLink serverLink) {		
-		this(serverLink.getServerAddress(),serverLink.getServerPort());
+
+	Server(ED2KServerLink serverLink) {
+		this(serverLink.getServerAddress(), serverLink.getServerPort());
 	}
-	
+
 	public void setStatic(boolean status) {
 		is_static = status;
 	}
-	
+
 	public boolean isStatic() {
 		return is_static;
 	}
-	
+
 	public ServerStatus getStatus() {
 		return status;
 	}
-	
+
 	public boolean isConnected() {
-		return status ==ServerStatus.CONNECTED;
+		return status == ServerStatus.CONNECTED;
 	}
-	
+
 	public String getAddress() {
 		return serverIP;
 	}
-	
+
 	public Set<ServerFeatures> getFeatures() {
 		return serverFeatures;
 	}
-	
-	
+
 	void setFeatures(Set<ServerFeatures> features) {
 		this.serverFeatures = features;
 	}
-	
+
 	void setTagList(TagList tagList) {
 		this.tagList = tagList;
 	}
-	
+
 	public byte[] getAddressAsByte() {
 		return Convert.stringIPToArray(getAddress());
 	}
-	
+
 	public int getPort() {
 		return serverPort;
 	}
 
 	public ED2KServerLink getServerLink() {
-		return new ED2KServerLink(getAddress(),getPort());
-		
+		return new ED2KServerLink(getAddress(), getPort());
+
 	}
 
+	void setChallenge(int challenge) {
+		this.sended_challenge = challenge;
+	}
+	
 	void setStatus(ServerStatus status) {
 		this.status = status;
 	}
-	
-	public ClientID getClientID() {		
+
+	public ClientID getClientID() {
 		return clientID;
 	}
 
@@ -151,9 +158,9 @@ public class Server {
 
 	public String getName() {
 		try {
-			String result = (String)tagList.getTag(SL_SERVERNAME).getValue();
+			String result = (String) tagList.getTag(SL_SERVERNAME).getValue();
 			result = result.trim();
-			if (result.length()!=0)
+			if (result.length() != 0)
 				return result;
 			return getAddress();
 		} catch (Throwable t) {
@@ -165,12 +172,12 @@ public class Server {
 		Tag tag = new StringTag(SL_DESCRIPTION, serverDesc);
 		tagList.removeTag(SL_DESCRIPTION);
 		tagList.addTag(tag);
-		
+
 	}
 
 	public String getDesc() {
 		try {
-			return (String)tagList.getTag(SL_DESCRIPTION).getValue();
+			return (String) tagList.getTag(SL_DESCRIPTION).getValue();
 		} catch (Throwable e) {
 			return "";
 		}
@@ -180,13 +187,14 @@ public class Server {
 		Tag tag = new IntTag(SL_SOFTFILES, softLimit);
 		tagList.removeTag(SL_SOFTFILES);
 		tagList.addTag(tag);
-		
+
 	}
 
 	public int getSoftLimit() {
-		if (!tagList.hasTag(SL_SOFTFILES)) return 0;
+		if (!tagList.hasTag(SL_SOFTFILES))
+			return 0;
 		try {
-			return (Integer)tagList.getTag(SL_SOFTFILES).getValue();
+			return (Integer) tagList.getTag(SL_SOFTFILES).getValue();
 		} catch (Throwable e) {
 			return 0;
 		}
@@ -196,56 +204,56 @@ public class Server {
 		Tag tag = new IntTag(SL_HARDFILES, hardLimit);
 		tagList.removeTag(SL_HARDFILES);
 		tagList.addTag(tag);
-		
 	}
 
 	public int getHardLimit() {
 		try {
-			return (Integer)tagList.getTag(SL_HARDFILES).getValue();
+			return (Integer) tagList.getTag(SL_HARDFILES).getValue();
 		} catch (Throwable e) {
 			return 0;
 		}
 	}
 
-	void setPing(long ping) {
-		last_udp_response = System.currentTimeMillis();
-		Tag tag = new IntTag(SL_PING,Convert.longToInt(ping));
+	void setPing(int receivedChallenge)  {
+		Tag tag = new IntTag(SL_PING, Convert.longToInt(System.currentTimeMillis() - last_udp_response));
 		tagList.removeTag(SL_PING);
 		tagList.addTag(tag);
+		last_udp_response = System.currentTimeMillis();
 	}
 
 	public long getPing() {
 		try {
-			return Convert.longToInt((Integer)tagList.getTag(SL_PING).getValue());
+			return Convert.longToInt((Integer) tagList.getTag(SL_PING)
+					.getValue());
 		} catch (Throwable e) {
 			return 0;
-			
 		}
 	}
 
 	public String getVersion() {
 		try {
-			long version = (Integer)tagList.getTag(SL_VERSION).getValue();
+			long version = (Integer) tagList.getTag(SL_VERSION).getValue();
 			long major = version >> 16;
 			long minor = version & 0xFFFF;
-			return major+"."+minor;
+			return major + "." + minor;
 		} catch (Throwable e) {
 			return "";
 		}
 	}
-	
+
 	public long getNumFiles() {
 		try {
-			return Convert.intToLong((Integer)tagList.getTag(SL_FILES).getValue());
+			return Convert.intToLong((Integer) tagList.getTag(SL_FILES)
+					.getValue());
 		} catch (Throwable e) {
 			return 0;
 		}
-		
 	}
-	
+
 	public long getMaxUsers() {
 		try {
-			return Convert.intToLong((Integer)tagList.getTag(SL_SRVMAXUSERS).getValue());
+			return Convert.intToLong((Integer) tagList.getTag(SL_SRVMAXUSERS)
+					.getValue());
 		} catch (Throwable e) {
 			return 0;
 		}
@@ -253,12 +261,13 @@ public class Server {
 
 	public long getNumUsers() {
 		try {
-			return Convert.intToLong((Integer)tagList.getTag(SL_USERS).getValue());
+			return Convert.intToLong((Integer) tagList.getTag(SL_USERS)
+					.getValue());
 		} catch (Throwable e) {
 			return 0;
 		}
 	}
-	
+
 	void setNumUsers(long numUsers) {
 		last_udp_response = System.currentTimeMillis();
 		Tag tag = new IntTag(SL_USERS, Convert.longToInt(numUsers));
@@ -271,23 +280,26 @@ public class Server {
 		Tag tag = new IntTag(SL_FILES, Convert.longToInt(numFiles));
 		tagList.removeTag(SL_FILES);
 		tagList.addTag(tag);
-		
+
 	}
-	
+
 	public boolean isDown() {
-		  if (isConnected()) return false;
-		  if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_DOWN_TIMEOUT)
-			  return true;
-		  return false;
-	  }
+		if (isConnected())
+			return false;
+		if (System.currentTimeMillis() - last_udp_response > ConfigurationManager.SERVER_DOWN_TIMEOUT)
+			return true;
+		return false;
+	}
 
 	public int hashCode() {
-		return (getAddress()+" : "+getPort()).hashCode(); 
+		return (getAddress() + " : " + getPort()).hashCode();
 	}
-	
+
 	public boolean equals(Object object) {
-		if (!(object instanceof Server)) return false;
-		if (object.hashCode()!=this.hashCode()) return false;
+		if (!(object instanceof Server))
+			return false;
+		if (object.hashCode() != this.hashCode())
+			return false;
 		return true;
-	}	
+	}
 }

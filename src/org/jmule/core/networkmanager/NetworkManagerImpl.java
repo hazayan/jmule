@@ -45,6 +45,8 @@ import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.Packet;
 import org.jmule.core.edonkey.packet.PacketFactory;
+import org.jmule.core.edonkey.packet.UDPPacket;
+import org.jmule.core.edonkey.packet.UDPPacketFactory;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
@@ -75,8 +77,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/07 06:01:04 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/14 09:24:55 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
@@ -456,7 +458,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 
 	public void receivedNewServerDescription(String ip, int port,
 			int challenge, TagList tagList) {
-		_server_manager.receivedNewServerDescription(ip, port, tagList);
+		_server_manager.receivedNewServerDescription(ip, port, challenge, tagList);
 	}
 
 	public void receivedQueueRankFromPeer(String peerIP, int peerPort,
@@ -801,6 +803,31 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 
 		connection_waiter = new JMConnectionWaiter();
 		connection_waiter.start();
+	}
+	
+	public void sendServerUDPStatusRequest(String serverIP, int serverPort, int clientTime) {
+		UDPPacket packet = UDPPacketFactory.getUDPStatusRequest(clientTime);
+		udp_connection.sendPacket(packet, serverIP, serverPort);
+	}
+	
+	public void sendServerUDPDescRequest(String serverIP, int serverPort) {
+		UDPPacket packet = UDPPacketFactory.getUDPServerDescRequest();
+		udp_connection.sendPacket(packet, serverIP, serverPort);
+	}
+	
+	public void sendServerUDPSourcesRequest(String serverIP, int serverPort, FileHash... fileHashSet) {
+		UDPPacket packet = UDPPacketFactory.getUDPSourcesRequest(fileHashSet);
+		udp_connection.sendPacket(packet, serverIP, serverPort);
+	}
+	
+	public void sendServerUDPSearchRequest(String serverIP, int serverPort, String searchString) {
+		UDPPacket packet = UDPPacketFactory.getUDPSearchPacket(searchString);
+		udp_connection.sendPacket(packet, serverIP, serverPort);
+	}
+	
+	public void sendServerUDPReaskFileRequest(String serverIP, int serverPort, FileHash fileHash) {
+		UDPPacket packet = UDPPacketFactory.getUDPReaskFilePacket(fileHash);
+		udp_connection.sendPacket(packet, serverIP, serverPort);
 	}
 
 }

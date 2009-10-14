@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:59:33 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/14 09:24:43 $
  */
 public class PacketReader {
 
@@ -604,6 +604,7 @@ public class PacketReader {
 
 	public static void readUDPPacket(DatagramChannel channel)
 			throws NetworkManagerException, UnknownPacketException {
+		
 		InetSocketAddress packetSender;
 		boolean kad_enabled = false;
 		PacketType type;
@@ -618,7 +619,7 @@ public class PacketReader {
 			packetBuffer.clear();
 			packetSender = (InetSocketAddress) channel.receive(packetBuffer);
 			packet_content = getByteBuffer(packetBuffer.position());
-
+			
 			packetBuffer.limit(packetBuffer.position());
 			packetBuffer.position(0);
 			packet_content.position(0);
@@ -656,7 +657,9 @@ public class PacketReader {
 		}
 
 		byte packet_protocol = packet_content.get(0);
+		
 		byte packet_op_code = packet_content.get(1);
+	//	System.out.println("packet : "+Convert.byteToHexString(packet_content.array(), " "));
 
 		packet_content.position(1 + 1);
 
@@ -708,16 +711,7 @@ public class PacketReader {
 						packet_op_code, packet_content.array());
 			}
 			}
-		}
-
-		case PROTO_EDONKEY_PEER_UDP: {
-			switch (packet_op_code) {
-			default: {
-				throw new UnknownPacketException(packet_protocol,
-						packet_op_code, packet_content.array());
-			}
-			}
-		}
+		}	
 
 		}
 
@@ -734,8 +728,9 @@ public class PacketReader {
 	}
 
 	public static String readString(ByteBuffer packet) {
-		short message_length = packet.getShort();
+		int message_length = Convert.shortToInt(packet.getShort());
 		ByteBuffer bytes = Misc.getByteBuffer(message_length);
+		bytes.position(0);
 		bytes.put(packet);
 		return new String(bytes.array());
 	}

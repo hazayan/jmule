@@ -22,8 +22,6 @@
  */
 package org.jmule.core.networkmanager;
 
-import static org.jmule.core.utils.Convert.shortToInt;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
@@ -39,8 +37,8 @@ import org.jmule.core.jkad.IPAddress;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:54:15 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:24:43 $$
  */
 public class JMUDPConnection {
 	
@@ -119,13 +117,18 @@ public class JMUDPConnection {
 	}
 	
 	public void sendPacket(UDPPacket packet, IPAddress address, int port) {
-		InetSocketAddress ip_address = new InetSocketAddress(address.toString(), shortToInt((short)port));
+		InetSocketAddress ip_address = new InetSocketAddress(address.toString(), port);
 		sendPacket(packet, ip_address);
 	}
 	
 	public void sendPacket(UDPPacket packet, InetSocketAddress destination) {
 		packet.setAddress(destination);
 		sendPacket(packet);
+	}
+	
+	public void sendPacket(UDPPacket packet, String address, int port) {
+		InetSocketAddress ip_address = new InetSocketAddress(address, port);
+		sendPacket(packet, ip_address);
 	}
 	
 	/** Packet listener **/
