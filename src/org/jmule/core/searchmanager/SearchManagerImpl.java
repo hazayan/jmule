@@ -52,7 +52,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * 
  * @author javajox
- * @version $$Revision: 1.10 $$ Last changed by $$Author: binary255 $$ on $$Date: 2009/10/10 07:47:53 $$
+ * @version $$Revision: 1.11 $$ Last changed by $$Author: binary255 $$ on $$Date: 2009/10/15 07:49:24 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements
 		InternalSearchManager {
@@ -60,10 +60,8 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 	private static int SEARCH_ANSWER_WAIT = 8000;
 
 	private Search jkad_search = Search.getSingleton();
-	private InternalJKadManager jkad = (InternalJKadManager) JKadManagerSingleton
-			.getInstance();
-	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
-			.getInstance();
+	private InternalJKadManager jkad = (InternalJKadManager) JKadManagerSingleton.getInstance();
+	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 
 	private Map<SearchQuery, SearchResult> search_result_list = new ConcurrentHashMap<SearchQuery, SearchResult>();
 	private Queue<SearchQuery> server_search_request_queue = new LinkedList<SearchQuery>();
@@ -246,7 +244,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 			return;
 		if (server_search_task == null)
 			return;
-		if (server_search_task.isStarted())
+		if (server_search_task.isRunning())
 			return;
 		timer.addTask(server_search_task, 1);
 	}
@@ -316,9 +314,8 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 		processServerSearchRequest();
 	}
 
-	public void removeSearchResultListener(
-			SearchResultListener searchResultListener) {
-
+	public void removeSearchResultListener(SearchResultListener searchResultListener) {
+		search_result_listeners.remove(searchResultListener);
 	}
 
 }
