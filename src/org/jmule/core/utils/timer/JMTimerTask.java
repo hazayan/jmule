@@ -25,11 +25,13 @@ package org.jmule.core.utils.timer;
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/10 07:47:53 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/15 07:49:05 $
  */
 public abstract class JMTimerTask implements Runnable {
 	private boolean stop = false;
+	
+	private boolean is_running = false;
 	
 	public void stopTask() {
 		stop = true;
@@ -39,8 +41,16 @@ public abstract class JMTimerTask implements Runnable {
 		return stop;
 	}
 
-	public boolean isStarted() {
-		return !stop;
+	void setRunning(boolean running) {
+		this.is_running = running;
+	}
+	
+	void resetStopTask() {
+		stop = false;
+	}
+	
+	public boolean isRunning() {
+		return is_running;
 	}
 	
 }
