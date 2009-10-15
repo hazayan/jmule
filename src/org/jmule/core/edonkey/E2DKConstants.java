@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 15:13:47 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/15 07:50:32 $$
  */
 public class E2DKConstants {
 
@@ -99,7 +99,7 @@ public class E2DKConstants {
 	
 	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
 	 
-	public final static long PACKET_SIZE_TO_COMPRESS	= 100;
+	public final static long PACKET_SIZE_TO_COMPRESS	= 900;
 	
 	static {
 		SERVER_ERROR_MESSAGES.add("WARNING : This server is full.");
