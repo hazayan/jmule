@@ -285,7 +285,8 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void stopSharingFilesToServer() {
-		server_sharing_task.stopTask();
+		if (server_sharing_task != null)
+			server_sharing_task.stopTask();
 		server_shared_files.clear();
 	}
 
