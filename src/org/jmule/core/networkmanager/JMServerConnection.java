@@ -39,8 +39,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 20, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/14 15:13:47 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/18 17:35:30 $
  */
 public class JMServerConnection extends JMConnection {
 
@@ -172,10 +172,10 @@ public class JMServerConnection extends JMConnection {
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (UnknownPacketException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (DataFormatException e) {
-						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (MalformattedPacketException e) {
 						e.printStackTrace();
 					}
 				}
