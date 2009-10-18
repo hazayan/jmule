@@ -320,8 +320,6 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 								part_met);
 						sharedFiles.put(partial_shared_file.getFileHash(),
 								partial_shared_file);
-						JMuleCoreFactory.getSingleton().getDownloadManager()
-								.addDownload(partial_shared_file);
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
