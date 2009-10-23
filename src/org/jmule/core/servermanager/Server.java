@@ -48,8 +48,8 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:24:43 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/23 18:10:39 $$
  */
 public class Server {
 	public static enum ServerStatus {
@@ -213,12 +213,13 @@ public class Server {
 			return 0;
 		}
 	}
-
+	
 	void setPing(int receivedChallenge)  {
 		Tag tag = new IntTag(SL_PING, Convert.longToInt(System.currentTimeMillis() - last_udp_response));
 		tagList.removeTag(SL_PING);
 		tagList.addTag(tag);
 		last_udp_response = System.currentTimeMillis();
+		sended_challenge = 0;
 	}
 
 	public long getPing() {

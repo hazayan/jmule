@@ -54,8 +54,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:24:43 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/23 18:10:39 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private List<Server> server_list = new LinkedList<Server>();
@@ -91,7 +91,14 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			Random random = new Random();
 			public void run() {
 				for(Server server : server_list) {
-					int challenge = random.nextInt();
+					byte[] bytes = new byte[4]; 
+					random.nextBytes(bytes);
+					bytes[2] = (byte)0xFF;
+					bytes[3] = (byte)0xFF;
+					int challenge = Convert.byteToInt(bytes);
+					byte[] byte_challenge = Convert.intToByteArray(challenge);
+										
+					challenge = Convert.byteToInt(byte_challenge);
 					server.setChallenge(challenge);
 					_network_manager.sendServerUDPStatusRequest(server.getAddress(), E2DKConstants.SERVER_UDP_PORT, challenge);
 					_network_manager.sendServerUDPDescRequest(server.getAddress(), E2DKConstants.SERVER_UDP_PORT);

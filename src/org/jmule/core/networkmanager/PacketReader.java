@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/18 17:25:50 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/23 18:10:39 $
  */
 public class PacketReader {
 
@@ -679,6 +679,7 @@ public class PacketReader {
 				case PROTO_EDONKEY_SERVER_UDP: {
 					switch (packet_op_code) {
 					case OP_GLOBSERVSTATUS: {
+						if (packet_content.capacity()<15) return ; // skip old packet format
 						int challenge = packet_content.getInt();
 						long user_count = Convert.intToLong(packet_content.getInt());
 						long files_count = Convert.intToLong(packet_content.getInt());
@@ -695,11 +696,13 @@ public class PacketReader {
 					case OP_SERVER_DESC_ANSWER: {
 						boolean new_packet = false;
 						short test_short = packet_content.getShort();
-						if (test_short < 0)
-							new_packet = true;
-						if (test_short > 500)
-							new_packet = true;
-						packet_content.position(packet_content.position() - 2);
+						test_short = packet_content.getShort();
+						byte[] test_read = Convert.shortToByte(test_short);
+						if (test_read[0] == (byte) 0xFF)
+							if (test_read[1] == (byte) 0xFF) { 
+								new_packet = true;
+							}
+						packet_content.position(packet_content.position() - 4);
 						if (new_packet) {
 							int challenge = packet_content.getInt();
 							TagList tag_list = readTagList(packet_content);
