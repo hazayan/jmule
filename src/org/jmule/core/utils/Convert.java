@@ -29,8 +29,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:07:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/23 18:12:42 $$
  */
 public class Convert {
 	
@@ -38,6 +38,13 @@ public class Convert {
 		ByteBuffer data = Misc.getByteBuffer(4);
 		data.put(bvalue);
 		return data.getInt(0);
+	}
+	
+	public static int byteToShort(byte[] bvalue){
+		ByteBuffer data = Misc.getByteBuffer(2);
+		for(int i=0;i<bvalue.length;i++)
+			data.put(bvalue[i]);
+		return data.getShort(0);
 	}
 	
 	public static int byteToInt(byte[] bvalue){
@@ -68,6 +75,12 @@ public class Convert {
 	public static byte[] intToByteArray(int value) {
 		ByteBuffer data = Misc.getByteBuffer(4);
 		data.putInt(value);
+		return data.array();
+	}
+	
+	public static byte[] shortToByte(short value) {
+		ByteBuffer data = Misc.getByteBuffer(2);
+		data.putShort(value);
 		return data.array();
 	}
 	
