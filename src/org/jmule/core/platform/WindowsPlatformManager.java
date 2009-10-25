@@ -22,49 +22,18 @@
  */
 package org.jmule.core.platform;
 
-import org.jmule.core.JMConstants;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.List;
 
 /**
- * Created on Aug 30, 2009
+ * Created on Oct 25, 2009
  * @author javajox
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:57:58 $
  */
-public class PlatformManagerFactory {
+public abstract class WindowsPlatformManager extends AbstractPlatformManager {
 
-	private static PlatformManager instance;
-	
-	public static PlatformManager getInstance() {
-		
-		if ( instance == null ) {
-			
-			    if( JMConstants.isLinux )
-				
-				    instance = new LinuxPlatformManager();
-			    
-		   else if( JMConstants.isFreeBSD )
-			   
-			        instance = new FreeBSDPlatformManager();
-			    
-		   else if ( JMConstants.isSolaris )
-			   
-			        instance = new SolarisPlatformManager();	    
-			    
-		   else if ( JMConstants.isOSX )
-			   
-			        instance = new MacOSPlatformManager();
-			    
-		   else if ( JMConstants.isWindowsXP )
-			   
-			        instance = new WinXPPlatformManager();
-			   
-		   else
-			  
-			        instance = new DummyPlatformManager();
-		}
-		
-		return instance;
-		
-	}
-	
+
 }
