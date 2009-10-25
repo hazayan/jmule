@@ -23,6 +23,8 @@
 package org.jmule.core.platform;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.List;
 
 import org.jmule.core.JMuleManager;
@@ -30,8 +32,8 @@ import org.jmule.core.JMuleManager;
 /**
  * Created on Aug 30, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2009/08/31 17:26:28 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:36:11 $
  */
 public class DummyPlatformManager extends AbstractPlatformManager {
 
@@ -59,6 +61,12 @@ public class DummyPlatformManager extends AbstractPlatformManager {
 	
 	public void moveFile(File source, File destination) throws PlatformManagerException {
 	    throw new PlatformManagerException( UC );	
+	}
+	
+	public PingResult ping(InetAddress source, 
+                           NetworkInterface networkInterface,
+                           int count) throws PlatformManagerException {
+		throw new PlatformManagerException( UC );
 	}
 	
 	public void addToIPFilter(Object ip) throws PlatformManagerException {

@@ -22,36 +22,46 @@
  */
 package org.jmule.core.platform;
 
-import java.io.File;
-
 /**
- * Created on Aug 31, 2009
+ * Created on Sep 1, 2009
  * @author javajox
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:36:11 $
  */
-public abstract class UnixPlatformManager extends AbstractPlatformManager {
+public class PingResult {
 
-	private void copyOrMoveFile(String command, File source, File destination) throws PlatformManagerException {
-		int exit_status;
-		try {
-			 ProcessBuilder mv_or_cp_cmd = new ProcessBuilder(new String[] { command, source.getAbsolutePath(), destination.getAbsolutePath() });
-			 Process mv_or_cp_cmd_running = mv_or_cp_cmd.start();
-			 exit_status = mv_or_cp_cmd_running.waitFor();
-		}catch( Throwable cause ) {
-			throw new PlatformManagerException( cause );
-		}
-		if( exit_status != 0 ) 
-			  throw new PlatformManagerException(PROCESS_ERROR + exit_status);
+	private int transmittedPackets;
+	private int receivedPackets;
+	private int packetLoss;
+	private int time;
+	
+	PingResult() {
+		
 	}
 	
-	public void copyFile(File source, File destination) throws PlatformManagerException {
-		copyOrMoveFile( "cp", source, destination );
+	public int getTransmittedPackets() {
+		return transmittedPackets;
 	}
-	
-	public void moveFile(File source, File destination) throws PlatformManagerException {
-        copyOrMoveFile( "mv", source, destination );
-	}	
-	
-
+	void setTransmittedPackets(int transmittedPackets) {
+		this.transmittedPackets = transmittedPackets;
+	}
+	public int getReceivedPackets() {
+		return receivedPackets;
+	}
+	void setReceivedPackets(int receivedPackets) {
+		this.receivedPackets = receivedPackets;
+	}
+	public int getPacketLoss() {
+		return packetLoss;
+	}
+	void setPacketLoss(int packetLoss) {
+		this.packetLoss = packetLoss;
+	}
+	public int getTime() {
+		return time;
+	}
+	void setTime(int time) {
+		this.time = time;
+	}
+		
 }

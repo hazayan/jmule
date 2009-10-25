@@ -32,11 +32,12 @@ import org.jmule.core.JMuleManagerException;
 /**
  * Created on Aug 30, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2009/08/31 17:26:28 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:36:11 $
  */
 public abstract class AbstractPlatformManager extends JMuleAbstractManager implements PlatformManager {
 	
+	protected final static String PROCESS_ERROR = "The OS process terminated abnormally, exit status : "; 
 	protected List<CPUCapabilities> cpus_capabilities;
 	
 	public void initialize() {

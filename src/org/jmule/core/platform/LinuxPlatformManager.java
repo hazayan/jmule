@@ -23,8 +23,9 @@
 package org.jmule.core.platform;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +34,8 @@ import org.jmule.core.JMuleManager;
 /**
  * Created on Aug 30, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2009/08/31 17:26:28 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:36:11 $
  */
 public class LinuxPlatformManager extends UnixPlatformManager {
 
@@ -50,7 +51,7 @@ public class LinuxPlatformManager extends UnixPlatformManager {
 		   Process cat_proc_cpuinfo_cmd_running = cat_proc_cpuinfo_cmd.start();
 		   int exit_status = cat_proc_cpuinfo_cmd_running.waitFor();
 		   if( exit_status != 0 ) 
-				   throw new PlatformManagerException("The OS process terminated abnormally, exit status : " + exit_status);
+				   throw new PlatformManagerException(PROCESS_ERROR + exit_status);
 		   BufferedReader cat_proc_cpuinfo_cmd_result = new BufferedReader( new InputStreamReader( cat_proc_cpuinfo_cmd_running.getInputStream() ) );
 		   String line;
 		   while( ( line = cat_proc_cpuinfo_cmd_result.readLine() ) != null ) {
@@ -95,6 +96,41 @@ public class LinuxPlatformManager extends UnixPlatformManager {
 			throw new PlatformManagerException( cause );
 		}
 		return cpus_capabilities;
+	}
+	
+	public PingResult ping(InetAddress source, 
+                           NetworkInterface networkInterface,
+                           int count) throws PlatformManagerException {
+		PingResult ping_result = null;
+		int exit_status;
+		try {
+			ProcessBuilder ping_cmd = new ProcessBuilder(new String[] {"ping","-I " + networkInterface.getName(), "-c " + count});
+			Process ping_cmd_running = ping_cmd.start();
+			exit_status = ping_cmd_running.waitFor();
+			BufferedReader ping_cmd_result = new BufferedReader( new InputStreamReader( ping_cmd_running.getInputStream() ) );
+			String line;
+			boolean near_result = false;
+			String transmitted_packets;
+			String received_packets;
+			String packet_loss;
+			String time;
+			while( ( line = ping_cmd_result.readLine() ) != null ) {
+				if( line.startsWith("---") ) near_result = true;
+				if( near_result ) {
+					String[] splitted_line = line.split(",");
+					transmitted_packets = splitted_line[0].split(" ")[0];
+					received_packets = splitted_line[1].split(" ")[0];
+					packet_loss = splitted_line[2].split(" ")[0];
+					time = splitted_line[3].split(" ")[1]; //TODO finish here !!!
+				}
+			}
+		}catch( Throwable cause ) {
+			throw new PlatformManagerException( cause );
+		}
+		if( exit_status != 0 ) 
+			  throw new PlatformManagerException(PROCESS_ERROR + exit_status);
+		
+		return ping_result;
 	}
 	
 	public void addToIPFilter(Object ip) throws PlatformManagerException {

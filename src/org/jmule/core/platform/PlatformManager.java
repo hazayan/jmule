@@ -23,6 +23,8 @@
 package org.jmule.core.platform;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.List;
 
 import org.jmule.core.JMuleManager;
@@ -30,8 +32,8 @@ import org.jmule.core.JMuleManager;
 /**
  * Created on Aug 23, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2009/08/31 17:26:28 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:36:11 $
  */
 public interface PlatformManager extends JMuleManager {
 
@@ -48,6 +50,10 @@ public interface PlatformManager extends JMuleManager {
 	public void copyFile(File source, File destination) throws PlatformManagerException;
 	
 	public void moveFile(File source, File destination) throws PlatformManagerException;
+	
+	public PingResult ping(InetAddress source, 
+			               NetworkInterface networkInterface,
+			               int count) throws PlatformManagerException;
 	
 	/**
 	 * Tests if native code is available for all or some functionality of the given JMule manager

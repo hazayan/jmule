@@ -22,36 +22,40 @@
  */
 package org.jmule.core.platform;
 
-import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.List;
 
 /**
- * Created on Aug 31, 2009
+ * Created on Oct 25, 2009
  * @author javajox
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: javajox $ on $Date: 2009/10/25 08:36:11 $
  */
-public abstract class UnixPlatformManager extends AbstractPlatformManager {
+public class FreeBSDPlatformManager extends UnixPlatformManager {
 
-	private void copyOrMoveFile(String command, File source, File destination) throws PlatformManagerException {
-		int exit_status;
-		try {
-			 ProcessBuilder mv_or_cp_cmd = new ProcessBuilder(new String[] { command, source.getAbsolutePath(), destination.getAbsolutePath() });
-			 Process mv_or_cp_cmd_running = mv_or_cp_cmd.start();
-			 exit_status = mv_or_cp_cmd_running.waitFor();
-		}catch( Throwable cause ) {
-			throw new PlatformManagerException( cause );
-		}
-		if( exit_status != 0 ) 
-			  throw new PlatformManagerException(PROCESS_ERROR + exit_status);
+	public void addToIPFilter(Object ip) throws PlatformManagerException {
+		
+        throw new PlatformManagerException("Not implemented yet");
 	}
-	
-	public void copyFile(File source, File destination) throws PlatformManagerException {
-		copyOrMoveFile( "cp", source, destination );
+
+	public List<CPUCapabilities> getCPUCapabilities()
+			throws PlatformManagerException {
+		
+		throw new PlatformManagerException("Not implemented yet");
 	}
-	
-	public void moveFile(File source, File destination) throws PlatformManagerException {
-        copyOrMoveFile( "mv", source, destination );
-	}	
-	
+
+	public PingResult ping(InetAddress source,
+			NetworkInterface networkInterface, int count)
+			throws PlatformManagerException {
+		
+		throw new PlatformManagerException("Not implemented yet");
+	}
+
+	public void removeFromIPFilter(Object ip) throws PlatformManagerException {
+
+		
+        throw new PlatformManagerException("Not implemented yet");
+	}
 
 }
