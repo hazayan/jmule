@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/23 18:10:39 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/25 12:16:07 $
  */
 public class PacketReader {
 
@@ -144,7 +144,7 @@ public class PacketReader {
 				String server_message = readString(packet_data);
 				_network_manager.receivedMessageFromServer(server_message);
 	
-				break;
+				return ;
 			}
 			case PACKET_SRVIDCHANGE: {
 				byte client_id[] = new byte[4];
@@ -154,13 +154,13 @@ public class PacketReader {
 				Set<ServerFeatures> features = Utils
 						.scanTCPServerFeatures(server_features);
 				_network_manager.receivedIDChangeFromServer(clientID, features);
-				break;
+				return ;
 			}
 			case PACKET_SRVSTATUS: {
 				int user_count = packet_data.getInt();
 				int file_count = packet_data.getInt();
 				_network_manager.receivedServerStatus(user_count, file_count);
-				break;
+				return ;
 			}
 	
 			case OP_SERVERLIST: {
@@ -178,7 +178,7 @@ public class PacketReader {
 				}
 	
 				_network_manager.receivedServerList(ip_list, port_list);
-				break;
+				return ;
 			}
 	
 			case PACKET_SRVSEARCHRESULT: {
@@ -217,7 +217,7 @@ public class PacketReader {
 	
 				}
 				_network_manager.receivedSearchResult(searchResults);
-				break;
+				return ;
 			}
 	
 			case PACKET_SRVFOUNDSOURCES: {
@@ -256,7 +256,7 @@ public class PacketReader {
 				}
 				_network_manager.receivedSourcesFromServer(new FileHash(file_hash),
 						clientid_list, port_list);
-				break;
+				return ;
 			}
 	
 			case PACKET_CALLBACKREQUESTED: {
@@ -270,12 +270,12 @@ public class PacketReader {
 				_network_manager.receivedCallBackRequest(Convert
 						.IPtoString(ip_address), port);
 	
-				break;
+				return ;
 			}
 	
 			case PACKET_CALLBACKFAILED: {
 				_network_manager.receivedCallBackFailed();
-				break;
+				return ;
 			}
 			default:
 				throw new UnknownPacketException(packet_header, packet_opcode,
@@ -284,7 +284,7 @@ public class PacketReader {
 		}catch(Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
-			throw new MalformattedPacketException(packet_data.array());
+			throw new MalformattedPacketException(packet_data.array(), cause);
 		}
 	}
 
@@ -327,9 +327,7 @@ public class PacketReader {
 		}
 		try {
 			switch (packet_header) {
-	
 			case PROTO_EDONKEY_TCP: {
-	
 				switch (packet_opcode) {
 				case OP_PEERHELLO: {
 					byte[] data = new byte[16];
@@ -355,7 +353,7 @@ public class PacketReader {
 							peerPort, userHash, clientID, tcpPort, tag_list,
 							server_ip, server_port);
 	
-					break;
+					return ;
 				}
 	
 				case OP_PEERHELLOANSWER: {
@@ -381,7 +379,7 @@ public class PacketReader {
 							userHash, clientID, tcpPort, tag_list, server_ip,
 							server_port);
 	
-					break;
+					return;
 				}
 	
 				case OP_SENDINGPART: {
@@ -395,7 +393,7 @@ public class PacketReader {
 					_network_manager.receivedRequestedFileChunkFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), new FileChunk(
 									chunk_start, chunk_end, chunk_content));
-					break;
+					return;
 				}
 	
 				case OP_REQUESTPARTS: {
@@ -419,13 +417,13 @@ public class PacketReader {
 					_network_manager.receivedFileChunkRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), chunks);
 	
-					break;
+					return;
 				}
 	
 				case OP_END_OF_DOWNLOAD: {
 					_network_manager
 							.receivedEndOfDownloadFromPeer(peerIP, peerPort);
-					break;
+					return;
 				}
 	
 				case OP_HASHSETREQUEST: {
@@ -434,7 +432,7 @@ public class PacketReader {
 	
 					_network_manager.receivedHashSetRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash));
-					break;
+					return;
 				}
 	
 				case OP_HASHSETANSWER: {
@@ -450,7 +448,7 @@ public class PacketReader {
 					}
 					_network_manager.receivedHashSetResponseFromPeer(peerIP,
 							peerPort, partSet);
-					break;
+					return;
 				}
 	
 				case OP_SLOTREQUEST: {
@@ -458,21 +456,21 @@ public class PacketReader {
 					packet_data.get(file_hash);
 					_network_manager.receivedSlotRequestFromPeer(peerIP, peerPort,
 							new FileHash(file_hash));
-					break;
+					return;
 				}
 	
 				case OP_SLOTGIVEN: {
 					_network_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
-					break;
+					return;
 				}
 	
 				case OP_SLOTRELEASE: {
-					break;
+					return;
 				}
 	
 				case OP_SLOTTAKEN: {
 					_network_manager.receivedSlotTakenFromPeer(peerIP, peerPort);
-					break;
+					return;
 				}
 	
 				case OP_FILEREQUEST: {
@@ -481,7 +479,7 @@ public class PacketReader {
 	
 					_network_manager.receivedFileRequestFromPeer(peerIP, peerPort,
 							new FileHash(file_hash));
-					break;
+					return;
 				}
 	
 				case OP_FILEREQANSWER: {
@@ -493,7 +491,7 @@ public class PacketReader {
 					_network_manager.receivedFileRequestAnswerFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), new String(str_bytes
 									.array()));
-					break;
+					return;
 				}
 	
 				case OP_FILEREQANSNOFILE: {
@@ -502,7 +500,7 @@ public class PacketReader {
 	
 					_network_manager.receivedFileNotFoundFromPeer(peerIP, peerPort,
 							new FileHash(file_hash));
-					break;
+					return;
 				}
 	
 				case OP_FILESTATREQ: {
@@ -512,7 +510,7 @@ public class PacketReader {
 					_network_manager.receivedFileStatusRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash));
 	
-					break;
+					return;
 				}
 	
 				case OP_FILESTATUS: {
@@ -521,6 +519,7 @@ public class PacketReader {
 					short partCount = packet_data.getShort();
 					int count = (partCount + 7) / 8;
 					if (((partCount + 7) / 8) != 0)
+					//if (count == 0)
 						count++;
 	
 					byte[] data = new byte[count];
@@ -533,7 +532,7 @@ public class PacketReader {
 	
 					_network_manager.receivedFileStatusResponseFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), bitSet);
-					break;
+					return;
 				}
 	
 				default: {
@@ -542,8 +541,6 @@ public class PacketReader {
 				}
 	
 				}
-	
-				break;
 			}
 	
 			case PROTO_EMULE_EXTENDED_TCP: {
@@ -555,7 +552,7 @@ public class PacketReader {
 					TagList tag_list = readTagList(packet_data);
 					_network_manager.receivedEMuleHelloFromPeer(peerIP, peerPort,
 							client_version, protocol_version, tag_list);
-					break;
+					return;
 				}
 	
 				case OP_COMPRESSEDPART: {
@@ -572,14 +569,14 @@ public class PacketReader {
 					_network_manager.receivedCompressedFileChunkFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), new FileChunk(
 									chunkStart, chunkEnd, data));
-					break;
+					return;
 				}
 	
 				case OP_EMULE_QUEUERANKING: {
 					short queue_rank = packet_data.getShort();
 					_network_manager.receivedQueueRankFromPeer(peerIP, peerPort,
 							Convert.shortToInt(queue_rank));
-					break;
+					return;
 				}
 	
 				default: {
@@ -588,7 +585,6 @@ public class PacketReader {
 				}
 	
 				}
-				break;
 			}
 	
 			default: {
@@ -600,7 +596,8 @@ public class PacketReader {
 		}catch(Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException)cause;
-			throw new MalformattedPacketException(packet_data.array());
+			cause.printStackTrace();
+			throw new MalformattedPacketException(packet_header, packet_opcode, packet_data.array(),cause);
 		}
 
 	}
@@ -691,7 +688,7 @@ public class PacketReader {
 						_network_manager.receivedServerStatus(ip, port, challenge,
 								user_count, files_count, soft_limit, hard_limit,
 								server_features);
-						break;
+						return ;
 					}
 					case OP_SERVER_DESC_ANSWER: {
 						boolean new_packet = false;
@@ -708,14 +705,13 @@ public class PacketReader {
 							TagList tag_list = readTagList(packet_content);
 							_network_manager.receivedNewServerDescription(ip, port,
 									challenge, tag_list);
-							break;
+							return ;
 						}
 						String server_name = readString(packet_content);
 						String server_desc = readString(packet_content);
-		
 						_network_manager.receivedServerDescription(ip, port,
 								server_name, server_desc);
-						break;
+						return ;
 					}
 		
 					default: {
@@ -727,7 +723,7 @@ public class PacketReader {
 			} }catch(Throwable cause ) {
 				if (cause instanceof UnknownPacketException)
 					throw (UnknownPacketException)cause;
-				throw new MalformattedPacketException(packet_content.array());
+				throw new MalformattedPacketException(packet_content.array(), cause);
 			}
 	}
 
@@ -745,7 +741,8 @@ public class PacketReader {
 		int message_length = (packet.getShort());
 		ByteBuffer bytes = Misc.getByteBuffer(message_length);
 		bytes.position(0);
-		bytes.put(packet);
+		for(int i = 0;i<message_length;i++)
+			bytes.put(packet.get());
 		return new String(bytes.array());
 	}
 

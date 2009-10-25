@@ -29,13 +29,17 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Oct 16, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/18 17:25:32 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/25 12:16:07 $
  */
 public class MalformattedPacketException extends JMException {
 
-	public MalformattedPacketException(byte[] packetContent) {
-		super("Malformatted packet : \n" + Convert.byteToHexString(packetContent, " "));
+	public MalformattedPacketException(byte proto, byte opcode, byte[] packetContent, Throwable cause) {
+		super("Proto : " + Convert.byteToHex(proto) + "\n" + "Opcode : " + Convert.byteToHex(opcode) +"\nMalformatted packet : \n" + Convert.byteToHexString(packetContent, " ")+"\n"+cause);
+	}
+	
+	public MalformattedPacketException(byte[] packetContent, Throwable cause) {
+		super("Malformatted packet : \n" + Convert.byteToHexString(packetContent, " ")+"\n"+cause);
 	}
 	
 }
