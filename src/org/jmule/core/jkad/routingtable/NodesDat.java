@@ -38,12 +38,13 @@ import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.JKadUDPKey;
 import org.jmule.core.jkad.utils.Utils;
+import org.jmule.core.utils.Convert;
 
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:28:40 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/25 12:15:05 $
  */
 public class NodesDat {
 
@@ -101,10 +102,9 @@ public class NodesDat {
 				
 				data = getByteBuffer(1);
 				channel.read(data);
-				
-				//System.out.println("*** IsGoodAddress ** disabled");
+
 				if (Utils.isGoodAddress(address)) {
-					KadContact contact = new KadContact(contact_id, new ContactAddress(address, udp_port), tcp_port, contact_version, udp_key, data.get(0)==1 ? true : false);
+					KadContact contact = new KadContact(contact_id, new ContactAddress(address, Convert.shortToInt(udp_port)), Convert.shortToInt(tcp_port), contact_version, udp_key, data.get(0)==1 ? true : false);
 					
 					result.add(contact);
 				}
