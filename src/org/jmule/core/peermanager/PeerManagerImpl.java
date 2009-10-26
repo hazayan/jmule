@@ -44,11 +44,10 @@ import org.jmule.core.peermanager.Peer.PeerStatus;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/07 06:05:34 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:32:09 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
-	
 	private Map<String, Peer> peers  = new Hashtable<String, Peer>();
 	private InternalNetworkManager _network_manager;
 	
@@ -80,7 +79,8 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		
 		for(Peer peer : peers.values()) {
 			try {
-				disconnect(peer);
+				if (peer.isConnected())
+					disconnect(peer);
 			}catch(PeerManagerException e) {
 				e.printStackTrace();
 			}
@@ -139,24 +139,47 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	}
 	
 	public Peer newIncomingPeer(String ip, int port) throws PeerManagerException {
+		Peer peer;
 		if (hasPeer(ip, port)) {
-			Peer peer = getPeer(ip, port);
-			if (!peer.isHighID())
+			peer = getPeer(ip, port);
+			/*Peer peer = getPeer(ip, port);
+			if (!peer.isHighID()) {
 				if (!peer.isConnected()) {
 					peer.setPeerStatus(PeerStatus.CONNECTED);
 					notifyNewPeer(peer);
 					return peer;
 				}
-			throw new PeerManagerException("Peer already exists");
+			}
+			throw new PeerManagerException("Peer already exists");*/
 		}
-			
-		Peer peer = new Peer(ip, port, PeerSource.SERVER);
+		peer = new Peer(ip, port, PeerSource.SERVER);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		notifyNewPeer(peer);
 		return peer;
 		
 	}
 
+	/**
+	 * Search replication peer and replace it
+	 * @param peer
+	 * @return
+	 */
+	private boolean replaceLowIDPeer(Peer peer) {
+		String search_key = peer.getID().getAsString() + KEY_SEPARATOR
+				+ peer.getPort();
+		if (peers.containsKey(search_key)) {
+			Peer stored_peer = peers.get(search_key);
+			System.out.println("LOW ID : " + stored_peer + "  ID : " + stored_peer.getID()+ "  " + peer + " ID : " + peer.getID());
+			String old_key = stored_peer.getIP()+KEY_SEPARATOR + stored_peer.getPort();
+			stored_peer.copyFields(peer);
+			String new_key = stored_peer.getIP()+KEY_SEPARATOR + stored_peer.getPort();
+			peers.remove(old_key);
+			peers.put(new_key, stored_peer);
+			return true;
+		}
+		return false;
+	}
+	
 	public void helloAnswerFromPeer(String peerIP, int peerPort,
 			UserHash userHash, ClientID clientID, int peerPacketPort,
 			TagList tagList, String serverIP, int serverPort) {
@@ -172,7 +195,15 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
 		peer.setServer(serverIP, serverPort);
-		
+		if (!peer.isHighID())
+		if (replaceLowIDPeer(peer)) {
+			try {
+				peer = getPeer(peerIP, peerPort);
+			} catch (PeerManagerException e) {
+				e.printStackTrace();
+				return ;
+			}
+		}
 		notifyPeerConnected(peer);
 	}
 
@@ -192,6 +223,15 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
 		peer.setServer(serverIP, serverPort);
+		if (!peer.isHighID())
+		if (replaceLowIDPeer(peer)) {
+			try {
+				peer = getPeer(peerIP, peerPort);
+			} catch (PeerManagerException e) {
+				e.printStackTrace();
+				return ;
+			}
+		}
 		
 		notifyPeerConnected(peer);
 	}

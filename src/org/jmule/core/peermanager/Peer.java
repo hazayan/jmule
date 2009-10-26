@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 18:01:50 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:32:09 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD}
@@ -62,10 +62,10 @@ public class Peer {
 	
 	private ClientID clientID = null;
 	private UserHash userHash = null;
-	private TagList tag_list = null;
+	private TagList tag_list = new TagList();
 	
 	private Map<PeerFeatures,Integer> peer_features = new Hashtable<PeerFeatures, Integer>();
-	private PeerSource peerSource = PeerSource.SERVER;
+	private PeerSource peer_source = PeerSource.SERVER;
 	
 	private PeerStatus peer_status = PeerStatus.DISCONNECTED;
 	
@@ -73,7 +73,24 @@ public class Peer {
 		this.ip = ip;
 		this.clientID = new ClientID(ip);
 		this.port = port;
-		this.peerSource = peerSource;
+		this.peer_source = peerSource;
+	}
+	
+	// used to avoid peer
+	void copyFields(Peer peer) {
+		this.ip = peer.ip;
+		this.port = peer.port;
+		
+		this.server_ip = peer.server_ip;
+		this.server_port = peer.server_port;
+		
+		this.clientID = peer.clientID;
+		this.userHash = peer.userHash;
+		this.tag_list = peer.tag_list;
+		
+		this.peer_features = peer.peer_features;
+		this.peer_source = peer.peer_source;
+		this.peer_status = peer.peer_status;
 	}
 	
 	void setPeerStatus(PeerStatus newStatus) {
@@ -122,7 +139,7 @@ public class Peer {
 	}
 		
 	public PeerSource getPeerSource() {
-		return peerSource;
+		return peer_source;
 	}
 	
 	public String getIP() {
@@ -162,7 +179,10 @@ public class Peer {
 	}
 	
 	public String toString() {
-		return getIP() + ":" + getPort();
+		String result = getIP() + ":" + getPort();
+		if (clientID != null)
+			result += " " + clientID.getAsString();
+		return result;
 	}
 	
 	public int hashCode() {
@@ -193,7 +213,10 @@ public class Peer {
 	public int getClientSoftware() {
 		int clientInfo;
 		try {
+			if (!tag_list.hasTag(TAG_NAME_CLIENTVER))
+				return E2DKConstants.SO_COMPAT_UNK;
 			Tag tag = tag_list.getTag(TAG_NAME_CLIENTVER);
+			
 			long value = Misc.extractNumberTag(tag);
 			clientInfo = Convert.longToInt(value);
 		} catch (Throwable e) {
@@ -234,12 +257,14 @@ public class Peer {
 	}
 	
 	public float getDownloadSpeed() {
+		if (!isConnected()) return 0;
 		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 		return network_manager.getPeerDownloadSpeed(getIP(), getPort());
 	}
 
 	public float getUploadSpeed() {
+		if (!isConnected()) return 0;
 		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 		return network_manager.getPeerUploadSpeed(getIP(), getPort());
