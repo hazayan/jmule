@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/25 12:16:07 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:31:28 $
  */
 public class PacketReader {
 
@@ -325,6 +325,12 @@ public class PacketReader {
 			packet_data.position(0);
 			packet_header = PROTO_EDONKEY_TCP;
 		}
+		
+		if ((packet_opcode == OP_SENDINGPART) || (packet_opcode == OP_COMPRESSEDPART)) {
+			channel.download_trafic.add(pkLength);
+		} else 
+			channel.service_download_trafic.add(pkLength);
+		
 		try {
 			switch (packet_header) {
 			case PROTO_EDONKEY_TCP: {
@@ -352,7 +358,7 @@ public class PacketReader {
 					_network_manager.receivedHelloFromPeerAndRespondTo(peerIP,
 							peerPort, userHash, clientID, tcpPort, tag_list,
 							server_ip, server_port);
-	
+
 					return ;
 				}
 	
@@ -378,7 +384,7 @@ public class PacketReader {
 					_network_manager.receivedHelloAnswerFromPeer(peerIP, peerPort,
 							userHash, clientID, tcpPort, tag_list, server_ip,
 							server_port);
-	
+
 					return;
 				}
 	
@@ -393,6 +399,7 @@ public class PacketReader {
 					_network_manager.receivedRequestedFileChunkFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), new FileChunk(
 									chunk_start, chunk_end, chunk_content));
+
 					return;
 				}
 	
@@ -416,13 +423,15 @@ public class PacketReader {
 	
 					_network_manager.receivedFileChunkRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), chunks);
-	
+					
+
 					return;
 				}
 	
 				case OP_END_OF_DOWNLOAD: {
 					_network_manager
 							.receivedEndOfDownloadFromPeer(peerIP, peerPort);
+
 					return;
 				}
 	
@@ -518,9 +527,9 @@ public class PacketReader {
 					packet_data.get(file_hash);
 					short partCount = packet_data.getShort();
 					int count = (partCount + 7) / 8;
-					if (((partCount + 7) / 8) != 0)
-					//if (count == 0)
-						count++;
+				//	if (((partCount + 7) / 8) != 0)
+				//	if (count == 0)
+					//	count++;
 	
 					byte[] data = new byte[count];
 					for (int i = 0; i < count; i++)
@@ -596,7 +605,6 @@ public class PacketReader {
 		}catch(Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException)cause;
-			cause.printStackTrace();
 			throw new MalformattedPacketException(packet_header, packet_opcode, packet_data.array(),cause);
 		}
 

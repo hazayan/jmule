@@ -27,8 +27,8 @@ import org.jmule.core.utils.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:45:20 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:28 $$
  */
 public class ClientID {
 	
@@ -55,8 +55,9 @@ public class ClientID {
 	}
 	
 	public boolean isHighID() {
-		
 		return !(data[3]==0);
+		//if (data[3] != 0) return true;
+		//return getAsLong()>=16777216;
 		
 	}
 
@@ -71,17 +72,16 @@ public class ClientID {
 	}
 	
 
-	public int hashCode() {
-		
+	public long getAsLong() {
 		long num = data[0];
-		
-		num+=Math.pow(2, 8)*data[1];
-		
-		num+=Math.pow(2, 16)*data[2];
-		
-		num+=Math.pow(2, 24)*data[3];
-		
-		return Convert.longToInt(num);
+		num += Math.pow(2, 8) * data[1];
+		num += Math.pow(2, 16) * data[2];
+		num += Math.pow(2, 24) * data[3];
+		return num;
+	}
+	
+	public int hashCode() {
+		return Convert.longToInt(getAsLong());
 	}
 	
 	public boolean equals(Object object){

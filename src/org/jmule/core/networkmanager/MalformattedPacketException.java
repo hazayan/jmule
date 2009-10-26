@@ -25,21 +25,27 @@ package org.jmule.core.networkmanager;
 import javax.management.JMException;
 
 import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Oct 16, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/25 12:16:07 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:31:28 $
  */
 public class MalformattedPacketException extends JMException {
 
 	public MalformattedPacketException(byte proto, byte opcode, byte[] packetContent, Throwable cause) {
-		super("Proto : " + Convert.byteToHex(proto) + "\n" + "Opcode : " + Convert.byteToHex(opcode) +"\nMalformatted packet : \n" + Convert.byteToHexString(packetContent, " ")+"\n"+cause);
+		super("Proto : " + Convert.byteToHex(proto) + "\n" + "Opcode : "
+				+ Convert.byteToHex(opcode) + "\nMalformatted packet : \n"
+				+ Convert.byteToHexString(packetContent, " ") + "\n"
+				+ Misc.getStackTrace(cause));
 	}
 	
 	public MalformattedPacketException(byte[] packetContent, Throwable cause) {
-		super("Malformatted packet : \n" + Convert.byteToHexString(packetContent, " ")+"\n"+cause);
+		super("Malformatted packet : \n"
+				+ Convert.byteToHexString(packetContent, " ") + "\n"
+				+ Misc.getStackTrace(cause));
 	}
 	
 }

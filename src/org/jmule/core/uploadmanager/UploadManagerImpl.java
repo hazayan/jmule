@@ -33,6 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerListener;
@@ -45,8 +47,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:37 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:29 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -56,7 +58,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	
 	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
 	private InternalSharingManager sharing_manager = (InternalSharingManager) SharingManagerSingleton.getInstance();
-	
+	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 	UploadManagerImpl() {
 		peer_manager.addPeerManagerListener(new PeerManagerListener() {
 
@@ -287,6 +289,11 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 
 	public void receivedFileRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
+		if (!sharing_manager.hasFile(fileHash)) {
+			network_manager.sendFileNotFound(peerIP, peerPort, fileHash);
+			return ;
+		}
+			
 		if (hasUpload(fileHash)) {
 			UploadSession upload_session;
 			try {

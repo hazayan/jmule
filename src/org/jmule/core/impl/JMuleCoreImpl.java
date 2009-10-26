@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import org.jmule.core.JMRawData;
-import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreComponent;
 import org.jmule.core.JMuleCoreException;
@@ -64,8 +63,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 15:30:22 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:29 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -482,7 +481,7 @@ public class JMuleCoreImpl implements JMuleCore {
 				logEvent("Debug thread");
 			
 				try {
-					Thread.sleep(9000);			
+					Thread.sleep(1000);			
 				} catch (InterruptedException e) {}
 			}
 		}

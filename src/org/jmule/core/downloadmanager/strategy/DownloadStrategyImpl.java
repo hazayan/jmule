@@ -38,8 +38,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:44:02 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:29 $$
  */
 public class DownloadStrategyImpl implements DownloadStrategy {
 
@@ -51,13 +51,13 @@ public class DownloadStrategyImpl implements DownloadStrategy {
 
 		int countSet = 0;// Total count of downloaded parts
 
-		JMuleBitSet bs = filePartStatus.get(sender);
+		JMuleBitSet bit_set_availability = filePartStatus.get(sender);
 
 		for (int i = 0; i < filePartStatus.getPartAvailibility().length; i++) {
 
 			if (availibility[i] != 0)
 
-				if (bs.get(i)) {
+				if (bit_set_availability.get(i)) {
 
 					if (gapList.getIntersectedGaps(PARTSIZE * i,
 							PARTSIZE * (i + 1) - 1).size() == 0) {

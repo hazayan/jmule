@@ -77,8 +77,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/14 09:24:55 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:31:28 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
@@ -221,6 +221,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 		try {
 			JMPeerConnection peer_connection = getPeerConnection(peerIP,
 					peerPort);
+			if (peer_connection == null)  {
+				System.out.println("Peer not found : " + peerIP + " : " + peerPort);
+				return 0;
+			}
 			return peer_connection.getJMConnection().getDownloadSpeed();
 		} catch (Throwable cause) {
 			cause.printStackTrace();

@@ -38,17 +38,17 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/24 05:11:41 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:28 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
 	private BandwidthController uploadController, downloadController;
 
-	private Average<Integer> download_trafic 				= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
-	private Average<Integer> upload_trafic 					= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
-	private Average<Integer> service_download_trafic 		= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
-	private Average<Integer> service_upload_trafic 			= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	Average<Integer> download_trafic 				= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	Average<Integer> upload_trafic 					= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	Average<Integer> service_download_trafic 		= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	Average<Integer> service_upload_trafic 			= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
 	
 	JMuleSocketChannel(SocketChannel channel) throws IOException {
 		this.channel = channel;
@@ -119,12 +119,14 @@ class JMuleSocketChannel {
 			downloadController.markBytesUsed(readedData);
 			packetBuffer.put(readCache.array(), 0, readedData);
 		} while (packetBuffer.hasRemaining());
-		if (totalReaded <= 5)
+		
+		/*if (totalReaded <= 5)
 			return totalReaded;
+		System.out.println("Readed : " + org.jmule.core.utils.Convert.byteToHexString(packetBuffer.array(), " ") );
 		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
 			download_trafic.add(packetBuffer.capacity());
 		else
-			service_download_trafic.add(packetBuffer.capacity());
+			service_download_trafic.add(packetBuffer.capacity());*/
 
 		return totalReaded;
 	}
@@ -151,21 +153,24 @@ class JMuleSocketChannel {
 		} while (mustRead > 0);
 		if (bytes <= 5)
 			return bytes;
-		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
+		/*System.out.println("Readed : " + org.jmule.core.utils.Convert.byteToHexString(packetBuffer.array(), " ") );
+		if (packetBuffer.get(1 + 4+1) == E2DKConstants.OP_SENDINGPART)
 			download_trafic.add(packetBuffer.capacity());
 		else
-			service_download_trafic.add(packetBuffer.capacity());
+			service_download_trafic.add(packetBuffer.capacity());*/
 		return bytes;
 
 	}
 
 	int write(ByteBuffer srcs) throws Exception {
+		
 		if (srcs.capacity() > 5) {
 			if (srcs.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
 				upload_trafic.add(srcs.capacity());
 			else
 				service_upload_trafic.add(srcs.capacity());
 		}
+		
 		srcs.position(0);
 		int totalSended = 0;
 
