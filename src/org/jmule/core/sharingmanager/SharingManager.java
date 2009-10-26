@@ -31,8 +31,8 @@ import org.jmule.core.edonkey.FileHash;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:02:02 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:33:20 $$
  */
 public interface SharingManager extends JMuleManager {
 	
@@ -102,6 +102,7 @@ public interface SharingManager extends JMuleManager {
 	 * @param fileHash
 	 * @return
 	 */
+	//TODO : Must throw exception if don't have filehash
 	public SharedFile getSharedFile(FileHash fileHash);
 	
 	/**

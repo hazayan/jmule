@@ -61,8 +61,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:33:20 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -187,7 +187,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 				boolean order) {
 			
 			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID)
-				return Misc.compareAllObjects(object1,object2,"getAddress",order);
+				return Misc.compareAllObjects(object1,object2,"getIP",order);
 			
 			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID)
 				return Misc.compareAllObjects(object1,object2,"getNickName",order);

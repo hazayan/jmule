@@ -70,7 +70,6 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	private InternalNetworkManager _network_manager;
 	private InternalServerManager _server_manager;
 	
-	
 	private Map<FileHash, SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
 	private LoadPartialFiles load_partial_files;
@@ -320,6 +319,8 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 								part_met);
 						sharedFiles.put(partial_shared_file.getFileHash(),
 								partial_shared_file);
+						JMuleCoreFactory.getSingleton().getDownloadManager()
+								.addDownload(partial_shared_file);
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
@@ -665,9 +666,10 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 
 	public List<PartialFile> getPartialFiles() {
 		List<PartialFile> file_list = new LinkedList<PartialFile>();
-		for (SharedFile file : sharedFiles.values())
+		for (SharedFile file : sharedFiles.values()) {
 			if (file instanceof PartialFile)
 				file_list.add((PartialFile) file);
+		}
 
 		return file_list;
 	}

@@ -65,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:33:20 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -431,22 +431,21 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_ID,SpeedFormatter.formatSpeed(upload_speed));
 		
 		int peerCount = session.getPeerCount();
+		int partialSources = session.getPartialSources();
 		UploadSession upload_session;
 		try {
-			upload_session = upload_manager.getUpload(session.getFileHash());
+			if (upload_manager.hasUpload(session.getFileHash())) {
+				upload_session = upload_manager.getUpload(session.getFileHash());
+				peerCount += upload_session.getPeersCount();
+				partialSources += upload_session.getPeersCount();
+			}
 		} catch (UploadManagerException e) {
 			e.printStackTrace();
 			return ;
 		}
-		if (upload_session != null)
-			peerCount += upload_session.getPeersCount();
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID,peerCount+"");
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID, session.getCompletedSources()+"");
-		int partialSources = session.getPartialSources();
-		if (upload_session != null)
-			partialSources += upload_session.getPeersCount();
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID, partialSources+"");
-		
 		
 		String time = TimeFormatter.formatColon(session.getETA());
 		setRowText(session, SWTConstants.DOWNLOAD_LIST_REMAINING_COLUMN_ID,time);

@@ -36,7 +36,7 @@ import org.jmule.ui.localizer._;
  * Created on Aug 9, 2008
  * 
  * @author binary256
- * @version $Revision: 1.3 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.4 $ Last changed by $Author: binary255 $ on $Date:
  *          2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
@@ -93,6 +93,9 @@ public class PeerInfoFormatter {
 	}
 
 	public static String formatPeerStatus(PeerDownloadInfo downloadInfo) {
+		if (downloadInfo == null)
+			return _
+					._("downloadinfowindow.tab.peerlist.column.status.connecting");
 		PeerDownloadStatus status = downloadInfo.getStatus();
 		if (status == null)
 			return _
