@@ -61,8 +61,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:33:20 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/27 20:44:58 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -194,7 +194,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
 			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID)
 				return Misc.compareAllObjects(object1,object2,"getClientSoftware",order);
-			
+
 			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID)
 				return Misc.compareAllObjects(object1,object2,"getDownloadSpeed",order);
 

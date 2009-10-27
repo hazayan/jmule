@@ -65,12 +65,11 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:33:20 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/27 20:44:58 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
-	private JMuleCore _core;
 	private DownloadManager download_manager;
 	private UploadManager   upload_manager;
 	
@@ -88,7 +87,6 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	public DownloadList(Composite composite, JMuleCore core) {
 		super(composite, SWT.NONE);
 		
-		_core = core;
 		download_manager = core.getDownloadManager();
 		upload_manager = core.getUploadManager();
 		
@@ -383,7 +381,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		}
 		
 		if (columnID == SWTConstants.DOWNLOAD_LIST_SOURCES_COLUMN_ID) {
-			return Misc.compareAllObjects(object1, object2, "getPeersCount", order);
+			return Misc.compareAllObjects(object1, object2, "getPeerCount", order);
 		}
 		
 		if (columnID == SWTConstants.DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_ID) {

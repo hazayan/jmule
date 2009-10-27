@@ -58,8 +58,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/27 20:44:58 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -166,7 +166,7 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 				return Misc.compareAllObjects(object1,object2,"getUploadSpeed",order);
 			
 			if (columnID == SWTConstants.UPLOAD_PEER_LIST_IP_COLUMN_ID)
-				return Misc.compareAllObjects(object1,object2,"getAddress",order);
+				return Misc.compareAllObjects(object1,object2,"getIP",order);
 			
 			if (columnID == SWTConstants.UPLOAD_PEER_LIST_NICKNAME_COLUMN_ID)
 				return Misc.compareAllObjects(object1,object2,"getNickName",order);

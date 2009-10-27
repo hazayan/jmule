@@ -59,8 +59,8 @@ import org.jmule.ui.utils.NumberFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:14 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/27 20:44:58 $$
  */
 public class ServerList extends JMTable<Server> implements Refreshable {
 	
@@ -614,13 +614,13 @@ public class ServerList extends JMTable<Server> implements Refreshable {
 			else
 				return Misc.reverse(result);
 		}
-		
+
 		if (columnID == SWTConstants.SERVER_LIST_DESCRIPTION_COLUMN_ID) {
 			return Misc.compareAllObjects(object1, object2, "getDesc", order);
 		}
-		
+
 		if (columnID == SWTConstants.SERVER_LIST_IP_COLUMN_ID) {
-			return Misc.compareAllObjects(object1, object2, "getAddressAsInt", order);
+			return Misc.compareAllObjects(object1, object2, "getAddress", order);
 		}
 		
 		if (columnID == SWTConstants.SERVER_LIST_PING_COLUMN_ID) {
