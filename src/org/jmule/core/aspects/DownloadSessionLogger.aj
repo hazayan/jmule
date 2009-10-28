@@ -30,8 +30,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:01:14 $$
  */
 public privileged aspect DownloadSessionLogger {
 
@@ -41,4 +41,17 @@ public privileged aspect DownloadSessionLogger {
 		log.warning(Misc.getStackTrace(t));
 	}
 	
+	after(DownloadSession session) : target(session) && execution(* DownloadSession.*(..)) {
+	
+	}
+	
+	/*before() : execution(* DownloadSession.*(..)) {
+		String join_point = thisJoinPoint.toString();
+		String args = " ";
+		for(Object object : thisJoinPoint.getArgs()) {
+			args += "(" + object + ") ";
+		}
+		log.info(join_point + "\n" + args);
+	}*/
+
 }

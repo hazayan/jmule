@@ -28,6 +28,7 @@ import org.jmule.core.JMThread;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.impl.JMuleCoreImpl;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
@@ -36,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:01:14 $$
  */
 public privileged aspect JMuleCoreLogger {
 	private Logger log = Logger.getLogger("org.jmule.core");
@@ -65,11 +66,13 @@ public privileged aspect JMuleCoreLogger {
 			downloadmanager += download_session + "\n";
 		}
 		
-		String peermanager = "Peer Manager : \n";
+		String network_manager = "Network manager : \n" + NetworkManagerSingleton.getInstance()+"\n";
 		
-		for (Peer peer : PeerManagerSingleton.getInstance().getPeers()) {
-				peermanager += peer + " \n";
-		}
+		String peermanager = "Peer Manager : \n" + PeerManagerSingleton.getInstance() + "\n" ;
+		
+		//for (Peer peer : PeerManagerSingleton.getInstance().getPeers()) {
+		//		peermanager += peer + " " + peer.getStatus()+ " \n";
+		//}
 		
 		/*peermanager += "Unknown peers : \n";
 		
@@ -90,6 +93,7 @@ public privileged aspect JMuleCoreLogger {
 			uploadmanager +=upload_session+"\n";
 		
 		log.fine("\nEvent : "+event+"\n"+
+				network_manager+"\n"+
 				peermanager+"\n"+
 				downloadmanager+"\n"+
 				uploadmanager+"\n");

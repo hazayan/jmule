@@ -24,13 +24,13 @@ package org.jmule.core.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.utils.Misc;
 import org.jmule.core.networkmanager.NetworkManagerImpl;
+import org.jmule.core.utils.Misc;
 /**
  * Created on Sep 18, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 06:42:26 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/28 15:01:14 $
  */
 public privileged aspect NetworkManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.networkmanager.NetworkManager");
@@ -38,4 +38,14 @@ public privileged aspect NetworkManagerLogger {
 	after() throwing (Throwable t): execution (* NetworkManagerImpl.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
+	
+	/*before() : execution(* NetworkManagerImpl.*(..)) {
+		String join_point = thisJoinPoint.toString();
+		String args = " ";
+		for(Object object : thisJoinPoint.getArgs()) {
+			args += "(" + object + ") ";
+		}
+		log.info(join_point + "\n" + args);
+	}*/
+	
 }

@@ -29,11 +29,24 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:01:14 $$
  */
 public privileged aspect ServerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.impl.ServerManager");
+	
+	before() : execution(void ServerManagerImpl.receivedIDChange(..)) {
+		log.info("Connected to server ");
+	}
+	
+	before(String ip, int port, Throwable t) : args(ip,port,t) && execution(void ServerManagerImpl.serverConnectingFailed(String, int, Throwable)) {
+		log.info("Server connecting failed to " + ip + ":" + port + "\n"
+				+ Misc.getStackTrace(t));
+	}
+	
+	before(String ip, int port) : args(ip,port) && execution(void ServerManagerImpl.serverDisconnected(String, int)) {
+		log.info("Disconnected from server " + ip + ":" + port);
+	}
 	
 	after() throwing (Throwable t): execution (* ServerManagerImpl.*(..)) {
 		log.warning(Misc.getStackTrace(t));

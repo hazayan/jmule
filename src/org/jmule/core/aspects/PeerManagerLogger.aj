@@ -25,13 +25,14 @@ package org.jmule.core.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.utils.Misc;
-
+import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 06:42:26 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:01:14 $$
  */
 public privileged aspect PeerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.peermanager.PeerManager");
@@ -39,6 +40,27 @@ public privileged aspect PeerManagerLogger {
 	after() throwing (Throwable t): execution (* PeerManager.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
+	
+	before(Peer peer) : args(peer) && execution (void PeerManager.connect(Peer)) {
+		log.info("Connect to peer " + peer.getIP() + ":" + peer.getPort());
+	}
+	
+	before(String ip, int port) : args(ip, port) && execution (Peer InternalPeerManager.newIncomingPeer(String,int)) {
+		log.info("Incoming peer " + ip + ":" + port);
+	}
+	
+	before(String ip, int port) : args(ip, port) && execution (void InternalPeerManager.peerDisconnected(String,int)) {
+		log.info("Disconnected peer " + ip + ":" + port);
+	}
+	
+	/*before() : execution(* PeerManager.*(..)) {
+		String join_point = thisJoinPoint.toString();
+		String args = " ";
+		for(Object object : thisJoinPoint.getArgs()) {
+			args += "(" + object + ") ";
+		}
+		log.info(join_point + "\n" + args);
+	}*/
 	
 	
 }
