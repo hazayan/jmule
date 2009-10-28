@@ -42,8 +42,8 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:14:42 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:00:20 $$
  */
 public class Misc {
 	
@@ -146,6 +146,14 @@ public class Misc {
 				else
 					return reverse(result);
 			}
+				
+			String name1 = result1 + "";
+			String name2 = result2 + "";
+			int result = name1.compareTo(name2);
+			if (order)
+				return result;
+			else
+				return reverse(result);
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
