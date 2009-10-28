@@ -29,11 +29,13 @@ import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.DataFormatException;
 
@@ -86,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.31 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:29 $$
+ * @version $$Revision: 1.32 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:55:59 $$
  */
 public class DownloadSession implements JMTransferSession {
 	class CompressedChunkContainer {
@@ -109,14 +111,15 @@ public class DownloadSession implements JMTransferSession {
 
 	private final static long UNUSED_PEER_ACTIVATION = 1000 * 10;;
 
-	private static final String PEER_SEPARATOR = ":";
 	private PartialFile sharedFile;
 	private FilePartStatus partStatus;
 	private DownloadStatus sessionStatus = DownloadStatus.STOPPED;
 	private DownloadStrategy downloadStrategy = new DownloadStrategyImpl();
 
 	private FileRequestList fileRequestList = new FileRequestList();
-	private Map<String, Peer> peer_list = new ConcurrentHashMap<String, Peer>();
+	
+	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
+	
 	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
 	private DownloadStatusList download_status_list = new DownloadStatusList();
 
@@ -197,7 +200,7 @@ public class DownloadSession implements JMTransferSession {
 				continue;
 			if (upload_manager.hasPeer(peer))
 				continue;
-			if (peer_list.containsValue(peer))
+			if (session_peers.contains(peer))
 				continue;
 			addPeer(peer);
 			if (peer.isConnected())
@@ -210,7 +213,7 @@ public class DownloadSession implements JMTransferSession {
 	private void addPeer(Peer peer) {
 		if (hasPeer(peer))
 			return;
-		peer_list.put(peer.getIP() + PEER_SEPARATOR + peer.getPort(), peer);
+		session_peers.add(peer);
 	}
 
 	void cancelDownload() {
@@ -342,14 +345,8 @@ public class DownloadSession implements JMTransferSession {
 		return partStatus.getPartialSources();
 	}
 
-	private Peer getPeer(String ip, int port) {
-		if (!hasPeer(ip, port))
-			return null;
-		return peer_list.get(ip + PEER_SEPARATOR + port);
-	}
-
 	public int getPeerCount() {
-		return peer_list.size();
+		return session_peers.size();
 	}
 
 	public PeerDownloadInfo getPeerDownloadStatus(Peer peer) {
@@ -357,9 +354,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	public List<Peer> getPeers() {
-		List<Peer> result = new ArrayList<Peer>();
-		result.addAll(peer_list.values());
-		return result;
+		return Arrays.asList(session_peers.toArray(new Peer[0]));
 	}
 
 	public double getPercentCompleted() {
@@ -376,16 +371,14 @@ public class DownloadSession implements JMTransferSession {
 
 	public float getSpeed() {
 		float downloadSpeed = 0;
-		for (Peer peer : peer_list.values())
-			if (peer.isConnected())
-				downloadSpeed += peer.getDownloadSpeed();
+		for (Peer peer : session_peers) {
+			downloadSpeed += peer.getDownloadSpeed();
+		}
 		return downloadSpeed; 
 	}
 
 	public DownloadStatus getStatus() {
-
 		return sessionStatus;
-
 	}
 
 	public String getTempFileName() {
@@ -397,7 +390,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	public int getUnknownSources() {
-		return peer_list.size() - (getCompletedSources() + getPartialSources());
+		return session_peers.size() - (getCompletedSources() + getPartialSources());
 	}
 
 	public int hashCode() {
@@ -405,12 +398,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	public boolean hasPeer(Peer peer) {
-		boolean result = peer_list.containsValue(peer);
-		return result;
-	}
-
-	boolean hasPeer(String peerIP, int peerPort) {
-		return peer_list.containsKey(peerIP + PEER_SEPARATOR + peerPort);
+		return session_peers.contains(peer);
 	}
 
 	public boolean isStarted() {
@@ -434,17 +422,18 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	void peerConnectingFailed(Peer peer, Throwable cause) {
-
+		peerDisconnected(peer);
 	}
 
 	void peerDisconnected(Peer peer) {
+		//TODO : mark in status list as disconnected
 		compressedFileChunks.remove(peer);
 		PeerDownloadStatus status = download_status_list
 				.getPeerDownloadStatus(peer);
 		if ((status == null) || (status != PeerDownloadStatus.IN_QUEUE)) {
 			partStatus.removePartStatus(peer);
 			fileRequestList.remove(peer);
-			peer_list.remove(peer);
+			session_peers.remove(peer);
 			download_status_list.removePeer(peer);
 			return;
 		}
@@ -528,9 +517,7 @@ public class DownloadSession implements JMTransferSession {
 		// }
 	}
 
-	void receivedCompressedFileChunk(String peerIP, int peerPort,
-			FileChunk compressedFileChunk) {
-		Peer sender = getPeer(peerIP, peerPort);
+	void receivedCompressedFileChunk(Peer sender, FileChunk compressedFileChunk) {
 		if (sender == null) return ; // or maybe write chunk!
 		download_status_list.updatePeerTime(sender);
 		if (!compressedFileChunks.containsKey(sender)) {
@@ -594,8 +581,7 @@ public class DownloadSession implements JMTransferSession {
 		}
 	}
 
-	void receivedFileNotFoundFromPeer(String peerIP, int peerPort) {
-		Peer sender = getPeer(peerIP, peerPort);
+	void receivedFileNotFoundFromPeer(Peer sender) {
 		if (sender == null) return ;
 		download_status_list.addPeerHistoryRecord(sender, "File not found");
 		download_status_list.setPeerStatus(sender,
@@ -607,23 +593,13 @@ public class DownloadSession implements JMTransferSession {
 		}
 	}
 
-	void receivedFileRequestAnswerFromPeer(String peerIP, int peerPort,
-			String fileName) {
-		Peer sender = getPeer(peerIP, peerPort);
-		download_status_list
-				.addPeerHistoryRecord(sender, "File request answer");
-		download_status_list.setPeerStatus(sender,
-				PeerDownloadStatus.UPLOAD_REQUEST);
-		network_manager.sendUploadRequest(peerIP, peerPort, sharedFile
-				.getFileHash());
+	void receivedFileRequestAnswerFromPeer(Peer sender,String fileName) {
+		download_status_list.addPeerHistoryRecord(sender, "File request answer");
+		download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
+		network_manager.sendUploadRequest(sender.getIP(), sender.getPort(), sharedFile.getFileHash());
 	}
 
-	void receivedFileStatusResponseFromPeer(String peerIP, int peerPort,
-			FileHash fileHash, JMuleBitSet bitSetpartStatus) {
-		Peer sender = getPeer(peerIP, peerPort);
-		if (sender == null) {
-			return ;
-		}
+	void receivedFileStatusResponseFromPeer(Peer sender,FileHash fileHash, JMuleBitSet bitSetpartStatus) {
 		JMuleBitSet bitSet = bitSetpartStatus;
 		if (bitSet.getPartCount() == 0) {
 			int partCount = (int) ((this.sharedFile.length() / PARTSIZE));
@@ -639,14 +615,11 @@ public class DownloadSession implements JMTransferSession {
 		if (!this.sharedFile.hasHashSet()) {
 			download_status_list.setPeerStatus(sender,
 					PeerDownloadStatus.HASHSET_REQUEST);
-			network_manager.sendPartHashSetRequest(peerIP, peerPort,
-					getFileHash());
+			network_manager.sendPartHashSetRequest(sender.getIP() , sender.getPort(),getFileHash());
 		}
 	}
 
-	void receivedHashSetResponseFromPeer(String peerIP, int peerPort,
-			PartHashSet partHashSet) {
-		Peer sender = getPeer(peerIP, peerPort);
+	void receivedHashSetResponseFromPeer(Peer sender,PartHashSet partHashSet) {
 		download_status_list.addPeerHistoryRecord(sender, "Hash set answer");
 		if (!sharedFile.hasHashSet()) {
 			try {
@@ -667,22 +640,15 @@ public class DownloadSession implements JMTransferSession {
 		return;
 	}
 
-	void receivedQueueRankFromPeer(String peerIP, int peerPort, int queueRank) {
-		Peer sender = getPeer(peerIP, peerPort);
+	void receivedQueueRankFromPeer(Peer sender, int queueRank) {
 		download_status_list.setPeerQueuePosition(sender, queueRank);
 	}
 
-	void receivedRequestedFileChunkFromPeer(String peerIP, int peerPort,
-			FileHash fileHash, FileChunk chunk) {
-		Peer sender = getPeer(peerIP, peerPort);
+	void receivedRequestedFileChunkFromPeer(Peer sender,FileHash fileHash, FileChunk chunk) {
 		processFileChunk(sender, chunk);
 	}
 
-	void receivedSlotGivenFromPeer(String peerIP, int peerPort) {
-		Peer sender = getPeer(peerIP, peerPort);
-		if (sender == null) {
-			return ; //strange situation
-		}
+	void receivedSlotGivenFromPeer(Peer sender) {
 		download_status_list.setPeerStatus(sender, PeerDownloadStatus.ACTIVE);
 		download_status_list.setPeerResendCount(sender, 0);
 		download_status_list.addPeerHistoryRecord(sender, "Slot given");
@@ -697,8 +663,7 @@ public class DownloadSession implements JMTransferSession {
 
 	}
 	
-	void receivedSlotTakenFromPeer(String peerIP, int peerPort) {
-		Peer sender = getPeer(peerIP, peerPort);
+	void receivedSlotTakenFromPeer(Peer sender) {
 		download_status_list.addPeerHistoryRecord(sender, "Slot taken");
 		download_status_list.setPeerStatus(sender,
 				PeerDownloadStatus.SLOTREQUEST);
@@ -707,13 +672,7 @@ public class DownloadSession implements JMTransferSession {
 	private void removePeer(Peer peer) {
 		if (hasPeer(peer))
 			return;
-		peer_list.remove(peer.getIP() + PEER_SEPARATOR + peer.getPort());
-	}
-
-	private void removePeer(String ip, int port) {
-		if (hasPeer(ip, port))
-			return;
-		peer_list.remove(ip + PEER_SEPARATOR + port);
+		session_peers.remove(peer);
 	}
 
 	private void resendFilePartsRequest(Peer peer) {
@@ -835,7 +794,7 @@ public class DownloadSession implements JMTransferSession {
 				network_manager.sendEndOfDownload(peer.getIP(), peer.getPort(),
 						getFileHash());*/
 
-		peer_list.clear();
+		session_peers.clear();
 		download_status_list.clear();
 		partStatus.clear();
 		fileRequestList.clear();
@@ -847,14 +806,10 @@ public class DownloadSession implements JMTransferSession {
 
 	public String toString() {
 		String str = "[ ";
-		String key_str = "";
-		for(String s : peer_list.keySet())
-			key_str +=" " + s;
-		str += "Keys : " + key_str + "\n";
 		str += sharedFile.getSharingName() + " " + sharedFile.getGapList()
 				+ " " + sharedFile.getFileHash() + "\n";
 		str += "Peer used by session : \n";
-		for (Peer peer : peer_list.values())
+		for (Peer peer : session_peers)
 			str += peer + "\n";
 		str += "\nDownload status list :\n" + download_status_list + "\n";
 		str += fileRequestList + "\n";

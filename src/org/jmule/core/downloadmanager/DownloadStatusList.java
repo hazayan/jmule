@@ -25,9 +25,10 @@ package org.jmule.core.downloadmanager;
 import static org.jmule.core.downloadmanager.PeerDownloadStatus.CONNECTED;
 import static org.jmule.core.downloadmanager.PeerDownloadStatus.DISCONNECTED;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.FileChunkRequest;
@@ -35,12 +36,12 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:43:39 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:55:59 $$
  */
 public class DownloadStatusList {
 
-	private List<PeerDownloadInfo> peer_status_list = new CopyOnWriteArrayList<PeerDownloadInfo>();
+	private Collection<PeerDownloadInfo> peer_status_list = new ConcurrentLinkedQueue<PeerDownloadInfo>();
 
 	DownloadStatusList() {
 	}

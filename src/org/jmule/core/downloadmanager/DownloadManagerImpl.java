@@ -35,10 +35,7 @@ import org.jmule.core.JMuleManagerException;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
-import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
-import org.jmule.core.peermanager.PeerManagerListener;
-import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.PartialFile;
@@ -49,51 +46,16 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:29 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:55:59 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
 	private Map<FileHash, DownloadSession> session_list = new ConcurrentHashMap<FileHash, DownloadSession>();
 	private List<DownloadManagerListener> listener_list = new LinkedList<DownloadManagerListener>();
-	
-	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
-	
+		
 	public DownloadManagerImpl() {
-		peer_manager.addPeerManagerListener(new PeerManagerListener() {
-			public void newPeer(Peer peer) {
-			}
-			
-			public void peerConnecting(Peer peer) { }
-			
-			public void peerRemoved(Peer peer) {
-				
-			}
-
-			public void peerConnected(Peer peer) {
-				for(DownloadSession session : session_list.values())
-					if (session.hasPeer(peer)) {
-						session.peerConnected(peer);
-						return ;
-					}
-			}
-
-			public void peerConnectingFailed(Peer peer, Throwable cause) {
-				for(DownloadSession session : session_list.values())
-					if (session.hasPeer(peer)) {
-						session.peerConnectingFailed(peer, cause);
-						return ;
-					}
-			}
-
-			public void peerDisconnected(Peer peer) {
-				for(DownloadSession session : session_list.values())
-					if (session.hasPeer(peer)) {
-						session.peerDisconnected(peer);
-						return ;
-					}
-			}
-		});
+	
 	}
 	
 	public void addDownload(SearchResultItem searchResult) throws DownloadManagerException {
@@ -263,8 +225,37 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		return false;
 	}
 	
+	public void peerConnected(Peer peer) {
+		for(DownloadSession session : session_list.values())
+			if (session.hasPeer(peer)) {
+				try {
+					session.peerConnected(peer);
+				}catch(Throwable cause) { cause.printStackTrace(); }
+				return ;
+			}
+	}
 
-	public void receivedCompressedFileChunk(String peerIP, int peerPort,
+	public void peerDisconnected(Peer peer) {
+		for(DownloadSession session : session_list.values())
+			if (session.hasPeer(peer)) {
+				try {
+					session.peerDisconnected(peer);
+				}catch(Throwable cause) { cause.printStackTrace(); }
+				return ;
+			}
+	}
+	
+	public void peerConnectingFailed(Peer peer, Throwable cause) {
+		for(DownloadSession session : session_list.values())
+			if (session.hasPeer(peer)) {
+				try {
+					session.peerConnectingFailed(peer, cause);
+				}catch(Throwable fail_cause) { fail_cause.printStackTrace(); }
+				return ;
+			}
+	}
+
+	public void receivedCompressedFileChunk(Peer sender,
 			FileHash fileHash, FileChunk compressedFileChunk) {
 		DownloadSession session;
 		try {
@@ -273,11 +264,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		session.receivedCompressedFileChunk(peerIP, peerPort,
+		session.receivedCompressedFileChunk(sender,
 				compressedFileChunk);
 	}
 
-	public void receivedFileNotFoundFromPeer(String peerIP, int peerPort,
+	public void receivedFileNotFoundFromPeer(Peer sender,
 			FileHash fileHash) {
 		DownloadSession session;
 		if (hasDownload(fileHash)) {
@@ -287,11 +278,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				e.printStackTrace();
 				return;
 			}
-			session.receivedFileNotFoundFromPeer(peerIP, peerPort);
+			session.receivedFileNotFoundFromPeer(sender);
 		}
 	}
 
-	public void receivedFileRequestAnswerFromPeer(String peerIP, int peerPort,
+	public void receivedFileRequestAnswerFromPeer(Peer sender,
 			FileHash fileHash, String fileName) {
 		DownloadSession session;
 		try {
@@ -300,10 +291,10 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		session.receivedFileRequestAnswerFromPeer(peerIP, peerPort, fileName);
+		session.receivedFileRequestAnswerFromPeer(sender, fileName);
 	}
 
-	public void receivedFileStatusResponseFromPeer(String peerIP, int peerPort,
+	public void receivedFileStatusResponseFromPeer(Peer sender,
 			FileHash fileHash, JMuleBitSet partStatus) {
 		DownloadSession session;
 		try {
@@ -312,11 +303,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		session.receivedFileStatusResponseFromPeer(peerIP, peerPort, fileHash,
+		session.receivedFileStatusResponseFromPeer(sender, fileHash,
 				partStatus);
 	}
 
-	public void receivedHashSetResponseFromPeer(String peerIP, int peerPort,
+	public void receivedHashSetResponseFromPeer(Peer sender,
 			FileHash fileHash, PartHashSet partHashSet) {
 		DownloadSession session;
 		try {
@@ -325,23 +316,21 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		session.receivedHashSetResponseFromPeer(peerIP, peerPort, partHashSet);
+		session.receivedHashSetResponseFromPeer(sender, partHashSet);
 	}
 
-	public void receivedQueueRankFromPeer(String peerIP, int peerPort,
-			int queueRank) {
+	public void receivedQueueRankFromPeer(Peer sender,int queueRank) {
 		DownloadSession session;
 		try {
-			session = getDownloadSession(peerIP, peerPort);
+			session = getDownloadSession(sender);
 		} catch (DownloadManagerException e) {
 			e.printStackTrace();
 			return ;
 		}	
-		session.receivedQueueRankFromPeer(peerIP, peerPort, queueRank);
+		session.receivedQueueRankFromPeer(sender, queueRank);
 	}
 
-	public void receivedRequestedFileChunkFromPeer(String peerIP, int peerPort,
-			FileHash fileHash, FileChunk chunk) {
+	public void receivedRequestedFileChunkFromPeer(Peer sender, FileHash fileHash, FileChunk chunk) {
 		DownloadSession session;
 		try {
 			session = getDownload(fileHash);
@@ -349,30 +338,30 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		session.receivedRequestedFileChunkFromPeer(peerIP, peerPort, fileHash,
+		session.receivedRequestedFileChunkFromPeer(sender, fileHash,
 				chunk);
 	}
 
-	public void receivedSlotGivenFromPeer(String peerIP, int peerPort) {
+	public void receivedSlotGivenFromPeer(Peer sender) {
 		DownloadSession session;
 		try {
-			session = getDownloadSession(peerIP, peerPort);
+			session = getDownloadSession(sender);
 		} catch (DownloadManagerException e) {
 			e.printStackTrace();
 			return;
 		}
-		session.receivedSlotGivenFromPeer(peerIP, peerPort);
+		session.receivedSlotGivenFromPeer(sender);
 	}
 
-	public void receivedSlotTakenFromPeer(String peerIP, int peerPort) {
+	public void receivedSlotTakenFromPeer(Peer sender) {
 		DownloadSession session;
 		try {
-			session = getDownloadSession(peerIP, peerPort);
+			session = getDownloadSession(sender);
 		} catch (DownloadManagerException e) {
 			e.printStackTrace();
 			return ;
 		}
-		session.receivedSlotTakenFromPeer(peerIP, peerPort);
+		session.receivedSlotTakenFromPeer(sender);
 	}
 
 	public void receivedSourcesFromServer(FileHash fileHash, List<Peer> peerList) {
@@ -386,11 +375,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		session.addDownloadPeers(peerList);
 	}
 
-	private DownloadSession getDownloadSession(String ip, int port) throws DownloadManagerException {
+	private DownloadSession getDownloadSession(Peer peer) throws DownloadManagerException {
 		for(DownloadSession session : session_list.values())
-			if (session.hasPeer(ip, port)) 
+			if (session.hasPeer(peer)) 
 				return session;
-		throw new DownloadManagerException("Downloadsession with " + ip + ":" + port+" not found");
+		throw new DownloadManagerException("Download session with " + peer + " not found");
 	}
 
 	public boolean hasPeer(Peer peer) {
@@ -435,6 +424,4 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				t.printStackTrace();
 			}
 	}
-	
-
 }
