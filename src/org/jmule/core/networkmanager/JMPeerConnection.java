@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.zip.DataFormatException;
 
+import org.jmule.core.JMException;
 import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.E2DKConstants;
@@ -40,8 +40,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/18 17:35:30 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/28 14:59:42 $
  */
 public class JMPeerConnection extends JMConnection {
 
@@ -122,16 +122,13 @@ public class JMPeerConnection extends JMConnection {
 				while (!stop_thread) {
 					try {
 						PacketReader.readPeerPacket(jm_socket_channel);
-					} catch (JMEndOfStreamException e) {
-						notifyDisconnect();
-					} catch (UnknownPacketException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (DataFormatException e) {
-						e.printStackTrace();
-					} catch (MalformattedPacketException e) {
-						e.printStackTrace();
+					} catch (Throwable cause) {
+						if (cause instanceof JMEndOfStreamException)
+							notifyDisconnect();
+						else { 
+							JMException exception = new JMException("Exception in connection " + remote_inet_socket_address+"\n"+Misc.getStackTrace(cause));
+							exception.printStackTrace();
+						}
 					}
 				}
 			}
@@ -176,6 +173,7 @@ public class JMPeerConnection extends JMConnection {
 	}
 	
 	private void notifyDisconnect() {
+		connection_status = ConnectionStatus.DISCONNECTED;
 		int port = jm_socket_channel.getSocket().getPort();
 		String peerIP = Convert.IPtoString(jm_socket_channel.getChannel().socket().getInetAddress().getAddress());
 		_network_manager.peerDisconnected(peerIP, port);
@@ -185,24 +183,30 @@ public class JMPeerConnection extends JMConnection {
 	
 	
 	void send(Packet packet) throws Exception {
-		if (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS) {
-			byte op_code = packet.getCommand(); 
-			ByteBuffer raw_data = Misc.getByteBuffer(packet.getLength()-1-4-1);
-			ByteBuffer data = packet.getAsByteBuffer();
-			data.position(1 + 4 + 1);
-			raw_data.put(data);
-			raw_data.position(0);
-			raw_data = JMuleZLib.compressData(raw_data);
-			packet = new Packet(raw_data.capacity(), E2DKConstants.PROTO_EMULE_COMPRESSED_TCP);
-			packet.setCommand(op_code);
-			raw_data.position(0);
-			packet.insertData(raw_data);
-		}
-		if(jm_socket_channel.write(packet.getAsByteBuffer()) == -1 )
+		try {
+			if (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS) {
+				byte op_code = packet.getCommand(); 
+				ByteBuffer raw_data = Misc.getByteBuffer(packet.getLength()-1-4-1);
+				ByteBuffer data = packet.getAsByteBuffer();
+				data.position(1 + 4 + 1);
+				raw_data.put(data);
+				raw_data.position(0);
+				raw_data = JMuleZLib.compressData(raw_data);
+				packet = new Packet(raw_data.capacity(), E2DKConstants.PROTO_EMULE_COMPRESSED_TCP);
+				packet.setCommand(op_code);
+				raw_data.position(0);
+				packet.insertData(raw_data);
+			}
+			if(jm_socket_channel.write(packet.getAsByteBuffer()) == -1 )
+					notifyDisconnect();
+		}catch(Throwable cause) {
+			if (!jm_socket_channel.isConnected())
 				notifyDisconnect();
+			throw new JMException("Exception in connection : " +remote_inet_socket_address + "\n"+Misc.getStackTrace(cause));
+		}
 	}
 	
 	public String toString() {
-		return "Peer connection to : " +  getIPAddress() + " : " + getPort();
+		return "Peer connection to : " +  remote_inet_socket_address + " Status : " + connection_status;
 	}
 }

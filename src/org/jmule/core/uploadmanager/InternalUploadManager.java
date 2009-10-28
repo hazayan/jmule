@@ -31,32 +31,34 @@ import org.jmule.core.peermanager.Peer;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.1 $ Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:30:12 $
+ * @version $Revision: 1.2 $ Last changed by $Author: binary255 $ on $Date: 2009/10/28 15:00:32 $
  */
 public interface InternalUploadManager extends UploadManager {
 
 	public void addUpload(FileHash fileHash) throws UploadManagerException;
 	
-	public void endOfDownload(String peerIP, int peerPort);
+	public void endOfDownload(Peer sender);
 
-	public void receivedFileChunkRequestFromPeer(String peerIP, int peerPort,
-			FileHash fileHash, List<FileChunkRequest> requestedChunks);
+	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks);
 
-	public void receivedFileRequestFromPeer(String peerIP, int peerPort,
-			FileHash fileHash);
+	public void receivedFileRequestFromPeer(Peer sender,FileHash fileHash);
 
-	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort,
-			FileHash fileHash);
+	public void receivedFileStatusRequestFromPeer(Peer sender,FileHash fileHash);
 
-	public void receivedHashSetRequestFromPeer(String peerIP, int peerPort,
-			FileHash fileHash);
+	public void receivedHashSetRequestFromPeer(Peer sender,FileHash fileHash);
 
-	public void receivedSlotRequestFromPeer(String peerIP, int peerPort,
-			FileHash fileHash);
+	public void receivedSlotRequestFromPeer(Peer sender,FileHash fileHash);
 
-	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort);
+	public void receivedSlotReleaseFromPeer(Peer sender);
 	
 	public void removeUpload(FileHash fileHash);
 
 	public boolean hasPeer(Peer peer);
+	
+	public void peerConnected(Peer peer);
+
+	public void peerConnectingFailed(Peer peer, Throwable cause);
+
+	public void peerDisconnected(Peer peer);
+	
 }

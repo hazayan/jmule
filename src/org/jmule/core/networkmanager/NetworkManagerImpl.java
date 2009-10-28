@@ -77,8 +77,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:31:28 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/10/28 14:59:42 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
@@ -99,6 +99,15 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	private JMConnectionWaiter connection_waiter;
 
 	NetworkManagerImpl() {
+	}
+	
+	public String toString() {
+		String result = "";
+		result += "Peer connections : \n";
+		for (String key_connection : peer_connections.keySet())
+			result += "[" + key_connection + "] = " + "["+ peer_connections.get(key_connection) + "]\n";
+		result += "Server connection : " + server_connection + "\n";
+		return result;
 	}
 	
 	public float getDownloadSpeed() {
@@ -326,8 +335,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	}
 
 	public void peerDisconnected(String ip, int port) {
+		peer_connections.remove(ip + KEY_SEPARATOR + port);
 		_peer_manager.peerDisconnected(ip, port);
-
 	}
 
 	public void receivedCallBackFailed() {
@@ -340,8 +349,14 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 
 	public void receivedCompressedFileChunkFromPeer(String peerIP,
 			int peerPort, FileHash fileHash, FileChunk compressedFileChunk) {
-		_download_manager.receivedCompressedFileChunk(peerIP, peerPort,
-				fileHash, compressedFileChunk);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedCompressedFileChunk(sender,fileHash, compressedFileChunk);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void receivedEMuleHelloFromPeer(String ip, int port,
@@ -360,55 +375,104 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	}
 
 	public void receivedEndOfDownloadFromPeer(String peerIP, int peerPort) {
-		_upload_manager.endOfDownload(peerIP, peerPort);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.endOfDownload(sender);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedFileChunkRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, List<FileChunkRequest> requestedChunks) {
-		_upload_manager.receivedFileChunkRequestFromPeer(peerIP, peerPort,
-				fileHash, requestedChunks);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.receivedFileChunkRequestFromPeer(sender,fileHash, requestedChunks);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void receivedFileNotFoundFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_download_manager.receivedFileNotFoundFromPeer(peerIP, peerPort,
-				fileHash);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedFileNotFoundFromPeer(sender,fileHash);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedFileRequestAnswerFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, String fileName) {
-		_download_manager.receivedFileRequestAnswerFromPeer(peerIP, peerPort,
-				fileHash, fileName);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedFileRequestAnswerFromPeer(sender,fileHash, fileName);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedFileRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_upload_manager.receivedFileRequestFromPeer(peerIP, peerPort, fileHash);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.receivedFileRequestFromPeer(sender,  fileHash);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedFileStatusRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_upload_manager.receivedFileStatusRequestFromPeer(peerIP, peerPort,
-				fileHash);
-
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.receivedFileStatusRequestFromPeer(sender,fileHash);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedFileStatusResponseFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, JMuleBitSet partStatus) {
-		_download_manager.receivedFileStatusResponseFromPeer(peerIP, peerPort,
-				fileHash, partStatus);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedFileStatusResponseFromPeer(sender,fileHash, partStatus);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void receivedHashSetRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_upload_manager.receivedHashSetRequestFromPeer(peerIP, peerPort,
-				fileHash);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.receivedHashSetRequestFromPeer(sender,fileHash);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedHashSetResponseFromPeer(String peerIP, int peerPort,
 			PartHashSet partHashSet) {
-		_download_manager.receivedHashSetResponseFromPeer(peerIP, peerPort,
-				partHashSet.getFileHash(), partHashSet);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedHashSetResponseFromPeer(sender,partHashSet.getFileHash(), partHashSet);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void receivedHelloAnswerFromPeer(String peerIP, int peerPort,
@@ -467,14 +531,26 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 
 	public void receivedQueueRankFromPeer(String peerIP, int peerPort,
 			int queueRank) {
-		_download_manager
-				.receivedQueueRankFromPeer(peerIP, peerPort, queueRank);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedQueueRankFromPeer(sender, queueRank);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public void receivedRequestedFileChunkFromPeer(String peerIP, int peerPort,
 			FileHash fileHash, FileChunk chunk) {
-		_download_manager.receivedRequestedFileChunkFromPeer(peerIP, peerPort,
-				fileHash, chunk);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedRequestedFileChunkFromPeer(sender,fileHash, chunk);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public void receivedSearchResult(SearchResultItemList resultList) {
@@ -502,20 +578,45 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	}
 
 	public void receivedSlotGivenFromPeer(String peerIP, int peerPort) {
-		_download_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedSlotGivenFromPeer(sender);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedSlotReleaseFromPeer(String peerIP, int peerPort) {
-		_upload_manager.receivedSlotReleaseFromPeer(peerIP, peerPort);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.receivedSlotReleaseFromPeer(sender);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedSlotRequestFromPeer(String peerIP, int peerPort,
 			FileHash fileHash) {
-		_upload_manager.receivedSlotRequestFromPeer(peerIP, peerPort, fileHash);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_upload_manager.receivedSlotRequestFromPeer(sender, fileHash);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void receivedSlotTakenFromPeer(String peerIP, int peerPort) {
-		_download_manager.receivedSlotTakenFromPeer(peerIP, peerPort);
+		Peer sender;
+		try {
+			sender = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedSlotTakenFromPeer(sender);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void receivedSourcesFromServer(FileHash fileHash,
