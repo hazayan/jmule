@@ -47,13 +47,13 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:32:09 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:58:40 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD}
 	public enum PeerStatus {DISCONNECTED, CONNECTED, CONNECTING}
-	
+		
 	private String ip;
 	private int port;
 	
@@ -182,6 +182,9 @@ public class Peer {
 		String result = getIP() + ":" + getPort();
 		if (clientID != null)
 			result += " " + clientID.getAsString();
+		result += " Speed : " + getDownloadSpeed();
+		result += " service Speed : " + getDownloadServiceSpeed();
+		result += " isConnected : " + isConnected();
 		return result;
 	}
 	
@@ -271,6 +274,7 @@ public class Peer {
 	}
 
 	public float getDownloadServiceSpeed() {
+		if (!isConnected()) return 0;
 		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 		return network_manager.getPeerDownloadServiceSpeed(getIP(), getPort());
@@ -281,5 +285,4 @@ public class Peer {
 				.getInstance();
 		return network_manager.getPeerUploadServiceSpeed(getIP(), getPort());
 	}
-	
 }
