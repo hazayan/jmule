@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.jmule.core.JMuleCore;
+import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.GUIUpdater;
@@ -39,8 +40,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/29 16:10:08 $$
  */
 public class TransfersTab extends AbstractTab{
 
@@ -92,6 +93,11 @@ public class TransfersTab extends AbstractTab{
 				if (isDisposed()) return;
 				int download_count = _core.getDownloadManager().getDownloadCount();
 				int upload_count = _core.getUploadManager().getUploadCount();
+				
+				for(UploadSession session : _core.getUploadManager().getUploads()) {
+					if (_core.getDownloadManager().hasDownload(session.getFileHash()))
+						upload_count--;
+				}
 				
 				downloads.setText(Localizer._("mainwindow.transferstab.downloads")+"("+download_count+")");
 				uploads.setText(Localizer._("mainwindow.transferstab.uploads")+"("+upload_count+")");
