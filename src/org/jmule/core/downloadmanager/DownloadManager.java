@@ -34,8 +34,8 @@ import org.jmule.core.sharingmanager.PartialFile;
  * Created on 2008-Apr-20
  * @author javajox
  * @author binary
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/11/01 20:15:04 $$
  */
 public interface DownloadManager extends JMuleManager {
 
@@ -67,5 +67,9 @@ public interface DownloadManager extends JMuleManager {
 	public void addDownloadManagerListener(DownloadManagerListener listener);
 
 	public void removeDownloadMangerListener(DownloadManagerListener listener);
+	
+	public void addNeedMorePeersListener( NeedMorePeersListener listener );
+	
+	public void removeNeedMorePeersListener( NeedMorePeersListener listener );
 	
 }

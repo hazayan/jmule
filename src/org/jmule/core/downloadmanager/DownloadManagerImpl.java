@@ -22,12 +22,15 @@
  */
 package org.jmule.core.downloadmanager;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMuleAbstractManager;
@@ -46,15 +49,23 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:55:59 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2009/11/01 20:15:04 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
 	private Map<FileHash, DownloadSession> session_list = new ConcurrentHashMap<FileHash, DownloadSession>();
-	private List<DownloadManagerListener> listener_list = new LinkedList<DownloadManagerListener>();
-		
+
+	private List<DownloadManagerListener> download_manager_listeners = new LinkedList<DownloadManagerListener>();
+	private List<NeedMorePeersListener> need_more_peers_listeners = new LinkedList<NeedMorePeersListener>();
+    
+	private Timer need_more_peers_timer;
+	
+	private static final long   NEED_MORE_PEERS_INTERVAL           =    60*1000;
+	private static final float  MEDIUM_SPEED_CONSIDERED_AS_SMALL   =    10*1000;
+	
 	public DownloadManagerImpl() {
+
 	
 	}
 	
@@ -173,7 +184,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				}
 			}
 		});
-
 	}
 
 	public void shutdown() {
@@ -185,6 +195,8 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			return;
 		}
 
+		need_more_peers_timer.cancel();
+		
 		for (DownloadSession download_session : session_list.values())
 			if (download_session.isStarted())
 				download_session.stopDownload(false);
@@ -193,12 +205,27 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 
 	public void start() {
 		try {
-			super.start();
+			super.start();	
 		} catch (JMuleManagerException e) {
 			e.printStackTrace();
 			return;
 		}
 		
+		need_more_peers_timer = new Timer( true );
+		need_more_peers_timer.schedule( new TimerTask() {
+			@Override
+			public void run() {
+				Set<FileHash> file_hashes = session_list.keySet();
+				List<FileHash> file_hashes_needed_help = new ArrayList<FileHash>();
+				for(FileHash file_hash : file_hashes) {
+					DownloadSession download_session = session_list.get( file_hash );
+					if( download_session.isStarted() && 
+					    ( download_session.getSpeed() <= MEDIUM_SPEED_CONSIDERED_AS_SMALL ) ) 
+						   file_hashes_needed_help.add( file_hash );
+				}
+				notifyNeedMorePeersForFiles( file_hashes_needed_help );
+			}
+		}, (long)1, NEED_MORE_PEERS_INTERVAL);
 	}
 
 	public void addDownloadPeers(FileHash fileHash, List<Peer> peerList) {
@@ -214,11 +241,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	}
 
 	public void addDownloadManagerListener(DownloadManagerListener listener) {
-		listener_list.add(listener);
+		download_manager_listeners.add(listener);
 	}
 
 	public void removeDownloadMangerListener(DownloadManagerListener listener) {
-		listener_list.add(listener);
+		download_manager_listeners.add(listener);
 	}
 
 	protected boolean iAmStoppable() {
@@ -390,7 +417,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	}
 	
 	private void notifyDownloadStarted(FileHash fileHash) {
-		for(DownloadManagerListener listener : listener_list)
+		for(DownloadManagerListener listener : download_manager_listeners)
 			try {
 				listener.downloadStarted(fileHash);
 			}catch(Throwable t) {
@@ -399,7 +426,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	}
 	
 	private void notifyDownloadStopped(FileHash fileHash) {
-		for(DownloadManagerListener listener : listener_list)
+		for(DownloadManagerListener listener : download_manager_listeners)
 			try {
 				listener.downloadStopped(fileHash);
 			}catch(Throwable t) {
@@ -408,7 +435,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	}
 	
 	private void notifyDownloadAdded(FileHash fileHash) {
-		for(DownloadManagerListener listener : listener_list)
+		for(DownloadManagerListener listener : download_manager_listeners)
 			try {
 				listener.downloadAdded(fileHash);
 			}catch(Throwable t) {
@@ -417,11 +444,31 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	}
 	
 	private void notifyDownloadRemoved(FileHash fileHash) {
-		for(DownloadManagerListener listener : listener_list)
+		for(DownloadManagerListener listener : download_manager_listeners)
 			try {
 				listener.downloadRemoved(fileHash);
 			}catch(Throwable t) {
 				t.printStackTrace();
 			}
 	}
+
+	public void addNeedMorePeersListener(NeedMorePeersListener listener) {
+		
+		need_more_peers_listeners.add( listener );
+	}
+
+	public void removeNeedMorePeersListener(NeedMorePeersListener listener) {
+		
+		need_more_peers_listeners.remove( listener );
+	}
+	
+	private void notifyNeedMorePeersForFiles(List<FileHash> fileHashes) {
+		for( NeedMorePeersListener listener : need_more_peers_listeners ) 
+		   try {
+			   listener.needMorePeersForFiles( fileHashes );
+		   }catch( Throwable cause ) {
+			   cause.printStackTrace();
+		   }
+	}
+
 }
