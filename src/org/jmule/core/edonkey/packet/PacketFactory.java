@@ -74,6 +74,7 @@ import org.jmule.core.JMException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
@@ -97,8 +98,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:16:08 $$
  */
 public class PacketFactory {
 	
@@ -625,7 +626,7 @@ public class PacketFactory {
 		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,0 ));
 		
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
-		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
 		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerSingleton.getInstance().getUDP()));
 	
@@ -708,7 +709,7 @@ public class PacketFactory {
 		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2, 0));
 
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION, ProtocolVersion));
-		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
 		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER,
 				ConfigurationManagerSingleton.getInstance().getUDP()));
@@ -1293,11 +1294,12 @@ public class PacketFactory {
 	 */
 	public static Packet getFileRequestAnswerPacket(FileHash fileHash,
 			String fileName) {
-		Packet packet = new Packet(16 + 2 + fileName.length(), PROTO_EDONKEY_TCP);
+		byte[] fileNameBytes = fileName.getBytes();
+		Packet packet = new Packet(16 + 2 + fileNameBytes.length, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_FILEREQANSWER);
 		packet.insertData(fileHash.getHash());
-		packet.insertData(Convert.intToShort(fileName.length()));
-		packet.insertData(fileName.getBytes());
+		packet.insertData(Convert.intToShort(fileNameBytes.length));
+		packet.insertData(fileNameBytes);
 		return packet;
 	}
 	
