@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:31:28 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/03 07:25:59 $
  */
 public class PacketReader {
 
@@ -293,6 +293,8 @@ public class PacketReader {
 			UnknownPacketException, MalformattedPacketException {
 		ByteBuffer data2;
 
+		channel.transferred_bytes = 0;
+		
 		data2 = Misc.getByteBuffer(1);
 
 		channel.read(data2);
@@ -326,14 +328,8 @@ public class PacketReader {
 			packet_header = PROTO_EDONKEY_TCP;
 		}
 		
-		if ((packet_opcode == OP_SENDINGPART) || (packet_opcode == OP_COMPRESSEDPART)) {
-			channel.download_trafic.add(pkLength);
-		} else 
-			channel.service_download_trafic.add(pkLength);
-		
 		try {
-			switch (packet_header) {
-			case PROTO_EDONKEY_TCP: {
+			if (packet_header == PROTO_EDONKEY_TCP) 
 				switch (packet_opcode) {
 				case OP_PEERHELLO: {
 					byte[] data = new byte[16];
@@ -359,7 +355,7 @@ public class PacketReader {
 							peerPort, userHash, clientID, tcpPort, tag_list,
 							server_ip, server_port);
 
-					return ;
+					break ;
 				}
 	
 				case OP_PEERHELLOANSWER: {
@@ -385,7 +381,7 @@ public class PacketReader {
 							userHash, clientID, tcpPort, tag_list, server_ip,
 							server_port);
 
-					return;
+					break;
 				}
 	
 				case OP_SENDINGPART: {
@@ -400,7 +396,7 @@ public class PacketReader {
 							peerPort, new FileHash(file_hash), new FileChunk(
 									chunk_start, chunk_end, chunk_content));
 
-					return;
+					break;
 				}
 	
 				case OP_REQUESTPARTS: {
@@ -425,14 +421,13 @@ public class PacketReader {
 							peerPort, new FileHash(file_hash), chunks);
 					
 
-					return;
+					break;
 				}
 	
 				case OP_END_OF_DOWNLOAD: {
 					_network_manager
 							.receivedEndOfDownloadFromPeer(peerIP, peerPort);
-
-					return;
+					break;
 				}
 	
 				case OP_HASHSETREQUEST: {
@@ -441,7 +436,7 @@ public class PacketReader {
 	
 					_network_manager.receivedHashSetRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash));
-					return;
+					break;
 				}
 	
 				case OP_HASHSETANSWER: {
@@ -457,7 +452,7 @@ public class PacketReader {
 					}
 					_network_manager.receivedHashSetResponseFromPeer(peerIP,
 							peerPort, partSet);
-					return;
+					break;
 				}
 	
 				case OP_SLOTREQUEST: {
@@ -465,21 +460,21 @@ public class PacketReader {
 					packet_data.get(file_hash);
 					_network_manager.receivedSlotRequestFromPeer(peerIP, peerPort,
 							new FileHash(file_hash));
-					return;
+					break;
 				}
 	
 				case OP_SLOTGIVEN: {
 					_network_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
-					return;
+					break;
 				}
 	
 				case OP_SLOTRELEASE: {
-					return;
+					break;
 				}
 	
 				case OP_SLOTTAKEN: {
 					_network_manager.receivedSlotTakenFromPeer(peerIP, peerPort);
-					return;
+					break;
 				}
 	
 				case OP_FILEREQUEST: {
@@ -488,7 +483,7 @@ public class PacketReader {
 	
 					_network_manager.receivedFileRequestFromPeer(peerIP, peerPort,
 							new FileHash(file_hash));
-					return;
+					break;
 				}
 	
 				case OP_FILEREQANSWER: {
@@ -500,7 +495,7 @@ public class PacketReader {
 					_network_manager.receivedFileRequestAnswerFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), new String(str_bytes
 									.array()));
-					return;
+					break;
 				}
 	
 				case OP_FILEREQANSNOFILE: {
@@ -509,7 +504,7 @@ public class PacketReader {
 	
 					_network_manager.receivedFileNotFoundFromPeer(peerIP, peerPort,
 							new FileHash(file_hash));
-					return;
+					break;
 				}
 	
 				case OP_FILESTATREQ: {
@@ -519,7 +514,7 @@ public class PacketReader {
 					_network_manager.receivedFileStatusRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash));
 	
-					return;
+					break;
 				}
 	
 				case OP_FILESTATUS: {
@@ -541,27 +536,24 @@ public class PacketReader {
 	
 					_network_manager.receivedFileStatusResponseFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), bitSet);
-					return;
+					break;
 				}
 	
 				default: {
 					throw new UnknownPacketException(packet_header, packet_opcode,
 							packet_data.array());
 				}
-	
-				}
 			}
-	
-			case PROTO_EMULE_EXTENDED_TCP: {
+			else 
+				if (packet_opcode == PROTO_EMULE_EXTENDED_TCP)
 				switch (packet_opcode) {
-	
 				case OP_EMULE_HELLO: {
 					byte client_version = packet_data.get();
 					byte protocol_version = packet_data.get();
 					TagList tag_list = readTagList(packet_data);
 					_network_manager.receivedEMuleHelloFromPeer(peerIP, peerPort,
 							client_version, protocol_version, tag_list);
-					return;
+					break;
 				}
 	
 				case OP_COMPRESSEDPART: {
@@ -578,36 +570,34 @@ public class PacketReader {
 					_network_manager.receivedCompressedFileChunkFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), new FileChunk(
 									chunkStart, chunkEnd, data));
-					return;
+					break;
 				}
 	
 				case OP_EMULE_QUEUERANKING: {
 					short queue_rank = packet_data.getShort();
 					_network_manager.receivedQueueRankFromPeer(peerIP, peerPort,
 							Convert.shortToInt(queue_rank));
-					return;
+					break;
 				}
 	
 				default: {
 					throw new UnknownPacketException(packet_header, packet_opcode,
 							packet_data.array());
 				}
-	
-				}
 			}
-	
-			default: {
-				throw new UnknownPacketException(packet_header, packet_opcode,
-						packet_data.array());
-			}
-	
-			}
-		}catch(Throwable cause) {
+		} catch (Throwable cause) {
 			if (cause instanceof UnknownPacketException)
-				throw (UnknownPacketException)cause;
-			throw new MalformattedPacketException(packet_header, packet_opcode, packet_data.array(),cause);
+				throw (UnknownPacketException) cause;
+			throw new MalformattedPacketException(packet_header, packet_opcode,
+					packet_data.array(), cause);
 		}
-
+		if ((packet_opcode == OP_SENDINGPART) || (packet_opcode == OP_COMPRESSEDPART)) {
+				channel.file_transfer_trafic.addReceivedBytes(channel.transferred_bytes);
+			} else {
+				channel.service_trafic.addReceivedBytes(channel.transferred_bytes);
+			}
+		
+		
 	}
 
 	private static ByteBuffer packetBuffer = Misc

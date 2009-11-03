@@ -22,33 +22,33 @@
  */
 package org.jmule.core.networkmanager;
 
+import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.speedmanager.BandwidthController;
 import org.jmule.core.speedmanager.SpeedManagerSingleton;
-import org.jmule.core.utils.Average;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:28 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:25:15 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
 	private BandwidthController uploadController, downloadController;
 
-	Average<Integer> download_trafic 				= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
-	Average<Integer> upload_trafic 					= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
-	Average<Integer> service_download_trafic 		= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
-	Average<Integer> service_upload_trafic 			= new Average<Integer>(ConfigurationManager.CONNECTION_TRAFIC_AVERAGE_CHECKS);
+	JMConnectionTransferStats file_transfer_trafic = new JMConnectionTransferStats();
+	JMConnectionTransferStats service_trafic	   = new JMConnectionTransferStats();
+
+	long transferred_bytes = 0;
 	
 	JMuleSocketChannel(SocketChannel channel) throws IOException {
 		this.channel = channel;
@@ -58,19 +58,19 @@ class JMuleSocketChannel {
 	}
 	
 	float getDownloadSpeed() {
-		return download_trafic.getAverage();
+		return file_transfer_trafic.getDownloadSpeed();
 	}
 	
 	float getUploadSpeed() {
-		return upload_trafic.getAverage();
+		return file_transfer_trafic.getUploadSpeed();
 	}
 	
 	float getServiceDownloadSpeed() {
-		return service_download_trafic.getAverage();
+		return service_trafic.getDownloadSpeed();
 	}
 	
 	float getServiceUploadSpeed() {
-		return service_upload_trafic.getAverage();
+		return service_trafic.getUploadSpeed();
 	}
 
 	void connect(InetSocketAddress address) throws IOException {
@@ -119,15 +119,7 @@ class JMuleSocketChannel {
 			downloadController.markBytesUsed(readedData);
 			packetBuffer.put(readCache.array(), 0, readedData);
 		} while (packetBuffer.hasRemaining());
-		
-		/*if (totalReaded <= 5)
-			return totalReaded;
-		System.out.println("Readed : " + org.jmule.core.utils.Convert.byteToHexString(packetBuffer.array(), " ") );
-		if (packetBuffer.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
-			download_trafic.add(packetBuffer.capacity());
-		else
-			service_download_trafic.add(packetBuffer.capacity());*/
-
+		transferred_bytes += totalReaded;
 		return totalReaded;
 	}
 
@@ -151,29 +143,14 @@ class JMuleSocketChannel {
 			readCache.position(0);
 			packetBuffer.put(readCache);
 		} while (mustRead > 0);
-		if (bytes <= 5)
-			return bytes;
-		/*System.out.println("Readed : " + org.jmule.core.utils.Convert.byteToHexString(packetBuffer.array(), " ") );
-		if (packetBuffer.get(1 + 4+1) == E2DKConstants.OP_SENDINGPART)
-			download_trafic.add(packetBuffer.capacity());
-		else
-			service_download_trafic.add(packetBuffer.capacity());*/
+		transferred_bytes += bytes;
 		return bytes;
 
 	}
 
 	int write(ByteBuffer srcs) throws Exception {
-		
-		if (srcs.capacity() > 5) {
-			if (srcs.get(1 + 4) == E2DKConstants.OP_SENDINGPART)
-				upload_trafic.add(srcs.capacity());
-			else
-				service_upload_trafic.add(srcs.capacity());
-		}
-		
 		srcs.position(0);
 		int totalSended = 0;
-
 		do {
 			int numBytes;
 			if (uploadController.getThrottlingRate() != 0)
@@ -197,7 +174,15 @@ class JMuleSocketChannel {
 			if (uploadController.getThrottlingRate() != 0)
 				uploadController.markBytesUsed(sended);
 		} while (totalSended < srcs.capacity());
-
+		if (srcs.capacity()<1+4) return totalSended; // 0_0
+		byte packet_opcode = srcs.get(1 + 4);
+		if ((packet_opcode == OP_SENDINGPART)
+				|| (packet_opcode == OP_COMPRESSEDPART)) {
+			file_transfer_trafic.addReceivedBytes(totalSended);
+		} else {
+			service_trafic.addReceivedBytes(totalSended);
+		}
+		
 		return totalSended;
 	}
 

@@ -72,13 +72,15 @@ import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
+import org.jmule.core.utils.timer.JMTimer;
+import org.jmule.core.utils.timer.JMTimerTask;
 
 /**
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/28 14:59:42 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/03 07:25:59 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
@@ -98,7 +100,99 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 	private JMUDPConnection udp_connection;
 	private JMConnectionWaiter connection_waiter;
 
+	private JMTimer connections_maintenance = new JMTimer();
+	private JMTimerTask connection_speed_updater;
+	
 	NetworkManagerImpl() {
+	}
+	
+	public void initialize() {
+		try {
+			super.initialize();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager = (InternalPeerManager) PeerManagerSingleton
+				.getInstance();
+		_server_manager = (InternalServerManager) ServerManagerSingleton
+				.getInstance();
+		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton
+				.getInstance();
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton
+				.getInstance();
+		_upload_manager = (InternalUploadManager) UploadManagerSingleton
+				.getInstance();
+		_jkad_manager = (InternalJKadManager) JKadManagerSingleton
+				.getInstance();
+		_search_manager = (InternalSearchManager) SearchManagerSingleton
+				.getInstance();
+		
+		connection_speed_updater = new JMTimerTask() {
+			public void run() {
+				for(JMPeerConnection connection : peer_connections.values()) {
+					if (connection.getStatus() != ConnectionStatus.CONNECTED) continue;
+					JMuleSocketChannel channel = connection.getJMConnection();
+					synchronized(channel) {
+						channel.file_transfer_trafic.syncSpeed();
+						channel.service_trafic.syncSpeed();
+					}
+				}
+			}
+		};
+	}
+	
+	public void start() {
+		try {
+			super.start();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		udp_connection = new JMUDPConnection();
+		try {
+			if (_config_manager.isUDPEnabled())
+				udp_connection.open();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
+
+		connection_waiter = new JMConnectionWaiter();
+		connection_waiter.start();
+		
+		connections_maintenance.addTask(connection_speed_updater, 1000, true);
+	}
+	
+	public void shutdown() {
+		try {
+			super.shutdown();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		try {
+			if (_config_manager.isUDPEnabled())
+				udp_connection.close();
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+		}
+		connection_waiter.stop();
+
+		for (JMPeerConnection connection : peer_connections.values())
+			try {
+				connection.disconnect();
+			} catch (NetworkManagerException e) {
+				e.printStackTrace();
+			}
+
+		if (server_connection != null)
+			try {
+				server_connection.disconnect();
+			} catch (NetworkManagerException e) {
+				e.printStackTrace();
+			}
+		connections_maintenance.removeTask(connection_speed_updater);
 	}
 	
 	public String toString() {
@@ -271,29 +365,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 
 	protected boolean iAmStoppable() {
 		return false;
-	}
-
-	public void initialize() {
-		try {
-			super.initialize();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-		_peer_manager = (InternalPeerManager) PeerManagerSingleton
-				.getInstance();
-		_server_manager = (InternalServerManager) ServerManagerSingleton
-				.getInstance();
-		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton
-				.getInstance();
-		_download_manager = (InternalDownloadManager) DownloadManagerSingleton
-				.getInstance();
-		_upload_manager = (InternalUploadManager) UploadManagerSingleton
-				.getInstance();
-		_jkad_manager = (InternalJKadManager) JKadManagerSingleton
-				.getInstance();
-		_search_manager = (InternalSearchManager) SearchManagerSingleton
-				.getInstance();
 	}
 
 	public void offerFilesToServer(ClientID userID,
@@ -857,57 +928,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
-	}
-
-	public void shutdown() {
-		try {
-			super.shutdown();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-
-		try {
-			if (_config_manager.isUDPEnabled())
-				udp_connection.close();
-		} catch (ConfigurationManagerException e) {
-			e.printStackTrace();
-		}
-		connection_waiter.stop();
-
-		for (JMPeerConnection connection : peer_connections.values())
-			try {
-				connection.disconnect();
-			} catch (NetworkManagerException e) {
-				e.printStackTrace();
-			}
-
-		if (server_connection != null)
-			try {
-				server_connection.disconnect();
-			} catch (NetworkManagerException e) {
-				e.printStackTrace();
-			}
-
-	}
-
-	public void start() {
-		try {
-			super.start();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-		udp_connection = new JMUDPConnection();
-		try {
-			if (_config_manager.isUDPEnabled())
-				udp_connection.open();
-		} catch (ConfigurationManagerException e) {
-			e.printStackTrace();
-		}
-
-		connection_waiter = new JMConnectionWaiter();
-		connection_waiter.start();
 	}
 	
 	public void sendServerUDPStatusRequest(String serverIP, int serverPort, int clientTime) {
