@@ -25,10 +25,10 @@ package org.jmule.core.peermanager;
 import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
@@ -48,11 +48,11 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:58:40 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:17:21 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
-	private Map<String, Peer> peers  = new Hashtable<String, Peer>();
+	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
 	private InternalNetworkManager _network_manager;
 	
 	private List<PeerManagerListener> listener_list = new LinkedList<PeerManagerListener>();
