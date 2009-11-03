@@ -38,8 +38,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:25:15 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:31:09 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -178,9 +178,9 @@ class JMuleSocketChannel {
 		byte packet_opcode = srcs.get(1 + 4);
 		if ((packet_opcode == OP_SENDINGPART)
 				|| (packet_opcode == OP_COMPRESSEDPART)) {
-			file_transfer_trafic.addReceivedBytes(totalSended);
+			file_transfer_trafic.addSendBytes(totalSended);
 		} else {
-			service_trafic.addReceivedBytes(totalSended);
+			service_trafic.addSendBytes(totalSended);
 		}
 		
 		return totalSended;
