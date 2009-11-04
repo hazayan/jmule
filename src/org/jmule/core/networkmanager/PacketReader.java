@@ -95,8 +95,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/03 07:25:59 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/04 08:21:17 $
  */
 public class PacketReader {
 
@@ -296,11 +296,8 @@ public class PacketReader {
 		channel.transferred_bytes = 0;
 		
 		data2 = Misc.getByteBuffer(1);
-
 		channel.read(data2);
-
 		byte packet_header = data2.get(0);
-
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 
@@ -545,7 +542,7 @@ public class PacketReader {
 				}
 			}
 			else 
-				if (packet_opcode == PROTO_EMULE_EXTENDED_TCP)
+				if (packet_header == PROTO_EMULE_EXTENDED_TCP)
 				switch (packet_opcode) {
 				case OP_EMULE_HELLO: {
 					byte client_version = packet_data.get();
@@ -588,7 +585,7 @@ public class PacketReader {
 		} catch (Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
-			throw new MalformattedPacketException(packet_header, packet_opcode,
+			throw new MalformattedPacketException(packet_header, (packet_opcode),
 					packet_data.array(), cause);
 		}
 		if ((packet_opcode == OP_SENDINGPART) || (packet_opcode == OP_COMPRESSEDPART)) {
