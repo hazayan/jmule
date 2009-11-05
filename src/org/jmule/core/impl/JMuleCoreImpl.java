@@ -63,8 +63,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:29 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 06:53:16 $$
  */
 public class JMuleCoreImpl implements JMuleCore {
 	
@@ -194,15 +194,19 @@ public class JMuleCoreImpl implements JMuleCore {
 		
 		configuration_manager.start();
 		
+		UserHash hash = null;
 		try {
-			if (configuration_manager.getUserHash() == null) {
-				UserHash user_hash = new UserHash();
-				user_hash = UserHash.genNewUserHash();
-				((InternalConfigurationManager)configuration_manager).setUserHash(user_hash.getAsString());
+			hash = configuration_manager.getUserHash();
+		} catch (ConfigurationManagerException e1) {
+			e1.printStackTrace();
+		}
+		if (hash == null) {
+			hash = UserHash.genNewUserHash();
+			try {
+				((InternalConfigurationManager)configuration_manager).setUserHash(hash);
+			} catch (ConfigurationManagerException e) {
+				e.printStackTrace();
 			}
-		} catch (Throwable cause) {
-			throw new JMuleCoreException( cause );
-		
 		}
 
 		Logger log = Logger.getLogger("org.jmule");

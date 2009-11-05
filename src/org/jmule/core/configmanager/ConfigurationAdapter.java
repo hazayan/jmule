@@ -25,11 +25,13 @@ package org.jmule.core.configmanager;
 import java.io.File;
 import java.util.List;
 
+import org.jmule.core.jkad.ClientID;
+
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: javajox $ on $Date: 2009/10/10 18:56:26 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/05 06:53:16 $
  */
 public abstract class ConfigurationAdapter implements ConfigurationListener {
 
@@ -81,7 +83,7 @@ public abstract class ConfigurationAdapter implements ConfigurationListener {
 		
 	}
 	
-	public void jkadIDChanged(String newID) {
+	public void jkadIDChanged(ClientID newID) {
 		
 	}
 	

@@ -131,8 +131,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/24 05:07:24 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/05 06:53:16 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
@@ -186,22 +186,15 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 		search = Search.getSingleton();
 		publisher = Publisher.getInstance();
 
-		String client_id = null;
-		try {
-			client_id = _config_manager.getJKadClientID();
-		} catch (ConfigurationManagerException e) {
-			e.printStackTrace();
-		}
-		if (client_id == null) {
+		if (clientID == null) {
 			clientID = new ClientID(getRandomInt128());
 			try {
-				_config_manager.setJKadClientID(clientID.toHexString(true));
+				_config_manager.setJKadClientID(clientID);
 			} catch (ConfigurationManagerException e) {
 
 				e.printStackTrace();
 			}
-		} else
-			clientID = new ClientID(hexStringToByte(client_id));
+		}
 
 		filesToPublishChecker = new Task() {
 			Set<FileHash> publishedFiles = new HashSet<FileHash>();

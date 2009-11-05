@@ -22,16 +22,19 @@
  */
 package org.jmule.core.configmanager;
 
+import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.jkad.ClientID;
+
 /**
  * Created on Aug 10, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/11 13:02:57 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/05 06:53:16 $
  */
 public interface InternalConfigurationManager extends ConfigurationManager {
 	
-	 public void setJKadClientID(String newID) throws ConfigurationManagerException;
+	 public void setJKadClientID(ClientID newID) throws ConfigurationManagerException;
 	 
-	 public void setUserHash(String userHash) throws ConfigurationManagerException;
+	 public void setUserHash(UserHash userHash) throws ConfigurationManagerException;
 
 }

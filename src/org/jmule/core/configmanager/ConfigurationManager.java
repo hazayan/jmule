@@ -27,12 +27,13 @@ import java.util.List;
 
 import org.jmule.core.JMuleManager;
 import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.jkad.ClientID;
 
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/10/10 18:56:26 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 06:53:16 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -47,6 +48,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final String       SERVER_MET         			=     SETTINGS_DIR + File.separator + "server.met";
 	public static final String       GEOIP_DAT                      =     SETTINGS_DIR + File.separator + "geoip.dat";
 	
+	public static final String       USER_HASH_FILE                 =     SETTINGS_DIR + File.separator + "preferences.dat";
+	public static final String       KAD_ID_FILE	                =     SETTINGS_DIR + File.separator + "preferenceskad.dat";
 	
 	public static final String       NICK_NAME       				=     "http://jmule.net";
 	
@@ -61,7 +64,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
 	public static final int          UPLOAD_QUEUE_SIZE              =     200;
 	public static final int          UPLOAD_QUEUE_SLOTS             =     2;
-	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 30;
+	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 2;
 	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 SERVER_CONNECTING_TIMEOUT		=	  1000 * 40;
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
@@ -71,8 +74,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int 		 CONNECTION_TRAFIC_AVERAGE_CHECKS= 	  20;
 	
 	// the network
-	public static final long          DOWNLOAD_BANDWIDTH            =     1024 * 10 * 256;
-	public static final long          UPLOAD_BANDWIDTH              =     1024 * 10 * 256;
+	public static final long          DOWNLOAD_BANDWIDTH            =    1024 * 10 * 256;
+	public static final long          UPLOAD_BANDWIDTH              =    1024 * 10 * 256;
 	public static final int           MAX_CONNECTIONS               =    500;
 	public static final long          DOWNLOAD_LIMIT     			=    1024 * 1024;
 	public static final long          UPLOAD_LIMIT       			=    1024 * 512;
@@ -266,7 +269,7 @@ public interface ConfigurationManager extends JMuleManager {
     
     public void setUpdateServerListAtConnect(boolean newStatus) throws ConfigurationManagerException;
     
-    public String getJKadClientID() throws ConfigurationManagerException;
+    public ClientID getJKadClientID() throws ConfigurationManagerException;
         
     public String getNicName() throws ConfigurationManagerException;
     

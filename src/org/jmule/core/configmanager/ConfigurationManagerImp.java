@@ -25,6 +25,8 @@ package org.jmule.core.configmanager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +35,7 @@ import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.jkad.ClientID;
 import org.jmule.core.utils.AddressUtils;
 import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.NetworkUtils;
@@ -40,8 +43,8 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/10/10 18:56:26 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 06:53:16 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
@@ -49,7 +52,8 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 	private static final String 	DEFAULT_TRUE  = "true";
 	
 	private Properties config_store;
-	
+	private UserHash user_hash = null;
+	private ClientID client_id = null;
 	private List<ConfigurationListener> config_listeners = new LinkedList<ConfigurationListener>();
 		
 	public ConfigurationManagerImp() {
@@ -177,47 +181,82 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 	
 	
 	public UserHash getUserHash() throws ConfigurationManagerException {
-		
-		String user_hash_str = config_store.getProperty(USER_HASH_KEY);
-		
-		if (user_hash_str==null) {
-			return null;
-		
-		} else {
-			
-			try {
-				UserHash user_hash = new UserHash();
-				user_hash.loadFromString(user_hash_str);
-				return user_hash;
-			}catch(Throwable cause) {
-				
-				throw new ConfigurationManagerException( cause );
-			}
-		}		
+		return user_hash;
 	}
 	
-	public void setUserHash(String userHash) throws ConfigurationManagerException {
-		if (!Misc.isHexadecimalNumber(userHash))
-			throw new ConfigurationManagerException("User Hash must be hexadecimal string");
-		config_store.setProperty(USER_HASH_KEY, userHash);
-		save();
+	public void setUserHash(UserHash userHash) throws ConfigurationManagerException {
+		this.user_hash = userHash;
+		try {
+			storeUserHash();
+		} catch (Throwable cause) {
+			throw new ConfigurationManagerException(cause);
+		}
 		notifyPropertyChanged(USER_HASH_KEY, userHash);
 	}
+	public ClientID getJKadClientID()throws ConfigurationManagerException {
+		return client_id;
+	}
 	
+	public void setJKadClientID(ClientID newID) throws ConfigurationManagerException {
+		this.client_id = newID;
+		try {
+			storeClientID();
+		} catch (Throwable cause) {
+			throw new ConfigurationManagerException(cause);
+		}
+		notifyPropertyChanged(JKAD_ID_KEY, newID);
+	}
+	
+	private void storeUserHash() throws Throwable {
+		FileChannel output_channel = new FileOutputStream(USER_HASH_FILE).getChannel();
+		ByteBuffer hash = Misc.getByteBuffer(16);
+		hash.put(user_hash.getUserHash());
+		hash.position(0);
+		output_channel.write(hash);
+		output_channel.close();
+	}
+	
+	private void loadUserHash() throws Throwable {
+		File file = new File(USER_HASH_FILE);
+		if (!file.exists()) return ;
+		FileChannel input_channel = new FileInputStream(file).getChannel();
+		ByteBuffer hash = Misc.getByteBuffer(16);
+		input_channel.read(hash);
+		user_hash = new UserHash(hash.array());
+		input_channel.close();
+	}
+	
+	private void storeClientID() throws Throwable {
+		FileChannel output_channel = new FileOutputStream(KAD_ID_FILE).getChannel();
+		ByteBuffer data = Misc.getByteBuffer(16);
+		data.put(client_id.toByteArray());
+		data.position(0);
+		output_channel.write(data);
+		output_channel.close();
+	}
+	
+	private void loadClientID() throws Throwable {
+		File file = new File(KAD_ID_FILE);
+		if (!file.exists()) return ;
+		FileChannel input_channel = new FileInputStream(file).getChannel();
+		ByteBuffer data = Misc.getByteBuffer(16);
+		input_channel.read(data);
+		client_id = new ClientID(data.array());
+	}
 	
 	public void load() throws ConfigurationManagerException {
-
 		try {
-		   config_store.load( new FileInputStream( CONFIG_FILE ) );	
-		 //  loadKeys();
+		   config_store.load( new FileInputStream( CONFIG_FILE ) );
+		   user_hash = null;
+		   client_id = null;
+		   loadUserHash();
+		   loadClientID();
 		} catch(Throwable cause) {
 			throw new ConfigurationManagerException( cause );
 		}
 		
 
 	}
-
-
 	
 	public void removeConfigurationListener(ConfigurationListener listener) {
 		
@@ -618,7 +657,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 				    
 			   else if( property == SERVER_LIST_UPDATE_ON_CONNECT_KEY) listener.updateServerListAtConnectChanged((Boolean)new_value);
 			   
-			   else if( property == JKAD_ID_KEY) listener.jkadIDChanged((String) new_value);
+			   else if( property == JKAD_ID_KEY) listener.jkadIDChanged((ClientID) new_value);
 				    
 			   else if( property == NIC_NAME_KEY) listener.nicNameChanged((String) new_value);
 				    
@@ -650,20 +689,6 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 			throw new ConfigurationManagerException( cause );
 		}
 		return update_server_list;
-	}
-
-	
-	public String getJKadClientID()throws ConfigurationManagerException {
-		return config_store.getProperty(JKAD_ID_KEY, null);
-	}
-
-	
-	public void setJKadClientID(String newID) throws ConfigurationManagerException {
-		if (!Misc.isHexadecimalNumber(newID))
-			throw new ConfigurationManagerException("JKad ID must be hexadecimal string");
-		config_store.setProperty(JKAD_ID_KEY, newID);
-		save();
-		notifyPropertyChanged(JKAD_ID_KEY, newID);
 	}
 	
     public String getNicName() throws ConfigurationManagerException {
