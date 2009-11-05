@@ -54,8 +54,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/23 18:10:39 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 20:19:42 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private List<Server> server_list = new LinkedList<Server>();
@@ -106,6 +106,44 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			}
 		};
 	}
+	
+	public void initialize() {
+		try {
+			super.initialize();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
+				.getInstance();
+		_sharing_manager = (InternalSharingManager) SharingManagerSingleton
+				.getInstance();
+		try {
+			server_met = new ServerMet(ConfigurationManager.SERVER_MET);
+		} catch (ServerMetException e) {
+		}
+	}
+
+	public void start() {
+		try {
+			super.start();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		server_manager_timer.addTask(servers_udp_query, ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
+	}
+	
+	public void shutdown() {
+		try {
+			super.shutdown();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		server_manager_timer.cancelAllTasks();
+	}
 
 	public void addServerListListener(ServerManagerListener serverListListener) {
 		listener_list.add(serverListListener);
@@ -119,9 +157,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	public void connect() throws ServerManagerException {
 		auto_connect_started = true;
 		candidate_servers.addAll(server_list);
-
 		requestNextAutoConnectServer();
-
 		notifyAutoConnectStarted();
 	}
 
@@ -146,13 +182,13 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	public void disconnect() throws ServerManagerException {
 		if (connected_server == null)
-			throw new ServerManagerException(
-					"JMule is not connected to server ");
+			throw new ServerManagerException("JMule is not connected to server");
 		try {
 			_network_manager.disconnectFromServer();
 		} catch (NetworkManagerException e) {
 			throw new ServerManagerException(e);
 		}
+		connected_server.setStatus(ServerStatus.DISCONNECTED);
 		notifyDisconnected(connected_server);
 		connected_server = null;
 	}
@@ -230,44 +266,6 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		}
 		server_met.close();
 
-	}
-
-	public void initialize() {
-		try {
-			super.initialize();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-
-		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
-				.getInstance();
-		_sharing_manager = (InternalSharingManager) SharingManagerSingleton
-				.getInstance();
-		try {
-			server_met = new ServerMet(ConfigurationManager.SERVER_MET);
-		} catch (ServerMetException e) {
-		}
-	}
-
-	public void start() {
-		try {
-			super.start();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-		server_manager_timer.addTask(servers_udp_query, ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
-	}
-	
-	public void shutdown() {
-		try {
-			super.shutdown();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-		server_manager_timer.cancelAllTasks();
 	}
 	
 	public boolean isConnected() {
