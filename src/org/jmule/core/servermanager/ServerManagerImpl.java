@@ -23,12 +23,14 @@
 package org.jmule.core.servermanager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
@@ -54,11 +56,11 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 20:19:42 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/06 18:18:36 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
-	private List<Server> server_list = new LinkedList<Server>();
+	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
 	private Server connected_server = null;
 
 	private InternalNetworkManager _network_manager;
@@ -197,7 +199,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		return connected_server;
 	}
 
-	private Server getServer(String ip, int port) {
+	public Server getServer(String ip, int port) {
 		for (Server server : server_list)
 			if (server.getAddress().equals(ip))
 				if (server.getPort() == port)
@@ -212,19 +214,10 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		return null;
 	}
 
-	private int getServerID(String ip, int port) {
-		for (int i = 0; i < server_list.size(); i++) {
-			Server server = server_list.get(i);
-			if (server.getAddress().equals(ip))
-				if (server.getPort() == port) {
-					return i;
-				}
-		}
-		return -1;
-	}
-
 	public List<Server> getServers() {
-		return server_list;
+		List<Server> result = new LinkedList<Server>();
+		result.addAll(server_list);
+		return result;
 	}
 
 	public int getServersCount() {
@@ -237,6 +230,13 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 				if (server.getPort() == port)
 					return true;
 		return false;
+	}
+	
+	public boolean hasServer(Server server) {
+		if (server_list.contains(server))
+			return true;
+		else
+			return false;
 	}
 
 	protected boolean iAmStoppable() {
@@ -484,14 +484,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	public void removeServer(Server... servers) throws ServerManagerException {
 		for (Server server : servers) {
-			String ip = server.getAddress();
-			int port = server.getPort();
-			if (!hasServer(ip, port))
-				throw new ServerManagerException("Server " + ip + " : " + port
-						+ " not found");
-			int id = getServerID(ip, port);
-			notifyServerRemoved(server_list.get(id));
-			server_list.remove(id);
+			if (!hasServer(server.getAddress(), server.getPort()))
+				throw new ServerManagerException("Server " + server.getAddress() + " : " + server.getPort() + " not found");
+			server_list.remove(server);
 		}
 
 	}
@@ -534,8 +529,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		List<Integer> port_list = new LinkedList<Integer>();
 		List<TagList> tag_list = new LinkedList<TagList>();
 
-		for (int i = 0; i < server_list.size(); i++) {
-			Server server = server_list.get(i);
+		for (Server server : server_list) {
 			ip_list.add(server.getAddress());
 			port_list.add(server.getPort());
 			tag_list.add(server.getTagList());

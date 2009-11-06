@@ -30,8 +30,8 @@ import org.jmule.core.edonkey.ED2KServerLink;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:00:50 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/06 18:18:36 $$
  */
 public interface ServerManager extends JMuleManager {
 
@@ -91,6 +91,8 @@ public interface ServerManager extends JMuleManager {
 	 * @return the current server list
 	 */
 	public List<Server> getServers();
+	
+	public Server getServer(String address, int port);
 	
 	/**
 	 * Clears the current server list
