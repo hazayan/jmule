@@ -31,6 +31,7 @@ import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
@@ -47,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:00:32 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 12:01:49 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -122,7 +123,11 @@ public class UploadSession implements JMTransferSession {
 			if (peer.isConnected())
 				network_manager.sendSlotGiven(peer.getIP(), peer.getServerPort(), getFileHash());
 			else
-				network_manager.addPeer(peer.getIP(), peer.getPort());
+				try {
+					network_manager.addPeer(peer.getIP(), peer.getPort());
+				} catch (NetworkManagerException e) {
+					e.printStackTrace();
+				}
 		}
 	}
 	

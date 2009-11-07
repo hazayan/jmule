@@ -38,6 +38,7 @@ import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.peermanager.Peer.PeerStatus;
@@ -48,8 +49,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:17:21 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 12:01:49 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -136,7 +137,6 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	public Peer newPeer(String ip, int port, PeerSource source) throws PeerManagerException {
 		if (hasPeer(ip, port))
 			throw new PeerManagerException("Peer already exists");
-		
 		Peer peer = new Peer(ip, port, source);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		peer.setPeerStatus(PeerStatus.DISCONNECTED);
@@ -264,7 +264,11 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		int port  = peer.getPort();
 		if (!hasPeer(ip, port))
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
-		_network_manager.addPeer(ip, port);
+		try {
+			_network_manager.addPeer(ip, port);
+		}catch(NetworkManagerException cause) {
+			throw new PeerManagerException(cause);
+		}
 		peer.setPeerStatus(PeerStatus.CONNECTING);
 		notifyPeerConnecting(peer);	
 	}

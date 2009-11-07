@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 06:53:16 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 12:01:49 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -89,6 +89,9 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int 		  SEARCH_QUERY_CHECK_INTERVAL   = 10000;
 	
 	public static final int 		  SHARED_FILES_PUBLISH_INTERVAL = 1000 * 60;
+	
+	public static final int 		  MAX_PEERS						= 300;
+	
 	// data base keys
 	public static final String       NICK_NAME_KEY                         =     "NickName";
 	public static final String       TCP_PORT_KEY                          =     "TCPPort";

@@ -109,6 +109,7 @@ import org.jmule.core.jkad.utils.Convert;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerSingleton;
@@ -131,8 +132,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/05 06:53:16 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/07 12:01:49 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
@@ -988,8 +989,12 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 							"KAD callback request, Peer : " + peer);
 					JMRunnable task = new JMRunnable() {
 						public void JMRun() {
-							_network_manager.addPeer(peer.getIP(), peer
-									.getPort());
+							try {
+								_network_manager.addPeer(peer.getIP(), peer
+										.getPort());
+							} catch (NetworkManagerException e1) {
+								e1.printStackTrace();
+							}
 							long counter = 0;
 							while (!peer.isConnected()) {
 								counter++;
