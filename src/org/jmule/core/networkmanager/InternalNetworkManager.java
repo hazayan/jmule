@@ -47,14 +47,14 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/14 09:24:43 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/07 11:58:34 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
-	public void addPeer(JMPeerConnection peerConnection);
+	public void addPeer(JMPeerConnection peerConnection) throws NetworkManagerException;
 	
-	public void addPeer(String ip, int port);
+	public void addPeer(String ip, int port) throws NetworkManagerException;
 	
 	public void callBackRequest(ClientID clientID);
 	

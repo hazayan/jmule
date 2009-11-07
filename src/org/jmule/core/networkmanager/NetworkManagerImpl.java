@@ -24,13 +24,14 @@ package org.jmule.core.networkmanager;
 
 import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
@@ -79,13 +80,14 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/03 07:25:59 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/07 11:58:34 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements
 		InternalNetworkManager {
+	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
 
-	private Map<String, JMPeerConnection> peer_connections = new Hashtable<String, JMPeerConnection>();
+	private Map<String, JMPeerConnection> peer_connections = new ConcurrentHashMap<String, JMPeerConnection>();
 
 	private InternalPeerManager _peer_manager;
 	private InternalServerManager _server_manager;
@@ -160,7 +162,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 		connection_waiter = new JMConnectionWaiter();
 		connection_waiter.start();
 		
-		connections_maintenance.addTask(connection_speed_updater, 1000, true);
+		connections_maintenance.addTask(connection_speed_updater, CONNECTION_UPDATE_SPEED_INTERVAL, true);
 	}
 	
 	public void shutdown() {
@@ -218,9 +220,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 		return result;
 	}
 
-	public void addPeer(JMPeerConnection peerConnection) {
-		peer_connections.put(peerConnection.getIPAddress() + KEY_SEPARATOR
-				+ peerConnection.getPort(), peerConnection);
+	public void addPeer(JMPeerConnection peerConnection) throws NetworkManagerException {
+		if (peer_connections.size() > ConfigurationManager.MAX_PEERS)
+			throw new NetworkManagerException("Connection limit exceeded");
+		peer_connections.put(peerConnection.getIPAddress() + KEY_SEPARATOR+ peerConnection.getPort(), peerConnection);
 		try {
 			_peer_manager.newIncomingPeer(peerConnection.getIPAddress(),
 					peerConnection.getPort());
@@ -229,8 +232,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements
 		}
 	}
 
-	public synchronized void addPeer(String ip, int port) {
-		
+	public synchronized void addPeer(String ip, int port) throws NetworkManagerException {
+		if (peer_connections.size() > ConfigurationManager.MAX_PEERS)
+			throw new NetworkManagerException("Connection limit exceeded");
 		Peer peer;
 		try {
 			peer = _peer_manager.getPeer(ip, port);

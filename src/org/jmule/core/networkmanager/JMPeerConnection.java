@@ -40,8 +40,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/28 14:59:42 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/07 11:58:34 $
  */
 public class JMPeerConnection extends JMConnection {
 
@@ -60,7 +60,7 @@ public class JMPeerConnection extends JMConnection {
 		remote_inet_socket_address = remoteInetSocketAddress;
 	}
 	
-	JMPeerConnection(JMuleSocketChannel peerConnection) {
+	JMPeerConnection(JMuleSocketChannel peerConnection) throws NetworkManagerException {
 		jm_socket_channel = peerConnection;
 		remote_inet_socket_address = (InetSocketAddress) jm_socket_channel.getSocket().getRemoteSocketAddress();
 		_network_manager.addPeer(this);

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
@@ -36,8 +37,8 @@ import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 08:52:54 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 11:58:34 $$
  */
 public class JMConnectionWaiter{
 
@@ -126,11 +127,16 @@ public class JMConnectionWaiter{
 		}
 		
 		public void run() {
+			JMuleSocketChannel socket = null;
 			while (!stop) {
 				try {
-					new JMPeerConnection(new JMuleSocketChannel(listenSocket.accept()));
+					socket = new JMuleSocketChannel(listenSocket.accept());
+					new JMPeerConnection(socket);
 				} catch (IOException e) {
 					if (!listenSocket.isOpen()) return ;
+				} catch (NetworkManagerException e) {
+					e.printStackTrace();
+					socket.disconnect();
 				}
 			}
 		}
