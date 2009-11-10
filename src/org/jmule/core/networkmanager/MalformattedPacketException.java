@@ -22,16 +22,16 @@
  */
 package org.jmule.core.networkmanager;
 
-import javax.management.JMException;
 
+import org.jmule.core.JMException;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Oct 16, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/26 16:31:28 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/10 14:06:41 $
  */
 public class MalformattedPacketException extends JMException {
 
@@ -46,6 +46,10 @@ public class MalformattedPacketException extends JMException {
 		super("Malformatted packet : \n"
 				+ Convert.byteToHexString(packetContent, " ") + "\n"
 				+ Misc.getStackTrace(cause));
+	}
+	
+	public MalformattedPacketException(String cause) {
+		super(cause);
 	}
 	
 }
