@@ -80,13 +80,11 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/07 11:58:34 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/10 14:07:23 $
  */
-public class NetworkManagerImpl extends JMuleAbstractManager implements
-		InternalNetworkManager {
+public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
-
 	private Map<String, JMPeerConnection> peer_connections = new ConcurrentHashMap<String, JMPeerConnection>();
 
 	private InternalPeerManager _peer_manager;

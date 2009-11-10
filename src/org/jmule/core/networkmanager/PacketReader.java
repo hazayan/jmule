@@ -73,6 +73,7 @@ import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
@@ -95,14 +96,15 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/04 08:21:17 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/10 14:07:23 $
  */
 public class PacketReader {
 
 	public static void readServerPacket(JMuleSocketChannel channel)
 			throws JMEndOfStreamException, IOException, DataFormatException,
-			UnknownPacketException,MalformattedPacketException {
+			UnknownPacketException, MalformattedPacketException,
+			MalformattedPacketException {
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 
@@ -124,6 +126,12 @@ public class PacketReader {
 
 		int packet_length_proto = packet_length.getInt(0);
 
+		if ((packet_length_proto >= E2DKConstants.MAXPACKETSIZE) || (packet_length_proto <= 0))
+			throw new MalformattedPacketException("Invalid packet length "
+					+ " Header :" + Convert.byteToHex(packet_header)
+					+ " Packet opcode : " + packet_opcode + " Length : "
+					+ packet_length_proto);
+		
 		ByteBuffer packet_data = Misc.getByteBuffer(packet_length_proto - 1);
 		channel.read(packet_data);
 		packet_data.position(0);
@@ -314,7 +322,13 @@ public class PacketReader {
 		byte packet_opcode = packet_opcode_buffer.get(0);
 
 		int pkLength = packet_length.getInt(0);
-
+		
+		if ((pkLength >= E2DKConstants.MAXPACKETSIZE) || (pkLength <= 0))
+			throw new MalformattedPacketException("Invalid packet length "
+					+ " Header :" + Convert.byteToHex(packet_header)
+					+ " Packet opcode : " + packet_opcode + " Length : "
+					+ pkLength);
+		
 		ByteBuffer packet_data = Misc.getByteBuffer(pkLength - 1);
 		channel.read(packet_data);
 		packet_data.position(0);
@@ -593,8 +607,7 @@ public class PacketReader {
 			} else {
 				channel.service_trafic.addReceivedBytes(channel.transferred_bytes);
 			}
-		
-		
+		packet_data = null;
 	}
 
 	private static ByteBuffer packetBuffer = Misc

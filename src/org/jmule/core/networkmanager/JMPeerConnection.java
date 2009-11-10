@@ -40,8 +40,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/07 11:58:34 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/10 14:07:23 $
  */
 public class JMPeerConnection extends JMConnection {
 
@@ -128,6 +128,7 @@ public class JMPeerConnection extends JMConnection {
 						else { 
 							JMException exception = new JMException("Exception in connection " + remote_inet_socket_address+"\n"+Misc.getStackTrace(cause));
 							exception.printStackTrace();
+							cause.printStackTrace();
 						}
 					}
 				}
