@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/15 07:50:32 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/10 14:05:43 $$
  */
 public class E2DKConstants {
 
@@ -106,6 +106,7 @@ public class E2DKConstants {
 		SERVER_ERROR_MESSAGES.add("ERROR : Connection refused. Your IP is currently blacklisted.");
 	}
 	
+	public final static long MAXPACKETSIZE				= 2000000;
 	public final static long PARTSIZE 					= 0x947000; //9728000
     public final static int  BLOCKSIZE 					= 184320;//184320 10240
     public final static int  MAX_OFFER_FILES			= 200;
