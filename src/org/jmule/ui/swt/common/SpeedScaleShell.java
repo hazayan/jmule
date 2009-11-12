@@ -53,8 +53,8 @@ import org.jmule.ui.utils.SpeedFormatter;
  * Created on Aug 22, 2008
  * @author TuxPaper
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:40:14 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/12 18:38:49 $
  */
 public class SpeedScaleShell {
 
@@ -100,7 +100,7 @@ public class SpeedScaleShell {
 
 	private String sValue = "";
 
-	private String title = "Jora";
+	private String title = "";
 	
 	private Composite composite;
 
