@@ -30,14 +30,20 @@ import org.jmule.core.edonkey.FileHash;
 /**
  * Created on Oct 2, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/19 06:42:26 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/12 18:11:33 $
  */
 public privileged aspect SharingManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.edonkey.sharingmanager.SharingManager");
 	
 	after() throwing (Throwable t): execution (* SharingManagerImpl.*(..)) {
-		log.warning(Misc.getStackTrace(t));
+		String join_point = thisJoinPoint.toString();
+		String args = " ";
+		for(Object object : thisJoinPoint.getArgs()) {
+			args += "(" + object + ") ";
+		}
+		log.warning("Exception In method with args : \n" + join_point + "\n"
+				+ args + "\n" + Misc.getStackTrace(t));
 	}
 	
 	after(FileHash fileHash) : within(SharingManagerImpl) && call (* Map.remove(Object)) && args(fileHash) {

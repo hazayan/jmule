@@ -32,14 +32,20 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:36:56 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:11:33 $$
  */
 public aspect FilePartStatusLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.FilePartStatus");
 	
 	after() throwing (Throwable t): execution (* FilePartStatus.*(..)) {
-		log.warning(Misc.getStackTrace(t));
+		String join_point = thisJoinPoint.toString();
+		String args = " ";
+		for(Object object : thisJoinPoint.getArgs()) {
+			args += "(" + object + ") ";
+		}
+		log.warning("Exception In method with args : \n" + join_point + "\n"
+				+ args + "\n" + Misc.getStackTrace(t));
 	}
 	
 	after(Peer p) returning(boolean result) : args(p) && execution(boolean FilePartStatus.hasStatus(Peer)) {

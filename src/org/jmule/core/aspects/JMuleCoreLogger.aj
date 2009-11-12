@@ -29,7 +29,6 @@ import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.impl.JMuleCoreImpl;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
-import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
 import org.jmule.core.uploadmanager.UploadSession;
@@ -37,8 +36,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:01:14 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:11:33 $$
  */
 public privileged aspect JMuleCoreLogger {
 	private Logger log = Logger.getLogger("org.jmule.core");

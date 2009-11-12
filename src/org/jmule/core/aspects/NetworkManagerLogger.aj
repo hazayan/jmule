@@ -29,14 +29,20 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Sep 18, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/28 15:01:14 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/12 18:11:33 $
  */
 public privileged aspect NetworkManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.networkmanager.NetworkManager");
 	
 	after() throwing (Throwable t): execution (* NetworkManagerImpl.*(..)) {
-		log.warning(Misc.getStackTrace(t));
+		String join_point = thisJoinPoint.toString();
+		String args = " ";
+		for(Object object : thisJoinPoint.getArgs()) {
+			args += "(" + object + ") ";
+		}
+		log.warning("Exception In method with args : \n" + join_point + "\n"
+				+ args + "\n" + Misc.getStackTrace(t));
 	}
 	
 	/*before() : execution(* NetworkManagerImpl.*(..)) {
