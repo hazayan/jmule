@@ -60,8 +60,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:43:30 $$
  */
 public abstract class SharedFile {
 	
@@ -77,6 +77,7 @@ public abstract class SharedFile {
 				readChannel = new RandomAccessFile(file,"rws").getChannel();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
+				throw new SharedFileException("Failed to open file : " + file.getName());
 			}
 		ByteBuffer data = Misc.getByteBuffer(chunkData.getChunkEnd()-chunkData.getChunkBegin());
 		data.position(0);
