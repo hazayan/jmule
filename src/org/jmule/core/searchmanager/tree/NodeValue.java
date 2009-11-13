@@ -36,8 +36,8 @@ import static org.jmule.core.searchmanager.tree.NodeValue.NodeType.*;
  * Tree node value.
  * Created on Oct 26, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 17:59:58 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/13 08:25:08 $
  */
 
 public class NodeValue {
@@ -73,11 +73,12 @@ public class NodeValue {
 		if (type == AND) return SEARCH_AND;
 		if (type == FILE_NAME) {
 			String str = (String)getValue(Tree.DATA_KEY);
-			ByteBuffer data = Misc.getByteBuffer(1 + 2 + str.length());
+			byte[] str_content = str.getBytes();
+			ByteBuffer data = Misc.getByteBuffer(1 + 2 + str_content.length);
 			data.position(0);
 			data.put(SEARCH_BY_NAME);
-			data.putShort(Convert.intToShort(str.length()));
-			data.put(str.getBytes());
+			data.putShort(Convert.intToShort(str_content.length));
+			data.put(str_content);
 			return data.array();
 		}
 		if (type == FILETYPE) {
