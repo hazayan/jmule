@@ -25,7 +25,10 @@ package org.jmule.core.networkmanager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.JMException;
 import org.jmule.core.JMThread;
@@ -40,8 +43,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/10 14:07:23 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/14 09:35:43 $
  */
 public class JMPeerConnection extends JMConnection {
 
@@ -49,6 +52,9 @@ public class JMPeerConnection extends JMConnection {
 	
 	private JMThread connecting_thread;
 	private JMThread receiver_thread;
+	
+	private SenderThread sender_thread;
+	private Queue<Packet> send_queue = new ConcurrentLinkedQueue<Packet>();
 	
 	private InetSocketAddress remote_inet_socket_address;
 		
@@ -65,6 +71,10 @@ public class JMPeerConnection extends JMConnection {
 		remote_inet_socket_address = (InetSocketAddress) jm_socket_channel.getSocket().getRemoteSocketAddress();
 		_network_manager.addPeer(this);
 		connection_status = ConnectionStatus.CONNECTED;
+		send_queue.clear();
+		createSenderThread();
+		sender_thread.start();
+		
 		createReceiverThread();
 		receiver_thread.start();
 	}
@@ -86,14 +96,16 @@ public class JMPeerConnection extends JMConnection {
 							ConfigurationManager.PEER_CONNECTING_TIMEOUT);
 
 					connection_status = ConnectionStatus.CONNECTED;
-
+					send_queue.clear();
+					createSenderThread();
+					sender_thread.start();
+					
+					createReceiverThread();
+					receiver_thread.start();
+					
 					_network_manager.peerConnected(remote_inet_socket_address
 							.getAddress().getHostAddress(),
 							remote_inet_socket_address.getPort());
-
-					createReceiverThread();
-
-					receiver_thread.start();
 
 				} catch (IOException cause) {
 					cause.printStackTrace();
@@ -112,6 +124,7 @@ public class JMPeerConnection extends JMConnection {
 	
 	private void createReceiverThread() {
 		receiver_thread = new JMThread() {
+			
 			private boolean stop_thread = false;
 
 			public void JMStop() {
@@ -124,7 +137,9 @@ public class JMPeerConnection extends JMConnection {
 						PacketReader.readPeerPacket(jm_socket_channel);
 					} catch (Throwable cause) {
 						if (cause instanceof JMEndOfStreamException)
-							notifyDisconnect();
+							notifyDisconnect(); else
+						if (cause instanceof AsynchronousCloseException)
+							return ;
 						else { 
 							JMException exception = new JMException("Exception in connection " + remote_inet_socket_address+"\n"+Misc.getStackTrace(cause));
 							exception.printStackTrace();
@@ -136,15 +151,21 @@ public class JMPeerConnection extends JMConnection {
 		};
 	}
 	
+	private void createSenderThread() {
+		sender_thread = new SenderThread();
+	}
+
 	void disconnect() throws NetworkManagerException {
 		if (connection_status == ConnectionStatus.CONNECTED) {
-			receiver_thread.JMStop();
 			try {
 				jm_socket_channel.close();
 				connection_status = ConnectionStatus.DISCONNECTED;
 			} catch (IOException cause) {
 				throw new NetworkManagerException(cause);
 			}
+			receiver_thread.JMStop();
+			sender_thread.JMStop();
+			send_queue.clear();
 		}
 		
 		if (connection_status == ConnectionStatus.CONNECTING) {
@@ -182,8 +203,15 @@ public class JMPeerConnection extends JMConnection {
 		receiver_thread.JMStop();
 	}
 	
+	void send(Packet packet) throws JMException {
+		if (connection_status != ConnectionStatus.CONNECTED)
+			throw new JMException("Not connected to " + remote_inet_socket_address);
+		send_queue.add(packet);
+		if (sender_thread.isSleeping())
+			sender_thread.wakeUp();
+	}
 	
-	void send(Packet packet) throws Exception {
+	private void sendPacket(Packet packet) throws Exception {
 		try {
 			if (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS) {
 				byte op_code = packet.getCommand(); 
@@ -210,4 +238,51 @@ public class JMPeerConnection extends JMConnection {
 	public String toString() {
 		return "Peer connection to : " +  remote_inet_socket_address + " Status : " + connection_status;
 	}
+	
+	private class SenderThread extends JMThread {
+		
+		private boolean loop = true;
+		private boolean is_sleeping = false;
+		public SenderThread() {
+			super("Peer packet sender for " + remote_inet_socket_address);
+		}
+		
+		public void run() {
+			while(loop) {
+				is_sleeping = false;
+				if (!jm_socket_channel.isConnected()) break;
+				if (send_queue.isEmpty()) {
+					is_sleeping = true;
+					synchronized(this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+						}
+					}
+					continue;
+				}
+				Packet packet = send_queue.poll();
+				try {
+					sendPacket(packet);
+				} catch (Exception e) {
+					if (!jm_socket_channel.isConnected()) break;
+				}
+				
+			}
+		}
+		public void JMStop() {
+			loop = false;
+			synchronized(this) {
+				this.notify();
+			}
+		}
+		public boolean isSleeping() { return is_sleeping; }
+		public void wakeUp() {
+			synchronized(this) {
+				this.notify();
+			}
+		}
+		
+	}
+	
 }

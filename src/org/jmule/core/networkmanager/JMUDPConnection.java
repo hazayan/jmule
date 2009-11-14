@@ -25,6 +25,10 @@ package org.jmule.core.networkmanager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.management.JMException;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
@@ -37,8 +41,8 @@ import org.jmule.core.jkad.IPAddress;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:24:43 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/14 09:35:43 $$
  */
 public class JMUDPConnection {
 	
@@ -49,6 +53,9 @@ public class JMUDPConnection {
 	private DatagramChannel listenChannel;
 	private UDPListenThread udpListenThread;
 	private UDPConnectionStatus connectionStatus = UDPConnectionStatus.CLOSED;
+	
+	private Queue<UDPPacket> sendQueue = new ConcurrentLinkedQueue<UDPPacket>();
+	private UDPSenderThread sender_thread;
 	
 	JMUDPConnection(){
 		_core = JMuleCoreFactory.getSingleton();
@@ -78,6 +85,9 @@ public class JMUDPConnection {
 			udpListenThread = new UDPListenThread();
 			udpListenThread.start();
 			
+			sender_thread = new UDPSenderThread();
+			sender_thread.start();
+			
 			connectionStatus = UDPConnectionStatus.OPEN;
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -92,8 +102,9 @@ public class JMUDPConnection {
 		if (!isOpen()) return;
 		try {
 			connectionStatus = UDPConnectionStatus.CLOSED;
-			udpListenThread.JMStop();
 			listenChannel.close();
+			udpListenThread.JMStop();
+			sender_thread.JMStop();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -105,33 +116,85 @@ public class JMUDPConnection {
 		open();
 	}
 	
-	public void sendPacket(UDPPacket packet ) {
-		if (!isOpen()) return ;
-		InetSocketAddress destination = packet.getAddress();
-		packet.getAsByteBuffer().position(0);
-		try {
-			listenChannel.send(packet.getAsByteBuffer(), destination);
-		} catch (IOException cause) {
-			cause.printStackTrace();
-		}		
+	public void sendPacket(UDPPacket packet ) throws JMException {
+		if (!isOpen())
+			throw new JMException("UDP socket is not open");
+		sendQueue.offer(packet);
+		if (sender_thread.isSleeping())
+			sender_thread.wakeUp();
 	}
 	
-	public void sendPacket(UDPPacket packet, IPAddress address, int port) {
+	public void sendPacket(UDPPacket packet, IPAddress address, int port) throws JMException {
 		InetSocketAddress ip_address = new InetSocketAddress(address.toString(), port);
 		sendPacket(packet, ip_address);
 	}
 	
-	public void sendPacket(UDPPacket packet, InetSocketAddress destination) {
+	public void sendPacket(UDPPacket packet, InetSocketAddress destination) throws JMException {
 		packet.setAddress(destination);
 		sendPacket(packet);
 	}
 	
-	public void sendPacket(UDPPacket packet, String address, int port) {
+	public void sendPacket(UDPPacket packet, String address, int port) throws JMException {
 		InetSocketAddress ip_address = new InetSocketAddress(address, port);
 		sendPacket(packet, ip_address);
 	}
 	
-	/** Packet listener **/
+	private class UDPSenderThread extends JMThread {
+		private boolean is_sleeping = false;
+		private boolean loop = true;
+		public UDPSenderThread() {
+			super("UDP Sender thread");
+		}
+		
+		public void run() {
+			while(loop) {
+				if (!isOpen()) return ;
+				is_sleeping = false;
+				if (sendQueue.isEmpty()) {
+					is_sleeping = true;
+					synchronized(this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+						}
+					}
+					continue;
+				}
+				while(!sendQueue.isEmpty()) {
+					if (!isOpen()) return ;
+					UDPPacket packet = sendQueue.poll();
+					InetSocketAddress destination = packet.getAddress();
+					packet.getAsByteBuffer().position(0);
+					try {
+						listenChannel.send(packet.getAsByteBuffer(), destination);
+					} catch (IOException cause) {
+						if (!isOpen()) return ;
+						cause.printStackTrace();
+					}
+				}
+			}
+			
+		}
+		
+		public boolean isSleeping() {
+			return is_sleeping;
+		}
+		
+		public void wakeUp() {
+			synchronized(this) {
+				this.notify();
+			}
+		}
+		
+		public void JMStop() {
+			loop = false;
+			this.interrupt();
+		}
+		
+		
+		
+	}
+	
 	private class UDPListenThread extends JMThread {
 		
 		private volatile boolean stop = false;

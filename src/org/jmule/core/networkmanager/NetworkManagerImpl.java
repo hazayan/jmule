@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.management.JMException;
+
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -80,8 +82,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/10 14:07:23 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/14 09:35:43 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -207,14 +209,16 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public float getDownloadSpeed() {
 		float result = 0;
 		for (JMPeerConnection peer_connection : peer_connections.values())
-			result += peer_connection.getJMConnection().getDownloadSpeed();
+			if (peer_connection.getStatus() == ConnectionStatus.CONNECTED)
+				result += peer_connection.getJMConnection().getDownloadSpeed();
 		return result;
 	}
 	
 	public float getUploadSpeed() {
 		float result = 0;
 		for (JMPeerConnection peer_connection : peer_connections.values())
-			result += peer_connection.getJMConnection().getUploadSpeed();
+			if (peer_connection.getStatus() == ConnectionStatus.CONNECTED)
+				result += peer_connection.getJMConnection().getUploadSpeed();
 		return result;
 	}
 
@@ -838,7 +842,11 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void sendKadPacket(KadPacket packet, IPAddress address, int port) {
-		udp_connection.sendPacket(packet, address, port);
+		try {
+			udp_connection.sendPacket(packet, address, port);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendPartHashSetRequest(String peerIP, int peerPort,
@@ -934,27 +942,47 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	
 	public void sendServerUDPStatusRequest(String serverIP, int serverPort, int clientTime) {
 		UDPPacket packet = UDPPacketFactory.getUDPStatusRequest(clientTime);
-		udp_connection.sendPacket(packet, serverIP, serverPort);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void sendServerUDPDescRequest(String serverIP, int serverPort) {
 		UDPPacket packet = UDPPacketFactory.getUDPServerDescRequest();
-		udp_connection.sendPacket(packet, serverIP, serverPort);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void sendServerUDPSourcesRequest(String serverIP, int serverPort, FileHash... fileHashSet) {
 		UDPPacket packet = UDPPacketFactory.getUDPSourcesRequest(fileHashSet);
-		udp_connection.sendPacket(packet, serverIP, serverPort);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void sendServerUDPSearchRequest(String serverIP, int serverPort, String searchString) {
 		UDPPacket packet = UDPPacketFactory.getUDPSearchPacket(searchString);
-		udp_connection.sendPacket(packet, serverIP, serverPort);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void sendServerUDPReaskFileRequest(String serverIP, int serverPort, FileHash fileHash) {
 		UDPPacket packet = UDPPacketFactory.getUDPReaskFilePacket(fileHash);
-		udp_connection.sendPacket(packet, serverIP, serverPort);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
