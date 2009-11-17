@@ -47,8 +47,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 09:43:50 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 14:54:55 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -88,7 +88,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
                  if (types.contains(JMuleCoreStats.ST_NET_PEERS_UPLOAD_COUNT)) {
                 	 int total_upload_peers = 0;
 	            	 for(UploadSession session : session_list.values()) {
-	            		 total_upload_peers+=session.getPeersCount();
+						total_upload_peers += session.getPeerCount();
 	            	 }
 	            	 values.put(JMuleCoreStats.ST_NET_PEERS_UPLOAD_COUNT, total_upload_peers);
                 	 
@@ -183,7 +183,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		UploadSession session = getUploadSession(sender);
 		if (session == null) return ;
 		session.endOfDownload(sender);
-		if (session.getPeersCount()==0) {
+		if (session.getPeerCount()==0) {
 			session.stopSession();
 			session_list.remove(session.getFileHash());
 		}
@@ -193,7 +193,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		UploadSession session = getUploadSession(sender);
 		if (session == null) return ;
 		session.endOfDownload(sender);
-		if (session.getPeersCount()==0) {
+		if (session.getPeerCount()==0) {
 			session.stopSession();
 			session_list.remove(session.getFileHash());
 		}

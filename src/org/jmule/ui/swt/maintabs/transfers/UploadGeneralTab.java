@@ -48,8 +48,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/28 16:26:32 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/17 14:53:42 $
  */
 public class UploadGeneralTab extends CTabItem implements Refreshable {
 
@@ -162,12 +162,12 @@ public class UploadGeneralTab extends CTabItem implements Refreshable {
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		peers = new Label(transfer,SWT.NONE);
 		peers.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		peers.setText(upload_session.getPeersCount()+"");		
+		peers.setText(upload_session.getPeerCount() + "");		
 	}
 
 	public void refresh() {
 		if (isDisposed()) return ;
-		peers.setText(upload_session.getPeersCount()+"");
+		peers.setText(upload_session.getPeerCount() + "");
 		eta.setText(TimeFormatter.format(upload_session.getETA()));
 		total_uploaded.setText(FileFormatter.formatFileSize(upload_session.getTransferredBytes()));
 		upload_speed.setText(SpeedFormatter.formatSpeed(upload_session.getSpeed()));

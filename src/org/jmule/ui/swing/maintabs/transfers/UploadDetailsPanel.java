@@ -44,8 +44,8 @@ import org.jmule.ui.utils.TimeFormatter;
  *
  * Created on Oct 11, 2008
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/11 18:07:21 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/17 14:53:43 $
  */
 public class UploadDetailsPanel extends JPanel {
 
@@ -132,7 +132,7 @@ public class UploadDetailsPanel extends JPanel {
 		upload_speed_value.setText(SpeedFormatter.formatSpeed(session.getSpeed()));
 		transferred_value.setText(FileFormatter.formatFileSize(session.getTransferredBytes()));
 		eta_value.setText(TimeFormatter.format(session.getETA()));
-		peers_value.setText(session.getPeersCount() + "");
+		peers_value.setText(session.getPeerCount() + "");
 	}
 
 }

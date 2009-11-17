@@ -54,8 +54,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:09:57 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 14:53:43 $$
  */
 public class UploadsTable extends JMTable {
 
@@ -96,7 +96,7 @@ public class UploadsTable extends JMTable {
 		public Component getTableCellRendererComponent(JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            this.setText(session.getPeersCount()+"");
+			this.setText(session.getPeerCount() + "");
             this.setHorizontalAlignment(SwingConstants.CENTER);
 			return this;
 		}

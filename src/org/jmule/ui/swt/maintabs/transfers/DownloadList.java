@@ -65,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/27 20:44:58 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 14:53:42 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -434,8 +434,8 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		try {
 			if (upload_manager.hasUpload(session.getFileHash())) {
 				upload_session = upload_manager.getUpload(session.getFileHash());
-				peerCount += upload_session.getPeersCount();
-				partialSources += upload_session.getPeersCount();
+				peerCount += upload_session.getPeerCount();
+				partialSources += upload_session.getPeerCount();
 			}
 		} catch (UploadManagerException e) {
 			e.printStackTrace();

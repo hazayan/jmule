@@ -54,8 +54,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/17 14:53:42 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -182,7 +182,9 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, object.getSharingName());
 		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));
 		setRowText(object,  SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, SpeedFormatter.formatSpeed(object.getSpeed()));
-		setRowText(object,  SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, object.getPeersCount()+"");
+		setRowText(object, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, object
+				.getPeerCount()
+				+ "");
 		long eta = object.getETA();
 		setRowText(object,  SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, TimeFormatter.format(eta));
 		setRowText(object,  SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID, FileFormatter.formatFileSize(object.getTransferredBytes()));
