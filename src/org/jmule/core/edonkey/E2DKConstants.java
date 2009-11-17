@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/10 14:05:43 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 10:04:46 $$
  */
 public class E2DKConstants {
 
@@ -98,13 +98,21 @@ public class E2DKConstants {
 	public final static int SUPPORTED_FLAGS 			= E2DKConstants.CAP_ZLIB | E2DKConstants.CAP_UNICODE | E2DKConstants.CAP_LARGEFILES ;
 	
 	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
-	 
-	public final static long PACKET_SIZE_TO_COMPRESS	= 900;
 	
 	static {
 		SERVER_ERROR_MESSAGES.add("WARNING : This server is full.");
 		SERVER_ERROR_MESSAGES.add("ERROR : Connection refused. Your IP is currently blacklisted.");
 	}
+	
+	public final static long PACKET_SIZE_TO_COMPRESS	= 900;
+	public static final Set<Byte> PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
+	static {
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_HASHSETANSWER);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_PEERHELLO);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_PEERHELLOANSWER);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_SENDINGPART);
+	}
+	public static final Set<Byte> SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
 	
 	public final static long MAXPACKETSIZE				= 2000000;
 	public final static long PARTSIZE 					= 0x947000; //9728000

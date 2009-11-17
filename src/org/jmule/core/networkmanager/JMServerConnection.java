@@ -42,8 +42,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 20, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/14 09:35:43 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/17 10:04:46 $
  */
 public class JMServerConnection extends JMConnection {
 
@@ -90,7 +90,9 @@ public class JMServerConnection extends JMConnection {
 	}
 	
 	private void sendPacket(Packet packet) throws Exception {
-		if (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS) {
+		if (!E2DKConstants.SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS
+				.contains(packet.getCommand())
+				&& (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS)) {
 			byte op_code = packet.getCommand(); 
 			ByteBuffer raw_data = Misc.getByteBuffer(packet.getLength()-1-4-1);
 			ByteBuffer data = packet.getAsByteBuffer();
