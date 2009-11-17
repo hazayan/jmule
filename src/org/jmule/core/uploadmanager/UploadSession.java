@@ -38,7 +38,6 @@ import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.CompletedFile;
-import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharedFileException;
@@ -48,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 12:01:49 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 09:42:46 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -68,6 +67,12 @@ public class UploadSession implements JMTransferSession {
 		sharedFile = sFile;
 	}
 	
+	void stopSession() {
+		for(Peer peer : session_peers) {
+			network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+		}
+	}
+	
 	public boolean sharingCompleteFile() {
 		boolean result = sharedFile instanceof CompletedFile;
 		if (!result) {
@@ -79,12 +84,6 @@ public class UploadSession implements JMTransferSession {
 		return result;
 	}
 		
-	void stopSession() {
-		for(Peer peer : session_peers) {
-			network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
-		}
-	}
-	
 	public int getPeerCount() {
 		return session_peers.size();
 	}
@@ -102,9 +101,8 @@ public class UploadSession implements JMTransferSession {
 	}
 	
 	public float getSpeed() {
-		List<Peer> peer_list = uploadQueue.getSlotPeers(PeerQueueStatus.SLOTGIVEN, PeerQueueStatus.SLOTTAKEN);
 		float upload_speed = 0.0f;
-		for(Peer peer : peer_list)
+		for(Peer peer : session_peers)
 			upload_speed += peer.getUploadSpeed();
 		return upload_speed;
 	}
@@ -118,6 +116,7 @@ public class UploadSession implements JMTransferSession {
 	}
 	
 	void endOfDownload(Peer sender) {
+		session_peers.remove(sender);
 		uploadQueue.removePeer(sender);
 		for(Peer peer : uploadQueue.getSlotPeers(PeerQueueStatus.SLOTTAKEN)) {
 			if (peer.isConnected())
@@ -153,25 +152,8 @@ public class UploadSession implements JMTransferSession {
 		}
 	}
 	
-	void receivedFileStatusRequestFromPeer(Peer sender,FileHash fileHash) {
-		if (sharedFile instanceof PartialFile){
-			PartialFile partialFile = (PartialFile) sharedFile;
-			network_manager.sendFileStatusAnswer(sender.getIP(), sender.getPort(), sharedFile.getHashSet(), sharedFile.length() ,partialFile.getGapList());
-		} else {
-			network_manager.sendFileStatusAnswer(sender.getIP(), sender.getPort(), sharedFile.getHashSet(), sharedFile.length() ,new GapList());
-		}
-	}
-	
-	void receivedHashSetRequestFromPeer(Peer sender,FileHash fileHash) {
-		network_manager.sendFileHashSetAnswer(sender.getIP(), sender.getPort(), sharedFile.getHashSet());
-	}
-	
-	void receivedFileRequestFromPeer(Peer sender,FileHash fileHash) {
-		session_peers.add(sender);
-		network_manager.sendFileRequestAnswer(sender.getIP(), sender.getPort(), sharedFile.getFileHash(), sharedFile.getSharingName());	
-	}
-	
 	void receivedSlotRequestFromPeer(Peer sender,FileHash fileHash) {
+		session_peers.add(sender);
 		addIfNeedToUploadQueue(sender.getIP(), sender.getPort());
 		
 		boolean contains = uploadQueue.getSlotPeers(PeerQueueStatus.SLOTGIVEN, PeerQueueStatus.SLOTTAKEN).contains(sender);
