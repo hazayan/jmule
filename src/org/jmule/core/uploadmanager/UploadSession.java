@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 09:42:46 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 14:54:22 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -234,10 +234,6 @@ public class UploadSession implements JMTransferSession {
 
 	public long getFileSize() {
 		return sharedFile.length();
-	}
-
-	public int getPeersCount() {
-		return uploadQueue.size();
 	}
 
 	public ED2KFileLink getED2KLink() {
