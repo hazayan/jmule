@@ -31,15 +31,11 @@ import org.jmule.core.peermanager.Peer;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.2 $ Last changed by $Author: binary255 $ on $Date: 2009/10/28 15:00:32 $
+ * @version $Revision: 1.3 $ Last changed by $Author: binary255 $ on $Date: 2009/11/17 09:44:21 $
  */
 public interface InternalUploadManager extends UploadManager {
 
 	public void addUpload(FileHash fileHash) throws UploadManagerException;
-	
-	public void endOfDownload(Peer sender);
-
-	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks);
 
 	public void receivedFileRequestFromPeer(Peer sender,FileHash fileHash);
 
@@ -50,6 +46,10 @@ public interface InternalUploadManager extends UploadManager {
 	public void receivedSlotRequestFromPeer(Peer sender,FileHash fileHash);
 
 	public void receivedSlotReleaseFromPeer(Peer sender);
+	
+	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks);
+	
+	public void endOfDownload(Peer sender);
 	
 	public void removeUpload(FileHash fileHash);
 
