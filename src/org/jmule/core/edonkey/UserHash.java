@@ -30,24 +30,15 @@ import org.jmule.core.utils.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:45:20 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/19 17:24:10 $$
  */
-public class UserHash {
+public class UserHash implements Comparable<UserHash> {
 	
 	private byte[] userHash = new byte[16];
 	
-	public UserHash() { }
-	
-	public UserHash(byte[] hash){
-		
-		this.userHash=hash;
-		
-	}
-	
-	public UserHash(String hash) {
-		
-		loadFromString(hash);
+	public UserHash(byte[] hash) {
+		this.userHash = hash;
 	}
 	
 	public static UserHash genNewUserHash() {
@@ -59,46 +50,31 @@ public class UserHash {
 	}
 	
 	public byte[] getUserHash() {
-		
 		return this.userHash;
-		
 	}
 	
 	public String getAsString() {
-		String value="";
-		
-		for(int i = 0 ; i < userHash.length; i++)
-			
+		String value = "";
+		for (int i = 0; i < userHash.length; i++)
 			value = value + Convert.byteToHex(userHash[i]);
-		
 		return value;
 	}
 	
-	
 	public String toString() {
-		
-		String sValue="";
-		
-		for(int i = 0 ; i < userHash.length; i++)
-			
+		String sValue = "";
+		for (int i = 0; i < userHash.length; i++)
 			sValue = sValue + Convert.byteToHex(userHash[i]);
-		
 		return sValue;
-		
 	}
 	
-	public void loadFromString(String inputString){
-		
-		for(int i = 0; i < userHash.length; i++)
-			
-			userHash[i] = Convert.hexToByte(inputString.charAt(i*2)+""+inputString.charAt(i*2+1));
-		
+	public void loadFromString(String inputString) {
+		for (int i = 0; i < userHash.length; i++)
+			userHash[i] = Convert.hexToByte(inputString.charAt(i * 2) + ""
+					+ inputString.charAt(i * 2 + 1));
 	}
 	
-	public void setUserHash(byte data[]){
-		
+	public void setUserHash(byte data[]) {
 		userHash = data;
-		
 	}
 	
 	public int hashCode() {
@@ -110,6 +86,16 @@ public class UserHash {
 		if (!(object instanceof UserHash )) return false;
 		UserHash hash = (UserHash)object;
 		return Arrays.equals(userHash, hash.getUserHash());
+	}
+
+	public int compareTo(UserHash o) {
+		int hash_code1 = hashCode();
+		int hash_code2 = o.hashCode();
+		if (hash_code1 < hash_code2)
+			return -1;
+		if (hash_code1 == hash_code2)
+			return 0;
+		return 1;
 	}
 	
 }
