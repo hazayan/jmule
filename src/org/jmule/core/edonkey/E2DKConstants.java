@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 10:04:46 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/19 17:23:24 $$
  */
 public class E2DKConstants {
 
@@ -172,23 +172,31 @@ public class E2DKConstants {
 	
 	public final static byte OP_KAD_CALLBACK			= (byte) 0x99;
 	
-	
-	public final static byte	SRV_TCPFLG_COMPRESSION		= 0x00000001;
-	public final static byte	SRV_TCPFLG_NEWTAGS			= 0x00000008;
-	public final static byte	SRV_TCPFLG_UNICODE			= 0x00000010;
-	public final static byte	SRV_TCPFLG_RELATEDSEARCH	= 0x00000040;
-	public final static byte	SRV_TCPFLG_TYPETAGINTEGER	= (byte) 0x00000080;
-	public final static byte	SRV_TCPFLG_LARGEFILES		= (byte) 0x00000100;
-	public final static byte	SRV_TCPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
+	public final static byte SRV_TCPFLG_COMPRESSION		= 0x00000001;
+	public final static byte SRV_TCPFLG_NEWTAGS			= 0x00000008;
+	public final static byte SRV_TCPFLG_UNICODE			= 0x00000010;
+	public final static byte SRV_TCPFLG_RELATEDSEARCH	= 0x00000040;
+	public final static byte SRV_TCPFLG_TYPETAGINTEGER	= (byte) 0x00000080;
+	public final static byte SRV_TCPFLG_LARGEFILES		= (byte) 0x00000100;
+	public final static byte SRV_TCPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
 
-	public final static byte	SRV_UDPFLG_EXT_GETSOURCES	= 0x00000001;
-	public final static byte 	SRV_UDPFLG_EXT_GETFILES		= 0x00000002;
-	public final static byte	SRV_UDPFLG_NEWTAGS			= 0x00000008;
-	public final static byte	SRV_UDPFLG_UNICODE			= 0x00000010;
-	public final static byte	SRV_UDPFLG_EXT_GETSOURCES2	= 0x00000020;
-	public final static byte	SRV_UDPFLG_LARGEFILES		= (byte) 0x00000100;
-	public final static byte	SRV_UDPFLG_UDPOBFUSCATION	= (byte) 0x00000200;
-	public final static byte	SRV_UDPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
+	public final static byte SRV_UDPFLG_EXT_GETSOURCES	= 0x00000001;
+	public final static byte SRV_UDPFLG_EXT_GETFILES	= 0x00000002;
+	public final static byte SRV_UDPFLG_NEWTAGS			= 0x00000008;
+	public final static byte SRV_UDPFLG_UNICODE			= 0x00000010;
+	public final static byte SRV_UDPFLG_EXT_GETSOURCES2	= 0x00000020;
+	public final static byte SRV_UDPFLG_LARGEFILES		= (byte) 0x00000100;
+	public final static byte SRV_UDPFLG_UDPOBFUSCATION	= (byte) 0x00000200;
+	public final static byte SRV_UDPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
+	
+	// Queue rating modifiers
+	public final static float INITIAL_RATING			= 100f;
+	public final static float BANNED 					= 0f;
+	public final static float FILE_PRIORITY_RELEASE		= 1.8f;
+	public final static float FILE_PRIORITY_HIGH		= 0.9f;
+	public final static float FILE_PRIORITY_NORMAL		= 0.7f;
+	public final static float FILE_PRIORITY_LOW			= 0.6f;
+	public final static float FILE_PRIORITY_VERY_LOW	= 0.2f;
 	
 	public static enum ServerFeatures {
 		// TCP + UDP flags
@@ -205,7 +213,6 @@ public class E2DKConstants {
 		GetFiles,
 		GetSources2,
 		UDPObfusication
-
 	}
 	
 	public static enum PeerFeatures { 
@@ -237,7 +244,6 @@ public class E2DKConstants {
 		DefaultJMuleFeatures.put(NoViewSharedFiles, 0);
 		DefaultJMuleFeatures.put(MultiPacket, 0);
 		DefaultJMuleFeatures.put(SupportPreview, 0);
-		
 	}
 	//UDP
 	//Server <-> Peer 
@@ -386,7 +392,6 @@ public class E2DKConstants {
 		iso_extensions.add("nrg");
 		iso_extensions.add("mdf");
 	}
-
 	// Part files constants
 	public final static byte PARTFILE_VERSION 			= (byte)0xe0;
 	public final static byte[] FT_FILENAME				= new byte[]{0x01};
