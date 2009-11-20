@@ -29,15 +29,13 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_REASKFILEPING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_REQ;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
 
-import java.net.InetSocketAddress;
-
 import org.jmule.core.edonkey.FileHash;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/14 09:26:18 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:25:43 $$
  */
 public class UDPPacketFactory {
 
