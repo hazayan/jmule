@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.33 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 13:02:03 $$
+ * @version $$Revision: 1.34 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:25:13 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -197,6 +197,16 @@ public class DownloadSession implements JMTransferSession {
 		download_tasks = new JMTimer();
 		peer_monitor_task = new JMTimerTask() {
 			public void run() {
+				List<Peer> status_unresponse_list = download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, PeerDownloadStatus.FILE_STATUS_REQUEST);
+				for(Peer peer : status_unresponse_list) {
+					network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
+							getFileHash());
+				}
+				for(Peer peer : status_unresponse_list) {
+					network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
+							getFileHash());
+				}
+				
 				List<Peer> frenzed_list = download_status_list
 						.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL,
 								ACTIVE);
@@ -623,21 +633,7 @@ public class DownloadSession implements JMTransferSession {
 			return;
 		session_peers.remove(peer);
 	}
-
-	private void resendFilePartsRequest(Peer peer) {
-		int resend_count = download_status_list.getPeerResendCount(peer);
-		if (resend_count > 5)
-			return;
-		FileChunkRequest[] request = download_status_list.getPeerFileChunksRequest(peer);
-		if (request == null)
-			return;
-		download_status_list.updatePeerTime(peer);
-		download_status_list.setPeerResendCount(peer, resend_count + 1);
-		download_status_list.addPeerHistoryRecord(peer, "Resend last request");
-		network_manager.sendFilePartsRequest(peer.getIP(), peer.getPort(),
-				getFileHash(), request);
-	}
-
+	
 	private void completeDownload() {
 
 		stopDownload();
