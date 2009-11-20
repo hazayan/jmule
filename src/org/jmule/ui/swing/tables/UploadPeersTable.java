@@ -37,6 +37,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadQueueException;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.GeneralComparator;
 import org.jmule.core.utils.Misc;
@@ -51,8 +52,8 @@ import org.jmule.ui.utils.SpeedFormatter;
  *
  * Created on Oct 7, 2008
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: javajox $ on $Date: 2009/09/27 14:20:00 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/20 12:23:59 $
  */
 public class UploadPeersTable extends JMTable {
 
@@ -139,8 +140,13 @@ public class UploadPeersTable extends JMTable {
     	    Object[] objects = (Object[])value;
     	    UploadSession session = (UploadSession)objects[0];
     	    Peer peer = (Peer)objects[1];
-    	    int peer_position = _upload_manager.
-    	                 getUploadQueue().getPeerPosition(peer);
+    	    int peer_position = 0;
+			try {
+				peer_position = _upload_manager.
+				             getUploadQueue().getPeerPosition(peer);
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
     	    boolean is_uploading = (peer_position == 0)?true:false;
     	    this.setHorizontalAlignment(SwingConstants.LEFT);
     	    this.setText(" " + (is_uploading?"Uploading":"Position: " + peer_position));
@@ -247,8 +253,18 @@ public class UploadPeersTable extends JMTable {
 				Peer peer1 = (Peer)objects1[1];    
 				UploadSession session2 = (UploadSession)objects2[0];
 	    	    Peer peer2 = (Peer)objects2[1];
-	    	    int peer_position1 = _upload_manager.getUploadQueue().getPeerPosition(peer1);
-	    	    int peer_position2 = _upload_manager.getUploadQueue().getPeerPosition(peer2);
+	    	    int peer_position1 = 0;
+				try {
+					peer_position1 = _upload_manager.getUploadQueue().getPeerPosition(peer1);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
+	    	    int peer_position2 = 0;
+				try {
+					peer_position2 = _upload_manager.getUploadQueue().getPeerPosition(peer2);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
 	    	    boolean is_uploading1 = (peer_position1 == 0)?true:false;
 	    	    boolean is_uploading2 = (peer_position2 == 0)?true:false;
 	    	    String str1 = is_uploading1?"Uploading":"Position: " + peer_position1;

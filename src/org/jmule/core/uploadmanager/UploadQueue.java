@@ -22,142 +22,85 @@
  */
 package org.jmule.core.uploadmanager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMIterator;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.peermanager.Peer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/11 07:01:09 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:23:59 $$
  */
 public class UploadQueue {
-	private static final String PEER_SEPARATOR 				=   ":";
 	private static UploadQueue instance = null;
 	
 	static UploadQueue getInstance() {
 		if (instance == null)
-			instance = new UploadQueue();
+				instance = new UploadQueue();
 		return instance;
 	}
 	
-	private List<UploadQueueContainer> upload_queue = new CopyOnWriteArrayList<UploadQueueContainer>();
-	private Set<String> stored_peers = new ConcurrentSkipListSet<String>();
-	
+	private Map<UserHash, UploadQueueContainer> upload_queue = new ConcurrentHashMap<UserHash, UploadQueueContainer>();
+	private Collection<UploadQueueContainer>    slot_clients = new ConcurrentLinkedQueue<UploadQueueContainer>();
 	enum PeerQueueStatus { SLOTGIVEN, SLOTTAKEN }
 	
 	private UploadQueue() {
 	}
 	
-	public int getPeerPosition(Peer peer) {
-		int position = 0;
-		for(UploadQueueContainer container : upload_queue)
-			if (container.peer.equals(peer))
-				return position;
-			else
-				position++;
-		return -1;
+	boolean hasPeer(Peer peer) {
+		return upload_queue.containsKey(peer.getUserHash());
 	}
 	
-	void addPeer(Peer peer) throws UploadQueueException {
+	void addPeer(Peer peer, FileHash fileHash) throws UploadQueueException {
 		if (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE))
 			throw new UploadQueueException("Queue full");
-		stored_peers.add(peer.getIP() + PEER_SEPARATOR + peer.getPort());
-		upload_queue.add(new UploadQueueContainer(peer));
+		upload_queue.put(peer.getUserHash(), 
+				new UploadQueueContainer(peer,fileHash, E2DKConstants.INITIAL_RATING));
 	}
 	
-	boolean isFull() {
-		return (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE));
-	}
-	
-	List<UploadQueueContainer> getTopContainers() {
-		List<UploadQueueContainer> result = new LinkedList<UploadQueueContainer>();
-		if (size() <= ConfigurationManager.UPLOAD_QUEUE_SLOTS)
-			for (UploadQueueContainer container : upload_queue)
-				result.add(container);
-		else {
-			for (int i = 1; i <= ConfigurationManager.UPLOAD_QUEUE_SLOTS; i++) {
-				int id = size() - i;
-				if (id>=0)
-					result.add(upload_queue.get(id));
-				else {
-					
-				}
-			}
+	public int getPeerPosition(Peer peer) throws UploadQueueException {
+		UploadQueueContainer peer_container = upload_queue.get(peer.getUserHash());
+		if (peer_container == null)
+			throw new UploadQueueException("Peer " + peer + " not found in UploadQueue");
+		float peer_score = getPeerScore(peer_container);
+		int position = 1;
+		// Hot code
+		for (UploadQueueContainer container : upload_queue.values()) {
+			if (getPeerScore(container) > peer_score)
+				position++;
 		}
-		return result;
+		return position;
 	}
 	
-	List<Peer> getSlotPeers(PeerQueueStatus... status) {
-		List<UploadQueueContainer> containers = getTopContainers();
-		List<Peer> peer_list = new LinkedList<Peer>();
-		for (UploadQueueContainer container : containers)
-			for (PeerQueueStatus s : status)
-				if (container.peer_status.contains(s)) {
-					peer_list.add(container.peer);
-					break;
-				}
-		return peer_list;
+	float getPeerScore(UploadQueueContainer container) {
+		float rating = container.rating;
+		float time_in_queue = (System.currentTimeMillis() - container.addTime) / 1000f;
+		float score = rating * time_in_queue / 100f;
+		return score;
 	}
 	
-	void markSlotGiven(Peer peer) {
-		for(UploadQueueContainer container : upload_queue)
-			if (container.peer.equals(peer)) {
-				container.peer_status.remove(PeerQueueStatus.SLOTTAKEN);
-				container.peer_status.add(PeerQueueStatus.SLOTGIVEN);
-				return ;
-			}
-	}
-	
-	void markSlotTaken(Peer peer) {
-		for(UploadQueueContainer container : upload_queue)
-			if (container.peer.equals(peer)) {
-				container.peer_status.remove(PeerQueueStatus.SLOTGIVEN);
-				container.peer_status.add(PeerQueueStatus.SLOTGIVEN);
-				return ;
-			}
-	}
-	
-	boolean hasPeer(Peer peer) {
-		return stored_peers.contains(peer.getIP() + ":" + peer.getPort());
-	}
-	
-	boolean hasPeer(String peerIP, int peerPort) {
-		return stored_peers.contains(peerIP + ":" + peerPort);
-	}
-	
-	int getPeerQueueID(Peer peer) {
-		int id = 0;
-		for (UploadQueueContainer container : upload_queue) 
-			if (container.peer.equals(peer))
-				return id;
-			else
-				id++;
-		return -1;
-	}
-	
-	void removePeer(Peer peer) {
-		int id = getPeerQueueID(peer);
-		if (id == -1)
-			return;
-		upload_queue.remove(id);
-		stored_peers.remove(peer.getID() + ":" + peer.getPort());
-	}
-	
-	void moveToLast(Peer peer) {
-		int id = getPeerQueueID(peer);
-		UploadQueueContainer container = upload_queue.get(id);
-		upload_queue.remove(container);
-		upload_queue.add(container);
+	void removePeer(Peer peer) throws UploadQueueException {
+		if (!hasPeer(peer))
+			throw new UploadQueueException("Peer " + peer + " not found in UploadQueue");
+		UploadQueueContainer container = upload_queue.get(peer.getUserHash());
+		upload_queue.remove(peer.getUserHash());
+		if (slot_clients.contains(slot_clients))
+			slot_clients.remove(container);
 	}
 	
 	public int size() {
@@ -166,40 +109,121 @@ public class UploadQueue {
 	
 	void clear() {
 		upload_queue.clear();
-		stored_peers.clear();
+		slot_clients.clear();
 	}
 	
-			
+	boolean isFull() {
+		return (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE));
+	}
+	
+	public boolean hasSlotPeer(Peer peer) {
+		for(UploadQueueContainer container : slot_clients)
+			if (container.peer.equals(peer))
+				return true;
+		return false;
+	}
+	
 	public JMIterable<Peer> getPeers() {
 		List<Peer> list = new LinkedList<Peer>();
-		for (UploadQueueContainer element : upload_queue)
+		for (UploadQueueContainer element : upload_queue.values())
 			list.add(element.peer);
 		return new JMIterable<Peer>(new JMIterator<Peer>(list.iterator()));
 	}
 	
 	public String toString() {
-		String result = "";
-		int id = 0;
-		for (Peer peer : getPeers()) {
-			result += peer + " " + id + " \n";
-			id++;
+		String result = "Upload queue : \n";
+		for (UploadQueueContainer container : upload_queue.values()) {
+			try {
+				result += "[\n" + container
+						+ "\n Peer position :" + getPeerPosition(container.peer) + "\n]\n";
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
 		}
+		
+		result += "Slot peers : \n";
+		for (UploadQueueContainer container : slot_clients) {
+			try {
+				result += "[\n" + container
+						+ "\n Peer position :" + getPeerPosition(container.peer) + "\n]\n";
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
 		return result;
 	}
+	
+	public void recalcSlotPeers(List<UploadQueueContainer> lostSlotPeers, List<UploadQueueContainer> obtainedSlotPeers) {
+		
+		List<UploadQueueContainer> max_score_peers = new ArrayList<UploadQueueContainer>();
+		
+		for(UploadQueueContainer container : upload_queue.values()) {
+			
+			if (max_score_peers.size()<ConfigurationManager.UPLOAD_QUEUE_SLOTS)
+				max_score_peers.add(container);
+			else {
+				
+				float current_peer_score = getPeerScore(container);
+				UploadQueueContainer slot_container = null;
+				boolean found = false;
+				
+				for(int i = 0;i<max_score_peers.size();i++) {
+					slot_container = max_score_peers.get(i);
+					float c_score = getPeerScore(slot_container);
+					if (current_peer_score > c_score) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (found) {
+					max_score_peers.remove(slot_container);
+					max_score_peers.add(container);
+				}
+			}
+		}
+		
+		//extract lost slot peers
+		for(UploadQueueContainer container : slot_clients) {
+			if (!max_score_peers.contains(container)) 
+				lostSlotPeers.add(container);
+			
+		}
+		slot_clients.removeAll(lostSlotPeers);
+		
+		for(UploadQueueContainer container : max_score_peers) {
+			if (!slot_clients.contains(container)) {
+				slot_clients.add(container);
+				obtainedSlotPeers.add(container);
+			}
+		}
+		
+		
+	}
 
-	class UploadQueueContainer {
-		private Peer peer;
-		private long addTime;
-		private Set<PeerQueueStatus> peer_status = new HashSet<PeerQueueStatus>();
-
-		public UploadQueueContainer(Peer uploadPeer) {
+	public class UploadQueueContainer {
+		float rating = 0;
+		Peer peer;
+		long addTime;
+		FileHash fileHash;
+		Set<PeerQueueStatus> peer_status = new HashSet<PeerQueueStatus>();
+		
+		public UploadQueueContainer(Peer uploadPeer, FileHash fileHash, float initialRating) {
 			peer = uploadPeer;
+			this.fileHash = fileHash;
 			addTime = System.currentTimeMillis();
-			peer_status.add(PeerQueueStatus.SLOTTAKEN);
+			rating = initialRating;
 		}
 		
 		public String toString() {
-			return peer+" " + addTime;
+			return " "+peer+
+			"\n Rating   : "+ rating+
+			"\n Score    : "+ getPeerScore(this)+
+			"\n Addtime  : " + addTime +
+			"\n FileHash : " + fileHash
+			;
 		}
 
 	}

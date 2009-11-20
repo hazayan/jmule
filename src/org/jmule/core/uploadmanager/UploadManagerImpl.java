@@ -43,12 +43,13 @@ import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
+import org.jmule.core.uploadmanager.UploadQueue.UploadQueueContainer;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/17 14:54:55 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:23:59 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -58,6 +59,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	
 	private InternalSharingManager sharing_manager = (InternalSharingManager) SharingManagerSingleton.getInstance();
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	
+	private UploadQueue uploadQueue = UploadQueue.getInstance();
 	
 	UploadManagerImpl() { }
 
@@ -126,6 +129,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		return UploadQueue.getInstance();
 	}
 	
+	
+	
 	public void addUpload(FileHash fileHash) throws UploadManagerException {
 		if (hasUpload(fileHash))
 			throw new UploadManagerException("Upload " + fileHash
@@ -179,37 +184,12 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		return null;
 	}
 
-	public void endOfDownload(Peer sender) {
-		UploadSession session = getUploadSession(sender);
-		if (session == null) return ;
-		session.endOfDownload(sender);
-		if (session.getPeerCount()==0) {
-			session.stopSession();
-			session_list.remove(session.getFileHash());
-		}
-	}
 	
-	public void receivedSlotReleaseFromPeer(Peer sender) {
-		UploadSession session = getUploadSession(sender);
-		if (session == null) return ;
-		session.endOfDownload(sender);
-		if (session.getPeerCount()==0) {
-			session.stopSession();
-			session_list.remove(session.getFileHash());
-		}
-	}
-
-	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks) {
-		UploadSession session;
-		try {
-			session = getUpload(fileHash);
-		} catch (UploadManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		session.receivedFileChunkRequestFromPeer(sender, fileHash, requestedChunks);
-	}
-
+	
+	/*
+	 * Generic, non UploadSession requests handling
+	 * 
+	 */
 	public void receivedFileStatusRequestFromPeer(Peer sender,FileHash fileHash) { 
 		if (!sharing_manager.hasFile(fileHash)) {
 			// requested file not found!
@@ -222,14 +202,6 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		} else {
 			network_manager.sendFileStatusAnswer(sender.getIP(), sender.getPort(), shared_file.getHashSet(), shared_file.length() ,new GapList());
 		}
-		/*UploadSession session;
-		try {
-			session = getUpload(fileHash);
-		} catch (UploadManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		session.receivedFileStatusRequestFromPeer(sender, fileHash);*/
 	}
 
 	public void receivedHashSetRequestFromPeer(Peer sender,FileHash fileHash) {
@@ -239,19 +211,35 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		}
 		SharedFile shared_file = sharing_manager.getSharedFile(fileHash);
 		network_manager.sendFileHashSetAnswer(sender.getIP(), sender.getPort(), shared_file.getHashSet());
-		
-		/*
-		UploadSession session;
-		try {
-			session = getUpload(fileHash);
-		} catch (UploadManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		session.receivedHashSetRequestFromPeer(sender, fileHash);*/
 	}
 
+	public void receivedFileRequestFromPeer(Peer sender,FileHash fileHash) {
+		if (!sharing_manager.hasFile(fileHash)) {
+			network_manager.sendFileNotFound(sender.getIP(),sender.getPort(), fileHash);
+			return ;
+		}
+		
+		SharedFile shared_file = sharing_manager.getSharedFile(fileHash);
+		network_manager.sendFileRequestAnswer(sender.getIP(), sender.getPort(), shared_file.getFileHash(), shared_file.getSharingName());
+	}
+	
+	
+	
+	/*
+	 * Slot request, begin/end of upload requests handling
+	 * 
+	 */
 	public void receivedSlotRequestFromPeer(Peer sender,FileHash fileHash) {
+		if (!uploadQueue.hasPeer(sender)) {
+			try {
+				uploadQueue.addPeer(sender, fileHash);
+				recalcUploadQueuePeers();
+			} catch (UploadQueueException e) {
+				// queue is full
+				e.printStackTrace();
+				return ;
+			}
+		}
 		if (hasUpload(fileHash)) {
 			UploadSession upload_session;
 			try {
@@ -267,17 +255,69 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		session_list.put(fileHash, session);
 		session.receivedSlotRequestFromPeer(sender, fileHash);
 	}
-
-	public void receivedFileRequestFromPeer(Peer sender,FileHash fileHash) {
-		if (!sharing_manager.hasFile(fileHash)) {
-			network_manager.sendFileNotFound(sender.getIP(),sender.getPort(), fileHash);
+	
+	/*
+	 * Process chunk request
+	 * 
+	 */
+	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks) {
+		if (!uploadQueue.hasSlotPeer(sender)) {
+			try {
+				network_manager.sendQueueRanking(sender.getIP(), sender.getPort(), uploadQueue.getPeerPosition(sender));
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
 			return ;
 		}
-		
-		SharedFile shared_file = sharing_manager.getSharedFile(fileHash);
-		network_manager.sendFileRequestAnswer(sender.getIP(), sender.getPort(), shared_file.getFileHash(), shared_file.getSharingName());
+		UploadSession session;
+		try {
+			session = getUpload(fileHash);
+		} catch (UploadManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
+		session.receivedFileChunkRequestFromPeer(sender, fileHash, requestedChunks);
 	}
-
+	
+	public void endOfDownload(Peer sender) {
+		receivedSlotReleaseFromPeer(sender);
+	}
+	
+	public void receivedSlotReleaseFromPeer(Peer sender) {
+		UploadSession session = getUploadSession(sender);
+		if (session == null) return ;
+		session.endOfDownload(sender);
+		if (session.getPeerCount()==0) {
+			session.stopSession();
+			session_list.remove(session.getFileHash());
+		}
+		if (uploadQueue.hasPeer(sender)) {
+			try {
+				uploadQueue.removePeer(sender);
+				recalcUploadQueuePeers();
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	public void recalcUploadQueuePeers() {
+		List<UploadQueueContainer> lostSlotPeers = new ArrayList<UploadQueueContainer>();
+		List<UploadQueueContainer> obtainedSlotPeers = new ArrayList<UploadQueueContainer>();
+		uploadQueue.recalcSlotPeers(lostSlotPeers, obtainedSlotPeers);
+		for(UploadQueueContainer container : lostSlotPeers) {
+			network_manager.sendSlotRelease(container.peer.getIP(), container.peer.getPort());
+		}
+		for(UploadQueueContainer container : obtainedSlotPeers) {
+			network_manager.sendSlotGiven(container.peer.getIP(), container.peer.getPort(), container.fileHash);
+		}
+	}
+	
+	/*
+	 * Peer status handling
+	 * 
+	 */
 	public void peerConnected(Peer peer) {
 		for(UploadSession session : session_list.values())
 			if (session.hasPeer(peer)) {
@@ -286,14 +326,21 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 	}
 
-
-
 	public void peerConnectingFailed(Peer peer, Throwable cause) {
 		for(UploadSession session : session_list.values())
 			if (session.hasPeer(peer)) {
 				session.peerConnectingFailed(peer, cause);
 				break;
 			}
+		/*if (uploadQueue.hasPeer(peer)) {
+			try {
+				uploadQueue.removePeer(peer);
+				recalcUploadQueuePeers();
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
+		}*/
+			
 	}
 
 	public void peerDisconnected(Peer peer) {
@@ -304,16 +351,17 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 	}
 	
+	
+	
+	
+	
 	public void addUploadManagerListener(UploadManagerListener listener) {
 		listener_list.add(listener);
 	}
 
-	
 	public void removeUploadMaanagerListener(UploadManagerListener listener) {
 		listener_list.remove(listener);
 	}
-	
-	
 	
 	private void notifyUploadAdded(FileHash fileHash) {
 		for(UploadManagerListener listener : listener_list)

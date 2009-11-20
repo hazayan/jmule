@@ -42,6 +42,7 @@ import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerException;
+import org.jmule.core.uploadmanager.UploadQueueException;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
@@ -61,8 +62,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/27 20:44:58 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/20 12:23:59 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -301,7 +302,12 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			if (download_session.hasPeer(object)) {
 				setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID, PeerInfoFormatter.formatPeerStatus(download_session.getPeerDownloadStatus(object)));
 			} else {		
-				int rank = upload_manager.getUploadQueue().getPeerPosition(object);
+				int rank = 0;
+				try {
+					rank = upload_manager.getUploadQueue().getPeerPosition(object);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
 				String str="";
 				if (rank!=0) {
 					str = Localizer.getString("downloadinfowindow.tab.peerlist.column.status.upload_queue",rank+"");

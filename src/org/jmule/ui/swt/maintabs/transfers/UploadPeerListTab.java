@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.UploadQueue;
+import org.jmule.core.uploadmanager.UploadQueueException;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
 import org.jmule.countrylocator.CountryLocator;
@@ -58,8 +59,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/27 20:44:58 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/20 12:23:59 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -195,8 +196,18 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			}
 			
 			if (columnID == SWTConstants.UPLOAD_PEER_LIST_STATUS_COLUMN_ID) {
-				int id1 = _upload_queue.getPeerPosition(object1);
-				int id2 = _upload_queue.getPeerPosition(object2);
+				int id1 = 0;
+				try {
+					id1 = _upload_queue.getPeerPosition(object1);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
+				int id2 = 0;
+				try {
+					id2 = _upload_queue.getPeerPosition(object2);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
 				
 				int result = 0;
 				if (id1>id2) result = 1;
@@ -229,7 +240,12 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			
 			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, SpeedFormatter.formatSpeed(object.getUploadSpeed()));
 			
-			int rank = _upload_queue.getPeerPosition(object);
+			int rank = 0;
+			try {
+				rank = _upload_queue.getPeerPosition(object);
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
 			String str="";
 			if (rank!=0) {
 				str = Localizer.getString("uploadinfowindow.tab.peerlist.column.status.queue",rank+"");
