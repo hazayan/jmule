@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.PeerDownloadStatus;
+import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerException;
@@ -62,8 +63,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/20 12:23:59 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/21 17:09:54 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -223,10 +224,10 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			}
 
 			if (columnID == SWTConstants.DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID) {
-				int id1 = toInt(download_session.getPeerDownloadStatus(object1)
-						.getStatus());
-				int id2 = toInt(download_session.getPeerDownloadStatus(object2)
-						.getStatus());
+				int id1 = toInt(download_session.getPeerDownloadStatus(object1));
+				int id2 = toInt(download_session.getPeerDownloadStatus(object2));
+				if (download_session.getPeerDownloadStatus(object1)!=null)
+					if (download_session.getPeerDownloadStatus(object2)!=null)
 				if ((download_session.getPeerDownloadStatus(object1)
 						.getStatus() == PeerDownloadStatus.IN_QUEUE)
 						&& (download_session.getPeerDownloadStatus(object2)
@@ -250,7 +251,9 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			return 0;
 		}
 		
-		private int toInt(PeerDownloadStatus object) {
+		private int toInt(PeerDownloadInfo arg) {
+			if (arg==null) return 0;
+			PeerDownloadStatus object = arg.getStatus();
 			if (object == PeerDownloadStatus.ACTIVE)
 				return -1;
 			if (object == PeerDownloadStatus.ACTIVE_UNUSED)
