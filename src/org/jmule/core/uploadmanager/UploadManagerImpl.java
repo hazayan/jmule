@@ -48,8 +48,8 @@ import org.jmule.core.uploadmanager.UploadQueue.UploadQueueContainer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:23:59 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/22 19:56:15 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -251,6 +251,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			upload_session.receivedSlotRequestFromPeer(sender, fileHash);
 			return ;
 		}
+		uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
 		UploadSession session = new UploadSession(sharing_manager.getSharedFile(fileHash));
 		session_list.put(fileHash, session);
 		session.receivedSlotRequestFromPeer(sender, fileHash);
@@ -263,12 +264,14 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks) {
 		if (!uploadQueue.hasSlotPeer(sender)) {
 			try {
+				uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
 				network_manager.sendQueueRanking(sender.getIP(), sender.getPort(), uploadQueue.getPeerPosition(sender));
 			} catch (UploadQueueException e) {
 				e.printStackTrace();
 			}
 			return ;
 		}
+		uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
 		UploadSession session;
 		try {
 			session = getUpload(fileHash);
@@ -310,6 +313,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			network_manager.sendSlotRelease(container.peer.getIP(), container.peer.getPort());
 		}
 		for(UploadQueueContainer container : obtainedSlotPeers) {
+			uploadQueue.updateLastRequestTime(container.peer, System.currentTimeMillis());
 			network_manager.sendSlotGiven(container.peer.getIP(), container.peer.getPort(), container.fileHash);
 		}
 	}

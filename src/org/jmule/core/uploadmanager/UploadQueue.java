@@ -43,8 +43,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:23:59 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/22 19:56:15 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -203,17 +203,24 @@ public class UploadQueue {
 		
 	}
 
+	public void updateLastRequestTime(Peer peer, long time) {
+		UploadQueueContainer container = upload_queue.get(peer.getUserHash());
+		if (container == null) { return ; }
+		container.lastRequestTime = time;
+	}
+
 	public class UploadQueueContainer {
 		float rating = 0;
 		Peer peer;
 		long addTime;
+		long lastRequestTime;
 		FileHash fileHash;
 		Set<PeerQueueStatus> peer_status = new HashSet<PeerQueueStatus>();
 		
 		public UploadQueueContainer(Peer uploadPeer, FileHash fileHash, float initialRating) {
 			peer = uploadPeer;
 			this.fileHash = fileHash;
-			addTime = System.currentTimeMillis();
+			lastRequestTime = addTime = System.currentTimeMillis();
 			rating = initialRating;
 		}
 		
@@ -222,6 +229,7 @@ public class UploadQueue {
 			"\n Rating   : "+ rating+
 			"\n Score    : "+ getPeerScore(this)+
 			"\n Addtime  : " + addTime +
+			"\n Last request  : " + lastRequestTime +
 			"\n FileHash : " + fileHash
 			;
 		}
