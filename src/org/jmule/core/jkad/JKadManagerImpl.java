@@ -64,7 +64,6 @@ import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.DISCONNECTED;
 import static org.jmule.core.jkad.utils.Utils.getRandomInt128;
 import static org.jmule.core.utils.Convert.byteToHexString;
 import static org.jmule.core.utils.Convert.byteToInt;
-import static org.jmule.core.utils.Convert.hexStringToByte;
 import static org.jmule.core.utils.Convert.shortToInt;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
@@ -132,8 +131,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/07 12:01:49 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/11/26 09:11:01 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
