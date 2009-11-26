@@ -43,8 +43,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/22 19:56:15 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:09:58 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -55,8 +55,8 @@ public class UploadQueue {
 		return instance;
 	}
 	
-	private Map<UserHash, UploadQueueContainer> upload_queue = new ConcurrentHashMap<UserHash, UploadQueueContainer>();
-	private Collection<UploadQueueContainer>    slot_clients = new ConcurrentLinkedQueue<UploadQueueContainer>();
+	Map<UserHash, UploadQueueContainer> upload_queue = new ConcurrentHashMap<UserHash, UploadQueueContainer>();
+	Collection<UploadQueueContainer>    slot_clients = new ConcurrentLinkedQueue<UploadQueueContainer>();
 	enum PeerQueueStatus { SLOTGIVEN, SLOTTAKEN }
 	
 	private UploadQueue() {
@@ -160,7 +160,14 @@ public class UploadQueue {
 		List<UploadQueueContainer> max_score_peers = new ArrayList<UploadQueueContainer>();
 		
 		for(UploadQueueContainer container : upload_queue.values()) {
-			
+			if (container.getLastResponseTime() >= ConfigurationManager.UPLOADQUEUE_REMOVE_TIMEOUT) {
+				try {
+					removePeer(container.peer);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
+				continue;
+			}
 			if (max_score_peers.size()<ConfigurationManager.UPLOAD_QUEUE_SLOTS)
 				max_score_peers.add(container);
 			else {
@@ -222,6 +229,10 @@ public class UploadQueue {
 			this.fileHash = fileHash;
 			lastRequestTime = addTime = System.currentTimeMillis();
 			rating = initialRating;
+		}
+		
+		public long getLastResponseTime() {
+			return System.currentTimeMillis() - lastRequestTime;
 		}
 		
 		public String toString() {

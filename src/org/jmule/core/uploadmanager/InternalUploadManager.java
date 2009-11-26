@@ -31,12 +31,10 @@ import org.jmule.core.peermanager.Peer;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.3 $ Last changed by $Author: binary255 $ on $Date: 2009/11/17 09:44:21 $
+ * @version $Revision: 1.4 $ Last changed by $Author: binary255 $ on $Date: 2009/11/26 09:09:58 $
  */
 public interface InternalUploadManager extends UploadManager {
-
-	public void addUpload(FileHash fileHash) throws UploadManagerException;
-
+	
 	public void receivedFileRequestFromPeer(Peer sender,FileHash fileHash);
 
 	public void receivedFileStatusRequestFromPeer(Peer sender,FileHash fileHash);

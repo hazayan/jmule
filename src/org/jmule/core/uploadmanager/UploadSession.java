@@ -43,8 +43,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:23:59 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:09:58 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -109,7 +109,7 @@ public class UploadSession implements JMTransferSession {
 			return Misc.INFINITY_AS_INT;
 	}
 	
-	void endOfDownload(Peer sender) {
+	void removePeer(Peer sender) {
 		session_peers.remove(sender);
 	}
 	
