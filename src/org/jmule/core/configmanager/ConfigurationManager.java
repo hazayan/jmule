@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 12:01:49 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:10:20 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -57,13 +57,20 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          UDP_PORT        				=     4662;
 	public static final boolean      UDP_ENABLED                    =     true;
 	public static final int          LOG_FILES_NUMBER   			=     10;
-	public static final int          LOG_FILE_SIZE      			=     2 * 1024 * 1024;
+	public static final int          LOG_FILE_SIZE      			=     20 * 1024 * 1024;
 	public static final int          SOURCES_QUERY_INTERVAL     	=     1000 * 60 * 5;
 	public static final int          PEER_ACTIVITY_CHECH_INTERVAL   =     1000 * 30;
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
+	
+	// upload queue
 	public static final int          UPLOAD_QUEUE_SIZE              =     200;
 	public static final int          UPLOAD_QUEUE_SLOTS             =     2;
+	public static final long 		 UPLOADQUEUE_REMOVE_TIMEOUT		= 	  1000 * 60 * 60;
+	public static final long 		 UPLOAD_SLOT_LOSE_TIMEOUT		= 	  1000 * 60;
+	public static final long 		 UPLOAD_QUEUE_CHECK_INTERVAL	= 	  1000 * 3;
+	
+	
 	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 2;
 	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 SERVER_CONNECTING_TIMEOUT		=	  1000 * 40;
@@ -83,27 +90,27 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final long		  MAX_UDP_PACKET_SIZE			=    65534;
 	
 	public static final long          WRONG_PACKET_CHECK_INTERVAL	=     1000 * 5;
-	public static final long		  MAX_WRONG_PACKET_COUNT		=     50 ;
+	public static final long		  MAX_WRONG_PACKET_COUNT		=     50;
 	
-	public static final int 		  DIR_RESCAN_INTERVAL  			= 1000*60*10;
-	public static final int 		  SEARCH_QUERY_CHECK_INTERVAL   = 10000;
+	public static final int 		  DIR_RESCAN_INTERVAL  			=	  1000 * 60 * 10;
+	public static final int 		  SEARCH_QUERY_CHECK_INTERVAL   =	  10000;
 	
-	public static final int 		  SHARED_FILES_PUBLISH_INTERVAL = 1000 * 60;
+	public static final int 		  SHARED_FILES_PUBLISH_INTERVAL = 	  1000 * 60;
 	
-	public static final int 		  MAX_PEERS						= 300;
+	public static final int 		  MAX_PEERS						= 	  300;
 	
 	// data base keys
-	public static final String       NICK_NAME_KEY                         =     "NickName";
-	public static final String       TCP_PORT_KEY                          =     "TCPPort";
-	public static final String       UDP_PORT_KEY                   	   =     "UDPPort";
-	public static final String       UDP_ENABLED_KEY                       =     "UDPEnabled";
-	public static final String       USER_HASH_KEY                         =     "UserHash";
-	public static final String       DOWNLOAD_LIMIT_KEY                    =     "DownloadLimit";
-	public static final String       UPLOAD_LIMIT_KEY               	   =     "UploadLimit";
-	public static final String       DOWNLOAD_BANDWIDTH_KEY                =     "DownloadBandwidth";
-	public static final String       UPLOAD_BANDWIDTH_KEY                  =     "UploadBandwidth";
-	public static final String       SHARED_DIRECTORIES_KEY                =     "SharedDirectories";
-	public static final String       WORKING_DIR_KEY                       =     "WorkingDir";
+	public static final String       NICK_NAME_KEY                  =     "NickName";
+	public static final String       TCP_PORT_KEY                   =     "TCPPort";
+	public static final String       UDP_PORT_KEY                	=     "UDPPort";
+	public static final String       UDP_ENABLED_KEY                =     "UDPEnabled";
+	public static final String       USER_HASH_KEY                  =     "UserHash";
+	public static final String       DOWNLOAD_LIMIT_KEY             =     "DownloadLimit";
+	public static final String       UPLOAD_LIMIT_KEY               =     "UploadLimit";
+	public static final String       DOWNLOAD_BANDWIDTH_KEY         =     "DownloadBandwidth";
+	public static final String       UPLOAD_BANDWIDTH_KEY           =     "UploadBandwidth";
+	public static final String       SHARED_DIRECTORIES_KEY         =     "SharedDirectories";
+	public static final String       WORKING_DIR_KEY                =     "WorkingDir";
 	
 	public static final String		 SERVER_LIST_UPDATE_ON_CONNECT_KEY	   =     "ServerListUpdateOnConnect";
 	
@@ -123,7 +130,7 @@ public interface ConfigurationManager extends JMuleManager {
 	// 
 	//public static final String       PEER_ACTIVITY_CHECK_TIME_KEY   	   =     "PeerActivityCheckTime";
 	//public static final String       SOURCES_QUERY_INTERVAL_KEY     	   =     "SourcesQueryInterval";
-	//public static final String       PEER_INACTIVITY_REMOVE_TIME_KEY       =     "PeerInactivityRemoveTime";
+	//public static final String       PEER_INACTIVITY_REMOVE_TIME_KEY     =     "PeerInactivityRemoveTime";
 	
 	/**
 	 * Loads the configuration from the repository
