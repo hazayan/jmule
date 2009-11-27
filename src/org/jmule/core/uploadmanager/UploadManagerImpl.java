@@ -51,8 +51,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:09:58 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:01:41 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -107,6 +107,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		});
 	}
 
+	
 	public void start() {
 		try {
 			super.start();
@@ -116,26 +117,24 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		}
 		JMTimerTask frozen_peers_remover = new JMTimerTask() {
 			public void run() {
-				System.out.println("Recalc!");
 				boolean recalc_slots = false;
-				for(UploadQueueContainer container : uploadQueue.upload_queue.values()) {
-					if (container.getLastResponseTime() >= ConfigurationManager.UPLOADQUEUE_REMOVE_TIMEOUT) {
-						if (uploadQueue.slot_clients.contains(container))
+					for(UploadQueueContainer container : uploadQueue.upload_queue.values()) {
+						if (container.getLastResponseTime() >= ConfigurationManager.UPLOADQUEUE_REMOVE_TIMEOUT) {
+							if (uploadQueue.slot_clients.contains(container))
+								recalc_slots = true;
+							removePeer(container.peer);
+							continue;
+						}
+					}
+					for(UploadQueueContainer container : uploadQueue.slot_clients) {
+						if (container.getLastResponseTime() >= ConfigurationManager.UPLOAD_SLOT_LOSE_TIMEOUT) {
 							recalc_slots = true;
-						removePeer(container.peer);
-						continue;
+							removePeer(container.peer);
+							continue;
+						}
 					}
-				}
-				for(UploadQueueContainer container : uploadQueue.slot_clients) {
-					if (container.getLastResponseTime() >= ConfigurationManager.UPLOAD_SLOT_LOSE_TIMEOUT) {
-						recalc_slots = true;
-						removePeer(container.peer);
-						continue;
-					}
-				}
 				if (recalc_slots)
 					recalcSlotPeers();
-				
 			}
 		};
 		maintenance_tasks.addTask(frozen_peers_remover, ConfigurationManager.UPLOAD_QUEUE_CHECK_INTERVAL, true);
@@ -209,7 +208,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	 * Remove peer from uploads, WITHOUT slot recalculation
 	 * @param peer
 	 */
-	private void removePeer(Peer peer) {
+	public void removePeer(Peer peer) {
 		UploadSession session = getUploadSession(peer);
 		if (session != null) {
 			session.removePeer(peer);
@@ -437,4 +436,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 	}
 
+	public String toString() {
+		return uploadQueue.toString();
+	}
+	
 }

@@ -43,8 +43,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:09:58 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:01:41 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -99,7 +99,7 @@ public class UploadQueue {
 			throw new UploadQueueException("Peer " + peer + " not found in UploadQueue");
 		UploadQueueContainer container = upload_queue.get(peer.getUserHash());
 		upload_queue.remove(peer.getUserHash());
-		if (slot_clients.contains(slot_clients))
+		if (slot_clients.contains(container))
 			slot_clients.remove(container);
 	}
 	
@@ -132,16 +132,17 @@ public class UploadQueue {
 	
 	public String toString() {
 		String result = "Upload queue : \n";
-		for (UploadQueueContainer container : upload_queue.values()) {
+		for (UserHash hash : upload_queue.keySet()) {
 			try {
-				result += "[\n" + container
+				UploadQueueContainer container = upload_queue.get(hash);
+				result += "[ \n { "+hash.toString()+" } \n" + container
 						+ "\n Peer position :" + getPeerPosition(container.peer) + "\n]\n";
 			} catch (UploadQueueException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		result += "Slot peers : \n";
+		result += "   \nSlot peers : \n";
 		for (UploadQueueContainer container : slot_clients) {
 			try {
 				result += "[\n" + container
