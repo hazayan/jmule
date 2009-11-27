@@ -31,8 +31,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:50:37 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:04:45 $$
  */
 public class Packet {
 	
@@ -58,7 +58,6 @@ public class Packet {
 	
 	public void setProtocol(byte packetType) {
 		packet_data.put(0,packetType);
-		
 	}
 	
 	public byte getProtocol() {
@@ -100,6 +99,7 @@ public class Packet {
 	}
 
 	public ByteBuffer getAsByteBuffer() {
+		packet_data.position(0);
 		return packet_data;
 	}
 
