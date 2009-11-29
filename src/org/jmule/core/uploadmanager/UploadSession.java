@@ -43,8 +43,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:09:58 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/29 19:07:43 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -148,15 +148,6 @@ public class UploadSession implements JMTransferSession {
 			}
 		}*/
 			
-	}
-	
-	void peerDisconnected(Peer peer) {
-		/*List<Peer> peer_list = uploadQueue.getSlotPeers(PeerQueueStatus.SLOTGIVEN, PeerQueueStatus.SLOTTAKEN);
-		for(Peer p : peer_list)
-			if (p.equals(peer)) {
-				uploadQueue.moveToLast(peer);
-				return ;
-			}*/
 	}
 	
 	void peerConnectingFailed(Peer peer, Throwable cause) {

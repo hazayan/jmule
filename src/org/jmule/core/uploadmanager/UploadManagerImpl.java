@@ -51,8 +51,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:01:41 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/29 19:07:43 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -215,14 +215,15 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			if (session.getPeerCount()==0) {
 				session.stopSession();
 				session_list.remove(session.getFileHash());
+				notifyUploadRemoved(session.getFileHash());
 			}
 		}
-		try {
-			uploadQueue.removePeer(peer);
-			
-		} catch (UploadQueueException e) {
-			e.printStackTrace();
-		}
+		if (uploadQueue.hasPeer(peer))
+			try {
+				uploadQueue.removePeer(peer);
+			} catch (UploadQueueException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	
@@ -398,11 +399,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 
 	public void peerDisconnected(Peer peer) {
-		for(UploadSession session : session_list.values())
-			if (session.hasPeer(peer)) {
-				session.peerDisconnected(peer);
-				break;
-			}
+		removePeer(peer);
+		recalcSlotPeers();
 	}
 	
 	
