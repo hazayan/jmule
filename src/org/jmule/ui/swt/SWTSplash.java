@@ -35,15 +35,15 @@ import org.jmule.ui.Splash;
 /**
  * Created on Aug 25, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/09/07 16:01:13 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/04 20:23:03 $
  */
 public class SWTSplash implements Splash{
 
 	private Shell shell;
 	private Label currentTask;
 	private ProgressBar progress_bar;
-	
+	private Label image;
 	public SWTSplash() {
 		SWTThread.getDisplay().syncExec(new JMRunnable() {
 			public void JMRun() {
@@ -56,7 +56,7 @@ public class SWTSplash implements Splash{
 			    layout.marginWidth = 0;
 			    shell.setLayout(layout);
 			    
-			    Label image = new Label(shell,SWT.NONE);
+			    image = new Label(shell,SWT.NONE);
 			    image.setImage(SWTImageRepository.getImage("splash/splash_logo.png"));
 			    
 			    currentTask = new Label(shell,SWT.BORDER);
@@ -109,7 +109,10 @@ public class SWTSplash implements Splash{
 	public void splashOff() {
 		SWTThread.getDisplay().asyncExec(new JMRunnable() {
 			public void JMRun() {
+				shell.setVisible(false);
+				image.getImage().dispose();
 				shell.close();
+				shell.dispose();
 			}
 		});
 	}
