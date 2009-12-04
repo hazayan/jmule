@@ -53,8 +53,8 @@ import org.jmule.ui.swt.Utils;
  * @author parg<br>
  * @author TuxPaper (SWT.Virtual Stuff)
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 15:27:43 $$ 
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/04 16:07:21 $$ 
  */
 public class BufferedTableRow {
 	
@@ -188,6 +188,9 @@ public class BufferedTableRow {
 			
 		}
 		item = null;
+		for(Image image : image_values)
+			if (image != null)
+				image.dispose();
 	}
 	
 	public Image getImage(int id) {

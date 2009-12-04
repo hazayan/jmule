@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/04 16:07:21 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -263,8 +263,9 @@ public abstract class JMTable<T> extends Table {
 		int column = getColumnOrder(columnID);
 		BufferedTableRow row = line_list.get(line_id);
 		Image old_image = row.getImage(column);
-		if (old_image != null) 
+		if (old_image != null) {
 			old_image.dispose();
+		}
 		row.setImage(column, image);
 	}
 	
@@ -333,12 +334,14 @@ public abstract class JMTable<T> extends Table {
 		if (id!=getItemCount()) {
 			
 		}
+		BufferedTableRow row = line_list.get(id);
 		
 		remove(id);
 		line_list.remove(id);
 		default_custom_control_list.remove(id);
 		default_line_list.remove(id);
-
+		
+		row.dispose();
 		clearAll();		
 	}
 	
