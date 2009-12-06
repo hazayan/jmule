@@ -22,7 +22,7 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
@@ -86,6 +86,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.tree.NodeValue;
 import org.jmule.core.sharingmanager.GapList;
@@ -98,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:16:08 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/06 17:47:28 $$
  */
 public class PacketFactory {
 	
@@ -1618,6 +1619,26 @@ public class PacketFactory {
 	
 	
 	
+	public static Packet getEMulePeerHelloPacket() throws JMException {
+		TagList tag_list = new TagList();
+		tag_list.addTag(new IntTag(ET_COMPRESSION, ET_COMPRESSION_VALUE ));
+		tag_list.addTag(new IntTag(ET_UDPPORT, (ConfigurationManagerSingleton.getInstance().getUDP())));
+		tag_list.addTag(new IntTag(ET_UDPVER, ET_UDPVER_VALUE ));
+		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, ET_SOURCEEXCHANGE_VALUE ));
+		tag_list.addTag(new IntTag(ET_COMMENTS, ET_COMMENTS_VALUE ));
+		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, ET_EXTENDEDREQUEST_VALUE ));
+		tag_list.addTag(new IntTag(ET_FEATURES, ET_FEATURES_VALUE ));
+		
+		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
+				PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_EMULE_HELLO);
+		packet.insertData(Convert.intToByte(E2DKConstants.ClientVersion[1]));
+		packet.insertData((byte)1);
+		packet.insertData(tag_list.size());
+		packet.insertData(tag_list.getAsByteBuffer());
+		return packet;
+	}
+	
 	/**
 	 * Create eMule hello answer packet.
 	 * 
@@ -1663,13 +1684,23 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-	public static Packet getEMulePeerHelloAnswerPacket() {
-		Packet packet = new Packet(1+1+4, PROTO_EMULE_EXTENDED_TCP);
+	public static Packet getEMulePeerHelloAnswerPacket() throws JMException {
+		TagList tag_list = new TagList();
+		tag_list.addTag(new IntTag(ET_COMPRESSION, ET_COMPRESSION_VALUE ));
+		tag_list.addTag(new IntTag(ET_UDPPORT, (ConfigurationManagerSingleton.getInstance().getUDP())));
+		tag_list.addTag(new IntTag(ET_UDPVER, ET_UDPVER_VALUE ));
+		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, ET_SOURCEEXCHANGE_VALUE ));
+		tag_list.addTag(new IntTag(ET_COMMENTS, ET_COMMENTS_VALUE ));
+		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, ET_EXTENDEDREQUEST_VALUE ));
+		tag_list.addTag(new IntTag(ET_FEATURES, ET_FEATURES_VALUE ));
+		
+		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
+				PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_EMULEHELLOANSWER);
-
-		packet.insertData((byte)0x42);
-		packet.insertData((byte)0x42);
-		packet.insertData((int)0);
+		packet.insertData(Convert.intToByte(E2DKConstants.ClientVersion[1]));
+		packet.insertData((byte)1);
+		packet.insertData(tag_list.size());
+		packet.insertData(tag_list.getAsByteBuffer());
 		return packet;
 	}
 	
@@ -1735,7 +1766,7 @@ public class PacketFactory {
 	}
 	
 	/**
-	 * Create sources request packet.
+	 * Create sources request packet, used in Peer to Peer connections (PEX)
 	 * @param fileHash hash of file which sources are requested.
 	 * <table cellspacing="0" border="1" cellpadding="0">
 	 *   <thead>
@@ -1781,6 +1812,18 @@ public class PacketFactory {
 		packet.setCommand(OP_REQUESTSOURCES);
 		packet.insertData(fileHash.getHash());
 		
+		return packet;
+	}
+	
+	public static Packet getSourcesAnswerPacket(FileHash fileHash, List<Peer> peer_list, boolean isSourceExchange1) {
+		int hash_size = isSourceExchange1 ? 16 : 0;
+		Packet packet = new Packet(16 + 2 + peer_list.size()* (4 + 2 + 4 + 2 + hash_size),PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_ANSWERSOURCES);
+		packet.insertData(fileHash.getHash());
+		packet.insertData(Convert.intToShort(peer_list.size()));
+		for(Peer peer : peer_list) {
+			
+		}
 		return packet;
 	}
 	
