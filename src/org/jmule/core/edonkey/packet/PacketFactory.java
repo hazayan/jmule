@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/06 17:47:28 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/07 18:56:07 $$
  */
 public class PacketFactory {
 	
@@ -1766,7 +1766,8 @@ public class PacketFactory {
 	}
 	
 	/**
-	 * Create sources request packet, used in Peer to Peer connections (PEX)
+	 * PEX request
+	 * Create sources request packet
 	 * @param fileHash hash of file which sources are requested.
 	 * <table cellspacing="0" border="1" cellpadding="0">
 	 *   <thead>
@@ -1815,14 +1816,20 @@ public class PacketFactory {
 		return packet;
 	}
 	
-	public static Packet getSourcesAnswerPacket(FileHash fileHash, List<Peer> peer_list, boolean isSourceExchange1) {
-		int hash_size = isSourceExchange1 ? 16 : 0;
-		Packet packet = new Packet(16 + 2 + peer_list.size()* (4 + 2 + 4 + 2 + hash_size),PROTO_EMULE_EXTENDED_TCP);
+	/**
+	 * Basic PEX answer pachet
+	 * 
+	 */
+	public static Packet getSourcesAnswerPacket(FileHash fileHash, List<Peer> peer_list) {
+		Packet packet = new Packet(16 + 2 + peer_list.size() * (4 + 2),PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_ANSWERSOURCES);
 		packet.insertData(fileHash.getHash());
 		packet.insertData(Convert.intToShort(peer_list.size()));
 		for(Peer peer : peer_list) {
-			
+			byte[] ip_data = Convert.stringIPToArray(peer.getIP());
+			short port = Convert.intToShort(peer.getPort());
+			packet.insertData(ip_data);
+			packet.insertData(port);
 		}
 		return packet;
 	}
