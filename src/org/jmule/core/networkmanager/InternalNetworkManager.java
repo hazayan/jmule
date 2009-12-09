@@ -36,6 +36,7 @@ import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.networkmanager.JMConnection.ConnectionStatus;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.core.sharingmanager.GapList;
@@ -47,8 +48,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/07 11:58:34 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/09 07:00:51 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -193,6 +194,14 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void sendSlotRelease(String peerIP, int peerPort);
 	
 	public void sendUploadRequest(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendEMuleHelloPacket(String peerIP, int peerPort);
+	
+	public void sendEMuleHelloAnswerPacket(String peerIP, int peerPort);
+	
+	public void sendSourcesRequest(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void sendSourcesResponse(String peerIP, int peerPort, FileHash fileHash, List<Peer> peer_list);
 	
 	public void serverConnected();
 	

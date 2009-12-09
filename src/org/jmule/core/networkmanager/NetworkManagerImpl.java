@@ -82,8 +82,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/14 09:35:43 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/09 07:00:51 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -905,6 +905,50 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			cause.printStackTrace();
 		}
 	}
+		
+	public void sendEMuleHelloPacket(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getEMulePeerHelloPacket();
+			peer_connection.send(packet);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendEMuleHelloAnswerPacket(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getEMulePeerHelloAnswerPacket();
+			peer_connection.send(packet);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendSourcesRequest(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			Packet packet = PacketFactory.getSourcesRequestPacket(fileHash);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+	
+	public void sendSourcesResponse(String peerIP, int peerPort, FileHash fileHash, List<Peer> peer_list) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getSourcesAnswerPacket(fileHash, peer_list);
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+	
 
 	public void serverConnected() {
 		try {
