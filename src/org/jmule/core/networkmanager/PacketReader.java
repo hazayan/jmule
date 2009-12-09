@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -96,8 +97,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/14 09:35:43 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/09 07:31:51 $
  */
 public class PacketReader {
 
@@ -566,6 +567,15 @@ public class PacketReader {
 							client_version, protocol_version, tag_list);
 					break;
 				}
+				
+				case OP_EMULEHELLOANSWER : {
+					byte client_version = packet_data.get();
+					byte protocol_version = packet_data.get();
+					TagList tag_list = readTagList(packet_data);
+					_network_manager.receivedEMuleHelloAnswerFromPeer(peerIP, peerPort,
+							client_version, protocol_version, tag_list);
+					break;
+				}
 	
 				case OP_COMPRESSEDPART: {
 					byte[] file_hash = new byte[16];
@@ -590,6 +600,34 @@ public class PacketReader {
 							Convert.shortToInt(queue_rank));
 					break;
 				}
+				
+				case OP_REQUESTSOURCES : {
+					byte[] hash = new byte[16];
+					packet_data.get(hash);
+					_network_manager.receivedSourcesRequestFromPeer(peerIP, peerPort, new FileHash(hash));
+					break;
+				}
+				
+				case OP_ANSWERSOURCES : {
+					byte[] hash = new byte[16];
+					packet_data.get(hash);
+					int source_count = Convert.shortToInt(packet_data.getShort());
+					List<String> ip_list = new ArrayList<String>();
+					List<Integer> port_list = new ArrayList<Integer>();
+					byte[] ip = new byte[4];
+					short port;
+					for(int k = 0;k<source_count;k++) {
+						packet_data.get(ip);
+						port = packet_data.getShort();
+						ip = Convert.reverseArray(ip);
+						
+						ip_list.add(Convert.IPtoString(ip));
+						port_list.add(Convert.shortToInt(port));
+					}
+					_network_manager.receivedSourcesAnswerFromPeer(peerIP, peerPort,new FileHash(hash), ip_list, port_list);
+					break;
+				}
+				
 	
 				default: {
 					throw new UnknownPacketException(packet_header, packet_opcode,
