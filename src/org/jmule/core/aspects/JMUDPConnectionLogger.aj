@@ -23,26 +23,28 @@
 package org.jmule.core.aspects;
 
 import java.util.logging.Logger;
-import org.jmule.core.networkmanager.*;
+
+import org.jmule.core.networkmanager.JMUDPConnection;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:11:33 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
  */
 public privileged aspect JMUDPConnectionLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.networkmanager.JMUDPConnection");
 	
 	after() throwing (Throwable t): execution (* JMUDPConnection.*(..)) {
-		String join_point = thisJoinPoint.toString();
+		/*String join_point = thisJoinPoint.toString();
 		String args = " ";
 		for(Object object : thisJoinPoint.getArgs()) {
 			args += "(" + object + ") ";
 		}
 		log.warning("Exception In method with args : \n" + join_point + "\n"
-				+ args + "\n" + Misc.getStackTrace(t));
+				+ args + "\n" + Misc.getStackTrace(t));*/
+		log.warning(Misc.getStackTrace(t));
 	}
 
 }

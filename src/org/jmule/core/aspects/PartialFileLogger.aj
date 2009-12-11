@@ -31,20 +31,14 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:11:33 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
  */
 public privileged aspect PartialFileLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartialFile");
 	
 	after() throwing (Throwable t): execution (* PartialFile.*(..)) {
-		String join_point = thisJoinPoint.toString();
-		String args = " ";
-		for(Object object : thisJoinPoint.getArgs()) {
-			args += "(" + object + ") ";
-		}
-		log.warning("Exception In method with args : \n" + join_point + "\n"
-				+ args + "\n" + Misc.getStackTrace(t));
+		log.warning(Misc.getStackTrace(t));
 	}
 	
 	after(PartMet part_met) throwing(PartMetException e) : target(part_met) && call (void PartMet.writeFile()) {

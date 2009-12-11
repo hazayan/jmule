@@ -36,8 +36,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:11:33 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
  */
 public privileged aspect JMuleCoreLogger {
 	private Logger log = Logger.getLogger("org.jmule.core");
@@ -58,7 +58,7 @@ public privileged aspect JMuleCoreLogger {
 		log.warning(Misc.getStackTrace(t));
 	}
 	
-	before(String event) : args(event) && (call(void JMuleCoreImpl.logEvent(String))) {
+	after(String event) : args(event) && (call(void JMuleCoreImpl.logEvent(String))) {
 		
 		String downloadmanager = "Downloads : \n";
 		for(DownloadSession download_session : DownloadManagerSingleton.getInstance().getDownloads()) {
@@ -85,11 +85,10 @@ public privileged aspect JMuleCoreLogger {
 		//	peermanager += peer + "\n";
 		//}
 		
-		String uploadmanager = "Upload Manager :\n";
+		String uploadmanager = "Upload Manager :\n" + UploadManagerSingleton.getInstance();
 		
-		for(UploadSession upload_session : UploadManagerSingleton.getInstance().getUploads()) 
-			
-			uploadmanager +=upload_session+"\n";
+		//for(UploadSession upload_session : UploadManagerSingleton.getInstance().getUploads()) 
+		//	uploadmanager +=upload_session+"\n";
 		
 		log.fine("\nEvent : "+event+"\n"+
 				network_manager+"\n"+

@@ -31,20 +31,14 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:11:33 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
  */
 public privileged aspect PeerManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.peermanager.PeerManager");
 	
 	after() throwing (Throwable t): execution (* PeerManager.*(..)) {
-		String join_point = thisJoinPoint.toString();
-		String args = " ";
-		for(Object object : thisJoinPoint.getArgs()) {
-			args += "(" + object + ") ";
-		}
-		log.warning("Exception In method with args : \n" + join_point + "\n"
-				+ args + "\n" + Misc.getStackTrace(t));
+		log.warning(Misc.getStackTrace(t));
 	}
 	
 	before(Peer peer) : args(peer) && execution (void PeerManager.connect(Peer)) {
