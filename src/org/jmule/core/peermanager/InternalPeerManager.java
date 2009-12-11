@@ -33,8 +33,8 @@ import org.jmule.core.peermanager.Peer.PeerSource;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:04 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
  */
 public interface InternalPeerManager extends PeerManager {
 
@@ -67,6 +67,9 @@ public interface InternalPeerManager extends PeerManager {
 	public void receivedCallBackRequest(String ip, int port);
 	
 	public void receivedEMuleHelloFromPeer(String ip, int port,byte clientVersion, byte protocolVersion,
+			TagList tagList);
+	
+	public void receivedEMuleHelloAnswerFromPeer(String ip, int port,byte clientVersion, byte protocolVersion,
 			TagList tagList);
 	
 	public List<Peer> createPeerList(List<ClientID> peerIDList,

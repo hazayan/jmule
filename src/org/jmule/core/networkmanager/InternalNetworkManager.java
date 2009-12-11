@@ -48,8 +48,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/09 07:00:51 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -92,6 +92,8 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void receivedCompressedFileChunkFromPeer(String peerIP, int peerPort, FileHash fileHash, FileChunk compressedFileChunk);
 	
 	public void receivedEMuleHelloFromPeer(String ip, int port,byte clientVersion, byte protocolVersion, TagList tagList);
+	
+	public void receivedEMuleHelloAnswerFromPeer(String ip, int port, byte clientVersion, byte protocolVersion, TagList tagList);
 	
 	public void receivedEndOfDownloadFromPeer(String peerIP, int peerPort);
 	
@@ -160,6 +162,10 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void receivedSourcesFromServer(FileHash fileHash, List<ClientID> clientIDList, List<Integer> portList);
 	
 	public void receiveKadPacket(KadPacket packet);
+	
+	public void receivedSourcesRequestFromPeer(String peerIP, int peerPort, FileHash fileHash);
+	
+	public void receivedSourcesAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, List<String> ipList, List<Integer> portList);
 	
 	public void requestSourcesFromServer(FileHash fileHash, long fileSize);
 	

@@ -82,8 +82,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/09 07:00:51 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -436,21 +436,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		
 	}
 
-	public void receivedEMuleHelloFromPeer(String ip, int port,
-			byte clientVersion, byte protocolVersion, TagList tagList) {
-		try {
-			JMPeerConnection connection = getPeerConnection(ip, port);
-			Packet response = PacketFactory.getEMulePeerHelloAnswerPacket();
-			connection.send(response);
-		} catch (Throwable e) {
-			e.printStackTrace();
-			return;
-		}
-		_peer_manager.receivedEMuleHelloFromPeer(ip, port, clientVersion,
-				protocolVersion, tagList);
-
-	}
-
 	public void receivedEndOfDownloadFromPeer(String peerIP, int peerPort) {
 		Peer sender;
 		try {
@@ -705,6 +690,45 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 	public void receiveKadPacket(KadPacket packet) {
 		_jkad_manager.receivePacket(packet);
+	}
+	
+	public void receivedEMuleHelloFromPeer(String ip, int port,
+			byte clientVersion, byte protocolVersion, TagList tagList) {
+		try {
+			JMPeerConnection connection = getPeerConnection(ip, port);
+			Packet response = PacketFactory.getEMulePeerHelloAnswerPacket();
+			connection.send(response);
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager.receivedEMuleHelloFromPeer(ip, port, clientVersion,
+				protocolVersion, tagList);
+	}
+	
+	public void receivedEMuleHelloAnswerFromPeer(String ip, int port,
+			byte clientVersion, byte protocolVersion, TagList tagList) {
+		
+		_peer_manager.receivedEMuleHelloAnswerFromPeer(ip, port, clientVersion,
+				protocolVersion, tagList);
+	}
+	
+	public void receivedSourcesRequestFromPeer(String peerIP, int peerPort, FileHash fileHash) {
+		try {
+			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedSourcesRequestFromPeer(peer, fileHash);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receivedSourcesAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, List<String> ipList, List<Integer> portList) {
+		try {
+			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
+			_download_manager.receivedSourcesAnswerFromPeer(peer, fileHash, ipList, portList);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void requestSourcesFromServer(FileHash fileHash, long fileSize) {

@@ -49,8 +49,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/07 12:01:49 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:44:24 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -329,6 +329,11 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	}
 
 	public void receivedEMuleHelloFromPeer(String ip, int port,
+			byte clientVersion, byte protocolVersion, TagList tagList) {
+		
+	}
+	
+	public void receivedEMuleHelloAnswerFromPeer(String ip, int port,
 			byte clientVersion, byte protocolVersion, TagList tagList) {
 		
 	}

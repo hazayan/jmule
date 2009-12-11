@@ -33,7 +33,7 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.2 $ Last changed by $Author: binary255 $ on $Date: 2009/10/28 14:55:59 $
+ * @version $Revision: 1.3 $ Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
  */
 public interface InternalDownloadManager extends DownloadManager {
 
@@ -57,6 +57,10 @@ public interface InternalDownloadManager extends DownloadManager {
 
 	public void receivedSlotTakenFromPeer(Peer sender);
 
+	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash);
+	
+	public void receivedSourcesAnswerFromPeer(Peer peer, FileHash fileHash, List<String> ipList, List<Integer> portList);
+	
 	/**
 	 * Add peers which have fileHash to the download session identified by
 	 * fileHash

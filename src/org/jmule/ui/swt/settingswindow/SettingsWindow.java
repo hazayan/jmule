@@ -48,8 +48,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:14 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
  */
 public class SettingsWindow implements JMuleUIComponent {
 	
@@ -105,7 +105,7 @@ public class SettingsWindow implements JMuleUIComponent {
 		
 	
 		tab_list.add(new GeneralTab(settings_tab_panel));
-		tab_list.add(new ConnectionTab(settings_tab_panel));
+		//tab_list.add(new ConnectionTab(settings_tab_panel));
 	
 		completeList(null, tab_list);
 			

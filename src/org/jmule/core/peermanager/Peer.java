@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:58:40 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:44:24 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD}
@@ -185,6 +185,7 @@ public class Peer {
 		result += " Speed : " + getDownloadSpeed();
 		result += " service Speed : " + getDownloadServiceSpeed();
 		result += " isConnected : " + isConnected();
+		result += " userHash : " + userHash;
 		return result;
 	}
 	

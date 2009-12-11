@@ -49,8 +49,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/11/01 20:15:04 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:44:24 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -450,6 +450,15 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			}catch(Throwable t) {
 				t.printStackTrace();
 			}
+	}
+
+	public void receivedSourcesAnswerFromPeer(Peer peer, FileHash fileHash,
+			List<String> ipList, List<Integer> portList) {
+		
+	}
+
+	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash) {
+			
 	}
 
 	public void addNeedMorePeersListener(NeedMorePeersListener listener) {
