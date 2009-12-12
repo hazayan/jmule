@@ -97,8 +97,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/09 07:31:51 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/12 18:58:38 $
  */
 public class PacketReader {
 
@@ -234,7 +234,7 @@ public class PacketReader {
 				packet_data.get(file_hash);
 	
 				int source_count = Convert.byteToInt(packet_data.get());
-				List<ClientID> clientid_list = new LinkedList<ClientID>();
+				List<String> client_ip_list = new LinkedList<String>();
 				List<Integer> port_list = new LinkedList<Integer>();
 	
 				byte[] peerID = new byte[4];
@@ -260,11 +260,11 @@ public class PacketReader {
 					ClientID cid = new ClientID(peerID);
 					// if (PeerManagerFactory.getInstance().hasPeer(cid)) continue;
 					// if (PeerManagerFactory.getInstance().isFull()) continue;
-					clientid_list.add(cid);
+					client_ip_list.add(cid.getAsString());
 					port_list.add(peerPort);
 				}
 				_network_manager.receivedSourcesFromServer(new FileHash(file_hash),
-						clientid_list, port_list);
+						client_ip_list, port_list);
 				return ;
 			}
 	

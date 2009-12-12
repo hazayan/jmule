@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.34 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:25:13 $$
+ * @version $$Revision: 1.35 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -97,23 +97,20 @@ public class DownloadSession implements JMTransferSession {
 		STARTED, STOPPED
 	}
 	private final static int PEER_MONITOR_INTERVAL = 1000;
-
 	private final static long PEER_RESEND_PACKET_INTERVAL = 1000 * 10;
-
-	private final static long UNUSED_PEER_ACTIVATION = 1000 * 10;;
+	private final static long UNUSED_PEER_ACTIVATION = 1000 * 10;
+	private final static long MAX_PEX_CONCURENT_REQEUSTS = 30;
 
 	private PartialFile sharedFile;
 	private FilePartStatus partStatus;
 	private DownloadStatus sessionStatus = DownloadStatus.STOPPED;
 	private DownloadStrategy downloadStrategy = new DownloadStrategyImpl();
-
 	private FileRequestList fileRequestList = new FileRequestList();
-	
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
+	private DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
 	
 	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
-	private DownloadStatusList download_status_list = new DownloadStatusList();
-
+	
 	private InternalJKadManager jkad = (InternalJKadManager) JKadManagerSingleton
 			.getInstance();
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
@@ -122,14 +119,12 @@ public class DownloadSession implements JMTransferSession {
 			.getInstance();
 	private InternalDownloadManager download_manager = (InternalDownloadManager) DownloadManagerSingleton
 			.getInstance();
-
 	private InternalUploadManager upload_manager = (InternalUploadManager) UploadManagerSingleton
 			.getInstance();
 
 	private JMTimer download_tasks;
 	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask peer_monitor_task = null;
-
 	private JMTimerTask queue_sources_task = null;
 
 	private DownloadSession() {
@@ -225,7 +220,8 @@ public class DownloadSession implements JMTransferSession {
 		};
 		queue_sources_task = new JMTimerTask() {
 			public void run() {
-				queueSources();
+				queueSourcesFromServer();
+				queueSourcesFromPEX();
 			}
 		};
 		download_tasks.addTask(peer_monitor_task, PEER_MONITOR_INTERVAL, true);
@@ -298,11 +294,11 @@ public class DownloadSession implements JMTransferSession {
 		this.setStatus(DownloadStatus.STARTED);
 		sharedFile.markDownloadStarted();
 
-		queueSources();
+		queueSourcesFromServer();
 
 	}
 
-	private void queueSources() {
+	private void queueSourcesFromServer() {
 		if (ServerManagerSingleton.getInstance().isConnected())
 			network_manager.requestSourcesFromServer(getFileHash(), sharedFile
 					.length());
@@ -316,6 +312,20 @@ public class DownloadSession implements JMTransferSession {
 		// p.sendPacket(packet);
 		// }
 		// }
+	}
+	
+	private void queueSourcesFromPEX() {
+		List<Peer> peer_list = download_status_list.getPeersByStatus(PeerDownloadStatus.IN_QUEUE,PeerDownloadStatus.ACTIVE, PeerDownloadStatus.ACTIVE_UNUSED);
+		int request_count = 0;
+		for(Peer peer : peer_list) {
+			if (!peer.isConnected())  continue;
+			if (partStatus.get(peer).getBitCount(false)>=1) {
+				network_manager.sendSourcesRequest(peer.getIP(), peer.getPort(), sharedFile.getFileHash());
+				request_count++;
+			}
+			if (request_count > MAX_PEX_CONCURENT_REQEUSTS) break;
+		}
+		
 	}
 	
 	void addDownloadPeers(List<Peer> peerList) {
@@ -572,6 +582,11 @@ public class DownloadSession implements JMTransferSession {
 		}
 	}
 	
+	void receivedSourcesAnswerFromPeer(Peer peer, List<Peer> peerList) {
+		addDownloadPeers(peerList);
+	}
+	
+	
 	private void processFileChunk(Peer sender, FileChunk fileChunk) {
 		download_status_list.updatePeerTime(sender);
 		
@@ -827,6 +842,10 @@ public class DownloadSession implements JMTransferSession {
 		str += fileRequestList + "\n";
 		str += "]";
 		return str;
+	}
+	
+	FilePartStatus getPartStatus() {
+		return partStatus;
 	}
 
 	class CompressedChunkContainer {

@@ -36,8 +36,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 14:55:59 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
  */
 public class DownloadStatusList {
 
@@ -46,6 +46,8 @@ public class DownloadStatusList {
 	DownloadStatusList() {
 	}
 
+	
+	
 	List<Peer> getPeersWithInactiveTime(long inactiveTime) {
 		List<Peer> peer_list = new LinkedList<Peer>();
 		for (PeerDownloadInfo peer_download_status : peer_status_list) {

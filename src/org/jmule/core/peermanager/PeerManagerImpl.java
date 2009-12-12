@@ -53,8 +53,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -369,16 +369,26 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	public void removePeerManagerListener(PeerManagerListener listener) {
 		listener_list.remove(listener);
 	}
-	
-	public List<Peer> createPeerList(List<ClientID> peerIDList, List<Integer> peerPort, PeerSource peerSource) {
+
+	public List<Peer> createPeerList(List<String> peerIPList, List<Integer> peerPort, boolean addKnownPeersInList, PeerSource peerSource) {
 		List<Peer> result = new ArrayList<Peer>();
 		
-		for (int i = 0; i < peerIDList.size(); i++) {
-			String client_id = peerIDList.get(i).getAsString();
+		for (int i = 0; i < peerIPList.size(); i++) {
+			String peer_ip = peerIPList.get(i);
 			int peer_port = peerPort.get(i);
-			if (hasPeer(client_id, peer_port)) continue;
+			if (hasPeer(peer_ip, peer_port)) { 
+				if (addKnownPeersInList) {
+					try {
+						Peer peer = getPeer(peer_ip, peer_port);
+						result.add(peer);
+					} catch (PeerManagerException e) {
+						e.printStackTrace();
+					}
+				}
+				continue;
+			}
 			try {
-				result.add(newPeer(client_id, peer_port, peerSource));
+				result.add(newPeer(peer_ip, peer_port, peerSource));
 			} catch (PeerManagerException e) {
 				e.printStackTrace();
 			}
@@ -386,7 +396,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		
 		return result;
 	}
-
+	
 	private void notifyNewPeer(Peer peer) {
 		for(PeerManagerListener listener : listener_list) 
 			try {

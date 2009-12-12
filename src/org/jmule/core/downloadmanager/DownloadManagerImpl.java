@@ -22,7 +22,6 @@
  */
 package org.jmule.core.downloadmanager;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,9 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.JMuleBitSet;
@@ -49,8 +51,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:44:24 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -59,14 +61,14 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private List<DownloadManagerListener> download_manager_listeners = new LinkedList<DownloadManagerListener>();
 	private List<NeedMorePeersListener> need_more_peers_listeners = new LinkedList<NeedMorePeersListener>();
     
+	private InternalNetworkManager _network_manager;
+	
 	private Timer need_more_peers_timer;
 	
 	private static final long   NEED_MORE_PEERS_INTERVAL           =    60*1000;
 	private static final float  MEDIUM_SPEED_CONSIDERED_AS_SMALL   =    10*1000;
 	
 	public DownloadManagerImpl() {
-
-	
 	}
 	
 	public void addDownload(SearchResultItem searchResult) throws DownloadManagerException {
@@ -210,7 +212,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		need_more_peers_timer = new Timer( true );
 		need_more_peers_timer.schedule( new TimerTask() {
 			@Override
@@ -226,6 +228,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				notifyNeedMorePeersForFiles( file_hashes_needed_help );
 			}
 		}, (long)1, NEED_MORE_PEERS_INTERVAL);
+		
 	}
 
 	public void addDownloadPeers(FileHash fileHash, List<Peer> peerList) {
@@ -452,15 +455,37 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			}
 	}
 
-	public void receivedSourcesAnswerFromPeer(Peer peer, FileHash fileHash,
-			List<String> ipList, List<Integer> portList) {
-		
-	}
-
 	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash) {
-			
+		if (!hasDownload(fileHash))
+			return;
+		try {
+			DownloadSession session = getDownload(fileHash);
+			List<Peer> session_peers = session.getPeers();
+			FilePartStatus part_status = session.getPartStatus();
+			List<Peer> response_peers = new ArrayList<Peer>();
+			for(Peer p : session_peers) {
+				if (response_peers.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
+				if (!part_status.hasStatus(p)) continue;
+				JMuleBitSet bit_set = part_status.get(p);
+				if (bit_set.hasAtLeastOne(true))
+					response_peers.add(p);
+			}
+			_network_manager.sendSourcesResponse(peer.getIP(), peer.getPort(), fileHash, response_peers);
+		} catch (DownloadManagerException e) {
+			e.printStackTrace();
+		}
 	}
 
+	public void receivedSourcesAnswerFromPeer(Peer peer, FileHash fileHash,
+			List<Peer> peerList) {
+		try {
+			DownloadSession session = getDownload(fileHash);
+			session.receivedSourcesAnswerFromPeer(peer, peerList);
+		} catch (DownloadManagerException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void addNeedMorePeersListener(NeedMorePeersListener listener) {
 		
 		need_more_peers_listeners.add( listener );

@@ -81,8 +81,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/12 08:38:55 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/12 18:58:38 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -679,9 +679,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void receivedSourcesFromServer(FileHash fileHash,
-			List<ClientID> clientIDList, List<Integer> portList) {
-		List<Peer> peer_list = _peer_manager.createPeerList(clientIDList,
-				portList, PeerSource.SERVER);
+			List<String> clientIPList, List<Integer> portList) {
+		List<Peer> peer_list = _peer_manager.createPeerList(clientIPList,
+				portList, false, PeerSource.SERVER);
 		_download_manager.addDownloadPeers(fileHash, peer_list);
 	}
 
@@ -722,7 +722,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void receivedSourcesAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, List<String> ipList, List<Integer> portList) {
 		try {
 			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
-			_download_manager.receivedSourcesAnswerFromPeer(peer, fileHash, ipList, portList);
+			List<Peer> peer_list = _peer_manager.createPeerList(ipList, portList, true, PeerSource.PEX);
+			_download_manager.receivedSourcesAnswerFromPeer(peer, fileHash, peer_list);
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
 		}
