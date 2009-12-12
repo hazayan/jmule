@@ -33,7 +33,6 @@ import javax.management.JMException;
 
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
-import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
@@ -82,8 +81,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/12 08:38:55 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -223,8 +222,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void addPeer(JMPeerConnection peerConnection) throws NetworkManagerException {
-		if (peer_connections.size() > ConfigurationManager.MAX_PEERS)
-			throw new NetworkManagerException("Connection limit exceeded");
 		peer_connections.put(peerConnection.getIPAddress() + KEY_SEPARATOR+ peerConnection.getPort(), peerConnection);
 		try {
 			_peer_manager.newIncomingPeer(peerConnection.getIPAddress(),
@@ -235,8 +232,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public synchronized void addPeer(String ip, int port) throws NetworkManagerException {
-		if (peer_connections.size() > ConfigurationManager.MAX_PEERS)
-			throw new NetworkManagerException("Connection limit exceeded");
 		Peer peer;
 		try {
 			peer = _peer_manager.getPeer(ip, port);
@@ -569,8 +564,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					_config_manager.getUserHash(), client_id, _config_manager
 							.getTCP(), _config_manager.getNickName(),
 					server_ip, server_port, E2DKConstants.DefaultJMuleFeatures);
-
 			connection.send(packet);
+			
+			Packet emule_hello_packet = PacketFactory.getEMulePeerHelloPacket();
+			connection.send(emule_hello_packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
@@ -927,28 +924,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			peer_connection.send(packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
-		}
-	}
-		
-	public void sendEMuleHelloPacket(String peerIP, int peerPort) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP,
-					peerPort);
-			Packet packet = PacketFactory.getEMulePeerHelloPacket();
-			peer_connection.send(packet);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void sendEMuleHelloAnswerPacket(String peerIP, int peerPort) {
-		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP,
-					peerPort);
-			Packet packet = PacketFactory.getEMulePeerHelloAnswerPacket();
-			peer_connection.send(packet);
-		} catch (Throwable e) {
-			e.printStackTrace();
 		}
 	}
 	

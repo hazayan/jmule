@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:44:24 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD}
@@ -62,9 +62,9 @@ public class Peer {
 	
 	private ClientID clientID = null;
 	private UserHash userHash = null;
-	private TagList tag_list = new TagList();
+	TagList tag_list = new TagList();
 	
-	private Map<PeerFeatures,Integer> peer_features = new Hashtable<PeerFeatures, Integer>();
+	Map<PeerFeatures,Integer> peer_features = new Hashtable<PeerFeatures, Integer>();
 	private PeerSource peer_source = PeerSource.SERVER;
 	
 	private PeerStatus peer_status = PeerStatus.DISCONNECTED;
@@ -136,6 +136,10 @@ public class Peer {
 	
 	public Map<PeerFeatures, Integer> getPeerFeatures() {
 		return peer_features;
+	}
+	
+	void setPeerFeatures(Map<PeerFeatures, Integer> features) {
+		peer_features = features;
 	}
 		
 	public PeerSource getPeerSource() {

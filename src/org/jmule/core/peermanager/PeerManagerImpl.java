@@ -35,8 +35,12 @@ import org.jmule.core.JMuleManagerException;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
@@ -49,8 +53,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:44:24 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -330,12 +334,31 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 
 	public void receivedEMuleHelloFromPeer(String ip, int port,
 			byte clientVersion, byte protocolVersion, TagList tagList) {
-		
+		try {
+			Peer peer = getPeer(ip, port);
+			Map<PeerFeatures,Integer> peer_features = Utils.scanTagListPeerFeatures(tagList);
+			peer_features.put(PeerFeatures.ProtocolVersion, (int)protocolVersion);
+			peer.peer_features.putAll(peer_features);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void receivedEMuleHelloAnswerFromPeer(String ip, int port,
 			byte clientVersion, byte protocolVersion, TagList tagList) {
-		
+		try {
+			Peer peer = getPeer(ip, port);
+			Map<PeerFeatures,Integer> peer_features = Utils.scanTagListPeerFeatures(tagList);
+			peer_features.put(PeerFeatures.ProtocolVersion, (int)protocolVersion);
+			peer.peer_features.putAll(peer_features);
+			
+			Tag udp_port = tagList.getTag(E2DKConstants.ET_UDPPORT);
+			if (udp_port != null)
+				peer.tag_list.addTag(udp_port);
+			
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

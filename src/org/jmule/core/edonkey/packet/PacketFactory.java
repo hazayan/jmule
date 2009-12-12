@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/07 18:56:07 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
  */
 public class PacketFactory {
 	
@@ -1621,13 +1621,13 @@ public class PacketFactory {
 	
 	public static Packet getEMulePeerHelloPacket() throws JMException {
 		TagList tag_list = new TagList();
-		tag_list.addTag(new IntTag(ET_COMPRESSION, ET_COMPRESSION_VALUE ));
+		tag_list.addTag(new IntTag(ET_COMPRESSION, DefaultJMuleFeatures.get(PeerFeatures.DataCompressionVer)));
 		tag_list.addTag(new IntTag(ET_UDPPORT, (ConfigurationManagerSingleton.getInstance().getUDP())));
-		tag_list.addTag(new IntTag(ET_UDPVER, ET_UDPVER_VALUE ));
-		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, ET_SOURCEEXCHANGE_VALUE ));
-		tag_list.addTag(new IntTag(ET_COMMENTS, ET_COMMENTS_VALUE ));
-		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, ET_EXTENDEDREQUEST_VALUE ));
-		tag_list.addTag(new IntTag(ET_FEATURES, ET_FEATURES_VALUE ));
+		tag_list.addTag(new IntTag(ET_UDPVER, DefaultJMuleFeatures.get(PeerFeatures.UDPVer)));
+		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, DefaultJMuleFeatures.get(PeerFeatures.SourceExchange1Ver) ));
+		tag_list.addTag(new IntTag(ET_COMMENTS, DefaultJMuleFeatures.get(PeerFeatures.AcceptCommentVer)));
+		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, DefaultJMuleFeatures.get(PeerFeatures.ExtendedRequestsVer) ));
+		tag_list.addTag(new IntTag(ET_FEATURES, DefaultJMuleFeatures.get(PeerFeatures.NoViewSharedFiles)));
 		
 		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
 				PROTO_EMULE_EXTENDED_TCP);
@@ -1686,13 +1686,13 @@ public class PacketFactory {
 	 */
 	public static Packet getEMulePeerHelloAnswerPacket() throws JMException {
 		TagList tag_list = new TagList();
-		tag_list.addTag(new IntTag(ET_COMPRESSION, ET_COMPRESSION_VALUE ));
+		tag_list.addTag(new IntTag(ET_COMPRESSION, DefaultJMuleFeatures.get(PeerFeatures.DataCompressionVer)));
 		tag_list.addTag(new IntTag(ET_UDPPORT, (ConfigurationManagerSingleton.getInstance().getUDP())));
-		tag_list.addTag(new IntTag(ET_UDPVER, ET_UDPVER_VALUE ));
-		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, ET_SOURCEEXCHANGE_VALUE ));
-		tag_list.addTag(new IntTag(ET_COMMENTS, ET_COMMENTS_VALUE ));
-		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, ET_EXTENDEDREQUEST_VALUE ));
-		tag_list.addTag(new IntTag(ET_FEATURES, ET_FEATURES_VALUE ));
+		tag_list.addTag(new IntTag(ET_UDPVER, DefaultJMuleFeatures.get(PeerFeatures.UDPVer)));
+		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, DefaultJMuleFeatures.get(PeerFeatures.SourceExchange1Ver) ));
+		tag_list.addTag(new IntTag(ET_COMMENTS, DefaultJMuleFeatures.get(PeerFeatures.AcceptCommentVer)));
+		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, DefaultJMuleFeatures.get(PeerFeatures.ExtendedRequestsVer) ));
+		tag_list.addTag(new IntTag(ET_FEATURES, DefaultJMuleFeatures.get(PeerFeatures.NoViewSharedFiles)));
 		
 		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
 				PROTO_EMULE_EXTENDED_TCP);
@@ -1755,13 +1755,13 @@ public class PacketFactory {
 	 * </table>
 	 */
 	public static Packet getQueueRankingPacket(int position) {
-		Packet packet = new Packet(2+10, PROTO_EMULE_EXTENDED_TCP);
+		Packet packet = new Packet(2 + 10, PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_EMULE_QUEUERANKING);
 		packet.insertData(Convert.intToShort(position));
 
-		byte ZArray[] = new byte[10];
-		for(int i = 0;i<ZArray.length;i++) ZArray[i] = 0;
-		packet.insertData(ZArray);
+		ByteBuffer zero_array = Misc.getByteBuffer(10);
+		zero_array.position(0);
+		packet.insertData(zero_array);
 		return packet;
 	}
 	

@@ -24,7 +24,7 @@ package org.jmule.core.edonkey;
 
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AICHVer;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVer;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVer;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
@@ -47,8 +47,8 @@ import org.jmule.core.JMConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/06 17:47:29 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
  */
 public class E2DKConstants {
 
@@ -217,7 +217,7 @@ public class E2DKConstants {
 	
 	public static enum PeerFeatures { 
 		UDPVer,
-		DataCompVer,
+		DataCompressionVer,
 		SupportSecIdent,
 		SourceExchange1Ver,
 		ExtendedRequestsVer,
@@ -227,7 +227,9 @@ public class E2DKConstants {
 		SupportPreview,
 		PeerCache,
 		UnicodeSupport,
-		AICHVer
+		AICHVer,
+		//internal options used in JMule
+		ProtocolVersion
 	}
 	
 	public static final Map<PeerFeatures, Integer> DefaultJMuleFeatures = new HashMap<PeerFeatures, Integer> (); 
@@ -235,7 +237,7 @@ public class E2DKConstants {
 		DefaultJMuleFeatures.put(AICHVer, 0);
 		DefaultJMuleFeatures.put(UnicodeSupport, 1);
 		DefaultJMuleFeatures.put(UDPVer, 4);
-		DefaultJMuleFeatures.put(DataCompVer, 1);
+		DefaultJMuleFeatures.put(DataCompressionVer, 1);
 		DefaultJMuleFeatures.put(SupportSecIdent, 0);
 		DefaultJMuleFeatures.put(SourceExchange1Ver, 1);
 		DefaultJMuleFeatures.put(ExtendedRequestsVer,0);
@@ -291,22 +293,13 @@ public class E2DKConstants {
 	public final static byte[] TAG_NAME_COMPLETESRC 	= new byte[]{0x30};
 	// eMule tags - used in OP_EMULE_HELLO, OP_EMULE_HELLOANSWER
 	public final static byte[] ET_COMPRESSION 			= new byte[]{0x20};
-	public final static int ET_COMPRESSION_VALUE		= 1;
 	public final static byte[] ET_UDPPORT 				= new byte[]{0x21};
 	public final static byte[] ET_UDPVER 				= new byte[]{0x22};
-	public final static int ET_UDPVER_VALUE				= 4;
 	public final static byte[] ET_SOURCEEXCHANGE 		= new byte[]{0x23};
-	public final static int ET_SOURCEEXCHANGE_VALUE		= 3;
 	public final static byte[] ET_COMMENTS 				= new byte[]{0x24};
-	public final static int ET_COMMENTS_VALUE			= 1;
 	public final static byte[] ET_EXTENDEDREQUEST 		= new byte[]{0x25};
-	public final static int ET_EXTENDEDREQUEST_VALUE	= 2;
 	public final static byte[] ET_COMPATIBLECLIENT 		= new byte[]{0x26};//not used
 	public final static byte[] ET_FEATURES 				= new byte[]{0x27};
-	public final static int ET_FEATURES_VALUE			= 0;
-	
-	
-	
 	
 	public final static byte[] FT_NAME_STATUS			= new byte[]{0x14};
 	
