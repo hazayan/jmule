@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/26 09:10:20 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/13 10:45:55 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -57,8 +57,10 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          UDP_PORT        				=     4662;
 	public static final boolean      UDP_ENABLED                    =     true;
 	public static final int          LOG_FILES_NUMBER   			=     10;
-	public static final int          LOG_FILE_SIZE      			=     20 * 1024 * 1024;
-	public static final int          SOURCES_QUERY_INTERVAL     	=     1000 * 60 * 5;
+	public static final int          LOG_FILE_SIZE      			=     2000 * 1024 * 1024;
+	
+	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 5;
+	public static final int          PEX_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 1;
 	public static final int          PEER_ACTIVITY_CHECH_INTERVAL   =     1000 * 30;
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
@@ -98,6 +100,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int 		  SHARED_FILES_PUBLISH_INTERVAL = 	  1000 * 60;
 	
 	public static final int 		  MAX_PEERS						= 	  300;
+	
+	public static final int			  MAX_PEX_RESPONSE				= 	  500;
 	
 	// data base keys
 	public static final String       NICK_NAME_KEY                  =     "NickName";

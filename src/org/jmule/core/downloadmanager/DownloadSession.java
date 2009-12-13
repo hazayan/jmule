@@ -88,18 +88,18 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.35 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
+ * @version $$Revision: 1.36 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/13 10:45:55 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
 	public enum DownloadStatus {
 		STARTED, STOPPED
 	}
-	private final static int PEER_MONITOR_INTERVAL = 1000;
-	private final static long PEER_RESEND_PACKET_INTERVAL = 1000 * 10;
-	private final static long UNUSED_PEER_ACTIVATION = 1000 * 10;
-	private final static long MAX_PEX_CONCURENT_REQEUSTS = 30;
+	private final static int PEER_MONITOR_INTERVAL 			= 1000;
+	private final static long PEER_RESEND_PACKET_INTERVAL 	= 1000 * 10;
+	private final static long UNUSED_PEER_ACTIVATION 		= 1000 * 10;
+	private final static long MAX_PEX_CONCURENT_REQEUSTS 	= 30;
 
 	private PartialFile sharedFile;
 	private FilePartStatus partStatus;
@@ -125,8 +125,8 @@ public class DownloadSession implements JMTransferSession {
 	private JMTimer download_tasks;
 	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask peer_monitor_task = null;
-	private JMTimerTask queue_sources_task = null;
-
+	private JMTimerTask server_queue_sources_task = null;
+	private JMTimerTask pex_queue_sources_task = null;
 	private DownloadSession() {
 		
 	}
@@ -218,16 +218,23 @@ public class DownloadSession implements JMTransferSession {
 				}
 			}
 		};
-		queue_sources_task = new JMTimerTask() {
+		server_queue_sources_task = new JMTimerTask() {
 			public void run() {
 				queueSourcesFromServer();
-				queueSourcesFromPEX();
 			}
 		};
 		download_tasks.addTask(peer_monitor_task, PEER_MONITOR_INTERVAL, true);
-		download_tasks.addTask(queue_sources_task,
-				ConfigurationManager.SOURCES_QUERY_INTERVAL, true);
+		download_tasks.addTask(server_queue_sources_task,
+				ConfigurationManager.SERVER_SOURCES_QUERY_INTERVAL, true);
 
+		pex_queue_sources_task = new JMTimerTask() {
+			public void run() {
+				queueSourcesFromPEX();
+			}
+		};
+		download_tasks.addTask(pex_queue_sources_task,
+				ConfigurationManager.PEX_SOURCES_QUERY_INTERVAL, true);
+		
 		if (jkad.isConnected()) {
 			kad_source_search_task = new JMTimerTask() {
 				Int128 search_id;
@@ -315,11 +322,14 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	private void queueSourcesFromPEX() {
+		System.out.println("Pex Request");
 		List<Peer> peer_list = download_status_list.getPeersByStatus(PeerDownloadStatus.IN_QUEUE,PeerDownloadStatus.ACTIVE, PeerDownloadStatus.ACTIVE_UNUSED);
 		int request_count = 0;
 		for(Peer peer : peer_list) {
 			if (!peer.isConnected())  continue;
-			if (partStatus.get(peer).getBitCount(false)>=1) {
+			//if (partStatus.get(peer).getBitCount(false)>=1) 
+			{
+				System.out.println("Send PEX request to : " + peer.getIP()+" : "+ peer.getPort());
 				network_manager.sendSourcesRequest(peer.getIP(), peer.getPort(), sharedFile.getFileHash());
 				request_count++;
 			}
@@ -583,6 +593,10 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	void receivedSourcesAnswerFromPeer(Peer peer, List<Peer> peerList) {
+		System.out.println("PEX answers");
+		for(Peer pex_peer : peerList) {
+			System.out.println("PEX peer : " + pex_peer);
+		}
 		addDownloadPeers(peerList);
 	}
 	
