@@ -60,8 +60,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/12 18:43:30 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:31:54 $$
  */
 public abstract class SharedFile {
 	
@@ -72,13 +72,16 @@ public abstract class SharedFile {
 	protected File file;
 
 	public FileChunk getData(FileChunkRequest chunkData) throws SharedFileException{
-		if (readChannel == null)
-			try {
-				readChannel = new RandomAccessFile(file,"rws").getChannel();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				throw new SharedFileException("Failed to open file : " + file.getName());
+		if (readChannel == null) {
+			synchronized(FileChannel.class) {
+				try {
+					readChannel = new RandomAccessFile(file,"rws").getChannel();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					throw new SharedFileException("Failed to open file : " + file.getName());
+				}
 			}
+		}
 		ByteBuffer data = Misc.getByteBuffer(chunkData.getChunkEnd()-chunkData.getChunkBegin());
 		data.position(0);
 		try {
@@ -88,6 +91,13 @@ public abstract class SharedFile {
 		} catch (IOException e) {
 			throw new SharedFileException("I/O error on reading file "+this+"\n"+Misc.getStackTrace(e));
 		}
+		/*try {
+			readChannel.close();
+			readChannel = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
+		
 		return new FileChunk(chunkData.getChunkBegin(),chunkData.getChunkEnd(),data);
 	}
 	
@@ -234,5 +244,6 @@ public abstract class SharedFile {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		readChannel = writeChannel = null;
 	}
 }

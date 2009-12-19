@@ -52,8 +52,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:31:54 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -524,7 +524,6 @@ public class PartialFile extends SharedFile {
 		
 		if (write_thread != null)
 			if (write_thread.isAlive()) write_thread.JMStop();
-		
 		partFile.close();
 		super.closeFile();
 	}

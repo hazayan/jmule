@@ -39,21 +39,21 @@ import org.jmule.core.utils.MD4;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:31:54 $$
  */
 public class FileHashing extends JMFileTask {
 
 	private FileChannel fileChannel;
 	private PartHashSet fileHashSet;
 	private long position = 0L;
-	
+	private boolean close_file_on_finish = false;
 	public FileHashing(File file) throws FileNotFoundException {
 		
 		super("ED2K MD4 file hashing process");
 		
 		fileChannel = ( new FileInputStream(file) ).getChannel();
-		
+		close_file_on_finish = true;
 	}
 	
 	public FileHashing(FileChannel fileChannel) {
@@ -224,6 +224,12 @@ public class FileHashing extends JMFileTask {
         	 e.printStackTrace();
         	 
           }
+        if (close_file_on_finish)
+			try {
+				fileChannel.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 		
 }
