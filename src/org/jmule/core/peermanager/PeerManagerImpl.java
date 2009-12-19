@@ -48,13 +48,15 @@ import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.peermanager.Peer.PeerStatus;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
+import org.jmule.core.utils.timer.JMTimer;
+import org.jmule.core.utils.timer.JMTimerTask;
 
 /**
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:30:20 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -65,6 +67,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	private InternalDownloadManager _download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 	private InternalUploadManager _upload_manager 	  = (InternalUploadManager)   UploadManagerSingleton.getInstance();
 
+	private JMTimer maintenance_tasks = new JMTimer();
 	
 	PeerManagerImpl() {
 	}
@@ -98,7 +101,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		
+		maintenance_tasks.cancelAllTasks();
 		for(Peer peer : peers.values()) {
 			try {
 				if (peer.isConnected())
@@ -118,6 +121,23 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
+		JMTimerTask peer_dropper = new JMTimerTask() {
+			public void run() {
+				for(Peer peer : peers.values()) { 
+					if (!peer.isConnected()) continue;
+					if (!_download_manager.hasPeer(peer))
+						if (!_upload_manager.hasPeer(peer)) {
+							try {
+								disconnect(peer);
+							} catch (PeerManagerException e) {
+								e.printStackTrace();
+							}
+						}
+				}
+			}
+		};
+		maintenance_tasks.addTask(peer_dropper, 10000, true);
+		
 	}
 
 	protected boolean iAmStoppable() {
@@ -143,7 +163,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			throw new PeerManagerException("Peer already exists");
 		Peer peer = new Peer(ip, port, source);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
-		peer.setPeerStatus(PeerStatus.DISCONNECTED);
+		peer.setStatus(PeerStatus.DISCONNECTED);
 		notifyNewPeer(peer);		
 		return peer;
 	}
@@ -212,7 +232,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		peer.setPeerStatus(PeerStatus.CONNECTED);
+		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
@@ -221,7 +241,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (replaceLowIDPeer(peer)) {
 			try {
 				peer = getPeer(peerIP, peerPort);
-				peer.setPeerStatus(PeerStatus.CONNECTED);
+				peer.setStatus(PeerStatus.CONNECTED);
 			} catch (PeerManagerException e) {
 				e.printStackTrace();
 				return ;
@@ -243,7 +263,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			return ;
 		}
 		
-		peer.setPeerStatus(PeerStatus.CONNECTED);
+		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
@@ -252,7 +272,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (replaceLowIDPeer(peer)) {
 			try {
 				peer = getPeer(peerIP, peerPort);
-				peer.setPeerStatus(PeerStatus.CONNECTED);
+				peer.setStatus(PeerStatus.CONNECTED);
 			} catch (PeerManagerException e) {
 				e.printStackTrace();
 				return ;
@@ -273,7 +293,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		}catch(NetworkManagerException cause) {
 			throw new PeerManagerException(cause);
 		}
-		peer.setPeerStatus(PeerStatus.CONNECTING);
+		peer.setStatus(PeerStatus.CONNECTING);
 		notifyPeerConnecting(peer);	
 	}
 
@@ -283,6 +303,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (!hasPeer(ip, port))
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
 		_network_manager.disconnectPeer(ip, port);
+		peer.setStatus(PeerStatus.DISCONNECTED);
 		notifyPeerDisconnected(peer);
 	}
 	
@@ -294,7 +315,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		peer.setPeerStatus(PeerStatus.DISCONNECTED);
+		peer.setStatus(PeerStatus.DISCONNECTED);
 		_download_manager.peerConnectingFailed(peer, cause);
 		_upload_manager.peerConnectingFailed(peer, cause);
 		notifyPeerConnectingFailed(peer, cause);
@@ -308,7 +329,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return;
 		}
-		peer.setPeerStatus(PeerStatus.DISCONNECTED);
+		peer.setStatus(PeerStatus.DISCONNECTED);
 		_download_manager.peerDisconnected(peer);
 		_upload_manager.peerDisconnected(peer);
 		notifyPeerDisconnected(peer);

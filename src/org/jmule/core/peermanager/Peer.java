@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:30:20 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
@@ -93,7 +93,7 @@ public class Peer {
 		this.peer_status = peer.peer_status;
 	}
 	
-	void setPeerStatus(PeerStatus newStatus) {
+	void setStatus(PeerStatus newStatus) {
 		this.peer_status = newStatus;
 	}
 	
