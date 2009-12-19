@@ -43,8 +43,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:01:41 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:33:00 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -63,6 +63,7 @@ public class UploadQueue {
 	}
 	
 	boolean hasPeer(Peer peer) {
+		if (peer.getUserHash() == null) return false;
 		return upload_queue.containsKey(peer.getUserHash());
 	}
 	
