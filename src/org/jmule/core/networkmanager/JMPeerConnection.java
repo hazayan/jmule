@@ -43,10 +43,10 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/17 10:04:46 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/19 19:23:45 $
  */
-public class JMPeerConnection extends JMConnection {
+public final class JMPeerConnection extends JMConnection {
 
 	private JMuleSocketChannel jm_socket_channel;
 	
@@ -176,6 +176,7 @@ public class JMPeerConnection extends JMConnection {
 				throw new NetworkManagerException(cause);
 			}
 		}
+		jm_socket_channel = null;
 	}
 	
 	String getIPAddress() {
