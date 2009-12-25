@@ -48,12 +48,12 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 /**
  * Created on Dec 24, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/12 08:38:56 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:11:49 $
  */
 public class Utils {
 
-	public static int peerFeaturesToInt( Map<PeerFeatures, Integer> clientFeatures) {
+	public static int peerFeatures1ToInt( Map<PeerFeatures, Integer> clientFeatures) {
 		int misc_optins1 = 0;
 		
 		misc_optins1 |= (byte)(clientFeatures.get(AICHVer) << 29);
@@ -72,7 +72,23 @@ public class Utils {
 		return misc_optins1;
 	}
 	
-	public static Map<PeerFeatures,Integer> scanTCPPeerFeatures(int rawData) {
+	public static int peerFeatures2ToInt(Map<PeerFeatures, Integer> clientFeatures) {
+		int misc_optins2 = 0;
+		misc_optins2 |= (clientFeatures.get(DirectUDPCallback) << 12);
+		misc_optins2 |= (clientFeatures.get(SupportsCaptcha) << 11);
+		misc_optins2 |= (clientFeatures.get(SupportsSourceEx2) << 10);
+		misc_optins2 |= (clientFeatures.get(RequiresCryptLayer) << 9);
+		misc_optins2 |= (clientFeatures.get(RequestsCryptLayer) << 8);
+		misc_optins2 |= (clientFeatures.get(SupportsCryptLayer) << 7);
+		misc_optins2 |= (clientFeatures.get(Reserved) << 6);
+		misc_optins2 |= (clientFeatures.get(MultiPacket) << 5);
+		misc_optins2 |= (clientFeatures.get(SupportLargeFiles) << 4);
+		misc_optins2 |= (clientFeatures.get(KadVersion) << 0);
+		
+		return misc_optins2;
+	}
+	
+	public static Map<PeerFeatures,Integer> scanTCPPeerFeatures1(int rawData) {
 		Map<PeerFeatures,Integer> result = new Hashtable<PeerFeatures,Integer>();
 		
 		result.put(AICHVer, (rawData >> 29) & 0x07);
@@ -87,6 +103,23 @@ public class Utils {
 		result.put(NoViewSharedFiles, (rawData >>  2) & 0x01);
 		result.put(MultiPacket, (rawData >>  1) & 0x01);
 		result.put(SupportPreview, (rawData >>  0) & 0x01);
+		
+		return result;
+	}
+	
+	public static Map<PeerFeatures,Integer> scanTCPPeerFeatures2(int rawData) {
+		Map<PeerFeatures,Integer> result = new Hashtable<PeerFeatures,Integer>();
+		
+		result.put(DirectUDPCallback, (rawData >> 12) & 0x01);
+		result.put(SupportsCaptcha, (rawData >> 11) & 0x01);
+		result.put(SupportsSourceEx2, (rawData >> 10) & 0x01);
+		result.put(RequiresCryptLayer, (rawData >> 9) & 0x01);
+		result.put(RequestsCryptLayer, (rawData >> 8) & 0x01);
+		result.put(SupportsCryptLayer, (rawData >> 7) & 0x01);
+		result.put(Reserved, (rawData >> 6) & 0x01);
+		result.put(MultiPacket, (rawData >> 5) & 0x01);
+		result.put(SupportLargeFiles, (rawData >> 4) & 0x01);
+		result.put(KadVersion, (rawData >> 0) & 0x01);
 		
 		return result;
 	}
