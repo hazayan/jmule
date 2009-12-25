@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:30:20 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:13:28 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
@@ -117,7 +117,7 @@ public class Peer {
 			Tag tag = tag_list.getTag(TAG_NAME_MISC_OPTIONS1);
 			try {
 				long value = Misc.extractNumberTag(tag);
-				peer_features = Utils.scanTCPPeerFeatures(Convert
+				peer_features = Utils.scanTCPPeerFeatures1(Convert
 						.longToInt(value));
 			} catch (JMException e) {
 				e.printStackTrace();

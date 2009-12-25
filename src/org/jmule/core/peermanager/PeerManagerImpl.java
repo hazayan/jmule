@@ -24,6 +24,7 @@ package org.jmule.core.peermanager;
 
 import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,8 +56,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:30:20 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:13:28 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -418,6 +419,42 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		return result;
 	}
 	
+	public void sendMessage(Peer peer, String message) throws PeerManagerException{
+		if (!peer.isConnected())
+			throw new PeerManagerException("Peer not connected");
+		_network_manager.sendMessage(peer.getIP(), peer.getPort(), message);
+	}
+	
+	public void receivedMessage(String ip, int port, String message) {
+		Peer peer;
+		try {
+			peer = getPeer(ip, port);
+			notifyPeerMessage(peer, message);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receivedCaptchaImage(String ip, int port, ByteBuffer image) {
+		Peer peer;
+		try {
+			peer = getPeer(ip, port);
+			notifyPeerCaptchaImage(peer, image);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receivedCaptchaStatusAnswer(String ip, int port, byte answer) {
+		Peer peer;
+		try {
+			peer = getPeer(ip, port);
+			notifyPeerCaptchaStatusAnswer(peer, answer);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void notifyNewPeer(Peer peer) {
 		for(PeerManagerListener listener : listener_list) 
 			try {
@@ -468,6 +505,34 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		for(PeerManagerListener listener : listener_list) 
 			try {
 				listener.peerConnectingFailed(peer, cause);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
+	
+	private void notifyPeerMessage(Peer peer, String message) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerMessage(peer, message);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
+	private void notifyPeerCaptchaImage(Peer peer, ByteBuffer image) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerCaptchaImage(peer, image);
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+	}
+	
+	private void notifyPeerCaptchaStatusAnswer(Peer peer, byte answer) {
+		for(PeerManagerListener listener : listener_list) 
+			try {
+				listener.peerCaptchaStatusAnswer(peer, answer);
 			}catch(Throwable t) {
 				t.printStackTrace();
 			}

@@ -48,8 +48,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/12 18:58:38 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:29 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -168,6 +168,8 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void receivedSourcesAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, List<String> ipList, List<Integer> portList);
 	
 	public void requestSourcesFromServer(FileHash fileHash, long fileSize);
+	
+	public void sendMessage(String peerIP, int peerPort, String message);
 	
 	public void sendCallBackRequest(String peerIP, int peerPort, Int128 clientID, FileHash fileHash, IPAddress buddyIP, short buddyPort);
 	

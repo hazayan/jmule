@@ -81,8 +81,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/19 19:23:45 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:28 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -738,6 +738,16 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			server_connection.send(packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
+		}
+	}
+	
+	public void sendMessage(String peerIP, int peerPort, String message) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,peerPort);
+			Packet packet = PacketFactory.getMessagePacket(message);
+			peer_connection.send(packet);
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
 	}
 

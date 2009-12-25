@@ -59,7 +59,10 @@ import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.SERVER_SEARCH_RATIO;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
@@ -85,6 +88,8 @@ import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.packet.KadPacket;
+import org.jmule.core.peermanager.InternalPeerManager;
+import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.searchmanager.SearchResultItemList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
@@ -92,13 +97,14 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.JMuleZLib;
 import org.jmule.core.utils.Misc;
+import org.omg.CORBA._PolicyStub;
 
 /**
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/12 18:58:38 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:29 $
  */
 public class PacketReader {
 
@@ -108,6 +114,7 @@ public class PacketReader {
 			MalformattedPacketException {
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
+		
 
 		ByteBuffer header_buffer;
 
@@ -309,7 +316,8 @@ public class PacketReader {
 		byte packet_header = data2.get(0);
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
-
+		InternalPeerManager _peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
+		
 		int peerPort = channel.getChannel().socket().getPort();
 		String peerIP = Convert.IPtoString(channel.getChannel().socket()
 				.getInetAddress().getAddress());
@@ -550,6 +558,17 @@ public class PacketReader {
 							peerPort, new FileHash(file_hash), bitSet);
 					break;
 				}
+				
+				case OP_MESSAGE: {
+					int message_length = Convert.shortToInt(packet_data.getShort());
+					ByteBuffer message_bytes = Misc.getByteBuffer(message_length);
+					packet_data.get(message_bytes.array());
+					String message = new String(message_bytes.array());
+					message_bytes.clear();
+					message_bytes = null;
+					_peer_manager.receivedMessage(peerIP, peerPort, message);
+					break;
+				}
 	
 				default: {
 					throw new UnknownPacketException(packet_header, packet_opcode,
@@ -625,6 +644,23 @@ public class PacketReader {
 						port_list.add(Convert.shortToInt(port));
 					}
 					_network_manager.receivedSourcesAnswerFromPeer(peerIP, peerPort,new FileHash(hash), ip_list, port_list);
+					break;
+				}
+				
+				case OP_CHATCAPTCHAREQ : {
+					packet_data.get();
+					
+					ByteBuffer image_data = Misc.getByteBuffer(pkLength - 2);
+					image_data.position(0);
+					packet_data.get(image_data.array());
+					image_data.position(0);
+					_peer_manager.receivedCaptchaImage(peerIP, peerPort, image_data);
+					break;
+				}
+				
+				case OP_CHATCAPTCHARES : {
+					byte response = packet_data.get();
+					_peer_manager.receivedCaptchaStatusAnswer(peerIP, peerPort, response);
 					break;
 				}
 				

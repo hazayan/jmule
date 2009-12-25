@@ -22,11 +22,13 @@
  */
 package org.jmule.core.peermanager;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created on Aug 30, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:04 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:28 $
  */
 public interface PeerManagerListener {
 
@@ -42,4 +44,9 @@ public interface PeerManagerListener {
 	
 	public void peerConnectingFailed(Peer peer, Throwable cause);
 	
+	public void peerMessage(Peer peer, String message);
+	
+	public void peerCaptchaImage(Peer peer, ByteBuffer image);
+	
+	public void peerCaptchaStatusAnswer(Peer peer, byte answer);// 0 - response accepted
 }

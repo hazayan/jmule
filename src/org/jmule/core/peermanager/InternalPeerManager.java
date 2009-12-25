@@ -22,6 +22,7 @@
  */
 package org.jmule.core.peermanager;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.jmule.core.edonkey.ClientID;
@@ -33,8 +34,8 @@ import org.jmule.core.peermanager.Peer.PeerSource;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/12 18:58:38 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:28 $
  */
 public interface InternalPeerManager extends PeerManager {
 
@@ -75,5 +76,11 @@ public interface InternalPeerManager extends PeerManager {
 	public List<Peer> createPeerList(List<String> peerIPList,
 			List<Integer> peerPort, boolean addKnownPeersInList,
 			PeerSource peerSource);
+	
+	public void receivedMessage(String ip, int port, String message);
+	
+	public void receivedCaptchaImage(String ip, int port, ByteBuffer image);
+	
+	public void receivedCaptchaStatusAnswer(String ip, int port, byte answer);
 	
 }

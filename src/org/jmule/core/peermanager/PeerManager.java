@@ -32,8 +32,8 @@ import org.jmule.core.peermanager.Peer.PeerSource;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:13:28 $$
  */
 public interface PeerManager extends JMuleManager {
 
@@ -53,10 +53,12 @@ public interface PeerManager extends JMuleManager {
 	
 	public void disconnect(Peer peer) throws PeerManagerException;
 
+	public List<Peer> getPeers();
+	
+	public void sendMessage(Peer peer, String message) throws PeerManagerException;
+	
 	public void addPeerManagerListener(PeerManagerListener listener);
 
 	public void removePeerManagerListener(PeerManagerListener listener);
 
-	public List<Peer> getPeers();
-	
 }
