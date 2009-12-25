@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:11:15 $$
  */
 public class PacketFactory {
 	
@@ -619,12 +619,13 @@ public class PacketFactory {
 	public static Packet getPeerHelloPacket(UserHash userHash,ClientID clientID,int myPort,
 			byte[] serverIP,int serverPort,String userName, Map<PeerFeatures, Integer> clientFeatures) throws JMException  {
 				
-		int misc_optins1 = Utils.peerFeaturesToInt(clientFeatures);
+		int misc_optins1 = Utils.peerFeatures1ToInt(clientFeatures);
+		int misc_optins2 = Utils.peerFeatures2ToInt(clientFeatures);
 		
 		TagList tagList = new TagList();
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userName));
 		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS1,misc_optins1 ));
-		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,0 ));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,misc_optins2));
 		
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
@@ -702,12 +703,12 @@ public class PacketFactory {
 			int serverPort, Map<PeerFeatures, Integer> clientFeatures)
 			throws JMException {
 
-		int misc_optins1 = Utils.peerFeaturesToInt(clientFeatures);
-
+		int misc_optins1 = Utils.peerFeatures1ToInt(clientFeatures);
+		int misc_optins2 = Utils.peerFeatures2ToInt(clientFeatures);
 		TagList tagList = new TagList();
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userName));
 		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS1, misc_optins1));
-		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2, 0));
+		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2, misc_optins2));
 
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION, ProtocolVersion));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
@@ -793,10 +794,11 @@ public class PacketFactory {
 	 * </table>
 	 **/
 	public static Packet getMessagePacket(String message){
+		byte[] message_bytes = message.getBytes();
 		Packet packet = new Packet(2 + message.length(), PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_MESSAGE);
-		packet.insertData(Convert.intToShort(message.length()));
-		packet.insertData(message.getBytes());
+		packet.insertData(Convert.intToShort(message_bytes.length));
+		packet.insertData(message_bytes);
 		return packet;
 	}
 
