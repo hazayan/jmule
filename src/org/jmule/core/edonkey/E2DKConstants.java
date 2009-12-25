@@ -22,7 +22,7 @@
  */
 package org.jmule.core.edonkey;
 
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AICHVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.*;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVer;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVer;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVer;
@@ -43,12 +43,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jmule.core.JMConstants;
+import org.jmule.core.jkad.JKadConstants;
 
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 08:38:56 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:12:13 $$
  */
 public class E2DKConstants {
 
@@ -170,6 +171,9 @@ public class E2DKConstants {
 	public final static byte OP_PUBLICKEY 				= (byte) 0x85;
 	public final static byte OP_SIGNATURE 				= (byte) 0x86;
 	
+	public final static byte OP_CHATCAPTCHAREQ			= (byte) 0xA5;
+	public final static byte OP_CHATCAPTCHARES			= (byte) 0xA6;
+	
 	public final static byte OP_KAD_CALLBACK			= (byte) 0x99;
 	
 	public final static byte SRV_TCPFLG_COMPRESSION		= 0x00000001;
@@ -216,6 +220,7 @@ public class E2DKConstants {
 	}
 	
 	public static enum PeerFeatures { 
+		// Misc options 1
 		UDPVer,
 		DataCompressionVer,
 		SupportSecIdent,
@@ -228,6 +233,16 @@ public class E2DKConstants {
 		PeerCache,
 		UnicodeSupport,
 		AICHVer,
+		// Misc options 2
+		DirectUDPCallback,
+		SupportsCaptcha,
+		SupportsSourceEx2,
+		RequiresCryptLayer,
+		RequestsCryptLayer,
+		SupportsCryptLayer,
+		Reserved, // mod
+		SupportLargeFiles,
+		KadVersion,
 		//internal options used in JMule
 		ProtocolVersion
 	}
@@ -246,6 +261,16 @@ public class E2DKConstants {
 		DefaultJMuleFeatures.put(NoViewSharedFiles, 0);
 		DefaultJMuleFeatures.put(MultiPacket, 0);
 		DefaultJMuleFeatures.put(SupportPreview, 0);
+		
+		DefaultJMuleFeatures.put(DirectUDPCallback, 0);
+		DefaultJMuleFeatures.put(SupportsCaptcha, 1);
+		DefaultJMuleFeatures.put(SupportsSourceEx2, 0);
+		DefaultJMuleFeatures.put(RequiresCryptLayer, 0);
+		DefaultJMuleFeatures.put(RequestsCryptLayer, 0);
+		DefaultJMuleFeatures.put(SupportsCryptLayer, 0);
+		DefaultJMuleFeatures.put(Reserved, 0);
+		DefaultJMuleFeatures.put(SupportLargeFiles, 1);
+		DefaultJMuleFeatures.put(KadVersion, (int)JKadConstants.KAD_VERSION);
 	}
 	//UDP
 	//Server <-> Peer 
