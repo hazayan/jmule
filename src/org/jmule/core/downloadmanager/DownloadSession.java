@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.36 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/13 10:45:55 $$
+ * @version $$Revision: 1.37 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/26 09:47:22 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -322,17 +322,12 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	private void queueSourcesFromPEX() {
-		System.out.println("Pex Request");
 		List<Peer> peer_list = download_status_list.getPeersByStatus(PeerDownloadStatus.IN_QUEUE,PeerDownloadStatus.ACTIVE, PeerDownloadStatus.ACTIVE_UNUSED);
 		int request_count = 0;
 		for(Peer peer : peer_list) {
 			if (!peer.isConnected())  continue;
-			//if (partStatus.get(peer).getBitCount(false)>=1) 
-			{
-				System.out.println("Send PEX request to : " + peer.getIP()+" : "+ peer.getPort());
-				network_manager.sendSourcesRequest(peer.getIP(), peer.getPort(), sharedFile.getFileHash());
-				request_count++;
-			}
+			network_manager.sendSourcesRequest(peer.getIP(), peer.getPort(), sharedFile.getFileHash());
+			request_count++;
 			if (request_count > MAX_PEX_CONCURENT_REQEUSTS) break;
 		}
 		
@@ -593,10 +588,6 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	void receivedSourcesAnswerFromPeer(Peer peer, List<Peer> peerList) {
-		System.out.println("PEX answers");
-		for(Peer pex_peer : peerList) {
-			System.out.println("PEX peer : " + pex_peer);
-		}
 		addDownloadPeers(peerList);
 	}
 	
@@ -657,7 +648,7 @@ public class DownloadSession implements JMTransferSession {
 		fileChunkRequest(sender);
 	}
 
-	private void removePeer(Peer peer) {
+	void removePeer(Peer peer) {
 		if (hasPeer(peer))
 			return;
 		session_peers.remove(peer);
