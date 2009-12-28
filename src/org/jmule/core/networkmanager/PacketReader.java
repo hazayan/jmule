@@ -22,8 +22,12 @@
  */
 package org.jmule.core.networkmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
+import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHAREQ;
+import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHARES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
+import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_HELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
@@ -35,13 +39,16 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATUS;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSERVSTATUS;
 import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.OP_MESSAGE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLOANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTPARTS;
+import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVERLIST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_ANSWER;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
+import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTTAKEN;
 import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKFAILED;
@@ -59,10 +66,7 @@ import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.SERVER_SEARCH_RATIO;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
@@ -97,14 +101,13 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.JMuleZLib;
 import org.jmule.core.utils.Misc;
-import org.omg.CORBA._PolicyStub;
 
 /**
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:29 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/28 16:03:50 $
  */
 public class PacketReader {
 
