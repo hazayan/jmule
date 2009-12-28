@@ -81,8 +81,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:28 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/28 16:04:39 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -238,7 +238,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (!peer.isHighID()) 
 				if (server_connection!=null)
 					if (server_connection.getStatus() == ConnectionStatus.CONNECTED) {
-						callBackRequest(peer.getID());
+						if (_server_manager.getConnectedServer().getClientID().isHighID())
+							callBackRequest(peer.getID());
 						return ;
 					}
 		} catch (PeerManagerException e) {
@@ -539,15 +540,15 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			TagList tagList, String serverIP, int serverPort) {
 
 		_peer_manager.helloAnswerFromPeer(peerIP, peerPort, userHash, clientID,
-				peerPort, tagList, serverIP, serverPort);
+				peerPacketPort, tagList, serverIP, serverPort);
 	}
 
 	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort,
-			UserHash userHash, ClientID clientID, int peerPacketPort,
+			UserHash userHash, ClientID clientID, int peerListenPort,
 			TagList tagList, String serverIP, int serverPort) {
 
 		_peer_manager.helloFromPeer(peerIP, peerPort, userHash, clientID,
-				peerPort, tagList, serverIP, serverPort);
+				peerListenPort, tagList, serverIP, serverPort);
 
 		try {
 			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
