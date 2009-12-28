@@ -29,8 +29,6 @@ import static org.jmule.core.edonkey.E2DKConstants.FT_GAPSTART;
 import static org.jmule.core.edonkey.E2DKConstants.FT_TEMPFILE;
 import static org.jmule.core.edonkey.E2DKConstants.PARTFILE_VERSION;
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_STRING;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -99,8 +97,8 @@ import org.jmule.core.utils.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:08:58 $$
  */
 public class PartMet extends MetFile {
 	
