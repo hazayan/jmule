@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:11:15 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:06:13 $$
  */
 public class PacketFactory {
 	
@@ -1829,7 +1829,7 @@ public class PacketFactory {
 		packet.insertData(Convert.intToShort(peer_list.size()));
 		for(Peer peer : peer_list) {
 			byte[] ip_data = Convert.stringIPToArray(peer.getIP());
-			short port = Convert.intToShort(peer.getPort());
+			short port = Convert.intToShort(peer.getListenPort());
 			packet.insertData(ip_data);
 			packet.insertData(port);
 		}
