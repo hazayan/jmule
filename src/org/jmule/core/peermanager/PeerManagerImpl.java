@@ -56,8 +56,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:13:28 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:06:58 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -224,7 +224,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	}
 	
 	public void helloAnswerFromPeer(String peerIP, int peerPort,
-			UserHash userHash, ClientID clientID, int peerPacketPort,
+			UserHash userHash, ClientID clientID, int peerListenPort,
 			TagList tagList, String serverIP, int serverPort) {
 		Peer peer = null;
 		try {
@@ -237,6 +237,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
+		peer.setListenPort(peerListenPort);
 		peer.setServer(serverIP, serverPort);
 		if (!peer.isHighID())
 		if (replaceLowIDPeer(peer)) {
@@ -254,7 +255,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	}
 
 	public void helloFromPeer(String peerIP, int peerPort, UserHash userHash,
-			ClientID clientID, int peerPacketPort, TagList tagList,
+			ClientID clientID, int peerListenPort, TagList tagList,
 			String serverIP, int serverPort) {
 		Peer peer = null;
 		try {
@@ -269,6 +270,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
 		peer.setServer(serverIP, serverPort);
+		peer.setListenPort(peerListenPort);
 		if (!peer.isHighID())
 		if (replaceLowIDPeer(peer)) {
 			try {
@@ -290,7 +292,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (!hasPeer(ip, port))
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
 		try {
-			_network_manager.addPeer(ip, port);
+			_network_manager.addPeer(ip, peer.getListenPort());
 		}catch(NetworkManagerException cause) {
 			throw new PeerManagerException(cause);
 		}

@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:13:28 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:06:58 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
@@ -56,6 +56,7 @@ public class Peer {
 		
 	private String ip;
 	private int port;
+	private int listenPort;
 	
 	private String server_ip;
 	private int server_port;
@@ -123,6 +124,14 @@ public class Peer {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	void setListenPort(int listenPort) {
+		this.listenPort = listenPort;
+	}
+	
+	public int getListenPort() {
+		return listenPort;
 	}
 	
 	
