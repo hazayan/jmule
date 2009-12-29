@@ -54,8 +54,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/17 14:53:42 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/29 13:07:38 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -68,7 +68,7 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	
 	public UploadList(Composite composite,JMuleCore core) {
 		super(composite, SWT.NONE);
-
+		setLinesVisible(true);
 		upload_manager   = core.getUploadManager();
 		
 		upload_manager.addUploadManagerListener(this);
