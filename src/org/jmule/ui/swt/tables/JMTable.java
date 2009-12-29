@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/04 16:07:21 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/29 13:08:27 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -340,7 +340,7 @@ public abstract class JMTable<T> extends Table {
 		line_list.remove(id);
 		default_custom_control_list.remove(id);
 		default_line_list.remove(id);
-		
+		if (getItemCount() == 0) return ;
 		row.dispose();
 		clearAll();		
 	}
