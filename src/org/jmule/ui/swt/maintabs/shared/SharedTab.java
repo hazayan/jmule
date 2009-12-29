@@ -52,6 +52,7 @@ import org.jmule.core.configmanager.ConfigurationListener;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.sharingmanager.CompletedFile;
+import org.jmule.core.sharingmanager.FileQuality;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
@@ -74,8 +75,8 @@ import org.jmule.ui.utils.FileFormatter;
 
 /**
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/08/11 13:05:15 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/29 13:06:55 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -94,11 +95,20 @@ public class SharedTab extends AbstractTab {
 	private Button clear_button;
 	
 	private Menu no_items_menu;
-	private Menu select_menu;
+	private Menu select_completed_file_menu;
 	private MenuItem properties_menu_item;
 	private MenuItem open_selected_menu_item;
 	private MenuItem copy_ed2k_link_menu_item;
 	private MenuItem remove_from_disk_menu_item;
+	
+	private Menu rating_menu;
+	private MenuItem rating_menu_item;
+	private MenuItem file_not_rated;
+	private MenuItem file_fake;
+	private MenuItem file_poor;
+	private MenuItem file_fair;
+	private MenuItem file_good;
+	private MenuItem file_excellent;
 	
 	private String last_selection = "";
 	
@@ -135,7 +145,6 @@ public class SharedTab extends AbstractTab {
 		try {
 			dir = _core.getConfigurationManager().getSharedFolders();
 		} catch (ConfigurationManagerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (dir != null)
@@ -314,6 +323,31 @@ public class SharedTab extends AbstractTab {
 			protected Menu getPopUpMenu() {
 				if (getSelectionCount()<1)
 					return no_items_menu;
+				
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				if (shared_file.isCompleted()) {
+					rating_menu.setEnabled(true);
+					rating_menu.setVisible(true);
+					file_not_rated.setSelection(false);
+					file_fake.setSelection(false);
+					file_poor.setSelection(false);
+					file_fair.setSelection(false);
+					file_good.setSelection(false);
+					file_excellent.setSelection(false);
+					
+					switch (shared_file.getFileQuality()) {
+						case FAKE : file_fake.setSelection(true); break;
+						case POOR : file_poor.setSelection(true); break;
+						case FAIR : file_fair.setSelection(true); break;
+						case GOOD : file_good.setSelection(true); break;
+						case EXCELLENT : file_excellent.setSelection(true); break;
+						default : file_not_rated.setSelection(true); break;
+					}
+					
+				} else  { rating_menu.setEnabled(false); }
+				
+				
+				
 				properties_menu_item.setEnabled(true);
 				copy_ed2k_link_menu_item.setEnabled(true);
 				remove_from_disk_menu_item.setEnabled(true);
@@ -327,7 +361,7 @@ public class SharedTab extends AbstractTab {
 				open_selected_menu_item.setEnabled(false);
 				if (selectedRunnableFiles())
 					open_selected_menu_item.setEnabled(true);
-				return select_menu;
+				return select_completed_file_menu;
 			}
 
 			int HASHED 		= 0x01;
@@ -408,9 +442,9 @@ public class SharedTab extends AbstractTab {
 				shared_files_table.showColumnEditorWindow();
 	  }});
 	  
-	  select_menu = new Menu(shared_files_table);
+	  select_completed_file_menu = new Menu(shared_files_table);
 	  
-	  open_selected_menu_item = new MenuItem(select_menu,SWT.PUSH);
+	  open_selected_menu_item = new MenuItem(select_completed_file_menu,SWT.PUSH);
 	  open_selected_menu_item.setText(_._("mainwindow.sharedtab.popupmenu.open"));
 	  open_selected_menu_item.setImage(SWTImageRepository.getImage("open_file.png"));
 	  open_selected_menu_item.addSelectionListener(new SelectionAdapter() {
@@ -418,7 +452,7 @@ public class SharedTab extends AbstractTab {
 				openSelected();
 	  }});
 	  
-	  copy_ed2k_link_menu_item = new MenuItem(select_menu,SWT.PUSH);
+	  copy_ed2k_link_menu_item = new MenuItem(select_completed_file_menu,SWT.PUSH);
 	  copy_ed2k_link_menu_item.setText(_._("mainwindow.sharedtab.popupmenu.copy_ed2k_link"));
 	  copy_ed2k_link_menu_item.setImage(SWTImageRepository.getImage("ed2k_link.png"));
 	  copy_ed2k_link_menu_item.addSelectionListener(new SelectionAdapter() {
@@ -426,7 +460,7 @@ public class SharedTab extends AbstractTab {
 				copyED2KLink();
 	  }});
 
-	  remove_from_disk_menu_item = new MenuItem(select_menu,SWT.PUSH);
+	  remove_from_disk_menu_item = new MenuItem(select_completed_file_menu,SWT.PUSH);
 	  remove_from_disk_menu_item.setText(_._("mainwindow.sharedtab.popupmenu.remove_from_disk"));
 	  remove_from_disk_menu_item.setImage(SWTImageRepository.getImage("cancel.png"));
 	  remove_from_disk_menu_item.addSelectionListener(new SelectionAdapter() {
@@ -434,17 +468,103 @@ public class SharedTab extends AbstractTab {
 				removeFromDisk();
 	  }});
 	  
-	  MenuItem selected_column_setup_menu_item = new MenuItem(select_menu,SWT.PUSH);
+	  MenuItem selected_column_setup_menu_item = new MenuItem(select_completed_file_menu,SWT.PUSH);
 	  selected_column_setup_menu_item.setText(_._("mainwindow.sharedtab.popupmenu.column_setup"));
 	  selected_column_setup_menu_item.setImage(SWTImageRepository.getImage("columns_setup.png"));
 	  selected_column_setup_menu_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				shared_files_table.showColumnEditorWindow();
 	  }});
-	 
-	  new MenuItem(select_menu,SWT.SEPARATOR);
+
 	  
-	  properties_menu_item = new MenuItem(select_menu,SWT.PUSH);
+	  rating_menu_item = new MenuItem(select_completed_file_menu, SWT.CASCADE);
+	  rating_menu_item.setText("Rating");
+	  rating_menu = new Menu(select_completed_file_menu);
+	  rating_menu_item.setMenu(rating_menu);
+	  
+	  file_not_rated = new MenuItem(rating_menu, SWT.RADIO);
+	  file_not_rated.setText("Not rated");
+	  file_not_rated.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				file_fake.setSelection(false);
+				file_poor.setSelection(false);
+				file_fair.setSelection(false);
+				file_good.setSelection(false);
+				file_excellent.setSelection(false);
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				shared_file.setFileQuality(FileQuality.NOTRATED);
+	  }});
+	  
+	  file_fake = new MenuItem(rating_menu, SWT.RADIO);
+	  file_fake.setText("Fake");
+	  file_fake.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				file_not_rated.setSelection(false);
+				file_poor.setSelection(false);
+				file_fair.setSelection(false);
+				file_good.setSelection(false);
+				file_excellent.setSelection(false);
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				shared_file.setFileQuality(FileQuality.FAKE);
+	  }});
+
+	  file_poor = new MenuItem(rating_menu, SWT.RADIO);
+	  file_poor.setText("Poor");
+	  file_poor.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				file_not_rated.setSelection(false);
+				file_fake.setSelection(false);
+				file_fair.setSelection(false);
+				file_good.setSelection(false);
+				file_excellent.setSelection(false);	
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				shared_file.setFileQuality(FileQuality.POOR);
+	  }});
+	  
+	  file_fair = new MenuItem(rating_menu, SWT.RADIO);
+	  file_fair.setText("Fair");
+	  file_fair.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				file_not_rated.setSelection(false);
+				file_fake.setSelection(false);
+				file_poor.setSelection(false);
+				file_good.setSelection(false);
+				file_excellent.setSelection(false);
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				shared_file.setFileQuality(FileQuality.FAIR);
+	  }});
+	  
+	  file_good = new MenuItem(rating_menu, SWT.RADIO);
+	  file_good.setText("Good");
+	  file_good.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				file_not_rated.setSelection(false);
+				file_fake.setSelection(false);
+				file_poor.setSelection(false);
+				file_fair.setSelection(false);
+				file_excellent.setSelection(false);	
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				shared_file.setFileQuality(FileQuality.GOOD);
+	  }});
+	  
+	  file_excellent = new MenuItem(rating_menu, SWT.RADIO);
+	  file_excellent.setText("Excellent");
+	  file_excellent.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				file_not_rated.setSelection(false);
+				file_fake.setSelection(false);
+				file_poor.setSelection(false);
+				file_fair.setSelection(false);
+				file_good.setSelection(false);
+				SharedFile shared_file = shared_files_table.getSelectedObject();
+				shared_file.setFileQuality(FileQuality.EXCELLENT);
+				
+	  }});
+	  
+	  
+	  new MenuItem(select_completed_file_menu,SWT.SEPARATOR);
+	  
+	  properties_menu_item = new MenuItem(select_completed_file_menu,SWT.PUSH);
 	  properties_menu_item.setText(_._("mainwindow.sharedtab.popupmenu.properties"));
 	  properties_menu_item.setImage(SWTImageRepository.getImage("info.png"));
 	  properties_menu_item.addSelectionListener(new SelectionAdapter() {
@@ -454,6 +574,7 @@ public class SharedTab extends AbstractTab {
 				window.getCoreComponents();
 				window.initUIComponents();
 	  }});
+	  
 	  
 	  config_manager.addConfigurationListener(new ConfigurationAdapter() {
 		  public void sharedDirectoriesChanged(java.util.List<File> sharedDirs) {

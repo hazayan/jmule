@@ -53,8 +53,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 18, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:27:28 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2009/12/29 13:06:55 $
  */
 public class SharedFilePropertiesWindow implements JMuleUIComponent {
 
@@ -183,7 +183,11 @@ public class SharedFilePropertiesWindow implements JMuleUIComponent {
 		label.setText(_._("sharedfilepropertieswindow.label.file_quality") + " : ");
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
+		
 		file_quality_combo = new Combo(shared_file_fields,SWT.READ_ONLY);
+		
+		if (!shared_file.isCompleted())
+			file_quality_combo.setEnabled(false);
 		file_quality_combo.setFont(skin.getDefaultFont());
 		file_quality_combo.add(_._("sharedfilepropertieswindow.label.fq_not_rated"));
 		file_quality_combo.setData(_._("sharedfilepropertieswindow.label.fq_not_rated"), FileQuality.NOTRATED);
