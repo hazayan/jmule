@@ -32,14 +32,17 @@ import java.net.NetworkInterface;
 import java.util.List;
 
 import org.jmule.core.JMException;
+import org.jmule.core.JMuleCoreException;
+import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.configmanager.ConfigurationManagerFactory;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
-import org.jmule.core.edonkey.impl.UserHash;
+import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.NetworkUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,20 +50,37 @@ import org.junit.Test;
  * Created on Aug 10, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/13 06:37:01 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/01 15:01:26 $
  */
 public class ConfigurationManagerTest {
 
-	private InternalConfigurationManager manager = (InternalConfigurationManager) ConfigurationManagerFactory.getInstance();
+	private InternalConfigurationManager manager = (InternalConfigurationManager) ConfigurationManagerSingleton.getInstance();
+	
+	static {
+		try {
+			JMuleCoreFactory.create().start();
+		} catch (JMuleCoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ConfigurationManagerTest() {
+		
+	}
 	
 	@Before
 	public void setUp() {
-		manager.initialize();
-		manager.start();
+		
 	}
 	
+	@After
+	public void setDown() {
+		
+	}
 
+	
+	
 	@Test
 	public void testGetDownloadBandwidth() {
 		try {
@@ -249,24 +269,6 @@ public class ConfigurationManagerTest {
 		
 		try {
 			manager.setDownloadLimit(-128);		
-			assertTrue(false);
-		} catch (ConfigurationManagerException e) {
-			assertTrue(true);
-		}
-	}
-
-	@Test
-	public void testGetUserHash() {
-		UserHash newHash = UserHash.genNewUserHash();
-		try {
-			((InternalConfigurationManager)(manager)).setUserHash(newHash.getAsString());
-			assertEquals(newHash, manager.getUserHash());
-		} catch (ConfigurationManagerException e) {
-			fail(e+"");
-		}
-		
-		try {
-			((InternalConfigurationManager)(manager)).setUserHash("d1xc");
 			assertTrue(false);
 		} catch (ConfigurationManagerException e) {
 			assertTrue(true);
@@ -701,30 +703,6 @@ public class ConfigurationManagerTest {
 			fail(e+"");
 		}
 	}
-
-	@Test
-	public void testGetJKadClientID() {
-		try {
-			String jkad_id = manager.getJKadClientID();
-			if (jkad_id==null)
-				fail("JKad id is null");
-			assertTrue(true);
-		} catch (ConfigurationManagerException e) {
-			fail(e+"");
-		}
-	}	
-	@Test
-	public void testSetJKadClientID() {
-		Int128 new_id = new Int128(Utils.getRandomInt128());
-		try {
-			manager.setJKadClientID(new_id.toHexString());
-			String jkad_id = manager.getJKadClientID();
-			Int128 config_id = new Int128(hexStringToByte(jkad_id));
-			assertEquals(new_id,config_id);
-		} catch (ConfigurationManagerException e) {
-			fail(e+"");
-		}
-	}
 	
 	@Test
 	public void testGetNicName() { 
@@ -792,6 +770,13 @@ public class ConfigurationManagerTest {
 		} catch (ConfigurationManagerException e) {
 			assertTrue(true);
 		}
+	}
+	
+	@Test
+	public void testInitialize() {
+		manager.initialize();
+		manager.start();
+		manager.shutdown();
 	}
 	
 
