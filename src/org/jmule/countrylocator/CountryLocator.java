@@ -22,6 +22,7 @@
  */
 package org.jmule.countrylocator;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -35,13 +36,13 @@ import com.maxmind.geoip.LookupService;
  * Created on Aug 12, 2008
  * @author javajox
  * @author binary256_
- * @version $Revision: 1.3 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/09 15:16:01 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/01 14:48:56 $
  */
 public class CountryLocator {
-
-	public static int FLAG_WIDTH 	= 25;
-	public static int FLAG_HEIGHT	= 15;
+	public static final String GEOIP_DAT       = ConfigurationManager.SETTINGS_DIR + File.separator + "geoip.dat";
+	public static int FLAG_WIDTH 			   = 25;
+	public static int FLAG_HEIGHT			   = 15;
 	
 	private static CountryLocator instance;
 	
@@ -57,7 +58,7 @@ public class CountryLocator {
 	
 		try {
 			
-			lookup_service = new LookupService( ConfigurationManager.GEOIP_DAT, LookupService.GEOIP_MEMORY_CACHE );		
+			lookup_service = new LookupService( GEOIP_DAT, LookupService.GEOIP_MEMORY_CACHE );		
 			
 		} catch (IOException e) {
 			
