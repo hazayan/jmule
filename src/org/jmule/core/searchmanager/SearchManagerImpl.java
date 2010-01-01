@@ -50,9 +50,9 @@ import org.jmule.core.utils.timer.JMTimerTask;
 
 /**
  * Created on 2008-Jul-06
- * 
+ * @author binary
  * @author javajox
- * @version $$Revision: 1.11 $$ Last changed by $$Author: binary255 $$ on $$Date: 2009/10/15 07:49:24 $$
+ * @version $$Revision: 1.12 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/01/01 13:45:48 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements
 		InternalSearchManager {
@@ -198,6 +198,86 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 		search_result_listeners.add(searchResultListener);
 	}
 
+	private void processServerSearchRequest() {
+		server_search_request = null;
+		if (server_search_request_queue.isEmpty())
+			return;
+		if (server_search_task == null)
+			return;
+		if (server_search_task.isRunning())
+			return;
+		timer.addTask(server_search_task, 1);
+	}
+
+	private void processKadSearchRequest() {
+		if (kad_search_request_queue.isEmpty())
+			return;
+		kad_search_request = (SearchQuery) kad_search_request_queue.peek(); // remove
+																			// query
+																			// from
+																			// queue
+																			// after
+																			// complete
+																			// search
+		Int128 keyword_id;
+		try {
+			keyword_id = jkad_search.searchKeyword(kad_search_request
+					.getQuery(),
+					new org.jmule.core.jkad.search.SearchResultListener() {
+						SearchQuery searchquery = (SearchQuery) kad_search_request
+								.clone();
+						SearchResultItemList result_list = new SearchResultItemList();
+						SearchResult search_result = new SearchResult(
+								result_list, searchquery);
+
+						public void processNewResults(List<Source> result) {
+							result_list.clear();
+							for (Source source : result) {
+								SearchResultItem item = new SearchResultItem(
+										source.getClientID().toFileHash(),
+										null, (short) 0, SearchQueryType.KAD);
+								for (Tag tag : source.getTagList()) {
+									item.addTag(tag);
+								}
+								result_list.add(item);
+							}
+							notifySearchArrived(search_result);
+						}
+
+						public void searchFinished() {
+							notifySearchCompleted(searchquery);
+							kad_search_request_queue.poll();
+							processKadSearchRequest();
+
+						}
+
+						public void searchStarted() {
+							notifySearchStarted(searchquery);
+						}
+
+					});
+			kad_searches.put(kad_search_request, keyword_id);
+
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void receivedServerSearchResult(SearchResultItemList resultList) {
+		SearchResult searchResult = new SearchResult(resultList,
+				server_search_request, server_manager.getConnectedServer());
+		search_result_list.put(server_search_request, searchResult);
+		notifySearchArrived(searchResult);
+		if (searchResult.getSearchQuery().getQueryType() != SearchQueryType.SERVER_KAD)
+			notifySearchCompleted(searchResult.searchQuery);
+		processServerSearchRequest();
+	}
+
+	public void removeSearchResultListener(SearchResultListener searchResultListener) {
+		search_result_listeners.remove(searchResultListener);
+	}
+
 	private void notifySearchArrived(SearchResult search_result) {
 		for (SearchResultListener listener : search_result_listeners) {
 			try {
@@ -237,85 +317,5 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 			}
 		}
 	}
-
-	private void processServerSearchRequest() {
-		server_search_request = null;
-		if (server_search_request_queue.isEmpty())
-			return;
-		if (server_search_task == null)
-			return;
-		if (server_search_task.isRunning())
-			return;
-		timer.addTask(server_search_task, 1);
-	}
-
-	private void processKadSearchRequest() {
-		if (kad_search_request_queue.isEmpty())
-			return;
-		kad_search_request = (SearchQuery) kad_search_request_queue.peek(); // remove
-																			// query
-																			// from
-																			// queue
-																			// after
-																			// complete
-																			// search
-		Int128 keyword_id;
-		try {
-			keyword_id = jkad_search.searchKeyword(kad_search_request
-					.getQuery(),
-					new org.jmule.core.jkad.search.SearchResultListener() {
-						SearchQuery r = (SearchQuery) kad_search_request
-								.clone();
-						SearchResultItemList result_list = new SearchResultItemList();
-						SearchResult search_result = new SearchResult(
-								result_list, r);
-
-						public void processNewResults(List<Source> result) {
-							result_list.clear();
-							for (Source source : result) {
-								SearchResultItem item = new SearchResultItem(
-										source.getClientID().toFileHash(),
-										null, (short) 0, SearchQueryType.KAD);
-								for (Tag tag : source.getTagList()) {
-									item.addTag(tag);
-								}
-								result_list.add(item);
-							}
-							notifySearchArrived(search_result);
-						}
-
-						public void searchFinished() {
-							notifySearchCompleted(r);
-							kad_search_request_queue.poll();
-							processKadSearchRequest();
-
-						}
-
-						public void searchStarted() {
-							notifySearchStarted(r);
-						}
-
-					});
-			kad_searches.put(kad_search_request, keyword_id);
-
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public void receivedServerSearchResult(SearchResultItemList resultList) {
-		SearchResult searchResult = new SearchResult(resultList,
-				server_search_request, server_manager.getConnectedServer());
-		search_result_list.put(server_search_request, searchResult);
-
-		notifySearchArrived(searchResult);
-		notifySearchCompleted(searchResult.searchQuery);
-		processServerSearchRequest();
-	}
-
-	public void removeSearchResultListener(SearchResultListener searchResultListener) {
-		search_result_listeners.remove(searchResultListener);
-	}
-
+	
 }
