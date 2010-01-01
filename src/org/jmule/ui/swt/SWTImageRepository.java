@@ -22,6 +22,7 @@
  */
 package org.jmule.ui.swt;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.swt.graphics.Image;
@@ -36,8 +37,8 @@ import org.jmule.ui.FlagPack.FlagSize;
 /**
  * Created on Aug 12, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/10 11:26:24 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/01 14:20:48 $
  */
 public class SWTImageRepository {
 
@@ -45,7 +46,13 @@ public class SWTImageRepository {
 		InputStream input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/" + name));
 		if ( input_stream == null )
 			input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/image_not_found.png"));
-		return new Image(SWTThread.getDisplay(),input_stream);
+		Image image = new Image(SWTThread.getDisplay(),input_stream);
+		try {
+			input_stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
 	}
 	
 	public static Image getIconByExtension(String fileName) {
@@ -57,15 +64,28 @@ public class SWTImageRepository {
 		String extension = "no extension";
 		if (id!=0)
 			extension = fileName.substring(id+1, fileName.length());
+		
 		Program program = Program.findProgram(extension);
-		if (program == null)
-			return new Image(SWTThread.getDisplay(),UIConstants.getIconByExtension(extension) );
+		if (program == null) {
+			
+			InputStream stream = UIConstants.getIconByExtension(extension);
+			Image img = new Image(SWTThread.getDisplay(),stream);
+			
+			try {
+				stream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			stream = null;
+			return img;
+		}
 		
 		ImageData image_data = program.getImageData();
-		if (image_data == null) return getImage("image_not_found.png");
+		if (image_data == null) { 
+			return getImage("image_not_found.png");
+		}
 		image_data = image_data.scaledTo(16, 16);
 		Image image = new Image(SWTThread.getDisplay(),image_data);
-		
 		return image;
 	}
 	
@@ -73,12 +93,24 @@ public class SWTImageRepository {
 		InputStream input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/menuicons/" + name));
 		if ( input_stream == null )
 			input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/image_not_found.png"));
-		return new Image(SWTThread.getDisplay(),input_stream);
+		Image image = new Image(SWTThread.getDisplay(),input_stream);
+		try {
+			input_stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
 	}
 	
 	public static Image getFlagByAddress(String address,FlagSize size) {
 		InputStream stream = FlagPack.getFlagAsInputStreamByIP(address, size);
-		return new Image(SWTThread.getDisplay(),stream);
+		Image image = new Image(SWTThread.getDisplay(),stream);
+		try {
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
 	}
 	
 	public static Image getImage(FileQuality fileQuality) {
@@ -86,7 +118,13 @@ public class SWTImageRepository {
 		InputStream input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream(path));
 		if ( input_stream == null )
 			input_stream = (SWTImageRepository.class.getClassLoader().getResourceAsStream("org/jmule/ui/resources/image_not_found.png"));
-		return new Image(SWTThread.getDisplay(),input_stream);
+		Image image = new Image(SWTThread.getDisplay(),input_stream);
+		try {
+			input_stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
 	}
 	
 }
