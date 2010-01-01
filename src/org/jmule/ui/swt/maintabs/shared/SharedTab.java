@@ -75,8 +75,8 @@ import org.jmule.ui.utils.FileFormatter;
 
 /**
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/29 13:06:55 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/01 13:55:06 $$
  */
 public class SharedTab extends AbstractTab {
 
@@ -478,12 +478,12 @@ public class SharedTab extends AbstractTab {
 
 	  
 	  rating_menu_item = new MenuItem(select_completed_file_menu, SWT.CASCADE);
-	  rating_menu_item.setText("Rating");
+	  rating_menu_item.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu"));
 	  rating_menu = new Menu(select_completed_file_menu);
 	  rating_menu_item.setMenu(rating_menu);
 	  
 	  file_not_rated = new MenuItem(rating_menu, SWT.RADIO);
-	  file_not_rated.setText("Not rated");
+	  file_not_rated.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu.not_rated"));
 	  file_not_rated.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				file_fake.setSelection(false);
@@ -496,7 +496,7 @@ public class SharedTab extends AbstractTab {
 	  }});
 	  
 	  file_fake = new MenuItem(rating_menu, SWT.RADIO);
-	  file_fake.setText("Fake");
+	  file_fake.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu.fake"));
 	  file_fake.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				file_not_rated.setSelection(false);
@@ -509,7 +509,7 @@ public class SharedTab extends AbstractTab {
 	  }});
 
 	  file_poor = new MenuItem(rating_menu, SWT.RADIO);
-	  file_poor.setText("Poor");
+	  file_poor.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu.poor"));
 	  file_poor.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				file_not_rated.setSelection(false);
@@ -522,7 +522,7 @@ public class SharedTab extends AbstractTab {
 	  }});
 	  
 	  file_fair = new MenuItem(rating_menu, SWT.RADIO);
-	  file_fair.setText("Fair");
+	  file_fair.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu.fair"));
 	  file_fair.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				file_not_rated.setSelection(false);
@@ -535,7 +535,7 @@ public class SharedTab extends AbstractTab {
 	  }});
 	  
 	  file_good = new MenuItem(rating_menu, SWT.RADIO);
-	  file_good.setText("Good");
+	  file_good.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu.good"));
 	  file_good.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				file_not_rated.setSelection(false);
@@ -548,7 +548,7 @@ public class SharedTab extends AbstractTab {
 	  }});
 	  
 	  file_excellent = new MenuItem(rating_menu, SWT.RADIO);
-	  file_excellent.setText("Excellent");
+	  file_excellent.setText(_._("mainwindow.searchtab.popupmenu.rating_submenu.excellent"));
 	  file_excellent.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				file_not_rated.setSelection(false);
@@ -558,12 +558,8 @@ public class SharedTab extends AbstractTab {
 				file_good.setSelection(false);
 				SharedFile shared_file = shared_files_table.getSelectedObject();
 				shared_file.setFileQuality(FileQuality.EXCELLENT);
-				
 	  }});
-	  
-	  
 	  new MenuItem(select_completed_file_menu,SWT.SEPARATOR);
-	  
 	  properties_menu_item = new MenuItem(select_completed_file_menu,SWT.PUSH);
 	  properties_menu_item.setText(_._("mainwindow.sharedtab.popupmenu.properties"));
 	  properties_menu_item.setImage(SWTImageRepository.getImage("info.png"));
@@ -574,21 +570,17 @@ public class SharedTab extends AbstractTab {
 				window.getCoreComponents();
 				window.initUIComponents();
 	  }});
-	  
-	  
 	  config_manager.addConfigurationListener(new ConfigurationAdapter() {
 		  public void sharedDirectoriesChanged(java.util.List<File> sharedDirs) {
 			  updateDirList(sharedDirs);	
 		}
 	  });
-	  
 	  try {
 		updateDirList(config_manager.getSharedFolders());
 	} catch (ConfigurationManagerException e) {
 		e.printStackTrace();
 	}
-	  
-	  refreshable = new Refreshable() {
+	refreshable = new Refreshable() {
 		public void refresh() {
 			if (isDisposed()) return;
 			String text = _._("mainwindow.sharedtab.group.shared_files");
@@ -602,9 +594,9 @@ public class SharedTab extends AbstractTab {
 				text +=file_name+" : " + formatter.format(sharing_manager.getCurrentHashingFilePercent())+"%";
 				text +="]";
 			}
-			
+	
 			shared_files_group.setText(text);
-			
+		
 			for(SharedFile shared_file : shared_files_table.getObjects()) {
 				if (shared_files_table.getRow(shared_file).isVisible()) 
 					shared_files_table.updateRow(shared_file);
@@ -704,11 +696,8 @@ public class SharedTab extends AbstractTab {
 					shared_dir_list.add(file.getAbsolutePath());
 				}
 				clear_button.setEnabled(true);
-				
 			}
-			
 		});
-
 	}
 	
 	private JMThread file_list_updater;
