@@ -22,7 +22,6 @@
  */
 package org.jmule.core.configmanager.test;
 
-import static org.jmule.core.utils.Convert.hexStringToByte;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -37,9 +36,6 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
-import org.jmule.core.edonkey.UserHash;
-import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.NetworkUtils;
 import org.junit.After;
@@ -50,8 +46,8 @@ import org.junit.Test;
  * Created on Aug 10, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/01 15:01:26 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/01 15:01:39 $
  */
 public class ConfigurationManagerTest {
 
