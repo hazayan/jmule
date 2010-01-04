@@ -28,8 +28,7 @@ import java.nio.channels.DatagramChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.management.JMException;
-
+import org.jmule.core.JMException;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
@@ -41,8 +40,8 @@ import org.jmule.core.jkad.IPAddress;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/14 09:35:43 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/04 11:07:54 $$
  */
 public class JMUDPConnection {
 	
