@@ -29,8 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.management.JMException;
-
+import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerException;
@@ -81,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.19 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/28 16:04:39 $
+ * @version $Revision: 1.20 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/04 16:58:19 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
