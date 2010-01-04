@@ -40,8 +40,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/29 19:17:14 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/04 11:06:45 $$
  */
 public class GapListPainter {
 	
@@ -82,7 +82,7 @@ public class GapListPainter {
 	
 	public void draw(GC gc, int x,int y, int width, int height) {
 		
-		width  = width  - margin_width - 3;
+		width  = width  - margin_width - 10;
 		height = height - margin_width - 2;
 		x += margin_width;
 		y += margin_width;
