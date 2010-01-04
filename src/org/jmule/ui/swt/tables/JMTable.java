@@ -49,8 +49,8 @@ import org.jmule.ui.swt.SWTThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/29 13:08:27 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/04 10:12:13 $$
  */
 public abstract class JMTable<T> extends Table {
 
@@ -74,7 +74,9 @@ public abstract class JMTable<T> extends Table {
 		super(composite,SWT.VIRTUAL | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER | style);		
 		
 		setHeaderVisible(true);
-		setLinesVisible (false);
+		setLinesVisible (true);
+		
+		
 		
 		column_data_save_listener = new Listener() {
 			public void handleEvent(Event arg0) {

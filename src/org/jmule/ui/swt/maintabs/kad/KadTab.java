@@ -66,8 +66,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/11 15:30:22 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/04 10:12:12 $
  */
 public class KadTab extends AbstractTab {
 
@@ -79,7 +79,7 @@ public class KadTab extends AbstractTab {
 	public KadTab(Composite shell, JMuleCore core) {		
 		super(shell);
 		_core = core;
-
+		
 		setLayout(new GridLayout(1,false));
 		
 		final Composite tab_content = new Composite(this,SWT.NONE);
@@ -207,7 +207,6 @@ public class KadTab extends AbstractTab {
 			}
 			
 		};
-			
 		contact_list.setLayoutData(new GridData(GridData.FILL_BOTH));
 		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_ID_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_id"), _._("mainwindow.kadtab.contact_list.column.contact_id.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_ID_COLUMN_ID));
 		contact_list.addColumn(SWT.LEFT, KAD_CLIENT_DISTANCE_COLUMN_ID, _._("mainwindow.kadtab.contact_list.column.contact_distance"), _._("mainwindow.kadtab.contact_list.column.contact_distance.desc"), swtPreferences.getColumnWidth(KAD_CLIENT_DISTANCE_COLUMN_ID));
@@ -291,6 +290,7 @@ public class KadTab extends AbstractTab {
 		
 		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_TYPE_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_type"), _._("mainwindow.kadtab.task_list.column.task_type.desc"), swtPreferences.getColumnWidth(KAD_TASK_TYPE_COLUMN_ID));
 		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_LOOKUP_HASH_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_hash"), _._("mainwindow.kadtab.task_list.column.task_hash.desc"), swtPreferences.getColumnWidth(KAD_TASK_LOOKUP_HASH_COLUMN_ID));
+		kad_task_list.setLinesVisible(true);
 		_core.getJKadManager().getLookup().addListener(new LookupListener() {
 			public void taskAdded(final LookupTask task) {
 				Display.getDefault().asyncExec(new Runnable() {
