@@ -62,8 +62,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/16 18:20:02 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/04 11:19:02 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
@@ -278,8 +278,12 @@ public class UpdaterWindow implements JMuleUIComponent {
 		if (check_time != 0) {
 			Calendar calendar = new GregorianCalendar();
 			calendar.setTimeInMillis(check_time);
-			String upate_date = format(calendar.get(Calendar.DAY_OF_MONTH)) + "." +format(calendar.get(Calendar.MONTH)) +"."+ format(calendar.get(Calendar.YEAR));
-			upate_date += "  "+format(calendar.get(Calendar.HOUR_OF_DAY)) + ":"+format(calendar.get(Calendar.MINUTE))+":"+format(calendar.get(Calendar.SECOND));
+			String upate_date = format(calendar.get(Calendar.DAY_OF_MONTH))
+					+ "." + format(calendar.get(Calendar.MONTH) + 1) + "."
+					+ format(calendar.get(Calendar.YEAR));
+			upate_date += "  " + format(calendar.get(Calendar.HOUR_OF_DAY))
+					+ ":" + format(calendar.get(Calendar.MINUTE)) + ":"
+					+ format(calendar.get(Calendar.SECOND));
 			last_update.setText(upate_date);
 		}
 		
