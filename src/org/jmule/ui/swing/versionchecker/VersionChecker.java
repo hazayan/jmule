@@ -57,8 +57,8 @@ import org.jmule.updater.JMUpdater;
  *
  * Created on Oct 11, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/10/16 17:35:15 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/04 11:31:32 $
  */
 public class VersionChecker extends JDialog {
 
@@ -119,7 +119,7 @@ public class VersionChecker extends JDialog {
 		if (check_time != 0) {
 			Calendar calendar = new GregorianCalendar();
 			calendar.setTimeInMillis(check_time);
-			String upate_date = format(calendar.get(Calendar.DAY_OF_MONTH)) + "." +format(calendar.get(Calendar.MONTH)) +"."+ format(calendar.get(Calendar.YEAR));
+			String upate_date = format(calendar.get(Calendar.DAY_OF_MONTH)) + "." +format(calendar.get(Calendar.MONTH) + 1) +"."+ format(calendar.get(Calendar.YEAR));
 			upate_date += "  "+format(calendar.get(Calendar.HOUR_OF_DAY)) + ":"+format(calendar.get(Calendar.MINUTE))+":"+format(calendar.get(Calendar.SECOND));
 			last_update_value.setText(upate_date);
 		}
