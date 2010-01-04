@@ -51,8 +51,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/04 16:56:51 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -145,6 +145,20 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		List<DownloadSession> result = new ArrayList<DownloadSession>();
 		result.addAll(session_list.values());
 		return result;
+	}
+	
+	public void startDownload() {
+		for(DownloadSession session : session_list.values()) {
+			if (!session.isStarted())
+				session.startDownload();
+		}
+	}
+	
+	public void stopDownload() {
+		for(DownloadSession session : session_list.values()) {
+			if (session.isStarted())
+				session.stopDownload(true);
+		}
 	}
 
 	public void initialize() {
