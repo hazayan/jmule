@@ -42,8 +42,8 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/28 15:00:20 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:34:21 $$
  */
 public class Misc {
 	
@@ -246,5 +246,11 @@ public class Misc {
 		return true;
 	}
 	
+	public static void w(String string) {
+		System.out.println( string );
+	}
 	
+	public static void wl(String string) {
+		System.out.print( string );
+	}
 }
