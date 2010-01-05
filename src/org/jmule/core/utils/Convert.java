@@ -22,6 +22,7 @@
  */
 package org.jmule.core.utils;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.jmule.core.sharingmanager.JMuleBitSet;
@@ -29,8 +30,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/23 18:12:42 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:32:08 $$
  */
 public class Convert {
 	
@@ -178,6 +179,16 @@ public class Convert {
 		num += Math.pow(2, 16) * ip[2];
 		num += Math.pow(2, 24) * ip[3];
 		return Convert.longToInt(num);
+	}
+	
+	/**
+	 * @author javajox
+	 * @param inetSocketAddress
+	 * @return the IP address as int
+	 */
+	public static int InetSocketAddressToInt(InetSocketAddress inetSocketAddress) {
+		
+		return IPtoInt( inetSocketAddress.getAddress().getAddress() );
 	}
 	
 	public static String byteToHexString(byte[] bytes) {
