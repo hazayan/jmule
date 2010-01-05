@@ -26,12 +26,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerException;
 import org.jmule.core.uploadmanager.UploadManagerListener;
@@ -54,8 +56,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/04 10:12:12 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/05 17:35:06 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -65,6 +67,18 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	
 	private Menu no_uploads_menu;
 	private Menu upload_selected_menu;
+	MenuItem open_shared_file;
+	
+	private boolean selectedRunnableFiles() {
+		java.util.List<UploadSession> selectedSessions = getSelectedObjects();
+		for(UploadSession session : selectedSessions) {
+			SharedFile file = session.getSharedFile();
+			String extension = FileFormatter.getFileExtension(file.getSharingName());
+			Program program = Program.findProgram(extension);
+			if (program != null) return true;
+		}
+		return false;
+	}
 	
 	public UploadList(Composite composite,JMuleCore core) {
 		super(composite, SWT.NONE);
@@ -108,6 +122,22 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		});
 		
 		upload_selected_menu = new Menu(this);
+		
+		open_shared_file = new MenuItem(upload_selected_menu,SWT.PUSH);
+		open_shared_file.setText(_._("mainwindow.sharedtab.popupmenu.open"));
+		open_shared_file.setImage(SWTImageRepository.getImage("open_file.png"));
+		open_shared_file.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected( SelectionEvent e ) {
+				SharedFile shared_file = getSelectedObject().getSharedFile();
+				String extension = FileFormatter.getFileExtension(shared_file.getSharingName());
+				Program program = Program.findProgram(extension);
+				if (program == null) return;
+				program.execute(shared_file.getAbsolutePath());
+			}
+		});
+		
+		new MenuItem(upload_selected_menu,SWT.SEPARATOR);
+		
 		MenuItem upload_details = new MenuItem(upload_selected_menu,SWT.PUSH);
 		upload_details.setText(Localizer._("mainwindow.transferstab.uploads.popupmenu.details"));
 		upload_details.setImage(SWTImageRepository.getImage("info.png"));
@@ -151,7 +181,13 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		UploadListStatus status = getMenuStatus();
 		switch(status) {
 		case NO_UPLOADS_SELECTED : return no_uploads_menu;
-		case UPLOAD_SELECTED : return upload_selected_menu;
+		case UPLOAD_SELECTED : {
+			if (selectedRunnableFiles()) {
+				open_shared_file.setEnabled(true);
+			} else 
+				open_shared_file.setEnabled(false);
+			
+			return upload_selected_menu; }
 		case MULTIPLE_UPLOADS_SELECTED : return no_uploads_menu;
 		default : return no_uploads_menu;
 		
