@@ -44,6 +44,7 @@ import org.jmule.core.peermanager.Peer;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.PartialFile;
+import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
@@ -51,8 +52,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/04 16:56:51 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 19:13:26 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -105,7 +106,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		DownloadSession download_session = getDownload(fileHash);
 		
 		if (download_session.getPercentCompleted() != 100d)
-			download_session.cancelDownload();
+			download_session.cancelDownload(); 
 		
 		session_list.remove(fileHash);
 		notifyDownloadRemoved(fileHash);

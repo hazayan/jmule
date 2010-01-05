@@ -747,10 +747,10 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 		SharedFile shared_file = sharedFiles.get(fileHash);
 		if (shared_file == null)
 			return;
-		sharedFiles.remove(shared_file);
-		if (shared_file instanceof CompletedFile)
-			return;
+		sharedFiles.remove(fileHash);
 		shared_file.closeFile();
+		if (shared_file instanceof CompletedFile) 
+			return;
 		shared_file.delete();
 	}
 
