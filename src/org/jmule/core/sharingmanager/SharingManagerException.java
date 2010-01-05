@@ -27,11 +27,15 @@ import org.jmule.core.JMException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:04 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:28:11 $$
  */
 public class SharingManagerException extends JMException {
 
+	public SharingManagerException() {
+		
+	}
+	
 	public SharingManagerException(String str) {
 		super( str );
 	}

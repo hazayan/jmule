@@ -27,13 +27,46 @@ import org.jmule.core.JMException;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:41:03 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:28:11 $$
  */
 public class SharedFileException extends JMException {
 
+	private String partition_name;
+	private long partition_total_size;
+	private long partition_remaining_size;
+	private boolean not_enough_space = false;
+	
 	public SharedFileException(String str) {
 		super(str);
+	}
+	
+	public SharedFileException(String partitionName, long partitionTotalSize, long partitionRemainingSize) {
+		
+		this.partition_name = partitionName;
+		this.partition_total_size = partitionTotalSize;
+		this.partition_remaining_size = partitionRemainingSize;
+		this.not_enough_space = true;
+	}
+	
+	public String getPartitionName() {
+		
+		return this.partition_name;
+	}
+	
+	public long getPartitionTotalSize() {
+		
+		return this.partition_total_size;
+	}
+	
+	public long getPartitionRemainingSize() {
+		
+		return this.partition_remaining_size;
+	}
+	
+	public boolean notEnoughSpace() {
+		
+		return not_enough_space;
 	}
 	
 }
