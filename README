@@ -1,6 +1,3 @@
-  
-  First of all, THIS IS HIGHLY EXPERIMENTAL RELEASE !!!
- 
   =========================
     About
   ========================= 
@@ -21,7 +18,7 @@
   =========================
     System requirements
   =========================
-  JMule 0.5 requires Sun Java 1.6.x or newer to run, if you don't have the required Java
+  JMule 0.5.6 requires Sun Java 1.6.x or newer to run, if you don't have the required Java
   download it from http://java.sun.com
   
   Operating system : Windows NT, GNU/Linux
