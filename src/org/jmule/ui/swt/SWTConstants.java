@@ -28,8 +28,8 @@ import org.jmule.ui.UIPreferences;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 15:36:17 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
  */
 public class SWTConstants extends UIPreferences {
 
@@ -37,7 +37,7 @@ public class SWTConstants extends UIPreferences {
 	
 	public static final int TABLE_ROW_HEIGHT					=   20;
 	
-	protected static final String SWT_NODE 				 		=   "/swt";
+	protected static final String SWT_NODE 				 		=   ".swt";
 	
 	public static final String COLUMN_NAME_KEY			 		=   "ColumnID";
 	public static final String COLUMN_DISABLED_KEY	 			=   "ColumnDisabled";

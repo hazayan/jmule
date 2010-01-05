@@ -36,20 +36,20 @@ import org.jmule.core.JMConstants;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/28 15:14:00 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
  */
 
 public class UIConstants {
 	
-	protected static final String UI_ROOT = "/org/jmule/ui";
+	protected static final String UI_ROOT = "org.jmule.ui";
 	
-	protected static final String VISIBILITY        =       "VISIBILITY";
-	protected static final String ORDER             =       "ORDER";
-	protected static final String WIDTH             =       "WIDTH";
-	protected static final String ENABLED           =       "ENABLED";
-	protected static final String VERSION           =       "VERSION";
-	protected static final String TABLE_COLUMN_PATH =       "/tables/columns";
+	protected static final String VISIBILITY        =       ".VISIBILITY";
+	protected static final String ORDER             =       ".ORDER";
+	protected static final String WIDTH             =       ".WIDTH";
+	protected static final String ENABLED           =       ".ENABLED";
+	protected static final String VERSION           =       ".VERSION";
+	protected static final String TABLE_COLUMN_PATH =       ".tables.columns";
 	
 	public static final int TOOL_BAR_ID                         = 1;
 	public static final int STATUS_BAR_ID                       = 2;
@@ -155,97 +155,97 @@ public class UIConstants {
 	public static final int KAD_TASK_LOOKUP_HASH_COLUMN_ID		  	  = 5300;
 	
 	// Column UI nodes
-	protected static final String SERVER_LIST_NAME_NODE                      = "/server_list_name_column";
-	protected static final String SERVER_LIST_CC_NODE                        = "/server_list_cc_column";
-	protected static final String SERVER_LIST_FLAG_NODE                      = "/server_list_flag_column";
-	protected static final String SERVER_LIST_IP_NODE                        = "/server_list_ip_column";
-	protected static final String SERVER_LIST_DESCRIPTION_NODE               = "/server_list_description_column";
-	protected static final String SERVER_LIST_PING_NODE                      = "/server_list_ping_column";
-	protected static final String SERVER_LIST_USERS_NODE                     = "/server_list_user_column";
-	protected static final String SERVER_LIST_MAX_USERS_NODE                 = "/server_list_max_user_column";
-	protected static final String SERVER_LIST_FILES_NODE                     = "/server_list_files_column";
-	protected static final String SERVER_LIST_SOFT_LIMIT_NODE                = "/server_list_soft_limit_column";
-	protected static final String SERVER_LIST_HARD_LIMIT_NODE                = "/server_list_hard_limit_column";
-	protected static final String SERVER_LIST_VERSION_NODE                   = "/server_list_version_column";
-	protected static final String SERVER_LIST_STATIC_NODE                    = "/server_list_static_column";
-	protected static final String SERVER_LIST_DOWN_NODE                      = "/server_list_down_column";
+	protected static final String SERVER_LIST_NAME_NODE                      = ".server_list_name_column";
+	protected static final String SERVER_LIST_CC_NODE                        = ".server_list_cc_column";
+	protected static final String SERVER_LIST_FLAG_NODE                      = ".server_list_flag_column";
+	protected static final String SERVER_LIST_IP_NODE                        = ".server_list_ip_column";
+	protected static final String SERVER_LIST_DESCRIPTION_NODE               = ".server_list_description_column";
+	protected static final String SERVER_LIST_PING_NODE                      = ".server_list_ping_column";
+	protected static final String SERVER_LIST_USERS_NODE                     = ".server_list_user_column";
+	protected static final String SERVER_LIST_MAX_USERS_NODE                 = ".server_list_max_user_column";
+	protected static final String SERVER_LIST_FILES_NODE                     = ".server_list_files_column";
+	protected static final String SERVER_LIST_SOFT_LIMIT_NODE                = ".server_list_soft_limit_column";
+	protected static final String SERVER_LIST_HARD_LIMIT_NODE                = ".server_list_hard_limit_column";
+	protected static final String SERVER_LIST_VERSION_NODE                   = ".server_list_version_column";
+	protected static final String SERVER_LIST_STATIC_NODE                    = ".server_list_static_column";
+	protected static final String SERVER_LIST_DOWN_NODE                      = ".server_list_down_column";
 	
-	protected static final String DOWNLOAD_LIST_ORDER_NODE                   = "/download_list_order";        
-	protected static final String DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE        = "/download_list_file_name_column";
-	protected static final String DOWNLOAD_LIST_SIZE_COLUMN_NODE             = "/download_list_size_column";
-	protected static final String DOWNLOAD_LIST_TRANSFERRED_COLUMN_NODE      = "/download_list_transferred_column";
-	protected static final String DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_NODE   = "/download_list_download_speed_column";
-	protected static final String DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_NODE     = "/download_list_upload_speed_column";
-	protected static final String DOWNLOAD_LIST_PROGRESS_COLUMN_NODE         = "/download_list_progress_column";
-	protected static final String DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_NODE     = "/download_list_progress_bar_column";
-	protected static final String DOWNLOAD_LIST_COMPLETED_COLUMN_NODE        = "/download_list_completed_column";
-	protected static final String DOWNLOAD_LIST_SOURCES_COLUMN_NODE          = "/download_list_sources_column";
-	protected static final String DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_NODE = "/download_list_complete_sources_column";
-	protected static final String DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_NODE  = "/download_list_partial_sources_column";
-	protected static final String DOWNLOAD_LIST_REMAINING_COLUMN_NODE        = "/download_remaining_column";
-	protected static final String DOWNLOAD_LIST_STATUS_COLUMN_NODE           = "/download_list_status_column";
+	protected static final String DOWNLOAD_LIST_ORDER_NODE                   = ".download_list_order";        
+	protected static final String DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE        = ".download_list_file_name_column";
+	protected static final String DOWNLOAD_LIST_SIZE_COLUMN_NODE             = ".download_list_size_column";
+	protected static final String DOWNLOAD_LIST_TRANSFERRED_COLUMN_NODE      = ".download_list_transferred_column";
+	protected static final String DOWNLOAD_LIST_DOWNLOAD_SPEED_COLUMN_NODE   = ".download_list_download_speed_column";
+	protected static final String DOWNLOAD_LIST_UPLOAD_SPEED_COLUMN_NODE     = ".download_list_upload_speed_column";
+	protected static final String DOWNLOAD_LIST_PROGRESS_COLUMN_NODE         = ".download_list_progress_column";
+	protected static final String DOWNLOAD_LIST_PROGRESS_BAR_COLUMN_NODE     = ".download_list_progress_bar_column";
+	protected static final String DOWNLOAD_LIST_COMPLETED_COLUMN_NODE        = ".download_list_completed_column";
+	protected static final String DOWNLOAD_LIST_SOURCES_COLUMN_NODE          = ".download_list_sources_column";
+	protected static final String DOWNLOAD_LIST_COMPLETE_SOURCES_COLUMN_NODE = ".download_list_complete_sources_column";
+	protected static final String DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_NODE  = ".download_list_partial_sources_column";
+	protected static final String DOWNLOAD_LIST_REMAINING_COLUMN_NODE        = ".download_remaining_column";
+	protected static final String DOWNLOAD_LIST_STATUS_COLUMN_NODE           = ".download_list_status_column";
 	
-	protected static final String DOWNLOAD_PEER_LIST_IP_COLUMN_NODE          = "/download_peer_list_ip_column";
-	protected static final String DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE      = "/download_peer_list_status_column";
-	protected static final String DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_NODE    = "/download_peer_list_nickname_column";
-	protected static final String DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE    = "/download_peer_list_software_column";
-	protected static final String DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_NODE  = "/download_peer_list_down_speed_column";
-	protected static final String DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_NODE    = "/download_peer_list_up_speed_column";
-	protected static final String DOWNLOAD_PEER_LIST_FLAG_COLUMN_NODE   	 = "/download_peer_list_flag_column";
-	protected static final String DOWNLOAD_PEER_LIST_CC_COLUMN_NODE		   	 = "/download_peer_list_cc_column";
-	
-	protected static final String UPLOAD_LIST_FILENAME_COLUMN_NODE           = "/upload_list_filename_column";
-	protected static final String UPLOAD_LIST_FILESIZE_COLUMN_NODE           = "/upload_list_filesize_column";
-	protected static final String UPLOAD_LIST_UPLOADSPEED_COLUMN_NODE        = "/upload_list_uploadspeed_column";
-	protected static final String UPLOAD_LIST_PEERS_COLUMN_NODE              = "/upload_list_peers_column";
-	protected static final String UPLOAD_LIST_ETA_COLUMN_NODE                = "/upload_list_eta_column";
-	protected static final String UPLOAD_LIST_UPLOADED_COLUMN_NODE           = "/upload_list_uploaded_column";
-	
-	protected static final String UPLOAD_PEER_LIST_IP_COLUMN_NODE           = "/upload_peer_list_ip_column";
-	protected static final String UPLOAD_PEER_LIST_CC_COLUMN_NODE	        = "/upload_peer_list_cc_column";
-	protected static final String UPLOAD_PEER_LIST_FLAG_COLUMN_NODE	        = "/upload_peer_list_flag_column";
-	protected static final String UPLOAD_PEER_LIST_STATUS_COLUMN_NODE       = "/upload_peer_list_status_column";
-	protected static final String UPLOAD_PEER_LIST_NICKNAME_COLUMN_NODE     = "/upload_peer_list_nickname_column";
-	protected static final String UPLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE     = "/upload_peer_list_software_column";
-	protected static final String UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_NODE = "/upload_peer_list_upload_speed_column";
-	
-	protected static final String SEARCH_FILENAME_COLUMN_NODE               = "/search_filename_column";
-	protected static final String SEARCH_FILESIZE_COLUMN_NODE               = "/search_filesize_column";
-	protected static final String SEARCH_FILEQUALITY_COLUMN_NODE            = "/search_filequality_column";
-	protected static final String SEARCH_AVAILABILITY_COLUMN_NODE           = "/search_availability_column";
-	protected static final String SEARCH_COMPLETESRC_COLUMN_NODE            = "/search_completsrc_column";
-	protected static final String SEARCH_FILE_TYPE_COLUMN_NODE              = "/search_file_type_column";
-	protected static final String SEARCH_FILE_ID_COLUMN_NODE                = "/search_file_id_column";
-	
-	protected static final String SHARED_LIST_FILE_NAME_COLUMN_NODE         = "/shared_list_file_name_column";
-	protected static final String SHARED_LIST_FILE_SIZE_COLUMN_NODE         = "/shared_list_file_size_column";
-	protected static final String SHARED_LIST_FILE_TYPE_COLUMN_NODE         = "/shared_list_file_type_column";
-	protected static final String SHARED_LIST_FILE_ID_COLUMN_NODE           = "/shared_list_file_id_column";
-	protected static final String SHARED_LIST_COMPLETED_COLUMN_NODE         = "/shared_list_completed_column";
-	
-	protected static final String NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE	= "/new_download_list_file_name_column";
-	protected static final String NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_NODE	= "/new_download_list_file_size_column";
-	protected static final String NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_NODE		= "/new_download_list_file_id_column";
-	
-	protected static final String NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE	= "/new_server_list_name_column";
-	protected static final String NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE	= "/new_server_list_port_column";
-	
-	protected static final String KAD_CLIENT_ID_COLUMN_NAME_NODE			= "/kad_client_id";
-	protected static final String KAD_CLIENT_DISTANCE_COLUMN_NAME_NODE		= "/kad_client_distance";
-	
-	protected static final String KAD_TASK_TYPE_COLUMN_NAME_NODE			= "/kad_task_type";
-	protected static final String KAD_TASK_LOOKUP_HASH_COLUMN_NAME_NODE		= "/kad_lookup_hash";
+	protected static final String DOWNLOAD_PEER_LIST_IP_COLUMN_NODE          = ".download_peer_list_ip_column";
+	protected static final String DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE      = ".download_peer_list_status_column";
+	protected static final String DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_NODE    = ".download_peer_list_nickname_column";
+	protected static final String DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE    = ".download_peer_list_software_column";
+	protected static final String DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_NODE  = ".download_peer_list_down_speed_column";
+	protected static final String DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_NODE    = ".download_peer_list_up_speed_column";
+	protected static final String DOWNLOAD_PEER_LIST_FLAG_COLUMN_NODE   	 = ".download_peer_list_flag_column";
+	protected static final String DOWNLOAD_PEER_LIST_CC_COLUMN_NODE		   	 = ".download_peer_list_cc_column";
 
-	protected static final String TOOL_BAR_NODE                             = "/tool_bar";
-	protected static final String STATUS_BAR_NODE                           = "/status_bar";
+	protected static final String UPLOAD_LIST_FILENAME_COLUMN_NODE           = ".upload_list_filename_column";
+	protected static final String UPLOAD_LIST_FILESIZE_COLUMN_NODE           = ".upload_list_filesize_column";
+	protected static final String UPLOAD_LIST_UPLOADSPEED_COLUMN_NODE        = ".upload_list_uploadspeed_column";
+	protected static final String UPLOAD_LIST_PEERS_COLUMN_NODE              = ".upload_list_peers_column";
+	protected static final String UPLOAD_LIST_ETA_COLUMN_NODE                = ".upload_list_eta_column";
+	protected static final String UPLOAD_LIST_UPLOADED_COLUMN_NODE           = ".upload_list_uploaded_column";
 	
-	protected static final String PROMPT_ON_EXIT_NODE						= "/prompt_on_exit";
-	protected static final String CHECK_UPDATE_AT_STARTUP_NODE				= "/startup_update_check";
+	protected static final String UPLOAD_PEER_LIST_IP_COLUMN_NODE           = ".upload_peer_list_ip_column";
+	protected static final String UPLOAD_PEER_LIST_CC_COLUMN_NODE	        = ".upload_peer_list_cc_column";
+	protected static final String UPLOAD_PEER_LIST_FLAG_COLUMN_NODE	        = ".upload_peer_list_flag_column";
+	protected static final String UPLOAD_PEER_LIST_STATUS_COLUMN_NODE       = ".upload_peer_list_status_column";
+	protected static final String UPLOAD_PEER_LIST_NICKNAME_COLUMN_NODE     = ".upload_peer_list_nickname_column";
+	protected static final String UPLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE     = ".upload_peer_list_software_column";
+	protected static final String UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_NODE = ".upload_peer_list_upload_speed_column";
 	
-	protected static final String NIGHTLY_BUILD_WARNING_NODE                = "/nightly_build_warning";
-	protected static final String NIGHTLY_BUILD_WARNING_JM_VER_NODE         = "/nightly_build_warning_jm_ver";
+	protected static final String SEARCH_FILENAME_COLUMN_NODE               = ".search_filename_column";
+	protected static final String SEARCH_FILESIZE_COLUMN_NODE               = ".search_filesize_column";
+	protected static final String SEARCH_FILEQUALITY_COLUMN_NODE            = ".search_filequality_column";
+	protected static final String SEARCH_AVAILABILITY_COLUMN_NODE           = ".search_availability_column";
+	protected static final String SEARCH_COMPLETESRC_COLUMN_NODE            = ".search_completsrc_column";
+	protected static final String SEARCH_FILE_TYPE_COLUMN_NODE              = ".search_file_type_column";
+	protected static final String SEARCH_FILE_ID_COLUMN_NODE                = ".search_file_id_column";
 	
-	protected static final String CONNECT_AT_STARTUP_NODE                   = "/connect_at_startup";
+	protected static final String SHARED_LIST_FILE_NAME_COLUMN_NODE         = ".shared_list_file_name_column";
+	protected static final String SHARED_LIST_FILE_SIZE_COLUMN_NODE         = ".shared_list_file_size_column";
+	protected static final String SHARED_LIST_FILE_TYPE_COLUMN_NODE         = ".shared_list_file_type_column";
+	protected static final String SHARED_LIST_FILE_ID_COLUMN_NODE           = ".shared_list_file_id_column";
+	protected static final String SHARED_LIST_COMPLETED_COLUMN_NODE         = ".shared_list_completed_column";
+	
+	protected static final String NEW_DOWNLOAD_LIST_FILE_NAME_COLUMN_NODE	= ".new_download_list_file_name_column";
+	protected static final String NEW_DOWNLOAD_LIST_FILE_SIZE_COLUMN_NODE	= ".new_download_list_file_size_column";
+	protected static final String NEW_DOWNLOAD_LIST_FILE_ID_COLUMN_NODE		= ".new_download_list_file_id_column";
+
+	protected static final String NEW_SERVER_LIST_SERVER_NAME_COLUMN_NODE	= ".new_server_list_name_column";
+	protected static final String NEW_SERVER_LIST_SERVER_PORT_COLUMN_NODE	= ".new_server_list_port_column";
+	
+	protected static final String KAD_CLIENT_ID_COLUMN_NAME_NODE			= ".kad_client_id";
+	protected static final String KAD_CLIENT_DISTANCE_COLUMN_NAME_NODE		= ".kad_client_distance";
+	
+	protected static final String KAD_TASK_TYPE_COLUMN_NAME_NODE			= ".kad_task_type";
+	protected static final String KAD_TASK_LOOKUP_HASH_COLUMN_NAME_NODE		= ".kad_lookup_hash";
+
+	protected static final String TOOL_BAR_NODE                             = ".tool_bar";
+	protected static final String STATUS_BAR_NODE                           = ".status_bar";
+	
+	protected static final String PROMPT_ON_EXIT_NODE						= ".prompt_on_exit";
+	protected static final String CHECK_UPDATE_AT_STARTUP_NODE				= ".startup_update_check";
+	
+	protected static final String NIGHTLY_BUILD_WARNING_NODE                = ".nightly_build_warning";
+	protected static final String NIGHTLY_BUILD_WARNING_JM_VER_NODE         = ".nightly_build_warning_jm_ver";
+	
+	protected static final String CONNECT_AT_STARTUP_NODE                   = ".connect_at_startup";
 	
 	protected static final HashMap<String,Object> default_values = new HashMap<String,Object>();
 	

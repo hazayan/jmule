@@ -22,20 +22,18 @@
  */
 package org.jmule.ui.swing;
 
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
+import java.io.File;
+
+import org.jmule.ui.UIPreferences;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
  */
 public class SwingPreferences extends SwingConstants {
 
-	
-	
-	private Preferences preferences;
 	private static SwingPreferences instance = null;
 	
 	public static SwingPreferences getSingleton() {
@@ -44,18 +42,10 @@ public class SwingPreferences extends SwingConstants {
 	}
 	
 	private SwingPreferences() {
-		preferences = Preferences.systemRoot();
-		try {
-		  // if the node does not exists then we must store the default values in the system
-		  if(!preferences.nodeExists(UI_ROOT + SWING_ROOT)) {
-			  
-			
-			  storeDefaultPreferences(SWING_ROOT);
-			 
-		  }
-		} catch(BackingStoreException e) {
-			e.printStackTrace();
-		}
+		File ui_config_file = new File( UIPreferences.UI_SETTINGS_FILE );
+		   if( !ui_config_file.exists() )
+	          storeDefaultPreferences(SWING_ROOT);
+		   else UIPreferences.getSingleton().load();
 	}
 	
 	/**
@@ -63,8 +53,10 @@ public class SwingPreferences extends SwingConstants {
 	 * @return the column order
 	 */
 	public int getColumnOrder(int columnId) {
-		return preferences.getInt(getColumnNodePath(SWING_ROOT,columnId), 
-				                  getDefaultColumnOrder(columnId));
+		
+		String result = config_store.getProperty(getColumnNodePath(SWING_ROOT,columnId), 
+				                                getDefaultColumnOrder(columnId) + "");
+		return Integer.parseInt( result );
 	}
 	
 	/**
@@ -72,8 +64,10 @@ public class SwingPreferences extends SwingConstants {
 	 * @return true if the column is visible
 	 */
 	public boolean isColumnVisible(int columnId) {
-		return preferences.getBoolean(getColumnNodePath(SWING_ROOT,columnId),
-				                      getDefaultColumnVisibility(columnId));
+		
+		String result = config_store.getProperty(getColumnNodePath(SWING_ROOT,columnId),
+				                                 getDefaultColumnVisibility(columnId) + "");
+		return Boolean.parseBoolean(result);
 	}
 	
 	/**
@@ -81,7 +75,9 @@ public class SwingPreferences extends SwingConstants {
 	 * @param order the order of the column
 	 */
 	public void setColumnOrder(String columnId, int order) {
-		preferences.putInt(columnId, order);
+		
+		config_store.setProperty(columnId, order + "");
+		save();
 	}
 	
 	/**
@@ -89,7 +85,9 @@ public class SwingPreferences extends SwingConstants {
 	 * @param value true if the column must be visible, false otherwise
 	 */
 	public void setColumnVisibility(String columnId, boolean value) {
-		preferences.putBoolean(columnId, value);
+		
+		config_store.setProperty(columnId, value + "");
+		save();
 	}
 	
     public boolean isPromptOnExitEnabled() {

@@ -22,22 +22,21 @@
  */
 package org.jmule.ui.swt;
 
-import java.util.prefs.Preferences;
+import java.io.File;
 
 import org.jmule.ui.UIConstants;
+import org.jmule.ui.UIPreferences;
 
 /**
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 15:35:50 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
  */
 public class SWTPreferences extends SWTConstants {
 	
 	private static SWTPreferences instance = null;
-	
-	Preferences preferences = Preferences.systemRoot();
 	
 	public static SWTPreferences getInstance() {
 		if (instance == null)
@@ -46,7 +45,15 @@ public class SWTPreferences extends SWTConstants {
 	}
 	
 	private SWTPreferences() {
-		
+		try {
+			   File ui_config_file = new File( UIPreferences.UI_SETTINGS_FILE );
+			   if( !ui_config_file.exists() )
+		          storeDefaultPreferences(SWTConstants.SWT_NODE);
+			   else UIPreferences.getSingleton().load();
+				 
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}	
 	}
 	
 	public static int getDefaultColumnOrder(int columnID) {
@@ -95,7 +102,10 @@ public class SWTPreferences extends SWTConstants {
 	 */
 	public int getColumnOrder(int columnID) {
 		String node = getColumnNodePath(SWT_NODE, columnID);
-		return preferences.node(node).getInt(ORDER, getDefaultColumnOrder(columnID));
+		//String result = config_store.getProperty(node + ORDER, 
+		//		                    getDefaultColumnOrder(columnID) + "");
+		String result = getDefaultColumnOrder(columnID) + "";
+		return Integer.parseInt(result);
 	}
 	
 	/**

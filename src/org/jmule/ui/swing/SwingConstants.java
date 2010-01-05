@@ -30,14 +30,14 @@ import org.jmule.ui.UIPreferences;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
  */
 public class SwingConstants extends UIPreferences {
 
 	// Swing settings
 	
-	public static final String SWING_ROOT = "/swing";
+	public static final String SWING_ROOT = ".swing";
 	
 	public static final Dimension SETUP_WIZARD_DIMENSION  =  new Dimension(500, 360 + 90);
 	
