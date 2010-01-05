@@ -37,8 +37,8 @@ import org.jmule.core.uploadmanager.UploadManager;
  * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:27:31 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:29:06 $$
  */
 public interface JMuleCore {
 
@@ -95,4 +95,8 @@ public interface JMuleCore {
 	 * @param lifeCycleListener the given life cycle listener
 	 */
 	public void removeLifecycleListener(JMuleCoreLifecycleListener lifeCycleListener);
+	
+	public void addEventListener(JMuleCoreEventListener eventListener);
+	
+	public void removeEventListener(JMuleCoreEventListener eventListener);
 }

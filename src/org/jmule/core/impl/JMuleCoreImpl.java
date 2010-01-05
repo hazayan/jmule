@@ -23,16 +23,19 @@
 package org.jmule.core.impl;
 
 import java.io.File;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import org.jmule.core.InternalJMuleCore;
 import org.jmule.core.JMRawData;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreComponent;
+import org.jmule.core.JMuleCoreEvent;
+import org.jmule.core.JMuleCoreEventListener;
 import org.jmule.core.JMuleCoreException;
 import org.jmule.core.JMuleCoreLifecycleListener;
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -63,16 +66,17 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 06:53:16 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:29:06 $$
  */
-public class JMuleCoreImpl implements JMuleCore {
+public class JMuleCoreImpl implements InternalJMuleCore {
 	
 	private static JMuleCoreImpl instance = null;
 	
 	private DebugThread debugThread ;
 		
-	private List<JMuleCoreLifecycleListener> lifecycle_listeners = new LinkedList<JMuleCoreLifecycleListener>();
+	private List<JMuleCoreLifecycleListener> lifecycle_listeners = new ArrayList<JMuleCoreLifecycleListener>();
+	private List<JMuleCoreEventListener> event_listeners = new ArrayList<JMuleCoreEventListener>();
 	
 	// the first run flag is true when certain conditions have been met
 	private boolean first_run = false; 
@@ -498,23 +502,35 @@ public class JMuleCoreImpl implements JMuleCore {
 	}
 	
 	private void notifyComponentStarted(JMuleCoreComponent manager) {
-		
-		for(JMuleCoreLifecycleListener listener : lifecycle_listeners) {
-			
+		for(JMuleCoreLifecycleListener listener : lifecycle_listeners) {			
+		   try {	
 			 listener.componentStarted( manager );
+		   }catch(Throwable cause) {
+			   cause.printStackTrace();
+		   }
 		}
-		
 	}
 	
 	private void notifyComponentStopped(JMuleCoreComponent manager) {
-		
 		for(JMuleCoreLifecycleListener listener : lifecycle_listeners) {
-			
+		  try {	
 			listener.componentStopped( manager );
+		  }catch(Throwable cause) {
+			  cause.printStackTrace();
+		  }
 		}
-		
 	}
 
+	public void notifyListenersEventOccured(JMuleCoreEvent event, String details) {
+		for(JMuleCoreEventListener listener : event_listeners) {
+			try {
+				listener.eventOccured(event, details);
+			}catch(Throwable cause) {
+				cause.printStackTrace();
+			}
+		}
+	}
+	
 	public void addLifecycleListener(
 			JMuleCoreLifecycleListener lifeCycleListener) {
 		
@@ -527,7 +543,16 @@ public class JMuleCoreImpl implements JMuleCore {
 		lifecycle_listeners.remove( lifeCycleListener );
 	}
 
-
-
+	public void addEventListener(
+			JMuleCoreEventListener eventListener) {
+		
+		event_listeners.add( eventListener );
+	}
+	
+	public void removeEventListener(
+			JMuleCoreEventListener eventListener) {
+		
+		event_listeners.remove( eventListener );
+	}
 	
 }
