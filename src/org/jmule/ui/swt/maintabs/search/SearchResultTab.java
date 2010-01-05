@@ -60,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/05 19:12:30 $
  */
 public class SearchResultTab {
 
@@ -177,17 +177,18 @@ public class SearchResultTab {
 							if (!download_manager.getDownload(
 									item.getFileHash()).isStarted()) {
 								download_status = DOWNLOAD_FILE;
-							} else
+							} else {
 								download_status = SHARED_FILE;
+							}
 						} catch (DownloadManagerException e) {
 							e.printStackTrace();
 						}
 						break;
 					}
-					if (sharing_manager.hasFile(item.getFileHash()))
+					if (sharing_manager.hasFile(item.getFileHash())) {
 						download_status = SHARED_FILE;
+					}
 				}
-
 				switch (download_status) {
 				case NO_FILE: {
 					download_item.setEnabled(true);
