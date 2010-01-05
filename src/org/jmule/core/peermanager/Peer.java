@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:06:58 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 16:08:32 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
@@ -277,6 +277,9 @@ public class Peer {
 		if (!isConnected()) return 0;
 		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
+		if (!network_manager.hasPeer(getIP(), getPort())) {
+			return 0;
+		}
 		return network_manager.getPeerDownloadSpeed(getIP(), getPort());
 	}
 
