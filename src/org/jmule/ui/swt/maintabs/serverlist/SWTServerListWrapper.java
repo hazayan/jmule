@@ -40,8 +40,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/16 10:27:29 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 16:04:10 $$
  */
 public class SWTServerListWrapper {
 	
@@ -272,8 +272,7 @@ public class SWTServerListWrapper {
 	
 	public void removeServer(List<Server> servers) {
 		try {
-			for(Server server : servers)
-				server_manager.removeServer(server);
+			server_manager.removeServer(servers);
 		} catch (ServerManagerException e) {
 			e.printStackTrace();
 		}

@@ -30,8 +30,8 @@ import org.jmule.core.edonkey.ED2KServerLink;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/06 18:18:36 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 16:04:10 $$
  */
 public interface ServerManager extends JMuleManager {
 
@@ -58,7 +58,9 @@ public interface ServerManager extends JMuleManager {
 	 * Removes the given server form the server list
 	 * @param server the given server
 	 */
-	public void removeServer(Server... server) throws ServerManagerException;;
+	public void removeServer(Server... server) throws ServerManagerException;
+	
+	public void removeServer(List<Server> server) throws ServerManagerException;;
 	
 	/**
 	 * Returns the current connected server or null if there is no connected server
