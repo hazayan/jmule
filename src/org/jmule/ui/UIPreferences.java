@@ -33,8 +33,8 @@ import org.jmule.core.configmanager.ConfigurationManager;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.11 $$ Last changed by $$Author: javajox $$ on
- *          $$Date: 2010/01/05 14:39:15 $$
+ * @version $$Revision: 1.12 $$ Last changed by $$Author: binary255 $$ on
+ *          $$Date: 2010/01/05 14:44:56 $$
  */
 public class UIPreferences extends UIConstants {
 
@@ -70,10 +70,6 @@ public class UIPreferences extends UIConstants {
 		
 		try {
 			 config_store = new Properties();
-			 System.out.println("getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) + VISIBILITY = " +
-					             getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) + VISIBILITY);
-			 System.out.println("getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) + VISIBILITY = " +
-					             getDefaultColumnVisibility( SERVER_LIST_NAME_COLUMN_ID ));
 			 config_store.setProperty(getColumnNodePath( particular_ui_root, SERVER_LIST_NAME_COLUMN_ID ) + VISIBILITY,
 					                  getDefaultColumnVisibility( SERVER_LIST_NAME_COLUMN_ID ) + "");
 			 
@@ -1086,7 +1082,6 @@ public class UIPreferences extends UIConstants {
 	// ToolBar methods
 
 	protected boolean isToolBarVisible(String uiRoot) {
-		System.out.println("---------> " + UI_SETTINGS_FILE);
 		String toolbar_node = getToolBarNodePath(uiRoot);
 		// return preferences.node(toolbar_node).getBoolean(VISIBILITY,
 		// getToolBarDefaultVisibility());
