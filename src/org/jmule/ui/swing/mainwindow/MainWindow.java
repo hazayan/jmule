@@ -61,6 +61,8 @@ import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreEvent;
+import org.jmule.core.JMuleCoreEventListener;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -98,8 +100,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/09/27 14:20:00 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:26:43 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -149,6 +151,7 @@ public class MainWindow extends JFrame implements WindowListener  {
 	final JMToggleButton shared_files_button = new JMToggleButton();
 	final JMToggleButton statistics_button = new JMToggleButton();
 	final JMToggleButton log_button = new JMToggleButton();
+	final MainWindow _this = this;
 	
 	public MainWindow() {
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -268,7 +271,19 @@ public class MainWindow extends JFrame implements WindowListener  {
 				t.printStackTrace();
 			}
 		}
-		
+		_core.addEventListener(new JMuleCoreEventListener() {
+			public void eventOccured(JMuleCoreEvent event, final String details) {
+			  if(event == JMuleCoreEvent.NOT_ENOUGH_SPACE) {	
+			    SwingUtilities.invokeLater(new Runnable() {
+				    public void run() {
+				         JOptionPane.showMessageDialog(_this, 
+				            details,
+				            _._("mainwindow.not_enough_space_dialog.title"),JOptionPane.ERROR_MESSAGE);	
+				    }
+			    });
+			  }
+			}
+		});
 		LogTab.getLogInstance().addMessage("System started");
 	}
 
@@ -348,7 +363,6 @@ public class MainWindow extends JFrame implements WindowListener  {
         	}
         });
         
-        final MainWindow _this = this;
         about.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent event) {
         		AboutDialog about_dialog = new AboutDialog(_this,true);

@@ -44,8 +44,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:44:00 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:26:43 $$
  */
 public class Utils {
 	
@@ -70,6 +70,14 @@ public class Utils {
 	public static void showWarningMessage(Shell shell,String title,String message) {
 		MessageBox dialog = new MessageBox(shell,
                 SWT.OK | SWT.ICON_WARNING);
+		dialog.setText(title);
+		dialog.setMessage(message);
+		dialog.open();
+	}
+	
+	public static void showErrorMessage(Shell shell, String title, String message) {
+		MessageBox dialog = new MessageBox(shell,
+				 SWT.OK | SWT.ICON_ERROR);
 		dialog.setText(title);
 		dialog.setMessage(message);
 		dialog.open();

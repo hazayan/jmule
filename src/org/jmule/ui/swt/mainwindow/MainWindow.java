@@ -41,6 +41,8 @@ import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreEvent;
+import org.jmule.core.JMuleCoreEventListener;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.ui.JMuleUIComponent;
@@ -70,8 +72,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:15 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:26:43 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -171,7 +173,18 @@ public class MainWindow implements JMuleUIComponent {
             			logger.fine(Localizer._("mainwindow.logtab.message_partial_loaded", _core.getDownloadManager().getDownloadCount() + ""));
             		}}).start();
             	
-            	
+            	_core.addEventListener(new JMuleCoreEventListener() {
+					public void eventOccured(JMuleCoreEvent event,
+							final String details) {
+						if( event == JMuleCoreEvent.NOT_ENOUGH_SPACE ) {
+							display.syncExec(new JMRunnable() {
+								public void JMRun() {
+									Utils.showErrorMessage(shell, _._("mainwindow.not_enough_space_dialog.title"), details);
+								}
+							});
+						}
+					}
+            	});
             	// Update checker
             	if (SWTPreferences.getInstance().updateCheckAtStartup()) {
             		new JMThread(new JMRunnable() {
