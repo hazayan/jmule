@@ -1,7 +1,7 @@
 
   JMule CHANGELOG
  -----------------------
- 2010.01.08 | JMule 0.5.6
+ 2010.01.06 | JMule 0.5.6
             
  FEATURE:  Core	    | Added new tag architecture which supports more tag types [binary256]
  BUGFIX:   Core	    | Updated tag scanner with new tag types [binary256]
@@ -22,8 +22,7 @@
  FEATURE:  UI       | Other ui improvements [javajox,binary256]
  FEATURE:  Core     | The Kad and user id are stored in separate files [binary256]
  FEATURE:  Core     | If all the free space is gone on the partition then downloading process is stoped [javajox]
- FEATURE:  Swing UI | If all the free space is gone on the partition then an error message dialog is shown [javajox]
- FEATURE:  SWT UI   | If all the free space is gone on the partition then an error message dialog is shown [javajox]
+ FEATURE:  UI       | If all the free space is gone on the partition then an error message dialog is shown [javajox]
  
  2009.07.12 | JMule 0.5
  
