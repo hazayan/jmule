@@ -65,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/04 10:12:12 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/06 09:40:43 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -532,6 +532,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 			if (!download_manager.hasDownload(link.getFileHash()))
 				try {
 					download_manager.addDownload(link);
+					download_manager.startDownload(link.getFileHash());
 				} catch (DownloadManagerException e) {
 					e.printStackTrace();
 				}
@@ -539,7 +540,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 				failed+=link.getFileName()+"\n";
 		}
 		if (failed.length()!=0)
-			Utils.showWarningMessage(getShell(), _._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist.title"),_._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist")+" : \n"+failed);
+			Utils.showWarningMessage(getShell(), _._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist.title"),_._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist")+" : \n"+failed + "\n\n"+_._("mainwindow.transferstab.downloads.ed2k_paste_failed_already_exist2"));
 		
 	}
 
