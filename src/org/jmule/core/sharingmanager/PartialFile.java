@@ -37,6 +37,7 @@ import org.jmule.core.InternalJMuleCore;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCoreEvent;
 import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.NotEnoughSpaceDownloadingFile;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.E2DKConstants;
@@ -56,8 +57,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:28:11 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:23:55 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -312,14 +313,14 @@ public class PartialFile extends SharedFile {
 				if( t instanceof java.io.IOException ) {
 					JMuleCoreFactory.getSingleton().
 					            getDownloadManager().stopDownload();
-					//SharedFileException space_ex = new SharedFileException(file.getName(), file.getTotalSpace(), file.getFreeSpace());
-					//throw space_ex;
-					//TODO it's very bad to use it here -> FileFormatter.formatFileSize, the core must not depend of that part of the system
 					((InternalJMuleCore)JMuleCoreFactory.getSingleton()).
-					              notifyListenersEventOccured(JMuleCoreEvent.NOT_ENOUGH_SPACE, 
-					            		                      "Failed to write " + file.getName() + 
-					            		                      " total space : " + FileFormatter.formatFileSize( file.getTotalSpace() ) +
-					            		                      " free space : " + FileFormatter.formatFileSize( file.getFreeSpace() ));
+					              notifyListenersEventOccured(JMuleCoreEvent.NOT_ENOUGH_SPACE,
+					            		  new NotEnoughSpaceDownloadingFile( 
+					            				   file.getName(),
+	        		                               file.getTotalSpace(),
+	        		                               file.getFreeSpace()
+	        		                      )
+					               );
 				}
 				throw new SharedFileException("Failed to write data\n"+Misc.getStackTrace(t));
 			}

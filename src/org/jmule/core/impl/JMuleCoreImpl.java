@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import org.jmule.core.EventDescriptor;
 import org.jmule.core.InternalJMuleCore;
 import org.jmule.core.JMRawData;
 import org.jmule.core.JMuleCore;
@@ -66,8 +67,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:29:06 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:23:55 $$
  */
 public class JMuleCoreImpl implements InternalJMuleCore {
 	
@@ -521,10 +522,10 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		}
 	}
 
-	public void notifyListenersEventOccured(JMuleCoreEvent event, String details) {
+	public void notifyListenersEventOccured(JMuleCoreEvent event, EventDescriptor eventDescriptor) {
 		for(JMuleCoreEventListener listener : event_listeners) {
 			try {
-				listener.eventOccured(event, details);
+				listener.eventOccured(event, eventDescriptor);
 			}catch(Throwable cause) {
 				cause.printStackTrace();
 			}

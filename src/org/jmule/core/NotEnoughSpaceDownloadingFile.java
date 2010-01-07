@@ -23,13 +23,40 @@
 package org.jmule.core;
 
 /**
- * Created on Jan 5, 2010
+ * Created on Jan 7, 2010
  * @author javajox
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: javajox $ on $Date: 2010/01/07 15:23:55 $
  */
-public interface InternalJMuleCore extends JMuleCore {
+public class NotEnoughSpaceDownloadingFile implements EventDescriptor {
 
-	public void notifyListenersEventOccured(JMuleCoreEvent event, EventDescriptor eventDescriptor);
+	private String fileName;
+	private long totalSpace;
+	private long freeSpace;
 	
+	public NotEnoughSpaceDownloadingFile
+	          (String fileName, long totalSpace, long freeSpace) {
+		this.fileName = fileName;
+		this.totalSpace = totalSpace;
+		this.freeSpace = freeSpace;
+	}
+	
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	public long getTotalSpace() {
+		return totalSpace;
+	}
+	public void setTotalSpace(long totalSpace) {
+		this.totalSpace = totalSpace;
+	}
+	public long getFreeSpace() {
+		return freeSpace;
+	}
+	public void setFreeSpace(long freeSpace) {
+		this.freeSpace = freeSpace;
+	}	
 }

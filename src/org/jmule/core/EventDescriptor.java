@@ -23,13 +23,11 @@
 package org.jmule.core;
 
 /**
- * Created on Jan 5, 2010
+ * Created on Jan 7, 2010
  * @author javajox
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: javajox $ on $Date: 2010/01/07 15:23:55 $
  */
-public interface InternalJMuleCore extends JMuleCore {
+public interface EventDescriptor {
 
-	public void notifyListenersEventOccured(JMuleCoreEvent event, EventDescriptor eventDescriptor);
-	
 }
