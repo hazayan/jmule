@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.37 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/26 09:47:22 $$
+ * @version $$Revision: 1.38 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 11:22:33 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -192,12 +192,14 @@ public class DownloadSession implements JMTransferSession {
 		download_tasks = new JMTimer();
 		peer_monitor_task = new JMTimerTask() {
 			public void run() {
-				List<Peer> status_unresponse_list = download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, PeerDownloadStatus.FILE_STATUS_REQUEST);
-				for(Peer peer : status_unresponse_list) {
+				List<Peer> status_not_reponse_list = download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, PeerDownloadStatus.FILE_STATUS_REQUEST);
+				for(Peer peer : status_not_reponse_list) {
+					if (peer.isConnected())
 					network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
 							getFileHash());
 				}
-				for(Peer peer : status_unresponse_list) {
+				for(Peer peer : status_not_reponse_list) {
+					if (peer.isConnected())
 					network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
 							getFileHash());
 				}
@@ -214,7 +216,10 @@ public class DownloadSession implements JMTransferSession {
 						.getPeersWithInactiveTime(UNUSED_PEER_ACTIVATION,
 								PeerDownloadStatus.ACTIVE_UNUSED);
 				for (Peer peer : peer_list) {
-					fileChunkRequest(peer);
+					if (peer.isConnected())
+						fileChunkRequest(peer);
+					else
+						download_status_list.setPeerStatus(peer, PeerDownloadStatus.DISCONNECTED);
 				}
 			}
 		};
@@ -785,7 +790,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	public boolean hasPeer(Peer peer) {
-		return session_peers.contains(peer);
+		return session_peers.contains(peer) || download_status_list.hasPeer(peer);
 	}
 	
 	boolean hasPeer(String ip, int port) {
