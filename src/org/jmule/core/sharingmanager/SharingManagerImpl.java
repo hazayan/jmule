@@ -81,7 +81,8 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	private JMTimer sharing_manager_timer;
 	private JMTimerTask rescan_dirs_task;
 	private JMTimerTask server_sharing_task;
-
+	private JMTimerTask store_metadata_task;
+	
 	SharingManagerImpl() {
 		
 	}
@@ -246,8 +247,16 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 				loadCompletedFiles();
 			}
 		};
+		store_metadata_task = new JMTimerTask() {
+			public void run() {
+				writeMetadata();
+			}
+		};
 		sharing_manager_timer.addTask(rescan_dirs_task,
 				ConfigurationManager.DIR_RESCAN_INTERVAL, true);
+		
+		sharing_manager_timer.addTask(store_metadata_task,
+				ConfigurationManager.WRITE_METADATA_INTERVAL, true);
 	}
 	
 	protected boolean iAmStoppable() {
@@ -687,9 +696,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	public void writeMetadata() {
 		try {
 			KnownMet known_met = new KnownMet(ConfigurationManager.KNOWN_MET);
-
 			known_met.writeFile(sharedFiles.values());
-
 			known_met.close();
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -710,6 +717,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 		stopLoadingCompletedFiles();
 
 		stopLoadingPartialFiles();
+		writeMetadata();
 
 	}
 

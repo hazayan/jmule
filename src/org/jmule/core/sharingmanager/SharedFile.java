@@ -60,8 +60,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:31:54 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 12:41:38 $$
  */
 public abstract class SharedFile {
 	
@@ -206,11 +206,7 @@ public abstract class SharedFile {
 		if (tagList.hasTag(FT_FILERATING))
 			tagList.removeTag(FT_FILERATING);
 		Tag tag = new IntTag(FT_FILERATING, tag_value);		
-
-		//System.out.println(""+tag);
 		tagList.addTag(tag);
-		
-		SharingManagerSingleton.getInstance().writeMetadata();
 	}
 	
 	public FileQuality getFileQuality() {
