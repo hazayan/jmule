@@ -60,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/05 19:12:30 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/07 12:26:30 $
  */
 public class SearchResultTab {
 
@@ -84,6 +84,9 @@ public class SearchResultTab {
 
 	private Color color_red = SWTThread.getDisplay().getSystemColor(
 			SWT.COLOR_RED);
+	
+	private Color color_green = SWTThread.getDisplay().getSystemColor(
+			SWT.COLOR_GREEN);
 
 	public SearchResultTab(CTabFolder parent, SearchQuery searchRequest,
 			JMuleCore core) {
@@ -219,10 +222,10 @@ public class SearchResultTab {
 				if (_core.getDownloadManager().hasDownload(fileHash)) {
 					setForegroundColor(object, color_red);
 				}
-				/*
-				 * else if (_core.getSharingManager().hasFile(fileHash))
-				 * setForegroundColor(object, color_green);
-				 */
+				
+				else if (_core.getSharingManager().hasFile(fileHash))
+				  setForegroundColor(object, color_green);
+				 
 
 				setRowText(object, SWTConstants.SEARCH_FILENAME_COLUMN_ID,
 						object.getFileName());
