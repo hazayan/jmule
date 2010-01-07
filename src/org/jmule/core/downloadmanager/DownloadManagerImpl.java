@@ -32,6 +32,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.JMThread;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -42,9 +43,9 @@ import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.searchmanager.SearchResultItem;
+import org.jmule.core.servermanager.Server;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.PartialFile;
-import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 
@@ -52,8 +53,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 19:13:26 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 12:22:01 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -499,6 +500,41 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		} catch (DownloadManagerException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private JMThread notify_thread = null;
+	
+	public void connectedToServer(Server server) {
+		notify_thread = new JMThread() {
+			boolean stop_thread = false;
+			public void run() {
+				List<DownloadSession> downloads = getDownloads();
+				for(DownloadSession session : downloads) {
+					synchronized(this) {
+					try {
+						this.wait(10000);
+					} catch (InterruptedException e) {
+					} }
+					if (stop_thread) return ;
+					session.queueSourcesFromServer();
+				}
+				notify_thread = null;
+			}
+			
+			public void JMStop() {
+				stop_thread = true;
+				synchronized (this) {
+					this.notify();
+				}
+			}
+		};
+		notify_thread.start();
+		
+	}
+	
+	public void disconnectedFromServer(Server server) {
+		if (notify_thread != null)
+			notify_thread.JMStop();
 	}
 	
 	public void addNeedMorePeersListener(NeedMorePeersListener listener) {

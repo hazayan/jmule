@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.38 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 11:22:33 $$
+ * @version $$Revision: 1.39 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 12:22:01 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -310,7 +310,7 @@ public class DownloadSession implements JMTransferSession {
 
 	}
 
-	private void queueSourcesFromServer() {
+	void queueSourcesFromServer() {
 		if (ServerManagerSingleton.getInstance().isConnected())
 			network_manager.requestSourcesFromServer(getFileHash(), sharedFile
 					.length());

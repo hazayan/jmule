@@ -27,13 +27,14 @@ import java.util.List;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.peermanager.Peer;
+import org.jmule.core.servermanager.Server;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 
 /**
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.4 $ Last changed by $Author: binary255 $ on $Date: 2009/12/12 18:58:38 $
+ * @version $Revision: 1.5 $ Last changed by $Author: binary255 $ on $Date: 2010/01/07 12:22:01 $
  */
 public interface InternalDownloadManager extends DownloadManager {
 
@@ -77,5 +78,9 @@ public interface InternalDownloadManager extends DownloadManager {
 	public void peerConnected(Peer peer);
 	
 	public void peerConnectingFailed(Peer peer, Throwable cause);
+	
+	public void connectedToServer(Server server);
+	
+	public void disconnectedFromServer(Server server);
 	
 }
