@@ -57,6 +57,7 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.ColorUIResource;
 
+import org.jmule.core.EventDescriptor;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
@@ -64,6 +65,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreEvent;
 import org.jmule.core.JMuleCoreEventListener;
 import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.NotEnoughSpaceDownloadingFile;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.networkmanager.NetworkManager;
@@ -95,13 +97,14 @@ import org.jmule.ui.swing.settings.SettingsDialog;
 import org.jmule.ui.swing.versionchecker.VersionChecker;
 import org.jmule.ui.swing.wizards.SetupWizard;
 import org.jmule.ui.swing.wizards.UIChooserWizad;
+import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.SpeedFormatter;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:26:43 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:25:30 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -272,12 +275,16 @@ public class MainWindow extends JFrame implements WindowListener  {
 			}
 		}
 		_core.addEventListener(new JMuleCoreEventListener() {
-			public void eventOccured(JMuleCoreEvent event, final String details) {
+			public void eventOccured(JMuleCoreEvent event, final EventDescriptor eventDescriptor) {
 			  if(event == JMuleCoreEvent.NOT_ENOUGH_SPACE) {	
 			    SwingUtilities.invokeLater(new Runnable() {
+			    	NotEnoughSpaceDownloadingFile nes = (NotEnoughSpaceDownloadingFile)eventDescriptor;
 				    public void run() {
 				         JOptionPane.showMessageDialog(_this, 
-				            details,
+				            _._("mainwindow.not_enough_space_dialog.message", 
+											nes.getFileName(),
+											FileFormatter.formatFileSize( nes.getTotalSpace() ),
+											FileFormatter.formatFileSize( nes.getFreeSpace() )),
 				            _._("mainwindow.not_enough_space_dialog.title"),JOptionPane.ERROR_MESSAGE);	
 				    }
 			    });

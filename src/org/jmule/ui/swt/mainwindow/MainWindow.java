@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.jmule.core.EventDescriptor;
 import org.jmule.core.JMConstants;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMThread;
@@ -44,6 +45,7 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreEvent;
 import org.jmule.core.JMuleCoreEventListener;
 import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.NotEnoughSpaceDownloadingFile;
 import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
@@ -66,14 +68,15 @@ import org.jmule.ui.swt.maintabs.shared.SharedTab;
 import org.jmule.ui.swt.maintabs.statistics.StatisticsTab;
 import org.jmule.ui.swt.maintabs.transfers.TransfersTab;
 import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
+import org.jmule.ui.utils.FileFormatter;
 import org.jmule.updater.JMUpdater;
 import org.jmule.updater.JMUpdaterException;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:26:43 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:25:30 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -174,12 +177,17 @@ public class MainWindow implements JMuleUIComponent {
             		}}).start();
             	
             	_core.addEventListener(new JMuleCoreEventListener() {
-					public void eventOccured(JMuleCoreEvent event,
-							final String details) {
+					public void eventOccured(JMuleCoreEvent event, final EventDescriptor eventDescriptor) {
 						if( event == JMuleCoreEvent.NOT_ENOUGH_SPACE ) {
 							display.syncExec(new JMRunnable() {
+								NotEnoughSpaceDownloadingFile nes = (NotEnoughSpaceDownloadingFile)eventDescriptor;
 								public void JMRun() {
-									Utils.showErrorMessage(shell, _._("mainwindow.not_enough_space_dialog.title"), details);
+									Utils.showErrorMessage(shell, 
+											_._("mainwindow.not_enough_space_dialog.title"),
+											_._("mainwindow.not_enough_space_dialog.message", 
+													nes.getFileName(),
+													FileFormatter.formatFileSize( nes.getTotalSpace() ),
+													FileFormatter.formatFileSize( nes.getFreeSpace() )));
 								}
 							});
 						}
