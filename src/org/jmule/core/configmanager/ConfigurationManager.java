@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/01 14:48:56 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 15:01:38 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -94,6 +94,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final long		  MAX_WRONG_PACKET_COUNT		=     50;
 	
 	public static final int 		  DIR_RESCAN_INTERVAL  			=	  1000 * 60 * 10;
+	public static final int 		  WRITE_METADATA_INTERVAL		=	  1000 * 60;
 	public static final int 		  SEARCH_QUERY_CHECK_INTERVAL   =	  10000;
 	
 	public static final int 		  SHARED_FILES_PUBLISH_INTERVAL = 	  1000 * 60;
