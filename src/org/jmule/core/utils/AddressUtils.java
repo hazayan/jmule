@@ -22,10 +22,10 @@
  */
 package org.jmule.core.utils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.jmule.core.utils.Convert;
 
 
 /**
@@ -34,8 +34,8 @@ import org.jmule.core.utils.Convert;
  * @author javajox
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/common/address/AddressUtils.java?view=log
  * @see phex.common.address.AddressUtils
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:32:31 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/08 09:32:16 $$
  */
 public class AddressUtils {
 	
@@ -201,4 +201,80 @@ public class AddressUtils {
     		return false;
     	}
     }
+    
+    public static int addressToInt(String address ) throws UnknownHostException {
+    	
+		InetAddress i_address = InetAddress.getByAddress( textToNumericFormat( address ) );
+		byte[]	bytes = i_address.getAddress();
+		return byteArrayToInt( bytes );
+	}
+    
+    public static int addressToInt(InetAddress address) {
+    	
+		byte[]	bytes = address.getAddress();
+		return byteArrayToInt( bytes );
+    }
+    
+    private static int byteArrayToInt(byte[] bytes) {
+    	
+    	return (bytes[0]<<24)&0xff000000 | (bytes[1] << 16)&0x00ff0000 | (bytes[2] << 8)&0x0000ff00 | bytes[3]&0x000000ff;
+    }
+    
+    final static int INADDRSZ	= 4;
+    
+    static byte[] textToNumericFormat(String src ) {
+           if (src.length() == 0) {
+            	return null;
+            }
+            	
+            if ( src.indexOf(':') != -1 ){
+            		
+             try{
+            	 return( InetAddress.getByName(src).getAddress());
+            				
+             }catch( Throwable e ){
+            				
+            	 return( null );
+             }
+            }
+            		
+            int octets;
+            char ch;
+            byte[] dst = new byte[INADDRSZ];
+            	
+            char[] srcb = src.toCharArray();
+            boolean saw_digit = false;
+
+            octets = 0;
+            int i = 0;
+            int cur = 0;
+            while (i < srcb.length) {
+               ch = srcb[i++];
+               if (Character.isDigit(ch)) {
+               // note that Java byte is signed, so need to convert to int
+               int sum = (dst[cur] & 0xff)*10
+            			+ (Character.digit(ch, 10) & 0xff);
+            			
+                if (sum > 255)
+            	    return null;
+                dst[cur] = (byte)(sum & 0xff);
+            		if (! saw_digit) {
+            			 if (++octets > INADDRSZ)
+            			    return null;
+            			 saw_digit = true;
+            		 }
+                 } else if (ch == '.' && saw_digit) {
+            		if (octets == INADDRSZ)
+            			    return null;
+            	       cur++;
+            		   dst[cur] = 0;
+            		   saw_digit = false;
+            	  } else
+            			return null;
+            	  }
+            	if (octets < INADDRSZ)
+            		    return null;
+            return dst;
+    }
+    
 }
