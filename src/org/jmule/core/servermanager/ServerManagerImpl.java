@@ -61,8 +61,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 10:44:41 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 11:11:34 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -93,6 +93,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	
 	private JMTimer server_manager_timer;
 	private JMTimerTask servers_udp_query;
+	private JMTimerTask store_metadata_task;
 
 	ServerManagerImpl() {
 	}
@@ -159,6 +160,17 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 				}
 			}
 		};
+		
+		store_metadata_task = new JMTimerTask() {
+			public void run() {
+				try {
+					storeServerList();
+				} catch (ServerManagerException e) {
+					e.printStackTrace();
+				}
+			}
+		}; 
+		
 		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 		
 	}
@@ -170,7 +182,10 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			e.printStackTrace();
 			return;
 		}
-		server_manager_timer.addTask(servers_udp_query, ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
+		server_manager_timer.addTask(servers_udp_query,
+				ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
+		server_manager_timer.addTask(store_metadata_task,
+				ConfigurationManager.SERVER_LIST_STORE_INTERVAL, true);
 	}
 	
 	public void shutdown() {

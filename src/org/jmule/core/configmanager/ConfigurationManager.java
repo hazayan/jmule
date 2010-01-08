@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 15:01:38 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 11:11:34 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -73,6 +73,7 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	
 	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 2;
+	public static final int          SERVER_LIST_STORE_INTERVAL     =     1000 * 60;
 	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 SERVER_CONNECTING_TIMEOUT		=	  1000 * 40;
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
