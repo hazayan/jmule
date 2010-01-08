@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -38,7 +40,6 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ED2KServerLink;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.metfile.ServerMet;
@@ -50,6 +51,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.servermanager.Server.ServerStatus;
 import org.jmule.core.sharingmanager.InternalSharingManager;
 import org.jmule.core.sharingmanager.SharingManagerSingleton;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
@@ -58,8 +61,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 09:30:24 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 10:44:41 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -92,26 +95,6 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	private JMTimerTask servers_udp_query;
 
 	ServerManagerImpl() {
-		server_manager_timer = new JMTimer();
-		servers_udp_query = new JMTimerTask() {
-			Random random = new Random();
-			public void run() {
-				for(Server server : server_list) {
-					byte[] bytes = new byte[4]; 
-					random.nextBytes(bytes);
-					bytes[2] = (byte)0xFF;
-					bytes[3] = (byte)0xFF;
-					int challenge = Convert.byteToInt(bytes);
-					byte[] byte_challenge = Convert.intToByteArray(challenge);
-										
-					challenge = Convert.byteToInt(byte_challenge);
-					server.setChallenge(challenge);
-					_network_manager.sendServerUDPStatusRequest(server.getAddress(), E2DKConstants.SERVER_UDP_PORT, challenge);
-					_network_manager.sendServerUDPDescRequest(server.getAddress(), E2DKConstants.SERVER_UDP_PORT);
-				}
-			}
-		};
-		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 	}
 	
 	public void initialize() {
@@ -130,6 +113,54 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			server_met = new ServerMet(ConfigurationManager.SERVER_MET);
 		} catch (ServerMetException e) {
 		}
+		
+		Set<String> types = new HashSet<String>();
+		types.add(JMuleCoreStats.ST_NET_SERVERS_COUNT);
+		types.add(JMuleCoreStats.ST_NET_SERVERS_DEAD_COUNT);
+		types.add(JMuleCoreStats.ST_NET_SERVERS_ALIVE_COUNT);
+		
+		JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+			public void updateStats(Set<String> types,Map<String, Object> values) {
+				if (types.contains(JMuleCoreStats.ST_NET_SERVERS_COUNT)) {
+					values.put(JMuleCoreStats.ST_NET_SERVERS_COUNT, getServersCount());
+				}
+				if (types.contains(JMuleCoreStats.ST_NET_SERVERS_DEAD_COUNT)) {
+					int dead_servers_count = 0;
+					for(Server server : server_list)
+						if (server.isDown())  dead_servers_count++;
+					values.put(JMuleCoreStats.ST_NET_SERVERS_DEAD_COUNT, dead_servers_count);
+				}
+				if (types.contains(JMuleCoreStats.ST_NET_SERVERS_ALIVE_COUNT)) {
+					int alive_servers_count = 0;
+					for(Server server : server_list)
+						if (!server.isDown())  alive_servers_count++;
+					values.put(JMuleCoreStats.ST_NET_SERVERS_ALIVE_COUNT, alive_servers_count);
+				}
+				
+			}
+		});
+
+		server_manager_timer = new JMTimer();
+		servers_udp_query = new JMTimerTask() {
+			Random random = new Random();
+			public void run() {
+				for(Server server : server_list) {
+					byte[] bytes = new byte[4]; 
+					random.nextBytes(bytes);
+					bytes[2] = (byte)0xFF;
+					bytes[3] = (byte)0xFF;
+					int challenge = Convert.byteToInt(bytes);
+					byte[] byte_challenge = Convert.intToByteArray(challenge);
+										
+					challenge = Convert.byteToInt(byte_challenge);
+					server.setChallenge(challenge);
+					_network_manager.sendServerUDPStatusRequest(server.getAddress(), server.getPort() + 4, challenge);
+					_network_manager.sendServerUDPDescRequest(server.getAddress(), server.getPort() + 4);
+				}
+			}
+		};
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
+		
 	}
 
 	public void start() {

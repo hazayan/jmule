@@ -26,9 +26,11 @@ import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMuleAbstractManager;
@@ -47,6 +49,8 @@ import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.peermanager.Peer.PeerStatus;
+import org.jmule.core.statistics.JMuleCoreStats;
+import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
 import org.jmule.core.utils.timer.JMTimer;
@@ -56,8 +60,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:06:58 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 10:44:41 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -90,8 +94,19 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return;
 		}
+		Set<String> types = new HashSet<String>();	
+		   types.add(JMuleCoreStats.ST_NET_PEERS_COUNT);
+		   JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
+			public void updateStats(Set<String> types, Map<String, Object> values) {
+				if (types.contains(JMuleCoreStats.ST_NET_PEERS_COUNT)) {
+					values.put(JMuleCoreStats.ST_NET_PEERS_COUNT, peers.size());
+				}
+			}
+		   });
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
+		
+		
 	}
 
 
