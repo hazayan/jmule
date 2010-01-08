@@ -60,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/07 12:26:30 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/08 16:35:32 $
  */
 public class SearchResultTab {
 
@@ -425,13 +425,9 @@ public class SearchResultTab {
 			search_results.addRow(item);
 		}
 		String query = searchResult.getSearchQuery().getQuery();
-
-		String title = getTabTitle(query)
-				+ " ("
-				+ (search_results.getItemCount() + searchResult
-						.getSearchResultItemList().size()) + ")";
+		String title = getTabTitle(query) + " ("
+				+ (search_results.getItemCount()) + ")";
 		search_tab.setText(title);
-
 	}
 
 	private void start_download() {
@@ -474,10 +470,8 @@ public class SearchResultTab {
 
 	private String getTabTitle(String query) {
 		String result = query;
-
 		if (result.length() > 10)
 			result = result.substring(0, 10) + "...";
-
 		return result;
 	}
 

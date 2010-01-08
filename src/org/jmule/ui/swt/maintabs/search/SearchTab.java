@@ -62,8 +62,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/20 09:05:15 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 16:35:32 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -319,7 +319,7 @@ public class SearchTab extends AbstractTab{
 			search_query.setQueryType(SearchQueryType.SERVER_KAD);
 		
 		if (show_advanced_options) {
-			if (fileType != fileType.ANY)
+			if (fileType != FileType.ANY)
 				search_query.setFileType(fileType);
 			if (extension.length()!=0)
 				search_query.setExtension(extension);
