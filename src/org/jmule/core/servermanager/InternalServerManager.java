@@ -32,8 +32,8 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 /**
  * Created on Aug 20, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/14 09:24:43 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
  */
 public interface InternalServerManager extends ServerManager {
 
@@ -44,6 +44,7 @@ public interface InternalServerManager extends ServerManager {
 	public void receivedMessage(String message);
 	public void receivedServerList(List<String> ipList, List<Integer> portList);
 	public void receivedServerStatus(int userCount, int fileCount);
+	public void receivedOldServerStatus(String ip, int port, int challenge, long userCount, long fileCount);
 	public void receivedServerStatus(String ip, int port, int challenge,
 			long userCount, long fileCount, long softLimit, long hardLimit,
 			Set<ServerFeatures> serverFeatures);

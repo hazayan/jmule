@@ -48,8 +48,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/05 16:08:32 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -148,6 +148,8 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void receivedServerList(List<String> ipList, List<Integer> portList);
 	
 	public void receivedServerStatus(int userCount, int fileCount);
+	
+	public void receivedOldServerStatus(String ip, int port, int challenge, long userCount, long fileCount);
 	
 	public void receivedServerStatus(String ip , int port, int challenge, long userCount, long fileCount, long softLimit, long hardLimit, Set<ServerFeatures> serverFeatures);
 

@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.21 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/05 16:08:32 $
+ * @version $Revision: 1.22 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -633,6 +633,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		_server_manager.receivedServerStatus(userCount, fileCount);
 	}
 
+	public void receivedOldServerStatus(String ip, int port, int challenge, long userCount, long fileCount) {
+		_server_manager.receivedOldServerStatus(ip, port, challenge, userCount, fileCount);
+	}
+	
 	public void receivedServerStatus(String ip, int port, int challenge,
 			long userCount, long fileCount, long softLimit, long hardLimit,
 			Set<ServerFeatures> serverFeatures) {

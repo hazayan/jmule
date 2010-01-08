@@ -58,8 +58,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 12:22:02 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 09:30:24 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -474,12 +474,23 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		connected_server.setNumFiles(fileCount);
 	}
 
+	public void receivedOldServerStatus(String ip, int port, int challenge, long userCount, long fileCount) {
+		Server server = getServer(ip);
+		if (server == null) {
+			return;
+		}
+		server.setPing(challenge);
+		server.setNumUsers(userCount);
+		server.setNumFiles(fileCount);
+	}
+	
 	public void receivedServerStatus(String ip, int port, int challenge,
 			long userCount, long fileCount, long softLimit, long hardLimit,
 			Set<ServerFeatures> serverFeatures) {
 		Server server = getServer(ip);
-		if (server == null)
+		if (server == null) {
 			return;
+		}
 		server.setPing(challenge);
 		server.setNumUsers(userCount);
 		server.setNumFiles(fileCount);

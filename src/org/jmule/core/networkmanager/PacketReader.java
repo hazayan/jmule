@@ -106,8 +106,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/28 16:03:50 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
  */
 public class PacketReader {
 
@@ -756,12 +756,19 @@ public class PacketReader {
 
 		String ip = packetSender.getAddress().getHostAddress();
 		int port = packetSender.getPort();
+		
 		try {
 			switch (packet_protocol) {
 				case PROTO_EDONKEY_SERVER_UDP: {
 					switch (packet_op_code) {
 					case OP_GLOBSERVSTATUS: {
-						if (packet_content.capacity()<15) return ; // skip old packet format
+						if (packet_content.capacity()<15) {
+							int challenge = packet_content.getInt();
+							long user_count = Convert.intToLong(packet_content.getInt());
+							long files_count = Convert.intToLong(packet_content.getInt());
+							_network_manager.receivedOldServerStatus(ip, port, challenge, user_count, files_count);
+							return ;
+						}
 						int challenge = packet_content.getInt();
 						long user_count = Convert.intToLong(packet_content.getInt());
 						long files_count = Convert.intToLong(packet_content.getInt());
