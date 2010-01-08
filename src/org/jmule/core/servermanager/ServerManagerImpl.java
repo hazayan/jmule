@@ -61,8 +61,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 11:11:34 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 16:41:09 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -549,8 +549,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		for (Server server : servers) {
 			if (!hasServer(server.getAddress(), server.getPort()))
 				throw new ServerManagerException("Server " + server.getAddress() + " : " + server.getPort() + " not found");
-			if (connected_server.equals(server))
-				disconnect();
+			if (connected_server != null)
+				if (connected_server.equals(server))
+					disconnect();
 			server_list.remove(server);
 			notifyServerRemoved(server);
 		}
@@ -561,8 +562,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		for (Server server : servers) {
 			if (!hasServer(server.getAddress(), server.getPort()))
 				throw new ServerManagerException("Server " + server.getAddress() + " : " + server.getPort() + " not found");
-			if (connected_server.equals(server))
-				disconnect();
+			if (connected_server != null)
+				if (connected_server.equals(server))
+					disconnect();
 			server_list.remove(server);
 			notifyServerRemoved(server);
 		}
