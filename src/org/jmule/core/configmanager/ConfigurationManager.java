@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.27 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 11:11:34 $$
+ * @version $$Revision: 1.28 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/09 18:08:19 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -76,6 +76,9 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          SERVER_LIST_STORE_INTERVAL     =     1000 * 60;
 	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 SERVER_CONNECTING_TIMEOUT		=	  1000 * 40;
+	public static final int			 SERVER_RECONNECT_COUNT			=	  4;
+	public static final int			 SERVER_RECONNECT_TIMEOUT		= 	  5000;
+	
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
 	
 	public static final int 		 PEER_CONNECTING_TIMEOUT		= 	  1000 * 40;
