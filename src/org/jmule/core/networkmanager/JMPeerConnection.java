@@ -43,8 +43,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/19 19:23:45 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/09 18:01:32 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -53,8 +53,8 @@ public final class JMPeerConnection extends JMConnection {
 	private JMThread connecting_thread;
 	private JMThread receiver_thread;
 	
-	private SenderThread sender_thread;
-	private Queue<Packet> send_queue = new ConcurrentLinkedQueue<Packet>();
+	private volatile SenderThread sender_thread;
+	private volatile Queue<Packet> send_queue = new ConcurrentLinkedQueue<Packet>();
 	
 	private InetSocketAddress remote_inet_socket_address;
 		
@@ -208,8 +208,9 @@ public final class JMPeerConnection extends JMConnection {
 		if (connection_status != ConnectionStatus.CONNECTED)
 			throw new JMException("Not connected to " + remote_inet_socket_address);
 		send_queue.add(packet);
-		if (sender_thread.isSleeping())
+		if (sender_thread.isSleeping()) {
 			sender_thread.wakeUp();
+		}
 	}
 	
 	private void sendPacket(Packet packet) throws Exception {
@@ -229,6 +230,7 @@ public final class JMPeerConnection extends JMConnection {
 				raw_data.position(0);
 				packet.insertData(raw_data);
 			}
+//			System.out.println("Send packet to peer : " + getIPAddress() + " : " + getPort() +" Header : " + Convert.byteToHex(packet.getProtocol()) + " opcode : " + Convert.byteToHex(packet.getCommand())); 
 			if(jm_socket_channel.write(packet.getAsByteBuffer()) == -1 )
 					notifyDisconnect();
 		}catch(Throwable cause) {
@@ -244,8 +246,8 @@ public final class JMPeerConnection extends JMConnection {
 	
 	private class SenderThread extends JMThread {
 		
-		private boolean loop = true;
-		private boolean is_sleeping = false;
+		private volatile boolean loop = true;
+		private volatile boolean is_sleeping = false;
 		public SenderThread() {
 			super("Peer packet sender for " + remote_inet_socket_address);
 		}

@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.22 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
+ * @version $Revision: 1.23 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/09 18:01:32 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -547,13 +547,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort,
 			UserHash userHash, ClientID clientID, int peerListenPort,
 			TagList tagList, String serverIP, int serverPort) {
-
 		_peer_manager.helloFromPeer(peerIP, peerPort, userHash, clientID,
 				peerListenPort, tagList, serverIP, serverPort);
-
 		try {
 			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
-
 			Server connected_server = _server_manager.getConnectedServer();
 			byte[] server_ip = null;
 			int server_port = 0;
@@ -563,7 +560,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				server_port = connected_server.getPort();
 				client_id = connected_server.getClientID();
 			}
-
 			Packet packet = PacketFactory.getPeerHelloAnswerPacket(
 					_config_manager.getUserHash(), client_id, _config_manager
 							.getTCP(), _config_manager.getNickName(),

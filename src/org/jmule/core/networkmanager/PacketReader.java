@@ -106,8 +106,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/09 18:01:32 $
  */
 public class PacketReader {
 
@@ -350,7 +350,7 @@ public class PacketReader {
 			packet_data.position(0);
 			packet_header = PROTO_EDONKEY_TCP;
 		}
-		
+		// System.out.println("Peer packet from : " + peerIP + " : " + peerPort +" Header : " + Convert.byteToHex(packet_header) + " opcode : " + Convert.byteToHex(packet_opcode)); 
 		try {
 			if (packet_header == PROTO_EDONKEY_TCP) 
 				switch (packet_opcode) {
@@ -757,6 +757,7 @@ public class PacketReader {
 		String ip = packetSender.getAddress().getHostAddress();
 		int port = packetSender.getPort();
 		
+		// System.out.println("UDP Packet  " + ip + ":" + port + " Protocol : " + Convert.byteToHex(packet_protocol)+"  OpCode : " + Convert.byteToHex(packet_op_code));
 		try {
 			switch (packet_protocol) {
 				case PROTO_EDONKEY_SERVER_UDP: {
