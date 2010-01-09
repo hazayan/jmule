@@ -40,6 +40,7 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ED2KServerLink;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.metfile.ServerMet;
@@ -61,8 +62,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 16:41:09 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/09 18:07:34 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -80,6 +81,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	private InternalDownloadManager _download_manager;
 	
+	private boolean reconnect_to_server = false;
+	private int reconnect_count = 0;
+	
 	private Comparator<Server> compare_servers_by_ping = new Comparator<Server>() {
 		public int compare(Server object1, Server object2) {
 			if (object1.getPing() < object2.getPing()) {
@@ -94,6 +98,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	private JMTimer server_manager_timer;
 	private JMTimerTask servers_udp_query;
 	private JMTimerTask store_metadata_task;
+	private JMTimerTask reconnect_task;
 
 	ServerManagerImpl() {
 	}
@@ -209,6 +214,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	public void connect() throws ServerManagerException {
 		auto_connect_started = true;
+		reconnect_to_server = false;
 		candidate_servers.addAll(server_list);
 		requestNextAutoConnectServer();
 		notifyAutoConnectStarted();
@@ -218,6 +224,10 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		if (connected_server != null)
 			throw new ServerManagerException(
 					"JMule is already connected (connecting) to another server");
+		if (reconnect_task != null)
+			synchronized (reconnect_task) {
+				server_manager_timer.removeTask(reconnect_task);
+			}
 		String ip = server.getAddress();
 		int port = server.getPort();
 		if (hasServer(ip, port)) {
@@ -236,6 +246,12 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	public void disconnect() throws ServerManagerException {
 		if (connected_server == null)
 			throw new ServerManagerException("JMule is not connected to server");
+		if (reconnect_task != null)
+			synchronized (reconnect_task) {
+				server_manager_timer.removeTask(reconnect_task);
+			}
+		reconnect_to_server = false;
+		reconnect_count = 0;
 		try {
 			_network_manager.disconnectFromServer();
 		} catch (NetworkManagerException e) {
@@ -464,6 +480,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			// log, must newer get here
 			return;
 		}
+		reconnect_to_server = true;
+		reconnect_count = 0;
+		
 		connected_server.setClientID(clientID);
 		connected_server.setFeatures(serverFeatures);
 
@@ -482,6 +501,14 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	public void receivedMessage(String message) {
 		notifyMessage(connected_server, message);
+		for(String error_message : E2DKConstants.SERVER_ERROR_MESSAGES) {
+			if (message.contains(error_message))
+				try {
+					disconnect();
+				} catch (ServerManagerException e) {
+					e.printStackTrace();
+				}
+		}
 	}
 
 	public void receivedNewServerDescription(String ip, int port,
@@ -577,7 +604,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	}
 
 	public void serverConnectingFailed(String ip, int port, Throwable cause) {
-		Server failed_server = connected_server;
+		final Server failed_server = connected_server;
 		connected_server = null;
 		notifyServerConnectingFailed(failed_server, cause);
 		if (auto_connect_started) {
@@ -586,7 +613,29 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
-		}
+		} else
+		
+		if (reconnect_to_server)
+			if (reconnect_count < ConfigurationManager.SERVER_RECONNECT_COUNT) {
+			reconnect_task = new JMTimerTask() {
+				public void run() {
+					if (!reconnect_to_server) return;
+					reconnect_count++;
+					Server cserver = failed_server;
+					reconnect_task = null;
+					try {
+						connect(cserver);
+					} catch (ServerManagerException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			server_manager_timer.addTask(reconnect_task, ConfigurationManager.SERVER_RECONNECT_TIMEOUT);	
+				
+			} else {
+				_download_manager.disconnectedFromServer(connected_server);
+				_sharing_manager.stopSharingFilesToServer();
+			}
 	}
 
 	public void serverDisconnected(String ip, int port) {
@@ -602,9 +651,22 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 				t.printStackTrace();
 			}
 		} else {
+			if (reconnect_to_server)
+			if (reconnect_count < ConfigurationManager.SERVER_RECONNECT_COUNT) {
+				reconnect_count++;
+				Server cserver = connected_server;
+				connected_server = null;
+				try {
+					connect(cserver);
+				} catch (ServerManagerException e) {
+					e.printStackTrace();
+				}
+				return;
+			}
 			_download_manager.disconnectedFromServer(connected_server);
+			_sharing_manager.stopSharingFilesToServer();
 		}
-		_sharing_manager.stopSharingFilesToServer();
+		
 		connected_server = null;
 	}
 
