@@ -52,13 +52,12 @@ import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.MD4;
 import org.jmule.core.utils.MD4FileHasher;
 import org.jmule.core.utils.Misc;
-import org.jmule.ui.utils.FileFormatter;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:23:55 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 17:00:26 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -369,7 +368,15 @@ public class PartialFile extends SharedFile {
 	 * @return true - file is ok !
 	 */
 	public boolean checkFullFileIntegrity() {
-		
+		if (length()<PARTSIZE) {
+			PartHashSet newSet = MD4FileHasher.calcHashSets(writeChannel);
+			System.out.println(length() + "  \nNew hash : " + newSet.getFileHash());
+			System.out.println("hash : " + getFileHash());
+			if (newSet.getFileHash().equals(getFileHash()))
+				return true;
+			this.partFile.getGapList().addGap(0, length());
+			return false;
+		}
 		if (!hasHashSet()) return false;
 		
 		PartHashSet fileHashSet = partFile.getFileHashSet();
@@ -416,7 +423,10 @@ public class PartialFile extends SharedFile {
 	
 	private boolean checkFilePartsIntegrity() {
 		
-		if (!hasHashSet()) return false;
+		if (!hasHashSet()) {
+			if (E2DKConstants.PARTSIZE < length()) return true;
+			return false;
+		}
 		
 		if (checkedParts.length==0) return true;
 		
@@ -515,7 +525,7 @@ public class PartialFile extends SharedFile {
 	}
 	
 	public boolean hasHashSet() {
-		
+		if (length() < E2DKConstants.PARTSIZE) return true;
 		return this.hasHashSet;
 		
 	}
