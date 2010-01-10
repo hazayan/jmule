@@ -23,6 +23,8 @@
 package org.jmule.core.edonkey.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jmule.core.edonkey.ED2KFileLink;
@@ -35,11 +37,78 @@ import org.junit.Test;
 /**
  * Created on Sep 1, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/02 18:59:48 $
+ * @author javajox
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:23:10 $
  */
 public class ED2KFileLinkTest {
 
+	@Test
+	public void test_ed2k_link1() {
+		try {
+			if( ED2KFileLink.isValidLink("ed2k://|file|jmule-0.5.0_B2.jar|2693693|E8D635CD815FB4AADB4FA59116809542|/") )
+				  assertTrue( true );
+			else  assertFalse( true ); 
+		}catch(Throwable cause) {
+		   fail(cause+"");
+		}
+	}
+	
+	@Test
+	public void test_ed2k_link2() {
+		try {
+			if( ED2KFileLink.isValidLink("ed2k://|file|jmule-0.5.0_B2.jar|||2693693|E8D635CD815FB4AADB4FA59116809542|/") )
+				  assertTrue( false );
+			else  assertTrue( true ); 
+		}catch(Throwable cause) {
+		   fail(cause+"");
+		}
+	}
+	
+	@Test
+	public void test_ed2k_link3() {
+		try {
+			if( ED2KFileLink.isValidLink("ed2k:///|file|jmule-0.5.0_B2.jar|2693693|E8D635CD815FB4AADB4FA59116809542|/") )
+				  assertTrue( false );
+			else  assertTrue( true ); 
+		}catch(Throwable cause) {
+		   fail(cause+"");
+		}
+	}
+	
+	@Test
+	public void test_ed2k_link4() {
+		try {
+			if( ED2KFileLink.isValidLink("popopopo") )
+				  assertTrue( false );
+			else  assertTrue( true ); 
+		}catch(Throwable cause) {
+		   fail(cause+"");
+		}
+	}
+	
+	@Test
+	public void test_ed2k_link5() {
+		try {
+			if( ED2KFileLink.isValidLink("ed2k://|file|7z904.[contentdb.emule-project.net].exe|974770|63384BB380CF984566CF6CA4EB6DE4A8|h=7ANQSJUBBABXYBW4DTPO3RKA3BH5VGDE|/") )
+				  assertTrue( true );
+			else  assertTrue( false ); 
+		}catch(Throwable cause) {
+		   fail(cause+"");
+		}
+	}
+	
+	@Test
+	public void test_ed2k_link6() {
+		try {
+			if( ED2KFileLink.isValidLink("ed2k://|file|et-linux-2.56-2.x86.[contentdb.emule-project.net].run|270687706|EA2865D56038278872FF4D0CE0D48731|/") )
+				  assertTrue( true );
+			else  assertTrue( false ); 
+		}catch(Throwable cause) {
+		   fail(cause+"");
+		}
+	}
+	
 	@Test
 	public void testGeneric() {
 		String fileName = "jquery-1.3.2.min.js";
