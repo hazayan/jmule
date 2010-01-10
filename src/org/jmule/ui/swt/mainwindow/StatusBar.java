@@ -58,8 +58,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author binary
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/10 17:05:41 $
  */
 public class StatusBar extends Composite {
 
@@ -209,7 +209,7 @@ public class StatusBar extends Composite {
 				String down_speed = SpeedFormatter.formatSpeed(network_manager.getDownloadSpeed());
 				String up_speed = SpeedFormatter.formatSpeed(network_manager.getUploadSpeed());
 				
-				downspeed_label.setText(down_limit + down_speed);
+				downspeed_label.setText(down_limit + down_speed + " ");
 				upspeed_label.setText(up_limit + up_speed);
 				layout();
 			}
