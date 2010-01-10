@@ -24,6 +24,7 @@ package org.jmule.core;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
+import org.jmule.core.ipfilter.IPFilter;
 import org.jmule.core.jkad.JKadManager;
 import org.jmule.core.networkmanager.NetworkManager;
 import org.jmule.core.peermanager.PeerManager;
@@ -37,8 +38,8 @@ import org.jmule.core.uploadmanager.UploadManager;
  * Created on 2008-Apr-27
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:29:06 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:21:55 $$
  */
 public interface JMuleCore {
 
@@ -81,6 +82,8 @@ public interface JMuleCore {
 	public SearchManager getSearchManager();
 	
 	public JKadManager getJKadManager();
+	
+	public IPFilter getIPFilterManager();
 	
 	public boolean isFirstRun();
 	
