@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.39 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 12:22:01 $$
+ * @version $$Revision: 1.40 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -672,7 +672,7 @@ public class DownloadSession implements JMTransferSession {
 
 		try {
 			DownloadManagerSingleton.getInstance()
-					.removeDownload(getFileHash());
+					.cancelDownload(getFileHash());
 		} catch (DownloadManagerException e) {
 			e.printStackTrace();
 		}

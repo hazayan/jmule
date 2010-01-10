@@ -41,20 +41,22 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
+import org.jmule.core.utils.AddressUtils;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 16:08:32 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
 	public enum PeerStatus {DISCONNECTED, CONNECTED, CONNECTING}
 		
 	private String ip;
+	private int ip_as_int = 0;
 	private int port;
 	private int listenPort;
 	
@@ -157,6 +159,17 @@ public class Peer {
 	
 	public String getIP() {
 		return ip;
+	}
+	
+	public int getIPAsInt() {		
+		if( ip_as_int == 0 ) {
+		   try {	
+			 ip_as_int = AddressUtils.addressToInt( ip );
+		   }catch( Throwable cause ) {
+			   cause.printStackTrace();
+		   }
+		}
+		return ip_as_int;
 	}
 	
 	public int getPort() {

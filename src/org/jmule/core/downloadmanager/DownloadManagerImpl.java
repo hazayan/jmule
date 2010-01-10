@@ -23,6 +23,7 @@
 package org.jmule.core.downloadmanager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleAbstractManager;
@@ -53,8 +55,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/07 12:22:01 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -62,7 +64,10 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 
 	private List<DownloadManagerListener> download_manager_listeners = new LinkedList<DownloadManagerListener>();
 	private List<NeedMorePeersListener> need_more_peers_listeners = new LinkedList<NeedMorePeersListener>();
-    
+	
+	// this data structure is the helper for addAndStartSilentDownloads and addAndStartSilentDownloads methods 
+    private List<ED2KFileLink> ed2k_links_add_helper = new CopyOnWriteArrayList<ED2KFileLink>();
+	
 	private InternalNetworkManager _network_manager;
 	
 	private Timer need_more_peers_timer;
@@ -90,7 +95,52 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		session_list.put(fileLink.getFileHash(), download_session);
 		notifyDownloadAdded(fileLink.getFileHash());
 	}
+	
+	public void addDownload(String ed2kLinkAsString) throws DownloadManagerException {
+		try {
+		  ED2KFileLink ed2k_file_link = new ED2KFileLink( ed2kLinkAsString ); 
+		  this.addDownload( ed2k_file_link );
+		}catch( Throwable cause ) {
+			throw new DownloadManagerException( cause );
+		}
+	}
 
+	public void addAndStartSilentDownload(String ed2kLinkAsString) {
+		try {
+			this.addAndStartSilentDownload(new ED2KFileLink(ed2kLinkAsString));
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
+		}
+	}
+	
+	public void addAndStartSilentDownload(ED2KFileLink ed2kLink) {
+		try {
+		  this.addDownload( ed2kLink );
+		  this.startDownload( ed2kLink.getFileHash() );
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
+		}
+	}
+	
+	public DownloadManager addAndStartSilentDownloads(String edk2LinkAsString) {
+		try {
+			ed2k_links_add_helper.add(new ED2KFileLink( edk2LinkAsString ) );
+		}catch(Throwable cause) {
+			cause.printStackTrace();
+		}
+		return this;
+	}
+	
+	public void finishAddAndStartSilentDownloads() {
+		for(ED2KFileLink file_link : ed2k_links_add_helper) 
+	      try {
+	    	  this.addAndStartSilentDownload( file_link );
+	    	  ed2k_links_add_helper.remove(file_link);
+	      }catch(Throwable cause) {
+	    	  cause.printStackTrace();
+	      }
+	}
+	
 	public void addDownload(PartialFile partialFile) throws DownloadManagerException {
 		if (hasDownload(partialFile.getFileHash()))
 			throw new DownloadManagerException("Download "
@@ -100,7 +150,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		notifyDownloadAdded(partialFile.getFileHash());
 	}
 
-	public void removeDownload(FileHash fileHash) throws DownloadManagerException {
+	public void cancelDownload(FileHash fileHash) throws DownloadManagerException {
 		if (!hasDownload(fileHash))
 			throw new DownloadManagerException("Download " + fileHash
 					+ " not found ");
@@ -113,6 +163,16 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		notifyDownloadRemoved(fileHash);
 	}
 
+	public void cancelSilentDownloads() {
+		try {
+			Collection<DownloadSession> ds_collection = session_list.values();
+			for(DownloadSession ds : ds_collection)
+				this.cancelDownload( ds.getFileHash() );
+		}catch( Throwable cause ) {
+			cause.printStackTrace();
+		}
+	}
+	
 	public void startDownload(FileHash fileHash) throws DownloadManagerException {
 		if (!hasDownload(fileHash))
 			throw new DownloadManagerException("Download " + fileHash

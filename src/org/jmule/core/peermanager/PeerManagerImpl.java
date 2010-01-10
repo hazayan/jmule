@@ -26,6 +26,7 @@ import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,8 +61,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 10:44:41 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -555,4 +556,15 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			}
 	}
 	
+	public void bannedNode(int ipAsInt) {
+		Collection<Peer> ps = peers.values();
+		for( Peer p : ps )
+			if( p.getIPAsInt() == ipAsInt ) {
+				try {
+				   this.disconnect( p );
+				}catch( Throwable cause ) {
+					cause.printStackTrace();
+				}
+			}
+	}
 }

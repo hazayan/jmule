@@ -28,16 +28,17 @@ import java.util.List;
 import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.ipfilter.DisconnectNode;
 import org.jmule.core.peermanager.Peer.PeerSource;
 
 /**
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:13:28 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:18:48 $
  */
-public interface InternalPeerManager extends PeerManager {
+public interface InternalPeerManager extends PeerManager, DisconnectNode {
 
 	public Peer newIncomingPeer(String ip, int port) throws PeerManagerException;
 	
