@@ -40,8 +40,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 16:04:10 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 08:10:44 $$
  */
 public class SWTServerListWrapper {
 	
@@ -87,10 +87,6 @@ public class SWTServerListWrapper {
 					setUIDisconnected(server);
 				}
 			}
-
-			public void isconnecting(Server server) {
-			}
-
 			public void serverMessage(Server server,final String message) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
@@ -126,7 +122,7 @@ public class SWTServerListWrapper {
 			}
 
 			public void serverConnectingFailed(Server server, Throwable cause) {
-				
+				setUIDisconnected(server);
 			}
 
 			public void serverListCleared() {
