@@ -35,6 +35,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.CompletedFile;
+import org.jmule.core.sharingmanager.Gap;
+import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharedFileException;
@@ -43,8 +45,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/29 19:07:43 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 12:46:57 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -63,7 +65,8 @@ public class UploadSession implements JMTransferSession {
 	
 	void stopSession() {
 		for(Peer peer : session_peers) {
-			network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+			if (peer.isConnected())
+				network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
 		}
 	}
 	
@@ -115,13 +118,16 @@ public class UploadSession implements JMTransferSession {
 	
 	void receivedFileChunkRequestFromPeer(Peer sender,
 			FileHash fileHash, List<FileChunkRequest> requestedChunks) {
-	/*	List<Peer> slot_peers = uploadQueue.getSlotPeers(PeerQueueStatus.SLOTGIVEN);
-
-		if (! slot_peers.contains(sender) ) {
-			network_manager.sendQueueRanking(sender.getIP(), sender.getPort(), uploadQueue.getPeerQueueID(sender));
-			return ;
-		}*/
 		
+		if (sharedFile instanceof PartialFile) {
+			PartialFile partial_file = (PartialFile) sharedFile;
+			GapList gapList = partial_file.getGapList();
+			for(FileChunkRequest request : requestedChunks) {
+				if (gapList.getCoveredGaps(request.getChunkBegin(), request.getChunkEnd()).size()!=0) {
+					return;
+				}
+			}
+		}
 		for(FileChunkRequest chunk_request : requestedChunks) {
 			FileChunk file_chunk;
 			try {
