@@ -22,27 +22,38 @@
  */
 package org.jmule.core.ipfilter;
 
+import org.jmule.core.utils.AddressUtils;
+
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/07 20:54:20 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
  */
-class BannedIP implements BannedObject {
+public class BannedIP implements BannedObject, Comparable {
 
 	private int banned_ip_as_int;
 	private IPFilter.BannedReason banned_reason = IPFilter.BannedReason.DEFAULT;
+	private String who_banned;
 	
 	BannedIP(int bannedIPAsInt, 
-			        IPFilter.BannedReason bannedReason) {
+			 IPFilter.BannedReason bannedReason,
+			 String whoBanned) {
 		
 		banned_ip_as_int = bannedIPAsInt;
 		banned_reason = bannedReason;
+		who_banned = whoBanned;
+	}
+	
+	BannedIP(int bannedIPAsInt,
+			 String whoBanned) {
+		banned_ip_as_int = bannedIPAsInt;
+		banned_reason = IPFilter.BannedReason.DEFAULT;
+		who_banned = whoBanned;
 	}
 	
 	BannedIP(int bannedIPAsInt) {
 		banned_ip_as_int = bannedIPAsInt;
-		banned_reason = IPFilter.BannedReason.DEFAULT;
 	}
 	
 	int getIPAsInt() {
@@ -50,8 +61,42 @@ class BannedIP implements BannedObject {
 		return banned_ip_as_int;
 	}
 	
-	IPFilter.BannedReason getReason() {
+	public IPFilter.BannedReason getReason() {
 	
 		return banned_reason;
+	}
+	
+	public String getWhoBanned() {
+		
+		return who_banned;
+	}
+	
+	public String getIPAsString() {
+		
+		return AddressUtils.ip2string( banned_ip_as_int );
+	}
+	
+	public boolean equals(Object obj) {
+				
+		if( obj instanceof BannedIP )
+			return ((BannedIP)obj).getIPAsInt() == banned_ip_as_int;
+			
+		return false;
+	}
+	
+	public int hashCode() {
+		
+		return banned_ip_as_int;
+	}
+
+	@Override
+	public int compareTo(Object obj) {	
+		if( obj instanceof BannedIP ) {	
+			int int_value = ((BannedIP)obj).getIPAsInt();
+			if( int_value < banned_ip_as_int ) return -1;
+			if( int_value > banned_ip_as_int ) return 1;
+			return 0;
+		}
+		return 0;
 	}
 }

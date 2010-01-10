@@ -46,6 +46,8 @@ import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.ipfilter.IPFilter;
+import org.jmule.core.ipfilter.IPFilterSingleton;
 import org.jmule.core.jkad.JKadManager;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.networkmanager.NetworkManager;
@@ -67,8 +69,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:23:55 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:17:23 $$
  */
 public class JMuleCoreImpl implements InternalJMuleCore {
 	
@@ -238,6 +240,12 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		// notifies that the config manager has been started
 		notifyComponentStarted(configuration_manager);
 		
+		IPFilter ip_filter = IPFilterSingleton.getInstance();
+		ip_filter.initialize();
+		ip_filter.start();
+		
+		notifyComponentStarted( ip_filter );
+		
 		SharingManager sharingManager = SharingManagerSingleton.getInstance();
 		sharingManager.initialize();
 		sharingManager.start();
@@ -382,6 +390,10 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		
 		notifyComponentStopped(ConfigurationManagerSingleton.getInstance());
 		
+		IPFilterSingleton.getInstance().shutdown();
+		
+		notifyComponentStopped( IPFilterSingleton.getInstance() );
+		
 		if (debugThread != null)
 			debugThread.JMStop();
 		
@@ -471,6 +483,11 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		
 	}
 
+	public IPFilter getIPFilterManager() {
+		
+		return IPFilterSingleton.getInstance();
+	}
+	
 	private class DebugThread extends Thread {
 		
 		private boolean stop = false;

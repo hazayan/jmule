@@ -23,23 +23,15 @@
 package org.jmule.core.ipfilter;
 
 /**
- * Created on Nov 4, 2009
+ * Created on Jan 10, 2010
  * @author javajox
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
  */
-public class IPFilterSingleton {
+public interface IPFilterServerListener {
 
-	private static IPFilter instance = null;
+	public void serverBanned(String address);
 	
-	public static IPFilter getInstance() {
-		
-		if( instance == null )
-			
-			instance = new IPFilterImpl();
-		
-		return instance;
-		
-	}
+	public void serverUnbanned(String address);
 	
 }

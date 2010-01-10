@@ -22,13 +22,40 @@
  */
 package org.jmule.core.ipfilter;
 
+import org.jmule.core.JMuleManager;
+
 
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/07 20:54:20 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
  */
 public interface InternalIPFilter extends IPFilter {
 
+	// -------- ban the peer and tell who are you (which JMule manager?)
+	public void addPeer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, JMuleManager who);
+	
+	public void addPeer(String address, 
+			BannedReason bannedReason, JMuleManager who);
+	
+	public void addPeer(String address, int howLong, 
+			TimeUnit timeUnit, JMuleManager who);
+	
+	public void addPeer(String address, JMuleManager who);
+	
+	// -------- ban the server and tell who are you (which JMule manager?)
+	
+	public void addServer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, JMuleManager who);
+	
+	public void addServer(String address, 
+			BannedReason bannedReason, JMuleManager who);
+	
+	public void addServer(String address, int howLong, 
+			TimeUnit timeUnit, JMuleManager who);
+	
+	public void addServer(String address, JMuleManager who);
+	
 }

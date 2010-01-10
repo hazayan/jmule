@@ -22,30 +22,92 @@
  */
 package org.jmule.core.ipfilter;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.jmule.core.JMuleAbstractManager;
+import org.jmule.core.JMuleCore;
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.JMuleManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.peermanager.InternalPeerManager;
+import org.jmule.core.utils.AddressUtils;
 
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/07 20:54:20 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
  */
 public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilter {
 
-	private Set<BannedIP> banned_ips = new ConcurrentSkipListSet<BannedIP>();
+	private Set<BannedIP> banned_peers = new ConcurrentSkipListSet<BannedIP>();
 	private Set<BannedIP> banned_servers = new ConcurrentSkipListSet<BannedIP>();
 	private Set<BannedIPRange> banned_peer_ranges = new ConcurrentSkipListSet<BannedIPRange>();
 	
-	private Set<TemporaryBannedIP> temporary_banned_ips = new ConcurrentSkipListSet<TemporaryBannedIP>();
+	private Set<TemporaryBannedIP> temporary_banned_peers = new ConcurrentSkipListSet<TemporaryBannedIP>();
 	private Set<TemporaryBannedIP> temporary_banned_servers = new ConcurrentSkipListSet<TemporaryBannedIP>();
+	
+	private List<IPFilterPeerListener> ip_filter_peer_listeners = new LinkedList<IPFilterPeerListener>();
+	private List<IPFilterServerListener> ip_filter_server_listeners = new LinkedList<IPFilterServerListener>();
+	
+	private JMuleCore _core = JMuleCoreFactory.getSingleton();
+	private InternalPeerManager _internal_peer_manager = (InternalPeerManager)_core.getPeerManager();
 	
 	IPFilterImpl() {
 		
+	}
+
+	private void addPeer(InetAddress address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who) {
+		
+		try {
+			if( timeUnit == TimeUnit.INFINITY ) 
+			
+				banned_peers.add(new BannedIP( AddressUtils.addressToInt( address ), 
+						bannedReason, who ));
+			else
+				
+				temporary_banned_peers.add(new TemporaryBannedIP( AddressUtils.addressToInt( address ), 
+						 bannedReason, toMiliseconds(howLong, timeUnit), who));
+	
+			    _internal_peer_manager.bannedNode( AddressUtils.addressToInt(address));
+			    
+			this.notify_peer_banned( AddressUtils.ip2string( address.getAddress() ) );
+		}catch( Throwable cause ) {
+			
+			cause.printStackTrace();
+		}
+	}
+	
+	private void addServer(InetAddress address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who ) {
+		
+		try {
+			if( timeUnit == TimeUnit.INFINITY )
+				
+				banned_servers.add(new BannedIP( AddressUtils.addressToInt( address ), 
+						bannedReason, who ));
+			else
+				
+				temporary_banned_servers.add(new TemporaryBannedIP( AddressUtils.addressToInt( address ), 
+						 bannedReason, toMiliseconds(howLong, timeUnit), who));
+			
+			this.notify_server_banned( AddressUtils.ip2string( address.getAddress() ) );
+		}catch( Throwable cause ) {
+			
+			cause.printStackTrace();
+		}
+	}
+	
+	public void addPeer(InetSocketAddress address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who) {
+
+		addPeer(address.getAddress(), bannedReason, howLong, timeUnit, who);
 	}
 	
 	public void addPeer(InetSocketAddress inetSocketAddress, 
@@ -84,6 +146,7 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	public void addPeer(InetSocketAddress inetSocketAddress,
 			BannedReason bannedReason, int howLong, TimeUnit timeUnit) {
 		
+		this.addPeer(inetSocketAddress, bannedReason, howLong, timeUnit, "");
 	}
 
 	public void addPeer(InetSocketAddress inetSocketAddress, int howLong,
@@ -96,8 +159,15 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	public void addServer(InetSocketAddress inetSocketAddress,
 			BannedReason bannedReason, int howLong, TimeUnit timeUnit) {
 		
+		this.addServer(inetSocketAddress, bannedReason, howLong, timeUnit, "");
 	}
 
+	public void addServer(InetSocketAddress address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who) {
+
+		this.addServer(address.getAddress(), 
+				bannedReason, howLong, timeUnit, who);
+	}
 	
 	public void addServer(InetSocketAddress inetSocketAddress, int howLong,
 			TimeUnit timeUnit) {
@@ -108,26 +178,28 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	public void addPeer(String address, BannedReason bannedReason, int howLong,
 			TimeUnit timeUnit) {
 		
+		this.addPeer(address, bannedReason, howLong, timeUnit);
 	}
 
 	public void addPeer(String address, BannedReason bannedReason) {
 		
-		addPeer(address, bannedReason, 0, TimeUnit.INFINITY);
+		addPeer(address, bannedReason, 0, TimeUnit.INFINITY, "");
 	}
 
 	public void addPeer(String address, int howLong, TimeUnit timeUnit) {
 		
-		addPeer(address, BannedReason.DEFAULT, howLong, timeUnit);
+		addPeer(address, BannedReason.DEFAULT, howLong, timeUnit, "");
 	}
 
 	public void addPeer(String address) {
 		
-		addPeer(address, BannedReason.DEFAULT, 0, TimeUnit.INFINITY);
+		addPeer(address, BannedReason.DEFAULT, 0, TimeUnit.INFINITY, "");
 	}
 
 	public void addServer(String address, BannedReason bannedReason,
 			int howLong, TimeUnit timeUnit) {
 		
+        this.addServer(address, bannedReason, howLong, timeUnit, "");
 	}
 
 	public void addServer(String address, BannedReason bannedReason) {
@@ -142,26 +214,247 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 
 	public void addServer(String address) {
 		
+		this.addServer(address, BannedReason.DEFAULT, 0, TimeUnit.INFINITY, "");
 	}
 
 	public boolean isPeerBanned(String address) {
-
+        try {
+        	int address_as_int = AddressUtils.addressToInt( address );
+        	BannedIP bp = new BannedIP( address_as_int );
+        	return banned_peers.contains( bp ) ||
+        	       temporary_banned_peers.contains( bp );
+        }catch( Throwable cause ) {
+           cause.printStackTrace();        	
+        }
 		return false;
 	}
 
 	public boolean isServerBanned(String address) {
-
-		return false;
+       try {
+    	  int address_as_int =  AddressUtils.addressToInt(address);
+    	  BannedIP bs = new BannedIP( address_as_int );
+		  return banned_servers.contains( bs ) ||
+		         temporary_banned_servers.contains( bs );
+       }catch( Throwable cause ) {
+    	   cause.printStackTrace();
+       }
+       return false;
 	}
 
 	public void unbanPeer(String address) {
-
-		
+        try {
+        	int address_as_int =  AddressUtils.addressToInt(address);
+        	BannedIP bp = new BannedIP( address_as_int );
+        	if( banned_peers.remove( bp ) || temporary_banned_peers.remove( bp ) )
+        		this.notify_peer_unbanned( address );
+        }catch( Throwable cause ) {
+        	cause.printStackTrace();
+        }
 	}
 
 	public void unbanServer(String address) {
-
+        try {
+        	int address_as_int =  AddressUtils.addressToInt(address);
+        	BannedIP bs = new BannedIP( address_as_int );
+        	if( banned_servers.remove( bs ) || temporary_banned_servers.remove( bs ) )
+        		this.notify_server_unbanned( address );
+        }catch( Throwable cause ) {
+        	cause.printStackTrace();
+        }
+	}
+	
+	private static long toMiliseconds(int howLong, TimeUnit timeUnit) {
+		switch( timeUnit ) {
+		    case SECOND  : return ( howLong * 1000 );
+		    case MINUTE  : return ( howLong * 1000 * 60 );
+		    case HOUR    : return ( howLong * 1000 * 60 * 60);
+		    case DAY     : return ( howLong * 1000 * 60 * 60 * 24);
+		}
+		return 0;
+	}
+	
+	// ------------------- ban the peer and tell who are you
+	public void addPeer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who) {
+	   try {
+		   
+          this.addPeer( InetAddress.getByAddress(AddressUtils.textToNumericFormat( address )), 
+        		  bannedReason, howLong, timeUnit, who );
+	   }catch(Throwable cause) {
+		   cause.printStackTrace();
+	   }
+	}
+	
+	public void addPeer(String address, 
+			BannedReason bannedReason, String who) {
 		
+		this.addPeer(address, bannedReason, 0, TimeUnit.INFINITY, who);
+	}
+	
+	public void addPeer(String address, int howLong, 
+			TimeUnit timeUnit, String who) {
+		
+		this.addPeer(address, BannedReason.DEFAULT, howLong, timeUnit, who);
+	}
+	
+	public void addPeer(String address, String who) {
+		
+		this.addPeer(address, BannedReason.DEFAULT, 0, TimeUnit.INFINITY, who);
+	}
+	
+	// ------------------ ban the server and tell who are you
+	public void addServer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who) {
+		try {
+			   
+		     this.addServer( InetAddress.getByAddress(AddressUtils.textToNumericFormat( address )), 
+		        		  bannedReason, howLong, timeUnit, who );
+	    }catch(Throwable cause) {
+	    	
+		    cause.printStackTrace();
+		}
+	}
+	
+	public void addServer(String address, 
+			BannedReason bannedReason, String who) {
+		
+		this.addServer(address, bannedReason, 0, TimeUnit.INFINITY, who);
+	}
+	
+	public void addServer(String address, int howLong, 
+			TimeUnit timeUnit, String who) {
+		
+		this.addServer(address, BannedReason.DEFAULT, howLong, timeUnit, who);
+	}
+	
+	public void addServer(String address, String who) {
+		
+		this.addServer(address, BannedReason.DEFAULT, 0, TimeUnit.INFINITY, who);
+	}
+	
+	// -------- ban the peer and tell who are you (which JMule manager?)
+	public void addPeer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, JMuleManager who) {
+		
+		this.addPeer(address, bannedReason, 
+				howLong, timeUnit, who.toString());
+	}
+	
+	public void addPeer(String address, 
+			BannedReason bannedReason, JMuleManager who) {
+		
+		this.addPeer(address, bannedReason,
+				who.toString());
+	}
+	
+	public void addPeer(String address, int howLong, 
+			TimeUnit timeUnit, JMuleManager who) {
+		
+		this.addPeer(address, howLong, 
+				timeUnit, who.toString());
+	}
+	
+	public void addPeer(String address, JMuleManager who) {
+		
+		this.addPeer(address, who.toString());
+	}
+	
+	// -------- ban the server and tell who are you (which JMule manager?)
+	
+	public void addServer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, JMuleManager who) {
+		
+		this.addServer(address, bannedReason, 
+				howLong, timeUnit, who.toString());
+	}
+	
+	public void addServer(String address, 
+			BannedReason bannedReason, JMuleManager who) {
+		
+		this.addServer(address, 
+				bannedReason, who.toString());
+	}
+	
+	public void addServer(String address, int howLong, 
+			TimeUnit timeUnit, JMuleManager who) {
+	
+		this.addServer(address, howLong, 
+				timeUnit, who.toString());
+	}
+	
+	public void addServer(String address, JMuleManager who) {
+		
+		this.addServer(address, who.toString());
+	}
+	
+	public void clearBannedPeers() {
+	    
+		banned_peers.clear();
+		temporary_banned_peers.clear();
+	}
+	
+	public void clearBannedServers() {
+		
+		banned_servers.clear();
+		temporary_banned_servers.clear();
+	}
+	
+	public void clear() {
+		
+		this.clearBannedPeers();
+		this.clearBannedServers();
+	}
+	
+	public void addIPFilterPeerListener(IPFilterPeerListener peerListener) {
+		ip_filter_peer_listeners.add( peerListener );
+	}
+	
+	public void removeIPFilterPeerListener(IPFilterPeerListener peerListener) {
+		ip_filter_peer_listeners.remove( peerListener );
+	}
+	
+	public void addIPFilterServerListener(IPFilterServerListener serverListener) {
+		ip_filter_server_listeners.add( serverListener );
+	}
+	
+	public void removeIPFilterServerListener(IPFilterServerListener serverListener) {
+		ip_filter_server_listeners.remove( serverListener );
+	}
+	
+	private void notify_peer_banned(String address) {
+		for(IPFilterPeerListener peer_listener : ip_filter_peer_listeners)
+			try {
+				peer_listener.peerBanned( address );
+			}catch( Throwable cause ) {
+				cause.printStackTrace();
+			}
+	}
+	
+	private void notify_peer_unbanned(String address) {
+		for(IPFilterPeerListener peer_listener : ip_filter_peer_listeners)
+			try {
+				peer_listener.peerUnbanned( address );
+			}catch( Throwable cause ) {
+				cause.printStackTrace();
+			}
+	}
+	
+	private void notify_server_banned(String address) {
+		for(IPFilterServerListener server_listener : ip_filter_server_listeners)
+			try {
+				server_listener.serverBanned( address );
+			}catch( Throwable cause ) {
+				cause.printStackTrace();
+			}
+	}
+	
+	private void notify_server_unbanned(String address) {
+		 for(IPFilterServerListener server_listener : ip_filter_server_listeners)
+			 try {
+				 server_listener.serverUnbanned( address );
+			 }catch( Throwable cause ) {
+				 cause.printStackTrace();
+			 }
 	}
 	
 	public void initialize() {

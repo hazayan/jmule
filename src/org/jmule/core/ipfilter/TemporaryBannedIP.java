@@ -25,8 +25,8 @@ package org.jmule.core.ipfilter;
 /**
  * Created on Jan 7, 2010
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/07 20:54:20 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
  */
 public class TemporaryBannedIP extends BannedIP {
 
@@ -34,16 +34,18 @@ public class TemporaryBannedIP extends BannedIP {
 	
     TemporaryBannedIP(int bannedIPAsInt, 
 	        IPFilter.BannedReason bannedReason,
-	        long howLong) {
+	        long howLong,
+	        String whoBanned) {
     	
-       super(bannedIPAsInt, bannedReason);
+       super(bannedIPAsInt, bannedReason, whoBanned);
        this.how_long = howLong;
 	}
 	
     TemporaryBannedIP(int bannedIPAsInt,
-    		long howLong) {
+    		long howLong,
+    		String whoBanned) {
     	
-    	super(bannedIPAsInt);
+    	super(bannedIPAsInt, whoBanned);
     	this.how_long = howLong;
     }
     

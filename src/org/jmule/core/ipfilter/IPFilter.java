@@ -29,8 +29,8 @@ import org.jmule.core.JMuleManager;
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/07 20:54:20 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
  */
 public interface IPFilter extends JMuleManager {
 
@@ -102,4 +102,41 @@ public interface IPFilter extends JMuleManager {
 	public void addServer(InetSocketAddress inetSocketAddress, 
 			int howLong, TimeUnit timeUnit);
 	
+	// ------------------- ban the peer and tell who are you
+	public void addPeer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who);
+	
+	public void addPeer(String address, 
+			BannedReason bannedReason, String who);
+	
+	public void addPeer(String address, int howLong, 
+			TimeUnit timeUnit, String who);
+	
+	public void addPeer(String address, String who);
+	
+	// ------------------ ban the server and tell who are you
+	public void addServer(String address, BannedReason bannedReason, 
+			int howLong, TimeUnit timeUnit, String who);
+	
+	public void addServer(String address, 
+			BannedReason bannedReason, String who);
+	
+	public void addServer(String address, int howLong, 
+			TimeUnit timeUnit, String who);
+	
+	public void addServer(String address, String who);
+	
+	public void clearBannedPeers();
+	
+	public void clearBannedServers();
+	
+	public void clear();
+	
+	public void addIPFilterPeerListener(IPFilterPeerListener peerListener);
+	
+	public void removeIPFilterPeerListener(IPFilterPeerListener peerListener);
+	
+	public void addIPFilterServerListener(IPFilterServerListener serverListener);
+	
+	public void removeIPFilterServerListener(IPFilterServerListener serverListener);
 }
