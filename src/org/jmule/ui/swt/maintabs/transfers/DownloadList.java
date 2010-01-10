@@ -65,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/06 09:40:43 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:20:44 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -511,7 +511,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		if (result)
 			for(DownloadSession downloadSession : list)
 				try {
-					download_manager.removeDownload(downloadSession.getFileHash());
+					download_manager.cancelDownload(downloadSession.getFileHash());
 				} catch (DownloadManagerException e) {
 					e.printStackTrace();
 				}

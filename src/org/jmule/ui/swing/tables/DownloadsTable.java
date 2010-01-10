@@ -82,8 +82,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2009/09/27 14:20:00 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:20:44 $$
  */
 public class DownloadsTable extends JMTable {
 
@@ -605,7 +605,7 @@ public class DownloadsTable extends JMTable {
 					public void actionPerformed(ActionEvent e) {
 						for(DownloadSession session : getSelectedDownloadSessions())
 						  try {
-							_download_manager.removeDownload(session.getFileHash());
+							_download_manager.cancelDownload(session.getFileHash());
 						  }catch( Throwable cause ) {
 							  cause.printStackTrace();
 						  }
