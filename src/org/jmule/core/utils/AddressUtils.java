@@ -34,8 +34,8 @@ import java.util.Set;
  * @author javajox
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/common/address/AddressUtils.java?view=log
  * @see phex.common.address.AddressUtils
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/08 09:32:16 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:21:16 $$
  */
 public class AddressUtils {
 	
@@ -222,7 +222,7 @@ public class AddressUtils {
     
     final static int INADDRSZ	= 4;
     
-    static byte[] textToNumericFormat(String src ) {
+    public static byte[] textToNumericFormat(String src ) {
            if (src.length() == 0) {
             	return null;
             }
