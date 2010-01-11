@@ -35,7 +35,6 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.CompletedFile;
-import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -45,8 +44,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 12:46:57 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:06:33 $$
  */
 public class UploadSession implements JMTransferSession {
 	//private static final String PEER_SEPARATOR 				=   ":";
@@ -122,8 +121,12 @@ public class UploadSession implements JMTransferSession {
 		if (sharedFile instanceof PartialFile) {
 			PartialFile partial_file = (PartialFile) sharedFile;
 			GapList gapList = partial_file.getGapList();
+//			System.out.println("Request from partial file : \n" + partial_file);
 			for(FileChunkRequest request : requestedChunks) {
-				if (gapList.getCoveredGaps(request.getChunkBegin(), request.getChunkEnd()).size()!=0) {
+//				System.out.println("Gap request : " + request+"\nIntersected gaps :");
+//				for(Gap gap : gapList.getIntersectedGaps(request.getChunkBegin(), request.getChunkEnd()))
+//					System.out.println(gap);
+				if (gapList.getIntersectedGaps(request.getChunkBegin(), request.getChunkEnd()).size()!=0) {
 					return;
 				}
 			}

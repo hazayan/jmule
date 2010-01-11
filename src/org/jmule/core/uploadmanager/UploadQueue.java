@@ -43,8 +43,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:33:00 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:06:33 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -60,11 +60,18 @@ public class UploadQueue {
 	enum PeerQueueStatus { SLOTGIVEN, SLOTTAKEN }
 	
 	private UploadQueue() {
+		
 	}
 	
 	boolean hasPeer(Peer peer) {
 		if (peer.getUserHash() == null) return false;
 		return upload_queue.containsKey(peer.getUserHash());
+	}
+	
+	boolean hasPeer(UserHash userHash) {
+		if (userHash == null)
+			return false;
+		return upload_queue.containsKey(userHash);
 	}
 	
 	void addPeer(Peer peer, FileHash fileHash) throws UploadQueueException {
@@ -93,6 +100,10 @@ public class UploadQueue {
 		float time_in_queue = (System.currentTimeMillis() - container.addTime) / 1000f;
 		float score = rating * time_in_queue / 100f;
 		return score;
+	}
+	
+	UploadQueueContainer getContainerByUserHash(UserHash hash) {
+		return upload_queue.get(hash);
 	}
 	
 	void removePeer(Peer peer) throws UploadQueueException {
