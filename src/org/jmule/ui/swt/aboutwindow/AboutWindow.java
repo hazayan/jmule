@@ -70,8 +70,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/01 15:06:02 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:16:30 $
  */
 public class AboutWindow implements JMuleUIComponent {
 	
@@ -322,6 +322,8 @@ public class AboutWindow implements JMuleUIComponent {
 		content.setLayout(new FillLayout());
 		
 		Text license_text = new Text(content,SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
+		Font font_license = new Font(SWTThread.getDisplay(),"Courier",10,SWT.NONE );
+		license_text.setFont(font_license);
 	    license_text.setText(UIConstants.GNU_LICENSE);
 	    license_text.setBackground(SWTThread.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 	    
