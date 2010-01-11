@@ -62,8 +62,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * Created on Aug 23, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/04 11:19:02 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:07:06 $
  */
 public class UpdaterWindow implements JMuleUIComponent {
 
@@ -181,6 +181,8 @@ public class UpdaterWindow implements JMuleUIComponent {
 		
 		changelog_text = new StyledText(changelog_group,SWT.H_SCROLL | SWT.V_SCROLL);
 		changelog_text.setEditable(false);
+		Font font_changelog = new Font(SWTThread.getDisplay(),"Courier",10,SWT.NONE );
+		changelog_text.setFont(font_changelog);
 		
 		Composite button_bar = new Composite(shell,SWT.NONE);
 		button_bar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
