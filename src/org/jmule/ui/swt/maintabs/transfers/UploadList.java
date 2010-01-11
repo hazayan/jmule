@@ -56,8 +56,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/05 17:35:06 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/11 16:56:29 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -246,6 +246,7 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 				UploadSession session;
 				try {
 					session = upload_manager.getUpload(fileHash);
+					if (hasObject(session)) return;
 					if (session.sharingCompleteFile()) {
 						addRow(session);
 						MainWindow.getLogger().fine(Localizer._("mainwindow.logtab.message_upload_added",session.getSharingName()));
