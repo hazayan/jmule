@@ -106,8 +106,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.19 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/09 18:01:32 $
+ * @version $Revision: 1.20 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:01:12 $
  */
 public class PacketReader {
 
@@ -307,7 +307,7 @@ public class PacketReader {
 		}
 	}
 
-	public static void readPeerPacket(JMuleSocketChannel channel)
+	public static void readPeerPacket(JMuleSocketChannel channel, int usePort)
 			throws JMEndOfStreamException, IOException, DataFormatException,
 			UnknownPacketException, MalformattedPacketException {
 		ByteBuffer data2;
@@ -325,6 +325,9 @@ public class PacketReader {
 		String peerIP = Convert.IPtoString(channel.getChannel().socket()
 				.getInetAddress().getAddress());
 
+		if (usePort != 0)
+			peerPort = usePort;
+		
 		ByteBuffer packet_length = Misc.getByteBuffer(4);
 		channel.read(packet_length);
 

@@ -43,8 +43,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/09 18:01:32 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:01:12 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -55,6 +55,8 @@ public final class JMPeerConnection extends JMConnection {
 	
 	private volatile SenderThread sender_thread;
 	private volatile Queue<Packet> send_queue = new ConcurrentLinkedQueue<Packet>();
+	
+	volatile int usePort = 0;
 	
 	private InetSocketAddress remote_inet_socket_address;
 		
@@ -110,10 +112,10 @@ public final class JMPeerConnection extends JMConnection {
 				} catch (IOException cause) {
 					cause.printStackTrace();
 					connection_status = ConnectionStatus.DISCONNECTED;
-					_network_manager.peerConnectingFailed(
-							remote_inet_socket_address.getAddress()
-									.getHostAddress(),
-							remote_inet_socket_address.getPort(), cause);
+					int port = remote_inet_socket_address.getPort();
+					if (usePort!=0)
+						port = usePort;
+					_network_manager.peerConnectingFailed(remote_inet_socket_address.getAddress().getHostAddress(),port, cause);
 				}
 			}
 
@@ -134,7 +136,7 @@ public final class JMPeerConnection extends JMConnection {
 			public void run() {
 				while (!stop_thread) {
 					try {
-						PacketReader.readPeerPacket(jm_socket_channel);
+						PacketReader.readPeerPacket(jm_socket_channel,usePort);
 					} catch (Throwable cause) {
 						if (cause instanceof JMEndOfStreamException)
 							notifyDisconnect(); else
@@ -143,7 +145,6 @@ public final class JMPeerConnection extends JMConnection {
 						else { 
 							JMException exception = new JMException("Exception in connection " + remote_inet_socket_address+"\n"+Misc.getStackTrace(cause));
 							exception.printStackTrace();
-							cause.printStackTrace();
 						}
 					}
 				}
@@ -198,6 +199,8 @@ public final class JMPeerConnection extends JMConnection {
 	private void notifyDisconnect() {
 		connection_status = ConnectionStatus.DISCONNECTED;
 		int port = jm_socket_channel.getSocket().getPort();
+		if (usePort!=0)
+			port = usePort;
 		String peerIP = Convert.IPtoString(jm_socket_channel.getChannel().socket().getInetAddress().getAddress());
 		_network_manager.peerDisconnected(peerIP, port);
 		

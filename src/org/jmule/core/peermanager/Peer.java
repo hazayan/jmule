@@ -48,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:01:12 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
@@ -58,7 +58,7 @@ public class Peer {
 	private String ip;
 	private int ip_as_int = 0;
 	private int port;
-	private int listenPort;
+	private int listenPort = 0;;
 	
 	private String server_ip;
 	private int server_port;
@@ -173,6 +173,8 @@ public class Peer {
 	}
 	
 	public int getPort() {
+		if (listenPort != 0) 
+			return listenPort;
 		return port;
 	}
 	

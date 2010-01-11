@@ -61,8 +61,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:01:12 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -249,16 +249,20 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
+		synchronized(peer) {
+			peers.remove(peerIP+KEY_SEPARATOR+peerPort);
+			peers.put(peerIP+KEY_SEPARATOR+peerListenPort, peer);
+			peer.setListenPort(peerListenPort);
+		}
 		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
-		peer.setListenPort(peerListenPort);
 		peer.setServer(serverIP, serverPort);
 		if (!peer.isHighID())
 		if (replaceLowIDPeer(peer)) {
 			try {
-				peer = getPeer(peerIP, peerPort);
+				peer = getPeer(peerIP, peerListenPort);
 				peer.setStatus(PeerStatus.CONNECTED);
 			} catch (PeerManagerException e) {
 				e.printStackTrace();
@@ -280,17 +284,20 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		
+		synchronized (peer) {
+			peers.remove(peerIP+KEY_SEPARATOR+peerPort);
+			peers.put(peerIP+KEY_SEPARATOR+peerListenPort, peer);
+			peer.setListenPort(peerListenPort);
+		}
 		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
 		peer.setTagList(tagList);
 		peer.setServer(serverIP, serverPort);
-		peer.setListenPort(peerListenPort);
 		if (!peer.isHighID())
 		if (replaceLowIDPeer(peer)) {
 			try {
-				peer = getPeer(peerIP, peerPort);
+				peer = getPeer(peerIP, peerListenPort);
 				peer.setStatus(PeerStatus.CONNECTED);
 			} catch (PeerManagerException e) {
 				e.printStackTrace();

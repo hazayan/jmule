@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.23 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/09 18:01:32 $
+ * @version $Revision: 1.24 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:01:12 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -322,7 +322,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					peerPort);
 			return peer_connection.getJMConnection().getServiceDownloadSpeed();
 		} catch (Throwable cause) {
-			cause.printStackTrace();
 			return 0f;
 		}
 	}
@@ -346,7 +345,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					peerPort);
 			return peer_connection.getJMConnection().getServiceUploadSpeed();
 		} catch (Throwable cause) {
-			cause.printStackTrace();
 			return 0f;
 		}
 	}
@@ -357,7 +355,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					peerPort);
 			return peer_connection.getJMConnection().getUploadSpeed();
 		} catch (Throwable cause) {
-			cause.printStackTrace();
 			return 0f;
 		}
 	}
@@ -540,6 +537,15 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			UserHash userHash, ClientID clientID, int peerPacketPort,
 			TagList tagList, String serverIP, int serverPort) {
 
+		try {
+			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
+			peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
+			peer_connections.put(peerIP + KEY_SEPARATOR + peerPacketPort, connection);
+			connection.usePort = peerPacketPort;
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+		}
+		
 		_peer_manager.helloAnswerFromPeer(peerIP, peerPort, userHash, clientID,
 				peerPacketPort, tagList, serverIP, serverPort);
 	}
@@ -551,6 +557,11 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				peerListenPort, tagList, serverIP, serverPort);
 		try {
 			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
+			
+			peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
+			peer_connections.put(peerIP + KEY_SEPARATOR + peerListenPort, connection);
+			connection.usePort = peerListenPort;
+			
 			Server connected_server = _server_manager.getConnectedServer();
 			byte[] server_ip = null;
 			int server_port = 0;
