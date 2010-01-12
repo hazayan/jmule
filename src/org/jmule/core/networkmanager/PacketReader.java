@@ -106,8 +106,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.20 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:01:12 $
+ * @version $Revision: 1.21 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:45:16 $
  */
 public class PacketReader {
 
@@ -117,7 +117,6 @@ public class PacketReader {
 			MalformattedPacketException {
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
-		
 
 		ByteBuffer header_buffer;
 
@@ -137,12 +136,13 @@ public class PacketReader {
 
 		int packet_length_proto = packet_length.getInt(0);
 
-		if ((packet_length_proto >= E2DKConstants.MAXPACKETSIZE) || (packet_length_proto <= 0))
+		if ((packet_length_proto >= E2DKConstants.MAXPACKETSIZE)
+				|| (packet_length_proto <= 0))
 			throw new MalformattedPacketException("Invalid packet length "
 					+ " Header :" + Convert.byteToHex(packet_header)
 					+ " Packet opcode : " + packet_opcode + " Length : "
 					+ packet_length_proto);
-		
+
 		ByteBuffer packet_data = Misc.getByteBuffer(packet_length_proto - 1);
 		channel.read(packet_data);
 		packet_data.position(0);
@@ -162,8 +162,8 @@ public class PacketReader {
 			case PACKET_SRVMESSAGE: {
 				String server_message = readString(packet_data);
 				_network_manager.receivedMessageFromServer(server_message);
-	
-				return ;
+
+				return;
 			}
 			case PACKET_SRVIDCHANGE: {
 				byte client_id[] = new byte[4];
@@ -173,15 +173,15 @@ public class PacketReader {
 				Set<ServerFeatures> features = Utils
 						.scanTCPServerFeatures(server_features);
 				_network_manager.receivedIDChangeFromServer(clientID, features);
-				return ;
+				return;
 			}
 			case PACKET_SRVSTATUS: {
 				int user_count = packet_data.getInt();
 				int file_count = packet_data.getInt();
 				_network_manager.receivedServerStatus(user_count, file_count);
-				return ;
+				return;
 			}
-	
+
 			case OP_SERVERLIST: {
 				int server_count = packet_data.get();
 				List<String> ip_list = new LinkedList<String>();
@@ -189,33 +189,34 @@ public class PacketReader {
 				for (int i = 0; i < server_count; i++) {
 					byte address[] = new byte[4];
 					int port;
-	
+
 					packet_data.get(address);
 					port = Convert.shortToInt(packet_data.getShort());
 					ip_list.add(Convert.IPtoString(address));
 					port_list.add(port);
 				}
-	
+
 				_network_manager.receivedServerList(ip_list, port_list);
-				return ;
+				return;
 			}
-	
+
 			case PACKET_SRVSEARCHRESULT: {
 				int result_count = packet_data.getInt();
 				SearchResultItemList searchResults = new SearchResultItemList();
 				for (int i = 0; i < result_count; i++) {
 					byte fileHash[] = new byte[16];
 					packet_data.get(fileHash);
-	
+
 					byte clientID[] = new byte[4];
 					packet_data.get(clientID);
-	
+
 					short clientPort = packet_data.getShort();
-	
-					SearchResultItem result = new SearchResultItem(new FileHash(
-							fileHash), new ClientID(clientID), clientPort);
+
+					SearchResultItem result = new SearchResultItem(
+							new FileHash(fileHash), new ClientID(clientID),
+							clientPort);
 					int tag_count = packet_data.getInt();
-	
+
 					for (int j = 0; j < tag_count; j++) {
 						Tag tag = TagScanner.scanTag(packet_data);
 						result.addTag(tag);
@@ -233,20 +234,20 @@ public class PacketReader {
 						}
 					}
 					searchResults.add(result);
-	
+
 				}
 				_network_manager.receivedSearchResult(searchResults);
-				return ;
+				return;
 			}
-	
+
 			case PACKET_SRVFOUNDSOURCES: {
 				byte[] file_hash = new byte[16];
 				packet_data.get(file_hash);
-	
+
 				int source_count = Convert.byteToInt(packet_data.get());
 				List<String> client_ip_list = new LinkedList<String>();
 				List<Integer> port_list = new LinkedList<Integer>();
-	
+
 				byte[] peerID = new byte[4];
 				int peerPort;
 				ByteBuffer data = Misc.getByteBuffer(4);
@@ -258,49 +259,50 @@ public class PacketReader {
 						data.put(b);
 						peerID[j] = Convert.intToByte(data.getInt(0));
 					}
-	
+
 					byte[] portArray = new byte[2];
 					packet_data.get(portArray);
-	
+
 					ByteBuffer tmpData = Misc.getByteBuffer(4);
 					tmpData.put(portArray);
 					tmpData.position(0);
 					peerPort = tmpData.getInt();
-	
+
 					ClientID cid = new ClientID(peerID);
-					// if (PeerManagerFactory.getInstance().hasPeer(cid)) continue;
+					// if (PeerManagerFactory.getInstance().hasPeer(cid))
+					// continue;
 					// if (PeerManagerFactory.getInstance().isFull()) continue;
 					client_ip_list.add(cid.getAsString());
 					port_list.add(peerPort);
 				}
-				_network_manager.receivedSourcesFromServer(new FileHash(file_hash),
-						client_ip_list, port_list);
-				return ;
+				_network_manager.receivedSourcesFromServer(new FileHash(
+						file_hash), client_ip_list, port_list);
+				return;
 			}
-	
+
 			case PACKET_CALLBACKREQUESTED: {
 				byte[] ip_address = new byte[4];
 				int port;
-	
+
 				packet_data.get(ip_address);
-	
+
 				port = Convert.shortToInt(packet_data.getShort());
-	
+
 				_network_manager.receivedCallBackRequest(Convert
 						.IPtoString(ip_address), port);
-	
-				return ;
+
+				return;
 			}
-	
+
 			case PACKET_CALLBACKFAILED: {
 				_network_manager.receivedCallBackFailed();
-				return ;
+				return;
 			}
 			default:
 				throw new UnknownPacketException(packet_header, packet_opcode,
 						packet_data.array());
 			}
-		}catch(Throwable cause) {
+		} catch (Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
 			throw new MalformattedPacketException(packet_data.array(), cause);
@@ -313,21 +315,22 @@ public class PacketReader {
 		ByteBuffer data2;
 
 		channel.transferred_bytes = 0;
-		
+
 		data2 = Misc.getByteBuffer(1);
 		channel.read(data2);
 		byte packet_header = data2.get(0);
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
-		InternalPeerManager _peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
-		
+		InternalPeerManager _peer_manager = (InternalPeerManager) PeerManagerSingleton
+				.getInstance();
+
 		int peerPort = channel.getChannel().socket().getPort();
 		String peerIP = Convert.IPtoString(channel.getChannel().socket()
 				.getInetAddress().getAddress());
 
 		if (usePort != 0)
 			peerPort = usePort;
-		
+
 		ByteBuffer packet_length = Misc.getByteBuffer(4);
 		channel.read(packet_length);
 
@@ -337,13 +340,13 @@ public class PacketReader {
 		byte packet_opcode = packet_opcode_buffer.get(0);
 
 		int pkLength = packet_length.getInt(0);
-		
+
 		if ((pkLength >= E2DKConstants.MAXPACKETSIZE) || (pkLength <= 0))
 			throw new MalformattedPacketException("Invalid packet length "
 					+ " Header :" + Convert.byteToHex(packet_header)
 					+ " Packet opcode : " + packet_opcode + " Length : "
 					+ pkLength);
-		
+
 		ByteBuffer packet_data = Misc.getByteBuffer(pkLength - 1);
 		channel.read(packet_data);
 		packet_data.position(0);
@@ -353,63 +356,65 @@ public class PacketReader {
 			packet_data.position(0);
 			packet_header = PROTO_EDONKEY_TCP;
 		}
-		// System.out.println("Peer packet from : " + peerIP + " : " + peerPort +" Header : " + Convert.byteToHex(packet_header) + " opcode : " + Convert.byteToHex(packet_opcode)); 
+		// System.out.println("Peer packet from : " + peerIP + " : " + peerPort
+		// +" Header : " + Convert.byteToHex(packet_header) + " opcode : " +
+		// Convert.byteToHex(packet_opcode));
 		try {
-			if (packet_header == PROTO_EDONKEY_TCP) 
+			if (packet_header == PROTO_EDONKEY_TCP)
 				switch (packet_opcode) {
 				case OP_PEERHELLO: {
 					byte[] data = new byte[16];
 					packet_data.get(); // skip user hash's length
 					packet_data.get(data);
 					UserHash userHash = new UserHash(data);
-	
+
 					byte client_id[] = new byte[4];
 					packet_data.get(client_id);
 					ClientID clientID = new ClientID(client_id);
-	
+
 					int tcpPort = Convert.shortToInt(packet_data.getShort());
-	
+
 					TagList tag_list = readTagList(packet_data);
-	
+
 					byte[] server_ip_array = new byte[4];
 					packet_data.get(server_ip_array);
 					String server_ip = Convert.IPtoString(server_ip_array);
 					int server_port;
 					server_port = Convert.shortToInt(packet_data.getShort());
-	
+
 					_network_manager.receivedHelloFromPeerAndRespondTo(peerIP,
 							peerPort, userHash, clientID, tcpPort, tag_list,
 							server_ip, server_port);
 
-					break ;
+					break;
 				}
-	
+
 				case OP_PEERHELLOANSWER: {
 					byte[] data = new byte[16];
 					packet_data.get(data);
 					UserHash userHash = new UserHash(data);
-	
+
 					byte client_id[] = new byte[4];
 					packet_data.get(client_id);
 					ClientID clientID = new ClientID(client_id);
-	
+
 					int tcpPort = Convert.shortToInt(packet_data.getShort());
-	
+
 					TagList tag_list = readTagList(packet_data);
-	
+
 					byte[] server_ip_array = new byte[4];
 					packet_data.get(server_ip_array);
 					String server_ip = Convert.IPtoString(server_ip_array);
 					int server_port;
 					server_port = Convert.shortToInt(packet_data.getShort());
-	
-					_network_manager.receivedHelloAnswerFromPeer(peerIP, peerPort,
-							userHash, clientID, tcpPort, tag_list, server_ip,
-							server_port);
+
+					_network_manager.receivedHelloAnswerFromPeer(peerIP,
+							peerPort, userHash, clientID, tcpPort, tag_list,
+							server_ip, server_port);
 
 					break;
 				}
-	
+
 				case OP_SENDINGPART: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
@@ -424,7 +429,7 @@ public class PacketReader {
 
 					break;
 				}
-	
+
 				case OP_REQUESTPARTS: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
@@ -433,45 +438,47 @@ public class PacketReader {
 					List<FileChunkRequest> chunks = new LinkedList<FileChunkRequest>();
 					for (int i = 0; i < 3; i++)
 						startPos[i] = Convert.intToLong(packet_data.getInt());
-	
+
 					for (int i = 0; i < 3; i++)
 						endPos[i] = Convert.intToLong(packet_data.getInt());
-	
+
 					for (int i = 0; i < 3; i++) {
 						if ((startPos[i] == endPos[i]) && (startPos[i] == 0))
 							break;
-						chunks.add(new FileChunkRequest(startPos[i], endPos[i]));
+						chunks
+								.add(new FileChunkRequest(startPos[i],
+										endPos[i]));
 					}
-	
+
 					_network_manager.receivedFileChunkRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), chunks);
-					
 
 					break;
 				}
-	
+
 				case OP_END_OF_DOWNLOAD: {
-					_network_manager
-							.receivedEndOfDownloadFromPeer(peerIP, peerPort);
+					_network_manager.receivedEndOfDownloadFromPeer(peerIP,
+							peerPort);
 					break;
 				}
-	
+
 				case OP_HASHSETREQUEST: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-	
+
 					_network_manager.receivedHashSetRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash));
 					break;
 				}
-	
+
 				case OP_HASHSETANSWER: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
 					int partCount = Convert.shortToInt(packet_data.getShort());
-					PartHashSet partSet = new PartHashSet(new FileHash(file_hash));
+					PartHashSet partSet = new PartHashSet(new FileHash(
+							file_hash));
 					byte[] partHash = new byte[16];
-	
+
 					for (short i = 1; i <= partCount; i++) {
 						packet_data.get(partHash);
 						partSet.add(partHash);
@@ -480,94 +487,101 @@ public class PacketReader {
 							peerPort, partSet);
 					break;
 				}
-	
+
 				case OP_SLOTREQUEST: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-					_network_manager.receivedSlotRequestFromPeer(peerIP, peerPort,
-							new FileHash(file_hash));
+					_network_manager.receivedSlotRequestFromPeer(peerIP,
+							peerPort, new FileHash(file_hash));
 					break;
 				}
-	
+
 				case OP_SLOTGIVEN: {
-					_network_manager.receivedSlotGivenFromPeer(peerIP, peerPort);
+					_network_manager
+							.receivedSlotGivenFromPeer(peerIP, peerPort);
 					break;
 				}
-	
+
 				case OP_SLOTRELEASE: {
+					_network_manager.receivedSlotReleaseFromPeer(peerIP,
+							peerPort);
 					break;
 				}
-	
+
 				case OP_SLOTTAKEN: {
-					_network_manager.receivedSlotTakenFromPeer(peerIP, peerPort);
+					_network_manager
+							.receivedSlotTakenFromPeer(peerIP, peerPort);
 					break;
 				}
-	
+
 				case OP_FILEREQUEST: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-	
-					_network_manager.receivedFileRequestFromPeer(peerIP, peerPort,
-							new FileHash(file_hash));
+
+					_network_manager.receivedFileRequestFromPeer(peerIP,
+							peerPort, new FileHash(file_hash));
 					break;
 				}
-	
+
 				case OP_FILEREQANSWER: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-					int name_length = Convert.shortToInt(packet_data.getShort());
+					int name_length = Convert
+							.shortToInt(packet_data.getShort());
 					ByteBuffer str_bytes = Misc.getByteBuffer(name_length);
 					packet_data.get(str_bytes.array());
 					_network_manager.receivedFileRequestAnswerFromPeer(peerIP,
-							peerPort, new FileHash(file_hash), new String(str_bytes
-									.array()));
+							peerPort, new FileHash(file_hash), new String(
+									str_bytes.array()));
 					break;
 				}
-	
+
 				case OP_FILEREQANSNOFILE: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-	
-					_network_manager.receivedFileNotFoundFromPeer(peerIP, peerPort,
-							new FileHash(file_hash));
+
+					_network_manager.receivedFileNotFoundFromPeer(peerIP,
+							peerPort, new FileHash(file_hash));
 					break;
 				}
-	
+
 				case OP_FILESTATREQ: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-	
+
 					_network_manager.receivedFileStatusRequestFromPeer(peerIP,
 							peerPort, new FileHash(file_hash));
-	
+
 					break;
 				}
-	
+
 				case OP_FILESTATUS: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
 					short partCount = packet_data.getShort();
 					int count = (partCount + 7) / 8;
-				//	if (((partCount + 7) / 8) != 0)
-				//	if (count == 0)
-					//	count++;
-	
+					// if (((partCount + 7) / 8) != 0)
+					// if (count == 0)
+					// count++;
+
 					byte[] data = new byte[count];
 					for (int i = 0; i < count; i++)
 						data[i] = packet_data.get();
-	
+
 					JMuleBitSet bitSet;
 					bitSet = Convert.byteToBitset(data);
 					bitSet.setPartCount(partCount);
-	
+
 					_network_manager.receivedFileStatusResponseFromPeer(peerIP,
 							peerPort, new FileHash(file_hash), bitSet);
 					break;
 				}
-				
+
 				case OP_MESSAGE: {
-					int message_length = Convert.shortToInt(packet_data.getShort());
-					ByteBuffer message_bytes = Misc.getByteBuffer(message_length);
+					int message_length = Convert.shortToInt(packet_data
+							.getShort());
+					ByteBuffer message_bytes = Misc
+							.getByteBuffer(message_length);
 					packet_data.get(message_bytes.array());
 					String message = new String(message_bytes.array());
 					message_bytes.clear();
@@ -575,118 +589,125 @@ public class PacketReader {
 					_peer_manager.receivedMessage(peerIP, peerPort, message);
 					break;
 				}
-	
+
 				default: {
-					throw new UnknownPacketException(packet_header, packet_opcode,
-							packet_data.array());
+					throw new UnknownPacketException(packet_header,
+							packet_opcode, packet_data.array());
 				}
-			}
-			else 
-				if (packet_header == PROTO_EMULE_EXTENDED_TCP)
+				}
+			else if (packet_header == PROTO_EMULE_EXTENDED_TCP)
 				switch (packet_opcode) {
 				case OP_EMULE_HELLO: {
 					byte client_version = packet_data.get();
 					byte protocol_version = packet_data.get();
 					TagList tag_list = readTagList(packet_data);
-					_network_manager.receivedEMuleHelloFromPeer(peerIP, peerPort,
-							client_version, protocol_version, tag_list);
+					_network_manager.receivedEMuleHelloFromPeer(peerIP,
+							peerPort, client_version, protocol_version,
+							tag_list);
 					break;
 				}
-				
-				case OP_EMULEHELLOANSWER : {
+
+				case OP_EMULEHELLOANSWER: {
 					byte client_version = packet_data.get();
 					byte protocol_version = packet_data.get();
 					TagList tag_list = readTagList(packet_data);
-					_network_manager.receivedEMuleHelloAnswerFromPeer(peerIP, peerPort,
-							client_version, protocol_version, tag_list);
+					_network_manager.receivedEMuleHelloAnswerFromPeer(peerIP,
+							peerPort, client_version, protocol_version,
+							tag_list);
 					break;
 				}
-	
+
 				case OP_COMPRESSEDPART: {
 					byte[] file_hash = new byte[16];
 					packet_data.get(file_hash);
-	
+
 					long chunkStart = Convert.intToLong(packet_data.getInt());
 					long chunkEnd = Convert.intToLong(packet_data.getInt());
 					long compressedSize = packet_data.capacity()
 							- packet_data.position();
 					ByteBuffer data = Misc.getByteBuffer(compressedSize);
 					packet_data.get(data.array());
-	
-					_network_manager.receivedCompressedFileChunkFromPeer(peerIP,
-							peerPort, new FileHash(file_hash), new FileChunk(
-									chunkStart, chunkEnd, data));
+
+					_network_manager.receivedCompressedFileChunkFromPeer(
+							peerIP, peerPort, new FileHash(file_hash),
+							new FileChunk(chunkStart, chunkEnd, data));
 					break;
 				}
-	
+
 				case OP_EMULE_QUEUERANKING: {
 					short queue_rank = packet_data.getShort();
-					_network_manager.receivedQueueRankFromPeer(peerIP, peerPort,
-							Convert.shortToInt(queue_rank));
+					_network_manager.receivedQueueRankFromPeer(peerIP,
+							peerPort, Convert.shortToInt(queue_rank));
 					break;
 				}
-				
-				case OP_REQUESTSOURCES : {
+
+				case OP_REQUESTSOURCES: {
 					byte[] hash = new byte[16];
 					packet_data.get(hash);
-					_network_manager.receivedSourcesRequestFromPeer(peerIP, peerPort, new FileHash(hash));
+					_network_manager.receivedSourcesRequestFromPeer(peerIP,
+							peerPort, new FileHash(hash));
 					break;
 				}
-				
-				case OP_ANSWERSOURCES : {
+
+				case OP_ANSWERSOURCES: {
 					byte[] hash = new byte[16];
 					packet_data.get(hash);
-					int source_count = Convert.shortToInt(packet_data.getShort());
+					int source_count = Convert.shortToInt(packet_data
+							.getShort());
 					List<String> ip_list = new ArrayList<String>();
 					List<Integer> port_list = new ArrayList<Integer>();
 					byte[] ip = new byte[4];
 					short port;
-					for(int k = 0;k<source_count;k++) {
+					for (int k = 0; k < source_count; k++) {
 						packet_data.get(ip);
 						port = packet_data.getShort();
 						ip = Convert.reverseArray(ip);
-						
+
 						ip_list.add(Convert.IPtoString(ip));
 						port_list.add(Convert.shortToInt(port));
 					}
-					_network_manager.receivedSourcesAnswerFromPeer(peerIP, peerPort,new FileHash(hash), ip_list, port_list);
+					_network_manager.receivedSourcesAnswerFromPeer(peerIP,
+							peerPort, new FileHash(hash), ip_list, port_list);
 					break;
 				}
-				
-				case OP_CHATCAPTCHAREQ : {
+
+				case OP_CHATCAPTCHAREQ: {
 					packet_data.get();
-					
+
 					ByteBuffer image_data = Misc.getByteBuffer(pkLength - 2);
 					image_data.position(0);
 					packet_data.get(image_data.array());
 					image_data.position(0);
-					_peer_manager.receivedCaptchaImage(peerIP, peerPort, image_data);
+					_peer_manager.receivedCaptchaImage(peerIP, peerPort,
+							image_data);
 					break;
 				}
-				
-				case OP_CHATCAPTCHARES : {
+
+				case OP_CHATCAPTCHARES: {
 					byte response = packet_data.get();
-					_peer_manager.receivedCaptchaStatusAnswer(peerIP, peerPort, response);
+					_peer_manager.receivedCaptchaStatusAnswer(peerIP, peerPort,
+							response);
 					break;
 				}
-				
-	
+
 				default: {
-					throw new UnknownPacketException(packet_header, packet_opcode,
-							packet_data.array());
+					throw new UnknownPacketException(packet_header,
+							packet_opcode, packet_data.array());
 				}
-			}
+				}
 		} catch (Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
-			throw new MalformattedPacketException(packet_header, (packet_opcode),
-					packet_data.array(), cause);
+			throw new MalformattedPacketException(packet_header,
+					(packet_opcode), packet_data.array(), cause);
 		}
-		if ((packet_opcode == OP_SENDINGPART) || (packet_opcode == OP_COMPRESSEDPART)) {
-				channel.file_transfer_trafic.addReceivedBytes(channel.transferred_bytes);
-			} else {
-				channel.service_trafic.addReceivedBytes(channel.transferred_bytes);
-			}
+		if ((packet_opcode == OP_SENDINGPART)
+				|| (packet_opcode == OP_COMPRESSEDPART)) {
+			channel.file_transfer_trafic
+					.addReceivedBytes(channel.transferred_bytes);
+		} else {
+			channel.service_trafic.addReceivedBytes(channel.transferred_bytes);
+		}
 		packet_data = null;
 	}
 
@@ -698,8 +719,9 @@ public class PacketReader {
 	};
 
 	public static void readUDPPacket(DatagramChannel channel)
-			throws NetworkManagerException, UnknownPacketException, MalformattedPacketException {
-		
+			throws NetworkManagerException, UnknownPacketException,
+			MalformattedPacketException {
+
 		InetSocketAddress packetSender;
 		boolean kad_enabled = false;
 		PacketType type;
@@ -714,7 +736,7 @@ public class PacketReader {
 			packetBuffer.clear();
 			packetSender = (InetSocketAddress) channel.receive(packetBuffer);
 			packet_content = getByteBuffer(packetBuffer.position());
-			
+
 			packetBuffer.limit(packetBuffer.position());
 			packetBuffer.position(0);
 			packet_content.position(0);
@@ -752,75 +774,85 @@ public class PacketReader {
 		}
 
 		byte packet_protocol = packet_content.get(0);
-		
+
 		byte packet_op_code = packet_content.get(1);
 
 		packet_content.position(1 + 1);
 
 		String ip = packetSender.getAddress().getHostAddress();
 		int port = packetSender.getPort();
-		
-		// System.out.println("UDP Packet  " + ip + ":" + port + " Protocol : " + Convert.byteToHex(packet_protocol)+"  OpCode : " + Convert.byteToHex(packet_op_code));
+
+		// System.out.println("UDP Packet  " + ip + ":" + port + " Protocol : "
+		// + Convert.byteToHex(packet_protocol)+"  OpCode : " +
+		// Convert.byteToHex(packet_op_code));
 		try {
 			switch (packet_protocol) {
-				case PROTO_EDONKEY_SERVER_UDP: {
-					switch (packet_op_code) {
-					case OP_GLOBSERVSTATUS: {
-						if (packet_content.capacity()<15) {
-							int challenge = packet_content.getInt();
-							long user_count = Convert.intToLong(packet_content.getInt());
-							long files_count = Convert.intToLong(packet_content.getInt());
-							_network_manager.receivedOldServerStatus(ip, port, challenge, user_count, files_count);
-							return ;
-						}
+			case PROTO_EDONKEY_SERVER_UDP: {
+				switch (packet_op_code) {
+				case OP_GLOBSERVSTATUS: {
+					if (packet_content.capacity() < 15) {
 						int challenge = packet_content.getInt();
-						long user_count = Convert.intToLong(packet_content.getInt());
-						long files_count = Convert.intToLong(packet_content.getInt());
-						long soft_limit = Convert.intToLong(packet_content.getInt());
-						long hard_limit = Convert.intToLong(packet_content.getInt());
-						int udp_flags = packet_content.getInt();
-						Set<ServerFeatures> server_features = Utils
-								.scanUDPFeatures(udp_flags);
-						_network_manager.receivedServerStatus(ip, port, challenge,
-								user_count, files_count, soft_limit, hard_limit,
-								server_features);
-						return ;
+						long user_count = Convert.intToLong(packet_content
+								.getInt());
+						long files_count = Convert.intToLong(packet_content
+								.getInt());
+						_network_manager.receivedOldServerStatus(ip, port,
+								challenge, user_count, files_count);
+						return;
 					}
-					case OP_SERVER_DESC_ANSWER: {
-						boolean new_packet = false;
-						short test_short = packet_content.getShort();
-						test_short = packet_content.getShort();
-						byte[] test_read = Convert.shortToByte(test_short);
-						if (test_read[0] == (byte) 0xFF)
-							if (test_read[1] == (byte) 0xFF) { 
-								new_packet = true;
-							}
-						packet_content.position(packet_content.position() - 4);
-						if (new_packet) {
-							int challenge = packet_content.getInt();
-							TagList tag_list = readTagList(packet_content);
-							_network_manager.receivedNewServerDescription(ip, port,
-									challenge, tag_list);
-							return ;
+					int challenge = packet_content.getInt();
+					long user_count = Convert
+							.intToLong(packet_content.getInt());
+					long files_count = Convert.intToLong(packet_content
+							.getInt());
+					long soft_limit = Convert
+							.intToLong(packet_content.getInt());
+					long hard_limit = Convert
+							.intToLong(packet_content.getInt());
+					int udp_flags = packet_content.getInt();
+					Set<ServerFeatures> server_features = Utils
+							.scanUDPFeatures(udp_flags);
+					_network_manager.receivedServerStatus(ip, port, challenge,
+							user_count, files_count, soft_limit, hard_limit,
+							server_features);
+					return;
+				}
+				case OP_SERVER_DESC_ANSWER: {
+					boolean new_packet = false;
+					short test_short = packet_content.getShort();
+					test_short = packet_content.getShort();
+					byte[] test_read = Convert.shortToByte(test_short);
+					if (test_read[0] == (byte) 0xFF)
+						if (test_read[1] == (byte) 0xFF) {
+							new_packet = true;
 						}
-						String server_name = readString(packet_content);
-						String server_desc = readString(packet_content);
-						_network_manager.receivedServerDescription(ip, port,
-								server_name, server_desc);
-						return ;
+					packet_content.position(packet_content.position() - 4);
+					if (new_packet) {
+						int challenge = packet_content.getInt();
+						TagList tag_list = readTagList(packet_content);
+						_network_manager.receivedNewServerDescription(ip, port,
+								challenge, tag_list);
+						return;
 					}
-		
-					default: {
-						throw new UnknownPacketException(packet_protocol,
-								packet_op_code, packet_content.array());
-					}
-					}
-				}	
-			} }catch(Throwable cause ) {
-				if (cause instanceof UnknownPacketException)
-					throw (UnknownPacketException)cause;
-				throw new MalformattedPacketException(packet_content.array(), cause);
+					String server_name = readString(packet_content);
+					String server_desc = readString(packet_content);
+					_network_manager.receivedServerDescription(ip, port,
+							server_name, server_desc);
+					return;
+				}
+
+				default: {
+					throw new UnknownPacketException(packet_protocol,
+							packet_op_code, packet_content.array());
+				}
+				}
 			}
+			}
+		} catch (Throwable cause) {
+			if (cause instanceof UnknownPacketException)
+				throw (UnknownPacketException) cause;
+			throw new MalformattedPacketException(packet_content.array(), cause);
+		}
 	}
 
 	private static TagList readTagList(ByteBuffer packet) {
@@ -837,7 +869,7 @@ public class PacketReader {
 		int message_length = (packet.getShort());
 		ByteBuffer bytes = Misc.getByteBuffer(message_length);
 		bytes.position(0);
-		for(int i = 0;i<message_length;i++)
+		for (int i = 0; i < message_length; i++)
 			bytes.put(packet.get());
 		return new String(bytes.array());
 	}
