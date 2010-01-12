@@ -43,8 +43,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:06:33 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:39:12 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -140,6 +140,14 @@ public class UploadQueue {
 		for (UploadQueueContainer element : upload_queue.values())
 			list.add(element.peer);
 		return new JMIterable<Peer>(new JMIterator<Peer>(list.iterator()));
+	}
+	
+	public Collection<Peer> getPeers(FileHash fileHash) {
+		List<Peer> result = new LinkedList<Peer>();
+		for (UploadQueueContainer element : upload_queue.values())
+			if (element.fileHash.equals(fileHash))
+				result.add(element.peer);
+		return result;
 	}
 	
 	public String toString() {

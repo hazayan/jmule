@@ -25,52 +25,62 @@ package org.jmule.core.uploadmanager;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/06 14:31:58 $$
+ * @version $$Revision: 1.3 $$ Last changed by $$Author: binary255 $$ on $$Date:
+ *          2009/07/06 14:31:58 $$
  */
-public class FileChunkRequest {
+public class FileChunkRequest implements Comparable<FileChunkRequest> {
 
 	private long chunkBegin;
-	
 	private long chunkEnd;
-	
+
 	public FileChunkRequest(long chunkBegin, long chunkEnd) {
-		
 		super();
-		
 		this.chunkBegin = chunkBegin;
-		
 		this.chunkEnd = chunkEnd;
-		
 	}
 
 	public long getChunkBegin() {
-		
 		return chunkBegin;
-		
 	}
 
 	public void setChunkBegin(long chunkBegin) {
-		
 		this.chunkBegin = chunkBegin;
-		
 	}
 
 	public long getChunkEnd() {
-		
 		return chunkEnd;
-		
 	}
 
 	public void setChunkEnd(long chunkEnd) {
-		
 		this.chunkEnd = chunkEnd;
-		
 	}
-	
-	
+
 	public String toString() {
 		return "Chunk begin : " + chunkBegin + " Chunk end : " + chunkEnd;
 	}
-	
+
+	public int hashCode() {
+		return (chunkBegin + ":" + chunkEnd).hashCode();
+	}
+
+	public boolean equals(Object object) {
+		if (object == null)
+			return false;
+		if (!(object instanceof FileChunkRequest))
+			return false;
+		return object.hashCode() == hashCode();
+	}
+
+	public int compareTo(FileChunkRequest object) {
+		if (getChunkBegin() < object.getChunkBegin())
+			return -1;
+		if (getChunkBegin() > object.getChunkBegin())
+			return 1;
+		if (getChunkEnd() < object.getChunkEnd())
+			return -1;
+		if (getChunkEnd() > object.getChunkEnd())
+			return 1;
+		return this.toString().compareTo(object.toString());// chunks with same range
+	}
+
 }

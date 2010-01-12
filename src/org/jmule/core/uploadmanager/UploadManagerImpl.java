@@ -54,8 +54,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:06:33 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:39:12 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -145,7 +145,25 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 					recalcSlotPeers();
 			}
 		};
+		
+		JMTimerTask transferred_bytes_updater = new JMTimerTask() {
+			public void run() {
+				for(UploadQueueContainer container : uploadQueue.slot_clients) {
+					Peer peer = container.peer;
+					long transferred_bytes = _network_manager.getUploadedFileBytes(peer.getIP(), peer.getPort());
+					_network_manager.resetUploadedFileBytes(peer.getIP(), peer.getPort());
+					try {
+						UploadSession session = getUpload(container.fileHash);
+						session.addTransferredBytes(transferred_bytes);
+					} catch (UploadManagerException e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}
+		};
 		maintenance_tasks.addTask(frozen_peers_remover, ConfigurationManager.UPLOAD_QUEUE_CHECK_INTERVAL, true);
+		maintenance_tasks.addTask(transferred_bytes_updater, 1000, true);
 	}
 
 	public void shutdown() {
@@ -219,6 +237,10 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	public void removePeer(Peer peer) {
 		UploadSession session = getUploadSession(peer);
 		if (session != null) {
+			//update transferred bytes
+			long transferred_bytes = _network_manager.getUploadedFileBytes(peer.getIP(), peer.getPort());
+			session.addTransferredBytes(transferred_bytes);
+			
 			session.removePeer(peer);
 			if (session.getPeerCount()==0) {
 				session.stopSession();
@@ -354,23 +376,10 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 	
 	public void receivedSlotReleaseFromPeer(Peer sender) {
-		UploadSession session = getUploadSession(sender);
-		if (session != null) {
-			session.removePeer(sender);
-			if (session.getPeerCount()==0) {
-				session.stopSession();
-				session_list.remove(session.getFileHash());
-			}
+		if (uploadQueue.hasSlotPeer(sender)) {
+			removePeer(sender);
+			recalcSlotPeers();
 		}
-		if (uploadQueue.hasPeer(sender)) {
-			try {
-				uploadQueue.removePeer(sender);
-				recalcSlotPeers();
-			} catch (UploadQueueException e) {
-				e.printStackTrace();
-			}
-		}
-		
 	}
 	
 	public void recalcSlotPeers() {

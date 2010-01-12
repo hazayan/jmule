@@ -24,8 +24,13 @@ package org.jmule.core.uploadmanager;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ED2KFileLink;
@@ -33,6 +38,8 @@ import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
+import org.jmule.core.peermanager.PeerManagerException;
+import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.GapList;
@@ -44,19 +51,18 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:06:33 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:39:12 $$
  */
 public class UploadSession implements JMTransferSession {
-	//private static final String PEER_SEPARATOR 				=   ":";
-	//private static final int QUEUE_CHECK_INTERVAL			=   1000;
-	//private static final int QUEUE_PEER_DISCONNECT_TIME     =   9000;
 	private SharedFile sharedFile;	
-	private long totalUploaded = 0;
 	
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
+	private Map<Peer, Set<FileChunkRequest>> requested_chunks = new ConcurrentHashMap<Peer, Set<FileChunkRequest>>();
+	//private Map<Peer, Set<FileChunkRequest>> sended_chunks;
 	
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	private long totalUploaded = 0;
 	
 	UploadSession(SharedFile sFile) {
 		sharedFile = sFile;
@@ -113,25 +119,51 @@ public class UploadSession implements JMTransferSession {
 	
 	void removePeer(Peer sender) {
 		session_peers.remove(sender);
+		if (requested_chunks.containsKey(sender))
+			requested_chunks.remove(sender);
 	}
 	
 	void receivedFileChunkRequestFromPeer(Peer sender,
-			FileHash fileHash, List<FileChunkRequest> requestedChunks) {
+			FileHash fileHash, List<FileChunkRequest> chunkList) {
 		
 		if (sharedFile instanceof PartialFile) {
 			PartialFile partial_file = (PartialFile) sharedFile;
 			GapList gapList = partial_file.getGapList();
 //			System.out.println("Request from partial file : \n" + partial_file);
-			for(FileChunkRequest request : requestedChunks) {
+			for(FileChunkRequest request : chunkList) {
 //				System.out.println("Gap request : " + request+"\nIntersected gaps :");
 //				for(Gap gap : gapList.getIntersectedGaps(request.getChunkBegin(), request.getChunkEnd()))
 //					System.out.println(gap);
 				if (gapList.getIntersectedGaps(request.getChunkBegin(), request.getChunkEnd()).size()!=0) {
+					try {
+						PeerManagerSingleton.getInstance().disconnect(sender);
+					} catch (PeerManagerException e) {
+						e.printStackTrace();
+					}
 					return;
 				}
 			}
 		}
-		for(FileChunkRequest chunk_request : requestedChunks) {
+		
+		if (!requested_chunks.containsKey(sender)) {
+			requested_chunks.put(sender, new ConcurrentSkipListSet<FileChunkRequest>());
+		}
+		
+		Set<FileChunkRequest> chunks = requested_chunks.get(sender);
+		
+		List<FileChunkRequest> duplicate_chunks = new LinkedList<FileChunkRequest>();
+		
+		for(FileChunkRequest chunk_request : chunkList) {
+			if (chunks.contains(chunk_request)) {
+				duplicate_chunks.add(chunk_request);
+			}
+			else {
+				chunks.add(chunk_request);
+			}
+		}
+		chunkList.removeAll(duplicate_chunks);
+		
+		for(FileChunkRequest chunk_request : chunkList) {
 			FileChunk file_chunk;
 			try {
 				file_chunk = sharedFile.getData(chunk_request);
@@ -139,7 +171,6 @@ public class UploadSession implements JMTransferSession {
 				e.printStackTrace();
 				continue;
 			}
-			totalUploaded +=(file_chunk.getChunkEnd() - file_chunk.getChunkStart());
 			network_manager.sendFileChunk(sender.getIP(), sender.getPort(), getFileHash(), file_chunk);
 		}
 	}
@@ -187,6 +218,10 @@ public class UploadSession implements JMTransferSession {
 
 	public FileHash getFileHash() {
 		return this.sharedFile.getFileHash();
+	}
+	
+	void addTransferredBytes(long addBytes) {
+		this.totalUploaded += addBytes;
 	}
 
 	public long getTransferredBytes() {
