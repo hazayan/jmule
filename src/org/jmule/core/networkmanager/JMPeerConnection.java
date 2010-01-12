@@ -43,8 +43,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:01:12 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:42:36 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -63,6 +63,8 @@ public final class JMPeerConnection extends JMConnection {
 	private InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 	
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
+	
+	private long uploadedFileBytes = 0;
 	
 	JMPeerConnection(InetSocketAddress remoteInetSocketAddress) {
 		remote_inet_socket_address = remoteInetSocketAddress;
@@ -105,9 +107,7 @@ public final class JMPeerConnection extends JMConnection {
 					createReceiverThread();
 					receiver_thread.start();
 					
-					_network_manager.peerConnected(remote_inet_socket_address
-							.getAddress().getHostAddress(),
-							remote_inet_socket_address.getPort());
+					_network_manager.peerConnected(remote_inet_socket_address.getAddress().getHostAddress(),remote_inet_socket_address.getPort());
 
 				} catch (IOException cause) {
 					cause.printStackTrace();
@@ -236,11 +236,22 @@ public final class JMPeerConnection extends JMConnection {
 //			System.out.println("Send packet to peer : " + getIPAddress() + " : " + getPort() +" Header : " + Convert.byteToHex(packet.getProtocol()) + " opcode : " + Convert.byteToHex(packet.getCommand())); 
 			if(jm_socket_channel.write(packet.getAsByteBuffer()) == -1 )
 					notifyDisconnect();
+			if (packet.getCommand() == E2DKConstants.OP_SENDINGPART) {
+				uploadedFileBytes += packet.getLength() - 16 + 4 + 4;
+			}
 		}catch(Throwable cause) {
 			if (!jm_socket_channel.isConnected())
 				notifyDisconnect();
 			throw new JMException("Exception in connection : " +remote_inet_socket_address + "\n"+Misc.getStackTrace(cause));
 		}
+	}
+	
+	public long getUploadedFileBytes() {
+		return uploadedFileBytes;
+	}
+	
+	void resetUploadedFileBytes() {
+		uploadedFileBytes = 0;
 	}
 	
 	public String toString() {
