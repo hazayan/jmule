@@ -36,14 +36,24 @@ import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.JMuleManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.downloadmanager.DownloadManager;
+import org.jmule.core.jkad.JKadManager;
+import org.jmule.core.networkmanager.NetworkManager;
 import org.jmule.core.peermanager.InternalPeerManager;
+import org.jmule.core.peermanager.PeerManager;
+import org.jmule.core.searchmanager.SearchManager;
+import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.utils.AddressUtils;
+
+import com.sun.corba.se.spi.activation.ServerManager;
 
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.5 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:07:56 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:31:08 $
  */
 public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilter {
 
@@ -344,26 +354,26 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 			int howLong, TimeUnit timeUnit, JMuleManager who) {
 		
 		this.addPeer(address, bannedReason, 
-				howLong, timeUnit, who.toString());
+				howLong, timeUnit, getJMuleManagerAsString( who ));
 	}
 	
 	public void addPeer(String address, 
 			BannedReason bannedReason, JMuleManager who) {
 		
 		this.addPeer(address, bannedReason,
-				who.toString());
+				getJMuleManagerAsString( who ));
 	}
 	
 	public void addPeer(String address, int howLong, 
 			TimeUnit timeUnit, JMuleManager who) {
 		
 		this.addPeer(address, howLong, 
-				timeUnit, who.toString());
+				timeUnit, getJMuleManagerAsString( who ));
 	}
 	
 	public void addPeer(String address, JMuleManager who) {
 		
-		this.addPeer(address, who.toString());
+		this.addPeer(address, getJMuleManagerAsString( who ));
 	}
 	
 	// -------- ban the server and tell who are you (which JMule manager?)
@@ -372,26 +382,26 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 			int howLong, TimeUnit timeUnit, JMuleManager who) {
 		
 		this.addServer(address, bannedReason, 
-				howLong, timeUnit, who.toString());
+				howLong, timeUnit, getJMuleManagerAsString( who ));
 	}
 	
 	public void addServer(String address, 
 			BannedReason bannedReason, JMuleManager who) {
 		
 		this.addServer(address, 
-				bannedReason, who.toString());
+				bannedReason, getJMuleManagerAsString( who ));
 	}
 	
 	public void addServer(String address, int howLong, 
 			TimeUnit timeUnit, JMuleManager who) {
 	
 		this.addServer(address, howLong, 
-				timeUnit, who.toString());
+				timeUnit, getJMuleManagerAsString( who ));
 	}
 	
 	public void addServer(String address, JMuleManager who) {
 		
-		this.addServer(address, who.toString());
+		this.addServer(address, getJMuleManagerAsString( who ));
 	}
 	
 	public void clearBannedPeers() {
@@ -515,6 +525,38 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	protected boolean iAmStoppable() {
 
 		return false;
+	}
+	
+	private static final String DOWNLOAD_MANAGER = "Download manager";
+	private static final String JKAD_MANAGER = "JKad manager";
+	private static final String NETWORK_MANAGER = "Network manager";
+	private static final String PEER_MANAGER = "Peer manager";
+	private static final String SEARCH_MANAGER = "Search manager";
+	private static final String SERVER_MANAGER = "Server manager";
+	private static final String SHARING_MANAGER = "Sharing manager";
+	private static final String UPLOAD_MANAGER = "Upload manager";
+	private static final String CONFIG_MANAGER = "Config manager";
+	
+	private static final String getJMuleManagerAsString(JMuleManager manager) {
+		if( manager instanceof DownloadManager )
+			return DOWNLOAD_MANAGER;
+		if( manager instanceof JKadManager )
+			return JKAD_MANAGER;
+		if( manager instanceof NetworkManager )
+			return NETWORK_MANAGER;
+		if( manager instanceof PeerManager )
+			return PEER_MANAGER;
+		if( manager instanceof SearchManager )
+			return SEARCH_MANAGER;
+		if( manager instanceof ServerManager )
+			return SERVER_MANAGER;
+		if( manager instanceof SharingManager )
+			return SHARING_MANAGER;
+		if( manager instanceof UploadManager )
+			return UPLOAD_MANAGER;
+		if( manager instanceof ConfigurationManager )
+			return CONFIG_MANAGER;
+		return "";
 	}
 	
 }
