@@ -40,8 +40,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 08:10:44 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:47:03 $$
  */
 public class SWTServerListWrapper {
 	
@@ -58,7 +58,6 @@ public class SWTServerListWrapper {
 	private boolean is_autoconnect = false;
 	
 	private boolean single_connect = false;
-	private Server connecting_server = null;
 	
 	public static SWTServerListWrapper getInstance() {
 		if (instance == null)
@@ -253,7 +252,6 @@ public class SWTServerListWrapper {
 	}
 	
 	public void connectTo(Server server) {
-		connecting_server = server;
 		single_connect = true;
 		try {
 			server_manager.connect(server);
