@@ -27,10 +27,10 @@ import org.jmule.core.utils.AddressUtils;
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 12:00:01 $
  */
-public class BannedIP implements BannedObject, Comparable {
+public class BannedIP implements BannedObject, Comparable<BannedIP> {
 
 	private int banned_ip_as_int;
 	private IPFilter.BannedReason banned_reason = IPFilter.BannedReason.DEFAULT;
@@ -90,13 +90,10 @@ public class BannedIP implements BannedObject, Comparable {
 	}
 
 	@Override
-	public int compareTo(Object obj) {	
-		if( obj instanceof BannedIP ) {	
+	public int compareTo(BannedIP obj) {	
 			int int_value = ((BannedIP)obj).getIPAsInt();
 			if( int_value < banned_ip_as_int ) return -1;
 			if( int_value > banned_ip_as_int ) return 1;
-			return 0;
-		}
 		return 0;
 	}
 }
