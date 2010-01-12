@@ -48,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:01:12 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:41:01 $$
  */
 public class Peer {
 	public enum PeerSource {SERVER, KAD, PEX}
@@ -79,10 +79,13 @@ public class Peer {
 		this.peer_source = peerSource;
 	}
 	
-	// used to avoid peer
+	// method is used to replace content of lowid peers with
+	// add code to copy each peer field
 	void copyFields(Peer peer) {
 		this.ip = peer.ip;
 		this.port = peer.port;
+		
+		this.listenPort = peer.listenPort;
 		
 		this.server_ip = peer.server_ip;
 		this.server_port = peer.server_port;
@@ -210,8 +213,9 @@ public class Peer {
 		String result = getIP() + ":" + getPort();
 		if (clientID != null)
 			result += " " + clientID.getAsString();
+		result += " Open port : " + getListenPort();
 		result += " Speed : " + getDownloadSpeed();
-		result += " service Speed : " + getDownloadServiceSpeed();
+		
 		result += " isConnected : " + isConnected();
 		result += " userHash : " + userHash;
 		return result;
@@ -307,6 +311,7 @@ public class Peer {
 
 	public float getDownloadServiceSpeed() {
 		if (!isConnected()) return 0;
+		System.out.println("getDownloadServiceSpeed : " + this);
 		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 		return network_manager.getPeerDownloadServiceSpeed(getIP(), getPort());

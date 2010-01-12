@@ -61,8 +61,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/11 17:01:12 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:41:01 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -171,7 +171,6 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		Peer peer = peers.get(ip + KEY_SEPARATOR + port);
 		if (peer == null) 
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
-		notifyNewPeer(peer);
 		return peer;
 	}
 	
@@ -249,11 +248,11 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		synchronized(peer) {
-			peers.remove(peerIP+KEY_SEPARATOR+peerPort);
-			peers.put(peerIP+KEY_SEPARATOR+peerListenPort, peer);
-			peer.setListenPort(peerListenPort);
-		}
+		
+		peers.remove(peerIP + KEY_SEPARATOR + peerPort);
+		peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
+		peer.setListenPort(peerListenPort);
+		
 		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
@@ -284,11 +283,10 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		synchronized (peer) {
-			peers.remove(peerIP+KEY_SEPARATOR+peerPort);
-			peers.put(peerIP+KEY_SEPARATOR+peerListenPort, peer);
-			peer.setListenPort(peerListenPort);
-		}
+		peers.remove(peerIP + KEY_SEPARATOR + peerPort);
+		peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
+		peer.setListenPort(peerListenPort);
+		
 		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
 		peer.setClientID(clientID);
