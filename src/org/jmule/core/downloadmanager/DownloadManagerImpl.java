@@ -55,8 +55,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:18:48 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/12 13:33:36 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -289,8 +289,8 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			return;
 		}
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
-		need_more_peers_timer = new Timer( true );
-		need_more_peers_timer.schedule( new TimerTask() {
+		need_more_peers_timer = new Timer( "Need more peers timer", true );
+		need_more_peers_timer.scheduleAtFixedRate( new TimerTask() {
 			@Override
 			public void run() {
 				Set<FileHash> file_hashes = session_list.keySet();
