@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.24 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/11 17:01:12 $
+ * @version $Revision: 1.25 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:43:36 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -312,7 +312,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				+ KEY_SEPARATOR + peerPort);
 		if (peer_connection == null)
 			throw new NetworkManagerException("Peer " + peerIP + KEY_SEPARATOR
-					+ peerPort + " not found");
+					+ peerPort + " not found   " + System.currentTimeMillis());
 		return peer_connection;
 	}
 
@@ -405,11 +405,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 	public void peerConnectingFailed(String ip, int port, Throwable cause) {
 		_peer_manager.peerConnectingFailed(ip, port, cause);
+		peer_connections.remove(ip + KEY_SEPARATOR + port);
 	}
 
 	public void peerDisconnected(String ip, int port) {
-		peer_connections.remove(ip + KEY_SEPARATOR + port);
 		_peer_manager.peerDisconnected(ip, port);
+		peer_connections.remove(ip + KEY_SEPARATOR + port);
 	}
 
 	public void receivedCallBackFailed() {
@@ -542,6 +543,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
 			peer_connections.put(peerIP + KEY_SEPARATOR + peerPacketPort, connection);
 			connection.usePort = peerPacketPort;
+			getPeerConnection(peerIP, peerPacketPort);
 		} catch (NetworkManagerException e) {
 			e.printStackTrace();
 		}
@@ -553,14 +555,16 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort,
 			UserHash userHash, ClientID clientID, int peerListenPort,
 			TagList tagList, String serverIP, int serverPort) {
-		_peer_manager.helloFromPeer(peerIP, peerPort, userHash, clientID,
-				peerListenPort, tagList, serverIP, serverPort);
+		
 		try {
 			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
 			
 			peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
 			peer_connections.put(peerIP + KEY_SEPARATOR + peerListenPort, connection);
 			connection.usePort = peerListenPort;
+			
+			_peer_manager.helloFromPeer(peerIP, peerPort, userHash, clientID,
+					peerListenPort, tagList, serverIP, serverPort);
 			
 			Server connected_server = _server_manager.getConnectedServer();
 			byte[] server_ip = null;
@@ -668,6 +672,14 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			_upload_manager.receivedSlotReleaseFromPeer(sender);
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
+		}
+		if (hasPeer(peerIP, peerPort)) {
+			try {
+				JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
+				connection.resetUploadedFileBytes();
+			} catch (NetworkManagerException e1) {
+				e1.printStackTrace();
+			} 
 		}
 	}
 
@@ -1006,6 +1018,27 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			server_connection.send(packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
+		}
+	}
+	
+	public long getUploadedFileBytes(String peerIP, int peerPort) {
+		JMPeerConnection connection;
+		try {
+			connection = getPeerConnection(peerIP, peerPort);
+			return connection.getUploadedFileBytes();
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	public void resetUploadedFileBytes(String peerIP, int peerPort) {
+		JMPeerConnection connection;
+		try {
+			connection = getPeerConnection(peerIP, peerPort);
+			connection.resetUploadedFileBytes();
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
 		}
 	}
 	
