@@ -40,8 +40,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.jmule.core.JMRunnable;
-import org.jmule.core.JMThread;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -57,8 +55,8 @@ import sun.management.ManagementFactory;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/09 11:32:16 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:46:37 $$
  */
 public class StatisticsTab extends AbstractTab{
 
