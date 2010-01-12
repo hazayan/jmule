@@ -29,8 +29,8 @@ import org.jmule.core.JMuleManager;
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 11:00:14 $
  */
 public interface IPFilter extends JMuleManager {
 
@@ -41,7 +41,6 @@ public interface IPFilter extends JMuleManager {
 	}
 	
 	public enum TimeUnit {
-		SECOND,
 		MINUTE,
 		HOUR,
 		DAY,

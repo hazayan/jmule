@@ -40,8 +40,8 @@ import org.jmule.core.utils.AddressUtils;
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 11:00:14 $
  */
 public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilter {
 
@@ -265,7 +265,6 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	
 	private static long toMiliseconds(int howLong, TimeUnit timeUnit) {
 		switch( timeUnit ) {
-		    case SECOND  : return ( howLong * 1000 );
 		    case MINUTE  : return ( howLong * 1000 * 60 );
 		    case HOUR    : return ( howLong * 1000 * 60 * 60);
 		    case DAY     : return ( howLong * 1000 * 60 * 60 * 24);
