@@ -25,12 +25,13 @@ package org.jmule.core.ipfilter;
 /**
  * Created on Jan 7, 2010
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:17:22 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:00:59 $
  */
 public class TemporaryBannedIP extends BannedIP {
 
 	private long how_long;
+	private long when_banned;
 	
     TemporaryBannedIP(int bannedIPAsInt, 
 	        IPFilter.BannedReason bannedReason,
@@ -39,6 +40,7 @@ public class TemporaryBannedIP extends BannedIP {
     	
        super(bannedIPAsInt, bannedReason, whoBanned);
        this.how_long = howLong;
+       this.when_banned = System.currentTimeMillis();
 	}
 	
     TemporaryBannedIP(int bannedIPAsInt,
@@ -52,5 +54,10 @@ public class TemporaryBannedIP extends BannedIP {
     long getHowLong() {
     	
     	return how_long;
+    }
+    
+    long getWhenBanned() {
+    	
+    	return when_banned;
     }
 }

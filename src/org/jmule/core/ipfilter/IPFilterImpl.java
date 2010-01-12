@@ -27,6 +27,8 @@ import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.jmule.core.JMuleAbstractManager;
@@ -40,8 +42,8 @@ import org.jmule.core.utils.AddressUtils;
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/12 11:00:14 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:00:59 $
  */
 public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilter {
 
@@ -54,6 +56,12 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	
 	private List<IPFilterPeerListener> ip_filter_peer_listeners = new LinkedList<IPFilterPeerListener>();
 	private List<IPFilterServerListener> ip_filter_server_listeners = new LinkedList<IPFilterServerListener>();
+	
+	private Timer remove_temp_banned_peers_timer;
+	private Timer remove_temp_banned_servers_timer;
+	
+	private static final long REMOVE_TEMP_BANNED_PEERS_INTERVAL = 60 * 1000;
+	private static final long REMOVE_TEMP_BANNED_SERVERS_INTERVAL = 60 * 1000;
 	
 	private JMuleCore _core = JMuleCoreFactory.getSingleton();
 	private InternalPeerManager _internal_peer_manager = (InternalPeerManager)_core.getPeerManager();
@@ -472,6 +480,8 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 			e.printStackTrace();
 			return ;
 		}
+		remove_temp_banned_peers_timer.cancel();
+		remove_temp_banned_servers_timer.cancel();
 	}
 	
 	public void start() {
@@ -481,6 +491,25 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 			e.printStackTrace();
 			return ;
 		}
+		remove_temp_banned_peers_timer = new Timer( "Remove temp banned peers timer", true );
+		remove_temp_banned_peers_timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				for(TemporaryBannedIP banned_ip : temporary_banned_peers) 
+					if( ( System.currentTimeMillis() - banned_ip.getWhenBanned() ) >= banned_ip.getHowLong() )
+						temporary_banned_peers.remove( banned_ip );
+			}
+		}, (long)1, REMOVE_TEMP_BANNED_PEERS_INTERVAL);
+		
+		remove_temp_banned_servers_timer = new Timer( "Remove temp banned servers timer", true);
+		remove_temp_banned_servers_timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				for(TemporaryBannedIP banned_ip : temporary_banned_servers) 
+					if( ( System.currentTimeMillis() - banned_ip.getWhenBanned() ) >= banned_ip.getHowLong() )
+						temporary_banned_servers.remove( banned_ip );
+			}			
+		}, (long)1, REMOVE_TEMP_BANNED_SERVERS_INTERVAL);
 	}
 	
 	protected boolean iAmStoppable() {
