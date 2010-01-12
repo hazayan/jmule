@@ -42,8 +42,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/14 15:21:13 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:41:39 $
  */
 public class SrcIndexDat {
 
@@ -83,7 +83,6 @@ public class SrcIndexDat {
 				TagList tagList = new TagList();
 				
 				for(int k = 0;k<tagCount;k++) {
-					long p = channel.position();
 					Tag tag = TagScanner.scanTag(channel);
 					
 					if (tag!=null)

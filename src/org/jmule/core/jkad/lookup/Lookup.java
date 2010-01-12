@@ -22,7 +22,7 @@
  */
 package org.jmule.core.jkad.lookup;
 
-import static org.jmule.core.jkad.JKadConstants.CONCURENT_LOOKUP_COUNT;
+import static org.jmule.core.jkad.JKadConstants.CONCURRENT_LOOKUP_COUNT;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_NODE_CONTACTS;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_TASK_CHECK_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CONTACT_COUNT;
@@ -53,8 +53,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:07:02 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:41:39 $
  */
 public class Lookup {
 
@@ -157,7 +157,7 @@ public class Lookup {
 	}
 	
 	private void runTask(LookupTask task) {
-		if (currentRunningTasks<CONCURENT_LOOKUP_COUNT) {
+		if (currentRunningTasks<CONCURRENT_LOOKUP_COUNT) {
 			currentRunningTasks++;
 			task.startLookup();
 			notifyListeners(task, LookupStatus.STARTED);
@@ -166,7 +166,7 @@ public class Lookup {
 	}
 	
 	private void runNextTask() {
-		if (currentRunningTasks>=CONCURENT_LOOKUP_COUNT) return;
+		if (currentRunningTasks>=CONCURRENT_LOOKUP_COUNT) return;
 		LookupTask task = lookupTasksToRun.poll();
 		if (task == null) return ;
 		currentRunningTasks++;
@@ -175,7 +175,7 @@ public class Lookup {
 	}
 	
 	public int getLookupLoad() {
-		return (int)((currentRunningTasks * 100) / CONCURENT_LOOKUP_COUNT);
+		return (int)((currentRunningTasks * 100) / CONCURRENT_LOOKUP_COUNT);
 		
 	}
 	
