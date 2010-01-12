@@ -53,8 +53,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:48:24 $$
  */
 public class LogsTab extends AbstractTab implements Logger {
 
@@ -178,8 +178,22 @@ public class LogsTab extends AbstractTab implements Logger {
 				Calendar calendar = new GregorianCalendar();
 				calendar.setTimeInMillis(time);
 				int date_begin = log_content.getText().length();
-				String date = TimeFormatter.twoDigits(calendar.get(Calendar.DAY_OF_MONTH)) + "." + TimeFormatter.twoDigits(calendar.get(Calendar.MONTH)) + "." + TimeFormatter.twoDigits(calendar.get(Calendar.YEAR));
-				date += " "+TimeFormatter.twoDigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + TimeFormatter.twoDigits(calendar.get(Calendar.MINUTE))+":"+TimeFormatter.twoDigits(calendar.get(Calendar.SECOND));
+				String date = TimeFormatter.twoDigits(calendar
+						.get(Calendar.DAY_OF_MONTH))
+						+ "."
+						+ TimeFormatter
+								.twoDigits(calendar.get(Calendar.MONTH) + 1)
+						+ "."
+						+ TimeFormatter.twoDigits(calendar.get(Calendar.YEAR));
+				date += " "
+						+ TimeFormatter.twoDigits(calendar
+								.get(Calendar.HOUR_OF_DAY))
+						+ ":"
+						+ TimeFormatter
+								.twoDigits(calendar.get(Calendar.MINUTE))
+						+ ":"
+						+ TimeFormatter
+								.twoDigits(calendar.get(Calendar.SECOND));
 				date = "[" + date + "]";
 				log_content.append(date);
 								
