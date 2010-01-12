@@ -42,8 +42,8 @@ import org.jmule.core.utils.AddressUtils;
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.4 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:00:59 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:07:56 $
  */
 public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilter {
 
@@ -142,12 +142,12 @@ public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilt
 	
 	public boolean isPeerBanned(InetSocketAddress inetSocketAddress) {
 	    
-		return false;
+		return this.isPeerBanned( AddressUtils.ip2string( inetSocketAddress.getAddress().getAddress() ) );
 	}
 	
 	public boolean isServerBanned(InetSocketAddress inetSocketAddress) {
 		
-		return false;
+		return this.isServerBanned( AddressUtils.ip2string( inetSocketAddress.getAddress().getAddress() ) );
 	}
 	
 	
