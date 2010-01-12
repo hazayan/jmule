@@ -43,17 +43,17 @@ import org.jmule.core.networkmanager.NetworkManager;
 import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.PeerManager;
 import org.jmule.core.searchmanager.SearchManager;
+import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.utils.AddressUtils;
 
-import com.sun.corba.se.spi.activation.ServerManager;
 
 /**
  * Created on Nov 4, 2009
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:31:08 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/12 13:32:14 $
  */
 public class IPFilterImpl extends JMuleAbstractManager implements InternalIPFilter {
 
