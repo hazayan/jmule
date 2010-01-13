@@ -52,7 +52,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.12 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/01/01 13:45:48 $$
+ * @version $$Revision: 1.13 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/01/13 19:39:02 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements
 		InternalSearchManager {
@@ -157,6 +157,9 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 				jkad_search.cancelSearch(searchID);
 			}
 		}
+		if (searchRequest.getQueryType() == SearchQueryType.KAD) {
+			processKadSearchRequest();
+		}
 	}
 
 	public void search(String searchString) {
@@ -164,7 +167,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 		search(search_request);
 	}
 
-	public synchronized void search(SearchQuery searchRequest) {
+	public void search(SearchQuery searchRequest) {
 		if (searchRequest.getQueryType() == SearchQueryType.SERVER) {
 			server_search_request_queue.add(searchRequest);
 
@@ -212,7 +215,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 	private void processKadSearchRequest() {
 		if (kad_search_request_queue.isEmpty())
 			return;
-		kad_search_request = (SearchQuery) kad_search_request_queue.peek(); // remove
+		kad_search_request = (SearchQuery) kad_search_request_queue.poll(); // remove
 																			// query
 																			// from
 																			// queue
@@ -246,7 +249,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 
 						public void searchFinished() {
 							notifySearchCompleted(searchquery);
-							kad_search_request_queue.poll();
+							//kad_search_request_queue.poll();
 							processKadSearchRequest();
 
 						}

@@ -39,10 +39,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleCore;
@@ -62,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/08 16:35:32 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/13 19:39:02 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -84,11 +82,15 @@ public class SearchTab extends AbstractTab{
 	private Combo searchType;
 	private boolean show_advanced_options = false;
 	
+	SearchResultListener listener;
+	static SearchTab search_tab;
+	
 	public SearchTab(Composite parent, JMuleCore core) {
 		super(parent);
+		this.search_tab = this;
 		GridLayout layout;
 		_core = core;
-		_core.getSearchManager().addSeachResultListener(new SearchResultListener() {
+		listener = new SearchResultListener() {
 			public void resultArrived(final SearchResult searchResult) {
 				SWTThread.getDisplay().asyncExec(new JMRunnable() {
 					public void JMRun() {
@@ -127,7 +129,8 @@ public class SearchTab extends AbstractTab{
 				
 			}
 
-		});
+		};
+		_core.getSearchManager().addSeachResultListener(listener);
 		setLayout(new GridLayout(1,true));
 		
 		Composite search_bar_composite = new Composite(this,SWT.NONE);
@@ -342,15 +345,13 @@ public class SearchTab extends AbstractTab{
 		search_query_tab_list.setSelection(tab.getSearchTab());
 		
 		search_tabs.add(tab);
-
-		tab.getSearchTab().addListener(SWT.Close, new Listener() {
-			public void handleEvent(Event arg0) {
-				search_tabs.remove(tab);
-				SearchManager manager = _core.getSearchManager();
-				manager.removeSearch(tab.getSerchQuery());
-			}		
-		});
 		
+	}
+	
+	void tabClosed(SearchResultTab tab) {
+		search_tabs.remove(tab);
+		SearchManager manager = _core.getSearchManager();
+		manager.removeSearch(tab.getSerchQuery());
 	}
 	
 	private void showAdvancedOptions() {

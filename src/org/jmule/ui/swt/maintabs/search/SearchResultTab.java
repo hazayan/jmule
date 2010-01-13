@@ -60,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/08 16:35:32 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 19:39:02 $
  */
 public class SearchResultTab {
 
@@ -399,12 +399,11 @@ public class SearchResultTab {
 			}
 
 		});
-
+		final SearchResultTab tab_instance = this;
 		search_tab.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent arg0) {
 				_core.getSearchManager().removeSearch(query);
-				if (search_result != null)
-					_core.getSearchManager().removeSearch(query);
+				SearchTab.search_tab.tabClosed(tab_instance);
 			}
 
 		});
