@@ -113,6 +113,7 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.peermanager.Peer.PeerSource;
+import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.sharingmanager.SharingManagerSingleton;
@@ -131,8 +132,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/26 09:11:01 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:50:54 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
@@ -200,6 +201,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 			Set<FileHash> publishedFiles = new HashSet<FileHash>();
 
 			public void run() {
+				if (getStatus() != JKadStatus.CONNECTED) return;
 				SharingManager sharing_manager = SharingManagerSingleton
 						.getInstance();
 				Publisher publisher = Publisher.getInstance();
@@ -209,10 +211,17 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 						.getSharedFiles();
 				long filesToPublish = 0;
 				for (SharedFile file : shared_files) {
+					if (publisher.getPublishSourcesCount() > JKadConstants.MAX_CONCURRENT_PUBLISH_FILES) {
+						break;
+					}
 					if (publishedFiles.contains(file.getFileHash()))
 						continue;
 					if (filesToPublish > JKadConstants.ITERATION_MAX_PUBLISH_FILES)
 						break;
+					if (file instanceof PartialFile) {
+						PartialFile p_file = (PartialFile) file;
+						if (p_file.getAvailablePartCount()==0) continue;
+					}
 					publishedFiles.add(file.getFileHash());
 
 					byte[] hash = file.getFileHash().getHash().clone();
@@ -1125,6 +1134,10 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 
 	public Lookup getLookup() {
 		return lookup;
+	}
+	
+	public Search getSearch() {
+		return search;
 	}
 
 	public Publisher getPublisher() {
