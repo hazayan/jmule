@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:48:13 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:44:25 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -72,7 +72,7 @@ public class JKadConstants {
 	public static final long LOOKUP_TASK_CHECK_INTERVAL		= 5000;
 	public static final long LOOKUP_TASK_DEFAULT_TIMEOUT	= 15000;
 	
-	public static final long CONCURRENT_LOOKUP_COUNT		= 20;
+	public static final long CONCURRENT_LOOKUP_COUNT		= 50;
 	public static final long LOOKUP_CONTACT_CHECK_INTERVAL	= 5000;
 	public static final long LOOKUP_CONTACT_TIMEOUT			= 11000;
 	public static final long MAX_LOOKUP_RUNNING_TIME		= 1000 * 60 * 5;
