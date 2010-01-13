@@ -54,8 +54,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:07:02 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:46:57 $
  */
 public abstract class LookupTask {
 	
@@ -79,11 +79,18 @@ public abstract class LookupTask {
 	protected InternalNetworkManager _network_manager;
 	protected InternalJKadManager 	 _jkad_manager;
 	
+	protected long startTime = 0;
+	
+	public long getStartTime() {
+		return startTime;
+	}
+	
 	public LookupTask(RequestType requestType, Int128 targetID, long toleranceZone) {
 		this(requestType, targetID, toleranceZone, INITIAL_LOOKUP_CONTACTS);
 	}
 	
 	public LookupTask(RequestType requestType, Int128 targetID, long toleranceZone, int initialLookupContacts) {
+		this.startTime = System.currentTimeMillis();
 		this.targetID = targetID;
 		this.toleranceZone = toleranceZone;
 	
