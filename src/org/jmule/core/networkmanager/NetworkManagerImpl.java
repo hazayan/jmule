@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.25 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:43:36 $
+ * @version $Revision: 1.26 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:55:54 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -312,7 +312,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				+ KEY_SEPARATOR + peerPort);
 		if (peer_connection == null)
 			throw new NetworkManagerException("Peer " + peerIP + KEY_SEPARATOR
-					+ peerPort + " not found   " + System.currentTimeMillis());
+					+ peerPort + " not found   ");
 		return peer_connection;
 	}
 
