@@ -41,19 +41,19 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:08:24 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:42:51 $
  */
 public class PublishKeywordTask extends PublishTask {
 
-	private TagList tagList;
+	
 	private LookupTask lookup_task;
 	
 	public PublishKeywordTask(PublishTaskListener listener,Int128 publishID, List<Tag> tagList) {
 		super(publishID,listener);
 		this.tagList = new TagList(tagList);
 	}
-
+	
 	public void start() {
 		if (lookup_task!=null)
 			if (lookup_task.isLookupStarted()) return;
