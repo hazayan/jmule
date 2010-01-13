@@ -41,8 +41,8 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:08:24 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:44:28 $
  */
 
 public class Publisher {
@@ -70,6 +70,26 @@ public class Publisher {
 		return singleton;
 	}
 	
+	public int getPublishSourcesCount() {
+		return sourceTasks.size();
+	}
+	
+	public int getPublishKeywordCount() {
+		return sourceTasks.size();
+	}
+	
+	public PublishKeywordTask getPublishKeywordTask(Int128 id) {
+		return keywordTasks.get(id);
+	}
+	
+	public PublishNoteTask getPublishNoteTask(Int128 id) {
+		return noteTasks.get(id);
+	}
+	
+	public PublishSourceTask getPublishSourceTask(Int128 id) {
+		return sourceTasks.get(id);
+	}
+	
 	private Task publisher_maintenance;
 	
 	private Publisher() {
@@ -79,7 +99,7 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				
+				removeKeywordTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
@@ -94,7 +114,7 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				
+				removeNoteTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
@@ -109,7 +129,7 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				
+				removeSourceTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
@@ -121,7 +141,7 @@ public class Publisher {
 		publisher_maintenance = new Task() {
 			public void run() {
 				for(PublishKeywordTask task : keywordTasks.values()){
-					if (Lookup.getSingleton().getLookupLoad()<INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
+					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
 					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
 						task.start();
@@ -130,7 +150,7 @@ public class Publisher {
 				}
 				
 				for(PublishNoteTask task : noteTasks.values()){
-					if (Lookup.getSingleton().getLookupLoad()<INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
+					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
 					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
 						task.start();
@@ -139,7 +159,7 @@ public class Publisher {
 				}
 				
 				for(PublishSourceTask task : sourceTasks.values()){
-					if (Lookup.getSingleton().getLookupLoad()<INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
+					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
 					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
 						task.start();
