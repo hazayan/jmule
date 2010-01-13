@@ -27,8 +27,8 @@ import java.util.StringTokenizer;
 /**
  * Created on 07-06-2008
  * @author javajox
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/04 11:05:52 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/01/13 17:28:37 $$
  */
 public class JMConstants {
      
@@ -45,7 +45,7 @@ public class JMConstants {
 	  public static final String[] JMULE_DOMAINS 		   = { "jmule.org", "jmule.net" };
 	  
 	  public static final String JMULE_NAME                = "JMule";
-	  public static final String JMULE_VERSION             = "0.5.6";
+	  public static final String JMULE_VERSION             = "0.5.8";
 	  public static final boolean IS_BETA                  = true;
 	  public static final boolean IS_NIGHTLY_BUILD         = false;
 	  

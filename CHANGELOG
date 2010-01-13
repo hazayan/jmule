@@ -1,17 +1,17 @@
 
   JMule CHANGELOG
  -----------------------
- JMule 0.5.8
+ 2010.01.13 | JMule 0.5.8
  
  BUGFIX:   Core     | Fixed bugs in Kad publisher [binary256]
- FEATURE:  SWT UI   | Added new column in Kad tasks : Info about the current running task  [binary256]
+ FEATURE:  SWT UI   | Added a new column on Kad tasks table : Info about the current running task  [binary256]
  FEATURE:  Core     | Switched to AspectJ 1.6.8 [binary256]
  FEATURE:  Core     | IPFilter added [javajox]
  BUGFIX:   Core     | Correct upload bytes count is shown for each uploaded file [binary256]
  BUGFIX:   Core     | New management for upload client's queue added, now more peers concurrently can upload [binary256]
- BUGFIX:   Core     | Internal port for internal peer management is used instead of external [binary256]
+ BUGFIX:   Core     | Internal port for peer management is used instead of external [binary256]
  BUGFIX:   Core&UI  | The stats for server count and peer count are shown on "Statistics tab" [binary256]
- FEATURE:  SWT UI   | Many "micro" UI improvements [binary256]
+ FEATURE:  UI       | Many "micro" UI improvements [binary256, javajox]
  
  2010.01.06 | JMule 0.5.6
             
