@@ -29,6 +29,8 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
+import org.jmule.core.JMuleCoreFactory;
+import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.routingtable.KadContact;
@@ -37,8 +39,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:48 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:46:29 $
  */
 public class Utils {
 	
@@ -136,6 +138,14 @@ public class Utils {
 		}
 		if (result ==-1) return null;
 		return contactList.get(result);
+	}
+	
+	public static String KadFileIDToFileName(Int128 fileID) {
+		byte[] file_id = fileID.toByteArray();
+		Convert.updateSearchID(file_id);
+		FileHash fileHash = new FileHash(file_id);
+		String file_name = JMuleCoreFactory.getSingleton().getSharingManager().getSharedFile(fileHash).getSharingName();
+		return file_name;
 	}
 	
 }
