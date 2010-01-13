@@ -36,8 +36,8 @@ import org.jmule.core.JMConstants;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/13 15:55:28 $$
  */
 
 public class UIConstants {
@@ -153,6 +153,7 @@ public class UIConstants {
 	
 	public static final int KAD_TASK_TYPE_COLUMN_ID				  	  = 5200;
 	public static final int KAD_TASK_LOOKUP_HASH_COLUMN_ID		  	  = 5300;
+	public static final int KAD_TASK_LOOKUP_INFO_COLUMN_ID		  	  = 5400;
 	
 	// Column UI nodes
 	protected static final String SERVER_LIST_NAME_NODE                      = ".server_list_name_column";
@@ -235,6 +236,7 @@ public class UIConstants {
 	
 	protected static final String KAD_TASK_TYPE_COLUMN_NAME_NODE			= ".kad_task_type";
 	protected static final String KAD_TASK_LOOKUP_HASH_COLUMN_NAME_NODE		= ".kad_lookup_hash";
+	protected static final String KAD_TASK_LOOKUP_INFO_COLUMN_NAME_NODE		= ".kad_lookup_info";
 
 	protected static final String TOOL_BAR_NODE                             = ".tool_bar";
 	protected static final String STATUS_BAR_NODE                           = ".status_bar";
@@ -331,6 +333,7 @@ public class UIConstants {
 		
 		default_values.put(KAD_TASK_TYPE_COLUMN_ID + VISIBILITY, 			 	 true);
 		default_values.put(KAD_TASK_LOOKUP_HASH_COLUMN_ID + VISIBILITY, 	 	 true);
+		default_values.put(KAD_TASK_LOOKUP_INFO_COLUMN_ID + VISIBILITY, 	 	 true);
 
 		
 		// default table column's order
@@ -415,6 +418,7 @@ public class UIConstants {
 		
 		default_values.put(KAD_TASK_TYPE_COLUMN_ID + ORDER, 			 	 1);
 		default_values.put(KAD_TASK_LOOKUP_HASH_COLUMN_ID + ORDER, 	 	 	 2);
+		default_values.put(KAD_TASK_LOOKUP_INFO_COLUMN_ID + ORDER, 	 	 	 3);
 		
 		default_values.put(SERVER_LIST_NAME_COLUMN_ID + WIDTH,              150);
 		default_values.put(SERVER_LIST_CC_COLUMN_ID + WIDTH,                 40);
@@ -495,6 +499,7 @@ public class UIConstants {
 		
 		default_values.put(KAD_TASK_TYPE_COLUMN_ID + WIDTH, 			 	 300);
 		default_values.put(KAD_TASK_LOOKUP_HASH_COLUMN_ID + WIDTH, 	 	 	 500);
+		default_values.put(KAD_TASK_LOOKUP_INFO_COLUMN_ID + WIDTH, 	 	 	 400);
 		
 		default_values.put(TOOL_BAR_ID + VISIBILITY,                         true);
 		default_values.put(STATUS_BAR_ID + VISIBILITY,                       true);
@@ -593,6 +598,7 @@ public class UIConstants {
 		  	
 		  	case KAD_TASK_TYPE_COLUMN_ID				:  return KAD_TASK_TYPE_COLUMN_NAME_NODE;
 		  	case KAD_TASK_LOOKUP_HASH_COLUMN_ID			:  return KAD_TASK_LOOKUP_HASH_COLUMN_NAME_NODE;
+		  	case KAD_TASK_LOOKUP_INFO_COLUMN_ID			:  return KAD_TASK_LOOKUP_INFO_COLUMN_NAME_NODE;
 		  	
 		  	
 		  	//case NIGHTLY_BUILD_WARNING_ID               :  return NIGHTLY_BUILD_WARNING_NODE;
@@ -813,7 +819,8 @@ public class UIConstants {
 	public static final String GNU_LICENSE = "		    GNU GENERAL PUBLIC LICENSE"+
     "\n		       Version 2, June 1991"+
     "\n"+
-    "\n Copyright (C) 1989, 1991 Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"+
+    "\n Copyright (C) 1989, 1991 Free Software Foundation, " +
+    "\nInc. 59 Temple Place,Suite 330, Boston, MA  02111-1307  USA"+
     "\n Everyone is permitted to copy and distribute verbatim copies"+
     "\n of this license document, but changing it is not allowed."+
     "\n"+

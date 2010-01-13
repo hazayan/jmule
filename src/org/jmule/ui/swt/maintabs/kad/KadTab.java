@@ -25,9 +25,11 @@ package org.jmule.ui.swt.maintabs.kad;
 import static org.jmule.ui.UIConstants.KAD_CLIENT_DISTANCE_COLUMN_ID;
 import static org.jmule.ui.UIConstants.KAD_CLIENT_ID_COLUMN_ID;
 import static org.jmule.ui.UIConstants.KAD_TASK_LOOKUP_HASH_COLUMN_ID;
+import static org.jmule.ui.UIConstants.KAD_TASK_LOOKUP_INFO_COLUMN_ID;
 import static org.jmule.ui.UIConstants.KAD_TASK_TYPE_COLUMN_ID;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -44,18 +46,25 @@ import org.eclipse.swt.widgets.Menu;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManagerException;
+import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadListener;
+import org.jmule.core.jkad.JKadManager;
 import org.jmule.core.jkad.JKadConstants.ContactType;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.LookupListener;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.publisher.PublishKeywordTask;
-import org.jmule.core.jkad.publisher.PublishNoteTask;
 import org.jmule.core.jkad.publisher.PublishSourceTask;
-import org.jmule.core.jkad.publisher.PublishTask;
+import org.jmule.core.jkad.publisher.Publisher;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTableListener;
+import org.jmule.core.jkad.search.KeywordSearchTask;
+import org.jmule.core.jkad.search.NoteSearchTask;
+import org.jmule.core.jkad.search.Search;
+import org.jmule.core.jkad.search.SearchTask;
+import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.utils.Misc;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTImageRepository;
@@ -66,20 +75,21 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/04 10:12:12 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:55:28 $
  */
 public class KadTab extends AbstractTab {
 
 	private JMuleCore _core;
 	private JMTable<KadContact> contact_list;
 	private JMTable<KadTask> kad_task_list;
-	
+	private Map<Int128,KadTask> task_map = new ConcurrentHashMap<Int128, KadTask>();
+	private JKadManager _jkad;
 	private Group routing_table_container;
 	public KadTab(Composite shell, JMuleCore core) {		
 		super(shell);
 		_core = core;
-		
+		_jkad = _core.getJKadManager();
 		setLayout(new GridLayout(1,false));
 		
 		final Composite tab_content = new Composite(this,SWT.NONE);
@@ -273,6 +283,8 @@ public class KadTab extends AbstractTab {
 					result = object1.task_type.compareTo(object2.task_type);
 				if (columnID == KAD_TASK_LOOKUP_HASH_COLUMN_ID)
 					result = object1.task_id.compareTo(object2.task_id);
+				if (columnID == KAD_TASK_LOOKUP_INFO_COLUMN_ID)
+					result = object1.task_info.compareTo(object2.task_info);
 				if (!order)
 					result = Misc.reverse(result);
 				return result;
@@ -285,11 +297,13 @@ public class KadTab extends AbstractTab {
 			public void updateRow(KadTask object) {
 				setRowText(object, KAD_TASK_TYPE_COLUMN_ID, object.task_type);
 				setRowText(object, KAD_TASK_LOOKUP_HASH_COLUMN_ID, object.task_id);
+				setRowText(object, KAD_TASK_LOOKUP_INFO_COLUMN_ID, object.task_info);
 			}
 		};
 		
 		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_TYPE_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_type"), _._("mainwindow.kadtab.task_list.column.task_type.desc"), swtPreferences.getColumnWidth(KAD_TASK_TYPE_COLUMN_ID));
 		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_LOOKUP_HASH_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_hash"), _._("mainwindow.kadtab.task_list.column.task_hash.desc"), swtPreferences.getColumnWidth(KAD_TASK_LOOKUP_HASH_COLUMN_ID));
+		kad_task_list.addColumn(SWT.LEFT, KAD_TASK_LOOKUP_INFO_COLUMN_ID, _._("mainwindow.kadtab.task_list.column.task_info"), _._("mainwindow.kadtab.task_list.column.task_info.desc"), swtPreferences.getColumnWidth(KAD_TASK_LOOKUP_INFO_COLUMN_ID));
 		kad_task_list.setLinesVisible(true);
 		_core.getJKadManager().getLookup().addListener(new LookupListener() {
 			public void taskAdded(final LookupTask task) {
@@ -297,7 +311,11 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						KadTask kad_task = lookupTaskToKadTask(task);
-						kad_task_list.addRow(kad_task);
+						if (kad_task != null)
+							if (!kad_task_list.hasObject(kad_task)) {
+								task_map.put(task.getTargetID(), kad_task);
+								kad_task_list.addRow(kad_task);
+							}
 					}
 					
 				});
@@ -307,7 +325,9 @@ public class KadTab extends AbstractTab {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						if (isDisposed()) return;
-						KadTask kad_task =  lookupTaskToKadTask(task);
+						KadTask kad_task = task_map.get(task.getTargetID());
+						if (kad_task == null)
+							return;
 						kad_task_list.removeRow(kad_task);
 					}
 					
@@ -319,7 +339,12 @@ public class KadTab extends AbstractTab {
 					public void run() {
 						if (isDisposed()) return;
 						KadTask kad_task = lookupTaskToKadTask(task);
-						kad_task_list.updateRow(kad_task);
+						if (kad_task != null)
+							if (!kad_task_list.hasObject(kad_task)) {
+								task_map.remove(task.getTargetID());
+								task_map.put(task.getTargetID(), kad_task);
+								kad_task_list.updateRow(kad_task);
+							}
 					}
 					
 				});
@@ -330,53 +355,12 @@ public class KadTab extends AbstractTab {
 		Map<Int128,LookupTask> list = _core.getJKadManager().getLookup().getLookupTasks();
 		for(LookupTask task : list.values()) {
 			KadTask kad_task = lookupTaskToKadTask(task);
-			kad_task_list.addRow(kad_task);
+			if (kad_task!=null)
+				if (!kad_task_list.hasObject(kad_task)) {
+					task_map.put(task.getTargetID(), kad_task);
+					kad_task_list.addRow(kad_task);
+				}
 		}
-		
-		
-		/*_core.getJKad().getPublisher().addListener(new PublisherListener() {
-
-			public void publishTaskAdded(final PublishTask task) {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						if (isDisposed()) return;
-						KadTask kad_task = publishTaskToKadTask(task);
-						kad_task_list.addRow(kad_task);
-					}
-				});
-			}
-
-			public void publishTaskRemoved(final PublishTask task) {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						if (isDisposed()) return;
-						KadTask kad_task = publishTaskToKadTask(task);
-						kad_task_list.removeRow(kad_task);
-					}
-				});
-			}
-
-			public void publishTaskStarted(final PublishTask task) {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						if (isDisposed()) return;
-						KadTask kad_task = publishTaskToKadTask(task);
-						kad_task_list.updateRow(kad_task);
-					}
-				});
-			}
-
-			public void publishTaskStopped(final PublishTask task) {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						if (isDisposed()) return;
-						KadTask kad_task = publishTaskToKadTask(task);
-						kad_task_list.removeRow(kad_task);
-					}
-				});
-			}
-			
-		});*/
 		
 		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
 
@@ -410,41 +394,58 @@ public class KadTab extends AbstractTab {
 	private class KadTask {
 		public String task_type;
 		public String task_id;
+		public String task_info;
 		
 		public int hashCode() {
-			return task_id.hashCode() + task_type.hashCode();
+			return (task_id + task_type).hashCode();
 		}
 		
 		public boolean equals(Object object) {
 			if (object == null) return false;
 			if (!(object instanceof KadTask)) return false;
-			return object.hashCode()==hashCode();
+			KadTask kt = (KadTask)object;
+			return task_id.equals(kt.task_id);
 		}
-	}
-	
-	private KadTask publishTaskToKadTask(PublishTask task) {
-		KadTask result = new KadTask();
-		result.task_id = task.getPublishID().toHexString();
-		if (task instanceof PublishKeywordTask)
-			result.task_type = "Keyword publish";
-		
-		if (task instanceof PublishSourceTask)
-			result.task_type = "Source publish";
-		
-		if (task instanceof PublishNoteTask)
-			result.task_type = "Note publish";
-		
-		return result;
 	}
 
 	private KadTask lookupTaskToKadTask(LookupTask task) {
 		KadTask kad_task = new KadTask();
-		if (task.getRequestType() == RequestType.FIND_NODE)
+		if (task.getRequestType() == RequestType.FIND_NODE) {
 			kad_task.task_type = _._("mainwindow.kadtab.node_lookup");
-		if (task.getRequestType() == RequestType.FIND_VALUE)
+			
+			Search search = _jkad.getSearch();
+			SearchTask search_task = search.getSearchTask(task.getTargetID());
+			if (search_task==null) return null; 
+			kad_task.task_info = Utils.KadFileIDToFileName(search_task.getSearchID());
+		}
+		if (task.getRequestType() == RequestType.FIND_VALUE) {
 			kad_task.task_type = _._("mainwindow.kadtab.keyword_search");
-		if (task.getRequestType() == RequestType.STORE)
+			Search search = _jkad.getSearch();
+			SearchTask search_task = search.getSearchTask(task.getTargetID());
+			if (search_task==null) return null; 
+			if (search_task instanceof NoteSearchTask) {
+				//TODO : Add note
+				return null;
+			}
+			if (search_task instanceof KeywordSearchTask) {
+				KeywordSearchTask keyword_search_task = (KeywordSearchTask) search_task;
+				kad_task.task_info = keyword_search_task.getKeyword();
+			}
+		}
+		if (task.getRequestType() == RequestType.STORE) {
 			kad_task.task_type = _._("mainwindow.kadtab.store");
+			Publisher publisher = _jkad.getPublisher();
+			if (publisher.getPublishKeywordTask(task.getTargetID())!=null) {
+				PublishKeywordTask publish_keyword = publisher.getPublishKeywordTask(task.getTargetID());
+				StringTag file_name = (StringTag)publish_keyword.getTagList().getTag(JKadConstants.TAG_FILENAME);
+				kad_task.task_info = (String)file_name.getValue();
+			} else
+			if (publisher.getPublishSourceTask(task.getTargetID())!=null) {
+				PublishSourceTask publish_keyword = publisher.getPublishSourceTask(task.getTargetID());
+				StringTag file_name = (StringTag)publish_keyword.getTagList().getTag(JKadConstants.TAG_FILENAME);
+				kad_task.task_info = (String)file_name.getValue();
+			}
+		}
 		
 		kad_task.task_id = task.getTargetID().toHexString();
 		return kad_task;
