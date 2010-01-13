@@ -57,8 +57,8 @@ import org.jmule.updater.JMUpdater;
  *
  * Created on Oct 11, 2008
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/04 11:31:32 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/13 16:05:51 $
  */
 public class VersionChecker extends JDialog {
 
@@ -96,6 +96,7 @@ public class VersionChecker extends JDialog {
 			available_version_value.setText(jmule_updater.getVersion());
 			download_new_version_label.setText("Download new version");
 			changelog_editor_panel.setEnabled(true);
+			changelog_editor_panel.setFont(new Font("Courir", Font.PLAIN, 12));
 			changelog_editor_panel.setText(jmule_updater.getChangeLog());
 			
 			download_new_version_label.addMouseListener(new MouseAdapter() {

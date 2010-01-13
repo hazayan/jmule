@@ -24,6 +24,7 @@ package org.jmule.ui.swing.dialogs;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -44,8 +45,8 @@ import org.jmule.ui.swing.common.GradientPanel;
  *
  * Created on Sep 4, 2008
  * @author javajox
- * @version $Revision: 1.3 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/04 11:05:52 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: javajox $ on $Date: 2010/01/13 16:05:51 $
  */
 public class AboutDialog  extends javax.swing.JDialog {
 
@@ -369,6 +370,7 @@ public class AboutDialog  extends javax.swing.JDialog {
         license_text_area.setEditable(false);
         license_text_area.setColumns(20);
         license_text_area.setRows(5);
+        license_text_area.setFont(new Font("Courir", Font.PLAIN, 12));
         license_text_area.setText(UIConstants.GNU_LICENSE);
         license_scroll_pane.setViewportView(license_text_area);
         
