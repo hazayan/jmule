@@ -45,16 +45,26 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:21 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:44:59 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
 	private LookupTask lookup_task = null;
 	
+	private String searchKeyword = "";
+	
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
 	public KeywordSearchTask(Int128 searchID) {
 		super(searchID);
+	}
+	
+	public String getKeyword() {
+		return searchKeyword;
+	}
+	
+	public void setSearchKeyword(String searchKeyword) {
+		this.searchKeyword = searchKeyword;
 	}
 	
 	public void startSearch() {
