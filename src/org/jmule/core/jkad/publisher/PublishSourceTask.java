@@ -41,8 +41,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 19:40:04 $
  */
 public class PublishSourceTask extends PublishTask {
 
@@ -75,7 +75,6 @@ public class PublishSourceTask extends PublishTask {
 			}
 			
 			public void stopLookupEvent() {
-				System.out.println("source lookup stop " + targetID.toHexString() + " ");
 				updatePublishTime();
 				task_listener.taskStopped(task_instance);
 			}

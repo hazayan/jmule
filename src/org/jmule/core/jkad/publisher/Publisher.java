@@ -22,7 +22,6 @@
  */
 package org.jmule.core.jkad.publisher;
 
-import static org.jmule.core.jkad.JKadConstants.INDEXTER_MAX_LOAD_TO_NOT_PUBLISH;
 import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_NOTES;
 import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_SOURCES;
 import static org.jmule.core.jkad.JKadConstants.PUBLISHER_MAINTENANCE_INTERVAL;
@@ -34,15 +33,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 19:40:04 $
  */
 
 public class Publisher {
