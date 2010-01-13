@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:41:39 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:48:13 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -72,9 +72,10 @@ public class JKadConstants {
 	public static final long LOOKUP_TASK_CHECK_INTERVAL		= 5000;
 	public static final long LOOKUP_TASK_DEFAULT_TIMEOUT	= 15000;
 	
-	public static final long CONCURRENT_LOOKUP_COUNT		= 50;
+	public static final long CONCURRENT_LOOKUP_COUNT		= 20;
 	public static final long LOOKUP_CONTACT_CHECK_INTERVAL	= 5000;
 	public static final long LOOKUP_CONTACT_TIMEOUT			= 11000;
+	public static final long MAX_LOOKUP_RUNNING_TIME		= 1000 * 60 * 5;
 	
 	public static final int LOOKUP_NODE_CONTACTS			= 11;
 	public static final int LOOKUP_VALUE_CONTACTS			= 2;
@@ -109,7 +110,7 @@ public class JKadConstants {
 	
 	public static final long DEFAULT_PACKET_LISTENER_TIMEOUT = 5000;
 	
-	public static final long PUBLISHER_MAINTENANCE_INTERVAL	 = 1000 * 60;
+	public static final long PUBLISHER_MAINTENANCE_INTERVAL	 = 1000 * 6;
 	
 	public static final long PUBLISHER_NOTE_PUBLISH_TIMEOUT  = 1000 * 100;
 	public static final long PUBLISHER_KEYWORD_PUBLISH_TIMEOUT  = 1000 * 140;
@@ -121,7 +122,8 @@ public class JKadConstants {
 	
 	public static final long PUBLISHER_PUBLISH_CHECK_INTERVAL	= 5000;
 	
-	public static final long ITERATION_MAX_PUBLISH_FILES 	= 30;
+	public static final long ITERATION_MAX_PUBLISH_FILES 	= 5;
+	public static final long MAX_CONCURRENT_PUBLISH_FILES 	= 7;
 	
 	public static final int K 								= 10;//10
 	public static final int ALPHA 							= 3;//3;
