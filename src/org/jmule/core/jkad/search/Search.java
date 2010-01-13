@@ -36,8 +36,8 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:21 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:46:07 $
  */
 public class Search {
 	
@@ -54,6 +54,10 @@ public class Search {
 	}
 	
 	private Search() {
+	}
+	
+	public SearchTask getSearchTask(Int128 id) {
+		return searchTasks.get(id);
 	}
 	
 	public void start() {
@@ -83,6 +87,7 @@ public class Search {
 		
 		if (searchTasks.containsKey(keywordID)) return null;
 		KeywordSearchTask search_task = new KeywordSearchTask(keywordID);
+		search_task.setSearchKeyword(keyword);
 		search_task.setSearchResultListener(listener);
 		searchTasks.put(keywordID, search_task);
 		search_task.startSearch();
