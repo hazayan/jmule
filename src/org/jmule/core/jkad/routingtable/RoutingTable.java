@@ -76,8 +76,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:09:44 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -120,6 +120,9 @@ public class RoutingTable {
 							public void lookupTimeout() {
 							}
 
+							public void stopLookupEvent() {
+							}
+							
 							public void processToleranceContacts(
 									ContactAddress sender,
 									List<KadContact> results) {

@@ -41,8 +41,8 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:44:28 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
  */
 
 public class Publisher {
@@ -75,7 +75,7 @@ public class Publisher {
 	}
 	
 	public int getPublishKeywordCount() {
-		return sourceTasks.size();
+		return keywordTasks.size();
 	}
 	
 	public PublishKeywordTask getPublishKeywordTask(Int128 id) {
@@ -129,10 +129,12 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
+				System.out.println("taskStopped " + task.getPublishID().toHexString() + " ");
 				removeSourceTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
+				System.out.println("taskTimeOut " + task.getPublishID().toHexString() + " ");
 				removeSourceTask(task.getPublishID());
 			}
 			
@@ -140,7 +142,7 @@ public class Publisher {
 		
 		publisher_maintenance = new Task() {
 			public void run() {
-				for(PublishKeywordTask task : keywordTasks.values()){
+				/*for(PublishKeywordTask task : keywordTasks.values()){
 					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
 					long currentTime = System.currentTimeMillis();
 					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
@@ -165,7 +167,7 @@ public class Publisher {
 						task.start();
 						notifyListeners(task, TaskStatus.STARTED);
 					}
-				}
+				}*/
 				
 			}
 			
@@ -195,6 +197,9 @@ public class Publisher {
 		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID, tagList);
 		keywordTasks.put(fileID, task);
 		notifyListeners(task, TaskStatus.ADDED);
+		
+		task.start();
+		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
 
@@ -203,12 +208,18 @@ public class Publisher {
 		PublishSourceTask task = new PublishSourceTask(sourceTaskListener,fileID, tagList);
 		sourceTasks.put(fileID, task);
 		notifyListeners(task, TaskStatus.ADDED);
+		
+		task.start();
+		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
 	public void publishNote(Int128 fileID, List<Tag> tagList) {
 		PublishNoteTask task = new PublishNoteTask(noteTaskListener,fileID, tagList);
 		noteTasks.put(fileID, task);
 		notifyListeners(task, TaskStatus.ADDED);
+		
+		task.start();
+		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
 	public void stopPublishKeyword(Int128 fileID) {
@@ -266,7 +277,7 @@ public class Publisher {
 	
 	void removeKeywordTask(Int128 id) {
 		PublishTask task = keywordTasks.get(id);
-		keywordTasks.remove(id);
+		keywordTasks.remove(id); 
 		notifyListeners(task, TaskStatus.REMOVED);
 	}
 	

@@ -41,8 +41,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:42:51 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
  */
 public class PublishNoteTask extends PublishTask {
 
@@ -75,8 +75,7 @@ public class PublishNoteTask extends PublishTask {
 				}
 			}
 			
-			public void stopLookup() {
-				super.stopLookup();
+			public void stopLookupEvent() {
 				updatePublishTime();
 				task_listener.taskStopped(task_instance);
 			}

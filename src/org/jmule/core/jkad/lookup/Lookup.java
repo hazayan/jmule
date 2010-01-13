@@ -54,8 +54,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:47:24 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
  */
 public class Lookup {
 
@@ -152,7 +152,6 @@ public class Lookup {
 			notifyListeners(task, LookupStatus.REMOVED);
 			runNextTask();
 		}
-		
 	}
 	
 	public boolean hasTask(Int128 targetID) {
@@ -169,7 +168,8 @@ public class Lookup {
 	}
 	
 	private void runNextTask() {
-		if (currentRunningTasks>=CONCURRENT_LOOKUP_COUNT) return;
+		if (currentRunningTasks >= CONCURRENT_LOOKUP_COUNT)
+			return;
 		LookupTask task = lookupTasksToRun.poll();
 		if (task == null) return ;
 		currentRunningTasks++;
@@ -178,8 +178,7 @@ public class Lookup {
 	}
 	
 	public int getLookupLoad() {
-		return (int)((currentRunningTasks * 100) / CONCURRENT_LOOKUP_COUNT);
-		
+		return (int) ((currentRunningTasks * 100) / CONCURRENT_LOOKUP_COUNT);
 	}
 	
 	public void processRequest(InetSocketAddress sender, RequestType requestType, Int128 targetID, Int128 sourceID, int version ) {
@@ -237,7 +236,6 @@ public class Lookup {
 	private enum LookupStatus { ADDED, STARTED, REMOVED}
 	
 	private void notifyListeners(LookupTask lookup, LookupStatus status) {
-		
 		for(LookupListener listener : listenerList) {
 			if (status == LookupStatus.ADDED)
 				listener.taskAdded(lookup);

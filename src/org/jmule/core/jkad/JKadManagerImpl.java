@@ -132,8 +132,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:50:54 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
@@ -211,7 +211,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 						.getSharedFiles();
 				long filesToPublish = 0;
 				for (SharedFile file : shared_files) {
-					if (publisher.getPublishSourcesCount() > JKadConstants.MAX_CONCURRENT_PUBLISH_FILES) {
+					if (publisher.getPublishKeywordCount() > JKadConstants.MAX_CONCURRENT_PUBLISH_FILES) {
 						break;
 					}
 					if (publishedFiles.contains(file.getFileHash()))

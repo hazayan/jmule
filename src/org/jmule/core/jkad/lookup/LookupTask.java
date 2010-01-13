@@ -54,8 +54,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:46:57 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
  */
 public abstract class LookupTask {
 	
@@ -138,6 +138,7 @@ public abstract class LookupTask {
 	}
 	
 	public void stopLookup() {
+		stopLookupEvent();
 		lookupStarted = false;
 		
 		Timer.getSingleton().removeTask(contactCleaner);
@@ -145,6 +146,8 @@ public abstract class LookupTask {
 		usedContacts.clear();
 		requestedContacts.clear();
 	}
+	
+	public abstract void stopLookupEvent();
 	
 	public void  processResults(ContactAddress sender, List<KadContact> results) {
 		responseTime = System.currentTimeMillis();
