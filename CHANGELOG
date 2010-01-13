@@ -8,6 +8,7 @@
  FEATURE:  Core     | Switched to AspectJ 1.6.8 [binary256]
  FEATURE:  Core     | IPFilter added [javajox]
  BUGFIX:   Core     | Correct upload bytes count is shown for each uploaded file [binary256]
+ BUGFIX:   Core     | Fixed many bugs related to Kad manager [binary256]
  BUGFIX:   Core     | New management for upload client's queue added, now more peers concurrently can upload [binary256]
  BUGFIX:   Core     | Internal port for peer management is used instead of external [binary256]
  BUGFIX:   Core&UI  | The stats for server count and peer count are shown on "Statistics tab" [binary256]
