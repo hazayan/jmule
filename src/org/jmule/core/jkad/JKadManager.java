@@ -28,12 +28,13 @@ import org.jmule.core.jkad.indexer.Indexer;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.publisher.Publisher;
 import org.jmule.core.jkad.routingtable.RoutingTable;
+import org.jmule.core.jkad.search.Search;
 
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 08:48:49 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:48:42 $
  */
 public interface JKadManager extends JMuleStoppableManager  {
 
@@ -57,6 +58,7 @@ public interface JKadManager extends JMuleStoppableManager  {
 	public Indexer getIndexer();
 	public Lookup getLookup();
 	public Publisher getPublisher();
+	public Search getSearch();
 	
 	public void addJKadListener(JKadListener listener);
 	public void removeJKadListener(JKadListener listener);
