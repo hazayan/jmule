@@ -39,6 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.jkad.packet.PacketFactory;
@@ -53,8 +54,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:41:39 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:47:24 $
  */
 public class Lookup {
 
@@ -89,7 +90,9 @@ public class Lookup {
 				runNextTask();
 				for(Int128 key : lookupTasks.keySet()) {
 					LookupTask task = lookupTasks.get(key);
-					if (System.currentTimeMillis() - task.getResponseTime() > task.getTimeOut()) {
+					if ((System.currentTimeMillis() - task.getResponseTime() > task.getTimeOut())
+					|| (System.currentTimeMillis() - task.getStartTime() > JKadConstants.MAX_LOOKUP_RUNNING_TIME)){
+						
 						task.lookupTimeout();
 						task.stopLookup();
 						lookupTasks.remove(key);
