@@ -90,6 +90,9 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.edonkey.utils.Utils;
+import org.jmule.core.ipfilter.IPFilterSingleton;
+import org.jmule.core.ipfilter.InternalIPFilter;
+import org.jmule.core.ipfilter.IPFilter.BannedReason;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.peermanager.InternalPeerManager;
@@ -106,8 +109,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.21 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:45:16 $
+ * @version $Revision: 1.22 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/15 18:06:17 $
  */
 public class PacketReader {
 
@@ -312,13 +315,7 @@ public class PacketReader {
 	public static void readPeerPacket(JMuleSocketChannel channel, int usePort)
 			throws JMEndOfStreamException, IOException, DataFormatException,
 			UnknownPacketException, MalformattedPacketException {
-		ByteBuffer data2;
-
-		channel.transferred_bytes = 0;
-
-		data2 = Misc.getByteBuffer(1);
-		channel.read(data2);
-		byte packet_header = data2.get(0);
+		
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 		InternalPeerManager _peer_manager = (InternalPeerManager) PeerManagerSingleton
@@ -327,20 +324,28 @@ public class PacketReader {
 		int peerPort = channel.getChannel().socket().getPort();
 		String peerIP = Convert.IPtoString(channel.getChannel().socket()
 				.getInetAddress().getAddress());
-
+		
 		if (usePort != 0)
 			peerPort = usePort;
+		
+		ByteBuffer data2;
 
+		channel.transferred_bytes = 0;
+
+		data2 = Misc.getByteBuffer(1);
+		channel.read(data2);
+		byte packet_header = data2.get(0);
+		
 		ByteBuffer packet_length = Misc.getByteBuffer(4);
 		channel.read(packet_length);
-
+		
 		ByteBuffer packet_opcode_buffer = Misc.getByteBuffer(1);
 		channel.read(packet_opcode_buffer);
 
 		byte packet_opcode = packet_opcode_buffer.get(0);
 
 		int pkLength = packet_length.getInt(0);
-
+		
 		if ((pkLength >= E2DKConstants.MAXPACKETSIZE) || (pkLength <= 0))
 			throw new MalformattedPacketException("Invalid packet length "
 					+ " Header :" + Convert.byteToHex(packet_header)
@@ -767,6 +772,8 @@ public class PacketReader {
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 
+		InternalIPFilter _ipfilter = (InternalIPFilter) IPFilterSingleton.getInstance();
+		
 		if ((type == PacketType.KAD) || (type == PacketType.KAD_COMPRESSED)) {
 			_network_manager.receiveKadPacket(new KadPacket(packet_content,
 					packetSender));
@@ -782,6 +789,10 @@ public class PacketReader {
 		String ip = packetSender.getAddress().getHostAddress();
 		int port = packetSender.getPort();
 
+		if (_ipfilter.isServerBanned(ip)) {
+			return;
+		}
+		
 		// System.out.println("UDP Packet  " + ip + ":" + port + " Protocol : "
 		// + Convert.byteToHex(packet_protocol)+"  OpCode : " +
 		// Convert.byteToHex(packet_op_code));
@@ -851,6 +862,7 @@ public class PacketReader {
 		} catch (Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
+			_ipfilter.addServer(ip, BannedReason.BAD_PACKETS, _network_manager);
 			throw new MalformattedPacketException(packet_content.array(), cause);
 		}
 	}

@@ -26,18 +26,21 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.ipfilter.IPFilterSingleton;
+import org.jmule.core.ipfilter.InternalIPFilter;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/14 09:35:43 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/15 18:06:17 $$
  */
 public class JMConnectionWaiter{
 
@@ -46,10 +49,11 @@ public class JMConnectionWaiter{
 	private ServerSocketChannel listenSocket = null;
 	private WaiterStatus status;
 	private JMuleCore _core;
+	private InternalIPFilter _ip_filter;
 	
 	JMConnectionWaiter() {
 		_core = JMuleCoreFactory.getSingleton();
-			
+		_ip_filter = (InternalIPFilter) IPFilterSingleton.getInstance();
 		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
 			public void TCPPortChanged(int port) {		
 				restart();		
@@ -99,7 +103,6 @@ public class JMConnectionWaiter{
 		
 		
 	}
-	
 	//TODO : Add code to throw exception on restarting stopped listener
 	public void restart() {
 		if (status == WaiterStatus.OPEN) {
@@ -129,7 +132,14 @@ public class JMConnectionWaiter{
 			JMuleSocketChannel socket = null;
 			while (!stop) {
 				try {
-					socket = new JMuleSocketChannel(listenSocket.accept());
+					SocketChannel socket_channel = listenSocket.accept();
+					InetSocketAddress address = (InetSocketAddress) socket_channel.socket().getRemoteSocketAddress();
+					String ip_address = address.getAddress().getHostAddress();
+					if (_ip_filter.isPeerBanned(ip_address)) {
+						socket_channel.close();
+						continue;
+					}
+					socket = new JMuleSocketChannel(socket_channel);
 					new JMPeerConnection(socket);
 				} catch (IOException e) {
 					if (!listenSocket.isOpen()) return ;

@@ -35,6 +35,9 @@ import org.jmule.core.JMThread;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.packet.Packet;
+import org.jmule.core.ipfilter.IPFilterSingleton;
+import org.jmule.core.ipfilter.InternalIPFilter;
+import org.jmule.core.ipfilter.IPFilter.BannedReason;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.JMuleZLib;
 import org.jmule.core.utils.Misc;
@@ -43,8 +46,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:42:36 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/15 18:06:17 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -61,7 +64,7 @@ public final class JMPeerConnection extends JMConnection {
 	private InetSocketAddress remote_inet_socket_address;
 		
 	private InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
-	
+	private InternalIPFilter _ip_filter = (InternalIPFilter) IPFilterSingleton.getInstance();
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	
 	private long uploadedFileBytes = 0;
@@ -142,6 +145,14 @@ public final class JMPeerConnection extends JMConnection {
 							notifyDisconnect(); else
 						if (cause instanceof AsynchronousCloseException)
 							return ;
+						if (cause instanceof MalformattedPacketException) {
+							_ip_filter.addPeer(getIPAddress(), BannedReason.BAD_PACKETS, _network_manager);
+							try {
+								disconnect();
+							} catch (NetworkManagerException e) {
+								e.printStackTrace();
+							}
+						}
 						else { 
 							JMException exception = new JMException("Exception in connection " + remote_inet_socket_address+"\n"+Misc.getStackTrace(cause));
 							exception.printStackTrace();
