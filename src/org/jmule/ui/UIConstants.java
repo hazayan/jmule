@@ -36,8 +36,8 @@ import org.jmule.core.JMConstants;
  * 
  * @author javajox
  * @author binary
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/13 15:55:28 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/18 18:03:55 $$
  */
 
 public class UIConstants {
@@ -99,6 +99,7 @@ public class UIConstants {
 	public static final int DOWNLOAD_LIST_STATUS_COLUMN_ID            = 1900;
 	
 	public static final int DOWNLOAD_PEER_LIST_IP_COLUMN_ID           = 2000;
+	public static final int DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID       = 2020;
 	public static final int DOWNLOAD_PEER_LIST_CC_COLUMN_ID	          = 2025;
 	public static final int DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID         = 2050;
 	public static final int DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID       = 2100;
@@ -187,6 +188,7 @@ public class UIConstants {
 	protected static final String DOWNLOAD_LIST_STATUS_COLUMN_NODE           = ".download_list_status_column";
 	
 	protected static final String DOWNLOAD_PEER_LIST_IP_COLUMN_NODE          = ".download_peer_list_ip_column";
+	protected static final String DOWNLOAD_PEER_LIST_SOURCE_COLUMN_NODE      = ".download_peer_list_source_column";
 	protected static final String DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE      = ".download_peer_list_status_column";
 	protected static final String DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_NODE    = ".download_peer_list_nickname_column";
 	protected static final String DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_NODE    = ".download_peer_list_software_column";
@@ -284,6 +286,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_STATUS_COLUMN_ID + VISIBILITY,          true);
 		
 		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + VISIBILITY,         true);
+		default_values.put(DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID + VISIBILITY,     true);
 		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + VISIBILITY,     true);
 		default_values.put(DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID + VISIBILITY,   true);
 		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + VISIBILITY,   true);
@@ -372,10 +375,11 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + ORDER,	         2);
 		default_values.put(DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID + ORDER,        3);
 		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + ORDER,          4);
-		default_values.put(DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID + ORDER,  5);
-		default_values.put(DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID + ORDER,    6);
-		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,    7);
-		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,      8);
+		default_values.put(DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID + ORDER,      5);
+		default_values.put(DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID + ORDER,  6);
+		default_values.put(DOWNLOAD_PEER_LIST_UP_SPEED_COLUMN_ID + ORDER,    7);
+		default_values.put(DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID + ORDER,    8);
+		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + ORDER,      9);
 		
 		default_values.put(UPLOAD_LIST_FILE_NAME_COLUMN_ID + ORDER,          1);
 		default_values.put(UPLOAD_LIST_FILE_SIZE_COLUMN_ID + ORDER,          2);
@@ -450,6 +454,7 @@ public class UIConstants {
 		default_values.put(DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID + WIDTH,  50);
 		
 		default_values.put(DOWNLOAD_PEER_LIST_IP_COLUMN_ID + WIDTH,          150);
+		default_values.put(DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID + WIDTH,      100);
 		default_values.put(DOWNLOAD_PEER_LIST_CC_COLUMN_ID + WIDTH,	          50);
 		default_values.put(DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID + WIDTH,         50);
 		default_values.put(DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID + WIDTH,      150);
@@ -549,6 +554,7 @@ public class UIConstants {
 		  	case DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_ID : return DOWNLOAD_LIST_PARTIAL_SOURCES_COLUMN_NODE; 
 		  		
 		  	case DOWNLOAD_PEER_LIST_IP_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_IP_COLUMN_NODE;
+		  	case DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID    :  return DOWNLOAD_PEER_LIST_SOURCE_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_CC_COLUMN_ID        :  return DOWNLOAD_PEER_LIST_CC_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_FLAG_COLUMN_ID      :  return DOWNLOAD_PEER_LIST_FLAG_COLUMN_NODE;
 		  	case DOWNLOAD_PEER_LIST_STATUS_COLUMN_ID    :  return DOWNLOAD_PEER_LIST_STATUS_COLUMN_NODE;

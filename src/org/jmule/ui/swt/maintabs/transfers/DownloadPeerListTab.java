@@ -41,6 +41,7 @@ import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.peermanager.Peer;
+import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.uploadmanager.UploadManager;
 import org.jmule.core.uploadmanager.UploadManagerException;
 import org.jmule.core.uploadmanager.UploadQueueException;
@@ -63,8 +64,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/21 17:09:54 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/18 18:03:55 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -168,6 +169,9 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID);
 			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID, 	  	 _._("downloadinfowindow.tab.peerlist.column.address"), "", width);
 			
+			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID);
+			addColumn(SWT.LEFT, SWTConstants.DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID, 	  	 _._("downloadinfowindow.tab.peerlist.column.source"),  _._("downloadinfowindow.tab.peerlist.column.source.desc"), width);
+			
 			width = swt_preferences.getColumnWidth(SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID); 
 			addColumn(SWT.RIGHT, SWTConstants.DOWNLOAD_PEER_LIST_DOWN_SPEED_COLUMN_ID, _._("downloadinfowindow.tab.peerlist.column.download_speed"), "", width);
 			
@@ -190,6 +194,12 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			
 			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID)
 				return Misc.compareAllObjects(object1,object2,"getIP",order);
+			
+			if (columnID == SWTConstants.DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID) {
+				String source1 = PeerInfoFormatter.peerSourceToString(object1.getPeerSource());
+				String source2 = PeerInfoFormatter.peerSourceToString(object2.getPeerSource());
+				return source1.compareTo(source2);
+			}
 			
 			if (columnID==SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID)
 				return Misc.compareAllObjects(object1,object2,"getNickName",order);
@@ -296,6 +306,10 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID, country_code);
 			
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID, object.getIP()+":"+object.getPort());
+			PeerSource source = object.getPeerSource();
+			
+			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID, PeerInfoFormatter.peerSourceToString(source));
+			
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_NICKNAME_COLUMN_ID, object.getNickName());
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_SOFTWARE_COLUMN_ID, PeerInfoFormatter.formatPeerSoftware(object));
 

@@ -29,6 +29,7 @@ import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.peermanager.Peer;
+import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 
@@ -36,7 +37,7 @@ import org.jmule.ui.localizer._;
  * Created on Aug 9, 2008
  * 
  * @author binary256
- * @version $Revision: 1.4 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.5 $ Last changed by $Author: binary255 $ on $Date:
  *          2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
@@ -80,6 +81,17 @@ public class PeerInfoFormatter {
 		client_software.put(E2DKConstants.SO_COMPAT_UNK, SO_COMPAT_UNK);
 	}
 
+	public static String peerSourceToString(PeerSource source) {
+		switch(source) {
+			case SERVER : return _._("downloadinfowindow.tab.peerlist.column.source.type.server");
+			case KAD : return _._("downloadinfowindow.tab.peerlist.column.source.type.kad");
+			case PEX : return _._("downloadinfowindow.tab.peerlist.column.source.type.pex");
+			case ED2KLINK : return _._("downloadinfowindow.tab.peerlist.column.source.type.ed2klink");
+			case EXTERNAL : return _._("downloadinfowindow.tab.peerlist.column.source.type.external");
+		}
+		return "";
+	}
+	
 	public static String formatPeerSoftware(Peer peer) {
 		int software = peer.getClientSoftware();
 		String result = "";
