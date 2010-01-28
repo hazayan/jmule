@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/28 16:06:13 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:59:06 $$
  */
 public class PacketFactory {
 	
@@ -1634,8 +1634,8 @@ public class PacketFactory {
 		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
 				PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_EMULE_HELLO);
-		packet.insertData(Convert.intToByte(E2DKConstants.ClientVersion[1]));
-		packet.insertData((byte)1);
+		packet.insertData((byte)0x47);
+		packet.insertData((byte)0xFF);
 		packet.insertData(tag_list.size());
 		packet.insertData(tag_list.getAsByteBuffer());
 		return packet;
@@ -1699,8 +1699,8 @@ public class PacketFactory {
 		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
 				PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_EMULEHELLOANSWER);
-		packet.insertData(Convert.intToByte(E2DKConstants.ClientVersion[1]));
-		packet.insertData((byte)1);
+		packet.insertData((byte)0x47);
+		packet.insertData((byte)0xFF);
 		packet.insertData(tag_list.size());
 		packet.insertData(tag_list.getAsByteBuffer());
 		return packet;
@@ -1848,7 +1848,7 @@ public class PacketFactory {
 	}
 	
 	public static Packet getPublicKeyPacket(byte[] publicKey) {
-		Packet packet = new Packet(1+76, PROTO_EMULE_EXTENDED_TCP);
+		Packet packet = new Packet(1+publicKey.length, PROTO_EMULE_EXTENDED_TCP);
 		
 		packet.setCommand(OP_PUBLICKEY);
 		packet.insertData((byte)publicKey.length);
@@ -1858,7 +1858,7 @@ public class PacketFactory {
 	}
 	
 	public static Packet getSignaturePacket(byte[] signature) {
-		Packet packet = new Packet(1 + 48, PROTO_EMULE_EXTENDED_TCP);
+		Packet packet = new Packet(1 + signature.length, PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_SIGNATURE);
 		packet.insertData((byte)signature.length);
 		packet.insertData(signature);
