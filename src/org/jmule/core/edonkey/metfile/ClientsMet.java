@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.peermanager.PeerCredit;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 /**
@@ -103,20 +105,20 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:58:01 $$
  */
 public class ClientsMet extends MetFile {
 
 	public ClientsMet(String fileName) throws ClientsMetException {
 		super(fileName);
-		if (fileChannel==null)
-			throw new ClientsMetException("Failed to open "+fileName);
+		if (fileChannel == null)
+			throw new ClientsMetException("Failed to open " + fileName);
 	}
 
-	public Hashtable<UserHash,ClientCreditInfo> loadFile() throws FileNotFoundException,IOException,ClientsMetException {
+	public Map<UserHash,PeerCredit> loadFile() throws FileNotFoundException,IOException,ClientsMetException {
 		fileChannel.position(0);
-		Hashtable<UserHash,ClientCreditInfo> result = new Hashtable<UserHash,ClientCreditInfo>();
+		Hashtable<UserHash,PeerCredit> result = new Hashtable<UserHash,PeerCredit>();
 		ByteBuffer data;
 		
 		data = Misc.getByteBuffer(1);
@@ -128,11 +130,11 @@ public class ClientsMet extends MetFile {
 		
 		data = Misc.getByteBuffer(4);
 		fileChannel.read(data);
-		//data.position(0);
+		
 		long count = Convert.intToLong(data.getInt(0));
-		for(long i = 0; i<count; i++) {
+		for (long i = 0; i < count; i++) {
 			byte abyKey[] = new byte[16];
-			long nUploadedLo, nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi;
+			int nUploadedLo, nDownloadedLo, nLastSeen, nUploadedHi, nDownloadedHi;
 			byte abySecureIdent[];
 			int nKeySize;
 			int nReserved3;
@@ -144,23 +146,23 @@ public class ClientsMet extends MetFile {
 			
 			data = Misc.getByteBuffer(4);
 			fileChannel.read(data);
-			nUploadedLo = Convert.intToLong(data.getInt(0));
+			nUploadedLo = data.getInt(0);
 			
 			data = Misc.getByteBuffer(4);
 			fileChannel.read(data);
-			nDownloadedLo = Convert.intToLong(data.getInt(0));
+			nDownloadedLo = (data.getInt(0));
 			
 			data = Misc.getByteBuffer(4);
 			fileChannel.read(data);
-			nLastSeen = Convert.intToLong(data.getInt(0));
+			nLastSeen = (data.getInt(0));
 			
 			data = Misc.getByteBuffer(4);
 			fileChannel.read(data);
-			nUploadedHi = Convert.intToLong(data.getInt(0));
+			nUploadedHi = (data.getInt(0));
 			
 			data = Misc.getByteBuffer(4);
 			fileChannel.read(data);
-			nDownloadedHi = Convert.intToLong(data.getInt(0));
+			nDownloadedHi = (data.getInt(0));
 			
 			data = Misc.getByteBuffer(2);
 			fileChannel.read(data);
@@ -176,13 +178,13 @@ public class ClientsMet extends MetFile {
 			data.position(0);
 			data.get(abySecureIdent);
 			
-			ClientCreditInfo cc = new ClientCreditInfo(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
+			PeerCredit cc = new PeerCredit(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
 			result.put(cc.getUserHash(), cc);
 		}
 		return result;
 	}
 	
-	public void writeFile(Collection<ClientCreditInfo> clientsCredit) throws IOException {
+	public void writeFile(Collection<PeerCredit> clientsCredit) throws IOException {
 		fileChannel.position(0);
 		ByteBuffer data;
 		
@@ -196,29 +198,35 @@ public class ClientsMet extends MetFile {
 		data.position(0);
 		fileChannel.write(data);
 		
-		for(ClientCreditInfo credit : clientsCredit) {
+		for(PeerCredit credit : clientsCredit) {
+			
 			data = Misc.getByteBuffer(16);
 			data.put(credit.getUserHash().getUserHash());
 			data.position(0);
 			fileChannel.write(data);
 			
 			data = Misc.getByteBuffer(4);
-			data.putInt(Convert.longToInt(credit.getNUploadedLo()));
+			data.putInt(credit.getNUploadedLo());
 			data.position(0);
 			fileChannel.write(data);
 			
 			data = Misc.getByteBuffer(4);
-			data.putInt(Convert.longToInt(credit.getNDownloadedLo()));
+			data.putInt(credit.getNDownloadedLo());
 			data.position(0);
 			fileChannel.write(data);
 			
 			data = Misc.getByteBuffer(4);
-			data.putInt(Convert.longToInt(credit.getNUploadedHi()));
+			data.putInt(Convert.longToInt(credit.getLastSeen()));
 			data.position(0);
 			fileChannel.write(data);
 			
 			data = Misc.getByteBuffer(4);
-			data.putInt(Convert.longToInt(credit.getNDownloadedHi()));
+			data.putInt(credit.getNUploadedHi());
+			data.position(0);
+			fileChannel.write(data);
+			
+			data = Misc.getByteBuffer(4);
+			data.putInt(credit.getNDownloadedHi());
 			data.position(0);
 			fileChannel.write(data);
 			
