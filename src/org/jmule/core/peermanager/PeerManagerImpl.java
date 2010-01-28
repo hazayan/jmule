@@ -24,24 +24,34 @@ package org.jmule.core.peermanager;
 
 import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
+import java.io.File;
 import java.nio.ByteBuffer;
+import java.security.KeyFactory;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.bccrypto.JDKKeyFactory;
+import org.jmule.core.bccrypto.SHA1WithRSAEncryption;
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import org.jmule.core.edonkey.metfile.ClientsMet;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
@@ -54,6 +64,7 @@ import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
+import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
 
@@ -61,8 +72,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:41:01 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:14:23 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -70,22 +81,24 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	
 	private List<PeerManagerListener> listener_list = new LinkedList<PeerManagerListener>();
 	
-	private InternalDownloadManager _download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
-	private InternalUploadManager _upload_manager 	  = (InternalUploadManager)   UploadManagerSingleton.getInstance();
-
+	private Map<UserHash, PeerCredit> credits = new ConcurrentHashMap<UserHash, PeerCredit>();
+	private Map<UserHash, byte[]> sended_challenges = new ConcurrentHashMap<UserHash, byte[]>();
+	private Map<UserHash, byte[]> challenge_to_send_peers = new ConcurrentHashMap<UserHash, byte[]>();
+	
+	private Map<UserHash, Long> last_download_bytes = new ConcurrentHashMap<UserHash, Long>();
+	private Map<UserHash, Long> last_upload_bytes = new ConcurrentHashMap<UserHash, Long>();
+	
+	private Random challengeGenerator = new Random();
+	
+	private InternalDownloadManager _download_manager = null;
+	private InternalUploadManager _upload_manager 	  = null;
+	private InternalConfigurationManager _config_manager = null;
+	
+	private ClientsMet clients_met = null;
+	
 	private JMTimer maintenance_tasks = new JMTimer();
 	
 	PeerManagerImpl() {
-	}
-	
-	public String toString() {
-		String result = "";
-		
-		for(String key : peers.keySet()) {
-			result += "[" + key +"]= " + "["+peers.get(key)+"]\n";
-		} 
-		
-		return result;
 	}
 	
 	public void initialize() {
@@ -106,10 +119,27 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		   });
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
-		
-		
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton
+				.getInstance();
+		_upload_manager = (InternalUploadManager) UploadManagerSingleton
+				.getInstance();
+		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton.getInstance();
+		File checkFile = new File(ConfigurationManager.CLIENTS_FILE);
+		if (!checkFile.exists()) {
+			try {
+				clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
+				clients_met.writeFile(credits.values());
+			}catch(Throwable cause) { }
+		} else {
+			try {
+				clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
+				Map<UserHash, PeerCredit> file_credits = clients_met.loadFile();
+				credits.putAll(file_credits);
+			} catch (Throwable e) {
+				e.printStackTrace();
+			} 
+		}
 	}
-
 
 	public void shutdown() {
 		try {
@@ -153,12 +183,203 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				}
 			}
 		};
-		maintenance_tasks.addTask(peer_dropper, 10000, true);
+		maintenance_tasks.addTask(peer_dropper, ConfigurationManager.PEERS_ACTIVITY_CHECK_INTERVAL, true);
 		
+		JMTimerTask store_credits = new JMTimerTask() {
+			public void run() {
+				try {
+					if (clients_met == null) {
+						clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
+					}
+					clients_met.writeFile(credits.values());
+				}catch(Throwable cause) { cause.printStackTrace(); }
+					
+			}
+		};
+		maintenance_tasks.addTask(store_credits, 10000, true);
+		
+		JMTimerTask credits_updater = new JMTimerTask() {
+			
+			public void run() {
+				for(UserHash userHash : credits.keySet()) {
+					Peer peer = getPeer(userHash);
+					if (peer == null) continue;
+					if (!peer.isConnected()) continue;
+					long last_check_download_bytes = 0;
+					long last_check_upload_bytes = 0;
+					if (last_download_bytes.containsKey(userHash))
+						last_check_download_bytes = last_download_bytes.get(userHash);
+					if (last_upload_bytes.containsKey(userHash))
+						last_check_upload_bytes = last_upload_bytes.get(userHash);
+					
+					long downloaded = _network_manager.getFileDownloadedBytes(peer.getIP(),peer.getPort());
+					long uploaded   = _network_manager.getFileUploadedBytes(peer.getIP(),peer.getPort());
+					
+					long d = downloaded - last_check_download_bytes;
+					if (d < 0) 
+						d = downloaded;
+					long u = uploaded - last_check_upload_bytes;
+					if (u < 0)
+						u = uploaded;
+					
+					PeerCredit credit = credits.get(userHash);
+					credit.addDownload(d);
+					credit.addUpload(u);
+					credit.setLastSeen(System.currentTimeMillis());
+					
+					last_download_bytes.put(userHash, downloaded);
+					last_upload_bytes.put(userHash, uploaded);
+				}
+			}
+		};
+		
+		maintenance_tasks.addTask(credits_updater, 1000, true);
 	}
 
 	protected boolean iAmStoppable() {
 		return false;
+	}
+	
+	public float getCredit(Peer peer) {
+		if (!credits.containsKey(peer.getUserHash()))
+			return 1;
+		PeerCredit credit = credits.get(peer.getUserHash());
+		long upload = credit.getUpload();
+		long download = credit.getDownload();
+		if ((upload / (1024 * 1024)) < 1f) return 1;
+		if (download == 0) return 10;
+		
+		float ratio1 = upload * 2 / download;
+		float ratio2 = (float) Math.sqrt((double)(upload + 2));
+		
+		float ratio = ratio1;
+		if (ratio > ratio2)
+			ratio = ratio2;
+		if (ratio > 10)
+			ratio = 10;
+		if (ratio < 1)
+			ratio = 1;
+		return ratio;
+	}
+	
+	public byte[] getPublicKey(Peer peer) {
+		if (!credits.containsKey(peer.getUserHash()))
+			return null;
+		PeerCredit credit = credits.get(peer.getUserHash());
+		byte[] public_key = credit.getAbySecureIdent();
+		if (public_key == null) return null;
+		if (Misc.isEmpty(public_key))
+			return null;
+		return public_key;
+	}
+	
+	public boolean hasPublicKey(Peer peer) {
+		if (!credits.containsKey(peer.getUserHash()))
+			return false;
+		PeerCredit credit = credits.get(peer.getUserHash());
+		byte[] public_key = credit.getAbySecureIdent();
+		if (public_key == null) return false;
+		if (Misc.isEmpty(public_key))
+			return false;
+		return true;
+	}
+	
+	public boolean isSecured(Peer peer) {
+		if (!credits.containsKey(peer.getUserHash()))
+			return false;
+		PeerCredit credit = credits.get(peer.getUserHash());
+		return credit.isVerified();
+	}
+	
+	public void setSecured(Peer peer, boolean verified) {
+		if (!credits.containsKey(peer.getUserHash()))
+			return;
+		PeerCredit credit = credits.get(peer.getUserHash());
+		credit.setVerified(verified);
+	}
+	
+	private void addIfNeedNewPeerCreditInfo(Peer peer) {
+		if (credits.containsKey(peer.getUserHash()))
+			return;
+		PeerCredit credit_info = new PeerCredit(peer.getUserHash());
+		credits.put(peer.getUserHash(), credit_info);
+	}
+	
+	public boolean isVerified(Peer peer) {
+		if (!credits.containsKey(peer.getUserHash()))
+			return false;
+		PeerCredit credit = credits.get(peer.getUserHash());
+		return credit.isVerified();
+	}
+	
+	public void receivedPublicKey(String peerIP, int peerPort, byte[] key) {
+		try {
+			Peer peer = getPeer(peerIP, peerPort);
+			if (getPublicKey(peer)==null) {
+				addIfNeedNewPeerCreditInfo(peer);
+				PeerCredit credit_info = credits.get(peer.getUserHash());
+				credit_info.setAbySecureIdent(key);
+				if (challenge_to_send_peers.containsKey(peer.getUserHash())) {
+					byte[] challenge = challenge_to_send_peers.get(peer.getUserHash());
+					challenge_to_send_peers.remove(peer.getUserHash());
+					
+					_network_manager.sendSignaturePacket(peerIP, peerPort, challenge);
+				}
+			} else {
+				// public key is already known, must ban peer
+			}
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receivedSignature(String peerIP, int peerPort, byte[] signature) {
+		try {
+			Peer peer = getPeer(peerIP, peerPort);
+			if (!sended_challenges.containsKey(peer.getUserHash())) {
+				return ;
+			}
+			byte[] random_challenge = sended_challenges.get(peer.getUserHash());
+			sended_challenges.remove(peer.getUserHash());
+			byte[] public_key = getPublicKey(peer);
+			if (public_key == null) {
+				return ;
+			}
+			SHA1WithRSAEncryption verifier = new SHA1WithRSAEncryption();
+			JDKKeyFactory.RSA rsa_key_factory = new JDKKeyFactory.RSA();
+			X509EncodedKeySpec public_key_spec = new X509EncodedKeySpec(public_key);
+			verifier.initVerify(rsa_key_factory.engineGeneratePublic(public_key_spec));
+			verifier.update(_config_manager.getPublicKey().getEncoded());
+			verifier.update(random_challenge);
+			boolean verified = verifier.verify(signature);
+			if (verified) {
+				PeerCredit info = credits.get(peer.getUserHash());
+				info.setVerified(true);
+			} else {
+				
+			}
+		}catch(Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receivedSecIdentState(String peerIP, int peerPort, byte state, byte[] challenge) {
+		try {
+			Peer peer = getPeer(peerIP, peerPort);
+			if (state == 1) {
+				if (hasPublicKey(peer))
+					_network_manager.sendSignaturePacket(peerIP, peerPort, challenge);
+				else
+					challenge_to_send_peers.put(peer.getUserHash(), challenge);
+			} 
+			if (state == 2){
+				_network_manager.sendPublicKeyPacket(peerIP, peerPort);
+				if (hasPublicKey(peer))
+					_network_manager.sendSignaturePacket(peerIP, peerPort, challenge);
+				else
+					challenge_to_send_peers.put(peer.getUserHash(), challenge);
+			}
+		}catch(Throwable cause) { cause.printStackTrace();}
 	}
 	
 	public List<Peer> getPeers() {
@@ -172,6 +393,16 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (peer == null) 
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
 		return peer;
+	}
+	
+	private Peer getPeer(UserHash userHash) {
+		for(Peer peer : peers.values()) {
+			if (peer.getUserHash() == null)
+				continue;
+			if (peer.getUserHash().equals(userHash))
+				return peer;
+		}
+		return null;
 	}
 	
 	public Peer newPeer(String ip, int port, PeerSource source) throws PeerManagerException {
@@ -268,6 +499,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				return ;
 			}
 		}
+		_network_manager.sendEMuleHelloPacket(peer.getIP(), peer.getPort());
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
 		notifyPeerConnected(peer);
@@ -302,6 +534,9 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				return ;
 			}
 		}
+
+		_network_manager.sendEMuleHelloPacket(peer.getIP(), peer.getPort());
+		
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
 		notifyPeerConnected(peer);
@@ -313,7 +548,8 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (!hasPeer(ip, port))
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
 		try {
-			_network_manager.addPeer(ip, peer.getListenPort());
+			
+			_network_manager.addPeer(ip, port);
 		}catch(NetworkManagerException cause) {
 			throw new PeerManagerException(cause);
 		}
@@ -384,7 +620,24 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			Map<PeerFeatures,Integer> peer_features = Utils.scanTagListPeerFeatures(tagList);
 			peer_features.put(PeerFeatures.ProtocolVersion, (int)protocolVersion);
 			peer.peer_features.putAll(peer_features);
-		} catch (PeerManagerException e) {
+			
+			Tag udp_port = tagList.getTag(E2DKConstants.ET_UDPPORT);
+			if (udp_port != null)
+				peer.tag_list.addTag(udp_port);
+			
+			if (_config_manager.isSecurityIdenficiationEnabled()) {
+				//Integer secident = peer_features.get(PeerFeatures.SupportSecIdent);
+				//if (secident == null)
+				//	return;
+				//if (secident != 0)
+				//	return;
+				if (isSecured(peer))
+					return;
+				
+				sendSecIdentState(peer);
+			}
+			
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
@@ -401,11 +654,31 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			if (udp_port != null)
 				peer.tag_list.addTag(udp_port);
 			
-		} catch (PeerManagerException e) {
+			if (_config_manager.isSecurityIdenficiationEnabled()) {
+				//Integer secident = peer_features.get(PeerFeatures.SupportSecIdent);
+				//if (secident == null)
+				//	return;
+				//if (secident == 0)
+				//	return;
+				if (isSecured(peer))
+					return;
+				
+				sendSecIdentState(peer);
+			}
+			
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 	
+	public void sendSecIdentState(Peer peer) {
+		byte[] challenge = new byte[4];
+		challengeGenerator.nextBytes(challenge);
+		sended_challenges.put(peer.getUserHash(), challenge);
+		boolean need_key = !hasPublicKey(peer);
+		_network_manager.sendSecIdentStatePacket(peer.getIP(), peer.getPort(), need_key,
+				challenge);
+	}
 	
 	public void addPeerManagerListener(PeerManagerListener listener) {
 		listener_list.add(listener);
@@ -476,6 +749,16 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String toString() {
+		String result = "";
+		
+		for(String key : peers.keySet()) {
+			result += "[" + key +"]= " + "["+peers.get(key)+"]\n";
+		} 
+		
+		return result;
 	}
 	
 	private void notifyNewPeer(Peer peer) {

@@ -35,8 +35,8 @@ import org.jmule.core.peermanager.Peer.PeerSource;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.5 $
- * Last changed by $Author: javajox $ on $Date: 2010/01/10 14:18:48 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:14:23 $
  */
 public interface InternalPeerManager extends PeerManager, DisconnectNode {
 
@@ -83,5 +83,13 @@ public interface InternalPeerManager extends PeerManager, DisconnectNode {
 	public void receivedCaptchaImage(String ip, int port, ByteBuffer image);
 	
 	public void receivedCaptchaStatusAnswer(String ip, int port, byte answer);
+	
+	public byte[] getPublicKey(Peer peer);
+	
+	public void receivedPublicKey(String peerIP, int peerPort, byte[] key);
+	
+	public void receivedSignature(String peerIP, int peerPort, byte[] signature);
+	
+	public void receivedSecIdentState(String peerIP, int peerPort, byte state, byte[] challenge);
 	
 }
