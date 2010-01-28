@@ -88,8 +88,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.41 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 17:00:25 $$
+ * @version $$Revision: 1.42 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:55:42 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -369,7 +369,6 @@ public class DownloadSession implements JMTransferSession {
 		if (this.getStatus() == DownloadStatus.STOPPED)
 			return;
 		download_status_list.addPeer(peer);
-
 		network_manager.sendFileRequest(peer.getIP(), peer.getPort(),
 				getFileHash());
 		download_status_list.setPeerStatus(peer,

@@ -36,8 +36,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:58:38 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:55:42 $$
  */
 public class DownloadStatusList {
 
@@ -240,10 +240,8 @@ public class DownloadStatusList {
 			String result = "" + peer + " : ";
 			String status = "";
 			status = peerStatus + ""; 
-			result+= " Current status : "+status+" History : ";
-			for (int i = 0; i < this.statusList.size(); i++) {
-				result += this.statusList.get(i) + " | ";
-			}
+			result+= " Current status : "+status+" ";
+			
 			return result;
 
 		}
