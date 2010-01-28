@@ -61,7 +61,6 @@ import static org.jmule.core.jkad.JKadConstants.TAG_SOURCETYPE;
 import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.CONNECTED;
 import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.CONNECTING;
 import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.DISCONNECTED;
-import static org.jmule.core.jkad.utils.Utils.getRandomInt128;
 import static org.jmule.core.utils.Convert.byteToHexString;
 import static org.jmule.core.utils.Convert.byteToInt;
 import static org.jmule.core.utils.Convert.shortToInt;
@@ -83,7 +82,6 @@ import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
-import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
@@ -132,8 +130,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:15:16 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
@@ -152,7 +150,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 	private JKadStatus status = DISCONNECTED;
 	private Map<Byte, List<PacketListener>> packetListeners = new ConcurrentHashMap<Byte, List<PacketListener>>();
 	private Task filesToPublishChecker;
-	private InternalConfigurationManager _config_manager = null;
 	private InternalNetworkManager _network_manager = null;
 
 	private List<JKadListener> listener_list = new LinkedList<JKadListener>();
@@ -170,9 +167,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 			e1.printStackTrace();
 			return;
 		}
-
-		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton
-				.getInstance();
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 
@@ -186,16 +180,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 		lookup = Lookup.getSingleton();
 		search = Search.getSingleton();
 		publisher = Publisher.getInstance();
-
-		if (clientID == null) {
-			clientID = new ClientID(getRandomInt128());
-			try {
-				_config_manager.setJKadClientID(clientID);
-			} catch (ConfigurationManagerException e) {
-
-				e.printStackTrace();
-			}
-		}
 
 		filesToPublishChecker = new Task() {
 			Set<FileHash> publishedFiles = new HashSet<FileHash>();

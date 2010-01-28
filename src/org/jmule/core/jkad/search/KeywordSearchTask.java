@@ -45,8 +45,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:15:16 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
@@ -106,8 +106,9 @@ public class KeywordSearchTask extends SearchTask {
 		};
 		lookup_task.setTimeOut(JKadConstants.SEARCH_KEYWORD_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
-		if (listener!=null)
+		if (listener!=null) {
 			listener.searchStarted();
+		}
 			
 	}
 
