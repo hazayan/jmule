@@ -47,6 +47,7 @@ import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
+import org.jmule.core.uploadmanager.PayloadPeerList.PayloadPeerContainer;
 import org.jmule.core.uploadmanager.UploadQueue.UploadQueueContainer;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
@@ -54,8 +55,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:39:12 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:09 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -67,7 +68,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	private InternalNetworkManager _network_manager;
 	private InternalPeerManager _peer_manager;
 	
-	private UploadQueue uploadQueue = UploadQueue.getInstance();
+	private UploadQueue uploadQueue;
+	private PayloadPeerList payload_peers;
 	
 	private JMTimer maintenance_tasks = new JMTimer();
 	
@@ -82,7 +84,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			e.printStackTrace();
 			return ;
 		}
-		
+		uploadQueue = UploadQueue.getInstance();
+		payload_peers = PayloadPeerList.getInstance();
 		_sharing_manager = (InternalSharingManager) SharingManagerSingleton.getInstance();
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		_peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
@@ -150,20 +153,70 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			public void run() {
 				for(UploadQueueContainer container : uploadQueue.slot_clients) {
 					Peer peer = container.peer;
-					long transferred_bytes = _network_manager.getUploadedFileBytes(peer.getIP(), peer.getPort());
-					_network_manager.resetUploadedFileBytes(peer.getIP(), peer.getPort());
-					try {
-						UploadSession session = getUpload(container.fileHash);
-						session.addTransferredBytes(transferred_bytes);
-					} catch (UploadManagerException e) {
-						e.printStackTrace();
-					}
-					
+					updateBytes(peer, container.fileHash);
+				}
+				
+				Map<Peer, PayloadPeerContainer> payload = payload_peers.getPayloadPeers();
+				for(Peer peer : payload.keySet()) {
+					PayloadPeerContainer container = payload.get(peer);
+					updateBytes(peer, container.getFileHash());
+				}
+			}
+			
+			public void updateBytes(Peer peer, FileHash fileHash) {
+				if (!peer.isConnected()) return;
+				long transferred_bytes = _network_manager.getUploadedFileBytes(peer.getIP(), peer.getPort());
+				_network_manager.resetUploadedFileBytes(peer.getIP(), peer.getPort());
+				try {
+					UploadSession session = getUpload(fileHash);
+					session.addTransferredBytes(transferred_bytes);
+				} catch (UploadManagerException e) {
+					e.printStackTrace();
 				}
 			}
 		};
+		
+		JMTimerTask payload_peers_monitor = new JMTimerTask() {
+			public void run() {
+				boolean recalcslots = false;
+				Map<Peer, PayloadPeerContainer> payload = payload_peers.getPayloadPeers();
+				for(Peer peer : payload.keySet()) {
+					long addTime = payload_peers.getAddTime(peer);
+					long payload_timeout = System.currentTimeMillis() - addTime;
+					if (payload_timeout > ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_TIME) {
+						recalcslots = true;
+						try {
+							uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
+						} catch (UploadQueueException e) {
+							e.printStackTrace();
+						}
+						payload_peers.removePeer(peer);
+						payload_peers.addPayloadLoosed(peer.getUserHash());
+						continue;
+					}
+					
+					long lastResponse = payload_peers.getLastActive(peer);
+					long last_response_timeout = System.currentTimeMillis() - lastResponse;
+					if (last_response_timeout >= ConfigurationManager.UPLOAD_SLOT_LOSE_TIMEOUT) {
+						recalcslots = true;
+						try {
+							uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
+						} catch (UploadQueueException e) {
+							e.printStackTrace();
+						}
+						payload_peers.removePeer(peer);
+						removePeer(peer);
+						continue;
+					}
+					
+				}
+				if (recalcslots) 
+					recalcSlotPeers();
+			}
+		};
 		maintenance_tasks.addTask(frozen_peers_remover, ConfigurationManager.UPLOAD_QUEUE_CHECK_INTERVAL, true);
-		maintenance_tasks.addTask(transferred_bytes_updater, 1000, true);
+		maintenance_tasks.addTask(transferred_bytes_updater, ConfigurationManager.UPLOAD_QUEUE_TRANSFER_CHECK_INTERVAL, true);
+		maintenance_tasks.addTask(payload_peers_monitor, ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_CHECK_INTERVAL, true);
 	}
 
 	public void shutdown() {
@@ -304,9 +357,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			//TODO : Investigate on eMule
 			return;
 		}
-		uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
+		UploadSession upload_session = null;
 		if (hasUpload(fileHash)) {
-			UploadSession upload_session;
 			try {
 				upload_session = getUpload(fileHash);
 			} catch (UploadManagerException e) {
@@ -315,13 +367,40 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 			upload_session.receivedSlotRequestFromPeer(sender, fileHash);
 		} else {
-			UploadSession session = new UploadSession(_sharing_manager.getSharedFile(fileHash));
-			session_list.put(fileHash, session);
+			upload_session = new UploadSession(_sharing_manager.getSharedFile(fileHash));
+			session_list.put(fileHash, upload_session);
 			notifyUploadAdded(fileHash);
-			session.receivedSlotRequestFromPeer(sender, fileHash);
+			upload_session.receivedSlotRequestFromPeer(sender, fileHash);
 		}
 		
-		if (!uploadQueue.hasPeer(sender)) {
+		if (payload_peers.hasPeer(sender)) {
+			FileHash check_hash = payload_peers.getFileHash(sender);
+			if (check_hash.equals(fileHash)) {
+				payload_peers.setLastActiveTime(sender, System.currentTimeMillis());
+				_network_manager.sendSlotGiven(sender.getIP(), sender.getPort(), fileHash);
+			}
+			return;
+		}
+		
+		if (!uploadQueue.hasPeer(sender))
+			if (!payload_peers.isPayloadLoosed(sender.getUserHash())){
+				// give 15 min payload for peer
+				payload_peers.addPeer(sender, upload_session.getFileHash());
+				payload_peers.setLastActiveTime(sender, System.currentTimeMillis());
+				_network_manager.sendSlotGiven(sender.getIP(), sender.getPort(), fileHash);
+				return;
+			} else {
+				try {
+					uploadQueue.addPeer(sender, fileHash);
+					recalcSlotPeers();
+				} catch (UploadQueueException e) {
+					// queue is full
+					e.printStackTrace();
+					return ;
+				}
+			}
+		
+		/*if (!uploadQueue.hasPeer(sender)) {
 			try {
 				uploadQueue.addPeer(sender, fileHash);
 				recalcSlotPeers();
@@ -330,7 +409,12 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 				e.printStackTrace();
 				return ;
 			}
+		}*/
+		
+		if (uploadQueue.hasPeer(sender)) {
+			uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());			
 		}
+		
 		if (uploadQueue.hasSlotPeer(sender)) {
 			_network_manager.sendSlotGiven(sender.getIP(), sender.getPort(), fileHash);
 		} else
@@ -351,7 +435,16 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			//TODO : Investigate on eMule
 			return;
 		}
-		if (!uploadQueue.hasSlotPeer(sender)) {
+		UploadSession session;
+		try {
+			session = getUpload(fileHash);
+		} catch (UploadManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
+		
+		if (!payload_peers.hasPeer(sender))
+				if (!uploadQueue.hasSlotPeer(sender)) {
 			try {
 				uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
 				_network_manager.sendQueueRanking(sender.getIP(), sender.getPort(), uploadQueue.getPeerPosition(sender));
@@ -360,14 +453,10 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 			return ;
 		}
-		UploadSession session;
-		try {
-			session = getUpload(fileHash);
-		} catch (UploadManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
+		if (uploadQueue.hasPeer(sender))
+			uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
+		if (payload_peers.hasPeer(sender))
+			payload_peers.setLastActiveTime(sender, System.currentTimeMillis());
 		session.receivedFileChunkRequestFromPeer(sender, fileHash, requestedChunks);
 	}
 	
@@ -451,17 +540,18 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 
 	public void peerDisconnected(Peer peer) {
 		if (!hasPeer(peer)) return;
+
+		if (payload_peers.hasPeer(peer)) {
+			payload_peers.removePeer(peer);
+			payload_peers.addPayloadLoosed(peer.getUserHash());
+		}
+
 		if (uploadQueue.hasSlotPeer(peer)) {
 			removePeer(peer);
 			recalcSlotPeers();
 		}
 		
 	}
-	
-	
-	/*
-	 * Listener maintenance
-	 */
 	
 	public void addUploadManagerListener(UploadManagerListener listener) {
 		listener_list.add(listener);
@@ -490,7 +580,9 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 
 	public String toString() {
-		return uploadQueue.toString();
+		String result = " Upload queue : \n" + uploadQueue+"\n";
+		result += "" + payload_peers;
+		return result;
 	}
 	
 }

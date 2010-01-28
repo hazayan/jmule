@@ -38,13 +38,15 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.UserHash;
+import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
+import org.jmule.core.peermanager.PeerManagerSingleton;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:39:12 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:09 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -59,8 +61,10 @@ public class UploadQueue {
 	Collection<UploadQueueContainer>    slot_clients = new ConcurrentLinkedQueue<UploadQueueContainer>();
 	enum PeerQueueStatus { SLOTGIVEN, SLOTTAKEN }
 	
+	private InternalPeerManager _peer_manager;
+	
 	private UploadQueue() {
-		
+		_peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
 	}
 	
 	boolean hasPeer(Peer peer) {
@@ -97,6 +101,7 @@ public class UploadQueue {
 	
 	float getPeerScore(UploadQueueContainer container) {
 		float rating = container.rating;
+		rating *= _peer_manager.getCredit(container.peer);
 		float time_in_queue = (System.currentTimeMillis() - container.addTime) / 1000f;
 		float score = rating * time_in_queue / 100f;
 		return score;
@@ -189,15 +194,14 @@ public class UploadQueue {
 				}
 				continue;
 			}
-			if (max_score_peers.size()<ConfigurationManager.UPLOAD_QUEUE_SLOTS)
+			if (max_score_peers.size() < ConfigurationManager.UPLOAD_QUEUE_SLOTS)
 				max_score_peers.add(container);
 			else {
-				
 				float current_peer_score = getPeerScore(container);
 				UploadQueueContainer slot_container = null;
 				boolean found = false;
 				
-				for(int i = 0;i<max_score_peers.size();i++) {
+				for (int i = 0; i < max_score_peers.size(); i++) {
 					slot_container = max_score_peers.get(i);
 					float c_score = getPeerScore(slot_container);
 					if (current_peer_score > c_score) {
@@ -221,6 +225,7 @@ public class UploadQueue {
 		}
 		slot_clients.removeAll(lostSlotPeers);
 		
+		// create list with peers which obtain slot
 		for(UploadQueueContainer container : max_score_peers) {
 			if (!slot_clients.contains(container)) {
 				slot_clients.add(container);

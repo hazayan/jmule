@@ -51,8 +51,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:39:12 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:09 $$
  */
 public class UploadSession implements JMTransferSession {
 	private SharedFile sharedFile;	
@@ -60,7 +60,7 @@ public class UploadSession implements JMTransferSession {
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
 	private Map<Peer, Set<FileChunkRequest>> requested_chunks = new ConcurrentHashMap<Peer, Set<FileChunkRequest>>();
 	//private Map<Peer, Set<FileChunkRequest>> sended_chunks;
-	
+		
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 	private long totalUploaded = 0;
 	
@@ -121,6 +121,7 @@ public class UploadSession implements JMTransferSession {
 		session_peers.remove(sender);
 		if (requested_chunks.containsKey(sender))
 			requested_chunks.remove(sender);
+
 	}
 	
 	void receivedFileChunkRequestFromPeer(Peer sender,
