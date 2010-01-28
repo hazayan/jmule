@@ -30,8 +30,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:39 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:17:40 $$
  */
 public privileged aspect UploadManagerLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.uploadmanager.UploadManager");
@@ -39,4 +39,15 @@ public privileged aspect UploadManagerLogger {
 	after() throwing (Throwable t): execution (* UploadManagerImpl.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
+	
+	/*before() : execution(* UploadManagerImpl.*(..)) {
+		String sig = thisJoinPoint.getSignature()+"";
+		if (sig.contains("toString"))return ;
+		System.out.println("Method call : "+thisJoinPoint.getSignature());
+		System.out.println("Arguments : ");
+		for(Object object : thisJoinPoint.getArgs()) {
+			System.out.println("{" + object + "}");
+		}
+		System.out.println();
+	}*/
 }

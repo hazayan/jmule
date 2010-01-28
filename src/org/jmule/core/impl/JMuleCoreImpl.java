@@ -42,10 +42,8 @@ import org.jmule.core.JMuleCoreLifecycleListener;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
-import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
-import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.ipfilter.IPFilter;
 import org.jmule.core.ipfilter.IPFilterSingleton;
 import org.jmule.core.jkad.JKadManager;
@@ -69,8 +67,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:17:23 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:15:50 $$
  */
 public class JMuleCoreImpl implements InternalJMuleCore {
 	
@@ -201,21 +199,6 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		
 		configuration_manager.start();
 		
-		UserHash hash = null;
-		try {
-			hash = configuration_manager.getUserHash();
-		} catch (ConfigurationManagerException e1) {
-			e1.printStackTrace();
-		}
-		if (hash == null) {
-			hash = UserHash.genNewUserHash();
-			try {
-				((InternalConfigurationManager)configuration_manager).setUserHash(hash);
-			} catch (ConfigurationManagerException e) {
-				e.printStackTrace();
-			}
-		}
-
 		Logger log = Logger.getLogger("org.jmule");
 		
 		/**Setup logger*/

@@ -31,8 +31,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:17:40 $$
  */
 public privileged aspect PartialFileLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.sharingmanager.PartialFile");
@@ -58,7 +58,7 @@ public privileged aspect PartialFileLogger {
 	
 	after(PartialFile pFile) returning(boolean result) : target(pFile) && execution(boolean PartialFile.checkFilePartsIntegrity()) {
 		if (!pFile.hasHashSet()) {
-			log.warning("Can't check file integrity don't have part hash set");
+			log.warning("Can't check file integrity don't have part hash set\n"+pFile);
 			return ;
 		}
 		if (!result)
