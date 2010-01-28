@@ -38,8 +38,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/03 07:31:09 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:05:58 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -55,6 +55,22 @@ class JMuleSocketChannel {
 		this.channel.configureBlocking(true);
 		this.channel.socket().setKeepAlive(true);
 		init();
+	}
+	
+	long getServiceUploadBytes() {
+		return service_trafic.getTotalSent();
+	}
+	
+	long getServiceDownloadBytes() {
+		return service_trafic.getTotalReceived();
+	}
+	
+	long getUploadBytes() {
+		return file_transfer_trafic.getTotalSent();
+	}
+	
+	long getDownloadedBytes() {
+		return file_transfer_trafic.getTotalReceived();
 	}
 	
 	float getDownloadSpeed() {

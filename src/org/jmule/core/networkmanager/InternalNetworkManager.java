@@ -48,8 +48,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:43:36 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:05:58 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -74,6 +74,14 @@ public interface InternalNetworkManager extends NetworkManager {
 	public float getPeerUploadServiceSpeed(String peerIP, int peerPort);
 	
 	public float getPeerUploadSpeed(String peerIP, int peerPort);
+	
+	public long getFileDownloadedBytes(String peerIP, int peerPort);
+	
+	public long getFileUploadedBytes(String peerIP, int peerPort);
+	
+	public long getServiceDownloadedBytes(String peerIP, int peerPort);
+	
+	public long getServiceUploadedBytes(String peerIP, int peerPort);
 	
 	public ConnectionStatus getServerConnectionStatus();
 	
@@ -216,10 +224,26 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void serverDisconnected();
 	
 	public void serverListRequest();
-	
+	// count uploaded bytes for file
 	public long getUploadedFileBytes(String peerIP, int peerPort);
 	
 	public void resetUploadedFileBytes(String peerIP, int peerPort);
+	
+	public void receivedPublicKey(String peerIP, int peerPort, byte[] key);
+	
+	public void receivedSignature(String peerIP, int peerPort, byte[] signature);
+	
+	public void receivedSecIdentState(String peerIP, int peerPort, byte state, byte[] challenge);
+	
+	public void sendPublicKeyPacket(String peerIP, int peerPort);
+	
+	public void sendSignaturePacket(String peerIP, int peerPort, byte[] challenge);
+	
+	public void sendSecIdentStatePacket(String peerIP, int peerPort, boolean isPublicKeyNeeded, byte[] challenge);
+	
+	public void sendEMuleHelloPacket(String peerIP, int peerPort);
+	
+	public void sendEMuleHelloAnswerPacket(String peerIP, int peerPort);
 	
 	// UDP 
 	

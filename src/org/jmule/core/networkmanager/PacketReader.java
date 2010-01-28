@@ -22,7 +22,7 @@
  */
 package org.jmule.core.networkmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHAREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHARES;
@@ -109,8 +109,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.22 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/15 18:06:17 $
+ * @version $Revision: 1.23 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:05:58 $
  */
 public class PacketReader {
 
@@ -666,7 +666,6 @@ public class PacketReader {
 					for (int k = 0; k < source_count; k++) {
 						packet_data.get(ip);
 						port = packet_data.getShort();
-						ip = Convert.reverseArray(ip);
 
 						ip_list.add(Convert.IPtoString(ip));
 						port_list.add(Convert.shortToInt(port));
@@ -692,6 +691,30 @@ public class PacketReader {
 					byte response = packet_data.get();
 					_peer_manager.receivedCaptchaStatusAnswer(peerIP, peerPort,
 							response);
+					break;
+				}
+				
+				case OP_PUBLICKEY : {
+					int key_length = Convert.byteToInt(packet_data.get());
+					byte[] public_key = new byte[key_length];
+					packet_data.get(public_key);
+					_network_manager.receivedPublicKey(peerIP, peerPort, public_key);
+					break;
+				}
+				
+				case OP_SIGNATURE : {
+					int sig_length = Convert.byteToInt(packet_data.get());
+					byte[] signature = new byte[sig_length];
+					packet_data.get(signature);
+					_network_manager.receivedSignature(peerIP, peerPort, signature);
+					break;
+				}
+				
+				case OP_SECIDENTSTATE: {
+					byte state = packet_data.get();
+					byte[] challenge = new byte[4];
+					packet_data.get(challenge);
+					_network_manager.receivedSecIdentState(peerIP, peerPort, state, challenge);
 					break;
 				}
 

@@ -46,8 +46,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/15 18:06:17 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:05:58 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -257,7 +257,7 @@ public final class JMPeerConnection extends JMConnection {
 		}
 	}
 	
-	public long getUploadedFileBytes() {
+	long getUploadedFileBytes() {
 		return uploadedFileBytes;
 	}
 	

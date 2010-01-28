@@ -24,6 +24,7 @@ package org.jmule.core.networkmanager;
 
 import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.bccrypto.SHA1WithRSAEncryption;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
@@ -80,8 +82,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.26 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:55:54 $
+ * @version $Revision: 1.27 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:05:58 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -359,6 +361,46 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 
+	public long getFileDownloadedBytes(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getDownloadedBytes();
+		} catch (Throwable cause) {
+			return 0;
+		}
+	}
+	
+	public long getFileUploadedBytes(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getUploadBytes();
+		} catch (Throwable cause) {
+			return 0;
+		}
+	}
+	
+	public long getServiceDownloadedBytes(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getServiceDownloadBytes();
+		} catch (Throwable cause) {
+			return 0;
+		}
+	}
+	
+	public long getServiceUploadedBytes(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,
+					peerPort);
+			return peer_connection.getJMConnection().getServiceUploadBytes();
+		} catch (Throwable cause) {
+			return 0;
+		}
+	}
+	
 	public ConnectionStatus getServerConnectionStatus() {
 		if (server_connection == null)
 			return ConnectionStatus.DISCONNECTED;
@@ -580,9 +622,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 							.getTCP(), _config_manager.getNickName(),
 					server_ip, server_port, E2DKConstants.DefaultJMuleFeatures);
 			connection.send(packet);
-			
-			Packet emule_hello_packet = PacketFactory.getEMulePeerHelloPacket();
-			connection.send(emule_hello_packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
@@ -986,6 +1025,26 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 	
+	public void sendEMuleHelloPacket(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getEMulePeerHelloPacket();
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+	
+	public void sendEMuleHelloAnswerPacket(String peerIP, int peerPort) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getEMulePeerHelloAnswerPacket();
+			peer_connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
+	
 
 	public void serverConnected() {
 		try {
@@ -1039,6 +1098,87 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			connection.resetUploadedFileBytes();
 		} catch (NetworkManagerException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void receivedPublicKey(String peerIP, int peerPort, byte[] key) {
+		try {
+			if (!_config_manager.isSecurityIdenficiationEnabled())
+				return;
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager.receivedPublicKey(peerIP, peerPort, key);
+	}
+	
+	public void receivedSignature(String peerIP, int peerPort, byte[] signature) {
+		try {
+			if (!_config_manager.isSecurityIdenficiationEnabled())
+				return;
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager.receivedSignature(peerIP, peerPort, signature);
+	}
+	
+	public void receivedSecIdentState(String peerIP, int peerPort, byte state, byte[] challenge) {
+		try {
+			if (!_config_manager.isSecurityIdenficiationEnabled())
+				return;
+		} catch (ConfigurationManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		_peer_manager.receivedSecIdentState(peerIP,peerPort,state,challenge);
+	}
+	
+	public void sendPublicKeyPacket(String peerIP, int peerPort) {
+		JMPeerConnection connection;
+		try {
+			connection = getPeerConnection(peerIP, peerPort);
+			PublicKey public_key = _config_manager.getPublicKey();
+			byte[] key = public_key.getEncoded();
+			Packet packet = PacketFactory.getPublicKeyPacket(key);
+			connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+		
+	}
+	
+	public void sendSignaturePacket(String peerIP, int peerPort, byte[] challenge) {
+		JMPeerConnection connection;
+		try {
+			connection = getPeerConnection(peerIP, peerPort);
+			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
+			byte[] public_key = _peer_manager.getPublicKey(peer);
+			if (public_key == null)
+				throw new JMException("Don't have public key for peer "
+						+ peerIP + ":" + peerPort);
+			//Signature signature = Signature.getInstance("SHA1withRSA");
+			SHA1WithRSAEncryption signature = new SHA1WithRSAEncryption();
+			signature.initSign(_config_manager.getPrivateKey());
+			signature.update(public_key);
+			signature.update(challenge);
+			byte[] sign = signature.sign();
+			Packet packet = PacketFactory.getSignaturePacket(sign);
+			connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+		
+	}
+	
+	public void sendSecIdentStatePacket(String peerIP, int peerPort, boolean isPublicKeyNeeded, byte[] challenge) {
+		JMPeerConnection connection;
+		try {
+			connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getSecureIdentificationPacket(challenge, isPublicKeyNeeded);
+			connection.send(packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
 		}
 	}
 	
