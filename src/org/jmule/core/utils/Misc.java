@@ -42,8 +42,8 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:34:21 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:46 $$
  */
 public class Misc {
 	
@@ -236,13 +236,20 @@ public class Misc {
 		if(number.length() == 0) return false;
 		if(number.length() % 2 != 0) return false;
 		for(Character current_char : number.toCharArray()) {
-			char char_to_test = current_char.toUpperCase(current_char);
+			char char_to_test = Character.toUpperCase(current_char);
 			if ( '0' <= char_to_test && char_to_test <= '9' )
 				continue;
 			if ( 'A' <= char_to_test && char_to_test <= 'F' )
 				continue;
 			return false;
 		}
+		return true;
+	}
+	
+	public static boolean isEmpty(byte[] array) {
+		for (byte b : array)
+			if (b != 0)
+				return false;
 		return true;
 	}
 	
