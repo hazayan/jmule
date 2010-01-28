@@ -48,13 +48,13 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/25 20:12:13 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:57:07 $$
  */
 public class E2DKConstants {
 
 	public final static int ClientSoftware 				    = E2DKConstants.SO_JMULE;// JMule client identification!	
-	public final static int ClientVersion[]					= new int[3];
+	public final static byte ClientVersion[]				= new byte[3];
 	
 	public static int getSoftwareVersion() {
 		return ((ClientSoftware << 24) | (ClientVersion[0] << 17) | (ClientVersion[1] << 10) | (ClientVersion[2] << 7)); 
@@ -66,7 +66,10 @@ public class E2DKConstants {
 		if (versions.length < count)
 			count = versions.length;
 		for (int i = 0; i < count; i++)
-			ClientVersion[i] = Integer.parseInt(versions[i]);
+			ClientVersion[i] = Byte.parseByte(versions[i]+"");
+		
+		if (ClientVersion[2] > 7)
+			ClientVersion[2] = 7;
 	}
 	
 	public final static int ServerClientSoftware 		= E2DKConstants.SO_JMULE;
@@ -119,6 +122,11 @@ public class E2DKConstants {
 	public final static long PARTSIZE 					= 0x947000; //9728000
     public final static int  BLOCKSIZE 					= 184320;//184320 10240
     public final static int  MAX_OFFER_FILES			= 200;
+    
+    public final static int  SECURITY_IDENTIFICATION_BIT_KEY_LENGTH	= 384;
+    public final static int  MAX_SECURITY_KEY_LENGTH	= 80;
+    
+    
 	public final static byte PROTO_EDONKEY_TCP 			= (byte) 0xE3;
 	public final static byte PROTO_EDONKEY_SERVER_UDP 	= (byte) 0xE3;
 	public final static byte PROTO_EDONKEY_PEER_UDP 	= (byte) 0xC5;
@@ -253,7 +261,7 @@ public class E2DKConstants {
 		DefaultJMuleFeatures.put(UnicodeSupport, 1);
 		DefaultJMuleFeatures.put(UDPVer, 4);
 		DefaultJMuleFeatures.put(DataCompressionVer, 1);
-		DefaultJMuleFeatures.put(SupportSecIdent, 0);
+		DefaultJMuleFeatures.put(SupportSecIdent, 1);
 		DefaultJMuleFeatures.put(SourceExchange1Ver, 1);
 		DefaultJMuleFeatures.put(ExtendedRequestsVer,0);
 		DefaultJMuleFeatures.put(AcceptCommentVer, 0);
