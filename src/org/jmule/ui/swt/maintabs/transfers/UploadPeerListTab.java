@@ -59,8 +59,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 11, 2008
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/20 12:23:59 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:11:23 $
  */
 public class UploadPeerListTab extends CTabItem implements Refreshable{
 
@@ -241,11 +241,12 @@ public class UploadPeerListTab extends CTabItem implements Refreshable{
 			setRowText(object, SWTConstants.UPLOAD_PEER_LIST_UPLOAD_SPEED_COLUMN_ID, SpeedFormatter.formatSpeed(object.getUploadSpeed()));
 			
 			int rank = 0;
-			try {
-				rank = _upload_queue.getPeerPosition(object);
-			} catch (UploadQueueException e) {
-				e.printStackTrace();
-			}
+			if (_upload_queue.hasSlotPeer(object))
+				try {
+					rank = _upload_queue.getPeerPosition(object);
+				} catch (UploadQueueException e) {
+					e.printStackTrace();
+				}
 			String str="";
 			if (rank!=0) {
 				str = Localizer.getString("uploadinfowindow.tab.peerlist.column.status.queue",rank+"");

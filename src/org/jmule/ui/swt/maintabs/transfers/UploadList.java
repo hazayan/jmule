@@ -56,8 +56,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/11 16:56:29 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:11:23 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -213,7 +213,9 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	}
 
 	public void updateRow(UploadSession object) {
+		if (isDisposed()) return;
 		Image image = SWTImageRepository.getIconByExtension(object.getSharingName());
+				
 		setRowImage(object, SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, image);
 		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, object.getSharingName());
 		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));
@@ -227,9 +229,11 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	}
 
 	public void refresh() {
+		if (isDisposed()) return;
 		for(UploadSession session : upload_manager.getUploads()) {
 			if (hasObject(session))
-				updateRow(session);
+				if (getRow(session).isVisible())
+					updateRow(session);
 			else
 				if (session.sharingCompleteFile()) {
 					addRow(session);

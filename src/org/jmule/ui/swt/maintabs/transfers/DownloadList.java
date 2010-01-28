@@ -65,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/10 14:20:44 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:11:23 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -406,6 +406,7 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	public void updateRow(DownloadSession session) {
 		String file_name = session.getSharingName();
 		Image image = SWTImageRepository.getIconByExtension(file_name);
+		
 		setRowImage(session, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, image);
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, file_name);
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, FileFormatter.formatFileSize(session.getFileSize()));
