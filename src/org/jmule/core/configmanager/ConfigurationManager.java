@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.29 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:46:00 $$
+ * @version $$Revision: 1.30 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:47:10 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -49,6 +49,8 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final String       USER_HASH_FILE                 =     SETTINGS_DIR + File.separator + "preferences.dat";
 	public static final String       KAD_ID_FILE	                =     SETTINGS_DIR + File.separator + "preferenceskad.dat";
+	public static final String       CRYPTKEY_FILE	                =     SETTINGS_DIR + File.separator + "cryptkey.dat";
+	public static final String       CLIENTS_FILE	                =     SETTINGS_DIR + File.separator + "clients.met";
 	
 	public static final String       NICK_NAME       				=     "http://jmule.net";
 	
@@ -56,12 +58,13 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          UDP_PORT        				=     4662;
 	public static final boolean      UDP_ENABLED                    =     true;
 	public static final int          LOG_FILES_NUMBER   			=     10;
-	public static final int          LOG_FILE_SIZE      			=     2000 * 1024 * 1024;
+	public static final int          LOG_FILE_SIZE      			=     20 * 1024 * 1024;
 	
 	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 5;
 	public static final int          PEX_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 1;
 	public static final int          PEER_ACTIVITY_CHECH_INTERVAL   =     1000 * 30;
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
+	public static final int 		 PEERS_ACTIVITY_CHECK_INTERVAL	=     10000;
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
 	
 	// upload queue
@@ -70,7 +73,9 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final long 		 UPLOADQUEUE_REMOVE_TIMEOUT		= 	  1000 * 60 * 60;
 	public static final long 		 UPLOAD_SLOT_LOSE_TIMEOUT		= 	  1000 * 60;
 	public static final long 		 UPLOAD_QUEUE_CHECK_INTERVAL	= 	  1000 * 3;
-	
+	public static final long 		 UPLOAD_QUEUE_TRANSFER_CHECK_INTERVAL	= 	  1000;
+	public static final long		 UPLOAD_QUEUE_PAYLOAD_TIME		=	  1000 * 60 * 5;
+	public static final long 		 UPLOAD_QUEUE_PAYLOAD_CHECK_INTERVAL	= 	  1000;
 	
 	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 2;
 	public static final int          SERVER_LIST_STORE_INTERVAL     =     1000 * 60;
@@ -124,10 +129,7 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final String 		 CUSTOM_PARAMETER_KEY				   =     "CustomParameter";
 	
-/*	public static final String		 PUBLIC_KEY_KEY						   =	 "PublicKey";
-	public static final String 		 PUBLIC_EXPONENT_KEY				   = 	 "PublicExponent";
-	public static final String 		 PRIVATE_KEY_KEY					   =     "PrivateKey";
-	public static final String		 PRIVATE_EXPONENT_KEY				   =	 "PrivateExponent";*/
+	public static final	String		 SECURITY_IDENTIFICATION			   = 	 "SecurityIdentificationEnabled";
 	
 	public static final String 		 JKAD_ENABLED_KEY					   = 	"JKadEnabled";
 	public static final String 		 JKAD_ID_KEY						   = 	"JKadID";
@@ -278,7 +280,6 @@ public interface ConfigurationManager extends JMuleManager {
      */
     public long getUploadBandwidth() throws ConfigurationManagerException;
     
-    
     public boolean isJKadAutoconnectEnabled() throws ConfigurationManagerException;
     
     public void setAutoconnectJKad(boolean newStatus) throws ConfigurationManagerException;
@@ -296,6 +297,10 @@ public interface ConfigurationManager extends JMuleManager {
     public String getNicIP() throws ConfigurationManagerException;
     
     public void setNicIP(String nicIP) throws ConfigurationManagerException;
+    
+    public boolean isSecurityIdenficiationEnabled() throws ConfigurationManagerException;
+    
+    public void setSecurityIdentification(boolean enableSecutity) throws ConfigurationManagerException;
     
     /**
 	 * Adds a configuration listener

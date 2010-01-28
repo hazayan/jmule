@@ -22,11 +22,22 @@
  */
 package org.jmule.core.configmanager;
 
+import static org.jmule.core.jkad.utils.Utils.getRandomInt128;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -34,17 +45,20 @@ import java.util.Properties;
 import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
+import org.jmule.core.bccrypto.JDKKeyFactory;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.utils.AddressUtils;
+import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.NetworkUtils;
 
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/05 06:53:16 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:47:10 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
@@ -56,16 +70,54 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 	private ClientID client_id = null;
 	private List<ConfigurationListener> config_listeners = new LinkedList<ConfigurationListener>();
 		
-	public ConfigurationManagerImp() {
+	ConfigurationManagerImp() {
 		
 	}
-
 	
-	public void addConfigurationListener(ConfigurationListener listener) {
-
-		  config_listeners.add( listener );
+	public void initialize() {
+		try {
+			super.initialize();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		config_store = new Properties();
 	}
 
+	public void start() {
+		try {
+			super.start();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return ;
+		}
+		
+         try {
+			this.load();
+		} catch (ConfigurationManagerException cause) {
+			cause.printStackTrace();
+		}
+	}
+	
+	public void shutdown() {
+
+		try {
+			super.shutdown();
+		} catch (JMuleManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		 try {
+			this.save();
+		} catch (ConfigurationManagerException cause) {
+			cause.printStackTrace();
+		}
+	}
+	
+	protected boolean iAmStoppable() {
+		return false;
+	}
 	
 	public long getDownloadBandwidth() throws ConfigurationManagerException {
 		
@@ -184,27 +236,50 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		return user_hash;
 	}
 	
-	public void setUserHash(UserHash userHash) throws ConfigurationManagerException {
-		this.user_hash = userHash;
-		try {
-			storeUserHash();
-		} catch (Throwable cause) {
-			throw new ConfigurationManagerException(cause);
-		}
-		notifyPropertyChanged(USER_HASH_KEY, userHash);
-	}
 	public ClientID getJKadClientID()throws ConfigurationManagerException {
 		return client_id;
 	}
 	
-	public void setJKadClientID(ClientID newID) throws ConfigurationManagerException {
-		this.client_id = newID;
+	public void load() throws ConfigurationManagerException {
 		try {
-			storeClientID();
-		} catch (Throwable cause) {
-			throw new ConfigurationManagerException(cause);
+		   config_store.load( new FileInputStream( CONFIG_FILE ) );
+		   user_hash = null;
+		   try {
+			   loadUserHash();
+		   }catch(Throwable t) { t.printStackTrace(); }
+		   if (user_hash==null) {
+			   user_hash = UserHash.genNewUserHash();
+			   storeUserHash();
+			   notifyPropertyChanged(USER_HASH_KEY, user_hash);
+		   }
+		   
+		   client_id = null;
+		   try {
+			   loadClientID();
+		   }catch(Throwable t) { t.printStackTrace(); }
+		   if (client_id==null) {
+			   client_id = new ClientID(getRandomInt128());
+			   storeClientID();
+			   notifyPropertyChanged(JKAD_ID_KEY, client_id);
+		   }
+		   
+		   if (isSecurityIdenficiationEnabled()) {
+			   publicKey = null;
+			   privateKey = null;
+			   try {
+				   loadSecurityKeys();
+			   }catch(Throwable cause) { cause.printStackTrace(); }
+			   
+				if ((publicKey == null) || (privateKey == null)) {
+					try {
+						genSecurityKeys();
+						storeSecurityKeys();
+					}catch(Throwable cause) { cause.printStackTrace(); }
+			   }
+		   }
+		} catch(Throwable cause) {
+			throw new ConfigurationManagerException( cause );
 		}
-		notifyPropertyChanged(JKAD_ID_KEY, newID);
 	}
 	
 	private void storeUserHash() throws Throwable {
@@ -243,27 +318,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		input_channel.read(data);
 		client_id = new ClientID(data.array());
 	}
-	
-	public void load() throws ConfigurationManagerException {
-		try {
-		   config_store.load( new FileInputStream( CONFIG_FILE ) );
-		   user_hash = null;
-		   client_id = null;
-		   loadUserHash();
-		   loadClientID();
-		} catch(Throwable cause) {
-			throw new ConfigurationManagerException( cause );
-		}
-		
 
-	}
-	
-	public void removeConfigurationListener(ConfigurationListener listener) {
-		
-        config_listeners.remove( listener );
-	}
-
-	
 	public void save() throws ConfigurationManagerException {
        try {
     	   
@@ -274,7 +329,6 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
        }
 
 	}
-
 	
 	public void setDownloadBandwidth(long downloadBandwidth) throws ConfigurationManagerException {
 		 if (downloadBandwidth <= 0)
@@ -503,54 +557,6 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		
 	}
 	
-	
-	public void initialize() {
-		
-		try {
-			super.initialize();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		config_store = new Properties();
-	}
-
-	
-	public void shutdown() {
-
-		try {
-			super.shutdown();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		 try {
-			this.save();
-		} catch (ConfigurationManagerException cause) {
-			cause.printStackTrace();
-		}
-	}
-
-	
-	public void start() {
-		
-		try {
-			super.start();
-		} catch (JMuleManagerException e) {
-			e.printStackTrace();
-			return ;
-		}
-		
-         try {
-			this.load();
-		} catch (ConfigurationManagerException cause) {
-			cause.printStackTrace();
-		}
-	}
-
-	
 	public void setUDPEnabled(boolean enabled) throws ConfigurationManagerException  {	
 		config_store.setProperty( UDP_ENABLED_KEY, enabled + "" );
 		save(); 
@@ -588,97 +594,12 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		save();
 		notifyPropertyChanged(JKAD_ENABLED_KEY, newStatus);
 	}	
-
-	
-/*	private void loadKeys() {
-		BigInteger public_key, private_key;
-		BigInteger public_exponent, private_exponent;
-		if (config_store.containsKey(PUBLIC_KEY_KEY)&&config_store.containsKey(PRIVATE_KEY_KEY)) {
-			private_key = new BigInteger(config_store.getProperty(PRIVATE_KEY_KEY),16);
-			private_exponent = new BigInteger(config_store.getProperty(PRIVATE_EXPONENT_KEY),16);
-			
-			public_key = new BigInteger(config_store.getProperty(PUBLIC_KEY_KEY),16);
-			public_exponent = new BigInteger(config_store.getProperty(PUBLIC_EXPONENT_KEY),16);
-			
-			JMuleRSA.getSingleton().setKeys(public_key, public_exponent, private_key, private_exponent);
-		} else {
-			JMuleRSA.getSingleton().genKeys();
-			setKeys();
-			
-			save();
-		}
-
-	}*/
-	
-/*	private void setKeys() {
-		BigInteger publicKey, publicExponent;
-		BigInteger privateKey, privateExponent;
-		
-		publicKey = JMuleRSA.getSingleton().getPublicKey();
-		publicExponent = JMuleRSA.getSingleton().getPublicExponent();
-		
-		privateKey = JMuleRSA.getSingleton().getPrivateKey();
-		privateExponent = JMuleRSA.getSingleton().getPrivateExponent();
-		
-		config_store.setProperty(PUBLIC_KEY_KEY, publicKey.toString(16));
-		config_store.setProperty(PUBLIC_EXPONENT_KEY, publicExponent.toString(16));
-		config_store.setProperty(PRIVATE_KEY_KEY, privateKey.toString(16));
-		config_store.setProperty(PRIVATE_EXPONENT_KEY, privateExponent.toString(16));
-	}*/
-	
-
-	
-	private void notifyPropertyChanged(String property, Object new_value) {
-		
-		for(ConfigurationListener listener : config_listeners) {
-			
-			try {
-				    if( property == NICK_NAME_KEY ) listener.nickNameChanged((String)new_value); 
-				    
-			   else if( property == TCP_PORT_KEY ) listener.TCPPortChanged((Integer)new_value);
-				    
-			   else if( property == UDP_PORT_KEY ) listener.UDPPortChanged((Integer)new_value);
-				    
-			   else if( property == DOWNLOAD_BANDWIDTH_KEY ) listener.downloadBandwidthChanged((Long)new_value);
-				    
-			   else if( property == UPLOAD_BANDWIDTH_KEY ) listener.uploadBandwidthChanged((Long)new_value);
-				    
-			   else if( property == UDP_ENABLED_KEY ) listener.isUDPEnabledChanged((Boolean)new_value);
-				    
-			   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
-				    
-			   else if( property == WORKING_DIR_KEY ) listener.workingDirChanged((File)new_value);
-				    
-			   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
-				    
-			   else if( property == UPLOAD_LIMIT_KEY) listener.uploadLimitChanged((Long)new_value);
-				    
-			   else if( property == JKAD_ENABLED_KEY) listener.jkadStatusChanged((Boolean)new_value);
-				    
-			   else if( property == SERVER_LIST_UPDATE_ON_CONNECT_KEY) listener.updateServerListAtConnectChanged((Boolean)new_value);
-			   
-			   else if( property == JKAD_ID_KEY) listener.jkadIDChanged((ClientID) new_value);
-				    
-			   else if( property == NIC_NAME_KEY) listener.nicNameChanged((String) new_value);
-				    
-			   else if( property == NIC_IP_KEY) listener.nicIPChanged((String) new_value);
-				    
-			}catch(Throwable cause) {
-				cause.printStackTrace();
-			}
-			
-		}
-		
-	}
-
 	
 	public void setUpdateServerListAtConnect(boolean newStatus) throws ConfigurationManagerException {
 		config_store.setProperty(SERVER_LIST_UPDATE_ON_CONNECT_KEY, newStatus+"");
 		save();
 		notifyPropertyChanged(SERVER_LIST_UPDATE_ON_CONNECT_KEY, newStatus);
-		
 	}
-
 	
 	public boolean updateServerListAtConnect() throws ConfigurationManagerException {
 		String status = config_store.getProperty(SERVER_LIST_UPDATE_ON_CONNECT_KEY,DEFAULT_FALSE);
@@ -738,10 +659,208 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		notifyPropertyChanged(NIC_IP_KEY, nicIP);
     }
 
-	protected boolean iAmStoppable() {
-		
-		return false;
-	}
+    public boolean isSecurityIdenficiationEnabled() throws ConfigurationManagerException {
+    	String security_identification_string = config_store.getProperty(SECURITY_IDENTIFICATION, DEFAULT_TRUE);
+		boolean status;
+		try {
+			status = Boolean.parseBoolean(security_identification_string);
+		}catch(Throwable cause ) {
+			throw new ConfigurationManagerException( cause );
+		}
+		return status;
+    }
+    
+    public void setSecurityIdentification(boolean enableSecutity) throws ConfigurationManagerException {
+    	config_store.setProperty(SECURITY_IDENTIFICATION, enableSecutity+"");
+    	save();
+		notifyPropertyChanged(SECURITY_IDENTIFICATION, enableSecutity);
+    }	
 
+    private RSAPrivateKey privateKey = null;
+    private RSAPublicKey  publicKey = null;
+    
+    public RSAPublicKey getPublicKey() {
+    	return publicKey;
+    }
+    
+    public RSAPrivateKey getPrivateKey() {
+    	return privateKey;
+    }
+    
+    private void genSecurityKeys() throws Throwable {
+    	BigInteger PUBLIC_EXPONENT = BigInteger.valueOf(0x10001L);
+    	SecureRandom random = new SecureRandom();
+    	BigInteger p = null;
+        BigInteger q = null;
+        BigInteger modulus = null;
+        BigInteger private_exponent = null;
+        while(true){
+            try{
+                do{
+                    p = new BigInteger(E2DKConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH >>> 1, 85, random);
+                    q = new BigInteger(E2DKConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH >>> 1, 85, random);
+                    modulus = p.multiply(q);
+                } while( (p.compareTo(q) == 0) || (modulus.bitLength() != 384) );
+                private_exponent = PUBLIC_EXPONENT.modInverse(p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)));
+                break;  
+            } catch(ArithmeticException ae) {
+            }
+        }
+        RSAPublicKeySpec  pubKeySpec = new RSAPublicKeySpec(modulus, PUBLIC_EXPONENT);
+        RSAPrivateKeySpec pKeySpec = new RSAPrivateKeySpec(modulus, private_exponent);
+    	
+        JDKKeyFactory.RSA rsa_key_factory = new JDKKeyFactory.RSA();
+        privateKey  = (RSAPrivateKey)rsa_key_factory.engineGeneratePrivate(pKeySpec);
+        publicKey = (RSAPublicKey)rsa_key_factory.engineGeneratePublic(pubKeySpec);
+        
+    	/*KeyPair keyPair = null;
+    	KeyPairGenerator keyGenerator =  KeyPairGenerator.getInstance("RSA","BC");
+    	keyGenerator.initialize(E2DKConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH);
+    	while(true) {
+	    	keyPair = keyGenerator.generateKeyPair();
+	    	RSAPublicKey key = (RSAPublicKey) keyPair.getPublic();
+	    	if (!(key.getEncoded().length > E2DKConstants.MAX_SECURITY_KEY_LENGTH))
+	    		break;
+    	}
+    	publicKey = (RSAPublicKey) keyPair.getPublic();
+    	privateKey = (RSAPrivateKey) keyPair.getPrivate();*/
+    }
+    
+    private void loadSecurityKeys() throws Throwable {
+    	File key_file = new File(CRYPTKEY_FILE);
+    	if (!key_file.exists())
+    		return;
+    	FileChannel key_channel = new FileInputStream(key_file).getChannel();
+    	ByteBuffer data_length = Misc.getByteBuffer(1);
+    	key_channel.read(data_length);
+    	
+    	ByteBuffer modulus = Misc.getByteBuffer(data_length.get(0));
+    	key_channel.read(modulus);
+    	
+    	data_length.position(0);
+    	key_channel.read(data_length);
+    	
+    	ByteBuffer public_exponent = Misc.getByteBuffer(data_length.get(0));
+    	key_channel.read(public_exponent);
+    	
+    	data_length.position(0);
+    	key_channel.read(data_length);
+    	
+    	ByteBuffer private_exponent = Misc.getByteBuffer(data_length.get(0));
+    	key_channel.read(private_exponent);
+    	
+    	key_channel.close();
+    	
+    	JDKKeyFactory.RSA rsa_key_factory = new JDKKeyFactory.RSA();
+		privateKey = (RSAPrivateKey) rsa_key_factory
+				.engineGeneratePrivate(new RSAPrivateKeySpec(new BigInteger(
+						modulus.array()), new BigInteger(private_exponent
+						.array())));
+		publicKey = (RSAPublicKey) rsa_key_factory
+				.engineGeneratePublic(new RSAPublicKeySpec(new BigInteger(
+						modulus.array()), new BigInteger(public_exponent
+						.array())));
+    	
+    	/*KeyFactory keyFactory = KeyFactory.getInstance("RSA","BC");
+    	
+		publicKey = (RSAPublicKey) keyFactory
+				.generatePublic(new RSAPublicKeySpec(new BigInteger(modulus.array())
+								, new BigInteger(public_exponent.array())));
+		
+		privateKey = (RSAPrivateKey)keyFactory.generatePrivate(new RSAPrivateKeySpec(new BigInteger(modulus.array())
+								, new BigInteger(private_exponent.array())));  */
+    }
+    
+    private void storeSecurityKeys() throws Throwable {
+    	FileChannel key_channel = new FileOutputStream(CRYPTKEY_FILE).getChannel();
+    	ByteBuffer length = Misc.getByteBuffer(1);
+    	byte[] bmodulus = publicKey.getModulus().toByteArray();
+    	byte[] bpublic = publicKey.getPublicExponent().toByteArray();
+    	byte[] bprivate = privateKey.getPrivateExponent().toByteArray();
+    	
+    	length.put(Convert.intToByte(bmodulus.length));
+    	length.position(0);
+    	key_channel.write(length);
+    	ByteBuffer modulus = Misc.getByteBuffer(bmodulus.length);
+    	modulus.put(bmodulus);
+    	modulus.position(0);
+    	key_channel.write(modulus);
+    	
+    	length.position(0);
+    	length.put(Convert.intToByte(bpublic.length));
+    	length.position(0);
+    	key_channel.write(length);
+    	ByteBuffer public_key = Misc.getByteBuffer(bpublic.length);
+    	public_key.put(bpublic);
+    	public_key.position(0);
+    	key_channel.write(public_key);
+    	
+    	length.position(0);
+    	length.put(Convert.intToByte(bprivate.length));
+    	length.position(0);
+    	key_channel.write(length);
+    	
+    	ByteBuffer private_key = Misc.getByteBuffer(bprivate.length);
+    	private_key.put(bprivate);
+    	private_key.position(0);
+    	key_channel.write(private_key);
+    	
+    	key_channel.close();
+    }
+    
+	public void addConfigurationListener(ConfigurationListener listener) {
+		  config_listeners.add( listener );
+	}
+	
+	public void removeConfigurationListener(ConfigurationListener listener) {
+      config_listeners.remove( listener );
+	}
+	
+	
+	private void notifyPropertyChanged(String property, Object new_value) {
+		
+		for(ConfigurationListener listener : config_listeners) {
+			
+			try {
+				    if( property == NICK_NAME_KEY ) listener.nickNameChanged((String)new_value); 
+				    
+			   else if( property == TCP_PORT_KEY ) listener.TCPPortChanged((Integer)new_value);
+				    
+			   else if( property == UDP_PORT_KEY ) listener.UDPPortChanged((Integer)new_value);
+				    
+			   else if( property == DOWNLOAD_BANDWIDTH_KEY ) listener.downloadBandwidthChanged((Long)new_value);
+				    
+			   else if( property == UPLOAD_BANDWIDTH_KEY ) listener.uploadBandwidthChanged((Long)new_value);
+				    
+			   else if( property == UDP_ENABLED_KEY ) listener.isUDPEnabledChanged((Boolean)new_value);
+				    
+			   else if( property == SHARED_DIRECTORIES_KEY) listener.sharedDirectoriesChanged((List<File>)new_value);
+				    
+			   else if( property == WORKING_DIR_KEY ) listener.workingDirChanged((File)new_value);
+				    
+			   else if( property == DOWNLOAD_LIMIT_KEY) listener.downloadLimitChanged((Long)new_value);
+				    
+			   else if( property == UPLOAD_LIMIT_KEY) listener.uploadLimitChanged((Long)new_value);
+				    
+			   else if( property == JKAD_ENABLED_KEY) listener.jkadStatusChanged((Boolean)new_value);
+				    
+			   else if( property == SERVER_LIST_UPDATE_ON_CONNECT_KEY) listener.updateServerListAtConnectChanged((Boolean)new_value);
+			   
+			   else if( property == JKAD_ID_KEY) listener.jkadIDChanged((ClientID) new_value);
+				    
+			   else if( property == NIC_NAME_KEY) listener.nicNameChanged((String) new_value);
+				    
+			   else if( property == NIC_IP_KEY) listener.nicIPChanged((String) new_value);
+			   
+			   else if (property == SECURITY_IDENTIFICATION ) listener.securityIdentificationStatusChanged((Boolean)new_value);
+				    
+			}catch(Throwable cause) {
+				cause.printStackTrace();
+			}
+			
+		}
+		
+	}
+	
 
 }

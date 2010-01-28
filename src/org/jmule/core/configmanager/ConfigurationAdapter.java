@@ -30,8 +30,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on Aug 22, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/05 06:53:16 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 12:47:10 $
  */
 public abstract class ConfigurationAdapter implements ConfigurationListener {
 
@@ -92,6 +92,10 @@ public abstract class ConfigurationAdapter implements ConfigurationListener {
 	}
 	
 	public void nicIPChanged(String newNicIP) {
+		
+	}
+	
+	public void securityIdentificationStatusChanged(boolean newStatus) {
 		
 	}
 	

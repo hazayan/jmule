@@ -22,19 +22,20 @@
  */
 package org.jmule.core.configmanager;
 
-import org.jmule.core.edonkey.UserHash;
-import org.jmule.core.jkad.ClientID;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+
 
 /**
  * Created on Aug 10, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/05 06:53:16 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/28 12:47:10 $
  */
 public interface InternalConfigurationManager extends ConfigurationManager {
 	
-	 public void setJKadClientID(ClientID newID) throws ConfigurationManagerException;
-	 
-	 public void setUserHash(UserHash userHash) throws ConfigurationManagerException;
-
+	public RSAPrivateKey getPrivateKey();
+	
+	public RSAPublicKey getPublicKey();
+	
 }
