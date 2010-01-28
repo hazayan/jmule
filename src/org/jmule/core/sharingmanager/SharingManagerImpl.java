@@ -272,9 +272,15 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 						break;
 					if (server_shared_files.containsKey(fileHash))
 						break;
-					files_to_share.add(sharedFiles.get(fileHash));
+					SharedFile shared_file = sharedFiles.get(fileHash);
+					if (shared_file instanceof PartialFile) {
+						PartialFile partial_file = (PartialFile) shared_file;
+						if (partial_file.getAvailablePartCount()==0)
+							continue;
+					}
+					files_to_share.add(shared_file);
 					server_shared_files
-							.put(fileHash, sharedFiles.get(fileHash));
+							.put(fileHash, shared_file);
 				}
 				if (files_to_share.size() == 0) return ;
 								
