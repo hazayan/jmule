@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.30 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:47:10 $$
+ * @version $$Revision: 1.31 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/29 12:19:55 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -87,7 +87,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
 	
 	public static final int 		 PEER_CONNECTING_TIMEOUT		= 	  1000 * 40;
-	
+	public static final int			 ERRORS_TO_DISCONNECT_PEER		= 	  3;
 	public static final int 		 CONNECTION_TRAFIC_AVERAGE_CHECKS= 	  20;
 	
 	// the network

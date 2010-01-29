@@ -46,8 +46,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:05:58 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/29 12:19:53 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -136,18 +136,34 @@ public final class JMPeerConnection extends JMConnection {
 				stop_thread = true;
 			}
 
+			private int io_errors = 0;
+			
 			public void run() {
 				while (!stop_thread) {
 					try {
 						PacketReader.readPeerPacket(jm_socket_channel,usePort);
+						io_errors = 0;
 					} catch (Throwable cause) {
 						if (cause instanceof JMEndOfStreamException)
 							notifyDisconnect(); else
 						if (cause instanceof AsynchronousCloseException)
-							return ;
+							return ; // closed from another thread, just return don't notify
+						if (cause instanceof IOException) {
+							if (io_errors > ConfigurationManager.ERRORS_TO_DISCONNECT_PEER) {
+								try {
+									notifyDisconnect();
+									disconnect();
+								} catch (NetworkManagerException e) {
+									e.printStackTrace();
+								}
+								return ;
+							}
+							io_errors++;
+						}
 						if (cause instanceof MalformattedPacketException) {
 							_ip_filter.addPeer(getIPAddress(), BannedReason.BAD_PACKETS, _network_manager);
 							try {
+								notifyDisconnect();
 								disconnect();
 							} catch (NetworkManagerException e) {
 								e.printStackTrace();
