@@ -131,8 +131,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/29 17:41:49 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/01/30 19:39:52 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements
 		InternalJKadManager {
@@ -318,7 +318,10 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 	public void connect() {
 		setStatus(CONNECTING);
 		routing_table.start();
-
+		if (routing_table.getTotalContacts() == 0) {
+			setStatus(DISCONNECTED);
+			return;
+		}
 		lookup.start();
 		publisher.start();
 		search.start();
