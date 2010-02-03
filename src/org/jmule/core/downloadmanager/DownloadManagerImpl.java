@@ -55,8 +55,8 @@ import org.jmule.core.statistics.JMuleCoreStatsProvider;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/12 13:33:36 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 17:04:02 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -305,6 +305,16 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			}
 		}, (long)1, NEED_MORE_PEERS_INTERVAL);
 		
+	}
+	
+	public void jKadConnected() {
+		for(DownloadSession session : session_list.values()) 
+			session.jKadConnected();
+	}
+	
+	public void jKadDisconnected() {
+		for(DownloadSession session : session_list.values()) 
+			session.jKadDisconnected();
 	}
 
 	public void addDownloadPeers(FileHash fileHash, List<Peer> peerList) {

@@ -34,7 +34,7 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.5 $ Last changed by $Author: binary255 $ on $Date: 2010/01/07 12:22:01 $
+ * @version $Revision: 1.6 $ Last changed by $Author: binary255 $ on $Date: 2010/02/03 17:04:02 $
  */
 public interface InternalDownloadManager extends DownloadManager {
 
@@ -82,5 +82,10 @@ public interface InternalDownloadManager extends DownloadManager {
 	public void connectedToServer(Server server);
 	
 	public void disconnectedFromServer(Server server);
+
+	
+	public void jKadConnected();
+	
+	public void jKadDisconnected();
 	
 }
