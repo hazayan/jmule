@@ -36,6 +36,7 @@ import org.jmule.core.JMuleManagerException;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.indexer.Source;
 import org.jmule.core.jkad.search.Search;
@@ -52,7 +53,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.13 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/01/13 19:39:02 $$
+ * @version $$Revision: 1.14 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 14:05:59 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements
 		InternalSearchManager {
@@ -224,42 +225,49 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 																			// search
 		Int128 keyword_id;
 		try {
-			keyword_id = jkad_search.searchKeyword(kad_search_request
-					.getQuery(),
-					new org.jmule.core.jkad.search.SearchResultListener() {
-						SearchQuery searchquery = (SearchQuery) kad_search_request
-								.clone();
-						SearchResultItemList result_list = new SearchResultItemList();
-						SearchResult search_result = new SearchResult(
-								result_list, searchquery);
+			try {
+				keyword_id = jkad_search.searchKeyword(kad_search_request
+						.getQuery(),
+						new org.jmule.core.jkad.search.SearchResultListener() {
+							SearchQuery searchquery = (SearchQuery) kad_search_request
+									.clone();
+							SearchResultItemList result_list = new SearchResultItemList();
+							SearchResult search_result = new SearchResult(
+									result_list, searchquery);
 
-						public void processNewResults(List<Source> result) {
-							result_list.clear();
-							for (Source source : result) {
-								SearchResultItem item = new SearchResultItem(
-										source.getClientID().toFileHash(),
-										null, (short) 0, SearchQueryType.KAD);
-								for (Tag tag : source.getTagList()) {
-									item.addTag(tag);
+							public void processNewResults(List<Source> result) {
+								result_list.clear();
+								for (Source source : result) {
+									SearchResultItem item = new SearchResultItem(
+											source.getClientID().toFileHash(),
+											null, (short) 0, SearchQueryType.KAD);
+									for (Tag tag : source.getTagList()) {
+										item.addTag(tag);
+									}
+									result_list.add(item);
 								}
-								result_list.add(item);
+								notifySearchArrived(search_result);
 							}
-							notifySearchArrived(search_result);
-						}
 
-						public void searchFinished() {
-							notifySearchCompleted(searchquery);
-							//kad_search_request_queue.poll();
-							processKadSearchRequest();
+							public void searchFinished() {
+								notifySearchCompleted(searchquery);
+								//kad_search_request_queue.poll();
+								processKadSearchRequest();
 
-						}
+							}
 
-						public void searchStarted() {
-							notifySearchStarted(searchquery);
-						}
+							public void searchStarted() {
+								notifySearchStarted(searchquery);
+							}
 
-					});
-			kad_searches.put(kad_search_request, keyword_id);
+						});
+				kad_searches.put(kad_search_request, keyword_id);
+			} catch (JKadException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				notifySearchCompleted(kad_search_request);
+			}
+			
 
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
