@@ -72,11 +72,12 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:14:23 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 16:03:18 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
+	private Map<UserHash,Peer> peers_with_hash = new ConcurrentHashMap<UserHash, Peer>(); //used to optimize peer acces
 	private InternalNetworkManager _network_manager;
 	
 	private List<PeerManagerListener> listener_list = new LinkedList<PeerManagerListener>();
@@ -196,7 +197,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 					
 			}
 		};
-		maintenance_tasks.addTask(store_credits, 10000, true);
+		maintenance_tasks.addTask(store_credits, 60000, true);
 		
 		JMTimerTask credits_updater = new JMTimerTask() {
 			
@@ -396,13 +397,14 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	}
 	
 	private Peer getPeer(UserHash userHash) {
-		for(Peer peer : peers.values()) {
+		return peers_with_hash.get(userHash);
+		/*for(Peer peer : peers.values()) {
 			if (peer.getUserHash() == null)
 				continue;
 			if (peer.getUserHash().equals(userHash))
 				return peer;
 		}
-		return null;
+		return null;*/
 	}
 	
 	public Peer newPeer(String ip, int port, PeerSource source) throws PeerManagerException {
@@ -502,6 +504,8 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		_network_manager.sendEMuleHelloPacket(peer.getIP(), peer.getPort());
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
+		
+		peers_with_hash.put(userHash, peer);
 		notifyPeerConnected(peer);
 	}
 
@@ -539,6 +543,9 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
+		
+		peers_with_hash.put(userHash, peer);
+		
 		notifyPeerConnected(peer);
 	}
 	
@@ -592,6 +599,8 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		peer.setStatus(PeerStatus.DISCONNECTED);
 		_download_manager.peerDisconnected(peer);
 		_upload_manager.peerDisconnected(peer);
+		if (peer.getUserHash()!=null)
+			peers_with_hash.remove(peer.getUserHash());
 		notifyPeerDisconnected(peer);
 	}
 
