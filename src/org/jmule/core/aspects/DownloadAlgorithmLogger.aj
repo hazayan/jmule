@@ -24,18 +24,18 @@ package org.jmule.core.aspects;
 
 import java.util.logging.Logger;
 
-import org.jmule.core.downloadmanager.strategy.DownloadStrategyImpl;
+import org.jmule.core.downloadmanager.strategy.DefaultDownloadStrategy;
 import org.jmule.core.utils.Misc;
 /**
  * Created on Sep, 13 2008 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 17:06:32 $$
  */
 public aspect DownloadAlgorithmLogger {
 	private Logger log = Logger.getLogger("org.jmule.core.downloadmanager.algorithm.DownloadAlgorithm");
 	
-	after() throwing (Throwable t): execution (* DownloadStrategyImpl.*(..)) {
+	after() throwing (Throwable t): execution (* DefaultDownloadStrategy.*(..)) {
 		log.warning(Misc.getStackTrace(t));
 	}
 	
