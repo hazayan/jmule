@@ -44,7 +44,8 @@ import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategy;
-import org.jmule.core.downloadmanager.strategy.DownloadStrategyImpl;
+import org.jmule.core.downloadmanager.strategy.DownloadStrategyFactory;
+import org.jmule.core.downloadmanager.strategy.DownloadStrategyFactory.STRATEGY;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
@@ -55,6 +56,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.indexer.Source;
 import org.jmule.core.jkad.search.Search;
@@ -88,8 +90,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.42 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:55:42 $$
+ * @version $$Revision: 1.43 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 17:04:18 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -104,7 +106,7 @@ public class DownloadSession implements JMTransferSession {
 	private PartialFile sharedFile;
 	private FilePartStatus partStatus;
 	private DownloadStatus sessionStatus = DownloadStatus.STOPPED;
-	private DownloadStrategy downloadStrategy = new DownloadStrategyImpl();
+	private DownloadStrategy downloadStrategy = DownloadStrategyFactory.getStrategy(STRATEGY.DEFAULT);
 	private FileRequestList fileRequestList = new FileRequestList();
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
 	private DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
@@ -241,66 +243,8 @@ public class DownloadSession implements JMTransferSession {
 				ConfigurationManager.PEX_SOURCES_QUERY_INTERVAL, true);
 		
 		if (jkad.isConnected()) {
-			kad_source_search_task = new JMTimerTask() {
-				Int128 search_id;
-				Search search = Search.getSingleton();
-
-				public void run() {
-					byte[] hash = sharedFile.getFileHash().getHash().clone();
-					org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
-					search_id = new Int128(hash);
-					if (search.hasSearchTask(search_id))
-						return;
-					Search.getSingleton().searchSources(search_id,
-							new SearchResultListener() {
-								public void processNewResults(
-										List<Source> result) {
-									List<Peer> peer_list = new LinkedList<Peer>();
-									for (Source source : result) {
-										String address = source.getAddress()
-												.toString();
-										int tcpPort = source.getTCPPort();
-										if (tcpPort == -1) continue;
-										if (hasPeer(address, tcpPort)) continue;
-										Peer peer;
-										if (!peer_manager.hasPeer(address, tcpPort)) {
-											try {
-												peer = peer_manager.newPeer(
-														address, tcpPort,
-														PeerSource.KAD);
-												peer_list.add(peer);
-											} catch (PeerManagerException e) {
-												e.printStackTrace();
-												continue;
-											} 
-										} else {
-											try {
-												peer = peer_manager.getPeer(address, tcpPort);
-												peer_list.add(peer);
-											} catch (PeerManagerException e) {
-												e.printStackTrace();
-												continue;
-											}
-										}
-										
-										
-									}
-									addDownloadPeers(peer_list);
-								}
-
-								public void searchFinished() {
-
-								}
-
-								public void searchStarted() {
-
-								}
-
-							});
-				}
-			};
-			download_tasks.addTask(kad_source_search_task,
-					JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, true);
+			createKadLookupTask();
+			download_tasks.addTask(kad_source_search_task,JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, true);
 			kad_source_search_task.run();
 		}
 		this.setStatus(DownloadStatus.STARTED);
@@ -309,7 +253,54 @@ public class DownloadSession implements JMTransferSession {
 		queueSourcesFromServer();
 
 	}
+	
+	synchronized void stopDownload() {
+		stopDownload(true);
+	}
 
+	synchronized void stopDownload(boolean saveDownloadStatus) {
+		compressedFileChunks.clear();
+
+		download_tasks.stop();
+		
+	/* for (Peer peer : peer_list.values())
+			if (peer.isConnected())
+				network_manager.sendEndOfDownload(peer.getIP(), peer.getPort(),
+						getFileHash());*/
+
+		session_peers.clear();
+		download_status_list.clear();
+		partStatus.clear();
+		fileRequestList.clear();
+
+		setStatus(DownloadStatus.STOPPED);
+		if (saveDownloadStatus)
+			sharedFile.markDownloadStopped();
+	}
+	
+	void cancelDownload() {
+		if (isStarted())
+			stopDownload(false);
+		SharingManagerSingleton.getInstance().removeSharedFile(
+				sharedFile.getFileHash());
+	}
+	
+	void jKadConnected() {
+		if (kad_source_search_task == null) {
+			createKadLookupTask();
+			download_tasks.addTask(kad_source_search_task,JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, true);
+			kad_source_search_task.run();//?
+		}
+	}
+	
+	void jKadDisconnected() {
+		if (kad_source_search_task == null)
+			return;
+		download_tasks.removeTask(kad_source_search_task);
+		kad_source_search_task = null;
+	}
+	
+	
 	void queueSourcesFromServer() {
 		if (ServerManagerSingleton.getInstance().isConnected())
 			network_manager.requestSourcesFromServer(getFileHash(), sharedFile
@@ -683,35 +674,68 @@ public class DownloadSession implements JMTransferSession {
 		this.sessionStatus = status;
 	}
 	
-	synchronized void stopDownload() {
-		stopDownload(true);
-	}
+	private void createKadLookupTask() {
+		kad_source_search_task = new JMTimerTask() {
+			Int128 search_id;
+			Search search = Search.getSingleton();
 
-	synchronized void stopDownload(boolean saveDownloadStatus) {
-		compressedFileChunks.clear();
+			public void run() {
+				byte[] hash = sharedFile.getFileHash().getHash().clone();
+				org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
+				search_id = new Int128(hash);
+				if (search.hasSearchTask(search_id))
+					return;
+				try {
+					Search.getSingleton().searchSources(search_id,
+							new SearchResultListener() {
+								public void processNewResults(List<Source> result) {
+									List<Peer> peer_list = new LinkedList<Peer>();
+									for (Source source : result) {
+										String address = source.getAddress()
+												.toString();
+										int tcpPort = source.getTCPPort();
+										if (tcpPort == -1) continue;
+										if (hasPeer(address, tcpPort)) continue;
+										Peer peer;
+										if (!peer_manager.hasPeer(address, tcpPort)) {
+											try {
+												peer = peer_manager.newPeer(
+														address, tcpPort,
+														PeerSource.KAD);
+												peer_list.add(peer);
+											} catch (PeerManagerException e) {
+												e.printStackTrace();
+												continue;
+											} 
+										} else {
+											try {
+												peer = peer_manager.getPeer(address, tcpPort);
+												peer_list.add(peer);
+											} catch (PeerManagerException e) {
+												e.printStackTrace();
+												continue;
+											}
+										}
+										
+										
+									}
+									addDownloadPeers(peer_list);
+								}
 
-		download_tasks.stop();
-		
-	/* for (Peer peer : peer_list.values())
-			if (peer.isConnected())
-				network_manager.sendEndOfDownload(peer.getIP(), peer.getPort(),
-						getFileHash());*/
+								public void searchFinished() {
 
-		session_peers.clear();
-		download_status_list.clear();
-		partStatus.clear();
-		fileRequestList.clear();
+								}
 
-		setStatus(DownloadStatus.STOPPED);
-		if (saveDownloadStatus)
-			sharedFile.markDownloadStopped();
-	}
-	
-	void cancelDownload() {
-		if (isStarted())
-			stopDownload(false);
-		SharingManagerSingleton.getInstance().removeSharedFile(
-				sharedFile.getFileHash());
+								public void searchStarted() {
+
+								}
+
+							});
+				} catch (JKadException e) {
+					e.printStackTrace();
+				}
+			}
+		};
 	}
 
 	public FileHash getFileHash() {
