@@ -22,20 +22,20 @@
  */
 package org.jmule.core.jkad.utils.timer;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class Timer {
 
 	private static Timer singleton = null;
 	
-	private List<TaskExecutor> taskList = new CopyOnWriteArrayList<TaskExecutor>();
+	private Collection<TaskExecutor> taskList = new ConcurrentLinkedQueue<TaskExecutor>();
 	
 	public static Timer getSingleton() {
 		if (singleton == null)

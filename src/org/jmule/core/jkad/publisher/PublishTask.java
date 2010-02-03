@@ -24,6 +24,7 @@ package org.jmule.core.jkad.publisher;
 
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 import org.jmule.core.networkmanager.JMUDPConnection;
 
@@ -31,8 +32,8 @@ import org.jmule.core.networkmanager.JMUDPConnection;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:42:51 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public abstract class PublishTask {
 
@@ -71,7 +72,7 @@ public abstract class PublishTask {
 		lastpublishTime = System.currentTimeMillis();
 	}
 	
-	public abstract void start();
+	public abstract void start() throws JKadException;
 	public abstract void stop();
 
 	public boolean isStarted() {

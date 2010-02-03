@@ -57,6 +57,7 @@ import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.ContactType;
@@ -76,8 +77,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -136,7 +137,11 @@ public class RoutingTable {
 							}
 							
 						};
-						Lookup.getSingleton().addLookupTask(lookup_new_contacts);
+						try {
+							Lookup.getSingleton().addLookupTask(lookup_new_contacts);
+						} catch (JKadException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 							

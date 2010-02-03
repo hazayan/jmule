@@ -29,17 +29,17 @@ import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CONTACT_COUNT;
 import static org.jmule.core.jkad.JKadConstants.SEARCH_CONTACTS;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.jkad.packet.PacketFactory;
@@ -54,25 +54,23 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class Lookup {
 
 	private static Lookup singleton = null;
 	
 	private Map<Int128, LookupTask> lookupTasks = new ConcurrentHashMap<Int128, LookupTask>();
-	private long currentRunningTasks = 0;
-	private Queue<LookupTask> lookupTasksToRun = new ConcurrentLinkedQueue<LookupTask>();
 	
 	private RoutingTable routing_table = null;
-	private InternalNetworkManager _network_manager;
+	private InternalNetworkManager _network_manager = null;
 	
-	private Task lookupCleaner;
+	private Task lookupCleaner = null;
 	
 	private boolean isStarted = false;
 	
-	private List<LookupListener> listenerList = new CopyOnWriteArrayList<LookupListener>();
+	private Collection<LookupListener> listenerList = new ConcurrentLinkedQueue<LookupListener>();
 	
 	public boolean isStarted() {
 		return isStarted;
@@ -87,19 +85,14 @@ public class Lookup {
 	private Lookup() {
 		lookupCleaner  = new Task() {
 			public void run() {
-				runNextTask();
 				for(Int128 key : lookupTasks.keySet()) {
 					LookupTask task = lookupTasks.get(key);
 					if ((System.currentTimeMillis() - task.getResponseTime() > task.getTimeOut())
-					|| (System.currentTimeMillis() - task.getStartTime() > JKadConstants.MAX_LOOKUP_RUNNING_TIME)){
-						
+							|| (System.currentTimeMillis() - task.getStartTime() > JKadConstants.MAX_LOOKUP_RUNNING_TIME)){
 						task.lookupTimeout();
 						task.stopLookup();
 						lookupTasks.remove(key);
 						notifyListeners(task, LookupStatus.REMOVED);
-						if (currentRunningTasks>0)
-							currentRunningTasks--;
-						runNextTask();
 					}
 				}
 				
@@ -109,6 +102,20 @@ public class Lookup {
 	}
 	
 	public Map<Int128,LookupTask> getLookupTasks() { return lookupTasks; }
+	
+	public String toString() {
+		String result = " [\n ";
+		
+		result += "Lookup tasks : \n";
+		
+		for(Int128 key : lookupTasks.keySet()) {
+			result += key.toHexString() + " " + lookupTasks.get(key) + "\n";
+		}
+		
+		result += " ] ";
+		
+		return result;
+	}
 	
 	public void start() {
 		isStarted = true;
@@ -122,20 +129,17 @@ public class Lookup {
 		isStarted = false;
 		for(Int128 key : lookupTasks.keySet()) {
 			LookupTask task = lookupTasks.get(key);
-			lookupTasksToRun.remove(task);
-			if (task.isLookupStarted()) {
-				task.stopLookup();
-			if (currentRunningTasks>0)
-				currentRunningTasks--;
-			}
 			
+			task.stopLookup();
 			lookupTasks.remove(key);
 			notifyListeners(task, LookupStatus.REMOVED);
 		}
 		Timer.getSingleton().removeTask(lookupCleaner);
 	}
 
-	public void addLookupTask(LookupTask task) {		
+	public void addLookupTask(LookupTask task) throws JKadException {
+		if (lookupTasks.containsKey(task.getTargetID()))
+			throw new JKadException("Already has lookup task with : " + task.getTargetID().toHexString());
 		lookupTasks.put(task.getTargetID(), task);
 		notifyListeners(task, LookupStatus.ADDED);
 		runTask(task);
@@ -144,13 +148,9 @@ public class Lookup {
 	public void removeLookupTask(Int128 targetID) {
 		if (lookupTasks.containsKey(targetID)) {
 			LookupTask task = lookupTasks.get(targetID);
-			lookupTasksToRun.remove(task);
-			if (task.isLookupStarted()) { task.stopLookup(); 
-			if (currentRunningTasks>0)
-				currentRunningTasks--;}
+			task.stopLookup();
 			lookupTasks.remove(targetID);
 			notifyListeners(task, LookupStatus.REMOVED);
-			runNextTask();
 		}
 	}
 	
@@ -158,27 +158,14 @@ public class Lookup {
 		return lookupTasks.containsKey(targetID);
 	}
 	
-	private void runTask(LookupTask task) {
-		if (currentRunningTasks<CONCURRENT_LOOKUP_COUNT) {
-			currentRunningTasks++;
-			task.startLookup();
-			notifyListeners(task, LookupStatus.STARTED);
-		}else
-			lookupTasksToRun.add(task);
-	}
 	
-	private void runNextTask() {
-		if (currentRunningTasks >= CONCURRENT_LOOKUP_COUNT)
-			return;
-		LookupTask task = lookupTasksToRun.poll();
-		if (task == null) return ;
-		currentRunningTasks++;
+	private void runTask(LookupTask task) {
 		task.startLookup();
 		notifyListeners(task, LookupStatus.STARTED);
 	}
 	
 	public int getLookupLoad() {
-		return (int) ((currentRunningTasks * 100) / CONCURRENT_LOOKUP_COUNT);
+		return (int) ((lookupTasks.size() * 100) / CONCURRENT_LOOKUP_COUNT);
 	}
 	
 	public void processRequest(InetSocketAddress sender, RequestType requestType, Int128 targetID, Int128 sourceID, int version ) {
@@ -219,7 +206,7 @@ public class Lookup {
 		}
 	}
 	
-	public void processResponse(InetSocketAddress sender, Int128 targetID, List<KadContact> contactList) {
+	public void processResponse(final InetSocketAddress sender, final Int128 targetID, final List<KadContact> contactList) {
 		LookupTask listener = lookupTasks.get(targetID);
 		if (listener == null) return ;
 		listener.processResults(new ContactAddress(sender), contactList);
@@ -245,6 +232,4 @@ public class Lookup {
 				listener.taskRemoved(lookup);
 		}
 	}
-	
-	
 }

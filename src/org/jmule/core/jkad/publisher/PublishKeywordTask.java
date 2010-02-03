@@ -29,6 +29,7 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
@@ -41,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class PublishKeywordTask extends PublishTask {
 
@@ -54,7 +55,7 @@ public class PublishKeywordTask extends PublishTask {
 		this.tagList = new TagList(tagList);
 	}
 	
-	public void start() {
+	public void start() throws JKadException {
 		if (lookup_task!=null)
 			if (lookup_task.isLookupStarted()) return;
 		isStarted = true;

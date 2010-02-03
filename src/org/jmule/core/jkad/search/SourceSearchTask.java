@@ -33,6 +33,7 @@ import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
@@ -45,8 +46,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class SourceSearchTask extends SearchTask {
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
@@ -56,13 +57,13 @@ public class SourceSearchTask extends SearchTask {
 		super(searchID);
 	}
 
-	public void startSearch() {
+	public void startSearch() throws JKadException {
 		isStarted = true;
 		
 		lookup_task = new LookupTask(RequestType.FIND_NODE, searchID, JKadConstants.toleranceZone) {
 			public void lookupTimeout() {
-				isStarted = false;
-				timeOut = JKadConstants.SEARCH_SOURCES_TIMEOUT;
+				System.out.println("lookupTimeout");
+				
 			}
 
 			public void processToleranceContacts(ContactAddress sender,
@@ -89,6 +90,7 @@ public class SourceSearchTask extends SearchTask {
 			}
 			
 			public void stopLookupEvent() {
+				System.out.println("stopLookupEvent");
 				stopSearch();
 			}
 			
@@ -101,10 +103,11 @@ public class SourceSearchTask extends SearchTask {
 
 	public void stopSearch() {
 		if (!isStarted) return;
-		isStarted = true;
+		isStarted = false;
+		
 		if (listener!=null)
 			listener.searchFinished();
-		Lookup.getSingleton().removeLookupTask(searchID);
+		//Lookup.getSingleton().removeLookupTask(searchID);
 		Search.getSingleton().removeSearchID(searchID);
 	}
 

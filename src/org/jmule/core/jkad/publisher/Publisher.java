@@ -33,14 +33,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 19:40:04 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 
 public class Publisher {
@@ -127,12 +128,10 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				System.out.println("taskStopped " + task.getPublishID().toHexString() + " ");
 				removeSourceTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
-				System.out.println("taskTimeOut " + task.getPublishID().toHexString() + " ");
 				removeSourceTask(task.getPublishID());
 			}
 			
@@ -191,32 +190,31 @@ public class Publisher {
 			sourceTasks.get(key).stop();
 	}
 	
-	public void publishKeyword(Int128 fileID, List<Tag> tagList) {
+	public void publishKeyword(Int128 fileID, List<Tag> tagList) throws JKadException {
 		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID, tagList);
-		keywordTasks.put(fileID, task);
-		notifyListeners(task, TaskStatus.ADDED);
 		
 		task.start();
+		keywordTasks.put(fileID, task);
+		notifyListeners(task, TaskStatus.ADDED);
 		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
 
 		
-	public void publishSource(Int128 fileID, List<Tag> tagList)  {
+	public void publishSource(Int128 fileID, List<Tag> tagList) throws JKadException  {
 		PublishSourceTask task = new PublishSourceTask(sourceTaskListener,fileID, tagList);
-		sourceTasks.put(fileID, task);
-		notifyListeners(task, TaskStatus.ADDED);
 		
 		task.start();
+		sourceTasks.put(fileID, task);
+		notifyListeners(task, TaskStatus.ADDED);
 		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
-	public void publishNote(Int128 fileID, List<Tag> tagList) {
+	public void publishNote(Int128 fileID, List<Tag> tagList) throws JKadException {
 		PublishNoteTask task = new PublishNoteTask(noteTaskListener,fileID, tagList);
+		task.start();
 		noteTasks.put(fileID, task);
 		notifyListeners(task, TaskStatus.ADDED);
-		
-		task.start();
 		notifyListeners(task, TaskStatus.STARTED);
 	}
 	

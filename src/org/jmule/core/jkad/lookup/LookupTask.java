@@ -30,10 +30,10 @@ import static org.jmule.core.jkad.JKadConstants.LOOKUP_TASK_DEFAULT_TIMEOUT;
 import static org.jmule.core.jkad.utils.Utils.getNearestContact;
 import static org.jmule.core.jkad.utils.Utils.inToleranceZone;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.jkad.ContactAddress;
@@ -54,8 +54,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public abstract class LookupTask {
 	
@@ -65,8 +65,8 @@ public abstract class LookupTask {
 	protected long toleranceZone;
 	protected long timeOut =  LOOKUP_TASK_DEFAULT_TIMEOUT;
 	
-	protected List<KadContact> possibleContacts = new Vector<KadContact> ();
-	protected List<KadContact> usedContacts = new Vector<KadContact>();
+	protected List<KadContact> possibleContacts = new ArrayList<KadContact> ();
+	protected List<KadContact> usedContacts = new ArrayList<KadContact>();
 	protected Map<ContactAddress, RequestedContact> requestedContacts = new ConcurrentHashMap<ContactAddress, RequestedContact>();
 	
 	protected RoutingTable routingTable;
@@ -147,8 +147,6 @@ public abstract class LookupTask {
 		requestedContacts.clear();
 	}
 	
-	public abstract void stopLookupEvent();
-	
 	public void  processResults(ContactAddress sender, List<KadContact> results) {
 		responseTime = System.currentTimeMillis();
 		
@@ -219,6 +217,8 @@ public abstract class LookupTask {
 	public void setToleranceZone(long toleranceZone) {
 		this.toleranceZone = toleranceZone;
 	};
+	
+	public abstract void stopLookupEvent();
 	
 	/**
 	 * Lookup process timeout

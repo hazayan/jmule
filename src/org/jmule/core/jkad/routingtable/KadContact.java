@@ -40,8 +40,8 @@ import org.jmule.core.jkad.utils.Utils;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:09:16 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 
 public class KadContact {
@@ -157,7 +157,9 @@ public class KadContact {
 	public boolean equals(Object object) {
 		if (object == null) return false;
 		if (!(object instanceof KadContact)) return false;
-		return hashCode()==object.hashCode();
+		//return hashCode()==object.hashCode();
+		KadContact contact = (KadContact) object;
+		return contactID.equals(contact.getContactID());
 	}
 	
 	public int hashCode() {

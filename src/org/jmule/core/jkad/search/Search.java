@@ -23,11 +23,13 @@
 package org.jmule.core.jkad.search;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.indexer.Source;
 import org.jmule.core.jkad.utils.Convert;
 import org.jmule.core.jkad.utils.MD4;
@@ -36,8 +38,8 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:46:07 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class Search {
 	
@@ -76,11 +78,11 @@ public class Search {
 		return isStarted;
 	}
 	
-	public Int128 searchKeyword(String keyword) {
+	public Int128 searchKeyword(String keyword) throws JKadException {
 		return searchKeyword(keyword, null);
 	}
 	
-	public Int128 searchKeyword(String keyword, SearchResultListener listener) {
+	public Int128 searchKeyword(String keyword, SearchResultListener listener) throws JKadException {
 		byte[] tmp = MD4.MD4Digest(keyword.getBytes()).toByteArray();
 		Convert.updateSearchID(tmp);
 		Int128 keywordID = new Int128(tmp);
@@ -95,11 +97,11 @@ public class Search {
 		return keywordID;
 	}
 
-	public void searchSources(Int128 fileID) {
+	public void searchSources(Int128 fileID) throws JKadException {
 		searchSources(fileID, null);
 	}
 	
-	public void searchSources(Int128 fileID,SearchResultListener listener) {
+	public void searchSources(Int128 fileID,SearchResultListener listener) throws JKadException {
 		if (searchTasks.containsKey(fileID)) return;
 		SourceSearchTask search_task = new SourceSearchTask(fileID);
 	
@@ -109,11 +111,11 @@ public class Search {
 		search_task.startSearch();
 	}
 
-	public void searchNotes(Int128 fileID) {
+	public void searchNotes(Int128 fileID) throws JKadException {
 		searchNotes(fileID,null);
 	}
 	
-	public void searchNotes(Int128 fileID,SearchResultListener listener) {
+	public void searchNotes(Int128 fileID,SearchResultListener listener) throws JKadException {
 		byte[] t = fileID.toByteArray();
 		Convert.updateSearchID(t);
 		Int128 updatedID = new Int128(t);
@@ -124,18 +126,22 @@ public class Search {
 		search_task.startSearch();
 	}
 	
-	public void processResults(InetSocketAddress sender, Int128 targetID, List<Source> sources) {
-		SearchTask task = searchTasks.get(targetID);
-		if (task == null) return ;
-		
-		task.addSearchResult(sources);
+	public void processResults(InetSocketAddress sender, final Int128 targetID, final List<Source> sources) {
+		new Thread(new Runnable() {
+			public void run() {
+				SearchTask task = searchTasks.get(targetID);
+				if (task == null) return ;
+				
+				task.addSearchResult(sources);
+			}
+		}).start();
 	}
 	
 	public boolean hasSearchTask(Int128 searchID) {
 		return searchTasks.containsKey(searchID);
 	}
 	
-	public List<Source> getSearchResults(Int128 searchID) {
+	public Collection<Source> getSearchResults(Int128 searchID) {
 		return searchTasks.get(searchID).getSearchResults();
 	}
 
@@ -146,7 +152,22 @@ public class Search {
 	}
 	
 	void removeSearchID(Int128 searchID) {
+		System.out.println("Remove ID : " + searchID.toHexString());
 		searchTasks.remove(searchID);
+	}
+	
+	public String toString() {
+		String result = " [ ";
+		
+		for(Int128 key : searchTasks.keySet()) {
+			SearchTask task = searchTasks.get(key);
+			result += "Task ID : " + key.toHexString() + "\n";
+			result += "Value   : \n" + task + "\n";
+		}
+		
+		result += " ] ";
+		
+		return result;
 	}
 	
 }

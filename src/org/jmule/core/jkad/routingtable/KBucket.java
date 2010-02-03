@@ -37,8 +37,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:27:50 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class KBucket {
 	
@@ -97,13 +97,15 @@ public class KBucket {
 	 * @param contactCount
 	 * @return
 	 */
-	public synchronized List<KadContact> getNearestContacts(Int128 targetID, int contactCount) {
+	public List<KadContact> getNearestContacts(Int128 targetID, int contactCount) {
 		List<KadContact> list = new LinkedList<KadContact>();
+
 		do {		
 			KadContact contact = getNearestContact(targetID, contact_list, list); 
 			if (contact == null) break;
 			list.add(contact);
-		}while(list.size()<contactCount);
+		} while (list.size() < contactCount);
+		
 		return list;
 	}
 	

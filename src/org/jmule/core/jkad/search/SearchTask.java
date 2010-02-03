@@ -22,24 +22,27 @@
  */
 package org.jmule.core.jkad.search;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.indexer.Source;
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:21 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public abstract class SearchTask {
 
 	protected Int128 searchID;
 
-	protected List<Source> searchResults = new CopyOnWriteArrayList<Source>();
+	protected Collection<Source> searchResults = new ConcurrentLinkedQueue<Source>();
 	protected boolean isStarted = false;
 	
 	protected SearchResultListener listener = null;
@@ -49,7 +52,7 @@ public abstract class SearchTask {
 		this.searchID = searchID;
 	}
 
-	public abstract void startSearch();
+	public abstract void startSearch() throws JKadException;
 	public abstract void stopSearch();
 	
 	public void setSearchResultListener(SearchResultListener listener) {
@@ -60,7 +63,7 @@ public abstract class SearchTask {
 		return searchID;
 	}
 
-	public List<Source> getSearchResults() {
+	public Collection<Source> getSearchResults() {
 		return searchResults;
 	}
 

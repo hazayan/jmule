@@ -31,6 +31,7 @@ import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
@@ -43,8 +44,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 18:42:15 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class NoteSearchTask extends SearchTask {
 
@@ -55,12 +56,11 @@ public class NoteSearchTask extends SearchTask {
 		
 	}
 
-	public void startSearch() {
+	public void startSearch() throws JKadException {
 		isStarted = true;
 			
 		lookup_task = new LookupTask(RequestType.FIND_VALUE, searchID, JKadConstants.toleranceZone) {
 			public void lookupTimeout() {
-				isStarted = false;
 			}
 
 			public void processToleranceContacts(ContactAddress sender,
@@ -103,7 +103,7 @@ public class NoteSearchTask extends SearchTask {
 		isStarted = false;
 		if (listener!=null)
 			listener.searchFinished();
-		Lookup.getSingleton().removeLookupTask(searchID);
+	//	Lookup.getSingleton().removeLookupTask(searchID);
 		Search.getSingleton().removeSearchID(searchID);
 	}
 

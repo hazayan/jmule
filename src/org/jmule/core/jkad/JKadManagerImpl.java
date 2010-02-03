@@ -83,6 +83,8 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
+import org.jmule.core.downloadmanager.DownloadManagerSingleton;
+import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
@@ -131,11 +133,10 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/30 19:39:52 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
-public class JKadManagerImpl extends JMuleAbstractManager implements
-		InternalJKadManager {
+public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
 		CONNECTED, CONNECTING, DISCONNECTED
 	}
@@ -153,7 +154,8 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 	private Task filesToPublishChecker;
 	private InternalConfigurationManager _config_manager = null;
 	private InternalNetworkManager _network_manager = null;
-
+	private InternalDownloadManager _download_manager = null;
+	
 	private List<JKadListener> listener_list = new LinkedList<JKadListener>();
 
 	private boolean is_started = false;
@@ -169,12 +171,9 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 			e1.printStackTrace();
 			return;
 		}
-		
-		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton
-				.getInstance();
-		
-		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
-				.getInstance();
+		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton.getInstance();
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 
 		Logger.getSingleton().start();
 		routing_table = RoutingTable.getSingleton();
@@ -196,46 +195,52 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 		filesToPublishChecker = new Task() {
 			Set<FileHash> publishedFiles = new HashSet<FileHash>();
 
+			SharingManager sharing_manager = SharingManagerSingleton.getInstance();
+			ConfigurationManager config_manager = ConfigurationManagerSingleton.getInstance();
+			
+			Set<Int128> currently_publishing_files = new HashSet<Int128>();
+			
 			public void run() {
 				if (getStatus() != JKadStatus.CONNECTED) return;
-				SharingManager sharing_manager = SharingManagerSingleton
-						.getInstance();
-				Publisher publisher = Publisher.getInstance();
-				ConfigurationManager config_manager = ConfigurationManagerSingleton
-						.getInstance();
-				Iterable<SharedFile> shared_files = sharing_manager
-						.getSharedFiles();
-				long filesToPublish = 0;
+				
+				int filesToPublish = 0;
+				Set<Int128> id_to_remove = new HashSet<Int128>();
+				for(Int128 lookup_id : currently_publishing_files) {
+					if (lookup.hasTask(lookup_id))
+						filesToPublish++;
+					else 
+						id_to_remove.add(lookup_id);
+				}
+				currently_publishing_files.removeAll(id_to_remove);
+				
+				if (filesToPublish >= JKadConstants.MAX_CONCURRENT_PUBLISH_FILES)
+					return;
+
+				Iterable<SharedFile> shared_files = sharing_manager.getSharedFiles();
 				for (SharedFile file : shared_files) {
-					if (publisher.getPublishKeywordCount() > JKadConstants.MAX_CONCURRENT_PUBLISH_FILES) {
+					if (filesToPublish > JKadConstants.MAX_CONCURRENT_PUBLISH_FILES) {
 						break;
 					}
 					if (publishedFiles.contains(file.getFileHash()))
 						continue;
-					if (filesToPublish > JKadConstants.ITERATION_MAX_PUBLISH_FILES)
-						break;
+					
 					if (file instanceof PartialFile) {
 						PartialFile p_file = (PartialFile) file;
 						if (p_file.getAvailablePartCount()==0) continue;
-					}
-					publishedFiles.add(file.getFileHash());
+					}					
 
 					byte[] hash = file.getFileHash().getHash().clone();
 					Convert.updateSearchID(hash);
 					Int128 id = new Int128(hash);
 
-					if (!publisher.isPublishingSource(id)) {
+					if (!lookup.hasTask(id)) {
+						publishedFiles.add(file.getFileHash());
+						currently_publishing_files.add(id);
 						filesToPublish++;
 						List<Tag> tagList = new LinkedList<Tag>();
-						tagList.add(new StringTag(TAG_FILENAME, file
-								.getSharingName()));
-						tagList.add(new IntTag(TAG_FILESIZE, (int) file
-								.length()));
-						tagList
-								.add(new IntTag(TAG_SOURCEIP,
-										org.jmule.core.utils.Convert
-												.byteToInt(getIPAddress()
-														.getAddress())));
+						tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
+						tagList.add(new IntTag(TAG_FILESIZE, (int) file.length()));
+						tagList.add(new IntTag(TAG_SOURCEIP,org.jmule.core.utils.Convert.byteToInt(getIPAddress().getAddress())));
 						try {
 							tagList.add(new IntTag(TAG_SOURCEPORT,
 									config_manager.getTCP()));
@@ -243,31 +248,41 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 							e.printStackTrace();
 						}
 
-						publisher.publishSource(id, tagList);
+						try {
+							publisher.publishSource(id, tagList);
+						} catch (JKadException e) {
+							e.printStackTrace();
+						}
 					}
-					if (!publisher.isPublishingKeyword(id)) {
+					if (!lookup.hasTask(id)) {
+						currently_publishing_files.add(id);
 						filesToPublish++;
 						List<Tag> tagList = new LinkedList<Tag>();
-						tagList.add(new StringTag(TAG_FILENAME, file
-								.getSharingName()));
-						tagList.add(new IntTag(TAG_FILESIZE, (int) file
-								.length()));
+						tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
+						tagList.add(new IntTag(TAG_FILESIZE, (int) file.length()));
 
-						publisher.publishKeyword(id, tagList);
+						try {
+							publisher.publishKeyword(id, tagList);
+						} catch (JKadException e) {
+							e.printStackTrace();
+						}
 					}
 
 					if (file.getTagList().hasTag(TAG_FILERATING))
 						if (!publisher.isPublishingNote(id)) {
+							publishedFiles.add(file.getFileHash());
+							currently_publishing_files.add(id);
 							filesToPublish++;
 							List<Tag> tagList = new LinkedList<Tag>();
-							tagList.add(new StringTag(TAG_FILENAME, file
-									.getSharingName()));
-							tagList.add(new IntTag(TAG_FILESIZE, (int) file
-									.length()));
-							tagList.add(new IntTag(TAG_FILERATING, file
-									.getFileQuality().getAsInt()));
+							tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
+							tagList.add(new IntTag(TAG_FILESIZE, (int) file.length()));
+							tagList.add(new IntTag(TAG_FILERATING, file.getFileQuality().getAsInt()));
 
-							publisher.publishNote(id, tagList);
+							try {
+								publisher.publishNote(id, tagList);
+							} catch (JKadException e) {
+								e.printStackTrace();
+							}
 						}
 				}
 			}
@@ -374,11 +389,17 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 			if (!firewallChecker.isStarted())
 				firewallChecker.start();
 		}
-
+		boolean status_changed = false;
 		if (status != newStatus)
-			notifyListeners(newStatus);
-
+			status_changed = true;
 		status = newStatus;
+		if (status_changed) {
+			notifyListeners(newStatus);
+			if (status == CONNECTED) 
+				_download_manager.jKadConnected();
+			if (status == DISCONNECTED)
+				_download_manager.jKadDisconnected();
+		}
 	}
 
 	public boolean isFirewalled() {
@@ -1153,5 +1174,23 @@ public class JKadManagerImpl extends JMuleAbstractManager implements
 		byte client_version = packetData.get();
 		return new KadContact(new ClientID(client_id_raw), new ContactAddress(
 				address, udp_port), tcp_port, client_version, null, false);
+	}
+	
+	public String toString() {
+		
+		/*private RoutingTable routing_table = null;
+		private Indexer indexer = null;
+		private FirewallChecker firewallChecker = null;
+		private BootStrap bootStrap = null;
+		private Lookup lookup = null;
+		private Search search = null;
+		private Publisher publisher = null;*/
+		
+		String result = "";
+		result += "\nJKad status : " + status;
+		//result += "\nRouting table : " + routing_table;
+		result += "\nLookup : " + lookup;
+		result += "\nSearch : " + search;
+		return result;
 	}
 }

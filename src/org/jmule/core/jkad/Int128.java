@@ -28,7 +28,6 @@ import static org.jmule.core.jkad.utils.Convert.byteArrayToBitSet;
 import static org.jmule.core.utils.Convert.byteToHexString;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.BitSet;
 
 import org.jmule.core.edonkey.FileHash;
@@ -38,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:58:14 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
  */
 public class Int128 implements Cloneable {
 
@@ -229,7 +228,12 @@ public class Int128 implements Cloneable {
 			return false;
 		if (!(value instanceof Int128))
 			return false;
-		return Arrays.equals(toByteArray(), ((Int128) value).toByteArray());
+		Int128 o = (Int128) value;
+		for(int i = 0;i<bit_set.size();i++)
+			if (bit_set.get(i)!= o.getBitSet().get(i))
+				return false;
+		return true;
+		//return Arrays.equals(toByteArray(), ((Int128) value).toByteArray());
 	}
 	
 	public int hashCode() {
