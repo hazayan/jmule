@@ -44,13 +44,13 @@ import org.jmule.ui.swing.maintabs.AbstractTab;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.TimeFormatter;
 
-import sun.management.ManagementFactory;
+import java.lang.management.ManagementFactory;
 
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/18 17:42:47 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 19:37:16 $$
  */
 public class StatisticsTabs extends AbstractTab {
 

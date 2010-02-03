@@ -50,13 +50,12 @@ import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.ui.utils.FileFormatter;
 import org.jmule.ui.utils.TimeFormatter;
 
-import sun.management.ManagementFactory;
-
+import java.lang.management.ManagementFactory;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:46:37 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 19:37:16 $$
  */
 public class StatisticsTab extends AbstractTab{
 
