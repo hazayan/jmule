@@ -28,6 +28,7 @@ import org.jmule.core.JMThread;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.impl.JMuleCoreImpl;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.PeerManagerSingleton;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
@@ -36,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/11 14:45:40 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 14:06:36 $$
  */
 public privileged aspect JMuleCoreLogger {
 	private Logger log = Logger.getLogger("org.jmule.core");
@@ -90,11 +91,13 @@ public privileged aspect JMuleCoreLogger {
 		//for(UploadSession upload_session : UploadManagerSingleton.getInstance().getUploads()) 
 		//	uploadmanager +=upload_session+"\n";
 		
+		String jkad = "JKad : \n" + JKadManagerSingleton.getInstance();
+		
 		log.fine("\nEvent : "+event+"\n"+
 				network_manager+"\n"+
 				peermanager+"\n"+
 				downloadmanager+"\n"+
-				uploadmanager+"\n");
+				uploadmanager+"\n" + jkad + "\n");
 	}
 	
 
