@@ -133,8 +133,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:11:43 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
@@ -247,7 +247,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 						} catch (ConfigurationManagerException e) {
 							e.printStackTrace();
 						}
-
 						try {
 							publisher.publishSource(id, tagList);
 						} catch (JKadException e) {
@@ -260,7 +259,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 						List<Tag> tagList = new LinkedList<Tag>();
 						tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 						tagList.add(new IntTag(TAG_FILESIZE, (int) file.length()));
-
 						try {
 							publisher.publishKeyword(id, tagList);
 						} catch (JKadException e) {
@@ -277,7 +275,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 							tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 							tagList.add(new IntTag(TAG_FILESIZE, (int) file.length()));
 							tagList.add(new IntTag(TAG_FILERATING, file.getFileQuality().getAsInt()));
-
 							try {
 								publisher.publishNote(id, tagList);
 							} catch (JKadException e) {
