@@ -31,7 +31,6 @@ import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +38,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.DataFormatException;
 
-import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
@@ -53,14 +51,6 @@ import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
-import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.InternalJKadManager;
-import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadException;
-import org.jmule.core.jkad.JKadManagerSingleton;
-import org.jmule.core.jkad.indexer.Source;
-import org.jmule.core.jkad.search.Search;
-import org.jmule.core.jkad.search.SearchResultListener;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
@@ -68,9 +58,7 @@ import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.PeerManagerException;
 import org.jmule.core.peermanager.PeerManagerSingleton;
-import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.searchmanager.SearchResultItem;
-import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.session.JMTransferSession;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
@@ -90,8 +78,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.43 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 17:04:18 $$
+ * @version $$Revision: 1.44 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:03:51 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -101,7 +89,6 @@ public class DownloadSession implements JMTransferSession {
 	private final static int PEER_MONITOR_INTERVAL 			= 1000;
 	private final static long PEER_RESEND_PACKET_INTERVAL 	= 1000 * 10;
 	private final static long UNUSED_PEER_ACTIVATION 		= 1000 * 10;
-	private final static long MAX_PEX_CONCURENT_REQEUSTS 	= 30;
 
 	private PartialFile sharedFile;
 	private FilePartStatus partStatus;
@@ -109,12 +96,11 @@ public class DownloadSession implements JMTransferSession {
 	private DownloadStrategy downloadStrategy = DownloadStrategyFactory.getStrategy(STRATEGY.DEFAULT);
 	private FileRequestList fileRequestList = new FileRequestList();
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
-	private DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
+	
+	DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
 	
 	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
-	
-	private InternalJKadManager jkad = (InternalJKadManager) JKadManagerSingleton
-			.getInstance();
+
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 			.getInstance();
 	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton
@@ -125,10 +111,8 @@ public class DownloadSession implements JMTransferSession {
 			.getInstance();
 
 	private JMTimer download_tasks;
-	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask peer_monitor_task = null;
-	private JMTimerTask server_queue_sources_task = null;
-	private JMTimerTask pex_queue_sources_task = null;
+	
 	private DownloadSession() {
 		
 	}
@@ -162,9 +146,9 @@ public class DownloadSession implements JMTransferSession {
 		if (sharedFile.length() % PARTSIZE != 0)
 			partCount++;
 		partStatus = new FilePartStatus(partCount);
-		if (partialFile.isDownloadStarted()) {
+		/*if (partialFile.isDownloadStarted()) {
 			startDownload();
-		}
+		}*/
 	}
 
 	DownloadSession(SearchResultItem searchResult) {
@@ -190,7 +174,7 @@ public class DownloadSession implements JMTransferSession {
 		SharingManagerSingleton.getInstance().addPartialFile(sharedFile);
 	}
 
-	synchronized void startDownload() {
+	void startDownload() {
 		download_tasks = new JMTimer();
 		peer_monitor_task = new JMTimerTask() {
 			public void run() {
@@ -225,40 +209,18 @@ public class DownloadSession implements JMTransferSession {
 				}
 			}
 		};
-		server_queue_sources_task = new JMTimerTask() {
-			public void run() {
-				queueSourcesFromServer();
-			}
-		};
-		download_tasks.addTask(peer_monitor_task, PEER_MONITOR_INTERVAL, true);
-		download_tasks.addTask(server_queue_sources_task,
-				ConfigurationManager.SERVER_SOURCES_QUERY_INTERVAL, true);
 
-		pex_queue_sources_task = new JMTimerTask() {
-			public void run() {
-				queueSourcesFromPEX();
-			}
-		};
-		download_tasks.addTask(pex_queue_sources_task,
-				ConfigurationManager.PEX_SOURCES_QUERY_INTERVAL, true);
+		download_tasks.addTask(peer_monitor_task, PEER_MONITOR_INTERVAL, true);
 		
-		if (jkad.isConnected()) {
-			createKadLookupTask();
-			download_tasks.addTask(kad_source_search_task,JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, true);
-			kad_source_search_task.run();
-		}
 		this.setStatus(DownloadStatus.STARTED);
 		sharedFile.markDownloadStarted();
-
-		queueSourcesFromServer();
-
 	}
 	
-	synchronized void stopDownload() {
+	void stopDownload() {
 		stopDownload(true);
 	}
 
-	synchronized void stopDownload(boolean saveDownloadStatus) {
+	void stopDownload(boolean saveDownloadStatus) {
 		compressedFileChunks.clear();
 
 		download_tasks.stop();
@@ -283,50 +245,6 @@ public class DownloadSession implements JMTransferSession {
 			stopDownload(false);
 		SharingManagerSingleton.getInstance().removeSharedFile(
 				sharedFile.getFileHash());
-	}
-	
-	void jKadConnected() {
-		if (kad_source_search_task == null) {
-			createKadLookupTask();
-			download_tasks.addTask(kad_source_search_task,JKadConstants.KAD_SOURCES_SEARCH_INTERVAL, true);
-			kad_source_search_task.run();//?
-		}
-	}
-	
-	void jKadDisconnected() {
-		if (kad_source_search_task == null)
-			return;
-		download_tasks.removeTask(kad_source_search_task);
-		kad_source_search_task = null;
-	}
-	
-	
-	void queueSourcesFromServer() {
-		if (ServerManagerSingleton.getInstance().isConnected())
-			network_manager.requestSourcesFromServer(getFileHash(), sharedFile
-					.length());
-		/** Queue peers for sources **/
-		// List<Peer> peerList =
-		// PeerManagerFactory.getInstance().getPeers(getFileHash());
-		// for(Peer p : peerList) {
-		// if (p.getStatus() == Peer.TCP_SOCKET_CONNECTED) {
-		// Packet packet =
-		// EMulePacketFactory.getSourcesRequestPacket(sharedFile.getFileHash());
-		// p.sendPacket(packet);
-		// }
-		// }
-	}
-	
-	private void queueSourcesFromPEX() {
-		List<Peer> peer_list = download_status_list.getPeersByStatus(PeerDownloadStatus.IN_QUEUE,PeerDownloadStatus.ACTIVE, PeerDownloadStatus.ACTIVE_UNUSED);
-		int request_count = 0;
-		for(Peer peer : peer_list) {
-			if (!peer.isConnected())  continue;
-			network_manager.sendSourcesRequest(peer.getIP(), peer.getPort(), sharedFile.getFileHash());
-			request_count++;
-			if (request_count > MAX_PEX_CONCURENT_REQEUSTS) break;
-		}
-		
 	}
 	
 	void addDownloadPeers(List<Peer> peerList) {
@@ -535,18 +453,14 @@ public class DownloadSession implements JMTransferSession {
 			if (container.offset == compressedFileChunk.getChunkStart()) {
 				compressedFileChunk.getChunkData().position(0);
 				found = true;
-				container.compressedData.put(compressedFileChunk.getChunkData()
-						.array());
-				if (container.compressedData.position() == container.compressedData
-						.capacity()) {// TODO : Fixme
+				container.compressedData.put(compressedFileChunk.getChunkData().array());
+				if (container.compressedData.position() == container.compressedData.capacity()) {// TODO : Fixme
 					container.compressedData.position(0);
 					ByteBuffer buffer;
 					try {
-						buffer = JMuleZLib
-								.decompressData(container.compressedData);
+						buffer = JMuleZLib.decompressData(container.compressedData);
 						buffer.position(0);
-						FileChunk chunk = new FileChunk(container.offset,
-								container.offset + buffer.capacity(), buffer);
+						FileChunk chunk = new FileChunk(container.offset,container.offset + buffer.capacity(), buffer);
 						processFileChunk(sender, chunk);
 						chunk_list.remove(container);
 					} catch (DataFormatException e) {
@@ -672,70 +586,6 @@ public class DownloadSession implements JMTransferSession {
 	
 	private void setStatus(DownloadStatus status) {
 		this.sessionStatus = status;
-	}
-	
-	private void createKadLookupTask() {
-		kad_source_search_task = new JMTimerTask() {
-			Int128 search_id;
-			Search search = Search.getSingleton();
-
-			public void run() {
-				byte[] hash = sharedFile.getFileHash().getHash().clone();
-				org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
-				search_id = new Int128(hash);
-				if (search.hasSearchTask(search_id))
-					return;
-				try {
-					Search.getSingleton().searchSources(search_id,
-							new SearchResultListener() {
-								public void processNewResults(List<Source> result) {
-									List<Peer> peer_list = new LinkedList<Peer>();
-									for (Source source : result) {
-										String address = source.getAddress()
-												.toString();
-										int tcpPort = source.getTCPPort();
-										if (tcpPort == -1) continue;
-										if (hasPeer(address, tcpPort)) continue;
-										Peer peer;
-										if (!peer_manager.hasPeer(address, tcpPort)) {
-											try {
-												peer = peer_manager.newPeer(
-														address, tcpPort,
-														PeerSource.KAD);
-												peer_list.add(peer);
-											} catch (PeerManagerException e) {
-												e.printStackTrace();
-												continue;
-											} 
-										} else {
-											try {
-												peer = peer_manager.getPeer(address, tcpPort);
-												peer_list.add(peer);
-											} catch (PeerManagerException e) {
-												e.printStackTrace();
-												continue;
-											}
-										}
-										
-										
-									}
-									addDownloadPeers(peer_list);
-								}
-
-								public void searchFinished() {
-
-								}
-
-								public void searchStarted() {
-
-								}
-
-							});
-				} catch (JKadException e) {
-					e.printStackTrace();
-				}
-			}
-		};
 	}
 
 	public FileHash getFileHash() {
