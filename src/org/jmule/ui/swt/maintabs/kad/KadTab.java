@@ -46,18 +46,13 @@ import org.eclipse.swt.widgets.Menu;
 import org.jmule.core.JMuleCore;
 import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManagerException;
-import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.jkad.Int128;
-import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadListener;
 import org.jmule.core.jkad.JKadManager;
 import org.jmule.core.jkad.JKadConstants.ContactType;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.LookupListener;
 import org.jmule.core.jkad.lookup.LookupTask;
-import org.jmule.core.jkad.publisher.PublishKeywordTask;
-import org.jmule.core.jkad.publisher.PublishSourceTask;
-import org.jmule.core.jkad.publisher.Publisher;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.jkad.routingtable.RoutingTableListener;
 import org.jmule.core.jkad.search.KeywordSearchTask;
@@ -75,8 +70,8 @@ import org.jmule.ui.swt.tables.JMTable;
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:55:28 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:17:38 $
  */
 public class KadTab extends AbstractTab {
 
@@ -100,7 +95,7 @@ public class KadTab extends AbstractTab {
 		Group kad_tasks_container = new Group(tab_content,SWT.NONE);
 		routing_table_container.setText(_._("mainwindow.kadtab.kad_nodes"));
 		kad_tasks_container.setText(_._("mainwindow.kadtab.kad_tasks"));
-		SashControl.createHorizontalSash(30, 80, tab_content, routing_table_container, kad_tasks_container);
+		SashControl.createHorizontalSash(30, 70, tab_content, routing_table_container, kad_tasks_container);
 		GridLayout grid_layout = new GridLayout(1,false);
 		grid_layout.marginWidth = 0;
 		grid_layout.marginHeight = 0;
@@ -199,10 +194,8 @@ public class KadTab extends AbstractTab {
 			}
 
 			protected Menu getPopUpMenu() {
-				
 				return null;
 			}
-
 
 			public void updateRow(KadContact object) {
 				String imageName = "";
@@ -434,17 +427,7 @@ public class KadTab extends AbstractTab {
 		}
 		if (task.getRequestType() == RequestType.STORE) {
 			kad_task.task_type = _._("mainwindow.kadtab.store");
-			Publisher publisher = _jkad.getPublisher();
-			if (publisher.getPublishKeywordTask(task.getTargetID())!=null) {
-				PublishKeywordTask publish_keyword = publisher.getPublishKeywordTask(task.getTargetID());
-				StringTag file_name = (StringTag)publish_keyword.getTagList().getTag(JKadConstants.TAG_FILENAME);
-				kad_task.task_info = (String)file_name.getValue();
-			} else
-			if (publisher.getPublishSourceTask(task.getTargetID())!=null) {
-				PublishSourceTask publish_keyword = publisher.getPublishSourceTask(task.getTargetID());
-				StringTag file_name = (StringTag)publish_keyword.getTagList().getTag(JKadConstants.TAG_FILENAME);
-				kad_task.task_info = (String)file_name.getValue();
-			}
+			kad_task.task_info = Utils.KadFileIDToFileName(task.getTargetID());
 		}
 		
 		kad_task.task_id = task.getTargetID().toHexString();
