@@ -46,8 +46,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/29 12:19:53 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:16:10 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -267,8 +267,9 @@ public final class JMPeerConnection extends JMConnection {
 				uploadedFileBytes += packet.getLength() - 16 + 4 + 4;
 			}
 		}catch(Throwable cause) {
-			if (!jm_socket_channel.isConnected())
-				notifyDisconnect();
+			if (jm_socket_channel != null)
+				if (!jm_socket_channel.isConnected())
+					notifyDisconnect();
 			throw new JMException("Exception in connection : " +remote_inet_socket_address + "\n"+Misc.getStackTrace(cause));
 		}
 	}
