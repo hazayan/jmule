@@ -45,8 +45,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.14 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:09 $$
+ * @version $$Revision: 1.15 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:17:10 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -156,7 +156,7 @@ public class UploadQueue {
 	}
 	
 	public String toString() {
-		String result = "Upload queue : \n";
+		String result = "\n";
 		for (UserHash hash : upload_queue.keySet()) {
 			try {
 				UploadQueueContainer container = upload_queue.get(hash);

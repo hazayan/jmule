@@ -55,8 +55,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:09 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:17:10 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -540,10 +540,11 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 
 	public void peerDisconnected(Peer peer) {
 		if (!hasPeer(peer)) return;
-
+		
 		if (payload_peers.hasPeer(peer)) {
 			payload_peers.removePeer(peer);
 			payload_peers.addPayloadLoosed(peer.getUserHash());
+			removePeer(peer);
 		}
 
 		if (uploadQueue.hasSlotPeer(peer)) {
@@ -580,7 +581,10 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 
 	public String toString() {
-		String result = " Upload queue : \n" + uploadQueue+"\n";
+		String result = "";
+		for(UploadSession session : session_list.values())
+			result+= session + "\n";
+		result = " Upload queue : \n" + uploadQueue+"\n";
 		result += "" + payload_peers;
 		return result;
 	}
