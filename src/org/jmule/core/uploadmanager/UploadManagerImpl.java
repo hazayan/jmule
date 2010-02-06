@@ -33,6 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.downloadmanager.DownloadManagerException;
+import org.jmule.core.downloadmanager.DownloadManagerSingleton;
+import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
@@ -55,8 +59,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:17:10 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 16:03:16 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -67,6 +71,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	private InternalSharingManager _sharing_manager;
 	private InternalNetworkManager _network_manager;
 	private InternalPeerManager _peer_manager;
+	private InternalDownloadManager _download_manager;
+	
 	
 	private UploadQueue uploadQueue;
 	private PayloadPeerList payload_peers;
@@ -89,6 +95,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		_sharing_manager = (InternalSharingManager) SharingManagerSingleton.getInstance();
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		_peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 		
   		Set<String> types = new HashSet<String>();
 		types.add(JMuleCoreStats.ST_NET_SESSION_UPLOAD_BYTES);
@@ -159,6 +166,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 				Map<Peer, PayloadPeerContainer> payload = payload_peers.getPayloadPeers();
 				for(Peer peer : payload.keySet()) {
 					PayloadPeerContainer container = payload.get(peer);
+					if (container == null)
+						continue;
 					updateBytes(peer, container.getFileHash());
 				}
 			}
@@ -344,6 +353,17 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		}
 		
 		SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
+		if(shared_file instanceof PartialFile) {
+			try {
+				DownloadSession session = _download_manager.getDownload(fileHash);
+				if (!session.isStarted()) {
+					_network_manager.sendFileNotFound(sender.getIP(),sender.getPort(), fileHash);
+					return ;
+				}
+			} catch (DownloadManagerException e) {
+				e.printStackTrace();
+			}
+		}
 		_network_manager.sendFileRequestAnswer(sender.getIP(), sender.getPort(), shared_file.getFileHash(), shared_file.getSharingName());
 	}
 	

@@ -48,7 +48,10 @@ import org.jmule.core.configmanager.ConfigurationAdapter;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.downloadmanager.DownloadManagerException;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
+import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.metfile.KnownMet;
 import org.jmule.core.edonkey.metfile.KnownMetEntity;
@@ -69,6 +72,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	
 	private InternalNetworkManager _network_manager;
 	private InternalServerManager _server_manager;
+	private InternalDownloadManager _download_manager;
 	
 	private Map<FileHash, SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
@@ -96,6 +100,8 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 		}
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		_server_manager = (InternalServerManager) ServerManagerSingleton.getInstance();
+		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
+		
 		sharing_manager_timer = new JMTimer();
 		sharedFiles = new ConcurrentHashMap<FileHash, SharedFile>();
 
@@ -277,6 +283,14 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 						PartialFile partial_file = (PartialFile) shared_file;
 						if (partial_file.getAvailablePartCount()==0)
 							continue;
+						try {
+							DownloadSession session = _download_manager.getDownload(partial_file.getFileHash());
+							if (!session.isStarted()) 
+								continue;
+						} catch (DownloadManagerException e) {
+							e.printStackTrace();
+							continue;
+						}
 					}
 					files_to_share.add(shared_file);
 					server_shared_files

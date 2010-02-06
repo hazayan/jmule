@@ -65,6 +65,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
+import org.jmule.core.uploadmanager.InternalUploadManager;
+import org.jmule.core.uploadmanager.UploadManagerSingleton;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
 
@@ -72,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.29 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 09:03:39 $$
+ * @version $$Revision: 1.30 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 16:03:16 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -93,6 +95,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private InternalNetworkManager _network_manager = null;
 	private InternalJKadManager _jkad = null;
 	private InternalPeerManager _peer_manager = null;
+	private InternalUploadManager _upload_manager = null;
 	
 	private JMTimer maintenance_tasks = new JMTimer();
 	private JMTimerTask server_sources_query = null;
@@ -117,6 +120,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		_jkad = (InternalJKadManager) JKadManagerSingleton.getInstance();
 		_peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
+		_upload_manager = (InternalUploadManager) UploadManagerSingleton.getInstance();
 		
 		Set<String> types = new HashSet<String>();
 		types.add(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES);
@@ -432,8 +436,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		session_list.remove(fileHash);
 		
-		
-		
 		server_sources_queue.remove(fileHash);
 		kad_sources_queue.remove(fileHash);
 		pex_sources_queue.remove(fileHash);
@@ -469,6 +471,9 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		kad_sources_queue.offer(fileHash);
 		pex_sources_queue.offer(fileHash);
 		
+		if (_upload_manager.hasUpload(fileHash))
+			_upload_manager.removeUpload(fileHash);
+		
 		download_session.startDownload();
 		notifyDownloadStarted(fileHash);
 	}
@@ -481,9 +486,18 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		if (!download_session.isStarted())
 			throw new DownloadManagerException("Download " + fileHash + " is already stopped");
 		
+		byte[] hash = fileHash.getHash().clone();
+		org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
+		Int128 search_id = new Int128(hash);
+		
+		_jkad.getSearch().cancelSearch(search_id);
+		
 		server_sources_queue.remove(fileHash);
 		kad_sources_queue.remove(fileHash);
 		pex_sources_queue.remove(fileHash);
+		
+		if (_upload_manager.hasUpload(fileHash))
+			_upload_manager.removeUpload(fileHash);
 		
 		download_session.stopDownload();
 		notifyDownloadStopped(fileHash);
@@ -788,7 +802,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	
 	public void connectedToServer(Server server) {
 		maintenance_tasks.addTask(server_sources_query, ConfigurationManager.SERVER_SOURCES_QUERY_INTERVAL, true);
-		server_sources_query.run();
 	}
 	
 	public void disconnectedFromServer(Server server) {
