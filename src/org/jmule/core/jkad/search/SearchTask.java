@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadException;
@@ -35,8 +34,8 @@ import org.jmule.core.jkad.indexer.Source;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:39:34 $
  */
 public abstract class SearchTask {
 
@@ -54,6 +53,8 @@ public abstract class SearchTask {
 
 	public abstract void startSearch() throws JKadException;
 	public abstract void stopSearch();
+	
+	public abstract void stopSearchRequest();
 	
 	public void setSearchResultListener(SearchResultListener listener) {
 		this.listener = listener;
