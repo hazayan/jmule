@@ -72,8 +72,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.28 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:03:51 $$
+ * @version $$Revision: 1.29 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 09:03:39 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -183,6 +183,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					
 					final FileHash fileHash = kad_sources_queue.poll();
 					if (fileHash == null) {
+						prev_search = null;
 						return;
 					}
 					if (!hasDownload(fileHash)) {
@@ -431,9 +432,17 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		session_list.remove(fileHash);
 		
+		
+		
 		server_sources_queue.remove(fileHash);
 		kad_sources_queue.remove(fileHash);
 		pex_sources_queue.remove(fileHash);
+		
+		byte[] hash = fileHash.getHash().clone();
+		org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
+		Int128 search_id = new Int128(hash);
+		
+		_jkad.getSearch().cancelSearch(search_id);
 		
 		notifyDownloadRemoved(fileHash);
 	}
