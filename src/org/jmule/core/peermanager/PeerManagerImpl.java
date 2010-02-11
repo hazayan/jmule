@@ -26,7 +26,6 @@ import static org.jmule.core.JMConstants.KEY_SEPARATOR;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.security.KeyFactory;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 16:03:18 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/11 09:05:09 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -398,13 +397,6 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	
 	private Peer getPeer(UserHash userHash) {
 		return peers_with_hash.get(userHash);
-		/*for(Peer peer : peers.values()) {
-			if (peer.getUserHash() == null)
-				continue;
-			if (peer.getUserHash().equals(userHash))
-				return peer;
-		}
-		return null;*/
 	}
 	
 	public Peer newPeer(String ip, int port, PeerSource source) throws PeerManagerException {
@@ -433,7 +425,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (hasPeer(ip, port)) {
 			peer = getPeer(ip, port);
 		}
-		peer = new Peer(ip, port, PeerSource.SERVER);
+		peer = new Peer(ip, port, PeerSource.UNKNOWN);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		notifyNewPeer(peer);
 		return peer;
@@ -519,9 +511,13 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		peers.remove(peerIP + KEY_SEPARATOR + peerPort);
-		peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
-		peer.setListenPort(peerListenPort);
+		if (peerListenPort != 0) {
+			synchronized (peers) {
+				peers.remove(peerIP + KEY_SEPARATOR + peerPort);
+				peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
+			}
+			peer.setListenPort(peerListenPort);
+		}
 		
 		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
