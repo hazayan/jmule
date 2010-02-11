@@ -56,8 +56,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:11:23 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/11 09:00:18 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -168,11 +168,11 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	}
 	
 	private UploadListStatus getMenuStatus() {
-		if ((getSelectionCount()==0)&&(getItems().length>0))
+		if ((getSelectionCount() == 0) && (getItems().length > 0))
 			return UploadListStatus.NO_UPLOADS_SELECTED;
-		if (getSelectionCount()==1)
+		if (getSelectionCount() == 1)
 			return UploadListStatus.UPLOAD_SELECTED;
-		if (getSelectionCount()>=1)
+		if (getSelectionCount() >= 1)
 			return UploadListStatus.MULTIPLE_UPLOADS_SELECTED;
 		return UploadListStatus.NO_UPLOADS;
 	}
@@ -196,19 +196,18 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	
 	protected int compareObjects(UploadSession object1, UploadSession object2,
 			int columnID, boolean order) {
-		if (columnID==SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID)
-			return Misc.compareAllObjects(object1, object2, "getSharingName", order);
-		if (columnID==SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID)
-			return Misc.compareAllObjects(object1, object2, "getFileSize", order);
-		if (columnID==SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID)
+		if (columnID == SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID)
+			return Misc.compareAllObjects(object1, object2, "getSharingName",order);
+		if (columnID == SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID)
+			return Misc.compareAllObjects(object1, object2, "getFileSize",order);
+		if (columnID == SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID)
 			return Misc.compareAllObjects(object1, object2, "getSpeed", order);
-		if (columnID==SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID)
-			return Misc.compareAllObjects(object1, object2, "getPeerCount", order);
-		if (columnID==SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID) 
+		if (columnID == SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID)
+			return Misc.compareAllObjects(object1, object2, "getPeerCount",order);
+		if (columnID == SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID)
 			return Misc.compareAllObjects(object1, object2, "getETA", order);
-		if (columnID==SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID)
-			return Misc.compareAllObjects(object1, object2, "getTransferredBytes", order);
-		
+		if (columnID == SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID)
+			return Misc.compareAllObjects(object1, object2,"getTransferredBytes", order);
 		return 0;
 	}
 
@@ -231,9 +230,10 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 	public void refresh() {
 		if (isDisposed()) return;
 		for(UploadSession session : upload_manager.getUploads()) {
-			if (hasObject(session))
+			if (hasObject(session)) {
 				if (getRow(session).isVisible())
 					updateRow(session);
+			}
 			else
 				if (session.sharingCompleteFile()) {
 					addRow(session);
