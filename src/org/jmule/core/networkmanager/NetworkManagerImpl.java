@@ -82,8 +82,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.27 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:05:58 $
+ * @version $Revision: 1.28 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/11 09:09:22 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -225,14 +225,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void addPeer(JMPeerConnection peerConnection) throws NetworkManagerException {
 		peer_connections.put(peerConnection.getIPAddress() + KEY_SEPARATOR+ peerConnection.getPort(), peerConnection);
 		try {
-			_peer_manager.newIncomingPeer(peerConnection.getIPAddress(),
-					peerConnection.getPort());
+			_peer_manager.newIncomingPeer(peerConnection.getIPAddress(),peerConnection.getPort());
 		} catch (PeerManagerException cause) {
 			cause.printStackTrace();
 		}
 	}
 
-	public synchronized void addPeer(String ip, int port) throws NetworkManagerException {
+	public void addPeer(String ip, int port) throws NetworkManagerException {
 		Peer peer;
 		try {
 			peer = _peer_manager.getPeer(ip, port);
@@ -597,13 +596,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void receivedHelloFromPeerAndRespondTo(String peerIP, int peerPort,
 			UserHash userHash, ClientID clientID, int peerListenPort,
 			TagList tagList, String serverIP, int serverPort) {
-		
 		try {
 			JMPeerConnection connection = getPeerConnection(peerIP, peerPort);
-			
-			peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
-			peer_connections.put(peerIP + KEY_SEPARATOR + peerListenPort, connection);
-			connection.usePort = peerListenPort;
+			if (peerListenPort != 0) {
+				peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
+				peer_connections.put(peerIP + KEY_SEPARATOR + peerListenPort, connection);
+				connection.usePort = peerListenPort;
+			}
 			
 			_peer_manager.helloFromPeer(peerIP, peerPort, userHash, clientID,
 					peerListenPort, tagList, serverIP, serverPort);
