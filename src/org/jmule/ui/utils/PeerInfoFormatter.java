@@ -37,7 +37,7 @@ import org.jmule.ui.localizer._;
  * Created on Aug 9, 2008
  * 
  * @author binary256
- * @version $Revision: 1.6 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.7 $ Last changed by $Author: binary255 $ on $Date:
  *          2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
@@ -88,7 +88,7 @@ public class PeerInfoFormatter {
 			case PEX : return _._("downloadinfowindow.tab.peerlist.column.source.type.pex");
 			case ED2KLINK : return _._("downloadinfowindow.tab.peerlist.column.source.type.ed2klink");
 			case EXTERNAL : return _._("downloadinfowindow.tab.peerlist.column.source.type.external");
-			case UNKNOWN : return _._("downloadinfowindow.tab.peerlist.column.source.type.unknown");
+			case INCOMING : return _._("downloadinfowindow.tab.peerlist.column.source.type.incoming");
 		}
 		return "";
 	}

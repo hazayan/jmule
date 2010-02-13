@@ -48,11 +48,11 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/11 09:05:09 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:59 $$
  */
 public class Peer {
-	public enum PeerSource {UNKNOWN, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
+	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
 	public enum PeerStatus {DISCONNECTED, CONNECTED, CONNECTING}
 		
 	private String ip;

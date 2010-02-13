@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/11 09:05:09 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:59 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
@@ -425,7 +425,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		if (hasPeer(ip, port)) {
 			peer = getPeer(ip, port);
 		}
-		peer = new Peer(ip, port, PeerSource.UNKNOWN);
+		peer = new Peer(ip, port, PeerSource.INCOMING);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		notifyNewPeer(peer);
 		return peer;
