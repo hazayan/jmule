@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -53,14 +55,15 @@ import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.uploadmanager.PayloadPeerList.PayloadPeerContainer;
 import org.jmule.core.uploadmanager.UploadQueue.UploadQueueContainer;
+import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 16:03:16 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:11:02 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -459,7 +462,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		try {
 			session = getUpload(fileHash);
 		} catch (UploadManagerException e) {
-			e.printStackTrace();
+			new JMException(Misc.getStackTrace(e) + " for peer : " + sender).printStackTrace();
 			return ;
 		}
 		
@@ -583,6 +586,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 	
 	private void notifyUploadAdded(FileHash fileHash) {
+		System.out.println(" notifyUploadAdded " + fileHash);
 		for(UploadManagerListener listener : listener_list)
 			try {
 				listener.uploadAdded(fileHash);
@@ -592,6 +596,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 	
 	private void notifyUploadRemoved(FileHash fileHash) {
+		System.out.println(" notifyUploadRemoved " + fileHash);
 		for(UploadManagerListener listener : listener_list)
 			try {
 				listener.uploadRemoved(fileHash);
@@ -601,10 +606,13 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 
 	public String toString() {
-		String result = "";
-		for(UploadSession session : session_list.values())
-			result+= session + "\n";
-		result = " Upload queue : \n" + uploadQueue+"\n";
+		String result = " Upload sessions : \n";
+		for(FileHash hash : session_list.keySet()) {
+			result += " Key   : [ " + hash + " ] " + " = \n";
+			result += " Value : " + session_list.get(hash) + "\n" ;
+				
+		}
+		result += " Upload queue : \n" + uploadQueue+"\n";
 		result += "" + payload_peers;
 		return result;
 	}

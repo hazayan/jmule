@@ -51,8 +51,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:09 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:11:02 $$
  */
 public class UploadSession implements JMTransferSession {
 	private SharedFile sharedFile;	
@@ -197,8 +197,8 @@ public class UploadSession implements JMTransferSession {
 	
 		
 	public String toString() {
-		String str = "[\n ";
-		str += this.sharedFile + "\n";
+		String str = " [ \n ";
+		str += "Shared file : " + this.sharedFile + "\nPeers : \n";
 		for(Peer peer : session_peers)
 			str += " " +peer + "\n";
 		str += "\n]";
