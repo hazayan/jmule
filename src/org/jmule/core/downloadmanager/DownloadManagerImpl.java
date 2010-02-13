@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.30 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 16:03:16 $$
+ * @version $$Revision: 1.31 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:06 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -767,27 +767,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			}catch(Throwable t) {
 				t.printStackTrace();
 			}
-	}
-
-	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash) {
-		if (!hasDownload(fileHash))
-			return;
-		try {
-			DownloadSession session = getDownload(fileHash);
-			List<Peer> session_peers = session.getPeers();
-			FilePartStatus part_status = session.getPartStatus();
-			List<Peer> response_peers = new ArrayList<Peer>();
-			for(Peer p : session_peers) {
-				if (response_peers.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
-				if (!part_status.hasStatus(p)) continue;
-				JMuleBitSet bit_set = part_status.get(p);
-				if (bit_set.hasAtLeastOne(true))
-					response_peers.add(p);
-			}
-			_network_manager.sendSourcesResponse(peer.getIP(), peer.getPort(), fileHash, response_peers);
-		} catch (DownloadManagerException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void receivedSourcesAnswerFromPeer(Peer peer, FileHash fileHash,

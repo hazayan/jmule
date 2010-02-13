@@ -70,8 +70,10 @@ import org.jmule.core.servermanager.InternalServerManager;
 import org.jmule.core.servermanager.Server;
 import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.sharingmanager.GapList;
+import org.jmule.core.sharingmanager.InternalSharingManager;
 import org.jmule.core.sharingmanager.JMuleBitSet;
 import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
@@ -82,8 +84,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.28 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/11 09:09:22 $
+ * @version $Revision: 1.29 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/02/13 16:02:05 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_UPDATE_SPEED_INTERVAL 		= 1000;
@@ -96,6 +98,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	private InternalUploadManager _upload_manager;
 	private InternalJKadManager _jkad_manager;
 	private InternalSearchManager _search_manager;
+	private InternalSharingManager _sharing_manager;
 
 	private JMServerConnection server_connection = null;
 
@@ -128,6 +131,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		_jkad_manager = (InternalJKadManager) JKadManagerSingleton
 				.getInstance();
 		_search_manager = (InternalSearchManager) SearchManagerSingleton
+				.getInstance();
+		_sharing_manager = (InternalSharingManager) SharingManagerSingleton
 				.getInstance();
 		
 		connection_speed_updater = new JMTimerTask() {
@@ -778,7 +783,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void receivedSourcesRequestFromPeer(String peerIP, int peerPort, FileHash fileHash) {
 		try {
 			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
-			_download_manager.receivedSourcesRequestFromPeer(peer, fileHash);
+			
+			_sharing_manager.receivedSourcesRequestFromPeer(peer, fileHash);
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
 		}

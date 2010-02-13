@@ -78,8 +78,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.44 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:03:51 $$
+ * @version $$Revision: 1.45 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:06 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -96,7 +96,6 @@ public class DownloadSession implements JMTransferSession {
 	private DownloadStrategy downloadStrategy = DownloadStrategyFactory.getStrategy(STRATEGY.DEFAULT);
 	private FileRequestList fileRequestList = new FileRequestList();
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
-	
 	DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
 	
 	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
@@ -708,6 +707,10 @@ public class DownloadSession implements JMTransferSession {
 		if (!(object instanceof DownloadSession))
 			return false;
 		return this.hashCode() == object.hashCode();
+	}
+	
+	public JMuleBitSet getPartAvailability(Peer peer) {
+		return partStatus.get(peer);
 	}
 	
 	public String toString() {

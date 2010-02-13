@@ -58,12 +58,16 @@ import org.jmule.core.edonkey.metfile.KnownMetEntity;
 import org.jmule.core.edonkey.metfile.PartMet;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
+import org.jmule.core.peermanager.Peer;
 import org.jmule.core.servermanager.InternalServerManager;
 import org.jmule.core.servermanager.Server;
 import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
+import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.UploadManagerException;
+import org.jmule.core.uploadmanager.UploadManagerSingleton;
 import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
@@ -73,6 +77,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	private InternalNetworkManager _network_manager;
 	private InternalServerManager _server_manager;
 	private InternalDownloadManager _download_manager;
+	private InternalUploadManager _upload_manager;
 	
 	private Map<FileHash, SharedFile> sharedFiles;
 	private LoadCompletedFiles load_completed_files;
@@ -101,6 +106,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		_server_manager = (InternalServerManager) ServerManagerSingleton.getInstance();
 		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
+		_upload_manager = (InternalUploadManager) UploadManagerSingleton.getInstance();
 		
 		sharing_manager_timer = new JMTimer();
 		sharedFiles = new ConcurrentHashMap<FileHash, SharedFile>();
@@ -739,6 +745,48 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 		stopLoadingPartialFiles();
 		writeMetadata();
 
+	}
+	
+	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash) {
+		if (!hasFile(fileHash)) return;
+		List<Peer> peer_list = new LinkedList<Peer>();
+		if (_download_manager.hasDownload(fileHash)) {
+			DownloadSession session;
+			try {
+				session = _download_manager.getDownload(fileHash);
+				if (!session.isStarted()) return;
+				PartialFile partialFile = getPartialFle(fileHash);
+				if (partialFile.getAvailablePartCount()==0) return;
+				
+				List<Peer> download_peer_list = session.getPeers();
+				for(Peer dpeer : download_peer_list) {
+					if (peer_list.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
+					if (!dpeer.isHighID()) continue;
+					JMuleBitSet availability = session.getPartAvailability(dpeer);
+					if (availability == null) continue;
+					if (availability.hasAtLeastOne(true))
+						peer_list.add(dpeer);
+				}
+			} catch (DownloadManagerException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (_upload_manager.hasUpload(fileHash)) {
+			try {
+				UploadSession session = _upload_manager.getUpload(fileHash);
+				List<Peer> upload_peer_list = session.getPeers();
+				for(Peer upeer : upload_peer_list) {
+					if (peer_list.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
+					if (!upeer.isHighID()) continue;
+					peer_list.add(upeer);
+				}
+			} catch (UploadManagerException e) {
+				e.printStackTrace();			
+			}
+		}
+		if (peer_list.size()!=0)
+			_network_manager.sendSourcesResponse(peer.getIP(), peer.getPort(), fileHash, peer_list);
 	}
 
 	public void addCompletedFileListener(CompletedFileListener listener) {
