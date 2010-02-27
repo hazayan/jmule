@@ -30,15 +30,27 @@ import org.jmule.core.utils.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/19 17:24:10 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/27 15:14:13 $$
  */
 public class UserHash implements Comparable<UserHash> {
 	
 	private byte[] userHash = new byte[16];
 	
+	private int hashCode = 0;
+	private String stringValue = "";
+	
 	public UserHash(byte[] hash) {
 		this.userHash = hash;
+		initUserHash();
+	}
+	
+	private void initUserHash() {
+		stringValue = "";
+		for (int i = 0; i < userHash.length; i++)
+			stringValue = stringValue + Convert.byteToHex(userHash[i]);
+		
+		hashCode = stringValue.hashCode();
 	}
 	
 	public static UserHash genNewUserHash() {
@@ -54,31 +66,15 @@ public class UserHash implements Comparable<UserHash> {
 	}
 	
 	public String getAsString() {
-		String value = "";
-		for (int i = 0; i < userHash.length; i++)
-			value = value + Convert.byteToHex(userHash[i]);
-		return value;
+		return stringValue;
 	}
 	
 	public String toString() {
-		String sValue = "";
-		for (int i = 0; i < userHash.length; i++)
-			sValue = sValue + Convert.byteToHex(userHash[i]);
-		return sValue;
-	}
-	
-	public void loadFromString(String inputString) {
-		for (int i = 0; i < userHash.length; i++)
-			userHash[i] = Convert.hexToByte(inputString.charAt(i * 2) + ""
-					+ inputString.charAt(i * 2 + 1));
-	}
-	
-	public void setUserHash(byte data[]) {
-		userHash = data;
+		return  stringValue;
 	}
 	
 	public int hashCode() {
-		return getAsString().hashCode();
+		return hashCode;
 	}
 	
 	public boolean equals(Object object) {
