@@ -71,10 +71,14 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.27 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:59 $$
+ * @version $$Revision: 1.28 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/27 15:13:33 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
+	
+	private static int STORE_CLIENTS_INTERVAL = 60000;
+	private static int CREDITS_UPDATE_INTERVAL = 1000;
+	
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
 	private Map<UserHash,Peer> peers_with_hash = new ConcurrentHashMap<UserHash, Peer>(); //used to optimize peer acces
 	private InternalNetworkManager _network_manager;
@@ -185,18 +189,22 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		};
 		maintenance_tasks.addTask(peer_dropper, ConfigurationManager.PEERS_ACTIVITY_CHECK_INTERVAL, true);
 		
-		JMTimerTask store_credits = new JMTimerTask() {
+		JMTimerTask cleanup_and_store_clients= new JMTimerTask() {
 			public void run() {
+				for(UserHash userHash : credits.keySet()) {
+					PeerCredit credit = credits.get(userHash);
+					if (System.currentTimeMillis() - credit.getLastSeen() >= E2DKConstants.PEER_CLIENTS_MET_EXPIRE_TIME)
+						credits.remove(userHash);
+				}
 				try {
 					if (clients_met == null) {
 						clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
 					}
 					clients_met.writeFile(credits.values());
 				}catch(Throwable cause) { cause.printStackTrace(); }
-					
 			}
 		};
-		maintenance_tasks.addTask(store_credits, 60000, true);
+		maintenance_tasks.addTask(cleanup_and_store_clients, STORE_CLIENTS_INTERVAL, true);
 		
 		JMTimerTask credits_updater = new JMTimerTask() {
 			
@@ -232,8 +240,8 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				}
 			}
 		};
-		
-		maintenance_tasks.addTask(credits_updater, 1000, true);
+				
+		maintenance_tasks.addTask(credits_updater, CREDITS_UPDATE_INTERVAL, true);
 	}
 
 	protected boolean iAmStoppable() {

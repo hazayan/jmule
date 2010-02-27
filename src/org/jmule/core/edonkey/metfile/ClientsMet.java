@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.peermanager.PeerCredit;
 import org.jmule.core.utils.Convert;
@@ -105,8 +106,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:58:01 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/27 15:13:32 $$
  */
 public class ClientsMet extends MetFile {
 
@@ -178,8 +179,10 @@ public class ClientsMet extends MetFile {
 			data.position(0);
 			data.get(abySecureIdent);
 			
-			PeerCredit cc = new PeerCredit(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
-			result.put(cc.getUserHash(), cc);
+			if (System.currentTimeMillis() - nLastSeen < E2DKConstants.PEER_CLIENTS_MET_EXPIRE_TIME) {
+				PeerCredit cc = new PeerCredit(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
+				result.put(cc.getUserHash(), cc);
+			}
 		}
 		return result;
 	}

@@ -48,8 +48,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.28 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:14:28 $$
+ * @version $$Revision: 1.29 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/27 15:13:33 $$
  */
 public class E2DKConstants {
 
@@ -127,6 +127,8 @@ public class E2DKConstants {
     public final static int  MAX_SECURITY_KEY_LENGTH	= 80;
     
     public final static int  RARE_SHARED_SOURCES_FILE	= 40;
+    
+    public final static long PEER_CLIENTS_MET_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 150;
     
 	public final static byte PROTO_EDONKEY_TCP 			= (byte) 0xE3;
 	public final static byte PROTO_EDONKEY_SERVER_UDP 	= (byte) 0xE3;
