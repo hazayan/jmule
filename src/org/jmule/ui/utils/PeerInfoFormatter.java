@@ -28,6 +28,8 @@ import java.util.Map;
 import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.jkad.JKadConstants.ContactType;
+import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.ui.localizer.Localizer;
@@ -37,7 +39,7 @@ import org.jmule.ui.localizer._;
  * Created on Aug 9, 2008
  * 
  * @author binary256
- * @version $Revision: 1.7 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.8 $ Last changed by $Author: javajox $ on $Date:
  *          2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
@@ -90,6 +92,15 @@ public class PeerInfoFormatter {
 			case EXTERNAL : return _._("downloadinfowindow.tab.peerlist.column.source.type.external");
 			case INCOMING : return _._("downloadinfowindow.tab.peerlist.column.source.type.incoming");
 		}
+		return "";
+	}
+	
+	public static String getPeerStatusKadImage(KadContact kad_contact) {
+		if (kad_contact.getContactType() == ContactType.Active2MoreHours) return "contact0.png";
+		if (kad_contact.getContactType() == ContactType.Active1Hour) return "contact1.png";
+		if (kad_contact.getContactType() == ContactType.Active) return "contact2.png";
+		if (kad_contact.getContactType() == ContactType.JustAdded) return "contact3.png";
+		if (kad_contact.getContactType() == ContactType.ScheduledForRemoval) return "contact4.png";
 		return "";
 	}
 	

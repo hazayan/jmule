@@ -66,12 +66,13 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.common.SashControl;
 import org.jmule.ui.swt.maintabs.AbstractTab;
 import org.jmule.ui.swt.tables.JMTable;
+import org.jmule.ui.utils.PeerInfoFormatter;
 
 /**
  * Created on Jul 10, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:17:38 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: javajox $ on $Date: 2010/02/28 17:08:19 $
  */
 public class KadTab extends AbstractTab {
 
@@ -197,16 +198,12 @@ public class KadTab extends AbstractTab {
 				return null;
 			}
 
-			public void updateRow(KadContact object) {
-				String imageName = "";
-				if (object.getContactType() == ContactType.Active2MoreHours) imageName="contact0.png";
-				if (object.getContactType() == ContactType.Active1Hour) imageName="contact1.png";
-				if (object.getContactType() == ContactType.Active) imageName="contact2.png";
-				if (object.getContactType() == ContactType.JustAdded) imageName="contact3.png";
-				if (object.getContactType() == ContactType.ScheduledForRemoval) imageName="contact4.png";
-				setRowImage(object, KAD_CLIENT_ID_COLUMN_ID, SWTImageRepository.getImage(imageName));
-				setRowText(object, KAD_CLIENT_ID_COLUMN_ID, object.getContactID().toHexString());
-				setRowText(object, KAD_CLIENT_DISTANCE_COLUMN_ID, object.getContactDistance().toBinaryString());
+			public void updateRow(KadContact kad_contact) {
+				setRowImage(kad_contact, KAD_CLIENT_ID_COLUMN_ID, SWTImageRepository.
+						                             getImage(PeerInfoFormatter.
+						                            		  getPeerStatusKadImage( kad_contact )));
+				setRowText(kad_contact, KAD_CLIENT_ID_COLUMN_ID, kad_contact.getContactID().toHexString());
+				setRowText(kad_contact, KAD_CLIENT_DISTANCE_COLUMN_ID, kad_contact.getContactDistance().toBinaryString());
 			}
 			
 		};
