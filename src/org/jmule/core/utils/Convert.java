@@ -30,8 +30,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:32:08 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:35:51 $$
  */
 public class Convert {
 	
@@ -199,6 +199,13 @@ public class Convert {
 		String value = "";
 		for (int i = 0; i < bytes.length; i++)
 			value = value + byteSeparator + Convert.byteToHex(bytes[i]);
+		return value;
+	}
+	
+	public static String byteToHexString(byte[] bytes, int begin,int end) {
+		String value = "";
+		for (int i = begin; i < end; i++)
+			value = value + " " + Convert.byteToHex(bytes[i]);
 		return value;
 	}
 	
