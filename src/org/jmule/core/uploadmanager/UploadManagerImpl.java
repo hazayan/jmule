@@ -62,8 +62,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:11:02 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:35:13 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -586,7 +586,6 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 	
 	private void notifyUploadAdded(FileHash fileHash) {
-		System.out.println(" notifyUploadAdded " + fileHash);
 		for(UploadManagerListener listener : listener_list)
 			try {
 				listener.uploadAdded(fileHash);
@@ -596,7 +595,6 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 	
 	private void notifyUploadRemoved(FileHash fileHash) {
-		System.out.println(" notifyUploadRemoved " + fileHash);
 		for(UploadManagerListener listener : listener_list)
 			try {
 				listener.uploadRemoved(fileHash);
