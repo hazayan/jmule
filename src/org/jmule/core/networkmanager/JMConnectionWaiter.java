@@ -39,8 +39,8 @@ import org.jmule.core.ipfilter.InternalIPFilter;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/15 18:06:17 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:45:45 $$
  */
 public class JMConnectionWaiter{
 
@@ -54,6 +54,7 @@ public class JMConnectionWaiter{
 	JMConnectionWaiter() {
 		_core = JMuleCoreFactory.getSingleton();
 		_ip_filter = (InternalIPFilter) IPFilterSingleton.getInstance();
+		
 		_core.getConfigurationManager().addConfigurationListener(new ConfigurationAdapter() {
 			public void TCPPortChanged(int port) {		
 				restart();		
@@ -62,7 +63,6 @@ public class JMConnectionWaiter{
 		
 	}
 	
-
 	public void start() {
 		if (connectionListenerThread != null)
 			return;

@@ -53,8 +53,8 @@ import org.jmule.ui.swt.Utils;
  * @author parg<br>
  * @author TuxPaper (SWT.Virtual Stuff)
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/04 16:07:21 $$ 
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:44:22 $$ 
  */
 public class BufferedTableRow {
 	
@@ -76,8 +76,8 @@ public class BufferedTableRow {
 	protected Table table;
 	protected TableItem	item;
 	
-	protected Image[]	image_values	= new Image[0];
-	protected Color[]	foreground_colors	= new Color[0];
+	protected Image[] image_values = new Image[0];
+	protected Color[] foreground_colors = new Color[0];
 	
 	protected Color		foreground;
 	
@@ -159,8 +159,7 @@ public class BufferedTableRow {
 	 * Disposing of fonts, colors and other resources are the responsibilty of 
 	 * the caller.
 	 */
-	public void
-	dispose()
+	public void dispose()
 	{
 		if (table != null && !table.isDisposed() ) {
 			if (!checkWidget(REQUIRE_TABLEITEM)) {
@@ -204,10 +203,7 @@ public class BufferedTableRow {
 	 * @param index the column index
 	 * @param new_image the new image
 	 */
-	public void
-	setImage(
-   		int 	index,
-		Image	new_image )
+	public void setImage(int index, Image new_image)
 	{
 	//	if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
 	//		return;
@@ -299,9 +295,7 @@ public class BufferedTableRow {
 	}
 	
 	
-	public Color
-	getForeground()
-	{
+	public Color getForeground() {
 		if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
   	  return null;
 
@@ -315,11 +309,7 @@ public class BufferedTableRow {
 		item.setForeground(foreground);
 	}
 
-	public boolean
-	setForeground(
-	  int index,
-		Color	new_color )
-	{
+	public boolean setForeground(int index, Color new_color) {
 		if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
 			return false;
 				
@@ -350,17 +340,16 @@ public class BufferedTableRow {
 		
 		foreground_colors[index] = new_color;
 
-    try {
-      item.setForeground(index, new_color);
-    } catch (NoSuchMethodError e) {
-      /* Ignore for Pre 3.0 SWT.. */
-    }
+		try {
+			item.setForeground(index, new_color);
+		} catch (NoSuchMethodError e) {
+			/* Ignore for Pre 3.0 SWT.. */
+		}
     
     return true;
 	}
 
-	public Color getForeground(int index)
-	{
+	public Color getForeground(int index) {
 		if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
   	  return null;
 		if (index >= foreground_colors.length)
@@ -369,10 +358,7 @@ public class BufferedTableRow {
 		return foreground_colors[index];
 	}
 	
-	protected String
-	getText(
-		int		index )
-	{
+	public String getText(int index ) {
 		if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
 			return "";
 
@@ -386,11 +372,7 @@ public class BufferedTableRow {
    * @param new_value
    * @return true if the item has been updated
    */
-	public boolean
-	setText(
-		int			index,
-		String		new_value )
-	{
+	public boolean setText(int index, String new_value) {
 	//	if (!checkWidget(REQUIRE_TABLEITEM_INITIALIZED))
 	//		return false;
 		
