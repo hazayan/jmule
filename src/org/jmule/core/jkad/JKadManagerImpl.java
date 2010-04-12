@@ -133,8 +133,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:11:43 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:25:26 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
@@ -178,7 +178,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 		Logger.getSingleton().start();
 		routing_table = RoutingTable.getSingleton();
 		indexer = Indexer.getSingleton();
-		indexer.start();
+		
 
 		firewallChecker = FirewallChecker.getSingleton();
 		bootStrap = BootStrap.getInstance();
@@ -329,6 +329,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 
 	public void connect() {
 		setStatus(CONNECTING);
+		indexer.start();
 		routing_table.start();
 		if (routing_table.getTotalContacts() == 0) {
 			setStatus(DISCONNECTED);
