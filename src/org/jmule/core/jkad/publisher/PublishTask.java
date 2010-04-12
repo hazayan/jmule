@@ -26,21 +26,19 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
-import org.jmule.core.networkmanager.JMUDPConnection;
 
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:29:00 $
  */
 public abstract class PublishTask {
 
 	protected Int128 publishID;
 	protected long lastpublishTime;
 	protected boolean isStarted = false;
-	protected JMUDPConnection udpConnection = null;
 	protected long publishInterval = 1000 * 60 * 60 * 12;
 	
 	protected int publishedSources = 0;
