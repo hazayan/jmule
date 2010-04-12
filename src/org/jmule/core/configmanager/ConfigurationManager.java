@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.32 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 09:37:09 $$
+ * @version $$Revision: 1.33 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:14:49 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -111,6 +111,8 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int 		  MAX_PEERS						= 	  300;
 	
 	public static final int			  MAX_PEX_RESPONSE				= 	  500;
+	
+	public static final int			  NETWORK_READ_BUFFER			= 	  1024 * 10;
 	
 	// data base keys
 	public static final String       NICK_NAME_KEY                  =     "NickName";
