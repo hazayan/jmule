@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.31 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:06 $$
+ * @version $$Revision: 1.32 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:27:34 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -342,6 +342,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		}
 
 		need_more_peers_timer.cancel();
+		maintenance_tasks.cancelAllTasks();
 		
 		for (DownloadSession download_session : session_list.values())
 			if (download_session.isStarted())
@@ -475,7 +476,9 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			_upload_manager.removeUpload(fileHash);
 		
 		download_session.startDownload();
+				
 		notifyDownloadStarted(fileHash);
+		
 	}
 
 	public void stopDownload(FileHash fileHash)  throws DownloadManagerException {

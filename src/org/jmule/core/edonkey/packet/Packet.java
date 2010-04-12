@@ -31,8 +31,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:04:45 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:27:34 $$
  */
 public class Packet {
 	
@@ -99,7 +99,6 @@ public class Packet {
 	}
 
 	public ByteBuffer getAsByteBuffer() {
-		packet_data.position(0);
 		return packet_data;
 	}
 
@@ -113,6 +112,7 @@ public class Packet {
 		packet_data.compact();
 		packet_data.rewind();
 		packet_data.limit(0);
+		packet_data = null;
 	}
 	
 	public String toString() {
