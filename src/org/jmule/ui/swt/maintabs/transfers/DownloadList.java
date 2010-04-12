@@ -65,8 +65,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 02 2008
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:11:23 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:38:20 $$
  */
 public class DownloadList extends JMTable<DownloadSession> implements Refreshable,DownloadManagerListener {
 
@@ -408,8 +408,13 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 		Image image = SWTImageRepository.getIconByExtension(file_name);
 		
 		setRowImage(session, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, image);
-		setRowText(session,  SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, file_name);
-		setRowText(session,  SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, FileFormatter.formatFileSize(session.getFileSize()));
+		
+		if (getRowText(session, SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID).isEmpty())
+			setRowText(session,  SWTConstants.DOWNLOAD_LIST_FILE_NAME_COLUMN_ID, file_name);
+		
+		if (getRowText(session, SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID).isEmpty())
+			setRowText(session,  SWTConstants.DOWNLOAD_LIST_SIZE_COLUMN_ID, FileFormatter.formatFileSize(session.getFileSize()));
+		
 		setRowText(session,  SWTConstants.DOWNLOAD_LIST_TRANSFERRED_COLUMN_ID, FileFormatter.formatFileSize(session.getTransferredBytes()));
 		
 		DecimalFormat formatter = new DecimalFormat("0.00");
@@ -458,17 +463,14 @@ public class DownloadList extends JMTable<DownloadSession> implements Refreshabl
 	
 	public void addDownlaodSession(DownloadSession session) {
 		addRow(session);
-
 		GapListPainter gap_list_painter = new GapListPainter(session.getGapList(),session.getFileSize());
-		
 		TableItemGapList painter = new TableItemGapList(SWTPreferences.getDefaultColumnOrder(SWTConstants.DOWNLOAD_LIST_PROGRESS_COLUMN_ID),gap_list_painter);
-		
 		addCustumControl(getItemCount()-1, painter);
 	}
 
 	public void refresh() {
 		if (isDisposed()) return ;
-		redraw();
+		//redraw();
 		for(DownloadSession session : download_manager.getDownloads()) {
 			if (!hasObject(session)) continue;
 			if (getRow(session).isVisible())

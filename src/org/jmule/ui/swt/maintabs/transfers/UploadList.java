@@ -56,8 +56,8 @@ import org.jmule.ui.utils.TimeFormatter;
 /**
  * Created on Aug 10, 2008
  * @author binary256
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/11 09:00:18 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:38:20 $
  */
 public class UploadList extends JMTable<UploadSession> implements Refreshable,UploadManagerListener{
 
@@ -216,12 +216,16 @@ public class UploadList extends JMTable<UploadSession> implements Refreshable,Up
 		Image image = SWTImageRepository.getIconByExtension(object.getSharingName());
 				
 		setRowImage(object, SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, image);
-		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, object.getSharingName());
-		setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));
+		
+		if (getRowText(object, SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID).isEmpty())
+			setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_NAME_COLUMN_ID, object.getSharingName());
+		
+		if (getRowText(object, SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID).isEmpty())
+			setRowText(object,  SWTConstants.UPLOAD_LIST_FILE_SIZE_COLUMN_ID, FileFormatter.formatFileSize(object.getFileSize()));
+
 		setRowText(object,  SWTConstants.UPLOAD_LIST_UPLOAD_SPEED_COLUMN_ID, SpeedFormatter.formatSpeed(object.getSpeed()));
-		setRowText(object, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, object
-				.getPeerCount()
-				+ "");
+		setRowText(object, SWTConstants.UPLOAD_LIST_PEERS_COLUMN_ID, object.getPeerCount()+ "");
+		
 		long eta = object.getETA();
 		setRowText(object,  SWTConstants.UPLOAD_LIST_ETA_COLUMN_ID, TimeFormatter.format(eta));
 		setRowText(object,  SWTConstants.UPLOAD_LIST_UPLOADED_COLUMN_ID, FileFormatter.formatFileSize(object.getTransferredBytes()));
