@@ -37,6 +37,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
@@ -62,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/09 18:07:34 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:32:30 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -71,6 +74,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	private InternalNetworkManager _network_manager;
 	private InternalSharingManager _sharing_manager;
+	private InternalConfigurationManager _config_manager;
 
 	private ServerMet server_met;
 
@@ -150,6 +154,13 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		servers_udp_query = new JMTimerTask() {
 			Random random = new Random();
 			public void run() {
+				try {
+					if (!_config_manager.isUDPEnabled())
+						return;
+				} catch (ConfigurationManagerException e) {
+					e.printStackTrace();
+					return;
+				}
 				for(Server server : server_list) {
 					byte[] bytes = new byte[4]; 
 					random.nextBytes(bytes);
@@ -177,7 +188,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		}; 
 		
 		_download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
-		
+		_config_manager = (InternalConfigurationManager) ConfigurationManagerSingleton.getInstance();
 	}
 
 	public void start() {
