@@ -75,8 +75,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:25:30 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:39:53 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -231,6 +231,11 @@ public class MainWindow implements JMuleUIComponent {
 								}
 							}
 						}).start();
+						try {
+							JMuleUIManager.getJMuleUI().shutdown();
+						} catch (JMuleUIManagerException e) {
+							e.printStackTrace();
+						}
 					}
             	});
             }});
