@@ -22,9 +22,6 @@
  */
 package org.jmule.core.networkmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -38,8 +35,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:05:58 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:53:31 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -52,7 +49,6 @@ class JMuleSocketChannel {
 	
 	JMuleSocketChannel(SocketChannel channel) throws IOException {
 		this.channel = channel;
-		this.channel.configureBlocking(true);
 		this.channel.socket().setKeepAlive(true);
 		init();
 	}
@@ -93,113 +89,71 @@ class JMuleSocketChannel {
 		channel.connect(address);
 	}
 
-	void connect(InetSocketAddress address, int connectingTimeout)
-			throws IOException {
-		channel.socket().connect(address, connectingTimeout);
-	}
-
+	
 	SocketChannel getChannel() {
 		return channel;
 	}
 
 	private void init() {
-		uploadController = SpeedManagerSingleton.getInstance()
-				.getUploadController();
-		downloadController = SpeedManagerSingleton.getInstance()
-				.getDownloadController();
+		uploadController = SpeedManagerSingleton.getInstance().getUploadController();
+		downloadController = SpeedManagerSingleton.getInstance().getDownloadController();
 	}
 
 	void close() throws IOException {
 		this.channel.close();
 	}
 
-	int read(ByteBuffer packetBuffer) throws IOException, JMEndOfStreamException {
+	int read(ByteBuffer packetBuffer) throws IOException,JMEndOfStreamException {
+		int readedBytes = 0;
 		if (downloadController.getThrottlingRate() == 0) {
-			packetBuffer.position(0);
-			return this.read(packetBuffer, packetBuffer.capacity());
-		}
-		int totalReaded = 0;
-		int cacheLimit = (int) Math.max(downloadController.getThrottlingRate(),
-				packetBuffer.capacity());
-		ByteBuffer readCache = Misc.getByteBuffer(cacheLimit);
-		packetBuffer.position(0);
-		do {
-			int mustRead = downloadController.getAvailableByteCount(packetBuffer
-					.remaining(), true);
-			readCache.position(0);
-			readCache.limit(mustRead);
-
-			read(readCache, mustRead);
-			int readedData = readCache.limit();
-			totalReaded += readedData;
-			downloadController.markBytesUsed(readedData);
-			packetBuffer.put(readCache.array(), 0, readedData);
-		} while (packetBuffer.hasRemaining());
-		transferred_bytes += totalReaded;
-		return totalReaded;
-	}
-
-	private int read(ByteBuffer packetBuffer, int bytes) throws IOException,
-			JMEndOfStreamException {
-		ByteBuffer readCache = Misc.getByteBuffer(bytes);
-		int mustRead = bytes;
-		do {
-			readCache.limit(mustRead);
-			readCache.position(0);
-			int readedData = 0;
-
-			readedData = channel.read(readCache); // return -1 if socket is
-													// closed
-			if (readedData == -1) {
+			readedBytes = channel.read(packetBuffer);
+			if (readedBytes == -1)
 				throw new JMEndOfStreamException();
-			}
-
-			mustRead -= readedData;
-			readCache.limit(readedData);
-			readCache.position(0);
-			packetBuffer.put(readCache);
-		} while (mustRead > 0);
-		transferred_bytes += bytes;
-		return bytes;
-
+			transferred_bytes += readedBytes;
+			return readedBytes;
+		}
+		long cacheLimit = Math.min(downloadController.getThrottlingRate(),packetBuffer.capacity());
+		ByteBuffer readCache = Misc.getByteBuffer(cacheLimit);
+		
+		int mustRead = downloadController.getAvailableByteCount(readCache.remaining(), false);
+		readCache.limit(mustRead);
+		
+		readedBytes = channel.read(readCache);
+		if (readedBytes == -1)
+			throw new JMEndOfStreamException();
+		downloadController.markBytesUsed(readedBytes);
+		packetBuffer.position(0);
+		packetBuffer.put(readCache.array());
+		
+		transferred_bytes += readedBytes;
+		
+		return readedBytes;	
 	}
 
-	int write(ByteBuffer srcs) throws Exception {
-		srcs.position(0);
-		int totalSended = 0;
-		do {
-			int numBytes;
-			if (uploadController.getThrottlingRate() != 0)
-				numBytes = uploadController.getAvailableByteCount(srcs
-						.remaining(), true);
-			else
-				numBytes = srcs.remaining();
-
-			int ipos = srcs.position();
-			ByteBuffer toSend = Misc.getByteBuffer(numBytes);
-			srcs.get(toSend.array(), 0, numBytes);
-			toSend.position(0);
-
-			int sended = channel.write(toSend);
-			if (sended == -1) {
-				return -1;
-			}
-
-			srcs.position(ipos + sended);
-			totalSended += sended;
-			if (uploadController.getThrottlingRate() != 0)
-				uploadController.markBytesUsed(sended);
-		} while (totalSended < srcs.capacity());
-		if (srcs.capacity()<1+4) return totalSended; // 0_0
-		byte packet_opcode = srcs.get(1 + 4);
-		if ((packet_opcode == OP_SENDINGPART)
-				|| (packet_opcode == OP_COMPRESSEDPART)) {
-			file_transfer_trafic.addSendBytes(totalSended);
-		} else {
-			service_trafic.addSendBytes(totalSended);
+	int write(ByteBuffer packet) throws IOException, JMEndOfStreamException {
+		int transferedBytes = 0;
+		if (uploadController.getThrottlingRate() == 0) {
+			transferedBytes = channel.write(packet);
+			if (transferedBytes == -1)
+				throw new JMEndOfStreamException();
+			
+			return transferedBytes;
 		}
 		
-		return totalSended;
+		long cacheLimit = Math.min(uploadController.getThrottlingRate(),packet.remaining());
+		int mustRead = uploadController.getAvailableByteCount((int)cacheLimit, true);
+		
+		packet.limit(packet.position() + mustRead);
+		transferedBytes = channel.write(packet);
+		
+		packet.limit(packet.capacity());
+		
+		if (transferedBytes == -1)
+			throw new JMEndOfStreamException();
+		
+		uploadController.markBytesUsed(transferedBytes);
+		
+		return transferedBytes;
 	}
 
 	boolean isOpen() {
@@ -220,13 +174,10 @@ class JMuleSocketChannel {
 		return channel.isConnected();
 	}
 
-	void configureBlocking(boolean value) throws IOException {
-		channel.configureBlocking(value);
-	}
-
 	void disconnect() {
 		try {
 			channel.socket().close();
+			channel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
