@@ -48,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:59 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:31:31 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
@@ -213,7 +213,7 @@ public class Peer {
 			result += " " + clientID.getAsString();
 		result += " Open port : " + getListenPort();
 		result += " Speed : " + getDownloadSpeed();
-		
+		result += " Status : " + getStatus();
 		result += " isConnected : " + isConnected();
 		result += " userHash : " + userHash;
 		return result;

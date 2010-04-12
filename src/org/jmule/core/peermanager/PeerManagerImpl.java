@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.28 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/27 15:13:33 $$
+ * @version $$Revision: 1.29 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:31:31 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -430,11 +430,13 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	
 	public Peer newIncomingPeer(String ip, int port) throws PeerManagerException {
 		Peer peer;
+		
 		if (hasPeer(ip, port)) {
 			peer = getPeer(ip, port);
 		}
 		peer = new Peer(ip, port, PeerSource.INCOMING);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
+		
 		notifyNewPeer(peer);
 		return peer;
 		
