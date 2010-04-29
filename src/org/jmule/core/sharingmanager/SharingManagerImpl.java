@@ -299,14 +299,12 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 						}
 					}
 					files_to_share.add(shared_file);
-					server_shared_files
-							.put(fileHash, shared_file);
+					server_shared_files.put(fileHash, shared_file);
 				}
 				if (files_to_share.size() == 0) return ;
 								
 				Server server = _server_manager.getConnectedServer();
-				_network_manager.offerFilesToServer(server.getClientID(),
-						files_to_share);
+				_network_manager.offerFilesToServer(server.getClientID(),files_to_share);
 
 			}
 		};
