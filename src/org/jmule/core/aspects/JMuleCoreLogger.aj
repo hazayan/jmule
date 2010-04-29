@@ -25,20 +25,13 @@ package org.jmule.core.aspects;
 import java.util.logging.Logger;
 
 import org.jmule.core.JMThread;
-import org.jmule.core.downloadmanager.DownloadManagerSingleton;
-import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.impl.JMuleCoreImpl;
-import org.jmule.core.jkad.JKadManagerSingleton;
-import org.jmule.core.networkmanager.NetworkManagerSingleton;
-import org.jmule.core.peermanager.PeerManagerSingleton;
-import org.jmule.core.uploadmanager.UploadManagerSingleton;
-import org.jmule.core.uploadmanager.UploadSession;
 import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 14:06:36 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 10:58:54 $$
  */
 public privileged aspect JMuleCoreLogger {
 	private Logger log = Logger.getLogger("org.jmule.core");
@@ -61,7 +54,7 @@ public privileged aspect JMuleCoreLogger {
 	
 	after(String event) : args(event) && (call(void JMuleCoreImpl.logEvent(String))) {
 		
-		String downloadmanager = "Downloads : \n";
+/*		String downloadmanager = "Downloads : \n";
 		for(DownloadSession download_session : DownloadManagerSingleton.getInstance().getDownloads()) {
 			downloadmanager += download_session + "\n";
 		}
@@ -74,13 +67,13 @@ public privileged aspect JMuleCoreLogger {
 		//		peermanager += peer + " " + peer.getStatus()+ " \n";
 		//}
 		
-		/*peermanager += "Unknown peers : \n";
+//		peermanager += "Unknown peers : \n";
+//
+//		for(Peer peer : PeerManagerSingleton.getInstance().getUnknownPeers())
+//			
+//			peermanager += peer + "\n";
 		
-		for(Peer peer : PeerManagerFactory.getInstance().getUnknownPeers())
-			
-			peermanager += peer + "\n";
-		
-		peermanager += "Low ID Peers \n";*/
+		peermanager += "Low ID Peers \n";
 		//PeerManagerImpl impl = (PeerManagerImpl)PeerManagerFactory.getInstance();
 		//for(Peer peer : impl.low_id_peer_list) {
 		//	peermanager += peer + "\n";
@@ -97,7 +90,15 @@ public privileged aspect JMuleCoreLogger {
 				network_manager+"\n"+
 				peermanager+"\n"+
 				downloadmanager+"\n"+
-				uploadmanager+"\n" + jkad + "\n");
+				uploadmanager+"\n" + jkad + "\n");*/
+		
+//		String downloadManager = "\nDownloads : \n";
+//		for(DownloadSession download_session : DownloadManagerSingleton.getInstance().getDownloads()) {
+//			downloadManager += download_session + "\n";
+//		}
+		
+//		log.fine("Network manager : " + NetworkManagerSingleton.getInstance() 
+//				+ "\nPeer manager : \n" + PeerManagerSingleton.getInstance());
 	}
 	
 
