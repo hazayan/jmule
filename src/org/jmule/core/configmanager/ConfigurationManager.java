@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.33 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:14:49 $$
+ * @version $$Revision: 1.34 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:23:07 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -60,11 +60,11 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          LOG_FILES_NUMBER   			=     10;
 	public static final int          LOG_FILE_SIZE      			=     20 * 1024 * 1024;
 	
-	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 1;
+	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 30;
 	public static final int          PEX_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 1;
 	public static final int          PEER_ACTIVITY_CHECH_INTERVAL   =     1000 * 30;
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
-	public static final int 		 PEERS_ACTIVITY_CHECK_INTERVAL	=     10000;
+	public static final int 		 PEERS_ACTIVITY_CHECK_INTERVAL	=     1000 * 10;
 	public static final int          SPEED_CHECK_INTERVAL           =     1000;
 	
 	// upload queue
@@ -112,7 +112,9 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final int			  MAX_PEX_RESPONSE				= 	  500;
 	
-	public static final int			  NETWORK_READ_BUFFER			= 	  1024 * 10;
+	public static final int			  NETWORK_READ_BUFFER			= 	  1024 * 2;
+	
+	public static final int			DROP_DISCONNECTED_PEERS_TIMEOUT =	  1000 * 60 * 1; 
 	
 	// data base keys
 	public static final String       NICK_NAME_KEY                  =     "NickName";
