@@ -48,8 +48,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.29 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/27 15:13:33 $$
+ * @version $$Revision: 1.30 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:20:29 $$
  */
 public class E2DKConstants {
 
@@ -122,6 +122,8 @@ public class E2DKConstants {
 	public final static long PARTSIZE 					= 0x947000; //9728000
     public final static int  BLOCKSIZE 					= 184320;//184320 10240
     public final static int  MAX_OFFER_FILES			= 200;
+    
+    public final static int FILE_SOURCES_QUERY_ITERATION	= 15;
     
     public final static int  SECURITY_IDENTIFICATION_BIT_KEY_LENGTH	= 384;
     public final static int  MAX_SECURITY_KEY_LENGTH	= 80;
