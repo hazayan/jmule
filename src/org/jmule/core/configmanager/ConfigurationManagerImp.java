@@ -30,9 +30,6 @@ import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -49,6 +46,8 @@ import org.jmule.core.bccrypto.JDKKeyFactory;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.jkad.ClientID;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.utils.AddressUtils;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
@@ -57,8 +56,8 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:47:10 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:25:22 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
@@ -480,6 +479,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		config_store.setProperty( TCP_PORT_KEY, tcp + "" );
 		save(); 
 		notifyPropertyChanged( TCP_PORT_KEY, tcp );
+		((InternalNetworkManager)NetworkManagerSingleton.getInstance()).tcpPortChanged();
 	}
 
 	
@@ -507,7 +507,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		config_store.setProperty( UDP_PORT_KEY, udp + "" );
 		save(); 
 		notifyPropertyChanged( UDP_PORT_KEY, udp );
-
+		((InternalNetworkManager)NetworkManagerSingleton.getInstance()).udpPortChanged();
 	}
 
 	
@@ -561,6 +561,7 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
 		config_store.setProperty( UDP_ENABLED_KEY, enabled + "" );
 		save(); 
 		notifyPropertyChanged( UDP_ENABLED_KEY, enabled );
+		((InternalNetworkManager)NetworkManagerSingleton.getInstance()).udpPortStatusChanged();
 	}
 	
 	
