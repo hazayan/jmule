@@ -29,8 +29,8 @@ import java.net.InetSocketAddress;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.19 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:53:31 $
+ * @version $Revision: 1.20 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/04/29 10:59:43 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -78,10 +78,9 @@ public final class JMPeerConnection extends JMConnection {
 	}
 	
 	int getUsePort() {
-		int port = remote_inet_socket_address.getPort();
 		if (usePort!=0)
-			port = usePort;
-		return port;
+			return usePort;
+		return remote_inet_socket_address.getPort();
 	}
 	
 	ConnectionStatus getStatus() {
@@ -111,12 +110,16 @@ public final class JMPeerConnection extends JMConnection {
 		return uploadedFileBytes;
 	}
 	
+	void addUploadedBytes(long bytes) {
+		uploadedFileBytes += bytes;
+	}
+	
 	void resetUploadedFileBytes() {
 		uploadedFileBytes = 0;
 	}
 	
 	public String toString() {
-		return "Peer connection to : " +  remote_inet_socket_address + " Status : " + connection_status;
+		return "Peer connection to : " +  remote_inet_socket_address + " Use port : " + usePort + " Status : " + connection_status;
 	}
 	
 	public boolean equals(Object obj) {
