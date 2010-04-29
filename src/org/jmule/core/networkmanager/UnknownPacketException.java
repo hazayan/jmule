@@ -29,13 +29,13 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Aug 21, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/04/29 10:52:50 $
  */
 public class UnknownPacketException extends JMException {
 	
 	public UnknownPacketException(byte header,byte opCode, byte[] packetContent) {
-		super("Unknown packet exception " + "\nHeader : " + Convert.byteToHex(header) + "\nOpCode : " + Convert.byteToHex(opCode) +"\n" +Convert.byteToHexString(packetContent," "));
+		super("Unknown packet exception " + "\nHeader : " + Convert.byteToHex(header) + "\nOpCode : " + Convert.byteToHex(opCode) +"\n" );
 	}
 	
 	public UnknownPacketException(String cause) {
