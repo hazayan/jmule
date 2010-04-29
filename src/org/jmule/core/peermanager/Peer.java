@@ -48,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:31:31 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 10:42:54 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
@@ -58,7 +58,7 @@ public class Peer {
 	private String ip;
 	private int ip_as_int = 0;
 	private int port;
-	private int listenPort = 0;;
+	private int listenPort = 0;
 	
 	private String server_ip;
 	private int server_port;
@@ -71,6 +71,7 @@ public class Peer {
 	private PeerSource peer_source;
 	
 	private PeerStatus peer_status = PeerStatus.DISCONNECTED;
+	private long lastSeen = 0;
 	
 	Peer(String ip, int port,PeerSource peerSource) {
 		this.ip = ip;
@@ -96,10 +97,15 @@ public class Peer {
 		
 		this.peer_features = peer.peer_features;
 		this.peer_status = peer.peer_status;
+		
+		this.lastSeen = peer.lastSeen;
+		this.peer_source = peer.peer_source;
 	}
 	
 	void setStatus(PeerStatus newStatus) {
 		this.peer_status = newStatus;
+		lastSeen = System.currentTimeMillis();
+		
 	}
 	
 	void setServer(String serverIP, int serverPort) {
@@ -132,6 +138,10 @@ public class Peer {
 	
 	void setListenPort(int listenPort) {
 		this.listenPort = listenPort;
+	}
+	
+	public long getLastSeen() {
+		return lastSeen;
 	}
 	
 	public int getListenPort() {
@@ -216,6 +226,8 @@ public class Peer {
 		result += " Status : " + getStatus();
 		result += " isConnected : " + isConnected();
 		result += " userHash : " + userHash;
+		
+		result += " lastSeen : " + lastSeen;
 		return result;
 	}
 	
@@ -236,8 +248,7 @@ public class Peer {
 		ClientID id = p.getID();
 		ClientID id2 = getID();
 		if ((id == null) || (id2 == null))
-			return (getIP() + ":" + getPort()).equals(p.getIP() + ":"
-					+ p.getPort());
+			return (getIP() + ":" + getPort()).equals(p.getIP() + ":"+ p.getPort());
 		byte[] b1 = id.getClientID();
 		byte[] b2 = id2.getClientID();
 
