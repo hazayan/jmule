@@ -24,28 +24,41 @@ package org.jmule.core.networkmanager;
 
 import java.nio.ByteBuffer;
 
+import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Mar 4, 2010
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:55:27 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/04/29 10:54:45 $
  */
 public class PacketFragment {
 
 	private JMConnection connection;
 	private ByteBuffer content;
 	private int packetLimit;
+	private long lastUpdate;
 	
+	public String toString() {
+		return "packetLimit : " + packetLimit + " " + " lastUpdate : " + lastUpdate + " content:: capacity :: " + content.capacity();
+	}
 	
 	public PacketFragment(JMConnection connection, long size) {
 		this.connection = connection;
-		content = Misc.getByteBuffer(size);	
+		content = Misc.getByteBuffer(size);
+		lastUpdate = System.currentTimeMillis();
+	}
+	
+	public long getLastUpdate() {
+		return lastUpdate;
 	}
 	
 	public boolean isFullUsed() {
-		return content.position() >= getPacketLimit();
+		boolean value = content.position() >= getPacketLimit();
+		if (content.capacity()==0)
+			value = false;
+		return value;
 	}
 	
 	public JMConnection getConnection() {
@@ -72,8 +85,15 @@ public class PacketFragment {
 		result.put(fragment.getContent().array(),0, l);
 		
 		setPacketLimit(result.position());
+		//ByteBuffer oldContent = content;
 		content = result;
 		content.position(0);
+		
+		lastUpdate = System.currentTimeMillis();
+		
+		fragment.clear();
+		//oldContent.reset();
+		//oldContent = null;
 	}
 	
 	public byte getHead() {
@@ -81,6 +101,13 @@ public class PacketFragment {
 		byte result = content.get();
 		content.position(0);
 		return result;
+	}
+	
+	public int getLength() {
+		content.position(0);
+		ByteBuffer len = Misc.getByteBuffer(4);
+		content.position(0);
+		return Convert.byteToInt(len.array());
 	}
 	
 	
@@ -114,9 +141,9 @@ public class PacketFragment {
 		
 		content.get(temp.array());
 		
-		int end = 10;
-		if(end > temp.capacity())
-			end = temp.capacity();
+//		int end = 10;
+//		if(end > temp.capacity())
+//			end = temp.capacity();
 //		System.out.println("moveUnusedBytes :: move bytes :: " + Convert.byteToHexString(temp.array(), 0, end));
 		
 		content.clear();
@@ -127,6 +154,11 @@ public class PacketFragment {
 		content.put(temp);
 		setPacketLimit(content.position());
 		content.position(0);
+		
+		lastUpdate = System.currentTimeMillis();
+		
+		//temp.clear();
+		//temp = null;
 	}
 	
 	public void clear() {
