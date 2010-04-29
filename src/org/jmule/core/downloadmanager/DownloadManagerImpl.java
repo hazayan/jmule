@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.32 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:27:34 $$
+ * @version $$Revision: 1.33 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:21:59 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -102,11 +102,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask pex_source_search_task = null;
 	
-	private Queue<FileHash> server_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> kad_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> pex_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	
 	public DownloadManagerImpl() {
+		
 	}
 	
 	public void initialize() {
@@ -156,21 +156,34 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		server_sources_query = new JMTimerTask() {
 			public void run() {
-				while(true) {
-					FileHash fileHash = server_sources_queue.poll();
-					if (fileHash == null) {
-						return;
-					}
-					if (!hasDownload(fileHash)) {
-						continue;
-					}
-					server_sources_queue.offer(fileHash);
-					DownloadSession session = session_list.get(fileHash);
-
-					_network_manager.requestSourcesFromServer(fileHash, session.getSharedFile().length());
-					return;
-					
+				
+				long time30Min = 1000 * 60 * 30;
+				
+				List<DownloadSession> sessions_to_request = new ArrayList<DownloadSession>();
+				for(DownloadSession session : session_list.values()) {
+					if (sessions_to_request.size() > E2DKConstants.FILE_SOURCES_QUERY_ITERATION)
+						break;
+					if (System.currentTimeMillis() - session.getNextServerRequest() > time30Min)
+						sessions_to_request.add(session);
 				}
+				
+				for(DownloadSession session : sessions_to_request) {
+					_network_manager.requestSourcesFromServer(session.getFileHash(), session.getSharedFile().length());
+					session.setNextServerRequest(System.currentTimeMillis()
+							+ time30Min);
+				}
+				
+				/*for (int i = 0; i < E2DKConstants.FILE_SOURCES_QUERY_ITERATION; i++) {
+					FileHash fileHash = server_sources_queue.poll();
+					if (fileHash == null)
+						break;
+					hash_to_request.add(fileHash);
+				}
+				for (FileHash hash : hash_to_request) {
+					server_sources_queue.offer(hash);
+					DownloadSession session = session_list.get(hash);
+					_network_manager.requestSourcesFromServer(hash, session.getSharedFile().length());
+				}*/
 			}
 		};
 		
@@ -437,7 +450,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		session_list.remove(fileHash);
 		
-		server_sources_queue.remove(fileHash);
 		kad_sources_queue.remove(fileHash);
 		pex_sources_queue.remove(fileHash);
 		
@@ -468,7 +480,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		if (download_session.isStarted())
 			throw new DownloadManagerException("Download " + fileHash+" is already started");
 		
-		server_sources_queue.offer(fileHash);
 		kad_sources_queue.offer(fileHash);
 		pex_sources_queue.offer(fileHash);
 		
@@ -495,7 +506,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		_jkad.getSearch().cancelSearch(search_id);
 		
-		server_sources_queue.remove(fileHash);
 		kad_sources_queue.remove(fileHash);
 		pex_sources_queue.remove(fileHash);
 		
@@ -524,7 +534,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		for(DownloadSession session : session_list.values()) {
 			if (!session.isStarted()) {
 				
-				server_sources_queue.offer(session.getFileHash());
 				kad_sources_queue.offer(session.getFileHash());
 				pex_sources_queue.offer(session.getFileHash());
 				
@@ -784,6 +793,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	
 	public void connectedToServer(Server server) {
 		maintenance_tasks.addTask(server_sources_query, ConfigurationManager.SERVER_SOURCES_QUERY_INTERVAL, true);
+		server_sources_query.run();
 	}
 	
 	public void disconnectedFromServer(Server server) {

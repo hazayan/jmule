@@ -78,8 +78,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.45 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:02:06 $$
+ * @version $$Revision: 1.46 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:21:59 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -100,18 +100,25 @@ public class DownloadSession implements JMTransferSession {
 	
 	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
 
-	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
-			.getInstance();
-	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton
-			.getInstance();
-	private InternalDownloadManager download_manager = (InternalDownloadManager) DownloadManagerSingleton
-			.getInstance();
-	private InternalUploadManager upload_manager = (InternalUploadManager) UploadManagerSingleton
-			.getInstance();
+	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
+	private InternalDownloadManager download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
+	private InternalUploadManager upload_manager = (InternalUploadManager) UploadManagerSingleton.getInstance();
 
 	private JMTimer download_tasks;
 	private JMTimerTask peer_monitor_task = null;
 	
+	private long nextServerRequest = 0;
+	
+	
+	public long getNextServerRequest() {
+		return nextServerRequest;
+	}
+
+	public void setNextServerRequest(long nextServerRequest) {
+		this.nextServerRequest = nextServerRequest;
+	}
+
 	private DownloadSession() {
 		
 	}
@@ -720,14 +727,14 @@ public class DownloadSession implements JMTransferSession {
 		str += "Peer used by session : \n";
 		for (Peer peer : session_peers)
 			str += peer + "\n";
-		str += "\nDownload status list :\n" + download_status_list + "\n";
-		String c_chunks = " [ ";
-		for(Peer peer : compressedFileChunks.keySet()) {
-			c_chunks += peer + " : " + compressedFileChunks.get(peer)+"\n";
-		}
-		c_chunks += " ]";
-		str += "\nCompressed chunks : " + c_chunks + "\n"; 
-		str += fileRequestList + "\n";
+//		str += "\nDownload status list :\n" + download_status_list + "\n";
+//		String c_chunks = " [ ";
+//		for(Peer peer : compressedFileChunks.keySet()) {
+//			c_chunks += peer + " : " + compressedFileChunks.get(peer)+"\n";
+//		}
+//		c_chunks += " ]";
+//		str += "\nCompressed chunks : " + c_chunks + "\n"; 
+//		str += fileRequestList + "\n";
 		str += "]";
 		return str;
 	}
