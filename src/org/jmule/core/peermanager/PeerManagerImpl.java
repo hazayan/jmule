@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.29 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:31:31 $$
+ * @version $$Revision: 1.30 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 10:47:47 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -175,13 +175,23 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		JMTimerTask peer_dropper = new JMTimerTask() {
 			public void run() {
 				for(Peer peer : peers.values()) { 
-					if (!peer.isConnected()) continue;
+					
 					if (!_download_manager.hasPeer(peer))
 						if (!_upload_manager.hasPeer(peer)) {
-							try {
-								disconnect(peer);
-							} catch (PeerManagerException e) {
-								e.printStackTrace();
+							if (peer.isConnected()) {
+								try {
+									System.out.println("peer manager :: peer_dropper :: disconnect :: " + peer);
+									disconnect(peer);
+								} catch (PeerManagerException e) {
+									e.printStackTrace();
+								} 
+							} else if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_DISCONNECTED_PEERS_TIMEOUT) {
+								try {
+									System.out.println("peer manager :: peer_dropper :: removePeer :: "+ peer);
+									removePeer(peer);
+								} catch (PeerManagerException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 				}
@@ -435,6 +445,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			peer = getPeer(ip, port);
 		}
 		peer = new Peer(ip, port, PeerSource.INCOMING);
+		peer.setStatus(PeerStatus.CONNECTED);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		
 		notifyNewPeer(peer);
@@ -575,6 +586,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		int port  = peer.getPort(); 
 		if (!hasPeer(ip, port))
 			throw new PeerManagerException("Peer " + ip + KEY_SEPARATOR + port + " not found");
+		
 		_network_manager.disconnectPeer(ip, port);
 		peer.setStatus(PeerStatus.DISCONNECTED);
 		notifyPeerDisconnected(peer);
