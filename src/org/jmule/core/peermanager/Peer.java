@@ -48,8 +48,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 10:42:54 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/02 18:02:50 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
@@ -99,10 +99,10 @@ public class Peer {
 		this.peer_status = peer.peer_status;
 		
 		this.lastSeen = peer.lastSeen;
-		this.peer_source = peer.peer_source;
 	}
 	
 	void setStatus(PeerStatus newStatus) {
+		System.out.println("Set status : " + this + "  " + newStatus);
 		this.peer_status = newStatus;
 		lastSeen = System.currentTimeMillis();
 		
