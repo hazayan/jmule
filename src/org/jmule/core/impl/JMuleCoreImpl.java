@@ -67,8 +67,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 16:00:26 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/05 06:44:25 $$
  */
 public class JMuleCoreImpl implements InternalJMuleCore {
 	
@@ -347,6 +347,7 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		JKadManager _jkad = getJKadManager();
 		if (!_jkad.isDisconnected()) {
 			_jkad.disconnect();
+			_jkad.shutdown();
 			// notifies that the kad manager has been stopped
 			notifyComponentStopped(_jkad);
 		}
@@ -366,7 +367,7 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		
 		System.out.println("Total shutdown time = " + ( System.currentTimeMillis() - stop_time ) );
 		
-		System.exit( 0 );
+		//System.exit( 0 );
 	}
 
 	public boolean isStarted() {
@@ -469,7 +470,11 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		
 			while(!stop){
 			
-				logEvent("Debug thread");
+				try {
+					logEvent("Debug thread");
+				}catch(Throwable cause) {
+					cause.printStackTrace();
+				}
 			
 				try {
 					Thread.sleep(1000);			

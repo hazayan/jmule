@@ -133,8 +133,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:25:26 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/05 06:44:25 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
@@ -375,6 +375,8 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 		bootStrap.stop();
 		routing_table.stop();
 
+		Timer.getSingleton().stop();
+		
 		setStatus(DISCONNECTED);
 	}
 
