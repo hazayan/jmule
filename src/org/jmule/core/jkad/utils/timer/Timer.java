@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/05 06:41:36 $
  */
 public class Timer {
 
@@ -49,6 +49,7 @@ public class Timer {
 	public void stop() {
 		for(TaskExecutor task : taskList)
 			task.stopTask();
+		taskList.clear();
 	}
 	
 	public void addTask(long waitTime, Task task, boolean repeat) {
