@@ -133,8 +133,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/05 06:44:25 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/09 14:17:11 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
@@ -385,15 +385,16 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 	}
 
 	public void setStatus(JKadStatus newStatus) {
-		if (status == CONNECTED) {
-			if (!firewallChecker.isStarted())
-				firewallChecker.start();
-		}
+		
 		boolean status_changed = false;
 		if (status != newStatus)
 			status_changed = true;
 		status = newStatus;
 		if (status_changed) {
+			if (status == CONNECTED) {
+				if (!firewallChecker.isStarted())
+					firewallChecker.start();
+			}
 			notifyListeners(newStatus);
 			if (status == CONNECTED) 
 				_download_manager.jKadConnected();

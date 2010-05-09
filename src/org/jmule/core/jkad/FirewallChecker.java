@@ -46,8 +46,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/24 05:07:24 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/09 14:17:11 $
  */
 public class FirewallChecker {
 
@@ -79,21 +79,19 @@ public class FirewallChecker {
 				if (!_jkad_manager.isConnected()) {
 					return;
 				}
-				List<KadContact> list = routing_table
-						.getRandomContacts(FIREWALL_CHECK_CONTACTS);
-				ConfigurationManager configManager = ConfigurationManagerSingleton
-						.getInstance();
+				List<KadContact> list = routing_table.getRandomContacts(FIREWALL_CHECK_CONTACTS);
+				ConfigurationManager configManager = ConfigurationManagerSingleton.getInstance();
 				for (KadContact contact : list) {
+					if (!_jkad_manager.isConnected()) {
+						return;
+					}
 					KadPacket packet;
 					try {
-						packet = PacketFactory.getFirewalled1Req(configManager
-								.getTCP());
-						_network_manager.sendKadPacket(packet, contact
-								.getIPAddress(), contact.getUDPPort());
+						packet = PacketFactory.getFirewalled1Req(configManager.getTCP());
+						_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 					} catch (ConfigurationManagerException e) {
 						e.printStackTrace();
 					}
-
 				}
 			}
 		};
@@ -102,12 +100,9 @@ public class FirewallChecker {
 	public void start() {
 		if (is_started) return ;
 		is_started = true;
-		_network_manager = (InternalNetworkManager) NetworkManagerSingleton
-				.getInstance();
-		_jkad_manager = (InternalJKadManager) JKadManagerSingleton
-				.getInstance();
-		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL,
-				firewall_check_task, true);
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
+		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL,firewall_check_task, true);
 		firewall_check_task.run();
 	}
 
@@ -140,8 +135,7 @@ public class FirewallChecker {
 		data = reverseArray(data);
 
 		KadPacket packet = PacketFactory.getFirewalled1Res(data);
-		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender
-				.getPort());
+		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender.getPort());
 	}
 
 	public void sendFirewallRequest(InetSocketAddress sender, Int128 contactID) {
@@ -155,27 +149,21 @@ public class FirewallChecker {
 			return;
 		contact.setUDPFirewallQueries(contact.getUDPFirewallQueries() + 1);
 
-		KadPacket packet = PacketFactory
-				.getFirewalled1Req(contact.getTCPPort());
-		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender
-				.getPort());
+		KadPacket packet = PacketFactory.getFirewalled1Req(contact.getTCPPort());
+		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender.getPort());
 	}
 
-	public void porcessFirewallResponse(InetSocketAddress sender,
-			IPAddress address) {
+	public void porcessFirewallResponse(InetSocketAddress sender,IPAddress address) {
 		KadContact contact = routing_table.getContact(new IPAddress(sender));
 		if (contact != null) {
 			contact.setLastUDPFirewallResponse(System.currentTimeMillis());
-			contact
-					.setUDPFirewallResponses(contact.getUDPFirewallResponses() + 1);
-
+			contact.setUDPFirewallResponses(contact.getUDPFirewallResponses() + 1);
 			if (my_ip_address == null) {
 				my_ip_address = address;
 			} else if (my_ip_address.equals(address))
 				setFirewalled(false);
 			else
 				setFirewalled(true);
-
 		}
 	}
 
