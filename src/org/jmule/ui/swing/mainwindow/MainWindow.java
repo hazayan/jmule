@@ -103,8 +103,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/07 15:25:30 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 18:19:58 $$
  */
 public class MainWindow extends JFrame implements WindowListener  {
 	private JMenuBar main_menu_bar;
@@ -945,12 +945,14 @@ public class MainWindow extends JFrame implements WindowListener  {
 			  }
 			this.setVisible(false);
 		   } else return;
-	    }
-		
-		try {
-		    JMuleUIManager.getSingleton().shutdown();
-		}catch(Throwable ex) {
-			ex.printStackTrace();
+		} else {
+
+			try {
+				JMuleUIManager.getSingleton().shutdown();
+			} catch (Throwable ex) {
+				ex.printStackTrace();
+			}
+
 		}
 	}
 	
