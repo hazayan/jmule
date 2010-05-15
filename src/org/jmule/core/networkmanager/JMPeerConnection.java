@@ -29,8 +29,8 @@ import java.net.InetSocketAddress;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.20 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/29 10:59:43 $
+ * @version $Revision: 1.21 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/15 15:40:37 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -39,6 +39,7 @@ public final class JMPeerConnection extends JMConnection {
 	InetSocketAddress remote_inet_socket_address;
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	private long uploadedFileBytes = 0;
+	private int ioErrors = 0;
 	
 	JMPeerConnection(InetSocketAddress remoteInetSocketAddress) {
 		remote_inet_socket_address = remoteInetSocketAddress;
@@ -124,6 +125,14 @@ public final class JMPeerConnection extends JMConnection {
 	
 	public boolean equals(Object obj) {
 		return hashCode() == obj.hashCode();
+	}
+
+	int getIoErrors() {
+		return ioErrors;
+	}
+
+	void setIoErrors(int ioErrors) {
+		this.ioErrors = ioErrors;
 	}
 		
 }
