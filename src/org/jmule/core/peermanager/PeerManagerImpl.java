@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.30 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 10:47:47 $$
+ * @version $$Revision: 1.31 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 15:40:10 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -179,12 +179,13 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 					if (!_download_manager.hasPeer(peer))
 						if (!_upload_manager.hasPeer(peer)) {
 							if (peer.isConnected()) {
+								if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_CONNECTED_PEERS_TIMEOUT) { 
 								try {
 									System.out.println("peer manager :: peer_dropper :: disconnect :: " + peer);
 									disconnect(peer);
 								} catch (PeerManagerException e) {
 									e.printStackTrace();
-								} 
+								} }
 							} else if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_DISCONNECTED_PEERS_TIMEOUT) {
 								try {
 									System.out.println("peer manager :: peer_dropper :: removePeer :: "+ peer);
