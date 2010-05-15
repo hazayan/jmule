@@ -152,8 +152,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.31 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/29 11:19:32 $
+ * @version $Revision: 1.32 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/15 15:41:32 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -2123,7 +2123,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 								continue;
 							}
 							JMPeerConnection peer_connection = new JMPeerConnection(new JMuleSocketChannel(client_channel));
-//							System.out.println("Incoming connection : " + peer_connection);
+							System.out.println("Incoming connection : " + peer_connection);
 							addPeer(peer_connection);
 						}
 					}
@@ -2254,10 +2254,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (channelsToConnect.isEmpty())
 				needToConnect = true;
 			channelsToConnect.offer(peerConnection);
-			if (isWaiting)
-				peerSelector.wakeup();
-//			else
-//				processIncomingConnections();
+			if (needToConnect)
+				if (isWaiting) {
+					peerSelector.wakeup();
+				} else processIncomingConnections();
 		}
 		
 		private boolean needToWrite = true;
@@ -2317,7 +2317,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			//synchronized (channelsToConnect){
 				while(!channelsToConnect.isEmpty()) {
 					JMPeerConnection connection = channelsToConnect.poll();
-//					System.out.println("NetworkManager :: channelsToConnect :: " + connection);
+					System.out.println("NetworkManager :: processIncomingConnections :: " + connection);
 					if (connection.getStatus() == ConnectionStatus.CONNECTED) {
 						SocketChannel peerChannel = connection.getJMConnection().getChannel();
 						try {
@@ -2486,6 +2486,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 								//break;
 								//continue;
 							} catch (IOException e) {
+								System.out.println("Exception in : " + connection);
+								connection.setIoErrors(connection.getIoErrors()+1);
+								if (connection.getIoErrors() > 3)
+									disconnectPeer(connection.getIPAddress(), connection.getUsePort());
 								e.printStackTrace();
 							}
 						//}
