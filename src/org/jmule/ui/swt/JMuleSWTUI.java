@@ -31,8 +31,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:37:40 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 15:36:23 $$
  */
 public class JMuleSWTUI implements JMuleUI<SWTSkin> {
 	
@@ -53,7 +53,7 @@ public class JMuleSWTUI implements JMuleUI<SWTSkin> {
 	
 	public void shutdown() {
 		GUIUpdater.getInstance().JMStop();
-		SWTThread.getInstance().start();
+		SWTThread.getInstance().stop();
 	}
 
 	public void start() {

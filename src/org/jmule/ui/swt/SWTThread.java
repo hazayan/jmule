@@ -28,8 +28,8 @@ import org.jmule.core.JMThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/05/10 07:52:20 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 15:36:23 $$
  */
 public class SWTThread {
 
@@ -132,6 +132,7 @@ public class SWTThread {
 		}
 		
 		public void JMStop() {
+			display.dispose();
 			stop = true;
 		}
 	
