@@ -35,8 +35,8 @@ import org.jmule.core.JMThread;
  *
  * Created on Aug 28, 2008
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: javajox $ on $Date: 2008/09/09 12:17:49 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/15 18:22:31 $
  */
 public class SwingGUIUpdater extends JMThread {
 
@@ -56,11 +56,12 @@ public class SwingGUIUpdater extends JMThread {
 	private List<Refreshable> refreshable_list = new CopyOnWriteArrayList<Refreshable>();
 	
 	private SwingGUIUpdater() {
-		super("GUI updater thread");
+		super("SWING GUI updater thread");
 	}
 
 	public void JMStop() {
 		stop = true;
+		refreshable_list.clear();
 		interrupt();
 		
 	}

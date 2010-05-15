@@ -32,7 +32,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
 
+import org.jmule.core.JMRunnable;
 import org.jmule.ui.Splash;
 
 /**
@@ -48,8 +50,8 @@ import org.jmule.ui.Splash;
  * <p>
  * @author Gregory Kotsaftis
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:43:04 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 18:22:31 $$
  */
 public final class JSplash extends JWindow implements Splash { 
 
@@ -151,7 +153,15 @@ public final class JSplash extends JWindow implements Splash {
      */
     public void splashOn()
     {
-        setVisible( true );
+    	try {
+			SwingUtilities.invokeAndWait(new JMRunnable() {
+				public void JMRun() {
+					setVisible( true );
+				}
+			});
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
     }
     
     
@@ -160,8 +170,19 @@ public final class JSplash extends JWindow implements Splash {
      */
     public void splashOff()
     {
-        setVisible( false );
-        dispose();
+    	
+    	try {
+			SwingUtilities.invokeAndWait(new JMRunnable() {
+				public void JMRun() {
+					setVisible( false );
+			        dispose();
+				}
+			});
+		} catch (Throwable e) {
+			e.printStackTrace();
+		} 
+		
+        
     }
 
     
@@ -186,14 +207,23 @@ public final class JSplash extends JWindow implements Splash {
      * @param value     The progress indicator value.
      * @param msg       The message to print.
      */
-    private void setProgress(int value, String msg)
+    private void setProgress(final int value, final String msg)
     {
-        setProgress( value );
+    	try {
+			SwingUtilities.invokeAndWait(new JMRunnable() {
+				public void JMRun() {
+					 setProgress( value );
 
-        if( m_progressBarMessages && !m_progressBarPercent && msg!=null )
-        {
-            m_progress.setString( msg );
-        }
+				        if( m_progressBarMessages && !m_progressBarPercent && msg!=null )
+				        {
+				            m_progress.setString( msg );
+				        }
+				}
+			});
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+       
     }
 
 

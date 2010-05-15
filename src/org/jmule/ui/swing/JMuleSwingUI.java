@@ -24,10 +24,12 @@ package org.jmule.ui.swing;
 
 import java.awt.Color;
 
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 
 import org.jmule.core.JMConstants;
+import org.jmule.core.JMRunnable;
 import org.jmule.ui.JMuleUI;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swing.dialogs.NightlyBuildDialog;
@@ -41,8 +43,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/10/16 17:35:11 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 18:22:31 $$
  */
 public class JMuleSwingUI implements JMuleUI<SwingSkin> {
 
@@ -51,59 +53,77 @@ public class JMuleSwingUI implements JMuleUI<SwingSkin> {
 	private MainWindow main_window;
 	
 	public void initialize() {
+		try {
+			SwingUtilities.invokeAndWait(new JMRunnable() {
+				public void JMRun() {
+					Localizer.initialize();
+					
+					SwingGUIUpdater.getInstance().start();
+					
+					UIManager.put("ToolTip.foreground", new ColorUIResource(Color.BLACK));
+					UIManager.put("ToolTip.background", new ColorUIResource(0Xfdf7c2));
+					
+					swing_preferences = SwingPreferences.getSingleton();
+					
+					swing_skin_instance = new DefaultSwingSkinImpl();
+					
+					main_window = new MainWindow();
+
+				}
+			});
+		} catch (Throwable e) {
+			e.printStackTrace();
+		} 
 		
-		Localizer.initialize();
-		
-		SwingGUIUpdater.getInstance().start();
-		
-		UIManager.put("ToolTip.foreground", new ColorUIResource(Color.BLACK));
-		UIManager.put("ToolTip.background", new ColorUIResource(0Xfdf7c2));
-		
-		swing_preferences = SwingPreferences.getSingleton();
-		
-		swing_skin_instance = new DefaultSwingSkinImpl();
-		
-		main_window = new MainWindow();
-		
+				
 	}
 
 	public void shutdown() {
-		
+		SwingGUIUpdater.getInstance().JMStop();
 	}
 
 	public void start() {
-		
-		SwingPreferences _pref = SwingPreferences.getSingleton();
-		
-		main_window.setVisible( true );
-		
-		
-		if(JMConstants.IS_NIGHTLY_BUILD) 
-			
-		  if(_pref.isNightlyBuildWarning()) {	
-			
-		     NightlyBuildDialog nightly_build_dialog = new NightlyBuildDialog(main_window);
-		  
-		     SwingUtils.setWindowLocationRelativeTo(nightly_build_dialog, main_window);
-		     
-		     nightly_build_dialog.setVisible(true);
-		  }
-		
-		// check for newer version if the option is enabled
-		if(_pref.isCheckForUpdatesAtStartup()) {
-		  JMUpdater update = JMUpdater.getInstance();
-		  try {
-			 update.checkForUpdates();
-		  } catch (JMUpdaterException e) {
-			// TODO Auto-generated catch block
+		try {
+			SwingUtilities.invokeAndWait(new JMRunnable() {
+				public void JMRun() {
+					SwingPreferences _pref = SwingPreferences.getSingleton();
+					
+					main_window.setVisible( true );
+					
+					
+					if(JMConstants.IS_NIGHTLY_BUILD) 
+						
+					  if(_pref.isNightlyBuildWarning()) {	
+						
+					     NightlyBuildDialog nightly_build_dialog = new NightlyBuildDialog(main_window);
+					  
+					     SwingUtils.setWindowLocationRelativeTo(nightly_build_dialog, main_window);
+					     
+					     nightly_build_dialog.setVisible(true);
+					  }
+					
+					// check for newer version if the option is enabled
+					if(_pref.isCheckForUpdatesAtStartup()) {
+					  JMUpdater update = JMUpdater.getInstance();
+					  try {
+						 update.checkForUpdates();
+					  } catch (JMUpdaterException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					  }
+					  if(update.isNewVersionAvailable()) {
+					    VersionChecker version_checker = new VersionChecker(main_window);
+					    SwingUtils.setWindowLocationRelativeTo(version_checker, main_window);
+					    version_checker.setVisible(true);
+					  }
+					}
+
+				}
+			});
+		} catch (Throwable e) {
 			e.printStackTrace();
-		  }
-		  if(update.isNewVersionAvailable()) {
-		    VersionChecker version_checker = new VersionChecker(main_window);
-		    SwingUtils.setWindowLocationRelativeTo(version_checker, main_window);
-		    version_checker.setVisible(true);
-		  }
-		}
+		} 
+		
 		
 	}
 
