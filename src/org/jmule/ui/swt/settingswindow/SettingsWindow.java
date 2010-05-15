@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.jmule.core.JMConstants;
 import org.jmule.ui.JMuleUIComponent;
 import org.jmule.ui.JMuleUIManager;
 import org.jmule.ui.localizer._;
@@ -48,8 +49,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/11 14:44:24 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/15 18:26:40 $
  */
 public class SettingsWindow implements JMuleUIComponent {
 	
@@ -182,6 +183,15 @@ public class SettingsWindow implements JMuleUIComponent {
 		});
 		
 		shell.open();
+		if (JMConstants.isOSX) {
+			TreeItem default_select_item = tabs_tree.getItem(0);
+			if (default_select_item != null) {
+				tabs_tree.select(default_select_item);
+				AbstractTab selected_tab = (AbstractTab) default_select_item.getData(DATA_KEY);
+				selectedTab = selected_tab;
+				settings_tab_panel.setContent(selected_tab.getTabContent());
+			}
+		}
 	}
 
 	private boolean apply() {
