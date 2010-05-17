@@ -29,14 +29,15 @@ import java.net.InetSocketAddress;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.21 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/15 15:40:37 $
+ * @version $Revision: 1.22 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/17 17:23:53 $
  */
 public final class JMPeerConnection extends JMConnection {
 
 	private JMuleSocketChannel jm_socket_channel;	
-	int usePort = 0;
-	InetSocketAddress remote_inet_socket_address;
+	private int usePort = 0;
+
+	private InetSocketAddress remote_inet_socket_address;
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	private long uploadedFileBytes = 0;
 	private int ioErrors = 0;
@@ -55,6 +56,10 @@ public final class JMPeerConnection extends JMConnection {
 		
 	JMPeerConnection(String ipAddress, int port) {
 		remote_inet_socket_address = new InetSocketAddress(ipAddress, port);
+	}
+	
+	void setUsePort(int usePort) {
+		this.usePort = usePort;
 	}
 	
 	InetSocketAddress getRemoteAddress() {

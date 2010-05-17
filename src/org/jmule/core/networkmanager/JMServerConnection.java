@@ -29,13 +29,13 @@ import java.net.InetSocketAddress;
  * Created on Aug 20, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:53:31 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/17 17:23:53 $
  */
 public class JMServerConnection extends JMConnection {
 
 	private JMuleSocketChannel jm_socket_channel;
-	InetSocketAddress remote_inet_socket_address;
+	private InetSocketAddress remote_inet_socket_address;
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	
 	JMServerConnection(String ipAddress, int port) {
@@ -44,6 +44,10 @@ public class JMServerConnection extends JMConnection {
 	
 	JMServerConnection(InetSocketAddress remoteInetSocketAddress) {
 		remote_inet_socket_address = remoteInetSocketAddress;
+	}
+	
+	public InetSocketAddress getRemoteInetSocketAddress() {
+		return remote_inet_socket_address;
 	}
 	
 	String getIPAddress() {

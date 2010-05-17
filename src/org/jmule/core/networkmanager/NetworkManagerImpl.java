@@ -152,8 +152,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.33 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/17 17:20:03 $
+ * @version $Revision: 1.34 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/05/17 17:23:53 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -700,7 +700,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			connection = getPeerConnection(peerIP, peerPort);
 			peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
 			peer_connections.put(peerIP + KEY_SEPARATOR + peerPacketPort, connection);
-			connection.usePort = peerPacketPort;
+			connection.setUsePort(peerPacketPort);
 			getPeerConnection(peerIP, peerPacketPort);
 		} catch (NetworkManagerException e) {
 			e.printStackTrace();
@@ -721,7 +721,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (peerListenPort != 0) {
 				peer_connections.remove(peerIP + KEY_SEPARATOR + peerPort);
 				peer_connections.put(peerIP + KEY_SEPARATOR + peerListenPort, connection);
-				connection.usePort = peerListenPort;
+				connection.setUsePort(peerListenPort);
 			}			
 			
 			Server connected_server = _server_manager.getConnectedServer();
