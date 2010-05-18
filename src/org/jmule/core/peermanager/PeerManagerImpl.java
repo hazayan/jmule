@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.31 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 15:40:10 $$
+ * @version $$Revision: 1.32 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/18 18:29:10 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -515,7 +515,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				return ;
 			}
 		}
-		_network_manager.sendEMuleHelloPacket(peer.getIP(), peer.getPort());
+		
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
 		
@@ -557,7 +557,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			}
 		}
 
-		_network_manager.sendEMuleHelloPacket(peer.getIP(), peer.getPort());
+		
 		
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
