@@ -67,8 +67,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.27 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/05 06:44:25 $$
+ * @version $$Revision: 1.28 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/18 18:27:45 $$
  */
 public class JMuleCoreImpl implements InternalJMuleCore {
 	
@@ -217,6 +217,11 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 			e.printStackTrace();
 		}
 		
+		SpeedManagerSingleton.getInstance().initialize();
+		SpeedManagerSingleton.getInstance().start();
+		// notifies that the speed manager has been started
+		notifyComponentStarted(SpeedManagerSingleton.getInstance());
+		
 		NetworkManagerSingleton.getInstance().initialize();
 		NetworkManagerSingleton.getInstance().start();
 		
@@ -238,11 +243,6 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
 		}
-		
-		SpeedManagerSingleton.getInstance().initialize();
-		SpeedManagerSingleton.getInstance().start();
-		// notifies that the speed manager has been started
-		notifyComponentStarted(SpeedManagerSingleton.getInstance());
 				
 		PeerManagerSingleton.getInstance().initialize();
 		PeerManagerSingleton.getInstance().start();
