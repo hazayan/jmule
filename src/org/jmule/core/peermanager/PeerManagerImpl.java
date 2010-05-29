@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.32 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/18 18:29:10 $$
+ * @version $$Revision: 1.33 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:19:41 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -80,7 +80,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	private static int CREDITS_UPDATE_INTERVAL = 1000;
 	
 	private Map<String, Peer> peers  = new ConcurrentHashMap<String, Peer>();
-	private Map<UserHash,Peer> peers_with_hash = new ConcurrentHashMap<UserHash, Peer>(); //used to optimize peer acces
+	private Map<UserHash,Peer> peers_with_hash = new ConcurrentHashMap<UserHash, Peer>(); //used to optimize peer access
 	private InternalNetworkManager _network_manager;
 	
 	private List<PeerManagerListener> listener_list = new LinkedList<PeerManagerListener>();
@@ -174,21 +174,35 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		}
 		JMTimerTask peer_dropper = new JMTimerTask() {
 			public void run() {
-				for(Peer peer : peers.values()) { 
-					
-					if (!_download_manager.hasPeer(peer))
-						if (!_upload_manager.hasPeer(peer)) {
-							if (peer.isConnected()) {
-								if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_CONNECTED_PEERS_TIMEOUT) { 
+				for (Peer peer : peers.values()) {
+					if (peer.getStatus() == PeerStatus.CONNECTING) {
+						if (peer.isHighID()) {
+							if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_CONNECTING_HIGH_ID_PEER_TIMEOUT) {
 								try {
-									System.out.println("peer manager :: peer_dropper :: disconnect :: " + peer);
 									disconnect(peer);
 								} catch (PeerManagerException e) {
 									e.printStackTrace();
-								} }
-							} else if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_DISCONNECTED_PEERS_TIMEOUT) {
+								}
+							} } else if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_CONNECTING_LOW_ID_PEER_TIMEOUT) {
 								try {
-									System.out.println("peer manager :: peer_dropper :: removePeer :: "+ peer);
+									removePeer(peer);
+								} catch (PeerManagerException e) {
+									e.printStackTrace();
+								}
+							}
+
+					} else if (!_download_manager.hasPeer(peer))
+						if (!_upload_manager.hasPeer(peer)) {
+							if (peer.isConnected()) {
+								if (System.currentTimeMillis()- peer.getLastSeen() > ConfigurationManager.DROP_CONNECTED_PEER_TIMEOUT) {
+									try {
+										disconnect(peer);
+									} catch (PeerManagerException e) {
+										e.printStackTrace();
+									}
+								}
+							} else if (System.currentTimeMillis() - peer.getLastSeen() > ConfigurationManager.DROP_DISCONNECTED_PEER_TIMEOUT) {
+								try {
 									removePeer(peer);
 								} catch (PeerManagerException e) {
 									e.printStackTrace();
@@ -433,9 +447,17 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		int port = peer.getPort();
 		if (! hasPeer(ip, port)) 
 			throw new PeerManagerException(" Peer " + ip + " : " + port + " not found");
-		if (peer.getStatus()!= PeerStatus.DISCONNECTED)
-			_network_manager.disconnectPeer(ip, port);
+		if(peer.isHighID())
+			if (peer.getStatus()!= PeerStatus.DISCONNECTED)
+				_network_manager.disconnectPeer(ip, port);
+		
+		System.out.println("Peer manager :: remove peer :: " + peer);
+		
 		peers.remove(ip + KEY_SEPARATOR + port);
+		
+		_download_manager.peerRemoved(peer);
+		_upload_manager.peerRemoved(peer);
+		
 		notifyPeerRemoved(peer);
 	}
 	
@@ -444,9 +466,10 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		
 		if (hasPeer(ip, port)) {
 			peer = getPeer(ip, port);
+		} else {
+			peer = new Peer(ip, port, PeerSource.INCOMING);
 		}
-		peer = new Peer(ip, port, PeerSource.INCOMING);
-		peer.setStatus(PeerStatus.CONNECTED);
+		peer.setStatus(PeerStatus.CONNECTING);
 		peers.put(ip + KEY_SEPARATOR + port, peer);
 		
 		notifyNewPeer(peer);
@@ -495,10 +518,19 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
-		
-		peers.remove(peerIP + KEY_SEPARATOR + peerPort);
-		peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
-		peer.setListenPort(peerListenPort);
+		if (peerListenPort != 0) {
+			peers.remove(peerIP + KEY_SEPARATOR + peerPort);
+			if (hasPeer(peerIP, peerListenPort)) {
+				peers.get(peerIP + KEY_SEPARATOR + peerListenPort).copyFields(peer);
+				try {
+					peer = getPeer(peerIP, peerListenPort);
+				} catch (PeerManagerException e) {
+					e.printStackTrace();
+				}
+			} else
+				peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
+			peer.setListenPort(peerListenPort);
+		}
 		
 		peer.setStatus(PeerStatus.CONNECTED);
 		peer.setUserHash(userHash);
@@ -533,11 +565,18 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			e.printStackTrace();
 			return ;
 		}
+				
 		if (peerListenPort != 0) {
-			synchronized (peers) {
-				peers.remove(peerIP + KEY_SEPARATOR + peerPort);
+			peers.remove(peerIP + KEY_SEPARATOR + peerPort);
+			if (hasPeer(peerIP, peerListenPort)) {
+				peers.get(peerIP + KEY_SEPARATOR + peerListenPort).copyFields(peer);
+				try {
+					peer = getPeer(peerIP, peerListenPort);
+				} catch (PeerManagerException e) {
+					e.printStackTrace();
+				}
+			} else
 				peers.put(peerIP + KEY_SEPARATOR + peerListenPort, peer);
-			}
 			peer.setListenPort(peerListenPort);
 		}
 		
@@ -556,8 +595,6 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				return ;
 			}
 		}
-
-		
 		
 		_download_manager.peerConnected(peer);
 		_upload_manager.peerConnected(peer);
@@ -590,7 +627,12 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		
 		_network_manager.disconnectPeer(ip, port);
 		peer.setStatus(PeerStatus.DISCONNECTED);
+		_download_manager.peerDisconnected(peer);
+		_upload_manager.peerDisconnected(peer);
+		
 		notifyPeerDisconnected(peer);
+		
+		
 	}
 	
 	public void peerConnectingFailed(String ip, int port, Throwable cause) {

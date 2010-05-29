@@ -30,8 +30,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.management.JMException;
-
+import org.jmule.core.JMException;
 import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.UserHash;
@@ -48,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/02 18:02:50 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:19:42 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
@@ -102,7 +101,7 @@ public class Peer {
 	}
 	
 	void setStatus(PeerStatus newStatus) {
-		System.out.println("Set status : " + this + "  " + newStatus);
+		System.out.println("Set peer status : " + this + "  " + newStatus + " ");
 		this.peer_status = newStatus;
 		lastSeen = System.currentTimeMillis();
 		
@@ -126,13 +125,16 @@ public class Peer {
 
 		if (tag_list.hasTag(TAG_NAME_MISC_OPTIONS1)) {
 			Tag tag = tag_list.getTag(TAG_NAME_MISC_OPTIONS1);
-			try {
-				long value = Misc.extractNumberTag(tag);
-				peer_features = Utils.scanTCPPeerFeatures1(Convert
-						.longToInt(value));
-			} catch (JMException e) {
-				e.printStackTrace();
-			}
+			
+				long value;
+				try {
+					value = Misc.extractNumberTag(tag);
+					peer_features = Utils.scanTCPPeerFeatures1(Convert.longToInt(value));
+				} catch (JMException e) {
+					e.printStackTrace();
+				}
+				
+			
 		}
 	}
 	
@@ -222,12 +224,14 @@ public class Peer {
 		if (clientID != null)
 			result += " " + clientID.getAsString();
 		result += " Open port : " + getListenPort();
-		result += " Speed : " + getDownloadSpeed();
+		result += " Download Speed : " + getDownloadSpeed();
+		result += " Upload Speed : " + getUploadSpeed();
 		result += " Status : " + getStatus();
 		result += " isConnected : " + isConnected();
 		result += " userHash : " + userHash;
 		
 		result += " lastSeen : " + lastSeen;
+		result += " source : " + getPeerSource();
 		return result;
 	}
 	
@@ -303,8 +307,7 @@ public class Peer {
 	
 	public float getDownloadSpeed() {
 		if (!isConnected()) return 0;
-		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
-				.getInstance();
+		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		if (!network_manager.hasPeer(getIP(), getPort())) {
 			return 0;
 		}
