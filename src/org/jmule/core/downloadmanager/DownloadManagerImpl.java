@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.33 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:21:59 $$
+ * @version $$Revision: 1.34 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:40:35 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -596,6 +596,16 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			if (session.hasPeer(peer)) {
 				try {
 					session.peerDisconnected(peer);
+				}catch(Throwable cause) { cause.printStackTrace(); }
+				return ;
+			}
+	}
+	
+	public void peerRemoved(Peer peer) {
+		for(DownloadSession session : session_list.values())
+			if (session.hasPeer(peer)) {
+				try {
+					session.removePeer(peer);
 				}catch(Throwable cause) { cause.printStackTrace(); }
 				return ;
 			}

@@ -78,8 +78,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.46 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:21:59 $$
+ * @version $$Revision: 1.47 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:40:35 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -266,8 +266,8 @@ public class DownloadSession implements JMTransferSession {
 				peerConnected(peer);
 			else
 				try {
-					network_manager.addPeer(peer.getIP(), peer.getPort());
-				} catch (NetworkManagerException e) {
+					peer_manager.connect(peer);
+				} catch (PeerManagerException e) {
 					e.printStackTrace();
 				}
 		}
@@ -301,8 +301,7 @@ public class DownloadSession implements JMTransferSession {
 	void peerDisconnected(Peer peer) {
 		//TODO : mark in status list as disconnected, update download_status_list
 		compressedFileChunks.remove(peer);
-		PeerDownloadStatus status = download_status_list
-				.getPeerDownloadStatus(peer);
+		PeerDownloadStatus status = download_status_list.getPeerDownloadStatus(peer);
 		if ((status == null) || (status != PeerDownloadStatus.IN_QUEUE)) {
 			partStatus.removePartStatus(peer);
 			fileRequestList.remove(peer);
@@ -566,9 +565,19 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	void removePeer(Peer peer) {
-		if (hasPeer(peer))
+		if (!hasPeer(peer))
 			return;
 		session_peers.remove(peer);
+		compressedFileChunks.remove(peer);
+		PeerDownloadStatus status = download_status_list.getPeerDownloadStatus(peer);
+		if ((status == null) || (status != PeerDownloadStatus.IN_QUEUE)) {
+			partStatus.removePartStatus(peer);
+			fileRequestList.remove(peer);
+			session_peers.remove(peer);
+			download_status_list.removePeer(peer);
+			return;
+		}
+
 	}
 	
 	private void completeDownload() {

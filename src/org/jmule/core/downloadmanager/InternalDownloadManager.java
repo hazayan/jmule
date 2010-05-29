@@ -34,7 +34,7 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.7 $ Last changed by $Author: binary255 $ on $Date: 2010/02/13 16:02:06 $
+ * @version $Revision: 1.8 $ Last changed by $Author: binary255 $ on $Date: 2010/05/29 11:40:35 $
  */
 public interface InternalDownloadManager extends DownloadManager {
 
@@ -71,6 +71,8 @@ public interface InternalDownloadManager extends DownloadManager {
 
 	public boolean hasPeer(Peer peer);
 
+	public void peerRemoved(Peer peer);
+	
 	public void peerDisconnected(Peer peer);
 	
 	public void peerConnected(Peer peer);

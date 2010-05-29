@@ -62,8 +62,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:35:13 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:40:35 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 
@@ -575,6 +575,21 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			recalcSlotPeers();
 		}
 		
+	}
+	
+	public void peerRemoved(Peer peer) {
+		if (!hasPeer(peer)) return;
+		
+		if (payload_peers.hasPeer(peer)) {
+			payload_peers.removePeer(peer);
+			payload_peers.addPayloadLoosed(peer.getUserHash());
+			removePeer(peer);
+		}
+
+		if (uploadQueue.hasSlotPeer(peer)) {
+			removePeer(peer);
+			recalcSlotPeers();
+		}
 	}
 	
 	public void addUploadManagerListener(UploadManagerListener listener) {

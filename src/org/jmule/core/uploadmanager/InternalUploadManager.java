@@ -31,7 +31,7 @@ import org.jmule.core.peermanager.Peer;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.4 $ Last changed by $Author: binary255 $ on $Date: 2009/11/26 09:09:58 $
+ * @version $Revision: 1.5 $ Last changed by $Author: binary255 $ on $Date: 2010/05/29 11:40:35 $
  */
 public interface InternalUploadManager extends UploadManager {
 	
@@ -58,5 +58,7 @@ public interface InternalUploadManager extends UploadManager {
 	public void peerConnectingFailed(Peer peer, Throwable cause);
 
 	public void peerDisconnected(Peer peer);
+	
+	public void peerRemoved(Peer peer);
 	
 }
