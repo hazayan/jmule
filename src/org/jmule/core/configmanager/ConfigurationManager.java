@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.35 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 15:40:10 $$
+ * @version $$Revision: 1.36 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:41:06 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -114,8 +114,10 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final int			  NETWORK_READ_BUFFER			= 	  1024 * 2;
 	
-	public static final int			DROP_DISCONNECTED_PEERS_TIMEOUT =	  1000 * 60 * 1;
-	public static final int			DROP_CONNECTED_PEERS_TIMEOUT =	  1000 * 60 * 1;
+	public static final int			DROP_DISCONNECTED_PEER_TIMEOUT =	  1000 * 60 * 1;
+	public static final int 		DROP_CONNECTING_HIGH_ID_PEER_TIMEOUT = 	  1000 * 60 * 1;
+	public static final int 		DROP_CONNECTING_LOW_ID_PEER_TIMEOUT  = 	  1000 * 60 * 2;
+	public static final int			DROP_CONNECTED_PEER_TIMEOUT    =	  1000 * 60 * 1;
 	
 	// data base keys
 	public static final String       NICK_NAME_KEY                  =     "NickName";
