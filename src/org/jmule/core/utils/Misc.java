@@ -34,16 +34,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-import javax.management.JMException;
-
+import org.jmule.core.JMException;
 import org.jmule.core.edonkey.packet.tag.NumberTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 13:08:46 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:29:29 $$
  */
 public class Misc {
 	
