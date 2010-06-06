@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:32:30 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/06 14:53:01 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
@@ -650,10 +650,20 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 	}
 
 	public void serverDisconnected(String ip, int port) {
-		if (connected_server==null) return;
-		if (connected_server.getStatus()==ServerStatus.DISCONNECTED) return ;
+		if (connected_server == null)
+			return;
+		if (connected_server.getStatus() == ServerStatus.DISCONNECTED)
+			return;
+		
+		if (connected_server.getStatus()==ServerStatus.CONNECTED) {
+			_download_manager.disconnectedFromServer(connected_server);
+			_sharing_manager.stopSharingFilesToServer();
+		}
+		
 		connected_server.setStatus(ServerStatus.DISCONNECTED);
 		notifyDisconnected(connected_server);
+
+		
 		
 		if (auto_connect_started) {
 			try {
@@ -663,21 +673,20 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			}
 		} else {
 			if (reconnect_to_server)
-			if (reconnect_count < ConfigurationManager.SERVER_RECONNECT_COUNT) {
-				reconnect_count++;
-				Server cserver = connected_server;
-				connected_server = null;
-				try {
-					connect(cserver);
-				} catch (ServerManagerException e) {
-					e.printStackTrace();
+				if (reconnect_count < ConfigurationManager.SERVER_RECONNECT_COUNT) {
+					reconnect_count++;
+					Server cserver = connected_server;
+					connected_server = null;
+					try {
+						connect(cserver);
+					} catch (ServerManagerException e) {
+						e.printStackTrace();
+					}
+					return;
 				}
-				return;
-			}
-			_download_manager.disconnectedFromServer(connected_server);
-			_sharing_manager.stopSharingFilesToServer();
+			
 		}
-		
+
 		connected_server = null;
 	}
 

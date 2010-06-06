@@ -152,8 +152,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.35 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/18 18:25:13 $
+ * @version $Revision: 1.36 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/06 14:53:01 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -1197,19 +1197,22 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void serverConnectingFailed(Throwable cause) {
-		_server_manager.serverConnectingFailed(serverConnectionMonitor.getServerConnection().getIPAddress(),serverConnectionMonitor.getServerConnection().getPort(), cause);
-		
-		serverConnectionMonitor.JMStop();
-		serverPacketProcessor.JMStop();
-		serverConnectionMonitor = null;
-	}
-
-	public void serverDisconnected() {		
-		serverConnectionMonitor.JMStop();
+		ServerConnectionMonitor old_monitor = serverConnectionMonitor;
+		serverConnectionMonitor=null;
+		old_monitor.JMStop();
 		if (serverPacketProcessor != null)
 			serverPacketProcessor.JMStop();
-		_server_manager.serverDisconnected(serverConnectionMonitor.getServerConnection().getIPAddress(),serverConnectionMonitor.getServerConnection().getPort());
+		_server_manager.serverConnectingFailed(old_monitor.getServerConnection().getIPAddress(),old_monitor.getServerConnection().getPort(), cause);
+		old_monitor = null;
+	}
+
+	public void serverDisconnected() {
+		ServerConnectionMonitor old_monitor = serverConnectionMonitor;
 		serverConnectionMonitor = null;
+		old_monitor.JMStop();
+		
+		_server_manager.serverDisconnected(old_monitor.getServerConnection().getIPAddress(),old_monitor.getServerConnection().getPort());
+		old_monitor = null;
 	}
 
 	public void serverListRequest() {
@@ -2262,7 +2265,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 				
 		public synchronized void installMonitor(JMPeerConnection peerConnection) {
-			//System.out.println("Install monitor for : " + peerConnection);
 			boolean needToConnect = false;
 			if (channelsToConnect.isEmpty())
 				needToConnect = true;
@@ -2273,13 +2275,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					peerSelector.wakeup();
 		}
 		
-		//private boolean needToWrite = true;
-		
 		public void sendPacket(JMPeerConnection connection, Packet packet) {
 			int k = 10;
 			if (packet.getPacket().length < k)
 				k = packet.getPacket().length;
-			//System.out.println("offer to send for connection ::  " + connection );//+ " :: " + Convert.byteToHexString(packet.getPacket(), 0, k));
 			if (connection.getStatus() != ConnectionStatus.CONNECTED)
 				return;
 			
@@ -2721,20 +2720,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					continue;
 				}
 					PacketFragment container = packetsToProcess.poll();
-//					System.out.println("packetsToProcess :: poll : " + container.getConnection() + " : " + container.getContent().capacity() + "  Limit :  " + container.getPacketLimit() + " " +  Convert.byteToHexString(container.getContent().array(), 0, 10)+ " lastUpdate : "+container.getLastUpdate()+"\n");
-					//System.out.println("Peer packet processor :: packet from :: " + container.getConnection());
 					JMPeerConnection peer_connection = (JMPeerConnection) container.getConnection();
 					String key = peer_connection.getIPAddress() + ":" + peer_connection.getUsePort();
 					PacketFragment beginPacket = fragmentMap.get(key);
 					fragmentMap.remove(key);
 					
 					if (beginPacket!=null) {
-//						System.out.println("packetsToProcess :: begin concat :");
 						try {
-//							System.out.println("concat :: part1 :: limit " + beginPacket.getPacketLimit());
-//							System.out.println("concat :: part1 :: packet " + Convert.byteToHexString(beginPacket.getContent().array(), 0,10));
-//							System.out.println("concat :: part2 :: limit " + container.getPacketLimit());
-//							System.out.println("concat :: part2 :: packet   : " + Convert.byteToHexString(container.getContent().array(), 0, 10));
 							beginPacket.concat(container);
 							container = beginPacket;
 							
@@ -2744,7 +2736,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						}
 						
 					}
-//					System.out.println("packetsToProcess :: begin analyze packet :");
 					boolean stopLoop = false;
 					do {
 												
@@ -2754,8 +2745,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 							if (first != E2DKConstants.PROTO_EDONKEY_TCP)
 								if (first != E2DKConstants.PROTO_EMULE_EXTENDED_TCP) {
 									stopLoop = true;
-									//System.out.println("Remove head byte : " + Convert.byteToHex(first));
-									
 								}
 						int packetLength = container.getLength();
 						if (packetLength < 0)
@@ -2763,66 +2752,37 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						if (stopLoop) {
 							container.moveUnusedBytes(1);
 						}
-//						System.out.println(" packetsToProcess :: iteration :: " + container);
 						if (container.getPacketLimit() < 5) {
-//							System.out.println("packetsToProcess :: packet to small :");
 							break;
 						}
 					}while(stopLoop);
-//					try {
-						
-//					System.out.println("packetsToProcess :: count packets count :");
 						int count = 0;
 						try {
 							count = getPacketCount(container);
 						}catch(Throwable t) {
 							t.printStackTrace();
 						}
-//						System.out.println("packetsToProcess :: packet count ::" + count);
 						if (count != 0)
-						//System.out.println("Peer packet processor :: input  :: count :: " + count);
 						for(int packetID = 0;packetID<count;packetID++) {
-//							System.out.println("Peer packet processor :: input  :: " + Convert.byteToHexString(container.getContent().array(), 0, 10));
-//							System.out.println("Peer packet processor :: input  :: limit :: " + container.getPacketLimit());
-//							System.out.println(" PeerPacketProcessor :: input");
-							
 							try {
 								processClientPackets(container);
 							} catch (UnknownPacketException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 								break;
 							} catch (MalformattedPacketException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (DataFormatException e) {
 								e.printStackTrace();
 							}
-							
-//							System.out.println(" PeerPacketProcessor :: output");
-//							System.out.println("Peer packet processor :: output :: " + Convert.byteToHexString(container.getContent().array(), 0, 10));
-//							System.out.println("Peer packet processor :: output :: limit :: " + container.getPacketLimit());
-//							System.out.println("Peer packet processor :: output :: position :: " + container.getContent().position());
 						}
 						
 						if (!container.isFullUsed()) {
-//							System.out.println("packetsToProcess :: container not full used ::");
 							container.getContent().position(0);
 							fragmentMap.put(key, container);
 						} else {
-//							System.out.println("packetsToProcess :: container full used ::");
 							container.clear();
 						}
-						
-						
-						
-//					} catch (UnknownPacketException e) {
-//						e.printStackTrace();
-//					} catch (MalformattedPacketException e) {
-//						e.printStackTrace();
-//					} catch (DataFormatException e) {
-//						e.printStackTrace();
-//					}
+
 			}
 		}
 	}
@@ -2964,8 +2924,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						try {
 
 							PacketFragment container;
-							container = new PacketFragment(serverConnection,
-									ConfigurationManager.NETWORK_READ_BUFFER);
+							container = new PacketFragment(serverConnection,ConfigurationManager.NETWORK_READ_BUFFER);
 
 							int readedBytes = channel.read(container
 									.getContent());
@@ -2989,9 +2948,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						if (packet == null) {
 							sendSequence = false;
 							try {
-								serverConnection.getJMChannel().getChannel()
-										.register(serverSelector,
-												SelectionKey.OP_READ);
+								serverConnection.getJMChannel().getChannel().register(serverSelector,SelectionKey.OP_READ);
 							} catch (ClosedChannelException e) {
 								e.printStackTrace();
 							}
@@ -3004,10 +2961,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 							if (packet == null) {
 								sendSequence = false;
 								try {
-									serverConnection.getJMChannel()
-											.getChannel().register(
-													serverSelector,
-													SelectionKey.OP_READ);
+									serverConnection.getJMChannel().getChannel().register(serverSelector,SelectionKey.OP_READ);
 								} catch (ClosedChannelException e) {
 									e.printStackTrace();
 								}
@@ -3108,13 +3062,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				
 				try {
 					int count =  getPacketCount(container);
-					//System.out.println("processServerPackets :: count :: " + count);
-					for(int xa = 0;xa<count;xa++) {
-//						System.out.println("processServerPackets :: input : " + Convert.byteToHexString(container.getContent().array(), 0,10));
+					
+					for(int packetID = 0;packetID<count;packetID++) {
 						processServerPackets(container);
-//						System.out.println("processServerPackets :: output : " + Convert.byteToHexString(container.getContent().array(), 0,10));
-//						System.out.println("processServerPackets :: limit  : " + container.getPacketLimit());
-//						System.out.println("processServerPackets :: position  :: " + container.getContent().position());
 					}
 					if (!container.isFullUsed()) {
 						beginFragment = container;
