@@ -43,10 +43,16 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 17:53:27 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:18:53 $
  */
 public class TagScanner {
+	
+	private static int INT_TAGTYPE_EXSTRING_LONG = Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_LONG);
+	private static int INT_TAGTYPE_EXSTRING_SHORT_BEGIN = Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_SHORT_BEGIN);
+	private static int INT_TAGTYPE_EXBYTE = Convert.byteToInt(E2DKConstants.TAGTYPE_EXBYTE);
+	private static int INT_TAGTYPE_EXWORD = Convert.byteToInt(E2DKConstants.TAGTYPE_EXWORD);
+	private static int INT_TAGTYPE_EXDWORD = Convert.byteToInt(E2DKConstants.TAGTYPE_EXDWORD);
 	
 	public static Tag scanTag(ByteBuffer data) {
 		byte tagType;
@@ -54,7 +60,7 @@ public class TagScanner {
 		byte[] tagName;
 		
 		tagType = data.get();
-		if (Convert.byteToInt(tagType) >=Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_LONG))
+		if (Convert.byteToInt(tagType) >= INT_TAGTYPE_EXSTRING_LONG)
 				tagNameLength = 1;
 			else
 				tagNameLength = data.getShort();
@@ -66,24 +72,24 @@ public class TagScanner {
 		boolean isExtendedCompressedStringTag = false;
 		int oldTagType = Convert.byteToInt(tagType);
 		int ivalue = Convert.byteToInt(tagType);
-		if (ivalue>=Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_SHORT_BEGIN)) {
+		if (ivalue >= INT_TAGTYPE_EXSTRING_SHORT_BEGIN) {
 			tagType = TAGTYPE_STRING;
 			isExtendedCompressedStringTag = true;
 		}
-		if (ivalue==Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_LONG)) {
+		if (ivalue== INT_TAGTYPE_EXSTRING_LONG) {
 			tagType = TAGTYPE_STRING;
 		}
 		
-		if (ivalue == Convert.byteToInt(E2DKConstants.TAGTYPE_EXBYTE)) {
+		if (ivalue == INT_TAGTYPE_EXBYTE) {
 			int value = Convert.byteToInt(data.get());
 			return new IntTag(tagName, value);
 		}
 		
-		if (ivalue == Convert.byteToInt(E2DKConstants.TAGTYPE_EXWORD)) {
+		if (ivalue == INT_TAGTYPE_EXWORD) {
 			int value = Convert.shortToInt(data.getShort());
 			return new IntTag(tagName, value);
 		}
-		if (ivalue == Convert.byteToInt(E2DKConstants.TAGTYPE_EXDWORD)) {
+		if (ivalue == INT_TAGTYPE_EXDWORD) {
 			int value = data.getInt();
 			return new IntTag(tagName, value);
 		}
