@@ -37,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:14:16 $
  */
 public class Int128 implements Cloneable {
 
@@ -206,11 +206,6 @@ public class Int128 implements Cloneable {
 		
 	}
 	
-	public int getInt(int beginValue) {
-	
-		return 0;
-	}
-	
 	public FileHash toFileHash() {
 		return new FileHash(toByteArray());
 	}
@@ -237,7 +232,7 @@ public class Int128 implements Cloneable {
 	}
 	
 	public int hashCode() {
-		return toString().hashCode();
+		return toHexString(false).hashCode();
 	}
 	
 }

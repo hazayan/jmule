@@ -77,8 +77,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:14:16 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -113,20 +113,23 @@ public class RoutingTable {
 		maintenanceTask = new Task() {
 			private LookupTask lookup_new_contacts = null;
 			public void run() {
+				System.out.println("Enter maintenance lookup");
+				long b = System.currentTimeMillis();
 				if (getTotalContacts() < ROUTING_TABLE_DIFICIT_CONTACTS) {
 					if ((lookup_new_contacts == null)||(!lookup_new_contacts.isLookupStarted())) {
-						
+						System.out.println("Start maintenance lookup");
 						Int128 fake_target = new Int128(Utils.getRandomInt128());
 						lookup_new_contacts = new LookupTask(RequestType.FIND_NODE, fake_target, JKadConstants.toleranceZone) {
 							public void lookupTimeout() {
+								System.out.println("maintenance lookup : lookupTimeout" );
 							}
 
 							public void stopLookupEvent() {
+								System.out.println("maintenance lookup : stopLookupEvent" );
 							}
 							
-							public void processToleranceContacts(
-									ContactAddress sender,
-									List<KadContact> results) {
+							public void processToleranceContacts(ContactAddress sender,List<KadContact> results) {
+								System.out.println("maintenance lookup : processToleranceContacts" );
 								for(KadContact contact : results) {
 									addContact(contact);
 								}
@@ -144,7 +147,7 @@ public class RoutingTable {
 						}
 					}
 				}
-							
+				
 				for(MaintenanceContact maintenance_contact : maintenanceContacts.values()) {
 					KadContact contact = maintenance_contact.kadContact;
 					
@@ -186,7 +189,8 @@ public class RoutingTable {
 					}
 					
 				}
-				if (maintenanceContacts.size()>=ROUTING_TABLE_MAX_MAINTENANCE_CONTACTS) return ;
+				
+				if (maintenanceContacts.size()>=ROUTING_TABLE_MAX_MAINTENANCE_CONTACTS)  return ;
 				List<KadContact> candidatList = getContactsWithTimeout(ROUTING_TABLE_CONTACT_IGNORE_TIME);
 				if (candidatList.size() == 0) return ;
 				for(int i = 0;i<ROUTING_TABLE_MAINTENANCE_CONTACTS; i++) {
@@ -208,6 +212,8 @@ public class RoutingTable {
 					}
 					c.requestCount++;
 				}
+				long e = System.currentTimeMillis();
+				System.out.println("Maintenance runtime : " + (e - b));
 			}
 			
 		};

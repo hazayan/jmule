@@ -22,43 +22,40 @@
  */
 package org.jmule.core.edonkey;
 
+import java.util.Arrays;
+
 import org.jmule.core.utils.Convert;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/26 16:31:28 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/09 15:14:56 $$
  */
 public class ClientID {
 	
 	private byte[] data = new byte[4];
+	private int hashCode = 0;
 	
 	public ClientID(byte[] clientID){
-		
 		for(int i = 0;i<clientID.length;i++)
-			
 			this.data[i] = clientID[i];
-		
+		hashCode = toString().hashCode();
 	}
 	
 	public ClientID(String clientID){
-		
 		data = (Convert.stringIPToArray(clientID));
-		
+		hashCode = toString().hashCode();
 	}
 	
 	public byte[] getClientID() {
-		
 		return data.clone();
-		
 	}
 	
 	public boolean isHighID() {
 		return !(data[3]==0);
 		//if (data[3] != 0) return true;
 		//return getAsLong()>=16777216;
-		
 	}
 
 	public String getAsString() {
@@ -66,12 +63,9 @@ public class ClientID {
 	}
 	
 	public String toString() {
-		
-		return Convert.intToLong( hashCode() ) + "";
-		
+		return getAsString();
 	}
 	
-
 	public long getAsLong() {
 		long num = data[0];
 		num += Math.pow(2, 8) * data[1];
@@ -81,17 +75,14 @@ public class ClientID {
 	}
 	
 	public int hashCode() {
-		return Convert.longToInt(getAsLong());
+		return hashCode;
 	}
 	
 	public boolean equals(Object object){
-		
 		if (object==null) return false;
-		
 		if (!(object instanceof ClientID)) return false;
+		ClientID oClientID = (ClientID) object;
+		return Arrays.equals(data, oClientID.data);
 		
-		return this.hashCode()==object.hashCode();
-		
-	}
-		
+	}		
 }

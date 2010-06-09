@@ -22,61 +22,50 @@
  */
 package org.jmule.core.edonkey;
 
+import java.util.Arrays;
+
 import org.jmule.core.utils.Convert;
 
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:45:20 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/09 15:14:56 $$
  */
 public class FileHash {
 	
 	private byte[] fileHash;
+	private int hashCode = 0;
 	
 	public FileHash(byte[] fileHash){
-		
 		this.fileHash = fileHash;
-		
+		hashCode = toString().hashCode();
 	}
 	
-	
 	public FileHash(String inputString){
-		
 		inputString = inputString.toUpperCase();
-		
 		fileHash = new byte[16];
-		
 		for(int i = 0; i < fileHash.length; i++)
-			
 			fileHash[i] = Convert.hexToByte(inputString.charAt(i*2)+""+inputString.charAt(i*2+1));
-		
+		hashCode = toString().hashCode();
 	}
 	
 	public byte[] getHash() {
-		
 		return this.fileHash;
-		
 	}
 	
 	public void setHash(byte[] fileHash){
-		
 		this.fileHash = fileHash;
-		
+		hashCode = toString().hashCode();
 	}	
 	
 	public int length() {
-		
 		return this.fileHash.length;
-		
 	}
 	
-	
 	public String toString() {
-		
 		return Convert.byteToHexString(fileHash);
-		
 	}
 	
 	public String getAsString() {
@@ -84,21 +73,14 @@ public class FileHash {
 	}
 	
 	public int hashCode() {
-		
-		return toString().hashCode();
-		
+		return hashCode;
 	}
 	
-	
-	public boolean equals(Object object){
-		
+	public boolean equals(Object object) {
 		if (object == null) return false;
-		
 		if (!(object instanceof FileHash))
 			return false;
-		
-		return this.hashCode()==object.hashCode();
-		
-	}
-	
+		FileHash fhash = (FileHash) object;
+		return Arrays.equals(fileHash, fhash.getHash());
+	}	
 }

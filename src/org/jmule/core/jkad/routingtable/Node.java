@@ -27,8 +27,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/05 13:24:49 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:14:16 $
  */
 public class Node {
 
@@ -174,7 +174,8 @@ public class Node {
 	}
 
 	public int hashCode() {
-		return getIDAsString().hashCode();
+		//return getIDAsString().hashCode();
+		return nodeIndex.hashCode();
 	}
 	
 	public boolean equals(Object object) {
