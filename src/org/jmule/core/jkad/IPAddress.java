@@ -34,8 +34,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/01 13:13:44 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:13:39 $
  */
 public class IPAddress {
 	
@@ -68,7 +68,7 @@ public class IPAddress {
 	}
 	
 	public boolean equals(InetSocketAddress address) {
-		return Arrays.equals(this.address, address.getAddress().getAddress());
+		return Arrays.equals(this.address,Convert.reverseArray(address.getAddress().getAddress()));
 	}
 	
 	public int hashCode() {
