@@ -35,8 +35,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:53:31 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/15 16:52:32 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -115,7 +115,7 @@ class JMuleSocketChannel {
 		long cacheLimit = Math.min(downloadController.getThrottlingRate(),packetBuffer.capacity());
 		ByteBuffer readCache = Misc.getByteBuffer(cacheLimit);
 		
-		int mustRead = downloadController.getAvailableByteCount(readCache.remaining(), false);
+		int mustRead = downloadController.getAvailableByteCount(readCache.remaining(), true);
 		readCache.limit(mustRead);
 		
 		readedBytes = channel.read(readCache);
@@ -141,9 +141,9 @@ class JMuleSocketChannel {
 		}
 		
 		long cacheLimit = Math.min(uploadController.getThrottlingRate(),packet.remaining());
-		int mustRead = uploadController.getAvailableByteCount((int)cacheLimit, true);
-		
-		packet.limit(packet.position() + mustRead);
+		int mustWrite = uploadController.getAvailableByteCount((int)cacheLimit, true);
+			
+		packet.limit(packet.position() + mustWrite);
 		transferedBytes = channel.write(packet);
 		
 		packet.limit(packet.capacity());
