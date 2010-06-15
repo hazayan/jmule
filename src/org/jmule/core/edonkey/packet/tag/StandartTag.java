@@ -59,23 +59,25 @@ import static org.jmule.core.utils.Convert.*;
  * 
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/15 18:05:34 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:47:06 $
  */
 abstract class StandartTag extends AbstractTag{
 
+	private ByteBuffer tagHeader;
+	
 	public StandartTag(byte tagType, byte[] tagName) {
 		super(tagType, tagName);
 	
+		tagHeader = getByteBuffer(1 + 2 + tagName.length);
+		tagHeader.put(tagType);
+		tagHeader.putShort(intToShort(tagName.length));
+		tagHeader.put(tagName);
 	}
 
 	public ByteBuffer getTagHeader() {
-		ByteBuffer result = getByteBuffer(1 + 2 + tagName.length);
-		result.put(tagType);
-		result.putShort(intToShort(tagName.length));
-		result.put(tagName);
-		result.position(0);
-		return result;
+		tagHeader.position(0);
+		return tagHeader;
 	}
 	
 	public int getHeaderSize() {

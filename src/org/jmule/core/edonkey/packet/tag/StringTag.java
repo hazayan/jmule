@@ -30,23 +30,28 @@ import static org.jmule.core.edonkey.E2DKConstants.*;
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/18 08:06:02 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:47:06 $
  */
 public class StringTag extends StandartTag {
 	private String tagValue;
+	private ByteBuffer byteBuffer;
 	
 	public StringTag(byte[] tagName, String tagValue) {
 		super(TAGTYPE_STRING, tagName);
 		this.tagValue = tagValue;
+		updateByteBuffer();
+	}
+	
+	private void updateByteBuffer() {
+		byteBuffer = Misc.getByteBuffer(2 + tagValue.getBytes().length);
+		byteBuffer.putShort(Convert.intToShort(tagValue.getBytes().length));
+		byteBuffer.put(tagValue.getBytes());
 	}
 	
 	ByteBuffer getValueAsByteBuffer() {
-		ByteBuffer result = Misc.getByteBuffer(2 + tagValue.getBytes().length);
-		result.putShort(Convert.intToShort(tagValue.getBytes().length));
-		result.put(tagValue.getBytes());
-		result.position(0);
-		return result;
+		byteBuffer.position(0);
+		return byteBuffer;
 	}
 
 	int getValueLength() {
@@ -60,6 +65,7 @@ public class StringTag extends StandartTag {
 
 	public void setValue(Object object) {
 		tagValue = (String)object;
+		updateByteBuffer();
 	}
 
 }

@@ -28,8 +28,8 @@ import java.nio.ByteBuffer;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:34 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/15 16:47:06 $$
  */
 public interface Tag {
 	
@@ -37,10 +37,8 @@ public interface Tag {
 	public int getHeaderSize();
 	
 	public byte getType();
-	public void setType(byte tagType);
 	
 	public byte[] getTagName();
-	public void setTagName(byte[] tagName);
 	
 	public ByteBuffer getAsByteBuffer();
 	public Object getValue();

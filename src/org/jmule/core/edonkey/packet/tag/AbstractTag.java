@@ -31,8 +31,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/28 10:14:07 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:47:06 $
  */
 abstract class AbstractTag implements Tag {
 	protected byte tagType;
@@ -48,15 +48,8 @@ abstract class AbstractTag implements Tag {
 		return tagType;
 	}
 	
-	public void setType(byte tagType) {
-		this.tagType = tagType;
-	}
-	
 	public byte[] getTagName() {
 		return tagName;
-	}
-	public void setTagName(byte[] tagName) {
-		this.tagName = tagName;
 	}
 	
 	abstract ByteBuffer getValueAsByteBuffer();

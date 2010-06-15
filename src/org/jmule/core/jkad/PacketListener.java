@@ -32,8 +32,8 @@ import org.jmule.core.jkad.packet.KadPacket;
 /**
  * Created on Feb 8, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:06:05 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:48:19 $
  */
 public abstract class PacketListener {
 	private Byte packetOPCode;
@@ -79,9 +79,7 @@ public abstract class PacketListener {
 	
 	public boolean processAddress(InetSocketAddress address) {
 		if (sender == null) return true;
-		if (Arrays.equals(address.getAddress().getAddress(),sender.getAddress().getAddress()))
-			if (address.getPort() == sender.getPort()) return true;
-		return false;
+		return sender.equals(address);
 	}
 	
 }
