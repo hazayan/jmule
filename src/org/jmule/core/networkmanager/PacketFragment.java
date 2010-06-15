@@ -30,8 +30,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Mar 4, 2010
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/29 10:54:45 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:50:54 $
  */
 public class PacketFragment {
 
@@ -39,7 +39,7 @@ public class PacketFragment {
 	private ByteBuffer content;
 	private int packetLimit;
 	private long lastUpdate;
-	
+	private int length = 0;
 	public String toString() {
 		return "packetLimit : " + packetLimit + " " + " lastUpdate : " + lastUpdate + " content:: capacity :: " + content.capacity();
 	}
@@ -47,7 +47,19 @@ public class PacketFragment {
 	public PacketFragment(JMConnection connection, long size) {
 		this.connection = connection;
 		content = Misc.getByteBuffer(size);
+		
+		upadateLength();
+		
 		lastUpdate = System.currentTimeMillis();
+	}
+	
+	public void upadateLength() {
+		content.position(0);
+		ByteBuffer len = Misc.getByteBuffer(4);
+		for (int i = 0; i < 4; i++)
+			len.put(content.get());
+		content.position(0);
+		length = Convert.byteToInt(len.array());
 	}
 	
 	public long getLastUpdate() {
@@ -75,25 +87,20 @@ public class PacketFragment {
 		
 		int l;
 		l = getPacketLimit();
-//		if (l>content.capacity())
-//			l--;
 		result.put(content.array(), 0, l);
 		
 		l = fragment.getPacketLimit();
-//		if (l>fragment.getContent().capacity())
-//			l--;
 		result.put(fragment.getContent().array(),0, l);
 		
 		setPacketLimit(result.position());
-		//ByteBuffer oldContent = content;
 		content = result;
 		content.position(0);
+		
+		upadateLength();
 		
 		lastUpdate = System.currentTimeMillis();
 		
 		fragment.clear();
-		//oldContent.reset();
-		//oldContent = null;
 	}
 	
 	public byte getHead() {
@@ -104,47 +111,24 @@ public class PacketFragment {
 	}
 	
 	public int getLength() {
-		content.position(0);
-		ByteBuffer len = Misc.getByteBuffer(4);
-		content.position(0);
-		return Convert.byteToInt(len.array());
+		return length;
 	}
 	
 	
 	public void moveUnusedBytes(int beginPos) {
-		
 		if (beginPos > getPacketLimit()) {
-			
 			return;
 		}
-		
 		int moveFragmentSize = (getPacketLimit()- beginPos);
-		
-//		System.out.println("moveUnusedBytes :: beginPos :: " + beginPos);
-//		System.out.println("moveUnusedBytes :: getPacketLimit :: " + getPacketLimit());
-//		System.out.println("moveUnusedBytes :: moveFragmentSize    :: " + moveFragmentSize);
-		
 		if (moveFragmentSize <= 0) {
 			return;
 		}
-		
 		if (moveFragmentSize == 0) {
-//			System.out.println("moveFragmentSize=0");
 			return;
 		}
-		
 		content.position(beginPos);
-		
 		ByteBuffer temp = Misc.getByteBuffer(moveFragmentSize );
-		
-//		System.out.println("moveFragmentSize :: " + moveFragmentSize + " ::  capacity :: " + content.capacity()+"  ::  position :: " + content.position());
-		
 		content.get(temp.array());
-		
-//		int end = 10;
-//		if(end > temp.capacity())
-//			end = temp.capacity();
-//		System.out.println("moveUnusedBytes :: move bytes :: " + Convert.byteToHexString(temp.array(), 0, end));
 		
 		content.clear();
 		content.position(0);
@@ -155,10 +139,9 @@ public class PacketFragment {
 		setPacketLimit(content.position());
 		content.position(0);
 		
-		lastUpdate = System.currentTimeMillis();
+		upadateLength();
 		
-		//temp.clear();
-		//temp = null;
+		lastUpdate = System.currentTimeMillis();
 	}
 	
 	public void clear() {
@@ -166,6 +149,7 @@ public class PacketFragment {
 		content.compact();
 		content.rewind();
 		content.limit(0);
+		length = 0;
 		content = null;
 	}
 
@@ -176,5 +160,4 @@ public class PacketFragment {
 	public void setPacketLimit(int packetLimit) {
 		this.packetLimit = packetLimit;
 	}
-	
 }
