@@ -155,8 +155,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.37 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:52:32 $
+ * @version $Revision: 1.38 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/16 18:23:06 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -328,12 +328,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	
 	public String toString() {
 		String result = "";
-		result += "Peer connections : \n";
-		for (String key_connection : peer_connections.keySet())
-			result += "[" + key_connection + "] = " + "["+ peer_connections.get(key_connection) + "]\n";
+//		result += "Peer connections : \n";
+//		for (String key_connection : peer_connections.keySet())
+//			result += "[" + key_connection + "] = " + "["+ peer_connections.get(key_connection) + "]\n";
 		
 		result += "\nPeer connection monitor : \n" + peerConnectionsMonitor;
-		
+		result += "\nPacket reader : \n" + packet_reader;
+		result += "\nPacket writter : \n" + packet_writer;
 		result += "\nPeerPacketProcessor : \n " + peerPacketProcessor;
 		return result;
 	}
@@ -2499,6 +2500,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			super("Peer packet reader");
 		}
 		
+		public String toString() {
+			return " Keys to read : " + keys_to_read.size(); 
+		}
+		
 		public void startReader() {
 			start();
 		}
@@ -2594,6 +2599,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		
 		public PeerPacketWriter() {
 			super("Peer Packet Writer");
+		}
+		
+		public String toString() {
+			return " Keys to write : " + keys_to_write.size(); 
 		}
 		
 		public void startWriter() {
@@ -2811,13 +2820,16 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			for(String k : fragmentMap.keySet()) {
 				String s = " NULL ";
 				PacketFragment pf = fragmentMap.get(k);
+				String cont = "";
 				if (pf != null) {
 					ByteBuffer b = pf.getContent();
 					
 					if (b != null)
 						s = b.capacity()+"";
+					
+					cont = Convert.byteToHexString(b.array(), 0, 6);
 				}
-				result += k + " : " + s + " lastUpdate : " + pf.getLastUpdate()+"\n";
+				result += k + " : " + s + " lastUpdate : " + pf.getLastUpdate()+  " len : " + pf.getLength() + " content :  " + cont + " \n";
 			}
 			
 			return result;
@@ -2863,8 +2875,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 									stopLoop = true;
 								}
 						int packetLength = container.getLength();
+						
 						if (packetLength < 0)
 							stopLoop = true;
+						
+						if (packetLength > E2DKConstants.MAXPACKETSIZE)
+							stopLoop = true;
+						
 						if (stopLoop) {
 							container.moveUnusedBytes(1);
 						}
