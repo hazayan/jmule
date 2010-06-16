@@ -30,8 +30,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Mar 4, 2010
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:50:54 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/16 18:21:19 $
  */
 public class PacketFragment {
 
@@ -40,6 +40,7 @@ public class PacketFragment {
 	private int packetLimit;
 	private long lastUpdate;
 	private int length = 0;
+	
 	public String toString() {
 		return "packetLimit : " + packetLimit + " " + " lastUpdate : " + lastUpdate + " content:: capacity :: " + content.capacity();
 	}
@@ -54,7 +55,7 @@ public class PacketFragment {
 	}
 	
 	public void upadateLength() {
-		content.position(0);
+		content.position(1);
 		ByteBuffer len = Misc.getByteBuffer(4);
 		for (int i = 0; i < 4; i++)
 			len.put(content.get());
@@ -113,7 +114,6 @@ public class PacketFragment {
 	public int getLength() {
 		return length;
 	}
-	
 	
 	public void moveUnusedBytes(int beginPos) {
 		if (beginPos > getPacketLimit()) {
