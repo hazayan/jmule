@@ -30,6 +30,7 @@ import org.jmule.core.servermanager.Server;
 import org.jmule.core.servermanager.ServerManager;
 import org.jmule.core.servermanager.ServerManagerException;
 import org.jmule.core.servermanager.ServerManagerListener;
+import org.jmule.core.servermanager.ServerManager.Status;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.localizer._;
 import org.jmule.ui.swt.SWTThread;
@@ -40,8 +41,8 @@ import org.jmule.ui.swt.mainwindow.StatusBar;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/12 14:47:03 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/17 14:45:00 $$
  */
 public class SWTServerListWrapper {
 	
@@ -69,8 +70,7 @@ public class SWTServerListWrapper {
 		server_manager = serverManager;
 		server_manager.addServerListListener(new ServerManagerListener() {
 
-			public void connected(Server server) {
-								
+			public void connected(Server server) {	
 				if (is_autoconnect) {
 					is_autoconnect = false;
 					setUIConnected(server);
@@ -202,6 +202,7 @@ public class SWTServerListWrapper {
 					status_bar.setStatusConnected(server);
 				if (!connection_info.isDisposed())
 					connection_info.setStatusConnected(server);
+				server_list.refresh();
 				MainWindow.getLogger().fine(Localizer.getString("mainwindow.logtab.message_connected_to", server.getAddress()+":"+server.getPort()));
 			}});
 	}
@@ -254,6 +255,8 @@ public class SWTServerListWrapper {
 	public void connectTo(Server server) {
 		single_connect = true;
 		try {
+			if (server_manager.getStatus()!=Status.DISCONNECTED)
+				server_manager.disconnect();
 			server_manager.connect(server);
 		} catch (ServerManagerException e) {
 			
