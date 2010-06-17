@@ -30,11 +30,13 @@ import org.jmule.core.edonkey.ED2KServerLink;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/05 16:04:10 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/17 14:45:31 $$
  */
 public interface ServerManager extends JMuleManager {
 
+	public enum Status { DISCONNECTED,CONNECTING,CONNECTED };
+	
 	/**
 	 * Import servers from specified file
 	 * @param fileName file with servers
@@ -121,6 +123,8 @@ public interface ServerManager extends JMuleManager {
 	 */
 	public boolean hasServer(String address, int port);
 		
+	public Status getStatus();
+	
 	/**
 	 * Adds a new server list listener
 	 * @param serverListListener the given server list listener

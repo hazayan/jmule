@@ -65,10 +65,13 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/06 14:53:01 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/17 14:45:31 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
+		
+	private Status status = Status.DISCONNECTED;
+	
 	private Collection<Server> server_list = new ConcurrentLinkedQueue<Server>();
 	private Server connected_server = null;
 
@@ -214,6 +217,10 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		server_manager_timer.cancelAllTasks();
 	}
 
+	public Status getStatus() {
+		return status;
+	}
+	
 	public void addServerListListener(ServerManagerListener serverListListener) {
 		listener_list.add(serverListListener);
 	}
@@ -228,6 +235,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		reconnect_to_server = false;
 		candidate_servers.addAll(server_list);
 		requestNextAutoConnectServer();
+		status = Status.CONNECTING;
 		notifyAutoConnectStarted();
 	}
 
@@ -244,6 +252,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		if (hasServer(ip, port)) {
 			connected_server = server;
 			connected_server.setStatus(ServerStatus.CONNECTING);
+			status = Status.CONNECTING;
 			try {
 				_network_manager.connectToServer(ip, port);
 			} catch (NetworkManagerException e) {
@@ -270,6 +279,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		}
 		
 		connected_server.setStatus(ServerStatus.DISCONNECTED);
+		status = Status.DISCONNECTED;
 		notifyDisconnected(connected_server);
 		connected_server = null;
 	}
@@ -506,6 +516,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 		_sharing_manager.startSharingFilesToServer();
 		_download_manager.connectedToServer(connected_server);
+		
+		status = Status.CONNECTED;
+		
 		notifyConnected(connected_server);
 
 	}
@@ -661,10 +674,9 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		}
 		
 		connected_server.setStatus(ServerStatus.DISCONNECTED);
+		status = Status.DISCONNECTED;
 		notifyDisconnected(connected_server);
 
-		
-		
 		if (auto_connect_started) {
 			try {
 				requestNextAutoConnectServer();
