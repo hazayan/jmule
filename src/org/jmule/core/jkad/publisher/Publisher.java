@@ -40,8 +40,8 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:26:58 $
  */
 
 public class Publisher {
@@ -190,8 +190,8 @@ public class Publisher {
 			sourceTasks.get(key).stop();
 	}
 	
-	public void publishKeyword(Int128 fileID, List<Tag> tagList) throws JKadException {
-		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID, tagList);
+	public void publishKeyword(Int128 fileID,Int128 keywordID, List<Tag> tagList) throws JKadException {
+		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID,keywordID,tagList);
 		
 		task.start();
 		keywordTasks.put(fileID, task);
@@ -246,14 +246,20 @@ public class Publisher {
 			task = sourceTasks.get(id);
 		if (task == null) return ;
 		task.addPublishedSources(1);
-		if (task.getPublishedSources()>=MAX_PUBLISH_SOURCES) {
-			task.stop();
-			if (task instanceof PublishKeywordTask)
-				removeKeywordTask(id);
-			if (task instanceof PublishSourceTask)
-				removeSourceTask(id);
-		}
-		
+		if ((task instanceof PublishKeywordTask) || (task instanceof PublishSourceTask))
+			if (task.getPublishedSources() >= MAX_PUBLISH_SOURCES) {
+				task.stop();
+				if (task instanceof PublishKeywordTask)
+					removeKeywordTask(id);
+				if (task instanceof PublishSourceTask)
+					removeSourceTask(id);
+			}
+		if (task instanceof PublishNoteTask)
+			if (task.getPublishedSources() >= MAX_PUBLISH_NOTES) {
+				task.stop();
+				removeNoteTask(id);
+			}
+				
 	}
 	
 	public void processNoteResponse(Int128 id, int load) {
