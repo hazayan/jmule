@@ -40,8 +40,8 @@ import org.jmule.core.jkad.utils.Utils;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:27:49 $
  */
 
 public class KadContact {
@@ -91,7 +91,7 @@ public class KadContact {
 	public String toString() {
 		String result = "";
 		
-		result += "Contact ID : " + contactID.toHexString() +"\n";
+		result += "Contact ID : " + contactID +"\n";
 		result += "Address : " + getIPAddress()+"\n";
 		result += "Type : " + getContactType()+"\n";
 	//	result += "Contact distance : " + contactDistance;
@@ -147,6 +147,11 @@ public class KadContact {
 	public void setVersion(byte version) {
 		this.version = version;
 	}
+	
+	public boolean supportKad2() {
+		return version > 0x05;
+	}
+	
 	public JKadUDPKey getKadUDPKey() {
 		return kadUDPKey;
 	}
