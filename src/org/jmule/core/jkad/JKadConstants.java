@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 16:03:16 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:13:30 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -74,7 +74,7 @@ public class JKadConstants {
 	
 	public static final long CONCURRENT_LOOKUP_COUNT		= 50;
 	public static final long LOOKUP_CONTACT_CHECK_INTERVAL	= 5000;
-	public static final long LOOKUP_CONTACT_TIMEOUT			= 11000;
+	public static final long LOOKUP_CONTACT_TIMEOUT			= 1000 * 10;
 	public static final long MAX_LOOKUP_RUNNING_TIME		= 1000 * 60 * 5;
 	
 	public static final int LOOKUP_NODE_CONTACTS			= 11;
@@ -112,9 +112,9 @@ public class JKadConstants {
 	
 	public static final long PUBLISHER_MAINTENANCE_INTERVAL	 = 1000 * 6;
 	
-	public static final long PUBLISHER_NOTE_PUBLISH_TIMEOUT  = 1000 * 100;
+	public static final long PUBLISHER_NOTE_PUBLISH_TIMEOUT  	= 1000 * 100;
 	public static final long PUBLISHER_KEYWORD_PUBLISH_TIMEOUT  = 1000 * 140;
-	public static final long PUBLISHER_SOURCE_PUBLISH_TIMEOUT = 1000 * 140;
+	public static final long PUBLISHER_SOURCE_PUBLISH_TIMEOUT 	= 1000 * 140;
 	
 	public static final long INDEXTER_MAX_LOAD_TO_NOT_PUBLISH = 60;
 	
@@ -123,7 +123,7 @@ public class JKadConstants {
 	public static final long PUBLISHER_PUBLISH_CHECK_INTERVAL	= 5000;
 	
 	public static final long ITERATION_MAX_PUBLISH_FILES 	= 3;
-	public static final long MAX_CONCURRENT_PUBLISH_FILES 	= 1;
+	public static final long MAX_CONCURRENT_PUBLISH_FILES 	= 3;
 	
 	public static final int K 								= 10;//10
 	public static final int ALPHA 							= 3;//3;
@@ -204,21 +204,6 @@ public class JKadConstants {
 	public static final byte ContactType2					= (byte) 0x02;
 	public static final byte ContactType3					= (byte) 0x03;
 	public static final byte ContactType4					= (byte) 0x04;
-
-	/*	
-	#define	TAGTYPE_HASH			0x01
-	#define	TAGTYPE_STRING			0x02
-	#define	TAGTYPE_UINT32			0x03
-	#define	TAGTYPE_FLOAT32			0x04
-	#define	TAGTYPE_BOOL			0x05
-	#define	TAGTYPE_BOOLARRAY		0x06
-	#define	TAGTYPE_BLOB			0x07
-	#define	TAGTYPE_UINT16			0x08
-	#define	TAGTYPE_UINT8			0x09
-	#define	TAGTYPE_BSOB			0x0A
-	#define	TAGTYPE_UINT64			0x0B
-	*/
-
 	
 	public static final byte[] TAG_SOURCETYPE				=  new byte[] { (byte)0xFF };
 	
@@ -226,7 +211,7 @@ public class JKadConstants {
 	public static final byte[] TAG_FILESIZE					=  new byte[] { (byte)0x02 };
 	public static final byte[] TAG_SOURCECOUNT				=  new byte[] { (byte)0x15 };
 	public static final byte[] TAG_FILERATING				=  new byte[] { (byte)0xF7 };
-	public static final byte[] TAG_FILEDESCRIPTION			=  new byte[] { (byte)0x0B };
+	public static final byte[] TAG_DESCRIPTION				=  new byte[] { (byte)0x0B };
 	
 	public static final byte[] TAG_SOURCEPORT				=  new byte[] { (byte)0xFD };
 	public static final byte[] TAG_SOURCEUPORT				=  new byte[] { (byte)0xFC };
