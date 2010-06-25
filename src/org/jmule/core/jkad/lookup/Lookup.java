@@ -23,10 +23,12 @@
 package org.jmule.core.jkad.lookup;
 
 import static org.jmule.core.jkad.JKadConstants.CONCURRENT_LOOKUP_COUNT;
+import static org.jmule.core.jkad.JKadConstants.LOOKUP_CONTACT_CHECK_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_NODE_CONTACTS;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_TASK_CHECK_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CONTACT_COUNT;
 import static org.jmule.core.jkad.JKadConstants.SEARCH_CONTACTS;
+import static org.jmule.core.jkad.utils.Utils.getNearestContact;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -41,6 +43,7 @@ import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadConstants.RequestType;
+import org.jmule.core.jkad.lookup.LookupTask.RequestedContact;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.jkad.packet.PacketFactory;
 import org.jmule.core.jkad.routingtable.KadContact;
@@ -54,8 +57,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:21:44 $
  */
 public class Lookup {
 
@@ -67,6 +70,7 @@ public class Lookup {
 	private InternalNetworkManager _network_manager = null;
 	
 	private Task lookupCleaner = null;
+	private Task lookupContactCleaner = null;
 	
 	private boolean isStarted = false;
 	
@@ -87,17 +91,34 @@ public class Lookup {
 			public void run() {
 				for(Int128 key : lookupTasks.keySet()) {
 					LookupTask task = lookupTasks.get(key);
-					if ((System.currentTimeMillis() - task.getResponseTime() > task.getTimeOut())
-							|| (System.currentTimeMillis() - task.getStartTime() > JKadConstants.MAX_LOOKUP_RUNNING_TIME)){
+					if ((System.currentTimeMillis() - task.getResponseTime() > task.getTimeOut()) || (System.currentTimeMillis() - task.getStartTime() > JKadConstants.MAX_LOOKUP_RUNNING_TIME)){
+						System.out.println("Lookup timeout : " + task.getTargetID().toBinaryString());
 						task.lookupTimeout();
 						task.stopLookup();
 						lookupTasks.remove(key);
 						notifyListeners(task, LookupStatus.REMOVED);
 					}
 				}
-				
 			}
-			
+		};
+		lookupContactCleaner = new Task() {
+			public void run() {
+				for(Int128 key : lookupTasks.keySet()) {
+					LookupTask task = lookupTasks.get(key);
+					for(ContactAddress address : task.requestedContacts.keySet()) {
+						RequestedContact c = task.requestedContacts.get(address);
+						if (c==null) { task.requestedContacts.remove(address); continue; }
+						if (System.currentTimeMillis() - c.getRequestTime() > task.getContactLookupTimeout()) {
+							task.requestedContacts.remove(address);
+							// lookup next
+							KadContact contact = getNearestContact(task.targetDistance, task.possibleContacts,task.usedContacts);
+							if (contact == null)
+								continue;
+							task.lookupContact(contact);
+						}
+					}
+				}
+			}
 		};
 	}
 	
@@ -123,18 +144,19 @@ public class Lookup {
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		
 		Timer.getSingleton().addTask(LOOKUP_TASK_CHECK_INTERVAL, lookupCleaner, true);
+		Timer.getSingleton().addTask(LOOKUP_CONTACT_CHECK_INTERVAL, lookupContactCleaner, true);
 	}
 	
 	public void stop() {
 		isStarted = false;
 		for(Int128 key : lookupTasks.keySet()) {
 			LookupTask task = lookupTasks.get(key);
-			
 			task.stopLookup();
 			lookupTasks.remove(key);
 			notifyListeners(task, LookupStatus.REMOVED);
 		}
 		Timer.getSingleton().removeTask(lookupCleaner);
+		Timer.getSingleton().removeTask(lookupContactCleaner);
 	}
 
 	public void addLookupTask(LookupTask task) throws JKadException {
@@ -142,7 +164,8 @@ public class Lookup {
 			throw new JKadException("Already has lookup task with : " + task.getTargetID().toHexString());
 		lookupTasks.put(task.getTargetID(), task);
 		notifyListeners(task, LookupStatus.ADDED);
-		runTask(task);
+		task.startLookup();
+		notifyListeners(task, LookupStatus.STARTED);
 	}
 	
 	public void removeLookupTask(Int128 targetID) {
@@ -158,23 +181,17 @@ public class Lookup {
 		return lookupTasks.containsKey(targetID);
 	}
 	
-	
-	private void runTask(LookupTask task) {
-		task.startLookup();
-		notifyListeners(task, LookupStatus.STARTED);
-	}
-	
 	public int getLookupLoad() {
 		return (int) ((lookupTasks.size() * 100) / CONCURRENT_LOOKUP_COUNT);
 	}
 	
-	public void processRequest(InetSocketAddress sender, RequestType requestType, Int128 targetID, Int128 sourceID, int version ) {
+	public void processRequest(InetSocketAddress sender, RequestType requestType, Int128 targetID, Int128 sourceID, boolean useKad2 ) {
 		switch(requestType) {
 		case FIND_NODE : {
 			List<KadContact> list = routing_table.getNearestContacts(targetID,LOOKUP_NODE_CONTACTS);
 			KadPacket response;
-			if (version==1)
-				response = PacketFactory.getResponsePacket(targetID, list);
+			if (!useKad2)
+				response = PacketFactory.getResponse1Packet(targetID, list);
 			else
 				response = PacketFactory.getResponse2Packet(targetID, list);
 			_network_manager.sendKadPacket(response, new IPAddress(sender), sender.getPort());
@@ -184,8 +201,8 @@ public class Lookup {
 		case FIND_VALUE : {
 			List<KadContact> list = routing_table.getNearestContacts(targetID, SEARCH_CONTACTS);
 			KadPacket response;
-			if (version==1)
-				response = PacketFactory.getResponsePacket(targetID, list);
+			if (!useKad2)
+				response = PacketFactory.getResponse1Packet(targetID, list);
 			else
 				response = PacketFactory.getResponse2Packet(targetID, list);
 			_network_manager.sendKadPacket(response, new IPAddress(sender), sender.getPort());
@@ -196,8 +213,8 @@ public class Lookup {
 			List<KadContact> list = routing_table.getNearestContacts(targetID, PUBLISH_KEYWORD_CONTACT_COUNT);
 			
 			KadPacket response;
-			if (version==1)
-				response = PacketFactory.getResponsePacket(targetID, list);
+			if (!useKad2)
+				response = PacketFactory.getResponse1Packet(targetID, list);
 			else
 				response = PacketFactory.getResponse2Packet(targetID, list);
 			_network_manager.sendKadPacket(response, new IPAddress(sender), sender.getPort());
