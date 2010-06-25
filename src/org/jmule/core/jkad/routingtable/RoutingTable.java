@@ -40,6 +40,8 @@ import static org.jmule.core.jkad.JKadConstants.ContactType.JustAdded;
 import static org.jmule.core.jkad.JKadConstants.ContactType.ScheduledForRemoval;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -48,7 +50,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.jmule.core.JMException;
 import org.jmule.core.edonkey.packet.tag.TagList;
@@ -77,8 +78,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:14:16 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:30:22 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -155,13 +156,21 @@ public class RoutingTable {
 					if (contact_time >= ROUTING_TABLE_CONTACT_TIMEOUT) {
 						int rcount = maintenance_contact.requestCount;
 						if (rcount<=contact.getContactType().toByte()+1) {
-							KadPacket hello_packet;
-							try {
-								hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-								_network_manager.sendKadPacket(hello_packet, maintenance_contact.kadContact.getIPAddress(), maintenance_contact.kadContact.getUDPPort());
-							} catch (JMException e) {
-								e.printStackTrace();
-							}
+							KadPacket hello_packet = null;
+							if (contact.supportKad2())
+								try {
+									hello_packet = PacketFactory.getHelloReq2Packet(TagList.EMPTY_TAG_LIST);
+								} catch (JMException e) {
+									e.printStackTrace();
+								}
+							else
+								try {
+									hello_packet = PacketFactory.getHello1ReqPacket();
+								} catch (JMException e1) {
+									e1.printStackTrace();
+								}
+							
+							_network_manager.sendKadPacket(hello_packet, maintenance_contact.kadContact.getIPAddress(), maintenance_contact.kadContact.getUDPPort());
 
 							maintenance_contact.requestCount++;
 							continue;
@@ -205,7 +214,7 @@ public class RoutingTable {
 					
 					KadPacket hello_packet;
 					try {
-						hello_packet = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
+						hello_packet = PacketFactory.getHelloReq2Packet(TagList.EMPTY_TAG_LIST);
 						_network_manager.sendKadPacket(hello_packet, addContact.getIPAddress(), addContact.getUDPPort());
 					} catch (JMException e) {
 						e.printStackTrace();
@@ -317,6 +326,7 @@ public class RoutingTable {
 		
 		if (getTotalContacts() >= MAX_CONTACTS) return ;
 		
+		
 		newContacts++;
 		
 		contact.setContactType(JustAdded);
@@ -390,7 +400,7 @@ public class RoutingTable {
 		return getRandomContacts(contactCount, Collections.EMPTY_LIST);
 	}
 	
-	public List<KadContact> getRandomContacts(int contactCount, List<KadContact> exceptContacts) {
+	public List<KadContact> getRandomContacts(int contactCount, Collection<KadContact> exceptContacts) {
 		List<KadContact> list = new LinkedList<KadContact>();
 		if (tree_nodes.isEmpty()) return list;
 		for(int i = 0;i<contactCount; i++) {
@@ -430,21 +440,17 @@ public class RoutingTable {
 			else
 				node = node.getLeft();
 		}
-		
-		if (node.getKBucket().size()>=contactCount)
-			return node.getKBucket().getNearestContacts(target, contactCount);
-		
-		List<KadContact> result = new LinkedList<KadContact>();
 				
-		Queue<Node> nodeQueue = new LinkedBlockingQueue<Node>();
-		List<Node>  usedNodes = new LinkedList<Node>();
+		List<KadContact> result = new ArrayList<KadContact>();
+				
+		Queue<Node> nodeQueue = new LinkedList<Node>();
+		List<Node>  usedNodes = new ArrayList<Node>();
 		nodeQueue.add(node);
 		usedNodes.add(node);
 		while(result.size()<contactCount) {
-			
-			if (nodeQueue.size()==0) {
+			if (nodeQueue.size()==0)
 				break;
-			}
+			
 			node = nodeQueue.poll();
 			
 			int count = contactCount - result.size();
@@ -456,6 +462,16 @@ public class RoutingTable {
 			Node leftNode = node.getLeft();
 			Node rightNode = node.getRight();
 			Node parentNode = node.getParent();
+			
+			/*if (leftNode!=null)
+			System.out.println("leftNode : " + leftNode.getLevel()+"\n");
+			
+			if (rightNode!=null)
+			System.out.println("rightNode : " + rightNode.getLevel()+"\n");
+			
+			if (parentNode!=null)
+			System.out.println("parentNode : " + parentNode.getLevel()+"\n");*/
+			
 			
 			if (leftNode != null) {
 				if (!usedNodes.contains(leftNode))  {
@@ -472,9 +488,10 @@ public class RoutingTable {
 			}
 			
 			if (parentNode!=null) {
-				if (!usedNodes.contains(parentNode))
+				if (!usedNodes.contains(parentNode)){
 					nodeQueue.add(parentNode);
 					usedNodes.add(parentNode);
+				}
 			}
 						
 		}
