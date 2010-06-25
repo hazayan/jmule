@@ -37,8 +37,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:30:39 $
  */
 public class KBucket {
 	
@@ -117,7 +117,7 @@ public class KBucket {
 		String result = " [ " + contact_list.size()+" :    ";
 		
 		for(KadContact contact : contact_list)
-			result += contact.getContactDistance().toBinaryString() + "  ";
+			result += contact.getContactAddress() + "  ";
 		
 		return result + " ]";
 	}

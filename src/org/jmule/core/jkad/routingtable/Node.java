@@ -27,8 +27,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/09 15:14:16 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:30:39 $
  */
 public class Node {
 
@@ -111,15 +111,9 @@ public class Node {
 	public String toString() {
 		String result = "";
 		
-		result = "Node index : "; 
-		for(int i=0;i<nodeLevel;i++) {
-			if (nodeIndex.getBit(i))
-				result+="1";
-			else
-				result += "0";
-				
-		}
-		if (nodeLevel==0) result+="<root>";
+		result = "Node index : " + getIDAsString(); 
+		
+		
 		result += "\n";
 		result += "Level     : " + getLevel() + "\n"; 
 		if (getParent()!=null)
@@ -174,8 +168,8 @@ public class Node {
 	}
 
 	public int hashCode() {
-		//return getIDAsString().hashCode();
-		return nodeIndex.hashCode();
+		return getIDAsString().hashCode();
+		//return nodeIndex.hashCode();
 	}
 	
 	public boolean equals(Object object) {
