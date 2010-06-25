@@ -46,8 +46,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/09 14:17:11 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:14:30 $
  */
 public class FirewallChecker {
 
@@ -73,6 +73,7 @@ public class FirewallChecker {
 	}
 
 	private FirewallChecker() {
+		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		routing_table = RoutingTable.getSingleton();
 		firewall_check_task = new Task() {
 			public void run() {
@@ -100,7 +101,7 @@ public class FirewallChecker {
 	public void start() {
 		if (is_started) return ;
 		is_started = true;
-		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		
 		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
 		Timer.getSingleton().addTask(FIREWALL_CHECK_INTERVAL,firewall_check_task, true);
 		firewall_check_task.run();
@@ -130,12 +131,12 @@ public class FirewallChecker {
 		lastStateChange = System.currentTimeMillis();
 	}
 
-	public void processFirewallRequest(InetSocketAddress sender, int TCPPort) {
-		byte data[] = sender.getAddress().getAddress();
+	public void processFirewallRequest(IPAddress sender, int TCPPort, int udpPort) {
+		byte data[] = sender.getAddress();
 		data = reverseArray(data);
 
 		KadPacket packet = PacketFactory.getFirewalled1Res(data);
-		_network_manager.sendKadPacket(packet, new IPAddress(sender), sender.getPort());
+		_network_manager.sendKadPacket(packet, sender, udpPort);
 	}
 
 	public void sendFirewallRequest(InetSocketAddress sender, Int128 contactID) {
