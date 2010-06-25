@@ -25,7 +25,10 @@ package org.jmule.core.jkad.utils;
 import static org.jmule.core.utils.Convert.byteToInt;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -39,13 +42,32 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:46:29 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:33:17 $
  */
 public class Utils {
 	
 	private static Random random = new Random();
 
+	public static List<String> getFileKeyword(String fileName) {
+		List<String> result = new ArrayList<String>();
+		HashSet<String> keywords = new HashSet<String>();
+		
+		if (fileName.contains(".")) {
+			int id = fileName.lastIndexOf(".");
+			fileName = fileName.substring(0, id);
+		}
+
+		if (fileName.contains("."))
+			keywords.addAll(Arrays.asList(fileName.split("\\.")));
+		
+		if (fileName.contains(" "))
+			keywords.addAll(Arrays.asList(fileName.split(" ")));
+		
+		result.addAll(keywords);
+		return result;
+	}
+	
 	public static byte[] getRandomInt128() {
 		ByteBuffer result = Misc.getByteBuffer(16);
 		result.putInt(random.nextInt());
@@ -89,9 +111,10 @@ public class Utils {
 	}
 	
 	public static Int128 XOR(Int128 a, Int128 b) {
-		BitSet xor_bit_set = (BitSet) a.getBitSet().clone();
-		xor_bit_set.xor(b.getBitSet());
-		return new Int128(xor_bit_set);
+		BitSet result = new BitSet(128);
+		for (int i = 0; i < result.size(); i++)
+			result.set(i, a.getBit(i) ^ b.getBit(i));
+		return new Int128(result);
 	}
 	
 	/**
