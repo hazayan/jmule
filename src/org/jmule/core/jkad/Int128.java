@@ -37,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/15 16:48:19 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:12:00 $
  */
 public class Int128 implements Cloneable {
 
@@ -50,12 +50,12 @@ public class Int128 implements Cloneable {
 	
 	public Int128() {
 		bit_set = new BitSet(128);
-		hashCode = toHexString().hashCode();
+		hashCode = (int) toLong();
 	}
 	
 	public Int128(BitSet bitSet) {
 		bit_set = bitSet;
-		hashCode = toHexString().hashCode();
+		hashCode = (int) toLong();
 	}
 	
 	/**
@@ -75,17 +75,17 @@ public class Int128 implements Cloneable {
 		}
 		
 		byteArrayToBitSet(reversed.array(), bit_set);
-		hashCode = toHexString().hashCode();
+		hashCode = (int) toLong();
 	}
 	
 	public Int128(FileHash fileHash) {
 		this(fileHash.getHash());
-		hashCode = toHexString().hashCode();
+		hashCode = (int) toLong();
 	}
 	
 	public Int128(Int128 int128) {
 		bit_set = (BitSet) int128.bit_set.clone();
-		hashCode = toHexString().hashCode();
+		hashCode = (int) toLong();
 	}
 	
 
@@ -100,7 +100,7 @@ public class Int128 implements Cloneable {
 	 */
 	public void setBit(int position, boolean value) {
 		bit_set.set(position, value);
-		hashCode = toHexString().hashCode();
+		hashCode = (int) toLong();
 	}
 	
 	public long toLong() {
