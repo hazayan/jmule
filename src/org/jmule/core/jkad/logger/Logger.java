@@ -33,8 +33,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Mar 1, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:15:00 $
  */
 public class Logger {
 	private static final String fileHeader 			= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
@@ -62,7 +62,7 @@ public class Logger {
 	}
 	
 	public void stop() {
-			writer.stopThread();
+		writer.stopThread();
 	}
 	
 	public void logPacket(String action,InetSocketAddress address,byte[] packetData){
@@ -114,11 +114,6 @@ public class Logger {
 			writer = new LogWriter();
 			writer.start();
 		}
-	}
-	
-	protected void finalize() throws Throwable {
-		super.finalize();
-		stop();
 	}
 	
 	private class LogWriter extends Thread {
