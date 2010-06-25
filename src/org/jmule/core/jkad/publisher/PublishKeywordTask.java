@@ -42,16 +42,17 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:27:12 $
  */
 public class PublishKeywordTask extends PublishTask {
 
-	
 	private LookupTask lookup_task;
+	private Int128 keywordID;
 	
-	public PublishKeywordTask(PublishTaskListener listener,Int128 publishID, List<Tag> tagList) {
+	public PublishKeywordTask(PublishTaskListener listener,Int128 publishID,Int128 keywordID, List<Tag> tagList) {
 		super(publishID,listener);
+		this.keywordID = keywordID;
 		this.tagList = new TagList(tagList);
 	}
 	
@@ -67,10 +68,13 @@ public class PublishKeywordTask extends PublishTask {
 				task_listener.taskTimeOut(task_instance);
 			}
 
-			public void processToleranceContacts(ContactAddress sender,
-					List<KadContact> results) {
+			public void processToleranceContacts(ContactAddress sender, List<KadContact> results) {
 				for(KadContact contact : results) {
-					KadPacket packet = PacketFactory.getPublishReqPacket(targetID, _jkad_manager.getClientID(), tagList);
+					KadPacket packet = null;
+					if (!contact.supportKad2())
+						packet = PacketFactory.getPublish1ReqPacket(targetID, _jkad_manager.getClientID(), tagList);
+					else
+						packet = PacketFactory.getPublishKeyReq2Packet(keywordID,targetID, tagList);
 					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 				}
 			}

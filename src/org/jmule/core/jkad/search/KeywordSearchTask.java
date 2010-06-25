@@ -22,7 +22,7 @@
  */
 package org.jmule.core.jkad.search;
 
-import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
+import static org.jmule.core.jkad.JKadConstants.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -46,16 +46,15 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:39:34 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:32:06 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
 	private LookupTask lookup_task = null;
-	
 	private String searchKeyword = "";
-	
 	private List<KadContact> used_contacts = new LinkedList<KadContact>();
+	
 	public KeywordSearchTask(Int128 searchID) {
 		super(searchID);
 	}
@@ -77,21 +76,36 @@ public class KeywordSearchTask extends SearchTask {
 
 			public void processToleranceContacts(ContactAddress sender,
 					List<KadContact> results) {
-				
 				for(KadContact contact : results) {
 					used_contacts.add(contact);
-					KadPacket hello;
-					try {
-						hello = PacketFactory.getHello2ReqPacket(TagList.EMPTY_TAG_LIST);
-						_network_manager.sendKadPacket(hello, contact.getIPAddress(), contact.getUDPPort());
-					} catch (JMException e) {						
-						e.printStackTrace();
-					}
+					KadPacket packet = null;
+					if (!contact.supportKad2())
+						try {
+							packet = PacketFactory.getHello1ReqPacket();
+						} catch (JMException e) {
+							e.printStackTrace();
+						}
+					else
+						try {
+							packet = PacketFactory.getHelloReq2Packet(TagList.EMPTY_TAG_LIST);
+						} catch (JMException e) {
+							e.printStackTrace();
+						}
+					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 					
-					
-					PacketListener listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
+					PacketListener listener = null;
+					if (contact.supportKad2())
+						listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 						public void packetReceived(KadPacket packet) {
-							KadPacket responsePacket = PacketFactory.getSearchReqPacket(searchID,false);
+							KadPacket responsePacket = PacketFactory.getSearchKeyReq2Packet(searchID);
+							_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
+							_jkad_manager.removePacketListener(this);
+						}
+					};
+					else
+						listener = new PacketListener(KADEMLIA_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
+						public void packetReceived(KadPacket packet) {
+							KadPacket responsePacket = PacketFactory.getSearch1ReqPacket(searchID,false);
 							_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
 							_jkad_manager.removePacketListener(this);
 						}

@@ -42,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 13:58:26 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:27:12 $
  */
 public class PublishNoteTask extends PublishTask {
 
@@ -71,7 +71,11 @@ public class PublishNoteTask extends PublishTask {
 					List<KadContact> results) {
 				
 				for(KadContact contact : results) {
-					KadPacket packet = PacketFactory.getPublishNotesReq(targetID, _jkad_manager.getClientID(), tagList);
+					KadPacket packet = null;
+					if (!contact.supportKad2())
+						packet = PacketFactory.getPublishNotes1Req(targetID, _jkad_manager.getClientID(), tagList);
+					else
+						packet = PacketFactory.getPublishNotes2Packet(targetID,_jkad_manager.getClientID(), tagList);
 					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 				}
 			}

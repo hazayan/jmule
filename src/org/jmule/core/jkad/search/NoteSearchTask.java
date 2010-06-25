@@ -22,11 +22,12 @@
  */
 package org.jmule.core.jkad.search;
 
-import static org.jmule.core.jkad.JKadConstants.KADEMLIA_HELLO_RES;
+import static org.jmule.core.jkad.JKadConstants.*;
 
 import java.util.List;
 
 import org.jmule.core.JMException;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
@@ -44,15 +45,17 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:39:34 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:32:06 $
  */
 public class NoteSearchTask extends SearchTask {
 
 	private LookupTask lookup_task = null;
+	private long fileSize;
 	
-	public NoteSearchTask(Int128 searchID) {
+	public NoteSearchTask(Int128 searchID, long fileSize) {
 		super(searchID);
+		this.fileSize = fileSize;
 		
 	}
 
@@ -63,26 +66,39 @@ public class NoteSearchTask extends SearchTask {
 			public void lookupTimeout() {
 			}
 
-			public void processToleranceContacts(ContactAddress sender,
-					List<KadContact> results) {
+			public void processToleranceContacts(ContactAddress sender,List<KadContact> results) {
 				
 				for(KadContact contact : results) {
-					KadPacket packet;
-					try {
-						packet = PacketFactory.getHello1ReqPacket();
-						_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
-					} catch (JMException e) {
-						e.printStackTrace();
-					}
-					
-					
-					PacketListener listener = new PacketListener(KADEMLIA_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
+					KadPacket packet = null;
+					if (!contact.supportKad2())
+						try {
+							packet = PacketFactory.getHello1ReqPacket();
+						} catch (JMException e) {
+							e.printStackTrace();
+						}
+					else
+						try {
+							packet = PacketFactory.getHelloReq2Packet(TagList.EMPTY_TAG_LIST);
+						} catch (JMException e) {
+							e.printStackTrace();
+						}
+					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+					PacketListener listener = null;
+					if (contact.supportKad2())
+						listener = new PacketListener(KADEMLIA2_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 						public void packetReceived(KadPacket packet) {
-							KadPacket responsePacket = PacketFactory.getNotesReq(searchID);
+							KadPacket responsePacket = PacketFactory.getNotes2Req(searchID,fileSize);
 							_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
 							_jkad_manager.removePacketListener(this);
 						}
-					};
+					}; else
+						listener = new PacketListener(KADEMLIA_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
+							public void packetReceived(KadPacket packet) {
+								KadPacket responsePacket = PacketFactory.getNotes1Req(searchID);
+								_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
+								_jkad_manager.removePacketListener(this);
+							}
+						};
 					_jkad_manager.addPacketListener(listener);
 				}
 			}

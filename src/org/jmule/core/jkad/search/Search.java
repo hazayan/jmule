@@ -22,12 +22,12 @@
  */
 package org.jmule.core.jkad.search;
 
-import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.indexer.Source;
@@ -38,8 +38,8 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:39:34 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:32:33 $
  */
 public class Search {
 	
@@ -97,13 +97,13 @@ public class Search {
 		return keywordID;
 	}
 
-	public void searchSources(Int128 fileID) throws JKadException {
-		searchSources(fileID, null);
+	public void searchSources(Int128 fileID,long fileSize) throws JKadException {
+		searchSources(fileID, null,fileSize);
 	}
 	
-	public void searchSources(Int128 fileID,SearchResultListener listener) throws JKadException {
+	public void searchSources(Int128 fileID,SearchResultListener listener,long fileSize) throws JKadException {
 		if (searchTasks.containsKey(fileID)) return;
-		SourceSearchTask search_task = new SourceSearchTask(fileID);
+		SourceSearchTask search_task = new SourceSearchTask(fileID,fileSize);
 	
 		search_task.setSearchResultListener(listener);
 		
@@ -111,30 +111,25 @@ public class Search {
 		search_task.startSearch();
 	}
 
-	public void searchNotes(Int128 fileID) throws JKadException {
-		searchNotes(fileID,null);
+	public void searchNotes(Int128 fileID,long fileSize) throws JKadException {
+		searchNotes(fileID,null,fileSize);
 	}
 	
-	public void searchNotes(Int128 fileID,SearchResultListener listener) throws JKadException {
+	public void searchNotes(Int128 fileID,SearchResultListener listener, long fileSize) throws JKadException {
 		byte[] t = fileID.toByteArray();
 		Convert.updateSearchID(t);
 		Int128 updatedID = new Int128(t);
 		if (searchTasks.containsKey(updatedID)) return;
-		NoteSearchTask search_task = new NoteSearchTask( updatedID);
+		NoteSearchTask search_task = new NoteSearchTask( updatedID,fileSize);
 		search_task.setSearchResultListener(listener);
 		searchTasks.put(updatedID, search_task);
 		search_task.startSearch();
 	}
 	
-	public void processResults(InetSocketAddress sender, final Int128 targetID, final List<Source> sources) {
-		new Thread(new Runnable() {
-			public void run() {
-				SearchTask task = searchTasks.get(targetID);
-				if (task == null) return ;
-				
+	public void processResults(IPAddress sender, final Int128 targetID, final List<Source> sources) {
+		SearchTask task = searchTasks.get(targetID);
+		if (task == null) return ;
 				task.addSearchResult(sources);
-			}
-		}).start();
 	}
 	
 	public boolean hasSearchTask(Int128 searchID) {
