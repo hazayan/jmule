@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.34 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:40:35 $$
+ * @version $$Revision: 1.35 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/25 10:38:30 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -259,7 +259,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 									public void searchStarted() {
 									}
 
-								});
+								},download_session.getSharedFile().length());
 						prev_search = search_id;
 					} catch (JKadException e) {
 						e.printStackTrace();
