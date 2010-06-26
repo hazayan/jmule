@@ -73,7 +73,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -140,8 +139,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:20:34 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/26 18:55:34 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
@@ -307,7 +306,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 							published_notes.put(fileID,System.currentTimeMillis());
 							currently_publishing_files.add(fileID);
 							filesToPublish++;
-							List<Tag> tagList = new LinkedList<Tag>();
+							List<Tag> tagList = new ArrayList<Tag>();
 							tagList.add(new StringTag(TAG_FILENAME, file.getSharingName()));
 							tagList.add(new IntTag(TAG_FILESIZE, (int) file.length()));
 							tagList.add(new IntTag(TAG_FILERATING, file.getFileQuality().getAsInt()));
@@ -464,12 +463,10 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 	private void processPacket(KadPacket packet) throws UnknownPacketOPCodeException, CorruptedPacketException, UnknownPacketType {
 		IPAddress sender_address = new IPAddress(packet.getAddress());
 		int sender_port = packet.getAddress().getPort();
-
 		if (isDisconnected())
 			return;
 		if (packet.isCompressed())
 			packet.decompress();
-
 		if (packet.getProtocol() != PROTO_KAD_UDP)
 			throw new UnknownPacketType();
 
@@ -510,7 +507,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			} else if (packetOPCode == KADEMLIA_BOOTSTRAP_RES) {
 
 				int contactCount = shortToInt(rawData.getShort());
-				List<KadContact> contact_list = new LinkedList<KadContact>();
+				List<KadContact> contact_list = new ArrayList<KadContact>();
 				for (int i = 0; i < contactCount; i++) {
 					contact_list.add(getContact(rawData));
 				}
@@ -590,7 +587,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				byte[] client_id_raw = new byte[16];
 				rawData.get(client_id_raw);
 				int contactCount = byteToInt(rawData.get());
-				List<KadContact> contact_list = new LinkedList<KadContact>();
+				List<KadContact> contact_list = new ArrayList<KadContact>();
 				for (int i = 0; i < contactCount; i++) {
 					contact_list.add(getContact(rawData));
 				}
@@ -602,7 +599,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				Int128 targetID = new Int128(target_id);
 				int clientCount = shortToInt(rawData.getShort());
 
-				List<Source> list = new LinkedList<Source>();
+				List<Source> list = new ArrayList<Source>();
 
 				for (int i = 0; i < clientCount; i++) {
 					byte clientID[] = new byte[16];
@@ -659,7 +656,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				byte[] noteID = new byte[16];
 				rawData.get(noteID);
 				int resultCount = shortToInt(rawData.getShort());
-				List<Source> sourceList = new LinkedList<Source>();
+				List<Source> sourceList = new ArrayList<Source>();
 
 				for (int i = 0; i < resultCount; i++) {
 					byte[] clientID = new byte[16];
@@ -730,7 +727,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				rawData.get(targetID);
 				int resultCount = shortToInt(rawData.getShort());
 
-				List<Source> sourceList = new LinkedList<Source>();
+				List<Source> sourceList = new ArrayList<Source>();
 
 				for (int i = 0; i < resultCount; i++) {
 					byte[] contactID = new byte[16];
@@ -788,7 +785,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				int tcpPort = shortToInt(rawData.getShort());
 				byte version = rawData.get();
 				byte tag_count = rawData.get();
-				List<Tag> tag_list = new LinkedList<Tag>();
+				List<Tag> tag_list = new ArrayList<Tag>();
 				for (byte i = 0; i < tag_count; i++) {
 					Tag tag = TagScanner.scanTag(rawData);
 					if (tag == null)
@@ -813,7 +810,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				int tcpPort = shortToInt(rawData.getShort());
 				byte version = rawData.get();
 				byte tag_count = rawData.get();
-				List<Tag> tag_list = new LinkedList<Tag>();
+				List<Tag> tag_list = new ArrayList<Tag>();
 
 				for (byte i = 0; i < tag_count; i++) {
 					Tag tag = TagScanner.scanTag(rawData);
@@ -867,7 +864,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				byte[] client_id_raw = new byte[16];
 				rawData.get(client_id_raw);
 				int contactCount = byteToInt(rawData.get());
-				List<KadContact> contact_list = new LinkedList<KadContact>();
+				List<KadContact> contact_list = new ArrayList<KadContact>();
 				for (int i = 0; i < contactCount; i++) {
 					contact_list.add(getContact(rawData));
 				}
@@ -968,7 +965,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				rawData.get(targetID);
 				int resultCount = shortToInt(rawData.getShort());
 
-				List<Source> sourceList = new LinkedList<Source>();
+				List<Source> sourceList = new ArrayList<Source>();
 
 				for (int i = 0; i < resultCount; i++) {
 					byte[] contactID = new byte[16];
