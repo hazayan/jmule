@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:13:30 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/26 18:56:15 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -122,8 +122,8 @@ public class JKadConstants {
 	
 	public static final long PUBLISHER_PUBLISH_CHECK_INTERVAL	= 5000;
 	
-	public static final long ITERATION_MAX_PUBLISH_FILES 	= 3;
-	public static final long MAX_CONCURRENT_PUBLISH_FILES 	= 3;
+	public static final long ITERATION_MAX_PUBLISH_FILES 	= 2;
+	public static final long MAX_CONCURRENT_PUBLISH_FILES 	= 2;
 	
 	public static final int K 								= 10;//10
 	public static final int ALPHA 							= 3;//3;
