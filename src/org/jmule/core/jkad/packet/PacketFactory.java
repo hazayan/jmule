@@ -66,7 +66,8 @@ import static org.jmule.core.utils.Convert.intToShort;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jmule.core.JMException;
@@ -88,7 +89,7 @@ import org.jmule.core.utils.Convert;
  * Created on Dec 31, 2008
  * 
  * @author binary256
- * @version $Revision: 1.2 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.3 $ Last changed by $Author: binary255 $ on $Date:
  *          2009/08/16 12:18:20 $
  */
 public class PacketFactory {
@@ -202,9 +203,8 @@ public class PacketFactory {
 		return packet;
 	}
 
-	public static KadPacket getSearchResPacket(Int128 targetID,
-			List<Source> sourceList) {
-		List<ByteBuffer> tag_list = new LinkedList<ByteBuffer>();
+	public static KadPacket getSearchResPacket(Int128 targetID,Collection<Source> sourceList) {
+		List<ByteBuffer> tag_list = new ArrayList<ByteBuffer>();
 		int tags_size = 0;
 		if (sourceList != null)
 			for (Source source : sourceList) {
@@ -223,8 +223,9 @@ public class PacketFactory {
 
 		packet.insertData(targetID.toByteArray());
 		packet.insertData(intToShort(sourceCount));
-		for (int i = 0; i < sourceCount; i++) {
-			Source source = sourceList.get(i);
+		int i = -1;
+		for(Source source : sourceList) {
+			i++;
 			ByteBuffer tags = tag_list.get(i);
 			packet.insertData(source.getClientID().toByteArray());
 			packet.insertData(intToShort(source.getTagList().size()));
@@ -242,8 +243,8 @@ public class PacketFactory {
 		return packet;
 	}
 
-	public static KadPacket getNotes1Res(Int128 noteID, List<Source> contactList) {
-		List<ByteBuffer> tag_list = new LinkedList<ByteBuffer>();
+	public static KadPacket getNotes1Res(Int128 noteID, Collection<Source> contactList) {
+		List<ByteBuffer> tag_list = new ArrayList<ByteBuffer>();
 		int tags_size = 0;
 		if (contactList != null)
 			for (Source source : contactList) {
@@ -262,8 +263,9 @@ public class PacketFactory {
 
 		packet.insertData(noteID.toByteArray());
 		packet.insertData(intToShort(contactCount));
-		for (int i = 0; i < contactCount; i++) {
-			Source source = contactList.get(i);
+		int i = -1;
+		for(Source source : contactList) {
+			i++;
 			packet.insertData(source.getClientID().toByteArray());
 			packet.insertData(intToShort(source.getTagList().size()));
 			packet.insertData(tag_list.get(i));
@@ -448,8 +450,8 @@ public class PacketFactory {
 		return packet;
 	}
 
-	public static KadPacket getSearchRes2Packet(Int128 targetID,List<Source> sourceList) {
-		List<ByteBuffer> tag_list = new LinkedList<ByteBuffer>();
+	public static KadPacket getSearchRes2Packet(Int128 targetID,Collection<Source> sourceList) {
+		List<ByteBuffer> tag_list = new ArrayList<ByteBuffer>();
 		int tags_size = 0;
 		if (sourceList != null)
 			for (Source source : sourceList) {
@@ -467,8 +469,9 @@ public class PacketFactory {
 		packet.insertData(JKadManagerSingleton.getInstance().getClientID().toByteArray());
 		packet.insertData(targetID.toByteArray());
 		packet.insertData(intToShort(sourceCount));
-		for (int i = 0; i < sourceCount; i++) {
-			Source source = sourceList.get(i);
+		int i = -1;
+		for(Source source : sourceList) {
+			i++;
 			ByteBuffer tags = tag_list.get(i);
 			packet.insertData(source.getClientID().toByteArray());
 			packet.insertData(Convert.intToByte(source.getTagList().size()));
@@ -539,7 +542,7 @@ public class PacketFactory {
 	}
 
 	private static ByteBuffer tagsToByteBuffer(Iterable<Tag> tagList) {
-		List<ByteBuffer> tag_list = new LinkedList<ByteBuffer>();
+		List<ByteBuffer> tag_list = new ArrayList<ByteBuffer>();
 		int total_tag_size = 0;
 		for (Tag tag : tagList) {
 			ByteBuffer t = tag.getAsByteBuffer();
