@@ -23,7 +23,6 @@
 package org.jmule.core.jkad.indexer;
 
 import static org.jmule.core.jkad.JKadConstants.INDEXER_CLEAN_DATA_INTERVAL;
-import static org.jmule.core.jkad.JKadConstants.INDEXER_SAVE_DATA_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_KEYWORDS;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_NOTES;
 import static org.jmule.core.jkad.JKadConstants.INDEX_MAX_SOURCES;
@@ -31,7 +30,7 @@ import static org.jmule.core.jkad.JKadConstants.KEY_INDEX_DAT;
 import static org.jmule.core.jkad.JKadConstants.NOTE_INDEX_DAT;
 import static org.jmule.core.jkad.JKadConstants.SRC_INDEX_DAT;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +41,7 @@ import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.ShortTag;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
@@ -56,8 +56,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:06:41 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:03:15 $
  */
 public class Indexer {
 	
@@ -125,36 +125,27 @@ public class Indexer {
 			}
 		};
 		
-		Timer.getSingleton().addTask(INDEXER_SAVE_DATA_INTERVAL, save_data_task, true);
+		Timer.getSingleton().addTask(JKadConstants.INDEXER_SAVE_DATA_INTERVAL, save_data_task, true);
 		
 		cleaner_task = new Task() {
 			public void run() {
-				synchronized (notes) {
 					for(Int128 id : notes.keySet()) {
 						Index index = notes.get(id);
 						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
 						if (index.isEmpty()) notes.remove(id);
-					}
 				}
 				
-				synchronized (keywords) {
 					for(Int128 id : keywords.keySet()) {
 						Index index = keywords.get(id);
 						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
 						if (index.isEmpty()) keywords.remove(id);
 					}
-				}
 				
-				synchronized (sources) {
 					for(Int128 id : sources.keySet()) {
 						Index index = sources.get(id);
 						index.removeContactsWithTimeOut(JKadConstants.TIME_24_HOURS);
 						if (index.isEmpty()) sources.remove(id);
 					}
-				}
-				
-				
-				
 			}
 		};
 		Timer.getSingleton().addTask(INDEXER_CLEAN_DATA_INTERVAL, cleaner_task, true);
@@ -166,16 +157,9 @@ public class Indexer {
 		Timer.getSingleton().removeTask(save_data_task);
 		Timer.getSingleton().removeTask(cleaner_task);
 		
-		synchronized (notes) {
 			notes.clear();
-		}
-		synchronized (keywords) {
 			keywords.clear();
-		}
-		synchronized (sources) {
-			sources.clear();
-		}
-		
+			sources.clear();		
 	}
 	
 	public boolean isStarted() {
@@ -183,46 +167,98 @@ public class Indexer {
 	}
 	
 	public int getKeywordLoad() {
-		return (keywords.size() / INDEX_MAX_KEYWORDS) * 100;
+		return (keywords.size() * 100) / INDEX_MAX_KEYWORDS;
 	}
 	
 	public int getNoteLoad() {
-		return (notes.size() / INDEX_MAX_NOTES) * 100;
+		return (notes.size() * 100) / INDEX_MAX_NOTES;
 	}
 	
 	public int getFileSourcesLoad() {
-		return (sources.size() / INDEX_MAX_SOURCES) * 100;
+		return (sources.size() * 100) / INDEX_MAX_SOURCES;
 	}
 	
-	public void addFileSource(Int128 fileID, Source source) {
+	public boolean hasKeywordSource(ClientID clientID) {
+		for(Index i : keywords.values())
+			if (i.containsClientID(clientID))
+				return true;
+		return false;
+	}
+	
+	public boolean hasNoteSource(ClientID clientID) {
+		for(Index i : notes.values())
+			if (i.containsClientID(clientID))
+				return true;
+		return false;
+	}
+	
+	public boolean hasFileSource(ClientID clientID) {
+		for(Index i : sources.values())
+			if (i.containsClientID(clientID))
+				return true;
+		return false;
+	}
+	
+	public int addFileSource(Int128 fileID, Source source) {
+		if (sources.size() >= INDEX_MAX_SOURCES)
+			return 100;
 		Index index = sources.get(fileID);
 		if (index == null) {
 			index = new SourceIndex(fileID);
+			index.addSource(source);
 			sources.put(fileID,index);
+			return 1;
+		}
+		if (index.getSourceCount() == JKadConstants.SOURCES_MAX_PER_FILE) {
+			((SourceIndex)index).removeOldestSource();
+			index.addSource(source);
+			return 100;
 		}
 		index.addSource(source);
+		return (index.getSourceCount()*100)/JKadConstants.SOURCES_MAX_PER_FILE;
 	}
 	
-	public void addKeywordSource(Int128 keywordID, Source source) {
+	public int addKeywordSource(Int128 keywordID, Source source) {
+		if (keywords.size() >= INDEX_MAX_KEYWORDS)
+			return 100;
 		Index index = keywords.get(keywordID);
 		if (index == null) {
 			index = new KeywordIndex(keywordID);
 			keywords.put(keywordID, index);
+			index.addSource(source);
+			return 1;
 		}
-		index.addSource(source);
-		
+		if (index.getSourceCount() < JKadConstants.KEYWORD_MAX_SOURCES)
+			return 100;
+		if (( !index.containsClientID(source.getClientID()) ) || (index.getSourceCount() <= JKadConstants.KEYWORD_MAX_SOURCES_FOR_NEW_SOURCES)) {
+			index.addSource(source);
+			return (index.getSourceCount()*100)/JKadConstants.KEYWORD_MAX_SOURCES;
+		}
+		return 100;
 	}
 	
-	public void addNoteSource(Int128 noteID, Source source) {
+	public int addNoteSource(Int128 noteID, Source source) {
+		if (notes.size() >= INDEX_MAX_NOTES)
+			return 100;
+		
 		Index index = notes.get(noteID);		
 		if (index == null) {
 			index = new NoteIndex(noteID);
+			index.addSource(source);
 			notes.put(noteID, index);
+			return 1;
+		}
+		
+		if (index.getSourceCount() >= JKadConstants.NOTES_MAX_PER_FILE) {
+			index.removeOldestSource();
+			index.addSource(source);
+			return 100;
 		}
 		index.addSource(source);
+		return (index.getSourceCount()*100) / JKadConstants.NOTES_MAX_PER_FILE;
 	}
 
-	public List<Source> getFileSources(Int128 targetID) {
+	public Collection<Source> getFileSources(Int128 targetID) {
 		Index indexer =  sources.get(targetID);
 		
 		FileHash fileHash = new FileHash(targetID.toByteArray());
@@ -255,22 +291,22 @@ public class Indexer {
 		return indexer.getSourceList();
 	}
 	
-	public List<Source> getFileSources(Int128 targetID,short start_position, long fileSize) {
+	public Collection<Source> getFileSources(Int128 targetID,short start_position, long fileSize) {
 		return this.getFileSources(targetID);
 	}
 
-	public List<Source> getKeywordSources(Int128 targetID) {
+	public Collection<Source> getKeywordSources(Int128 targetID) {
 		Index indexer = keywords.get(targetID);
 		if (indexer == null) return null;
 		return indexer.getSourceList();
 	}
 
-	public List<Source> getNoteSources(Int128 noteID) {
+	public Collection<Source> getNoteSources(Int128 noteID) {
 		Index indexer = notes.get(noteID);
 		if (indexer == null) return null;
 		return indexer.getSourceList();
 	}
-	public List<Source> getNoteSources(Int128 noteID, long fileSize) {
+	public Collection<Source> getNoteSources(Int128 noteID, long fileSize) {
 		return getNoteSources(noteID);
 	}
 
