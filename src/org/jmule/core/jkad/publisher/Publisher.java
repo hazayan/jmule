@@ -26,10 +26,11 @@ import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_NOTES;
 import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_SOURCES;
 import static org.jmule.core.jkad.JKadConstants.PUBLISHER_MAINTENANCE_INTERVAL;
 
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
@@ -40,8 +41,8 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:26:58 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:51:01 $
  */
 
 public class Publisher {
@@ -51,7 +52,7 @@ public class Publisher {
 	private Map<Int128, PublishNoteTask>    noteTasks    = new ConcurrentHashMap<Int128, PublishNoteTask>();
 	private Map<Int128, PublishSourceTask>  sourceTasks  = new ConcurrentHashMap<Int128, PublishSourceTask>();
 	
-	private List<PublisherListener> listener_list = new LinkedList<PublisherListener>();
+	private Collection<PublisherListener> listener_list = new ConcurrentLinkedQueue<PublisherListener>();
 	
 	private boolean isStarted = false;
 	
