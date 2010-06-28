@@ -37,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/26 18:57:21 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:25:25 $
  */
 public class Int128 implements Cloneable {
 
@@ -96,6 +96,7 @@ public class Int128 implements Cloneable {
 	 */
 	public void setBit(int position, boolean value) {
 		bit_set.set(position, value);
+		genHashCode = false;
 	}
 	
 	public long toLong() {

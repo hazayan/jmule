@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/26 18:56:15 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:25:25 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -100,9 +100,16 @@ public class JKadConstants {
 	public static final int ROUTING_TABLE_MAINTENANCE_CONTACTS			= 10; //3
 	public static final int ROUTING_TABLE_MAX_MAINTENANCE_CONTACTS		= 50;
 	
-	public static final int INDEX_MAX_KEYWORDS				= 60000;
-	public static final int INDEX_MAX_SOURCES				= 60000;
-	public static final int INDEX_MAX_NOTES					= 60000;
+	public static final int INDEX_MAX_KEYWORDS				= 6000;//60000
+	public static final int KEYWORD_MAX_SOURCES_FOR_NEW_SOURCES	= 4500;//45000
+	public static final int KEYWORD_MAX_SOURCES				= 5000;//50000
+	
+	public static final int INDEX_MAX_SOURCES				= 6000;//60000
+	public static final int SOURCES_MAX_PER_FILE			= 300;
+	
+	public static final int INDEX_MAX_NOTES					= 6000;//60000
+	public static final int NOTES_MAX_PER_FILE				= 300; // 50
+	
 	public static final int INDEXER_SAVE_DATA_INTERVAL		= 1000 * 60 * 2;
 	public static final int INDEXER_CLEAN_DATA_INTERVAL		= 1000 * 60 ;
 	
