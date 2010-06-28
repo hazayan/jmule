@@ -27,14 +27,16 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Jan 27, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/06 14:13:25 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:01:50 $
  */
 public class SourceIndex extends Index{
 
 	public SourceIndex(Int128 id) {
 		super(id);
 	}
+	
+
 
 	
 }

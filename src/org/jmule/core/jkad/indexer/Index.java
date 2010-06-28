@@ -22,22 +22,24 @@
  */
 package org.jmule.core.jkad.indexer;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.Int128;
 
 
 /**
  * Created on Apr 22, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/07/19 07:04:47 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:01:50 $
  */
 public class Index {
 
 	protected Int128 id;
-	protected List<Source> sourceList = new CopyOnWriteArrayList<Source>();
+	protected Map<ClientID,Source> sources = new ConcurrentHashMap<ClientID, Source>();
 	
 	public Index(Int128 id) {
 		this.id = id;
@@ -49,36 +51,53 @@ public class Index {
 	public void setId(Int128 id) {
 		this.id = id;
 	}
-	public List<Source> getSourceList() {
-		return sourceList;
-	}
-	public void setSourceList(List<Source> sourceList) {
-		this.sourceList = sourceList;
+	public Collection<Source> getSourceList() {
+		return sources.values();
+	}	
+	
+	public int getSourceCount() {
+		return sources.size();
 	}
 	
 	public void addSource(Source source) {
-		if (sourceList.contains(source)) {
-			for(Source s : sourceList) {
-				if (s.getClientID().equals(source.getClientID())) {
-					s.setCreationTime(System.currentTimeMillis());
-					return;
-				}
-			}
-			return ;
-		}
-		sourceList.add(source);
+		if (sources.containsKey(source.getClientID())) {
+			sources.get(source.getClientID()).setCreationTime(System.currentTimeMillis());
+		} else
+			sources.put(source.getClientID(),source);
 	}
 	
 	public void removeContactsWithTimeOut(long timeOut) {
-		for(Source source : sourceList) {
+		for(ClientID clientID : sources.keySet()) {
 			long ctime = System.currentTimeMillis();
+			Source source = sources.get(clientID);
 			if (ctime - source.getCreationTime() >= timeOut)
-				sourceList.remove(source);
+				sources.remove(clientID);
 		}
 	}
 	
 	public boolean isEmpty() {
-		return sourceList.isEmpty();
+		return sources.isEmpty();
+	}
+	
+	public boolean containsClientID(ClientID clientID) {
+		return sources.containsKey(clientID);
+	}
+	
+	public void removeOldestSource() {
+		long maxTimeout = 0;
+		ClientID clientID = null;
+		for(ClientID id : sources.keySet()) {
+			if (clientID == null) {
+				clientID = id;
+				maxTimeout = System.currentTimeMillis() - sources.get(id).getCreationTime();
+			} else
+				if (System.currentTimeMillis() - sources.get(id).getCreationTime() > maxTimeout) {
+					clientID = id;
+					maxTimeout = System.currentTimeMillis() - sources.get(id).getCreationTime();
+				}
+		}
+		if (clientID!=null)
+			sources.remove(clientID);
 	}
 	
 }
