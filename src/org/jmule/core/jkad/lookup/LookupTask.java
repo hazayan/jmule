@@ -30,11 +30,13 @@ import static org.jmule.core.jkad.utils.Utils.getNearestContact;
 import static org.jmule.core.jkad.utils.Utils.inToleranceZone;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
@@ -51,8 +53,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:21:44 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:00:43 $
  */
 public abstract class LookupTask {
 	protected int initialLookupContacts; 
@@ -65,6 +67,7 @@ public abstract class LookupTask {
 	
 	protected List<KadContact> possibleContacts = new ArrayList<KadContact> ();
 	protected List<KadContact> usedContacts = new ArrayList<KadContact>();
+	protected Set<ClientID> usedContactsSet = new HashSet<ClientID>();
 	protected Map<ContactAddress, RequestedContact> requestedContacts = new ConcurrentHashMap<ContactAddress, RequestedContact>();
 	
 	protected RoutingTable routingTable;
@@ -109,7 +112,7 @@ public abstract class LookupTask {
 		int count = ALPHA;
 		if (count > possibleContacts.size()) count = possibleContacts.size();
 		for (int i = 0; i < count; i++) {
-			KadContact contact = getNearestContact(targetDistance, possibleContacts,usedContacts);
+			KadContact contact = getNearestContact(targetDistance, possibleContacts,usedContactsSet);
 			
 			lookupContact(contact);
 		}
@@ -120,16 +123,17 @@ public abstract class LookupTask {
 		lookupStarted = false;
 		possibleContacts.clear();
 		usedContacts.clear();
+		usedContactsSet.clear();
 		requestedContacts.clear();
 	}
 	
 	public void  processResults(ContactAddress sender, List<KadContact> results) {
 		responseTime = System.currentTimeMillis();
 		
-		List<KadContact> alpha  = new LinkedList<KadContact>();
+		List<KadContact> alpha  = new ArrayList<KadContact>();
 		
 		for(KadContact contact : results) {
-			if (usedContacts.contains(contact)) continue;
+			if (usedContactsSet.contains(contact.getContactID())) continue;
 			if (inToleranceZone(Utils.XOR(contact.getContactID(), _jkad_manager.getClientID()), targetDistance, toleranceZone)) {
 				alpha.add(contact);
 				possibleContacts.add(contact);
@@ -142,15 +146,15 @@ public abstract class LookupTask {
 		}
 		
 		requestedContacts.remove(sender);
-		KadContact contact = getNearestContact(Utils.XOR(targetID, _jkad_manager.getClientID()), possibleContacts,usedContacts);
+		KadContact contact = getNearestContact(Utils.XOR(targetID, _jkad_manager.getClientID()), possibleContacts,usedContactsSet);
 		if (contact != null) lookupContact(contact);
 	}
 	
 	void lookupContact(KadContact contact) {
 		possibleContacts.remove(contact);
 		usedContacts.add(contact);
+		usedContactsSet.add(contact.getContactID());
 		RequestedContact requested_contact = new RequestedContact(contact, System.currentTimeMillis());
-		
 		requestedContacts.put(contact.getContactAddress(), requested_contact);
 		KadPacket packet = null;
 		if (contact.supportKad2())

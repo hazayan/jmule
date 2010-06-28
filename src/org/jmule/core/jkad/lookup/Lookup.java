@@ -57,8 +57,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:21:44 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:00:43 $
  */
 public class Lookup {
 
@@ -111,7 +111,7 @@ public class Lookup {
 						if (System.currentTimeMillis() - c.getRequestTime() > task.getContactLookupTimeout()) {
 							task.requestedContacts.remove(address);
 							// lookup next
-							KadContact contact = getNearestContact(task.targetDistance, task.possibleContacts,task.usedContacts);
+							KadContact contact = getNearestContact(task.targetDistance, task.possibleContacts,task.usedContactsSet);
 							if (contact == null)
 								continue;
 							task.lookupContact(contact);
