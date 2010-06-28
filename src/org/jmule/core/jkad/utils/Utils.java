@@ -28,12 +28,15 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.routingtable.KadContact;
@@ -42,8 +45,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:33:17 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:42:58 $
  */
 public class Utils {
 	
@@ -79,6 +82,20 @@ public class Utils {
 	
 	public static int getRandom(int range) {
 		return random.nextInt(range);
+	}
+	
+	public static Collection<Integer> getRandomValues(int range, int count, boolean unique) {
+		Collection<Integer> result = new ArrayList<Integer>();
+		
+		do {
+			if (result.size() == count) break;
+			Integer candidate = getRandom(range);
+			if (unique)
+				if (!result.contains(candidate))
+					result.add(candidate);
+		}while(true);
+		
+		return result;
 	}
 
 	/**
@@ -138,29 +155,26 @@ public class Utils {
 	 * @param exceptList
 	 * @return nearest contact or null
 	 */
-	public static KadContact getNearestContact(Int128 targetID, List<KadContact> contactList, List<KadContact> exceptList) {
-		int result = -1;
+	public static KadContact getNearestContact(Int128 targetID, Collection<KadContact> contactList, Set<ClientID> exceptList) {
+		KadContact result = null;
 		int biggerRang = -1;
-		
-		for(int i = 0;i<contactList.size();i++) {
-			KadContact contact = contactList.get(i);
-			if (exceptList.contains(contact)) continue;
+		for(KadContact contact : contactList) {
+			if (exceptList.contains(contact.getContactID())) {
+				continue;
+			}
 			Int128 distance = XOR(targetID, contact.getContactDistance());
-			if (result==-1) {
-				result = i;
+			if (result==null) {
+				result = contact;
 				biggerRang = getBiggerRang(distance.getBitSet());
 				continue;
 			}
 			int rang = getBiggerRang(distance.getBitSet());
 			if (rang<biggerRang) {
-				result = i;
+				result = contact;
 				biggerRang = rang;
 			}
-			
-			
 		}
-		if (result ==-1) return null;
-		return contactList.get(result);
+		return result;
 	}
 	
 	public static String KadFileIDToFileName(Int128 fileID) {
