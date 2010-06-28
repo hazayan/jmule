@@ -23,27 +23,30 @@
 package org.jmule.core.jkad.routingtable;
 
 import static org.jmule.core.jkad.JKadConstants.K;
-import static org.jmule.core.jkad.utils.Utils.*;
+import static org.jmule.core.jkad.utils.Utils.getNearestContact;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.utils.Utils;
 
 
 
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:30:39 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:46:03 $
  */
 public class KBucket {
 	
-	private List<KadContact> contact_list = new CopyOnWriteArrayList<KadContact>();
-	private static Random random = new Random();
+	private Collection<KadContact> contact_list = new ConcurrentLinkedQueue<KadContact>();
 	
 	public KBucket() {
 		
@@ -72,21 +75,17 @@ public class KBucket {
 	
 	
 	public List<KadContact> getRandomContacts(int contactCount){
-		List<KadContact> list = new LinkedList<KadContact>();
+		List<KadContact> list = new ArrayList<KadContact>();
 		
 		if (contact_list.size()<=contactCount) {
 			list.addAll(contact_list);
 			return list;
 		}
-		for(int i = 0;i<contactCount; i++) {
-			do {
-				int r = random.nextInt(contact_list.size());
-				KadContact contact = contact_list.get(r);
-				if (list.contains(contact)) continue;
-				list.add(contact);
-				break;
-			}while(true);
-		}
+		
+		Collection<Integer> add_id = Utils.getRandomValues(contact_list.size(), contactCount, true);
+		KadContact[] array = contact_list.toArray(new KadContact[0]);
+		for(Integer id : add_id) 
+			list.add(array[id]);
 		
 		return list;
 	}
@@ -98,14 +97,16 @@ public class KBucket {
 	 * @return
 	 */
 	public List<KadContact> getNearestContacts(Int128 targetID, int contactCount) {
-		List<KadContact> list = new LinkedList<KadContact>();
+		List<KadContact> list = new ArrayList<KadContact>();
+		Set<ClientID> id_set = new HashSet<ClientID>();
 
 		do {		
-			KadContact contact = getNearestContact(targetID, contact_list, list); 
+			KadContact contact = getNearestContact(targetID, contact_list, id_set);
 			if (contact == null) break;
+			id_set.add(contact.getContactID());
 			list.add(contact);
 		} while (list.size() < contactCount);
-		
+
 		return list;
 	}
 	
@@ -130,7 +131,7 @@ public class KBucket {
 		return contact_list.size();
 	}
 	
-	public List<KadContact> getContacts() {
+	public Collection<KadContact> getContacts() {
 		return contact_list;
 	}
 

@@ -30,7 +30,7 @@ import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jmule.core.jkad.ClientID;
@@ -43,8 +43,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/25 12:15:05 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:46:03 $
  */
 public class NodesDat {
 
@@ -54,7 +54,7 @@ public class NodesDat {
 	 * @return
 	 */
 	public static List<KadContact> loadFile(String fileName) {
-		List<KadContact> result = new LinkedList<KadContact>();
+		List<KadContact> result = new ArrayList<KadContact>();
 		
 		try {
 			FileChannel channel = new RandomAccessFile(fileName,"rw").getChannel();

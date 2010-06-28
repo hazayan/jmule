@@ -22,8 +22,8 @@
  */
 package org.jmule.core.jkad.search;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -34,8 +34,8 @@ import org.jmule.core.jkad.indexer.Source;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/06 08:39:34 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:50:25 $
  */
 public abstract class SearchTask {
 
@@ -77,7 +77,7 @@ public abstract class SearchTask {
 	}
 	
 	void addSearchResult(List<Source> result) {
-		List<Source> unicalList = new LinkedList<Source>();
+		List<Source> unicalList = new ArrayList<Source>();
 		for(Source s : result)
 			if (!searchResults.contains(s))
 				unicalList.add(s);

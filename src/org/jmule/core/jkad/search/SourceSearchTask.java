@@ -22,9 +22,10 @@
  */
 package org.jmule.core.jkad.search;
 
-import static org.jmule.core.jkad.JKadConstants.*;
+import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
+import static org.jmule.core.jkad.JKadConstants.KADEMLIA_HELLO_RES;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jmule.core.JMException;
@@ -46,11 +47,11 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:32:06 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:50:25 $
  */
 public class SourceSearchTask extends SearchTask {
-	private List<KadContact> used_contacts = new LinkedList<KadContact>();
+	private List<KadContact> used_contacts = new ArrayList<KadContact>();
 	private LookupTask lookup_task = null;
 	private long fileSize = 0;
 	public SourceSearchTask(Int128 searchID,long fileSize) {

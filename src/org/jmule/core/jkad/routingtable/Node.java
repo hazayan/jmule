@@ -27,8 +27,8 @@ import org.jmule.core.jkad.Int128;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:30:39 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:46:03 $
  */
 public class Node {
 
@@ -38,14 +38,15 @@ public class Node {
 	private Int128 nodeIndex;
 	private int nodeLevel;
 	
+	private int hashCode = 0;	
 	private KBucket subnet = null;
-
 	
 	public Node(Node parent, Int128 nodeIndex, int nodeLevel) {
 		this.parent = parent;
 		this.subnet = null;
 		this.nodeIndex = nodeIndex;
 		this.nodeLevel = nodeLevel;
+		hashCode = getIDAsString().hashCode(); 
 	}
 	
 	public Node(Node parent,Int128 nodeIndex, int nodeLevel, KBucket kBucket) {
@@ -113,7 +114,6 @@ public class Node {
 		
 		result = "Node index : " + getIDAsString(); 
 		
-		
 		result += "\n";
 		result += "Level     : " + getLevel() + "\n"; 
 		if (getParent()!=null)
@@ -168,7 +168,7 @@ public class Node {
 	}
 
 	public int hashCode() {
-		return getIDAsString().hashCode();
+		return hashCode;
 		//return nodeIndex.hashCode();
 	}
 	

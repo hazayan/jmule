@@ -40,11 +40,11 @@ import static org.jmule.core.jkad.JKadConstants.ContactType.JustAdded;
 import static org.jmule.core.jkad.JKadConstants.ContactType.ScheduledForRemoval;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -78,8 +78,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:30:22 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:46:03 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -114,23 +114,17 @@ public class RoutingTable {
 		maintenanceTask = new Task() {
 			private LookupTask lookup_new_contacts = null;
 			public void run() {
-				System.out.println("Enter maintenance lookup");
-				long b = System.currentTimeMillis();
 				if (getTotalContacts() < ROUTING_TABLE_DIFICIT_CONTACTS) {
 					if ((lookup_new_contacts == null)||(!lookup_new_contacts.isLookupStarted())) {
-						System.out.println("Start maintenance lookup");
 						Int128 fake_target = new Int128(Utils.getRandomInt128());
 						lookup_new_contacts = new LookupTask(RequestType.FIND_NODE, fake_target, JKadConstants.toleranceZone) {
 							public void lookupTimeout() {
-								System.out.println("maintenance lookup : lookupTimeout" );
 							}
 
 							public void stopLookupEvent() {
-								System.out.println("maintenance lookup : stopLookupEvent" );
 							}
 							
 							public void processToleranceContacts(ContactAddress sender,List<KadContact> results) {
-								System.out.println("maintenance lookup : processToleranceContacts" );
 								for(KadContact contact : results) {
 									addContact(contact);
 								}
@@ -221,8 +215,6 @@ public class RoutingTable {
 					}
 					c.requestCount++;
 				}
-				long e = System.currentTimeMillis();
-				System.out.println("Maintenance runtime : " + (e - b));
 			}
 			
 		};
@@ -401,7 +393,7 @@ public class RoutingTable {
 	}
 	
 	public List<KadContact> getRandomContacts(int contactCount, Collection<KadContact> exceptContacts) {
-		List<KadContact> list = new LinkedList<KadContact>();
+		List<KadContact> list = new ArrayList<KadContact>();
 		if (tree_nodes.isEmpty()) return list;
 		for(int i = 0;i<contactCount; i++) {
 			KadContact contact;
@@ -443,7 +435,7 @@ public class RoutingTable {
 				
 		List<KadContact> result = new ArrayList<KadContact>();
 				
-		Queue<Node> nodeQueue = new LinkedList<Node>();
+		Queue<Node> nodeQueue = new ArrayDeque<Node>();
 		List<Node>  usedNodes = new ArrayList<Node>();
 		nodeQueue.add(node);
 		usedNodes.add(node);
@@ -543,7 +535,7 @@ public class RoutingTable {
 	
 	private List<KadContact> getContactsWithTimeout(long timeout) {
 		long currentTime = System.currentTimeMillis();
-		List<KadContact> list = new LinkedList<KadContact>();
+		List<KadContact> list = new ArrayList<KadContact>();
 	
 		for(KadContact contact : tree_nodes) 
 			if (currentTime - contact.getLastResponse()>=timeout) 
@@ -561,7 +553,7 @@ public class RoutingTable {
 	
 	public String toString() {
 		String result =  "";
-		Deque<Node> process_nodes = new LinkedList<Node>();
+		Deque<Node> process_nodes = new ArrayDeque<Node>();
 		
 		process_nodes.offerFirst(root);
 		
