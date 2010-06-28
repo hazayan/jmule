@@ -28,17 +28,17 @@ import java.util.BitSet;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:10:48 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:43:13 $
  */
 public class Convert {
 	
 
 	public static Long bitSetToLong(BitSet bitSet) {
 		long result = 0l;
-		for(int i = 0;i<bitSet.length();i++)  {
-			int poz = bitSet.size() - i -1;
-			if (bitSet.get(poz)) 
+		for (int i = 0; i < bitSet.length(); i++) {
+			int poz = bitSet.size() - i - 1;
+			if (bitSet.get(poz))
 				result += Math.pow(2, i);
 		}
 		
