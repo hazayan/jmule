@@ -53,8 +53,8 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.24 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:54:04 $
+ * @version $Revision: 1.25 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:29:39 $
  */
 public class PacketReader {
 
@@ -75,8 +75,7 @@ public class PacketReader {
 		PacketType type;
 		ByteBuffer packet_content;
 		try {
-			kad_enabled = ConfigurationManagerSingleton.getInstance()
-					.isJKadAutoconnectEnabled();
+			kad_enabled = ConfigurationManagerSingleton.getInstance().isJKadAutoconnectEnabled();
 		} catch (ConfigurationManagerException cause) {
 			cause.printStackTrace();
 		}
@@ -106,20 +105,17 @@ public class PacketReader {
 				type = PacketType.KAD_COMPRESSED;
 			} else
 				throw new NetworkManagerException(
-						"Unknown UDP packet header : "
-								+ Convert.byteToHex(packet_content.get(0)));
+						"Unknown UDP packet header : " + Convert.byteToHex(packet_content.get(0)));
 		} catch (Throwable cause) {
 			throw new NetworkManagerException(Misc.getStackTrace(cause));
 		}
 
-		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton
-				.getInstance();
+		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 
 		InternalIPFilter _ipfilter = (InternalIPFilter) IPFilterSingleton.getInstance();
 		
 		if ((type == PacketType.KAD) || (type == PacketType.KAD_COMPRESSED)) {
-			_network_manager.receiveKadPacket(new KadPacket(packet_content,
-					packetSender));
+			_network_manager.receiveKadPacket(new KadPacket(packet_content,packetSender));
 			return;
 		}
 
@@ -146,29 +142,19 @@ public class PacketReader {
 				case OP_GLOBSERVSTATUS: {
 					if (packet_content.capacity() < 15) {
 						int challenge = packet_content.getInt();
-						long user_count = Convert.intToLong(packet_content
-								.getInt());
-						long files_count = Convert.intToLong(packet_content
-								.getInt());
-						_network_manager.receivedOldServerStatus(ip, port,
-								challenge, user_count, files_count);
+						long user_count = Convert.intToLong(packet_content.getInt());
+						long files_count = Convert.intToLong(packet_content.getInt());
+						_network_manager.receivedOldServerStatus(ip, port,challenge, user_count, files_count);
 						return;
 					}
 					int challenge = packet_content.getInt();
-					long user_count = Convert
-							.intToLong(packet_content.getInt());
-					long files_count = Convert.intToLong(packet_content
-							.getInt());
-					long soft_limit = Convert
-							.intToLong(packet_content.getInt());
-					long hard_limit = Convert
-							.intToLong(packet_content.getInt());
+					long user_count = Convert.intToLong(packet_content.getInt());
+					long files_count = Convert.intToLong(packet_content.getInt());
+					long soft_limit = Convert.intToLong(packet_content.getInt());
+					long hard_limit = Convert.intToLong(packet_content.getInt());
 					int udp_flags = packet_content.getInt();
-					Set<ServerFeatures> server_features = Utils
-							.scanUDPFeatures(udp_flags);
-					_network_manager.receivedServerStatus(ip, port, challenge,
-							user_count, files_count, soft_limit, hard_limit,
-							server_features);
+					Set<ServerFeatures> server_features = Utils.scanUDPFeatures(udp_flags);
+					_network_manager.receivedServerStatus(ip, port, challenge,user_count, files_count, soft_limit, hard_limit,server_features);
 					return;
 				}
 				case OP_SERVER_DESC_ANSWER: {

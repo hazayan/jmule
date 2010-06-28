@@ -79,7 +79,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -155,8 +154,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.38 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/16 18:23:06 $
+ * @version $Revision: 1.39 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:29:39 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -1399,7 +1398,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	/*
 	 * Packet processors
 	 */
-
 	int getPacketCount(PacketFragment container) {
 		ByteBuffer packetContent = container.getContent();
 		packetContent.position(0);
@@ -1495,8 +1493,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 				case OP_SERVERLIST: {
 					int server_count = rawPacket.get();
-					List<String> ip_list = new LinkedList<String>();
-					List<Integer> port_list = new LinkedList<Integer>();
+					List<String> ip_list = new ArrayList<String>();
+					List<Integer> port_list = new ArrayList<Integer>();
 					for (int i = 0; i < server_count; i++) {
 						byte address[] = new byte[4];
 						int port;
@@ -1556,8 +1554,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					rawPacket.get(file_hash);
 
 					int source_count = Convert.byteToInt(rawPacket.get());
-					List<String> client_ip_list = new LinkedList<String>();
-					List<Integer> port_list = new LinkedList<Integer>();
+					List<String> client_ip_list = new ArrayList<String>();
+					List<Integer> port_list = new ArrayList<Integer>();
 
 					byte[] peerID = new byte[4];
 					int peerPort;
@@ -1748,7 +1746,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						rawPacket.get(file_hash);
 						long[] startPos = new long[3];
 						long[] endPos = new long[3];
-						List<FileChunkRequest> chunks = new LinkedList<FileChunkRequest>();
+						List<FileChunkRequest> chunks = new ArrayList<FileChunkRequest>();
 						for (int i = 0; i < 3; i++)
 							startPos[i] = Convert.intToLong(rawPacket.getInt());
 
@@ -3028,20 +3026,14 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				while (keys.hasNext()) {
 					SelectionKey key = keys.next();
 					keys.remove();
-					JMuleSocketChannel channel = serverConnection
-							.getJMChannel();
+					JMuleSocketChannel channel = serverConnection.getJMChannel();
 
 					if (key.isConnectable()) {
-						if (serverConnection.getJMChannel().getChannel()
-								.isConnectionPending()) {
+						if (serverConnection.getJMChannel().getChannel().isConnectionPending()) {
 							try {
-								serverConnection.getJMChannel().getChannel()
-										.finishConnect();
-								serverConnection
-										.setStatus(ConnectionStatus.CONNECTED);
-								serverConnection.getJMChannel().getChannel()
-										.register(serverSelector,
-												SelectionKey.OP_READ);
+								serverConnection.getJMChannel().getChannel().finishConnect();
+								serverConnection.setStatus(ConnectionStatus.CONNECTED);
+								serverConnection.getJMChannel().getChannel().register(serverSelector,SelectionKey.OP_READ);
 								serverConnected();
 								continue;
 							} catch (IOException e) {
@@ -3363,13 +3355,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				while(!stop){
 					try {
 						long begin_read = System.currentTimeMillis();
-						
 						PacketReader.readUDPPacket(listenChannel);
 						long end_read = System.currentTimeMillis();
 						long read_time = end_read - begin_read;
 						//System.out.println("Read time : " + read_time);
-						
-						
 					}catch (Throwable cause) {
 						if (connectionStatus == UDPConnectionStatus.CLOSED) return ;			
 						cause.printStackTrace();

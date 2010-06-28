@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.35 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/25 10:38:30 $$
+ * @version $$Revision: 1.36 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/28 18:28:24 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -220,10 +220,9 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					
 					final DownloadSession download_session = session_list.get(fileHash);
 					try {
-						search.searchSources(search_id,
-								new SearchResultListener() {
+						search.searchSources(search_id,new SearchResultListener() {
 									public void processNewResults(List<Source> result) {
-										List<Peer> peer_list = new LinkedList<Peer>();
+										List<Peer> peer_list = new ArrayList<Peer>();
 										for (Source source : result) {
 											String address = source.getAddress().toString();
 											int tcpPort = source.getTCPPort();
