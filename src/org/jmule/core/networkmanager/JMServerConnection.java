@@ -29,8 +29,8 @@ import java.net.InetSocketAddress;
  * Created on Aug 20, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/17 17:23:53 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:04:26 $
  */
 public class JMServerConnection extends JMConnection {
 
@@ -77,7 +77,7 @@ public class JMServerConnection extends JMConnection {
 	void disconnect() throws NetworkManagerException {
 		if ((connection_status == ConnectionStatus.CONNECTED) || (connection_status == ConnectionStatus.CONNECTING)) {
 			try {
-				jm_socket_channel.close();
+				jm_socket_channel.disconnect();
 				connection_status = ConnectionStatus.DISCONNECTED;
 			} catch (IOException cause) {
 				throw new NetworkManagerException(cause);

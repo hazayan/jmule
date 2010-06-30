@@ -35,8 +35,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/15 16:52:32 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 18:04:26 $$
  */
 class JMuleSocketChannel {
 	private SocketChannel channel;
@@ -97,10 +97,6 @@ class JMuleSocketChannel {
 	private void init() {
 		uploadController = SpeedManagerSingleton.getInstance().getUploadController();
 		downloadController = SpeedManagerSingleton.getInstance().getDownloadController();
-	}
-
-	void close() throws IOException {
-		this.channel.close();
 	}
 
 	int read(ByteBuffer packetBuffer) throws IOException,JMEndOfStreamException {
@@ -174,13 +170,9 @@ class JMuleSocketChannel {
 		return channel.isConnected();
 	}
 
-	void disconnect() {
-		try {
-			channel.socket().close();
-			channel.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	void disconnect() throws IOException {
+		channel.socket().close();
+		channel.close();
 	}
 
 }
