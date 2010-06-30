@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/05 06:41:36 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:02:17 $
  */
 public class Timer {
 
@@ -90,14 +90,16 @@ public class Timer {
 		
 		public void run() {
 			while(repeatTask) {
-				if (task.mustStopTask()) break;
+				if (task.mustStopTask() || stop) break;
 				try {
-					this.join(waitTime);
+					synchronized (this) {
+						this.wait(waitTime);
+					}
 				} catch (InterruptedException e) {
 					if (stop) { break;  }
 				}
 				
-				if (task.mustStopTask()) break;
+				if (task.mustStopTask() || stop) break;
 				
 				try {
 					task.run();
@@ -113,7 +115,9 @@ public class Timer {
 		
 		public void stopTask() {
 			stop = true;
-			this.interrupt();
+			synchronized (this) {
+				this.notify();
+			}
 		}
 	}
 	
