@@ -56,8 +56,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/10 17:00:26 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 18:14:40 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -266,7 +266,7 @@ public class PartialFile extends SharedFile {
 	}
 	
 	public synchronized void writeData(FileChunk fileChunk) throws SharedFileException {
-			try { 
+			try {
 				if (writeChannel == null) {
 					
 					try {
@@ -299,6 +299,7 @@ public class PartialFile extends SharedFile {
 				partFile.getGapList().removeGap(fileChunk.getChunkStart(), fileChunk.getChunkStart()+fileChunk.getChunkData().capacity());
 				
 				fileChunk.getChunkData().clear();
+				fileChunk.setChunkData(null);
 				
 				try {
 					partFile.writeFile();
