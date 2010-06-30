@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/10/15 07:49:05 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:15:06 $
  */
 public class JMTimer {
 	private Queue<TaskExecutor> taskList = new ConcurrentLinkedQueue<TaskExecutor>();
@@ -92,17 +92,19 @@ public class JMTimer {
 		public void run() {
 			task.setRunning(true);
 			do {
-				if (task.mustStopTask())
+				if (task.mustStopTask() || stop)
 					break;
 				try {
-					this.join(waitTime);
+					synchronized (this) {
+						this.wait(waitTime);
+					}
 				} catch (InterruptedException e) {
 					if (stop) {
 						break;
 					}
 				}
 
-				if (task.mustStopTask())
+				if (task.mustStopTask() || stop) 
 					break;
 
 				try {
@@ -122,7 +124,9 @@ public class JMTimer {
 		
 		public void stopTask() {
 			stop = true;
-			this.interrupt();
+			synchronized (this) {
+				this.notify();
+			}
 		}
 	}
 
