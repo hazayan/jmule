@@ -62,15 +62,12 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.27 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:40:35 $$
+ * @version $$Revision: 1.28 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 18:17:51 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
-
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
-	
 	private List<UploadManagerListener> listener_list = new LinkedList<UploadManagerListener>(); 
-	
 	private InternalSharingManager _sharing_manager;
 	private InternalNetworkManager _network_manager;
 	private InternalPeerManager _peer_manager;
@@ -197,11 +194,12 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 					long payload_timeout = System.currentTimeMillis() - addTime;
 					if (payload_timeout > ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_TIME) {
 						recalcslots = true;
-						try {
-							uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
-						} catch (UploadQueueException e) {
-							e.printStackTrace();
-						}
+						if (!uploadQueue.isFull())
+							try {
+								uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
+							} catch (UploadQueueException e) {
+								e.printStackTrace();
+							}
 						payload_peers.removePeer(peer);
 						payload_peers.addPayloadLoosed(peer.getUserHash());
 						continue;
@@ -314,11 +312,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 		}
 		if (uploadQueue.hasPeer(peer))
-			try {
 				uploadQueue.removePeer(peer);
-			} catch (UploadQueueException e) {
-				e.printStackTrace();
-			}
 	}
 	
 	
@@ -545,51 +539,41 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 
 	public void peerConnectingFailed(Peer peer, Throwable cause) {
-		for(UploadSession session : session_list.values())
-			if (session.hasPeer(peer)) {
-				session.peerConnectingFailed(peer, cause);
-				break;
-			}
+		UploadSession session = getUploadSession(peer);
+		if (session != null)
+		session.peerConnectingFailed(peer, cause);
 		if (uploadQueue.hasPeer(peer)) {
-			try {
 				uploadQueue.removePeer(peer);
 				recalcSlotPeers();
-			} catch (UploadQueueException e) {
-				e.printStackTrace();
-			}
-		}
-			
+		}		
 	}
 
 	public void peerDisconnected(Peer peer) {
-		if (!hasPeer(peer)) return;
+		boolean recalcSlots = false;
+		if (uploadQueue.hasSlotPeer(peer))
+			recalcSlots = true;
 		
 		if (payload_peers.hasPeer(peer)) {
 			payload_peers.removePeer(peer);
 			payload_peers.addPayloadLoosed(peer.getUserHash());
-			removePeer(peer);
 		}
-
-		if (uploadQueue.hasSlotPeer(peer)) {
-			removePeer(peer);
+		removePeer(peer);
+		if (recalcSlots)
 			recalcSlotPeers();
-		}
-		
 	}
 	
 	public void peerRemoved(Peer peer) {
-		if (!hasPeer(peer)) return;
+		boolean recalcSlots = false;
+		if (uploadQueue.hasSlotPeer(peer))
+			recalcSlots = true;
 		
 		if (payload_peers.hasPeer(peer)) {
 			payload_peers.removePeer(peer);
 			payload_peers.addPayloadLoosed(peer.getUserHash());
-			removePeer(peer);
 		}
-
-		if (uploadQueue.hasSlotPeer(peer)) {
-			removePeer(peer);
+		removePeer(peer);
+		if (recalcSlots)
 			recalcSlotPeers();
-		}
 	}
 	
 	public void addUploadManagerListener(UploadManagerListener listener) {
