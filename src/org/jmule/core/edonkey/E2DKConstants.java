@@ -48,8 +48,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.30 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:20:29 $$
+ * @version $$Revision: 1.31 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:56:38 $$
  */
 public class E2DKConstants {
 
@@ -99,8 +99,6 @@ public class E2DKConstants {
 	
 	public final static int KEY_LENGTH					= 608;
 	
-	public final static int SUPPORTED_FLAGS 			= E2DKConstants.CAP_ZLIB | E2DKConstants.CAP_UNICODE | E2DKConstants.CAP_LARGEFILES ;
-	
 	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
 	
 	static {
@@ -110,13 +108,13 @@ public class E2DKConstants {
 	
 	public final static long PACKET_SIZE_TO_COMPRESS	= 900;
 	public static final Set<Byte> PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
+	public static final Set<Byte> SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
 	static {
 		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_HASHSETANSWER);
 		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_PEERHELLO);
 		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_PEERHELLOANSWER);
 		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_SENDINGPART);
 	}
-	public static final Set<Byte> SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
 	
 	public final static long MAXPACKETSIZE				= 2000000;
 	public final static long PARTSIZE 					= 0x947000; //9728000
@@ -351,7 +349,12 @@ public class E2DKConstants {
 	public final static byte CAP_LARGEFILES 			= (byte)0x0100;
 	public final static byte CAP_UNICODE 				= (byte)0x0010;
 	public final static byte CAP_ZLIB 					= (byte)0x0001;
-		
+	public final static byte CAP_SUPPORTCRYPT     		= (byte)0x0200;
+	public final static byte CAP_REQUESTCRYPT    		= (byte)0x0400;
+	public final static byte CAP_REQUIRECRYPT 		   	= (byte)0x0800;
+	
+	public final static int SERVER_SUPPORTED_FLAGS 			= E2DKConstants.CAP_ZLIB | E2DKConstants.CAP_UNICODE | E2DKConstants.CAP_LARGEFILES;
+
 	// Search constants
 	public final static byte[] SEARCH_BY_NAME			= new byte[] {0x01};
 	public final static byte[] SEARCH_BY_META			= new byte[] {0x02};
