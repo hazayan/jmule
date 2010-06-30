@@ -45,8 +45,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/06 08:17:10 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 18:16:06 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -111,9 +111,9 @@ public class UploadQueue {
 		return upload_queue.get(hash);
 	}
 	
-	void removePeer(Peer peer) throws UploadQueueException {
+	void removePeer(Peer peer) {
 		if (!hasPeer(peer))
-			throw new UploadQueueException("Peer " + peer + " not found in UploadQueue");
+			return;
 		UploadQueueContainer container = upload_queue.get(peer.getUserHash());
 		upload_queue.remove(peer.getUserHash());
 		if (slot_clients.contains(container))
@@ -182,16 +182,10 @@ public class UploadQueue {
 	}
 	
 	public void recalcSlotPeers(List<UploadQueueContainer> lostSlotPeers, List<UploadQueueContainer> obtainedSlotPeers) {
-		
 		List<UploadQueueContainer> max_score_peers = new ArrayList<UploadQueueContainer>();
-		
 		for(UploadQueueContainer container : upload_queue.values()) {
 			if (container.getLastResponseTime() >= ConfigurationManager.UPLOADQUEUE_REMOVE_TIMEOUT) {
-				try {
-					removePeer(container.peer);
-				} catch (UploadQueueException e) {
-					e.printStackTrace();
-				}
+				removePeer(container.peer);
 				continue;
 			}
 			if (max_score_peers.size() < ConfigurationManager.UPLOAD_QUEUE_SLOTS)
