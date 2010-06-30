@@ -30,11 +30,13 @@ import static org.jmule.core.jkad.utils.Utils.getNearestContact;
 import static org.jmule.core.jkad.utils.Utils.inToleranceZone;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.ContactAddress;
@@ -53,8 +55,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:00:43 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:00:54 $
  */
 public abstract class LookupTask {
 	protected int initialLookupContacts; 
@@ -65,8 +67,8 @@ public abstract class LookupTask {
 	protected long timeOut =  LOOKUP_TASK_DEFAULT_TIMEOUT;
 	protected long contactLookupTimeout = LOOKUP_CONTACT_TIMEOUT;
 	
-	protected List<KadContact> possibleContacts = new ArrayList<KadContact> ();
-	protected List<KadContact> usedContacts = new ArrayList<KadContact>();
+	protected Collection<KadContact> possibleContacts = new ConcurrentLinkedQueue<KadContact> ();
+	protected Collection<KadContact> usedContacts = new ConcurrentLinkedQueue<KadContact>();
 	protected Set<ClientID> usedContactsSet = new HashSet<ClientID>();
 	protected Map<ContactAddress, RequestedContact> requestedContacts = new ConcurrentHashMap<ContactAddress, RequestedContact>();
 	
