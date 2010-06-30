@@ -52,7 +52,6 @@ import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.networkmanager.InternalNetworkManager;
-import org.jmule.core.networkmanager.NetworkManagerException;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
@@ -78,8 +77,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.47 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:40:35 $$
+ * @version $$Revision: 1.48 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:47:47 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
