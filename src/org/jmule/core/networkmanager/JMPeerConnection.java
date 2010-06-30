@@ -29,8 +29,8 @@ import java.net.InetSocketAddress;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.22 $
- * Last changed by $Author: binary255 $ on $Date: 2010/05/17 17:23:53 $
+ * @version $Revision: 1.23 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:03:43 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -101,14 +101,10 @@ public final class JMPeerConnection extends JMConnection {
 		jm_socket_channel.connect(remote_inet_socket_address);
 	}
 	
-	void disconnect() throws NetworkManagerException {
+	void disconnect() throws IOException {
 		if (connection_status == ConnectionStatus.CONNECTED) {
-			try {
-				jm_socket_channel.close();
-				connection_status = ConnectionStatus.DISCONNECTED;
-			} catch (IOException cause) {
-				throw new NetworkManagerException(cause);
-			}
+			jm_socket_channel.disconnect();
+			connection_status = ConnectionStatus.DISCONNECTED;
 		}
 	}
 	
@@ -125,7 +121,7 @@ public final class JMPeerConnection extends JMConnection {
 	}
 	
 	public String toString() {
-		return "Peer connection to : " +  remote_inet_socket_address + " Use port : " + usePort + " Status : " + connection_status;
+		return "Peer connection to : " +  remote_inet_socket_address + " Use port : " + usePort + " Status : " + connection_status ;
 	}
 	
 	public boolean equals(Object obj) {
@@ -136,8 +132,8 @@ public final class JMPeerConnection extends JMConnection {
 		return ioErrors;
 	}
 
-	void setIoErrors(int ioErrors) {
-		this.ioErrors = ioErrors;
+	void incrementIOErrors() {
+		this.ioErrors++;
 	}
 		
 }
