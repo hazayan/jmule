@@ -54,7 +54,7 @@ import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.ProtocolVersion;
-import static org.jmule.core.edonkey.E2DKConstants.SUPPORTED_FLAGS;
+import static org.jmule.core.edonkey.E2DKConstants.SERVER_SUPPORTED_FLAGS;
 import static org.jmule.core.edonkey.E2DKConstants.ServerSoftwareVersion;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_FLAGS;
@@ -99,8 +99,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:59:06 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:58:56 $$
  */
 public class PacketFactory {
 	
@@ -193,7 +193,7 @@ public class PacketFactory {
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userNickName));
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ServerSoftwareVersion));
-		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
+		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SERVER_SUPPORTED_FLAGS));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT, ConfigurationManagerSingleton.getInstance().getUDP()));
 	
 		int tag_list_size = tagList.getByteSize();
@@ -629,7 +629,6 @@ public class PacketFactory {
 		
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,ProtocolVersion ));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
-		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerSingleton.getInstance().getUDP()));
 	
 		int tag_list_size = tagList.getByteSize();
@@ -712,7 +711,6 @@ public class PacketFactory {
 
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION, ProtocolVersion));
 		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
-		tagList.addTag(new IntTag(TAG_NAME_FLAGS, SUPPORTED_FLAGS));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER,
 				ConfigurationManagerSingleton.getInstance().getUDP()));
 
