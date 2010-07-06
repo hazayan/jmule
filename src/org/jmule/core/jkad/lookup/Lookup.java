@@ -22,7 +22,6 @@
  */
 package org.jmule.core.jkad.lookup;
 
-import static org.jmule.core.jkad.JKadConstants.CONCURRENT_LOOKUP_COUNT;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_CONTACT_CHECK_INTERVAL;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_NODE_CONTACTS;
 import static org.jmule.core.jkad.JKadConstants.LOOKUP_TASK_CHECK_INTERVAL;
@@ -41,8 +40,8 @@ import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadConstants.RequestType;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.lookup.LookupTask.RequestedContact;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.jkad.packet.PacketFactory;
@@ -57,8 +56,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:00:43 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:49:07 $
  */
 public class Lookup {
 
@@ -90,9 +89,8 @@ public class Lookup {
 		lookupCleaner  = new Task() {
 			public void run() {
 				for(Int128 key : lookupTasks.keySet()) {
-					LookupTask task = lookupTasks.get(key);
+					LookupTask task = lookupTasks.get(key);		
 					if ((System.currentTimeMillis() - task.getResponseTime() > task.getTimeOut()) || (System.currentTimeMillis() - task.getStartTime() > JKadConstants.MAX_LOOKUP_RUNNING_TIME)){
-						System.out.println("Lookup timeout : " + task.getTargetID().toBinaryString());
 						task.lookupTimeout();
 						task.stopLookup();
 						lookupTasks.remove(key);
@@ -180,11 +178,7 @@ public class Lookup {
 	public boolean hasTask(Int128 targetID) {
 		return lookupTasks.containsKey(targetID);
 	}
-	
-	public int getLookupLoad() {
-		return (int) ((lookupTasks.size() * 100) / CONCURRENT_LOOKUP_COUNT);
-	}
-	
+		
 	public void processRequest(InetSocketAddress sender, RequestType requestType, Int128 targetID, Int128 sourceID, boolean useKad2 ) {
 		switch(requestType) {
 		case FIND_NODE : {
