@@ -53,14 +53,13 @@ import org.jmule.core.utils.Misc;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.25 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:29:39 $
+ * @version $Revision: 1.26 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 09:00:55 $
  */
 public class PacketReader {
 
 
-	private static ByteBuffer packetBuffer = Misc
-			.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE);
+	private static ByteBuffer packetBuffer = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE);
 
 	private enum PacketType {
 		SERVER_UDP, PEER_UDP, KAD, KAD_COMPRESSED
@@ -104,30 +103,21 @@ public class PacketReader {
 					return;
 				type = PacketType.KAD_COMPRESSED;
 			} else
-				throw new NetworkManagerException(
-						"Unknown UDP packet header : " + Convert.byteToHex(packet_content.get(0)));
+				throw new NetworkManagerException("Unknown UDP packet header : " + Convert.byteToHex(packet_content.get(0)));
 		} catch (Throwable cause) {
 			throw new NetworkManagerException(Misc.getStackTrace(cause));
 		}
-
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
-
-		InternalIPFilter _ipfilter = (InternalIPFilter) IPFilterSingleton.getInstance();
-		
+		InternalIPFilter _ipfilter = (InternalIPFilter) IPFilterSingleton.getInstance();		
 		if ((type == PacketType.KAD) || (type == PacketType.KAD_COMPRESSED)) {
 			_network_manager.receiveKadPacket(new KadPacket(packet_content,packetSender));
 			return;
 		}
-
 		byte packet_protocol = packet_content.get(0);
-
 		byte packet_op_code = packet_content.get(1);
-
 		packet_content.position(1 + 1);
-
 		String ip = packetSender.getAddress().getHostAddress();
 		int port = packetSender.getPort();
-
 		if (_ipfilter.isServerBanned(ip)) {
 			return;
 		}
