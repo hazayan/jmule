@@ -42,8 +42,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:27:12 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
  */
 public class PublishSourceTask extends PublishTask {
 
@@ -59,7 +59,7 @@ public class PublishSourceTask extends PublishTask {
 			if (lookup_task.isLookupStarted()) return;
 
 		isStarted = true;
-		lookup_task = new LookupTask(RequestType.STORE, publishID, JKadConstants.toleranceZone) {
+		lookup_task = new LookupTask(RequestType.STORE, publishID, JKadConstants.LOOKUP_STORE_FILE_TIMEOUT) {
 			public void lookupTimeout() {
 				isStarted = false;
 				updatePublishTime();
@@ -79,19 +79,18 @@ public class PublishSourceTask extends PublishTask {
 				}
 			}
 			
-			public void stopLookupEvent() {
+			public void lookupTerminated() {
 				updatePublishTime();
 				task_listener.taskStopped(task_instance);
 			}
 			
 		};
-		lookup_task.setTimeOut(JKadConstants.PUBLISHER_SOURCE_PUBLISH_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		task_listener.taskStarted(task_instance);
 	}
 
 	public void stop() {
-		
+		if (!isStarted) return;
 		isStarted = false;
 		Lookup.getSingleton().removeLookupTask(publishID);
 	}

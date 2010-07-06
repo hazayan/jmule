@@ -31,8 +31,8 @@ import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/12 16:29:00 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
  */
 public abstract class PublishTask {
 
@@ -80,6 +80,7 @@ public abstract class PublishTask {
 	public void addPublishedSources(int sources) {
 		publishedSources+= sources;
 	}
+	
 	
 	public int getPublishedSources() {
 		return publishedSources;

@@ -23,7 +23,6 @@
 package org.jmule.core.jkad.publisher;
 
 import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_NOTES;
-import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_SOURCES;
 import static org.jmule.core.jkad.JKadConstants.PUBLISHER_MAINTENANCE_INTERVAL;
 
 import java.util.Collection;
@@ -34,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
@@ -41,8 +41,8 @@ import org.jmule.core.jkad.utils.timer.Timer;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:51:01 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
  */
 
 public class Publisher {
@@ -241,20 +241,24 @@ public class Publisher {
 		removeNoteTask(fileID);
 	}
 	
-	public void processGenericResponse(Int128 id, int load) {
+	public void processPublishResponse(Int128 id, int load) {
 		PublishTask task = keywordTasks.get(id);
 		if (task == null)
 			task = sourceTasks.get(id);
 		if (task == null) return ;
 		task.addPublishedSources(1);
-		if ((task instanceof PublishKeywordTask) || (task instanceof PublishSourceTask))
-			if (task.getPublishedSources() >= MAX_PUBLISH_SOURCES) {
+		if (task instanceof PublishKeywordTask)
+			if (task.getPublishedSources() >= JKadConstants.MAX_PUBLISH_KEYWORDS) {
 				task.stop();
-				if (task instanceof PublishKeywordTask)
-					removeKeywordTask(id);
-				if (task instanceof PublishSourceTask)
-					removeSourceTask(id);
+				removeKeywordTask(id);
 			}
+		
+		if (task instanceof PublishSourceTask)
+			if (task.getPublishedSources() >= JKadConstants.MAX_PUBLISH_SOURCES) {
+				task.stop();
+				removeSourceTask(id);
+			}
+				
 		if (task instanceof PublishNoteTask)
 			if (task.getPublishedSources() >= MAX_PUBLISH_NOTES) {
 				task.stop();
@@ -280,20 +284,29 @@ public class Publisher {
 	
 	void removeKeywordTask(Int128 id) {
 		PublishTask task = keywordTasks.get(id);
-		keywordTasks.remove(id); 
-		notifyListeners(task, TaskStatus.REMOVED);
+		if (task !=null) {
+			task.stop();
+			keywordTasks.remove(id); 
+			notifyListeners(task, TaskStatus.REMOVED);
+		}
 	}
 	
 	void removeSourceTask(Int128 id) {
 		PublishTask task = sourceTasks.get(id);
-		sourceTasks.remove(id);
-		notifyListeners(task, TaskStatus.REMOVED);
+		if (task != null) {
+			task.stop();
+			sourceTasks.remove(id);
+			notifyListeners(task, TaskStatus.REMOVED);
+		}
 	}
 	
 	void removeNoteTask(Int128 id) {
 		PublishTask task = noteTasks.get(id);
-		noteTasks.remove(id);
-		notifyListeners(task, TaskStatus.REMOVED);
+		if (task != null) {
+			task.stop();
+			noteTasks.remove(id);
+			notifyListeners(task, TaskStatus.REMOVED);
+		}
 	}
 	
 	public void addListener(PublisherListener listener) {
