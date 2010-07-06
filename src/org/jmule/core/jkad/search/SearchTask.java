@@ -34,8 +34,8 @@ import org.jmule.core.jkad.indexer.Source;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:50:25 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:55:52 $
  */
 public abstract class SearchTask {
 
@@ -51,8 +51,8 @@ public abstract class SearchTask {
 		this.searchID = searchID;
 	}
 
-	public abstract void startSearch() throws JKadException;
-	public abstract void stopSearch();
+	public abstract void start() throws JKadException;
+	public abstract void stop();
 	
 	public abstract void stopSearchRequest();
 	
@@ -66,6 +66,10 @@ public abstract class SearchTask {
 
 	public Collection<Source> getSearchResults() {
 		return searchResults;
+	}
+	
+	public int getResultCount() {
+		return searchResults.size();
 	}
 
 	public boolean isStarted() {

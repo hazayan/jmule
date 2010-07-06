@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.indexer.Source;
 import org.jmule.core.jkad.utils.Convert;
@@ -38,8 +39,8 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:32:33 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:55:52 $
  */
 public class Search {
 	
@@ -69,7 +70,7 @@ public class Search {
 	public void stop() {
 		for(Int128 key : searchTasks.keySet()) {
 			SearchTask task = searchTasks.get(key);
-			if (task.isStarted()) task.stopSearch();
+			if (task.isStarted()) task.stop();
 		}
 		isStarted = false;
 	}
@@ -92,7 +93,7 @@ public class Search {
 		search_task.setSearchKeyword(keyword);
 		search_task.setSearchResultListener(listener);
 		searchTasks.put(keywordID, search_task);
-		search_task.startSearch();
+		search_task.start();
 		
 		return keywordID;
 	}
@@ -108,7 +109,7 @@ public class Search {
 		search_task.setSearchResultListener(listener);
 		
 		searchTasks.put(fileID, search_task);
-		search_task.startSearch();
+		search_task.start();
 	}
 
 	public void searchNotes(Int128 fileID,long fileSize) throws JKadException {
@@ -123,13 +124,22 @@ public class Search {
 		NoteSearchTask search_task = new NoteSearchTask( updatedID,fileSize);
 		search_task.setSearchResultListener(listener);
 		searchTasks.put(updatedID, search_task);
-		search_task.startSearch();
+		search_task.start();
 	}
 	
-	public void processResults(IPAddress sender, final Int128 targetID, final List<Source> sources) {
+	public void processSearchResults(IPAddress sender, final Int128 targetID, final List<Source> sources) {
 		SearchTask task = searchTasks.get(targetID);
 		if (task == null) return ;
-				task.addSearchResult(sources);
+		task.addSearchResult(sources);
+		if (task instanceof KeywordSearchTask)
+			if (task.getResultCount()>=JKadConstants.MAX_KEYWORD_SEARCH_RESULTS)
+				cancelSearch(targetID);
+		if (task instanceof SourceSearchTask)
+			if (task.getResultCount()>=JKadConstants.MAX_SOURCES_SEARCH_RESULTS)
+				cancelSearch(targetID);
+		if (task instanceof NoteSearchTask)
+			if (task.getResultCount()>=JKadConstants.MAX_NOTES_SEARCH_RESULTS)
+				cancelSearch(targetID);
 	}
 	
 	public boolean hasSearchTask(Int128 searchID) {
@@ -143,24 +153,25 @@ public class Search {
 	public void cancelSearch(Int128 searchID) {
 		if (!hasSearchTask(searchID)) return ;
 		searchTasks.get(searchID).stopSearchRequest();
-		searchTasks.remove(searchID);
+		removeSearchID(searchID);
 	}
 	
+	/**
+	 * Only remove search by ID
+	 * @param searchID
+	 */
 	void removeSearchID(Int128 searchID) {
 		searchTasks.remove(searchID);
 	}
 	
 	public String toString() {
 		String result = " [ ";
-		
 		for(Int128 key : searchTasks.keySet()) {
 			SearchTask task = searchTasks.get(key);
 			result += "Task ID : " + key.toHexString() + "\n";
 			result += "Value   : \n" + task + "\n";
 		}
-		
 		result += " ] ";
-		
 		return result;
 	}
 	

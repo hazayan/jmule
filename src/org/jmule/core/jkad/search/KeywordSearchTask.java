@@ -25,7 +25,6 @@ package org.jmule.core.jkad.search;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
 import static org.jmule.core.jkad.JKadConstants.KADEMLIA_HELLO_RES;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jmule.core.JMException;
@@ -34,9 +33,9 @@ import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.PacketListener;
-import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -47,15 +46,13 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:50:25 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:55:52 $
  */
 public class KeywordSearchTask extends SearchTask {
 	
 	private LookupTask lookup_task = null;
-	private String searchKeyword = "";
-	private List<KadContact> used_contacts = new ArrayList<KadContact>();
-	
+	private String searchKeyword = "";	
 	public KeywordSearchTask(Int128 searchID) {
 		super(searchID);
 	}
@@ -68,17 +65,16 @@ public class KeywordSearchTask extends SearchTask {
 		this.searchKeyword = searchKeyword;
 	}
 	
-	public void startSearch() throws JKadException {
+	public void start() throws JKadException {
 		isStarted = true;
 				
-		lookup_task = new LookupTask(RequestType.FIND_VALUE, searchID, JKadConstants.toleranceZone) {
+		lookup_task = new LookupTask(RequestType.FIND_VALUE, searchID, JKadConstants.LOOKUP_SEARCH_KEYWORD_TIMEOUT) {
 			public void lookupTimeout() {
 			}
 
 			public void processToleranceContacts(ContactAddress sender,
 					List<KadContact> results) {
 				for(KadContact contact : results) {
-					used_contacts.add(contact);
 					KadPacket packet = null;
 					if (!contact.supportKad2())
 						try {
@@ -116,12 +112,12 @@ public class KeywordSearchTask extends SearchTask {
 				}
 			}
 		
-			public void stopLookupEvent() {
-				stopSearch();
+			public void lookupTerminated() {
+				stop();
 			}
 			
 		};
-		lookup_task.setTimeOut(JKadConstants.SEARCH_KEYWORD_TIMEOUT);
+		//lookup_task.setTimeOut(JKadConstants.SEARCH_KEYWORD_TIMEOUT);
 		Lookup.getSingleton().addLookupTask(lookup_task);
 		if (listener!=null) {
 			listener.searchStarted();
@@ -129,7 +125,7 @@ public class KeywordSearchTask extends SearchTask {
 			
 	}
 
-	public void stopSearch() {
+	public void stop() {
 		if (!isStarted) return;
 		isStarted = false;
 		//Lookup.getSingleton().removeLookupTask(searchID);
