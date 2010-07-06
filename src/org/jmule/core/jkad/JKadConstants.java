@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.19 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:25:25 $
+ * @version $Revision: 1.20 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:46:50 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -63,26 +63,37 @@ public class JKadConstants {
 	public static final int SEARCH_CONTACTS					= 2;
 	public static final int INITIAL_SEARCH_CONTACT_COUNT	= 50;
 	public static final int PUBLISH_KEYWORD_CONTACT_COUNT	= 20;
-	
-	public static final long SEARCH_KEYWORD_TIMEOUT			= 1000 * 45;
-	public static final long SEARCH_NOTES_TIMEOUT			= 1000 * 45;
-	public static final long SEARCH_SOURCES_TIMEOUT			= 1000 * 45;
-	
+		
 	public static final int  INITIAL_LOOKUP_CONTACTS 		= 50;
 	public static final long LOOKUP_TASK_CHECK_INTERVAL		= 5000;
 	public static final long LOOKUP_TASK_DEFAULT_TIMEOUT	= 15000;
 	
-	public static final long CONCURRENT_LOOKUP_COUNT		= 50;
 	public static final long LOOKUP_CONTACT_CHECK_INTERVAL	= 5000;
 	public static final long LOOKUP_CONTACT_TIMEOUT			= 1000 * 10;
+	
+	public static final long LOOKUP_NODE_TIMEOUT			= 1000 * 45;
+	
+	public static final long LOOKUP_SEARCH_SOURCE_TIMEOUT	= 1000 * 60;
+	public static final long LOOKUP_SEARCH_KEYWORD_TIMEOUT	= 1000 * 60;
+	public static final long LOOKUP_SEARCH_NOTE_TIMEOUT		= 1000 * 60;
+	
+	public static final long LOOKUP_STORE_FILE_TIMEOUT		= 1000 * 140;
+	public static final long LOOKUP_STORE_KEYWORD_TIMEOUT	= 1000 * 140;
+	public static final long LOOKUP_STORE_NOTE_TIMEOUT		= 1000 * 100;
+	
 	public static final long MAX_LOOKUP_RUNNING_TIME		= 1000 * 60 * 5;
 	
 	public static final int LOOKUP_NODE_CONTACTS			= 11;
 	public static final int LOOKUP_VALUE_CONTACTS			= 2;
 	public static final int LOOKUP_STORE_CONTACTS			= 4;
 	
-	public static final int MAX_PUBLISH_SOURCES				= 150; // keyword and sources
-	public static final int MAX_PUBLISH_NOTES				= 200; 
+	public static final int MAX_PUBLISH_SOURCES				= 300; // keyword and sources
+	public static final int MAX_PUBLISH_KEYWORDS			= 300; // keyword and sources
+	public static final int MAX_PUBLISH_NOTES				= 100; 
+	
+	public static final int MAX_KEYWORD_SEARCH_RESULTS 		= 300;
+	public static final int MAX_SOURCES_SEARCH_RESULTS 		= 300;
+	public static final int MAX_NOTES_SEARCH_RESULTS 		= 50;
 	
 	public static final int  MAX_CONTACTS 							= 5000;
 	public static final long ROUTING_TABLE_HELLO_SEND_INTERVAL		= 1000 * 60 * 2; //60
@@ -114,14 +125,12 @@ public class JKadConstants {
 	public static final int INDEXER_CLEAN_DATA_INTERVAL		= 1000 * 60 ;
 	
 	public static final long TIME_24_HOURS 					=  1000 * 60 * 60 * 24;
+	public static final long TIME_5_HOURS 					=  1000 * 60 * 60 * 5;
 	
 	public static final long DEFAULT_PACKET_LISTENER_TIMEOUT = 5000;
 	
 	public static final long PUBLISHER_MAINTENANCE_INTERVAL	 = 1000 * 6;
 	
-	public static final long PUBLISHER_NOTE_PUBLISH_TIMEOUT  	= 1000 * 100;
-	public static final long PUBLISHER_KEYWORD_PUBLISH_TIMEOUT  = 1000 * 140;
-	public static final long PUBLISHER_SOURCE_PUBLISH_TIMEOUT 	= 1000 * 140;
 	
 	public static final long INDEXTER_MAX_LOAD_TO_NOT_PUBLISH = 60;
 	
@@ -135,7 +144,7 @@ public class JKadConstants {
 	public static final int K 								= 10;//10
 	public static final int ALPHA 							= 3;//3;
 
-	public static final long toleranceZone 					= 16777216;
+	public static final long TOLERANCE_ZONE  				= 16777216;
 	
 	
 	public static final byte PROTO_KAD_UDP 					= (byte) 0xE4;
