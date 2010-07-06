@@ -24,16 +24,19 @@ package org.jmule.core.networkmanager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 
 /**
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.23 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:03:43 $
+ * @version $Revision: 1.24 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:57:16 $
  */
 public final class JMPeerConnection extends JMConnection {
 
+	enum InterestedOPS { OP_READ,OP_WRITE }
+	
 	private JMuleSocketChannel jm_socket_channel;	
 	private int usePort = 0;
 
@@ -41,6 +44,7 @@ public final class JMPeerConnection extends JMConnection {
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	private long uploadedFileBytes = 0;
 	private int ioErrors = 0;
+	private  HashSet<InterestedOPS> interestedOPS = new HashSet<JMPeerConnection.InterestedOPS>();
 	
 	JMPeerConnection(InetSocketAddress remoteInetSocketAddress) {
 		remote_inet_socket_address = remoteInetSocketAddress;
@@ -56,6 +60,32 @@ public final class JMPeerConnection extends JMConnection {
 		
 	JMPeerConnection(String ipAddress, int port) {
 		remote_inet_socket_address = new InetSocketAddress(ipAddress, port);
+	}
+	
+	void clearInterestedOPS() {
+		synchronized (interestedOPS) {
+			interestedOPS.clear();	
+		}
+	}
+	
+	boolean isInterestedOPS(InterestedOPS ops) {
+		synchronized (interestedOPS) {
+			return interestedOPS.contains(ops);	
+		}
+	}
+	
+	void installOPS(InterestedOPS... ops) {
+		synchronized (interestedOPS) {
+			for(InterestedOPS o : ops)
+				interestedOPS.add(o);
+		}
+	}
+	
+	void removeOPS(InterestedOPS ops) {
+		synchronized (interestedOPS) {
+			interestedOPS.remove(ops);
+		}
+		
 	}
 	
 	void setUsePort(int usePort) {
@@ -121,7 +151,12 @@ public final class JMPeerConnection extends JMConnection {
 	}
 	
 	public String toString() {
-		return "Peer connection to : " +  remote_inet_socket_address + " Use port : " + usePort + " Status : " + connection_status ;
+		String result = "Peer connection to : " + remote_inet_socket_address
+				+ " Use port : " + usePort + " Status : " + connection_status;
+		result += " OPS : ";
+		for(InterestedOPS o : interestedOPS)
+			result += o + " ";
+		return result;
 	}
 	
 	public boolean equals(Object obj) {
