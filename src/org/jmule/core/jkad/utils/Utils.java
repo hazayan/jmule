@@ -45,8 +45,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:42:58 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:56:39 $
  */
 public class Utils {
 	
@@ -128,10 +128,13 @@ public class Utils {
 	}
 	
 	public static Int128 XOR(Int128 a, Int128 b) {
-		BitSet result = new BitSet(128);
+		BitSet result = (BitSet) a.getBitSet().clone();
+		result.xor(b.getBitSet());
+		return new Int128(result);
+/*		BitSet result = new BitSet(128);
 		for (int i = 0; i < result.size(); i++)
 			result.set(i, a.getBit(i) ^ b.getBit(i));
-		return new Int128(result);
+		return new Int128(result);*/
 	}
 	
 	/**
