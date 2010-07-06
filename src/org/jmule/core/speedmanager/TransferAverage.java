@@ -31,8 +31,8 @@ package org.jmule.core.speedmanager;
  * @author binary
  * @see phex.common.bandwidth
  * @see http://phex.svn.sourceforge.net/viewvc/phex/phex/trunk/src/main/java/phex/common/bandwidth/TransferAverage.java?view=log
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/07/31 16:44:49 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 09:02:29 $$
  */
 public class TransferAverage
 {
@@ -75,7 +75,7 @@ public class TransferAverage
     /**
      * Updates and cleans the buffer of values.
      */
-    private synchronized void update( long currentTimeFactor )
+    private void update( long currentTimeFactor )
     {
         if ( updateTimeFactor < currentTimeFactor - values.length )
         {

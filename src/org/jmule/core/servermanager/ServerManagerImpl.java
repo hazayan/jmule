@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/17 14:45:31 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 09:01:52 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 		
@@ -244,9 +244,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			throw new ServerManagerException(
 					"JMule is already connected (connecting) to another server");
 		if (reconnect_task != null)
-			synchronized (reconnect_task) {
-				server_manager_timer.removeTask(reconnect_task);
-			}
+			server_manager_timer.removeTask(reconnect_task);
 		String ip = server.getAddress();
 		int port = server.getPort();
 		if (hasServer(ip, port)) {
@@ -267,9 +265,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 		if (connected_server == null)
 			throw new ServerManagerException("JMule is not connected to server");
 		if (reconnect_task != null)
-			synchronized (reconnect_task) {
-				server_manager_timer.removeTask(reconnect_task);
-			}
+			server_manager_timer.removeTask(reconnect_task);
 		reconnect_to_server = false;
 		reconnect_count = 0;
 		try {

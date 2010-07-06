@@ -633,8 +633,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 			if (upload_manager.hasUpload(fileHash)) { // JMule is now uploading
 														// file, need to
 														// synchronize moving
-				UploadSession upload_sessison = upload_manager
-						.getUpload(fileHash);
+				UploadSession upload_sessison = upload_manager.getUpload(fileHash);
 				synchronized (upload_sessison.getSharedFile()) {
 					sharedFiles.remove(fileHash);
 					// FileUtils.moveFile(shared_partial_file.getFile(),

@@ -53,7 +53,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.14 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/02/03 14:05:59 $$
+ * @version $$Revision: 1.15 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 09:01:29 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements
 		InternalSearchManager {
@@ -149,14 +149,12 @@ public class SearchManagerImpl extends JMuleAbstractManager implements
 		return false;
 	}
 
-	public synchronized void removeSearch(SearchQuery searchRequest) {
+	public void removeSearch(SearchQuery searchRequest) {
 		server_search_request_queue.remove(searchRequest);
 		kad_search_request_queue.remove(searchRequest);
 		if (kad_searches.containsKey(searchRequest)) {
-			synchronized (kad_searches) {
-				Int128 searchID = kad_searches.get(searchRequest);
-				jkad_search.cancelSearch(searchID);
-			}
+			Int128 searchID = kad_searches.get(searchRequest);
+			jkad_search.cancelSearch(searchID);
 		}
 		if (searchRequest.getQueryType() == SearchQueryType.KAD) {
 			processKadSearchRequest();
