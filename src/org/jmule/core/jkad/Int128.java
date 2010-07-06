@@ -37,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:25:25 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:45:44 $
  */
 public class Int128 implements Cloneable {
 
@@ -226,11 +226,10 @@ public class Int128 implements Cloneable {
 			return false;
 		if (!(value instanceof Int128))
 			return false;
+		if (value == this)
+			return true;
 		Int128 o = (Int128) value;
-		for(int i = 0;i<bit_set.size();i++)
-			if (bit_set.get(i)!= o.getBitSet().get(i))
-				return false;
-		return true;
+		return bit_set.equals(o.getBitSet());
 		//return Arrays.equals(toByteArray(), ((Int128) value).toByteArray());
 	}
 	
