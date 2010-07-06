@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.DataFormatException;
 
 import org.jmule.core.configmanager.ConfigurationManagerException;
@@ -77,8 +76,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.48 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:47:47 $$
+ * @version $$Revision: 1.49 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 08:42:45 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -97,7 +96,7 @@ public class DownloadSession implements JMTransferSession {
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
 	DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
 	
-	private Map<Peer, List<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, List<CompressedChunkContainer>>();
+	private Map<Peer, Collection<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, Collection<CompressedChunkContainer>>();
 
 	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
@@ -446,11 +445,10 @@ public class DownloadSession implements JMTransferSession {
 		if (sender == null) return ; // or maybe write chunk!
 		download_status_list.updatePeerTime(sender);
 		if (!compressedFileChunks.containsKey(sender)) {
-			List<CompressedChunkContainer> list = new CopyOnWriteArrayList<CompressedChunkContainer>();
+			Collection<CompressedChunkContainer> list = new ConcurrentLinkedQueue<CompressedChunkContainer>();
 			compressedFileChunks.put(sender, list);
 		}
-		List<CompressedChunkContainer> chunk_list = compressedFileChunks
-				.get(sender);
+		Collection<CompressedChunkContainer> chunk_list = compressedFileChunks.get(sender);
 		
 		boolean found = false;
 		for (CompressedChunkContainer container : chunk_list) {
@@ -477,13 +475,10 @@ public class DownloadSession implements JMTransferSession {
 		if (!found) {
 			CompressedChunkContainer container = new CompressedChunkContainer();
 			container.offset = compressedFileChunk.getChunkStart();
-			container.compressedData = Misc.getByteBuffer(compressedFileChunk
-					.getChunkEnd());
-			container.compressedData.put(compressedFileChunk.getChunkData()
-					.array());
+			container.compressedData = Misc.getByteBuffer(compressedFileChunk.getChunkEnd());
+			container.compressedData.put(compressedFileChunk.getChunkData().array());
 			chunk_list.add(container);
-			if (container.compressedData.position() == container.compressedData
-					.capacity()) {// TODO : Fixme
+			if (container.compressedData.position() == container.compressedData.capacity()) {// TODO : Fixme
 				container.compressedData.position(0);
 				ByteBuffer buffer;
 				try {
@@ -547,10 +542,8 @@ public class DownloadSession implements JMTransferSession {
 						PeerDownloadStatus.HASHSET_REQUEST,
 						PeerDownloadStatus.ACTIVE_UNUSED);
 				for (Peer peer : peer_list) {
-					network_manager.sendUploadRequest(peer.getIP(), peer
-							.getPort(), getFileHash());
-					download_status_list.setPeerStatus(peer,
-							PeerDownloadStatus.UPLOAD_REQUEST);
+					network_manager.sendUploadRequest(peer.getIP(), peer.getPort(), getFileHash());
+					download_status_list.setPeerStatus(peer,PeerDownloadStatus.UPLOAD_REQUEST);
 				}
 			}
 		FragmentList list = fileRequestList.get(sender);
