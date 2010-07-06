@@ -140,8 +140,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.20 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:27:51 $
+ * @version $Revision: 1.21 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:47:20 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus {
@@ -214,7 +214,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				if (getStatus() != JKadStatus.CONNECTED) return;
 				// clean published files
 				for(Int128 id : published_sources.keySet())
-					if (System.currentTimeMillis() - published_sources.get(id) > JKadConstants.TIME_24_HOURS)
+					if (System.currentTimeMillis() - published_sources.get(id) > JKadConstants.TIME_5_HOURS)
 						published_sources.remove(id);
 				
 				for(Int128 id : published_keywords.keySet())
@@ -655,7 +655,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				byte targetID[] = new byte[16];
 				rawData.get(targetID);
 				int load = byteToInt(rawData.get());
-				publisher.processGenericResponse(new ClientID(targetID), load);
+				publisher.processPublishResponse(new ClientID(targetID), load);
 				break;
 			}
 			
@@ -692,7 +692,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 						source.setTCPPort(contact.getTCPPort());
 					sourceList.add(source);
 				}
-				search.processResults(sender_address, new Int128(noteID),sourceList);
+				search.processSearchResults(sender_address, new Int128(noteID),sourceList);
 				break;
 			}
 			case KADEMLIA_PUBLISH_NOTES_REQ : {
@@ -779,7 +779,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 					}
 					sourceList.add(source);
 				}
-				search.processResults(sender_address,new Int128(targetID), sourceList);
+				search.processSearchResults(sender_address,new Int128(targetID), sourceList);
 				break;
 			}
 			
@@ -944,7 +944,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				byte targetID[] = new byte[16];
 				rawData.get(targetID);
 				int load = byteToInt(rawData.get());
-				publisher.processGenericResponse(new ClientID(targetID), load);
+				publisher.processPublishResponse(new ClientID(targetID), load);
 				break;
 			}
 			
@@ -1075,7 +1075,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 					}
 					sourceList.add(source);
 				}
-				search.processResults(sender_address,new Int128(targetID), sourceList);
+				search.processSearchResults(sender_address,new Int128(targetID), sourceList);
 				break;
 			}
 			case KADEMLIA_FINDBUDDY_REQ : {
