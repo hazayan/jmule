@@ -78,8 +78,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:46:03 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:55:08 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -117,11 +117,11 @@ public class RoutingTable {
 				if (getTotalContacts() < ROUTING_TABLE_DIFICIT_CONTACTS) {
 					if ((lookup_new_contacts == null)||(!lookup_new_contacts.isLookupStarted())) {
 						Int128 fake_target = new Int128(Utils.getRandomInt128());
-						lookup_new_contacts = new LookupTask(RequestType.FIND_NODE, fake_target, JKadConstants.toleranceZone) {
+						lookup_new_contacts = new LookupTask(RequestType.FIND_NODE, fake_target, JKadConstants.LOOKUP_NODE_TIMEOUT) {
 							public void lookupTimeout() {
 							}
 
-							public void stopLookupEvent() {
+							public void lookupTerminated() {
 							}
 							
 							public void processToleranceContacts(ContactAddress sender,List<KadContact> results) {
@@ -305,7 +305,7 @@ public class RoutingTable {
 		return is_started;
 	}
 	
-	public synchronized void addContact(KadContact contact) {
+	public void addContact(KadContact contact) {
 		// TODO : Create code to filter myself
 		if (!Utils.isGoodAddress(contact.getIPAddress())) {
 			Logger.getSingleton().logMessage("Filtered address : "+contact.getIPAddress());
