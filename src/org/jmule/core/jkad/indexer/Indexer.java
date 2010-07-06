@@ -56,8 +56,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 18:03:15 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:47:45 $
  */
 public class Indexer {
 	
@@ -97,31 +97,26 @@ public class Indexer {
 		
 		save_data_task = new Task() {
 			public void run() {
-				synchronized (notes) {
 					try {
 						SrcIndexDat.writeFile(NOTE_INDEX_DAT, notes);
 					} catch (Throwable e) {
 						Logger.getSingleton().logException(e);
 						e.printStackTrace();
 					}
-				}
-				
-				synchronized (keywords) {
+
 					try {
 						SrcIndexDat.writeFile(KEY_INDEX_DAT, keywords);
 					} catch (Throwable e) {
 						Logger.getSingleton().logException(e);
 						e.printStackTrace();
 					}
-				}
-				synchronized (sources) {
+
 					try {
 							SrcIndexDat.writeFile(SRC_INDEX_DAT, sources);
 					} catch (Throwable e) {
 						Logger.getSingleton().logException(e);
 						e.printStackTrace();
 					}
-				}
 			}
 		};
 		
