@@ -22,12 +22,23 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.DefaultJMuleFeatures;
+import static org.jmule.core.edonkey.E2DKConstants.ET_COMMENTS;
+import static org.jmule.core.edonkey.E2DKConstants.ET_COMPRESSION;
+import static org.jmule.core.edonkey.E2DKConstants.ET_EXTENDEDREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.ET_FEATURES;
+import static org.jmule.core.edonkey.E2DKConstants.ET_SOURCEEXCHANGE;
+import static org.jmule.core.edonkey.E2DKConstants.ET_UDPPORT;
+import static org.jmule.core.edonkey.E2DKConstants.ET_UDPVER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_AICHFILEHASHREQ;
+import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_HELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.OP_FILENAMEREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATUS;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GETSERVERLIST;
@@ -37,6 +48,9 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_KAD_CALLBACK;
 import static org.jmule.core.edonkey.E2DKConstants.OP_LOGINREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_MESSAGE;
+import static org.jmule.core.edonkey.E2DKConstants.OP_MULTIPACKET;
+import static org.jmule.core.edonkey.E2DKConstants.OP_MULTIPACKETANSWER;
+import static org.jmule.core.edonkey.E2DKConstants.OP_MULTIPACKET_EXT;
 import static org.jmule.core.edonkey.E2DKConstants.OP_OFFERFILES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLO;
 import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLOANSWER;
@@ -66,6 +80,8 @@ import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT_PEER;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,10 +91,10 @@ import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
-import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -99,8 +115,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:58:56 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:19:08 $$
  */
 public class PacketFactory {
 	
@@ -186,8 +202,7 @@ public class PacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static Packet getServerLoginPacket(UserHash userHash, int clientPort,
-			String userNickName) throws JMException {
+	public static Packet getServerLoginPacket(UserHash userHash, int clientPort, String userNickName) throws JMException {
 		
 		TagList tagList = new TagList();
 		tagList.addTag(new StringTag(TAG_NAME_NAME, userNickName));
@@ -486,7 +501,7 @@ public class PacketFactory {
      */
     public static Packet getOfferFilesPacket(ClientID userID, List<SharedFile> sharedFiles) throws JMException  {
     	int data_length=0;
-    	List<ByteBuffer> shared_files_data = new LinkedList<ByteBuffer>();
+    	List<ByteBuffer> shared_files_data = new ArrayList<ByteBuffer>();
     	for(SharedFile sFile : sharedFiles) {
     		TagList tag_list = sFile.getTagList();
     		int tag_list_size = tag_list.getByteSize();
@@ -863,9 +878,9 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 * */
-	public static Packet getFileRequestPacket(FileHash fileHash){
+	public static Packet getFileNameRequestPacket(FileHash fileHash){
         Packet packet=new Packet(16, PROTO_EDONKEY_TCP);
-        packet.setCommand(OP_FILEREQUEST);
+        packet.setCommand(OP_FILENAMEREQUEST);
         packet.insertData(fileHash.getHash());
         return packet;
 	}
@@ -913,12 +928,12 @@ public class PacketFactory {
 	 *   </tbody>
 	 * </table>
 	 */
-    public static Packet getFileStatusRequestPacket(FileHash fileHash){
-            Packet packet=new Packet(16, PROTO_EDONKEY_TCP);
-            packet.setCommand(OP_FILESTATREQ);
-            packet.insertData(fileHash.getHash());
-            return packet;
-    }
+	public static Packet getFileStatusRequestPacket(FileHash fileHash) {
+		Packet packet = new Packet(16, PROTO_EDONKEY_TCP);
+		packet.setCommand(OP_FILESTATREQ);
+		packet.insertData(fileHash.getHash());
+		return packet;
+	}
 	
     /**
      * Start upload request for file.
@@ -1368,7 +1383,7 @@ public class PacketFactory {
 		Packet packet = new Packet(16 + 2 + bitSetArray.length, PROTO_EDONKEY_TCP);
 		packet.setCommand(OP_FILESTATUS);
 		packet.insertData(partHashSet.getFileHash().getHash());
-		packet.insertData((short)partHashSet.size());
+		packet.insertData(Convert.intToShort(partHashSet.size()));
 		packet.insertData(bitSetArray);
 		return packet;
 	}
@@ -1621,12 +1636,12 @@ public class PacketFactory {
 	
 	public static Packet getEMulePeerHelloPacket() throws JMException {
 		TagList tag_list = new TagList();
-		tag_list.addTag(new IntTag(ET_COMPRESSION, DefaultJMuleFeatures.get(PeerFeatures.DataCompressionVer)));
+		tag_list.addTag(new IntTag(ET_COMPRESSION, DefaultJMuleFeatures.get(PeerFeatures.DataCompressionVersion)));
 		tag_list.addTag(new IntTag(ET_UDPPORT, (ConfigurationManagerSingleton.getInstance().getUDP())));
-		tag_list.addTag(new IntTag(ET_UDPVER, DefaultJMuleFeatures.get(PeerFeatures.UDPVer)));
-		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, DefaultJMuleFeatures.get(PeerFeatures.SourceExchange1Ver) ));
-		tag_list.addTag(new IntTag(ET_COMMENTS, DefaultJMuleFeatures.get(PeerFeatures.AcceptCommentVer)));
-		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, DefaultJMuleFeatures.get(PeerFeatures.ExtendedRequestsVer) ));
+		tag_list.addTag(new IntTag(ET_UDPVER, DefaultJMuleFeatures.get(PeerFeatures.UDPVersion)));
+		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, DefaultJMuleFeatures.get(PeerFeatures.SourceExchange1Version) ));
+		tag_list.addTag(new IntTag(ET_COMMENTS, DefaultJMuleFeatures.get(PeerFeatures.AcceptCommentVersion)));
+		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, DefaultJMuleFeatures.get(PeerFeatures.ExtendedRequestsVersion) ));
 		tag_list.addTag(new IntTag(ET_FEATURES, DefaultJMuleFeatures.get(PeerFeatures.NoViewSharedFiles)));
 		
 		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
@@ -1686,12 +1701,12 @@ public class PacketFactory {
 	 */
 	public static Packet getEMulePeerHelloAnswerPacket() throws JMException {
 		TagList tag_list = new TagList();
-		tag_list.addTag(new IntTag(ET_COMPRESSION, DefaultJMuleFeatures.get(PeerFeatures.DataCompressionVer)));
+		tag_list.addTag(new IntTag(ET_COMPRESSION, DefaultJMuleFeatures.get(PeerFeatures.DataCompressionVersion)));
 		tag_list.addTag(new IntTag(ET_UDPPORT, (ConfigurationManagerSingleton.getInstance().getUDP())));
-		tag_list.addTag(new IntTag(ET_UDPVER, DefaultJMuleFeatures.get(PeerFeatures.UDPVer)));
-		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, DefaultJMuleFeatures.get(PeerFeatures.SourceExchange1Ver) ));
-		tag_list.addTag(new IntTag(ET_COMMENTS, DefaultJMuleFeatures.get(PeerFeatures.AcceptCommentVer)));
-		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, DefaultJMuleFeatures.get(PeerFeatures.ExtendedRequestsVer) ));
+		tag_list.addTag(new IntTag(ET_UDPVER, DefaultJMuleFeatures.get(PeerFeatures.UDPVersion)));
+		tag_list.addTag(new IntTag(ET_SOURCEEXCHANGE, DefaultJMuleFeatures.get(PeerFeatures.SourceExchange1Version) ));
+		tag_list.addTag(new IntTag(ET_COMMENTS, DefaultJMuleFeatures.get(PeerFeatures.AcceptCommentVersion)));
+		tag_list.addTag(new IntTag(ET_EXTENDEDREQUEST, DefaultJMuleFeatures.get(PeerFeatures.ExtendedRequestsVersion) ));
 		tag_list.addTag(new IntTag(ET_FEATURES, DefaultJMuleFeatures.get(PeerFeatures.NoViewSharedFiles)));
 		
 		Packet packet = new Packet(1 + 4 + 1 + 1 + 1 + 4 + tag_list.getByteSize(),
@@ -1820,7 +1835,7 @@ public class PacketFactory {
 	 * Basic PEX answer pachet
 	 * 
 	 */
-	public static Packet getSourcesAnswerPacket(FileHash fileHash, List<Peer> peer_list) {
+	public static Packet getSourcesAnswerPacket(FileHash fileHash, Collection<Peer> peer_list) {
 		Packet packet = new Packet(16 + 2 + peer_list.size() * (4 + 2),PROTO_EMULE_EXTENDED_TCP);
 		packet.setCommand(OP_ANSWERSOURCES);
 		packet.insertData(fileHash.getHash());
@@ -1872,5 +1887,115 @@ public class PacketFactory {
 		packet.insertData(tcpPort);
 		return packet;
 	}
+	
+	
+	public static Packet getMultipacketRequest(FileHash fileHash, Collection<ByteBuffer> entries) {
+		int entries_capacity = 0;
+		for (ByteBuffer entry : entries)
+			entries_capacity += entry.capacity();
+		Packet packet = new Packet(16 + entries_capacity,PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_MULTIPACKET);
+		packet.insertData(fileHash.getHash());
+		for (ByteBuffer entry : entries)
+			packet.insertData(entry.array());
+		return packet;
+	}
+	
+	public static Packet getMultipacketExtRequest(FileHash fileHash, long fileSize, Collection<ByteBuffer> entries) {
+		int entries_capacity = 0;
+		for (ByteBuffer entry : entries)
+			entries_capacity += entry.capacity();
+		Packet packet = new Packet(16 + 8 + entries_capacity,PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_MULTIPACKET_EXT);
+		packet.insertData(fileHash.getHash());
+		packet.insertData(fileSize);
+		for (ByteBuffer entry : entries)
+			packet.insertData(entry.array());
+		return packet;
+	}
+	
+	public static Packet getMultipacketResponse(FileHash fileHash, Collection<ByteBuffer> entries) {
+		int entries_capacity = 0;
+		for (ByteBuffer entry : entries)
+			entries_capacity += entry.capacity();
+		Packet packet = new Packet(16 + entries_capacity,PROTO_EMULE_EXTENDED_TCP);
+		packet.setCommand(OP_MULTIPACKETANSWER);
+		packet.insertData(fileHash.getHash());
+		for (ByteBuffer entry : entries)
+			packet.insertData(entry.array());
+		return packet;
+	}
+	
+	/*
+	 * Multipacket entries
+	 */
+	
+	public static ByteBuffer getFileNameRequestEntry() {
+		ByteBuffer entry = Misc.getByteBuffer(1);
+		entry.put(OP_FILENAMEREQUEST);
+		entry.position(0);
+		return entry;
+	}
+	
+	public static ByteBuffer getFileNotFoundResponseEntry() {
+		ByteBuffer entry = Misc.getByteBuffer(1);
+		entry.put(OP_FILEREQANSNOFILE);
+		entry.position(0);
+		return entry;
+	}
+	
+	public static ByteBuffer getFileNameResponseEntry(String fileName) {
+		byte[] str_content = fileName.getBytes();
+		ByteBuffer entry = Misc.getByteBuffer(1 + 2 + str_content.length );
+		entry.put(OP_FILEREQANSWER);
+		
+		entry.putShort(Convert.intToShort(str_content.length));
+		entry.put(str_content);
+		
+		entry.position(0);
+		return entry;
+	}
+	
+	public static ByteBuffer getFileStatusRequestEntry() {
+		ByteBuffer entry = Misc.getByteBuffer(1);
+		entry.put(OP_FILESTATREQ);
+		entry.position(0);
+		return entry;
+	}
+	
+	public static ByteBuffer getCompletedFileStatusResponseEntry() {
+		ByteBuffer entry = Misc.getByteBuffer(1 + 2);
+		entry.put(OP_FILESTATUS);
+		entry.putShort((short)0);
+		entry.position(0);
+		return entry;
+	}
+	
+	public static ByteBuffer getFileStatusResponseEntry(GapList fileGapList,int partCount, long fileSize) {
+		JMuleBitSet bitSet = fileGapList.getBitSet(fileSize);
+		byte [] bitSetArray = bitSet.getAsByteArray();
+		ByteBuffer entry = Misc.getByteBuffer(1 + 2 + bitSetArray.length);
+		entry.put(OP_FILESTATUS);
+		entry.putShort(Convert.intToShort(partCount));
+		entry.put(bitSetArray);
+		entry.position(0);
+		return entry;
+	}
+	
+	public static ByteBuffer getFileSourcesRequestEntry() {
+		ByteBuffer entry = Misc.getByteBuffer(1);
+		entry.put(OP_REQUESTSOURCES);
+		entry.position(0);
+		return entry;
+	}
+		
+	public static ByteBuffer getFileAICHRequestEntry() {
+		ByteBuffer entry = Misc.getByteBuffer(1);
+		entry.put(OP_AICHFILEHASHREQ);
+		entry.position(0);
+		return entry;
+	}
+	
+	
 	
 }
