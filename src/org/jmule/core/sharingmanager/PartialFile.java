@@ -56,8 +56,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 09:02:29 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:30:05 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -295,8 +295,6 @@ public class PartialFile extends SharedFile {
 				
 				fileChunk.getChunkData().clear();
 				fileChunk.setChunkData(null);
-				System.gc();
-				
 				try {
 					partFile.writeFile();
 				} catch (PartMetException e) {

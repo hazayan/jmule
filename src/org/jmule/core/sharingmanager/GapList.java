@@ -38,8 +38,8 @@ import org.jmule.core.JMIterator;
  * 
  * @author pola
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/19 14:37:35 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:30:46 $$
  */
 public class GapList {
 
@@ -321,7 +321,7 @@ public class GapList {
 				bitSet.set(i, true);
 			else
 				bitSet.set(i, false);
-		bitSet.setPartCount(partCount);
+		bitSet.setBitCount(partCount);
 		return bitSet;
 	}
 	
