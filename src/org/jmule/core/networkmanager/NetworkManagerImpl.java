@@ -64,6 +64,7 @@ import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_COMPRESSED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
 import static org.jmule.core.edonkey.E2DKConstants.SERVER_SEARCH_RATIO;
+import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -115,9 +116,11 @@ import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.ipfilter.IPFilterSingleton;
 import org.jmule.core.ipfilter.InternalIPFilter;
+import org.jmule.core.ipfilter.IPFilter.BannedReason;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
+import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.packet.KadPacket;
 import org.jmule.core.networkmanager.JMConnection.ConnectionStatus;
@@ -156,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.42 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:27:21 $
+ * @version $Revision: 1.43 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:34:22 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -168,6 +171,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	private static final long PACKET_PROCESSOR_QUEUE_SCAN_INTERVAL 	= 1000 * 15;
 	private static final long PEER_CONNECTIONS_MONITOR_SELECT		= 50;
 	private static final long SERVER_CONNECTION_MONITOR_SELECT		= 5000;
+	
+	private static ByteBuffer packetBuffer = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE);
+
+	private enum PacketType {
+		SERVER_UDP, PEER_UDP, KAD, KAD_COMPRESSED
+	};
 	
 	private Map<String, JMPeerConnection> peer_connections = new ConcurrentHashMap<String, JMPeerConnection>();
 
@@ -1720,26 +1729,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	//	}
 	}
 	
-	
-	private String readString(ByteBuffer packet) {
-		int message_length = (packet.getShort());
-		ByteBuffer bytes = Misc.getByteBuffer(message_length);
-		bytes.position(0);
-		for (int i = 0; i < message_length; i++)
-			bytes.put(packet.get());
-		return new String(bytes.array());
-	}
-	
-	private static TagList readTagList(ByteBuffer packet) {
-		int tag_count = packet.getInt();
-		TagList tag_list = new TagList();
-		for (int i = 0; i < tag_count; i++) {
-			Tag Tag = TagScanner.scanTag(packet);
-			tag_list.addTag(Tag);
-		}
-		return tag_list;
-	}
-	
 	private void processClientPackets(PacketFragment container) throws UnknownPacketException, DataFormatException, MalformattedPacketException {
 		//for (PacketContainer container : clientPackets) {
 			JMPeerConnection connection = (JMPeerConnection) container.getConnection();
@@ -2209,6 +2198,156 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			
 			
 		//}
+	}
+	
+	private void readUDPPacket(DatagramChannel channel) throws NetworkManagerException, UnknownPacketException, MalformattedPacketException {
+		InetSocketAddress packetSender;
+		boolean kad_enabled = false;
+		PacketType type;
+		ByteBuffer packet_content;
+		try {
+			kad_enabled = ConfigurationManagerSingleton.getInstance()
+					.isJKadAutoconnectEnabled();
+		} catch (ConfigurationManagerException cause) {
+			cause.printStackTrace();
+		}
+		try {
+			packetBuffer.clear();
+			packetSender = (InetSocketAddress) channel.receive(packetBuffer);
+			packet_content = getByteBuffer(packetBuffer.position());
+
+			packetBuffer.limit(packetBuffer.position());
+			packetBuffer.position(0);
+			packet_content.position(0);
+			packet_content.put(packetBuffer);
+
+			packet_content.position(0);
+
+			if (packet_content.get(0) == PROTO_EDONKEY_SERVER_UDP)
+				type = PacketType.SERVER_UDP;
+			else if (packet_content.get(0) == PROTO_EDONKEY_PEER_UDP)
+				type = PacketType.PEER_UDP;
+			else if (packet_content.get(0) == JKadConstants.PROTO_KAD_UDP) {
+				if (!kad_enabled)
+					return;
+				type = PacketType.KAD;
+			} else if (packet_content.get(0) == JKadConstants.PROTO_KAD_COMPRESSED_UDP) {
+				if (!kad_enabled)
+					return;
+				type = PacketType.KAD_COMPRESSED;
+			} else
+				throw new NetworkManagerException(
+						"Unknown UDP packet header : "+ Convert.byteToHex(packet_content.get(0)));
+		} catch (Throwable cause) {
+			throw new NetworkManagerException(Misc.getStackTrace(cause));
+		}
+		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+		InternalIPFilter _ipfilter = (InternalIPFilter) IPFilterSingleton.getInstance();
+		if ((type == PacketType.KAD) || (type == PacketType.KAD_COMPRESSED)) {
+			_network_manager.receiveKadPacket(new KadPacket(packet_content,
+					packetSender));
+			return;
+		}
+		byte packet_protocol = packet_content.get(0);
+		byte packet_op_code = packet_content.get(1);
+		packet_content.position(1 + 1);
+		String ip = packetSender.getAddress().getHostAddress();
+		int port = packetSender.getPort();
+		if (_ipfilter.isServerBanned(ip)) {
+			return;
+		}
+
+		// System.out.println("UDP Packet  " + ip + ":" + port + " Protocol : "
+		// + Convert.byteToHex(packet_protocol)+"  OpCode : " +
+		// Convert.byteToHex(packet_op_code));
+		try {
+			switch (packet_protocol) {
+			case PROTO_EDONKEY_SERVER_UDP: {
+				switch (packet_op_code) {
+				case OP_GLOBSERVSTATUS: {
+					if (packet_content.capacity() < 15) {
+						int challenge = packet_content.getInt();
+						long user_count = Convert.intToLong(packet_content
+								.getInt());
+						long files_count = Convert.intToLong(packet_content
+								.getInt());
+						_network_manager.receivedOldServerStatus(ip, port,
+								challenge, user_count, files_count);
+						return;
+					}
+					int challenge = packet_content.getInt();
+					long user_count = Convert
+							.intToLong(packet_content.getInt());
+					long files_count = Convert.intToLong(packet_content
+							.getInt());
+					long soft_limit = Convert
+							.intToLong(packet_content.getInt());
+					long hard_limit = Convert
+							.intToLong(packet_content.getInt());
+					int udp_flags = packet_content.getInt();
+					Set<ServerFeatures> server_features = Utils
+							.scanUDPFeatures(udp_flags);
+					_network_manager.receivedServerStatus(ip, port, challenge,
+							user_count, files_count, soft_limit, hard_limit,
+							server_features);
+					return;
+				}
+				case OP_SERVER_DESC_ANSWER: {
+					boolean new_packet = false;
+					short test_short = packet_content.getShort();
+					test_short = packet_content.getShort();
+					byte[] test_read = Convert.shortToByte(test_short);
+					if (test_read[0] == (byte) 0xFF)
+						if (test_read[1] == (byte) 0xFF) {
+							new_packet = true;
+						}
+					packet_content.position(packet_content.position() - 4);
+					if (new_packet) {
+						int challenge = packet_content.getInt();
+						TagList tag_list = readTagList(packet_content);
+						_network_manager.receivedNewServerDescription(ip, port,
+								challenge, tag_list);
+						return;
+					}
+					String server_name = readString(packet_content);
+					String server_desc = readString(packet_content);
+					_network_manager.receivedServerDescription(ip, port,
+							server_name, server_desc);
+					return;
+				}
+
+				default: {
+					throw new UnknownPacketException(packet_protocol,
+							packet_op_code, packet_content.array());
+				}
+				}
+			}
+			}
+		} catch (Throwable cause) {
+			if (cause instanceof UnknownPacketException)
+				throw (UnknownPacketException) cause;
+			_ipfilter.addServer(ip, BannedReason.BAD_PACKETS, _network_manager);
+			throw new MalformattedPacketException(packet_content.array(), cause);
+		}
+	}
+
+	private String readString(ByteBuffer packet) {
+		int message_length = (packet.getShort());
+		ByteBuffer bytes = Misc.getByteBuffer(message_length);
+		bytes.position(0);
+		for (int i = 0; i < message_length; i++)
+			bytes.put(packet.get());
+		return new String(bytes.array());
+	}
+	
+	private TagList readTagList(ByteBuffer packet) {
+		int tag_count = packet.getInt();
+		TagList tag_list = new TagList();
+		for (int i = 0; i < tag_count; i++) {
+			Tag Tag = TagScanner.scanTag(packet);
+			tag_list.addTag(Tag);
+		}
+		return tag_list;
 	}
 	
 	/*
@@ -3577,7 +3716,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				while(!stop){
 					try {
 						long begin_read = System.currentTimeMillis();
-						PacketReader.readUDPPacket(listenChannel);
+						readUDPPacket(listenChannel);
 						long end_read = System.currentTimeMillis();
 						long read_time = end_read - begin_read;
 						//System.out.println("Read time : " + read_time);
