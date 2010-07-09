@@ -26,9 +26,12 @@ import static org.jmule.core.downloadmanager.PeerDownloadStatus.ACTIVE;
 import static org.jmule.core.edonkey.E2DKConstants.BLOCKSIZE;
 import static org.jmule.core.edonkey.E2DKConstants.FT_FILENAME;
 import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
+import static org.jmule.core.edonkey.E2DKConstants.OP_FILENAMEREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATREQ;
 import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +46,7 @@ import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategy;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyFactory;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyFactory.STRATEGY;
+import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
@@ -76,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.49 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 08:42:45 $$
+ * @version $$Revision: 1.50 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:25:03 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -98,7 +102,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	private Map<Peer, Collection<CompressedChunkContainer>> compressedFileChunks = new ConcurrentHashMap<Peer, Collection<CompressedChunkContainer>>();
 
-	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	private InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 	private InternalPeerManager peer_manager = (InternalPeerManager) PeerManagerSingleton.getInstance();
 	private InternalDownloadManager download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 	private InternalUploadManager upload_manager = (InternalUploadManager) UploadManagerSingleton.getInstance();
@@ -173,8 +177,7 @@ public class DownloadSession implements JMTransferSession {
 	private void createDownloadFiles(String fileName, long fileSize,
 			FileHash fileHash, PartHashSet hashSet, TagList tagList)
 			throws SharedFileException {
-		sharedFile = new PartialFile(fileName, fileSize, fileHash, hashSet,
-				tagList);
+		sharedFile = new PartialFile(fileName, fileSize, fileHash, hashSet, tagList);
 		SharingManagerSingleton.getInstance().addPartialFile(sharedFile);
 	}
 
@@ -185,12 +188,12 @@ public class DownloadSession implements JMTransferSession {
 				List<Peer> status_not_reponse_list = download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, PeerDownloadStatus.FILE_STATUS_REQUEST);
 				for(Peer peer : status_not_reponse_list) {
 					if (peer.isConnected())
-					network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
+					_network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
 							getFileHash());
 				}
 				for(Peer peer : status_not_reponse_list) {
 					if (peer.isConnected())
-					network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
+					_network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
 							getFileHash());
 				}
 				
@@ -282,14 +285,25 @@ public class DownloadSession implements JMTransferSession {
 		if (this.getStatus() == DownloadStatus.STOPPED)
 			return;
 		download_status_list.addPeer(peer);
-		network_manager.sendFileRequest(peer.getIP(), peer.getPort(),
-				getFileHash());
-		download_status_list.setPeerStatus(peer,
-				PeerDownloadStatus.UPLOAD_REQUEST);
-		network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(),
-				getFileHash());
-		download_status_list.setPeerStatus(peer,
-				PeerDownloadStatus.FILE_STATUS_REQUEST);
+		
+		Integer supportMultipacket = peer.getPeerFeature(PeerFeatures.MultiPacket);
+		if (supportMultipacket==1) {
+			Collection<Byte> entries = new ArrayList<Byte>();
+			entries.add(OP_FILENAMEREQUEST);
+			entries.add(OP_FILESTATREQ);
+			Integer supportExtMultipacket = peer.getPeerFeature(PeerFeatures.ExtMultiPacket);
+			if (supportExtMultipacket==1)
+				_network_manager.sendMultiPacketExtRequest(peer.getIP(), peer.getPort(), getFileHash(), getFileSize(), entries);
+			else
+				_network_manager.sendMultiPacketRequest(peer.getIP(), peer.getPort(), getFileHash(),entries);
+			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILENAME_REQUEST);
+			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILE_STATUS_REQUEST);
+		} else {
+			_network_manager.sendFileNameRequest(peer.getIP(), peer.getPort(),getFileHash());
+			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILENAME_REQUEST);
+			_network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(), getFileHash());
+			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILE_STATUS_REQUEST);
+		}
 	}
 
 	void peerConnectingFailed(Peer peer, Throwable cause) {
@@ -325,26 +339,25 @@ public class DownloadSession implements JMTransferSession {
 	void receivedFileRequestAnswerFromPeer(Peer sender,String fileName) {
 		download_status_list.addPeerHistoryRecord(sender, "File request answer");
 		download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
-		network_manager.sendUploadRequest(sender.getIP(), sender.getPort(), sharedFile.getFileHash());
+		_network_manager.sendUploadRequest(sender.getIP(), sender.getPort(), sharedFile.getFileHash());
 	}
 	
 	void receivedFileStatusResponseFromPeer(Peer sender,FileHash fileHash, JMuleBitSet bitSetpartStatus) {
 		JMuleBitSet bitSet = bitSetpartStatus;
-		if (bitSet.getPartCount() == 0) {
+		if (bitSet.getBitCount() == 0) {
 			int partCount = (int) ((this.sharedFile.length() / PARTSIZE));
 			if (this.sharedFile.length() % PARTSIZE != 0)
 				partCount++;
 			bitSet = new JMuleBitSet(partCount);
-			bitSet.setPartCount(partCount);
+			bitSet.setBitCount(partCount);
 			for (int i = 0; i < partCount; i++)
 				bitSet.set(i);
 		}
 		partStatus.addPartStatus(sender, bitSet);
 
 		if (!this.sharedFile.hasHashSet()) {
-			download_status_list.setPeerStatus(sender,
-					PeerDownloadStatus.HASHSET_REQUEST);
-			network_manager.sendPartHashSetRequest(sender.getIP() , sender.getPort(),getFileHash());
+			download_status_list.setPeerStatus(sender, PeerDownloadStatus.HASHSET_REQUEST);
+			_network_manager.sendPartHashSetRequest(sender.getIP() , sender.getPort(),getFileHash());
 		}
 	}
 	
@@ -433,7 +446,7 @@ public class DownloadSession implements JMTransferSession {
 		download_status_list.setPeerChunkRequests(peer, fragments);
 		download_status_list.setPeerStatus(peer, PeerDownloadStatus.ACTIVE);
 		
-		network_manager.sendFilePartsRequest(peer.getIP(), peer.getPort(),
+		_network_manager.sendFilePartsRequest(peer.getIP(), peer.getPort(),
 				getFileHash(), fragments);
 	}
 
@@ -523,7 +536,7 @@ public class DownloadSession implements JMTransferSession {
 						PeerDownloadStatus.ACTIVE,
 						PeerDownloadStatus.ACTIVE_UNUSED);
 				for (Peer peer : peer_list) {
-					network_manager.sendPartHashSetRequest(peer.getIP(), peer
+					_network_manager.sendPartHashSetRequest(peer.getIP(), peer
 							.getPort(), getFileHash());
 				}
 				return;
@@ -534,7 +547,7 @@ public class DownloadSession implements JMTransferSession {
 					return;
 				}
 				// file is broken
-				network_manager.sendUploadRequest(sender.getIP(), sender
+				_network_manager.sendUploadRequest(sender.getIP(), sender
 						.getPort(), getFileHash());
 				download_status_list.setPeerStatus(sender,
 						PeerDownloadStatus.UPLOAD_REQUEST);
@@ -542,7 +555,7 @@ public class DownloadSession implements JMTransferSession {
 						PeerDownloadStatus.HASHSET_REQUEST,
 						PeerDownloadStatus.ACTIVE_UNUSED);
 				for (Peer peer : peer_list) {
-					network_manager.sendUploadRequest(peer.getIP(), peer.getPort(), getFileHash());
+					_network_manager.sendUploadRequest(peer.getIP(), peer.getPort(), getFileHash());
 					download_status_list.setPeerStatus(peer,PeerDownloadStatus.UPLOAD_REQUEST);
 				}
 			}
