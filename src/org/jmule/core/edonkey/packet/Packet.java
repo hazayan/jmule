@@ -31,8 +31,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/12 16:27:34 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:18:37 $$
  */
 public class Packet {
 	
@@ -82,6 +82,10 @@ public class Packet {
 		packet_data.put(insertData.array());
 	}
 
+	public void insertData(long insertData) {
+		packet_data.putLong(insertData);
+	}
+	
 	public void insertData(int insertData) {
 		packet_data.putInt(insertData);
 	}
