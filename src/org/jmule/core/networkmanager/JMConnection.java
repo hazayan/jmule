@@ -27,10 +27,10 @@ package org.jmule.core.networkmanager;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/31 17:24:11 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:27:21 $
  */
-public class JMConnection {
+public abstract class JMConnection {
 	
 	public static enum ConnectionStatus { CONNECTED, DISCONNECTED, CONNECTING};
 	

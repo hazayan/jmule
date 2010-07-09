@@ -22,15 +22,16 @@
  */
 package org.jmule.core.networkmanager;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
@@ -48,8 +49,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2010/04/29 10:51:47 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:27:21 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -197,7 +198,7 @@ public interface InternalNetworkManager extends NetworkManager {
 	
 	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... requestData);
 	
-	public void sendFileRequest(String peerIP, int peerPort, FileHash fileHash);
+	public void sendFileNameRequest(String peerIP, int peerPort, FileHash fileHash);
 	
 	public void sendFileRequestAnswer(String peerIP, int peerPort, FileHash fileHash, String fileName);
 	
@@ -219,7 +220,11 @@ public interface InternalNetworkManager extends NetworkManager {
 	
 	public void sendSourcesRequest(String peerIP, int peerPort, FileHash fileHash);
 	
-	public void sendSourcesResponse(String peerIP, int peerPort, FileHash fileHash, List<Peer> peer_list);
+	public void sendSourcesResponse(String peerIP, int peerPort, FileHash fileHash, Collection<Peer> peer_list);
+	
+	public void sendMultiPacketRequest(String peerIP, int peerPort, FileHash fileHash, Collection<Byte> entries);
+	
+	public void sendMultiPacketExtRequest(String peerIP, int peerPort, FileHash fileHash, long fileSize, Collection<Byte> entries);
 	
 	public void serverConnected();
 	

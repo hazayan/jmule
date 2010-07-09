@@ -22,8 +22,8 @@
  */
 package org.jmule.core.networkmanager;
 
-import static org.jmule.core.JMConstants.KEY_SEPARATOR;
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
+import static org.jmule.core.JMConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
 import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHAREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHARES;
@@ -34,7 +34,7 @@ import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.OP_FILENAMEREQUEST;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATUS;
 import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETANSWER;
@@ -138,6 +138,7 @@ import org.jmule.core.servermanager.ServerManagerSingleton;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.InternalSharingManager;
 import org.jmule.core.sharingmanager.JMuleBitSet;
+import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.sharingmanager.SharingManagerSingleton;
 import org.jmule.core.speedmanager.BandwidthController;
@@ -155,8 +156,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.41 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 09:00:07 $
+ * @version $Revision: 1.42 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:27:21 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -950,6 +951,43 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			e.printStackTrace();
 		}
 	}
+	
+	public void receivedMultipacketRequest(String peerIP, int peerPort, FileHash fileHash, long fileSize, Collection<Byte> opCodeList) {
+		try {
+			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
+			Collection<ByteBuffer> response_entries = new ArrayList<ByteBuffer>();
+			if (!_sharing_manager.hasFile(fileHash)) {
+				response_entries.add(PacketFactory.getFileNotFoundResponseEntry());
+			} else {
+				SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
+				
+				if (shared_file.length()!=fileSize)
+					response_entries.add(PacketFactory.getFileNotFoundResponseEntry());
+				else
+				for(Byte opCode : opCodeList) {
+					if (opCode == OP_FILENAMEREQUEST)
+						response_entries.add(PacketFactory.getFileNameResponseEntry( shared_file.getSharingName() ));
+					else
+						if (opCode == OP_FILESTATREQ) {
+							if (shared_file.isCompleted())
+								response_entries.add( PacketFactory.getCompletedFileStatusResponseEntry() );
+							else
+								response_entries.add( PacketFactory.getFileStatusResponseEntry( ((PartialFile)shared_file).getGapList(), shared_file.getHashSet().size(), shared_file.length() ) );
+						} else
+							if (opCode == OP_REQUESTSOURCES)
+								sendSourcesResponse(peerIP, peerPort, fileHash, _sharing_manager.getFileSources(peer, fileHash));		
+				}
+			}
+			JMPeerConnection peer_connection = getPeerConnection(peerIP,peerPort);
+			Packet packet = PacketFactory.getMultipacketResponse(fileHash, response_entries);
+			peerConnectionsMonitor.sendPacket(peer_connection, packet);
+		} catch (PeerManagerException e) {
+			e.printStackTrace();
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	public void requestSourcesFromServer(FileHash fileHash, long fileSize) {
 		Packet packet = PacketFactory.getSourcesRequestPacket(fileHash,
@@ -1038,11 +1076,10 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 
-	public void sendFileRequest(String peerIP, int peerPort, FileHash fileHash) {
+	public void sendFileNameRequest(String peerIP, int peerPort, FileHash fileHash) {
 		try {
-			JMPeerConnection peer_connection = getPeerConnection(peerIP,
-					peerPort);
-			Packet packet = PacketFactory.getFileRequestPacket(fileHash);
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getFileNameRequestPacket(fileHash);
 			peerConnectionsMonitor.sendPacket(peer_connection, packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
@@ -1067,8 +1104,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		try {
 			JMPeerConnection peer_connection = getPeerConnection(peerIP,
 					peerPort);
-			Packet packet = PacketFactory.getFileStatusReplyPacket(partHashSet,
-					fileSize, gapList);
+			Packet packet = PacketFactory.getFileStatusReplyPacket(partHashSet,fileSize, gapList);
 			peerConnectionsMonitor.sendPacket(peer_connection, packet);
 		} catch (Throwable cause) {
 			cause.printStackTrace();
@@ -1163,7 +1199,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 	
-	public void sendSourcesResponse(String peerIP, int peerPort, FileHash fileHash, List<Peer> peer_list) {
+	public void sendSourcesResponse(String peerIP, int peerPort, FileHash fileHash, Collection<Peer> peer_list) {
 		try {
 			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
 			Packet packet = PacketFactory.getSourcesAnswerPacket(fileHash, peer_list);
@@ -1191,6 +1227,51 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		} catch (Throwable cause) {
 			cause.printStackTrace();
 		}
+	}
+	
+	
+	public void sendMultiPacketRequest(String peerIP, int peerPort, FileHash fileHash, Collection<Byte> entries) {
+		Collection<ByteBuffer> entries_content = new ArrayList<ByteBuffer>();
+		for(Byte entryID : entries) {
+			if (entryID == OP_FILENAMEREQUEST)
+				entries_content.add(PacketFactory.getFileNameRequestEntry());
+			else
+				if (entryID == OP_REQUESTSOURCES)
+					entries_content.add(PacketFactory.getFileSourcesRequestEntry());
+			else
+				if (entryID == OP_FILESTATREQ)
+					entries_content.add(PacketFactory.getFileStatusRequestEntry());
+		}
+		Packet packet = PacketFactory.getMultipacketRequest(fileHash, entries_content);
+		JMPeerConnection peer_connection;
+		try {
+			peer_connection = getPeerConnection(peerIP, peerPort);
+			peerConnectionsMonitor.sendPacket(peer_connection, packet);
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	public void sendMultiPacketExtRequest(String peerIP, int peerPort, FileHash fileHash, long fileSize, Collection<Byte> entries) {
+		Collection<ByteBuffer> entries_content = new ArrayList<ByteBuffer>();
+		for(Byte entryID : entries) {
+			if (entryID == OP_FILENAMEREQUEST)
+				entries_content.add(PacketFactory.getFileNameRequestEntry());
+			else
+				if (entryID == OP_REQUESTSOURCES)
+					entries_content.add(PacketFactory.getFileSourcesRequestEntry());
+			else
+				if (entryID == OP_FILESTATREQ)
+					entries_content.add(PacketFactory.getFileStatusRequestEntry());
+		}
+		Packet packet = PacketFactory.getMultipacketExtRequest(fileHash, fileSize, entries_content);
+		JMPeerConnection peer_connection;
+		try {
+			peer_connection = getPeerConnection(peerIP, peerPort);
+			peerConnectionsMonitor.sendPacket(peer_connection, packet);
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+		}	
 	}
 	
 
@@ -1386,6 +1467,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 	
+
 	public void receivePeerPacket(PacketFragment container) {
 		peerPacketProcessor.addPacket(container);	
 	}
@@ -1839,7 +1921,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						break;
 					}
 
-					case OP_FILEREQUEST: {
+					case OP_FILENAMEREQUEST: {
 						byte[] file_hash = new byte[16];
 						rawPacket.get(file_hash);
 
@@ -1851,8 +1933,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					case OP_FILEREQANSWER: {
 						byte[] file_hash = new byte[16];
 						rawPacket.get(file_hash);
-						int name_length = Convert
-								.shortToInt(rawPacket.getShort());
+						int name_length = Convert.shortToInt(rawPacket.getShort());
 						ByteBuffer str_bytes = Misc.getByteBuffer(name_length);
 						rawPacket.get(str_bytes.array());
 						receivedFileRequestAnswerFromPeer(peerIP,
@@ -1873,8 +1954,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						byte[] file_hash = new byte[16];
 						rawPacket.get(file_hash);
 
-						receivedFileStatusRequestFromPeer(peerIP,
-								peerPort, new FileHash(file_hash));
+						receivedFileStatusRequestFromPeer(peerIP, peerPort, new FileHash(file_hash));
 
 						break;
 					}
@@ -1894,7 +1974,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 						JMuleBitSet bitSet;
 						bitSet = Convert.byteToBitset(data);
-						bitSet.setPartCount(partCount);
+						bitSet.setBitCount(partCount);
 
 						receivedFileStatusResponseFromPeer(peerIP,
 								peerPort, new FileHash(file_hash), bitSet);
@@ -2036,7 +2116,77 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						receivedSecIdentState(peerIP, peerPort, state, challenge);
 						break;
 					}
+					
+					case OP_MULTIPACKET : {
+						byte[] hash = new byte[16];
+						rawPacket.get(hash);
+						FileHash fileHash = new FileHash(hash);
+						Collection<Byte> entries = new ArrayList<Byte>();
+						while(rawPacket.hasRemaining()) {
+							entries.add(rawPacket.get());
+						}
+						
+						long fileSize = 0;
+						if (_sharing_manager.hasFile(fileHash))
+							fileSize = _sharing_manager.getSharedFile(fileHash).length();
+						
+						receivedMultipacketRequest(peerIP,peerPort,fileHash,fileSize,entries);
+						break;
+					}
+					
+					case OP_MULTIPACKET_EXT : {
+						byte[] hash = new byte[16];
+						rawPacket.get(hash);
+						FileHash fileHash = new FileHash(hash);
+						long fileSize = rawPacket.getLong();
+						Collection<Byte> entries = new ArrayList<Byte>();
+						while(rawPacket.hasRemaining()) {
+							entries.add(rawPacket.get());
+						}
 
+						receivedMultipacketRequest(peerIP,peerPort,fileHash,fileSize,entries);
+						break;
+					}
+					
+					case OP_MULTIPACKETANSWER : {
+						byte[] hash = new byte[16];
+						rawPacket.get(hash);
+						FileHash fileHash = new FileHash(hash);
+						while(rawPacket.hasRemaining()) {
+							byte entryCode = rawPacket.get();
+							if (entryCode == OP_FILEREQANSNOFILE) {
+								receivedFileNotFoundFromPeer(peerIP, peerPort, fileHash);
+								break;
+							}
+							if (entryCode == OP_FILEREQANSWER) {
+								int name_length = Convert.shortToInt(rawPacket.getShort());
+								ByteBuffer str_bytes = Misc.getByteBuffer(name_length);
+								rawPacket.get(str_bytes.array());
+								receivedFileRequestAnswerFromPeer(peerIP,peerPort, fileHash, new String(str_bytes.array()));
+								continue;
+							}
+							if (entryCode == OP_FILESTATUS) {
+								short partCount = rawPacket.getShort();
+								int count = (partCount + 7) / 8;
+								// if (((partCount + 7) / 8) != 0)
+								// if (count == 0)
+								// count++;
+
+								byte[] data = new byte[count];
+								for (int i = 0; i < count; i++)
+									data[i] = rawPacket.get();
+
+								JMuleBitSet bitSet;
+								bitSet = Convert.byteToBitset(data);
+								bitSet.setBitCount(partCount);
+
+								receivedFileStatusResponseFromPeer(peerIP,peerPort, fileHash, bitSet);
+								continue;
+							}
+						}
+						break;
+					}
+					
 					default: {
 						throw new UnknownPacketException(header,
 								opCode, rawPacket.array());
