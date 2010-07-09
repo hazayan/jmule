@@ -23,7 +23,7 @@
 package org.jmule.core.peermanager;
 
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS1;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NICKNAME;
 
 import java.util.Arrays;
@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:19:42 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:27:54 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL}
@@ -122,10 +122,8 @@ public class Peer {
 	
 	void setTagList(TagList tagList) {
 		this.tag_list = tagList;
-
 		if (tag_list.hasTag(TAG_NAME_MISC_OPTIONS1)) {
 			Tag tag = tag_list.getTag(TAG_NAME_MISC_OPTIONS1);
-			
 				long value;
 				try {
 					value = Misc.extractNumberTag(tag);
@@ -133,9 +131,19 @@ public class Peer {
 				} catch (JMException e) {
 					e.printStackTrace();
 				}
-				
-			
 		}
+		
+		if (tag_list.hasTag(TAG_NAME_MISC_OPTIONS2)) {
+			Tag tag = tag_list.getTag(TAG_NAME_MISC_OPTIONS2);
+				long value;
+				try {
+					value = Misc.extractNumberTag(tag);
+					peer_features.putAll(Utils.scanTCPPeerFeatures2(Convert.longToInt(value)));
+				} catch (JMException e) {
+					e.printStackTrace();
+				}
+		}
+		
 	}
 	
 	void setListenPort(int listenPort) {
@@ -158,12 +166,11 @@ public class Peer {
 		return peer_status;
 	}
 	
-	public Map<PeerFeatures, Integer> getPeerFeatures() {
-		return peer_features;
-	}
-	
-	void setPeerFeatures(Map<PeerFeatures, Integer> features) {
-		peer_features = features;
+	public Integer getPeerFeature(PeerFeatures feature) {
+		Integer result = peer_features.get(feature);
+		if (result == null)
+			return 0;
+		return result;
 	}
 		
 	public PeerSource getPeerSource() {
@@ -232,6 +239,10 @@ public class Peer {
 		
 		result += " lastSeen : " + lastSeen;
 		result += " source : " + getPeerSource();
+		
+		result +=" Features : ";
+		for(PeerFeatures feature : peer_features.keySet())
+			result += " " + feature + " (" + peer_features.get(feature) + ")";
 		return result;
 	}
 	
