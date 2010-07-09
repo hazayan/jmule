@@ -22,25 +22,57 @@
  */
 package org.jmule.core.edonkey.utils;
 
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.*;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVer;
+import static org.jmule.core.edonkey.E2DKConstants.ET_COMMENTS;
+import static org.jmule.core.edonkey.E2DKConstants.ET_COMPRESSION;
+import static org.jmule.core.edonkey.E2DKConstants.ET_EXTENDEDREQUEST;
+import static org.jmule.core.edonkey.E2DKConstants.ET_FEATURES;
+import static org.jmule.core.edonkey.E2DKConstants.ET_SOURCEEXCHANGE;
+import static org.jmule.core.edonkey.E2DKConstants.ET_UDPVER;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_COMPRESSION;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_LARGEFILES;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_NEWTAGS;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_RELATEDSEARCH;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_TCPOBFUSCATION;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_TYPETAGINTEGER;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_UNICODE;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_EXT_GETFILES;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_EXT_GETSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_EXT_GETSOURCES2;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_LARGEFILES;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_NEWTAGS;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_TCPOBFUSCATION;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_UDPOBFUSCATION;
+import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_UNICODE;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DirectUDPCallback;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtMultiPacket;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.KadVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ModBit;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.PeerCache;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Ver;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportPreview;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportSecIdent;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UnicodeSupport;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequestsCryptLayer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequiresCryptLayer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Version;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsAICH;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCaptcha;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCryptLayer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsFileIdent;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsLargeFiles;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsPreview;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSecureIdentification;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSourceEx2;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsUnicode;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVersion;
 
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
@@ -48,41 +80,42 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 /**
  * Created on Dec 24, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/12/25 20:11:49 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:21:12 $
  */
 public class Utils {
 
 	public static int peerFeatures1ToInt( Map<PeerFeatures, Integer> clientFeatures) {
 		int misc_optins1 = 0;
 		
-		misc_optins1 |= (byte)(clientFeatures.get(AICHVer) << 29);
-		misc_optins1 |= (int)(clientFeatures.get(UnicodeSupport) << 28);
-		misc_optins1 |= (int)(clientFeatures.get(UDPVer) << 24);
-		misc_optins1 |= (int)(clientFeatures.get(DataCompressionVer) << 20);
-		misc_optins1 |= (int)(clientFeatures.get(SupportSecIdent) << 16);
-		misc_optins1 |= (int)(clientFeatures.get(SourceExchange1Ver) << 12);
-		misc_optins1 |= (int)(clientFeatures.get(ExtendedRequestsVer) << 8);
-		misc_optins1 |= (int)(clientFeatures.get(AcceptCommentVer) << 4);
+		misc_optins1 |= (byte)(clientFeatures.get(SupportsAICH) << 29);
+		misc_optins1 |= (int)(clientFeatures.get(SupportsUnicode) << 28);
+		misc_optins1 |= (int)(clientFeatures.get(UDPVersion) << 24);
+		misc_optins1 |= (int)(clientFeatures.get(DataCompressionVersion) << 20);
+		misc_optins1 |= (int)(clientFeatures.get(SupportsSecureIdentification) << 16);
+		misc_optins1 |= (int)(clientFeatures.get(SourceExchange1Version) << 12);
+		misc_optins1 |= (int)(clientFeatures.get(ExtendedRequestsVersion) << 8);
+		misc_optins1 |= (int)(clientFeatures.get(AcceptCommentVersion) << 4);
 		misc_optins1 |= (byte)(clientFeatures.get(PeerCache) << 3);
 		misc_optins1 |= (byte)(clientFeatures.get(NoViewSharedFiles) << 2);
 		misc_optins1 |= (byte)(clientFeatures.get(MultiPacket) << 1);
-		misc_optins1 |= (byte)(clientFeatures.get(SupportPreview) << 0);
+		misc_optins1 |= (byte)(clientFeatures.get(SupportsPreview) << 0);
 		
 		return misc_optins1;
 	}
 	
 	public static int peerFeatures2ToInt(Map<PeerFeatures, Integer> clientFeatures) {
 		int misc_optins2 = 0;
+		misc_optins2 |= (clientFeatures.get(SupportsFileIdent) << 13);
 		misc_optins2 |= (clientFeatures.get(DirectUDPCallback) << 12);
 		misc_optins2 |= (clientFeatures.get(SupportsCaptcha) << 11);
 		misc_optins2 |= (clientFeatures.get(SupportsSourceEx2) << 10);
 		misc_optins2 |= (clientFeatures.get(RequiresCryptLayer) << 9);
 		misc_optins2 |= (clientFeatures.get(RequestsCryptLayer) << 8);
 		misc_optins2 |= (clientFeatures.get(SupportsCryptLayer) << 7);
-		misc_optins2 |= (clientFeatures.get(Reserved) << 6);
-		misc_optins2 |= (clientFeatures.get(MultiPacket) << 5);
-		misc_optins2 |= (clientFeatures.get(SupportLargeFiles) << 4);
+		misc_optins2 |= (clientFeatures.get(ModBit) << 6);
+		misc_optins2 |= (clientFeatures.get(ExtMultiPacket) << 5);
+		misc_optins2 |= (clientFeatures.get(SupportsLargeFiles) << 4);
 		misc_optins2 |= (clientFeatures.get(KadVersion) << 0);
 		
 		return misc_optins2;
@@ -91,34 +124,34 @@ public class Utils {
 	public static Map<PeerFeatures,Integer> scanTCPPeerFeatures1(int rawData) {
 		Map<PeerFeatures,Integer> result = new Hashtable<PeerFeatures,Integer>();
 		
-		result.put(AICHVer, (rawData >> 29) & 0x07);
-		result.put(UnicodeSupport, (rawData >> 28) & 0x01);
-		result.put(UDPVer, (rawData >> 24) & 0x0f);
-		result.put(DataCompressionVer, (rawData >> 20) & 0x0f);
-		result.put(SupportSecIdent, (rawData >> 16) & 0x0f);
-		result.put(SourceExchange1Ver, (rawData >> 12) & 0x0f);
-		result.put(ExtendedRequestsVer,(rawData >>  8) & 0x0f);
-		result.put(AcceptCommentVer, (rawData >>  4) & 0x0f);
+		result.put(SupportsAICH, (rawData >> 29) & 0x07);
+		result.put(SupportsUnicode, (rawData >> 28) & 0x01);
+		result.put(UDPVersion, (rawData >> 24) & 0x0f);
+		result.put(DataCompressionVersion, (rawData >> 20) & 0x0f);
+		result.put(SupportsSecureIdentification, (rawData >> 16) & 0x0f);
+		result.put(SourceExchange1Version, (rawData >> 12) & 0x0f);
+		result.put(ExtendedRequestsVersion,(rawData >>  8) & 0x0f);
+		result.put(AcceptCommentVersion, (rawData >>  4) & 0x0f);
 		result.put(PeerCache, (rawData >>  3) & 0x01);
 		result.put(NoViewSharedFiles, (rawData >>  2) & 0x01);
 		result.put(MultiPacket, (rawData >>  1) & 0x01);
-		result.put(SupportPreview, (rawData >>  0) & 0x01);
+		result.put(SupportsPreview, (rawData >>  0) & 0x01);
 		
 		return result;
 	}
 	
 	public static Map<PeerFeatures,Integer> scanTCPPeerFeatures2(int rawData) {
 		Map<PeerFeatures,Integer> result = new Hashtable<PeerFeatures,Integer>();
-		
+		result.put(SupportsFileIdent, (rawData >> 13) & 0x01);
 		result.put(DirectUDPCallback, (rawData >> 12) & 0x01);
 		result.put(SupportsCaptcha, (rawData >> 11) & 0x01);
 		result.put(SupportsSourceEx2, (rawData >> 10) & 0x01);
 		result.put(RequiresCryptLayer, (rawData >> 9) & 0x01);
 		result.put(RequestsCryptLayer, (rawData >> 8) & 0x01);
 		result.put(SupportsCryptLayer, (rawData >> 7) & 0x01);
-		result.put(Reserved, (rawData >> 6) & 0x01);
-		result.put(MultiPacket, (rawData >> 5) & 0x01);
-		result.put(SupportLargeFiles, (rawData >> 4) & 0x01);
+		result.put(ModBit, (rawData >> 6) & 0x01);
+		result.put(ExtMultiPacket, (rawData >> 5) & 0x01);
+		result.put(SupportsLargeFiles, (rawData >> 4) & 0x01);
 		result.put(KadVersion, (rawData >> 0) & 0x01);
 		
 		return result;
@@ -130,27 +163,27 @@ public class Utils {
 		
 		tag = tagList.getTag(ET_COMPRESSION);
 		if (tag != null)
-			result.put(DataCompressionVer, (Integer)tag.getValue());
+			result.put(DataCompressionVersion, (Integer)tag.getValue());
 		
 		tag = tagList.getTag(ET_UDPVER);
 		if (tag != null)
-			result.put(UDPVer, (Integer)tag.getValue());
+			result.put(UDPVersion, (Integer)tag.getValue());
 		
 		tag = tagList.getTag(ET_SOURCEEXCHANGE);
 		if (tag != null)
-			result.put(SourceExchange1Ver, (Integer)tag.getValue());
+			result.put(SourceExchange1Version, (Integer)tag.getValue());
 		
 		tag = tagList.getTag(ET_COMMENTS);
 		if (tag != null)
-			result.put(AcceptCommentVer, (Integer)tag.getValue());
+			result.put(AcceptCommentVersion, (Integer)tag.getValue());
 		
 		tag = tagList.getTag(ET_EXTENDEDREQUEST);
 		if (tag != null)
-			result.put(ExtendedRequestsVer, (Integer)tag.getValue());
+			result.put(ExtendedRequestsVersion, (Integer)tag.getValue());
 		
 		tag = tagList.getTag(ET_FEATURES);
 		if (tag != null)
-			result.put(SupportPreview, (Integer)tag.getValue());
+			result.put(SupportsPreview, (Integer)tag.getValue());
 		
 		return result;
 	}
