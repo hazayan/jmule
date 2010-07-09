@@ -29,33 +29,32 @@ import org.jmule.core.utils.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/12 18:46:33 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:29:43 $$
  */
 public class JMuleBitSet extends BitSet {
-	private int partCount;
+	private int bitCount;
 	
-	public int getPartCount() {
-		return partCount;
+	public int getBitCount() {
+		return bitCount;
 	}
 
-	public void setPartCount(int partCount) {
-		this.partCount = partCount;
+	public void setBitCount(int bitCount) {
+		this.bitCount = bitCount;
 	}
 	
-	public JMuleBitSet(int partCount) {
-		super(partCount);
+	public JMuleBitSet(int bitCount) {
+		super(bitCount);
+		this.bitCount = bitCount;
 	}
-
+	
+	public int size() {
+		return bitCount;
+	}
+	
 	public byte[] getAsByteArray() {
 		byte[] rawData = Convert.bitSetToBytes(this);
 		return rawData;
-		/*byte[] byteArray = new byte[this.length()/8+1];
-		
-		for(int i = 0;i<byteArray.length;i++)
-			byteArray[i] = rawData[i];
-		
-		return byteArray;*/
 	}
 	
 	public int getBitCount(boolean value) {
@@ -76,7 +75,7 @@ public class JMuleBitSet extends BitSet {
 	public String toString() {
 		String value="";
 		
-		for(int i=0;i<this.partCount;i++)
+		for(int i=0;i<this.bitCount;i++)
 			if (this.get(i)) value+=" 1 ";
 			else 
 				value+=" 0 ";
