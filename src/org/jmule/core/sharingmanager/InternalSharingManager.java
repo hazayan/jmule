@@ -22,6 +22,8 @@
  */
 package org.jmule.core.sharingmanager;
 
+import java.util.Collection;
+
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.peermanager.Peer;
 
@@ -29,12 +31,14 @@ import org.jmule.core.peermanager.Peer;
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/13 16:02:06 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:30:38 $
  */
 public interface InternalSharingManager extends SharingManager {
 
 	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash);	
+	
+	public Collection<Peer> getFileSources(Peer sender, FileHash fileHash);
 	
 	public void startSharingFilesToServer();
 	

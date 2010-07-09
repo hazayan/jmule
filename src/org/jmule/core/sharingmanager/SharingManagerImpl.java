@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -348,12 +350,11 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 					try {
 						PartMet part_met = new PartMet(file);
 						part_met.loadFile();
-						PartialFile partial_shared_file = new PartialFile(
-								part_met);
-						sharedFiles.put(partial_shared_file.getFileHash(),
-								partial_shared_file);
-						JMuleCoreFactory.getSingleton().getDownloadManager()
-								.addDownload(partial_shared_file);
+						PartialFile partial_shared_file = new PartialFile(part_met);
+						//sharedFiles.put(partial_shared_file.getFileHash(),partial_shared_file);
+						//System.out.println(partial_shared_file + " : " + partial_shared_file.getAvailablePartCount());
+						addPartialFile(partial_shared_file);
+						JMuleCoreFactory.getSingleton().getDownloadManager().addDownload(partial_shared_file);
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
@@ -744,46 +745,51 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 
 	}
 	
-	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash) {
-		if (!hasFile(fileHash)) return;
+	public Collection<Peer> getFileSources(Peer sender, FileHash fileHash) {
+		Collection<Peer> result = new ArrayList<Peer>();
+		if (!hasFile(fileHash)) return result;
 		List<Peer> peer_list = new LinkedList<Peer>();
 		if (_download_manager.hasDownload(fileHash)) {
 			DownloadSession session;
 			try {
 				session = _download_manager.getDownload(fileHash);
-				if (!session.isStarted()) return;
+				if (!session.isStarted()) return result; //also don't get uploading peers from upload session (1)
 				PartialFile partialFile = getPartialFle(fileHash);
-				if (partialFile.getAvailablePartCount()==0) return;
-				
+				if (partialFile.getAvailablePartCount()==0) return result;  // (1)
 				List<Peer> download_peer_list = session.getPeers();
-				for(Peer dpeer : download_peer_list) {
+				for(Peer source_peer : download_peer_list) {
 					if (peer_list.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
-					if (!dpeer.isHighID()) continue;
-					JMuleBitSet availability = session.getPartAvailability(dpeer);
+					if (source_peer.equals(sender)) continue;
+					if (!source_peer.isHighID()) continue;
+					JMuleBitSet availability = session.getPartAvailability(source_peer);
 					if (availability == null) continue;
 					if (availability.hasAtLeastOne(true))
-						peer_list.add(dpeer);
+						peer_list.add(source_peer);
 				}
 			} catch (DownloadManagerException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		if (_upload_manager.hasUpload(fileHash)) {
-			try {
-				UploadSession session = _upload_manager.getUpload(fileHash);
-				List<Peer> upload_peer_list = session.getPeers();
-				for(Peer upeer : upload_peer_list) {
-					if (peer_list.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
-					if (!upeer.isHighID()) continue;
-					peer_list.add(upeer);
+		if (!(peer_list.size() > ConfigurationManager.MAX_PEX_RESPONSE ))
+			if (_upload_manager.hasUpload(fileHash)) {
+				try {
+					UploadSession session = _upload_manager.getUpload(fileHash);
+					List<Peer> upload_peer_list = session.getPeers();
+					for(Peer upeer : upload_peer_list) {
+						if (peer_list.size() > ConfigurationManager.MAX_PEX_RESPONSE ) break;
+						if (!upeer.isHighID()) continue;
+						peer_list.add(upeer);
+					}
+				} catch (UploadManagerException e) {
+					e.printStackTrace();			
 				}
-			} catch (UploadManagerException e) {
-				e.printStackTrace();			
 			}
-		}
-		if (peer_list.size()!=0)
-			_network_manager.sendSourcesResponse(peer.getIP(), peer.getPort(), fileHash, peer_list);
+		return result;
+	}
+	
+	public void receivedSourcesRequestFromPeer(Peer peer, FileHash fileHash) {
+		Collection<Peer> peer_list = getFileSources(peer, fileHash);
+		_network_manager.sendSourcesResponse(peer.getIP(), peer.getPort(), fileHash, peer_list);
 	}
 
 	public void addCompletedFileListener(CompletedFileListener listener) {
