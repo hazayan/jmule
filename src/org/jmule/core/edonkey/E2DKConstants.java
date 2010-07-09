@@ -23,17 +23,27 @@
 package org.jmule.core.edonkey;
 
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.*;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DirectUDPCallback;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtMultiPacket;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.KadVersion;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.PeerCache;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Ver;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportPreview;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportSecIdent;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UnicodeSupport;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequestsCryptLayer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequiresCryptLayer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Version;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsAICH;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCaptcha;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCryptLayer;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsFileIdent;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsLargeFiles;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsPreview;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSecureIdentification;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSourceEx2;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsUnicode;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVersion;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,8 +58,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.31 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:56:38 $$
+ * @version $$Revision: 1.32 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:26:25 $$
  */
 public class E2DKConstants {
 
@@ -156,7 +166,7 @@ public class E2DKConstants {
 	// Client<->Client
 	public final static byte OP_PEERHELLO 				= (byte) 0x01;
 	public final static byte OP_PEERHELLOANSWER 		= (byte) 0x4C;
-	public final static byte OP_FILEREQUEST 			= (byte) 0x58;
+	public final static byte OP_FILENAMEREQUEST 			= (byte) 0x58;
 	public final static byte OP_FILESTATREQ 			= (byte) 0x4F;
 	public final static byte OP_FILEREQANSNOFILE 		= (byte) 0x48;
 	public final static byte OP_FILEREQANSWER 			= (byte) 0x59;
@@ -181,6 +191,15 @@ public class E2DKConstants {
 	public final static byte OP_SECIDENTSTATE 			= (byte) 0x87;
 	public final static byte OP_PUBLICKEY 				= (byte) 0x85;
 	public final static byte OP_SIGNATURE 				= (byte) 0x86;
+	
+	public final static byte OP_MULTIPACKET 			= (byte) 0x92;
+	public final static byte OP_MULTIPACKET_EXT			= (byte) 0xA4;
+	public final static byte OP_MULTIPACKETANSWER 		= (byte) 0x93;
+	
+	public final static byte OP_MULTIPACKET_EXT2		= (byte) 0xA9;
+	public final static byte OP_MULTIPACKETANSWER_EXT2	= (byte) 0xB0;
+	
+	public final static byte OP_AICHFILEHASHREQ			= (byte) 0x9E;
 	
 	public final static byte OP_CHATCAPTCHAREQ			= (byte) 0xA5;
 	public final static byte OP_CHATCAPTCHARES			= (byte) 0xA6;
@@ -232,55 +251,61 @@ public class E2DKConstants {
 	
 	public static enum PeerFeatures { 
 		// Misc options 1
-		UDPVer,
-		DataCompressionVer,
-		SupportSecIdent,
-		SourceExchange1Ver,
-		ExtendedRequestsVer,
-		AcceptCommentVer,
+		SupportsAICH,
+		SupportsUnicode,
+		UDPVersion,
+		DataCompressionVersion,
+		SupportsSecureIdentification,
+		SourceExchange1Version,
+		ExtendedRequestsVersion,
+		AcceptCommentVersion,
+		PeerCache,
 		NoViewSharedFiles,
 		MultiPacket,
-		SupportPreview,
-		PeerCache,
-		UnicodeSupport,
-		AICHVer,
+		SupportsPreview,
+		
 		// Misc options 2
+		SupportsFileIdent,
 		DirectUDPCallback,
 		SupportsCaptcha,
 		SupportsSourceEx2,
 		RequiresCryptLayer,
 		RequestsCryptLayer,
 		SupportsCryptLayer,
-		Reserved, // mod
-		SupportLargeFiles,
+		ModBit,
+		ExtMultiPacket,
+		SupportsLargeFiles,
 		KadVersion,
+		
 		//internal options used in JMule
 		ProtocolVersion
 	}
 	
 	public static final Map<PeerFeatures, Integer> DefaultJMuleFeatures = new HashMap<PeerFeatures, Integer> (); 
 	static {
-		DefaultJMuleFeatures.put(AICHVer, 0);
-		DefaultJMuleFeatures.put(UnicodeSupport, 1);
-		DefaultJMuleFeatures.put(UDPVer, 4);
-		DefaultJMuleFeatures.put(DataCompressionVer, 1);
-		DefaultJMuleFeatures.put(SupportSecIdent, 1);
-		DefaultJMuleFeatures.put(SourceExchange1Ver, 1);
-		DefaultJMuleFeatures.put(ExtendedRequestsVer,0);
-		DefaultJMuleFeatures.put(AcceptCommentVer, 0);
+		DefaultJMuleFeatures.put(SupportsAICH, 0);
+		DefaultJMuleFeatures.put(SupportsUnicode, 1);
+		DefaultJMuleFeatures.put(UDPVersion, 4);
+		DefaultJMuleFeatures.put(DataCompressionVersion, 1);
+		DefaultJMuleFeatures.put(SupportsSecureIdentification, 1);
+		DefaultJMuleFeatures.put(SourceExchange1Version, 1);
+		DefaultJMuleFeatures.put(ExtendedRequestsVersion,0);
+		DefaultJMuleFeatures.put(AcceptCommentVersion, 0);
 		DefaultJMuleFeatures.put(PeerCache, 0);
 		DefaultJMuleFeatures.put(NoViewSharedFiles, 0);
-		DefaultJMuleFeatures.put(MultiPacket, 0);
-		DefaultJMuleFeatures.put(SupportPreview, 0);
+		DefaultJMuleFeatures.put(MultiPacket, 1);
+		DefaultJMuleFeatures.put(SupportsPreview, 0);
 		
+		DefaultJMuleFeatures.put(SupportsFileIdent, 0);
 		DefaultJMuleFeatures.put(DirectUDPCallback, 0);
 		DefaultJMuleFeatures.put(SupportsCaptcha, 1);
 		DefaultJMuleFeatures.put(SupportsSourceEx2, 0);
 		DefaultJMuleFeatures.put(RequiresCryptLayer, 0);
 		DefaultJMuleFeatures.put(RequestsCryptLayer, 0);
 		DefaultJMuleFeatures.put(SupportsCryptLayer, 0);
-		DefaultJMuleFeatures.put(Reserved, 0);
-		DefaultJMuleFeatures.put(SupportLargeFiles, 1);
+		DefaultJMuleFeatures.put(ModBit, 0);
+		DefaultJMuleFeatures.put(ExtMultiPacket, 1);
+		DefaultJMuleFeatures.put(SupportsLargeFiles, 1);
 		DefaultJMuleFeatures.put(KadVersion, (int)JKadConstants.KAD_VERSION);
 	}
 	//UDP
