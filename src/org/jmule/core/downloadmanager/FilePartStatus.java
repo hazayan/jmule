@@ -32,8 +32,8 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * and count total availability of the file in the network.
  * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 08:37:31 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:22:12 $$
  */
 public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 	private int partCount;
@@ -104,11 +104,11 @@ public class FilePartStatus extends Hashtable<Peer,JMuleBitSet> {
 	}
 	
 	private void UpdateTotalAvailability(JMuleBitSet bitSet,boolean add) {
-		if (bitSet.getPartCount() != partCount) {
+		if (bitSet.getBitCount() != partCount) {
 			return ;
 		}
 		
-		for(int i = 0;i<bitSet.getPartCount();i++) {
+		for(int i = 0;i<bitSet.getBitCount();i++) {
 			if (bitSet.get(i)) 
 				if (add) 
 					partAvailability[i]++;
