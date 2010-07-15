@@ -25,11 +25,12 @@ package org.jmule.core.searchmanager;
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:17:43 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:27:04 $
  */
 public interface InternalSearchManager extends SearchManager {
 	
 	public void receivedServerSearchResult(SearchResultItemList resultList);
+	public void receivedServerUDPSearchResult(SearchResultItemList resultList);
 	
 }

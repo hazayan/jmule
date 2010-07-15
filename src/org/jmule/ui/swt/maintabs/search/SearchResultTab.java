@@ -22,7 +22,9 @@
  */
 package org.jmule.ui.swt.maintabs.search;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -56,40 +58,29 @@ import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.utils.FileFormatter;
 
-
 /**
  * Created on Aug 15, 2008
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 19:39:02 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:26:07 $
  */
 public class SearchResultTab {
-
 	private boolean searchCompleted = false;
-
 	private SWTPreferences swt_preferences = null;
-
 	private CTabItem search_tab;
-
 	private SearchQuery query;
-
 	private JMTable<SearchResultItem> search_results;
 
+	private Set<FileHash> result_hashes = new HashSet<FileHash>(); 
 	private Menu no_items_menu, pop_up_menu;
 	private MenuItem download_item;
 	private MenuItem properties_item;
 	private JMuleCore _core;
 
-	private SearchResult search_result;
+	private Color color_red = SWTThread.getDisplay().getSystemColor(SWT.COLOR_RED);
+	private Color color_green = SWTThread.getDisplay().getSystemColor(SWT.COLOR_GREEN);
 
-	private Color color_red = SWTThread.getDisplay().getSystemColor(
-			SWT.COLOR_RED);
-	
-	private Color color_green = SWTThread.getDisplay().getSystemColor(
-			SWT.COLOR_GREEN);
-
-	public SearchResultTab(CTabFolder parent, SearchQuery searchRequest,
-			JMuleCore core) {
+	public SearchResultTab(CTabFolder parent, SearchQuery searchRequest, JMuleCore core) {
 		swt_preferences = SWTPreferences.getInstance();
 		search_tab = new CTabItem(parent, SWT.CLOSE);
 		_core = core;
@@ -339,7 +330,7 @@ public class SearchResultTab {
 				.getImage("start_download.png"));
 		download_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				start_download();
+				startDownload();
 			}
 		});
 
@@ -419,17 +410,18 @@ public class SearchResultTab {
 	}
 
 	public void addSearchResult(SearchResult searchResult) {
-		search_result = searchResult;
 		for (SearchResultItem item : searchResult.getSearchResultItemList()) {
-			search_results.addRow(item);
+			if (!result_hashes.contains(item.getFileHash())) {
+				result_hashes.add(item.getFileHash());
+				search_results.addRow(item);
+			}
 		}
 		String query = searchResult.getSearchQuery().getQuery();
-		String title = getTabTitle(query) + " ("
-				+ (search_results.getItemCount()) + ")";
+		String title = getTabTitle(query) + " (" + (search_results.getItemCount()) + ")";
 		search_tab.setText(title);
 	}
 
-	private void start_download() {
+	private void startDownload() {
 		List<SearchResultItem> list = search_results.getSelectedObjects();
 		DownloadManager download_manager = _core.getDownloadManager();
 		for (SearchResultItem item : list) {

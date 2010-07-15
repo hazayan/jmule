@@ -22,7 +22,7 @@
  */
 package org.jmule.ui.swt.maintabs.search;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -60,8 +60,8 @@ import org.jmule.ui.utils.FileFormatter;
 /**
  * Created on Jul 31, 2008
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/13 19:39:02 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:26:07 $$
  */
 public class SearchTab extends AbstractTab{
 
@@ -71,7 +71,7 @@ public class SearchTab extends AbstractTab{
 	
 	private JMuleCore _core;
 	
-	private List<SearchResultTab> search_tabs = new LinkedList<SearchResultTab>();
+	private List<SearchResultTab> search_tabs = new ArrayList<SearchResultTab>();
 	
 	private Label advanced_info_search_label;
 	private Label clear_advanced_options;
@@ -169,9 +169,10 @@ public class SearchTab extends AbstractTab{
 		});
 		
 		searchType = new Combo (basic_search_controls, SWT.READ_ONLY);
-		searchType.add("Server");
-		searchType.add("Kad");
-		searchType.add("Both");
+		searchType.add(_._("mainwindow.searchtab.search_type.server"));
+		searchType.add(_._("mainwindow.searchtab.search_type.kad"));
+		searchType.add(_._("mainwindow.searchtab.search_type.kad_server"));
+		searchType.add(_._("mainwindow.searchtab.search_type.global"));
 		searchType.select(0);
 		
 		Label adv_search = new Label(basic_search_controls,SWT.NONE);
@@ -320,6 +321,9 @@ public class SearchTab extends AbstractTab{
 		
 		if ((searchType.getSelectionIndex()==2))
 			search_query.setQueryType(SearchQueryType.SERVER_KAD);
+		
+		if ((searchType.getSelectionIndex()==3))
+			search_query.setQueryType(SearchQueryType.GLOBAL);
 		
 		if (show_advanced_options) {
 			if (fileType != FileType.ANY)

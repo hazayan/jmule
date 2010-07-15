@@ -159,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.43 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:34:22 $
+ * @version $Revision: 1.44 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:28:59 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -1450,7 +1450,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 	
 	public void sendServerUDPSourcesRequest(String serverIP, int serverPort, FileHash... fileHashSet) {
-		UDPPacket packet = UDPPacketFactory.getUDPSourcesRequest(fileHashSet);
+		UDPPacket packet = UDPPacketFactory.getSourcesRequest(fileHashSet);
 		try {
 			udp_connection.sendPacket(packet, serverIP, serverPort);
 		} catch (JMException e) {
@@ -1458,8 +1458,26 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 	
-	public void sendServerUDPSearchRequest(String serverIP, int serverPort, String searchString) {
-		UDPPacket packet = UDPPacketFactory.getUDPSearchPacket(searchString);
+	public void sendServerUDPSearchRequest(String serverIP, int serverPort, SearchQuery searchQuery) {
+		UDPPacket packet = UDPPacketFactory.getSearchPacket(searchQuery);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendServerUDPSearch2Request(String serverIP, int serverPort, SearchQuery searchQuery) {
+		UDPPacket packet = UDPPacketFactory.getSearch2Packet(searchQuery);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendServerUDPSearch3Request(String serverIP, int serverPort, SearchQuery searchQuery) {
+		UDPPacket packet = UDPPacketFactory.getSearch3Packet(searchQuery);
 		try {
 			udp_connection.sendPacket(packet, serverIP, serverPort);
 		} catch (JMException e) {
@@ -1590,8 +1608,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					rawPacket.get(client_id);
 					ClientID clientID = new ClientID(client_id);
 					int server_features = rawPacket.getInt();
-					Set<ServerFeatures> features = Utils
-							.scanTCPServerFeatures(server_features);
+					Set<ServerFeatures> features = Utils.scanTCPServerFeatures(server_features);
 					receivedIDChangeFromServer(clientID, features);
 					return;
 				}
@@ -1702,14 +1719,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				case PACKET_CALLBACKREQUESTED: {
 					byte[] ip_address = new byte[4];
 					int port;
-
 					rawPacket.get(ip_address);
-
 					port = Convert.shortToInt(rawPacket.getShort());
-
-					receivedCallBackRequest(Convert
-							.IPtoString(ip_address), port);
-
+					receivedCallBackRequest(Convert.IPtoString(ip_address), port);
 					return;
 				}
 
@@ -2206,8 +2218,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		PacketType type;
 		ByteBuffer packet_content;
 		try {
-			kad_enabled = ConfigurationManagerSingleton.getInstance()
-					.isJKadAutoconnectEnabled();
+			kad_enabled = ConfigurationManagerSingleton.getInstance().isJKadAutoconnectEnabled();
 		} catch (ConfigurationManagerException cause) {
 			cause.printStackTrace();
 		}
@@ -2248,6 +2259,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					packetSender));
 			return;
 		}
+		//while(packet_content.hasRemaining()) {
 		byte packet_protocol = packet_content.get(0);
 		byte packet_op_code = packet_content.get(1);
 		packet_content.position(1 + 1);
@@ -2260,69 +2272,101 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		// System.out.println("UDP Packet  " + ip + ":" + port + " Protocol : "
 		// + Convert.byteToHex(packet_protocol)+"  OpCode : " +
 		// Convert.byteToHex(packet_op_code));
+
 		try {
-			switch (packet_protocol) {
-			case PROTO_EDONKEY_SERVER_UDP: {
+			if (packet_protocol == PROTO_EDONKEY_SERVER_UDP) {
 				switch (packet_op_code) {
 				case OP_GLOBSERVSTATUS: {
 					if (packet_content.capacity() < 15) {
 						int challenge = packet_content.getInt();
-						long user_count = Convert.intToLong(packet_content
-								.getInt());
-						long files_count = Convert.intToLong(packet_content
-								.getInt());
-						_network_manager.receivedOldServerStatus(ip, port,
-								challenge, user_count, files_count);
-						return;
+						long user_count = Convert.intToLong(packet_content.getInt());
+						long files_count = Convert.intToLong(packet_content.getInt());
+						_network_manager.receivedOldServerStatus(ip, port, challenge, user_count, files_count);
+						break;
 					}
 					int challenge = packet_content.getInt();
-					long user_count = Convert
-							.intToLong(packet_content.getInt());
-					long files_count = Convert.intToLong(packet_content
-							.getInt());
-					long soft_limit = Convert
-							.intToLong(packet_content.getInt());
-					long hard_limit = Convert
-							.intToLong(packet_content.getInt());
+					long user_count = Convert.intToLong(packet_content.getInt());
+					long files_count = Convert.intToLong(packet_content.getInt());
+					long soft_limit = Convert.intToLong(packet_content.getInt());
+					long hard_limit = Convert.intToLong(packet_content.getInt());
 					int udp_flags = packet_content.getInt();
-					Set<ServerFeatures> server_features = Utils
-							.scanUDPFeatures(udp_flags);
-					_network_manager.receivedServerStatus(ip, port, challenge,
-							user_count, files_count, soft_limit, hard_limit,
-							server_features);
-					return;
+					Set<ServerFeatures> server_features = Utils.scanUDPServerFeatures(udp_flags);
+									
+					_network_manager.receivedServerStatus(ip, port, challenge, user_count, files_count, soft_limit, hard_limit, server_features);
+					break;
 				}
 				case OP_SERVER_DESC_ANSWER: {
 					boolean new_packet = false;
 					short test_short = packet_content.getShort();
-					test_short = packet_content.getShort();
-					byte[] test_read = Convert.shortToByte(test_short);
-					if (test_read[0] == (byte) 0xFF)
-						if (test_read[1] == (byte) 0xFF) {
-							new_packet = true;
-						}
-					packet_content.position(packet_content.position() - 4);
+					if (test_short == INVALID_SERVER_DESC_LENGTH)
+						new_packet = true;
+					
+					packet_content.position(packet_content.position() - 2);
 					if (new_packet) {
 						int challenge = packet_content.getInt();
 						TagList tag_list = readTagList(packet_content);
 						_network_manager.receivedNewServerDescription(ip, port,
 								challenge, tag_list);
-						return;
+						break;
 					}
+					
 					String server_name = readString(packet_content);
 					String server_desc = readString(packet_content);
-					_network_manager.receivedServerDescription(ip, port,
-							server_name, server_desc);
-					return;
+					_network_manager.receivedServerDescription(ip, port, server_name, server_desc);
+					break;
 				}
-
+				
+				case OP_GLOBSEARCHRES : {
+					SearchResultItemList search_results = new SearchResultItemList();
+					//while(packet_content.hasRemaining()) {
+						byte[] byte_file_hash = new byte[16];
+						packet_content.get(byte_file_hash);
+						byte[] client_id = new byte[4];
+						packet_content.get(client_id);
+						short clientPort = packet_content.getShort();
+						SearchResultItem result = new SearchResultItem(new FileHash(byte_file_hash), new ClientID(client_id), clientPort);
+						int tag_count = packet_content.getInt();
+						for (int j = 0; j < tag_count; j++) {
+							Tag tag = TagScanner.scanTag(packet_content);
+							result.addTag(tag);
+						}
+						// transform Server's file rating into eMule file rating
+						if (result.hasTag(FT_FILERATING)) {
+							Tag tag = result.getTag(FT_FILERATING);
+							try {
+								int data = (Integer) tag.getValue();
+								data = Convert.byteToInt(Misc.getByte(data, 0));
+								int rating_value = data / SERVER_SEARCH_RATIO;
+								tag.setValue(rating_value);
+							} catch (Throwable e) {
+								e.printStackTrace();
+							}
+						}
+						search_results.add(result);
+					//}
+					_search_manager.receivedServerUDPSearchResult(search_results);
+					break;
+				}
+				
+				case OP_GLOBFOUNDSOURCES : {
+					byte[] byte_file_hash = new byte[16];
+					packet_content.get(byte_file_hash);
+					int source_count = Convert.byteToInt(packet_content.get());
+					for(int i = 0;i<source_count;i++) {
+						byte[] client_id = new byte[4];
+						packet_content.get(client_id);
+						short client_port = packet_content.getShort();
+					}
+					break;
+				}
+	
 				default: {
 					throw new UnknownPacketException(packet_protocol,
 							packet_op_code, packet_content.array());
 				}
 				}
 			}
-			}
+		
 		} catch (Throwable cause) {
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
