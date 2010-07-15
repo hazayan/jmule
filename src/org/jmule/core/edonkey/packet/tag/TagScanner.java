@@ -43,8 +43,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/10 16:44:13 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:29:54 $
  */
 public class TagScanner {
 	
@@ -56,16 +56,14 @@ public class TagScanner {
 	
 	public static Tag scanTag(ByteBuffer data) {
 		byte tagType;
-		short tagNameLength;
+		byte[] tagNameLength = new byte[]{0x01,0x00};
 		byte[] tagName;
 		
 		tagType = data.get();
-		if (Convert.byteToInt(tagType) >= INT_TAGTYPE_EXSTRING_LONG)
-				tagNameLength = 1;
-			else
-				tagNameLength = data.getShort();
+		if (!(Convert.byteToInt(tagType) >= INT_TAGTYPE_EXSTRING_LONG))
+				data.get(tagNameLength);
 		
-		tagName = new byte[Convert.shortToInt(tagNameLength)];
+		tagName = new byte[Convert.byteToInt(tagNameLength)];
 		data.get(tagName);
 		
 		// Analyze extended tags
@@ -109,7 +107,9 @@ public class TagScanner {
 					String str = new String(str_data);
 					return new StringTag(tagName, str);
 				}
-				int str_length = Convert.shortToInt(data.getShort());
+				byte[] length = new byte[2];
+				data.get(length);
+				int str_length = Convert.byteToInt(length);
 				byte str_data[] = new byte[str_length];
 				data.get(str_data);
 				String str = new String(str_data);
