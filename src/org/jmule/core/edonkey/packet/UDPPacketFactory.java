@@ -22,20 +22,25 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBGETSOURCES;
+import static org.jmule.core.edonkey.E2DKConstants.*;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSERVRSTATREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REASKFILEPING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_REQ;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.searchmanager.SearchQuery;
+import org.jmule.core.searchmanager.tree.NodeValue;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/20 12:25:43 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:31:50 $$
  */
 public class UDPPacketFactory {
 
@@ -120,7 +125,7 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getUDPSourcesRequest(FileHash... fileHashSet){
+	public static UDPPacket getSourcesRequest(FileHash... fileHashSet){
 		UDPPacket packet = new UDPPacket(fileHashSet.length*16,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBGETSOURCES);
 		for(int i = 0; i < fileHashSet.length; i++){
@@ -204,15 +209,52 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getUDPSearchPacket(String searchString){
-		UDPPacket packet = new UDPPacket(1+2+searchString.length(),PROTO_EDONKEY_SERVER_UDP);
+	public static UDPPacket getSearchPacket(SearchQuery query){
 		
+		List<byte[]> data = new ArrayList<byte[]>();
+		int total_size = 0;
+		List<NodeValue> nodes = query.getSearchTree().traverse();
+		for(NodeValue value : nodes) {
+			byte[] tmp = value.getBytes();
+			data.add(tmp);
+			total_size += tmp.length;
+		}
+		UDPPacket packet = new UDPPacket(total_size,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBSEARCHREQ);
-		
-		packet.insertData((byte)0x01);
-		
-		packet.insertData((short)searchString.length());
-		packet.insertData(searchString.getBytes());
+		for(byte[] b : data)
+			packet.insertData(b);
+		return packet;
+	}
+	
+	public static UDPPacket getSearch2Packet(SearchQuery query){
+		List<byte[]> data = new ArrayList<byte[]>();
+		int total_size = 0;
+		List<NodeValue> nodes = query.getSearchTree().traverse();
+		for(NodeValue value : nodes) {
+			byte[] tmp = value.getBytes();
+			data.add(tmp);
+			total_size += tmp.length;
+		}
+		UDPPacket packet = new UDPPacket(total_size,PROTO_EDONKEY_SERVER_UDP);
+		packet.setCommand(OP_GLOBSEARCHREQ2);
+		for(byte[] b : data)
+			packet.insertData(b);
+		return packet;
+	}
+	
+	public static UDPPacket getSearch3Packet(SearchQuery query){
+		List<byte[]> data = new ArrayList<byte[]>();
+		int total_size = 0;
+		List<NodeValue> nodes = query.getSearchTree().traverse();
+		for(NodeValue value : nodes) {
+			byte[] tmp = value.getBytes();
+			data.add(tmp);
+			total_size += tmp.length;
+		}
+		UDPPacket packet = new UDPPacket(total_size,PROTO_EDONKEY_SERVER_UDP);
+		packet.setCommand(OP_GLOBSEARCHREQ3);
+		for(byte[] b : data)
+			packet.insertData(b);
 		return packet;
 	}
 	
