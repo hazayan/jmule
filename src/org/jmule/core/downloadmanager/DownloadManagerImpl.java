@@ -74,8 +74,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.36 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/28 18:28:24 $$
+ * @version $$Revision: 1.37 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:33:47 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -102,6 +102,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask pex_source_search_task = null;
 	
+	private Queue<FileHash> server_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> kad_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> pex_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	
@@ -157,7 +158,23 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		server_sources_query = new JMTimerTask() {
 			public void run() {
 				
-				long time30Min = 1000 * 60 * 30;
+				List<DownloadSession> sessions_to_request = new ArrayList<DownloadSession>();
+				while ((!server_sources_queue.isEmpty()) && (sessions_to_request.size() < E2DKConstants.FILE_SOURCES_QUERY_ITERATION)) {
+					FileHash hash = server_sources_queue.poll();
+					server_sources_queue.offer(hash);
+					try {
+						sessions_to_request.add(getDownload(hash));
+					} catch (DownloadManagerException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				for(DownloadSession session : sessions_to_request) {
+					System.out.println("Request sources for : " + session.getFileHash());
+					_network_manager.requestSourcesFromServer(session.getFileHash(), session.getSharedFile().length());
+				}
+				
+				/*long time30Min = 1000 * 60 * 30;
 				
 				List<DownloadSession> sessions_to_request = new ArrayList<DownloadSession>();
 				for(DownloadSession session : session_list.values()) {
@@ -169,9 +186,8 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				
 				for(DownloadSession session : sessions_to_request) {
 					_network_manager.requestSourcesFromServer(session.getFileHash(), session.getSharedFile().length());
-					session.setNextServerRequest(System.currentTimeMillis()
-							+ time30Min);
-				}
+					session.setNextServerRequest(System.currentTimeMillis() + time30Min);
+				}*/
 				
 				/*for (int i = 0; i < E2DKConstants.FILE_SOURCES_QUERY_ITERATION; i++) {
 					FileHash fileHash = server_sources_queue.poll();
@@ -449,6 +465,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		session_list.remove(fileHash);
 		
+		server_sources_queue.remove(fileHash);
 		kad_sources_queue.remove(fileHash);
 		pex_sources_queue.remove(fileHash);
 		
@@ -479,6 +496,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		if (download_session.isStarted())
 			throw new DownloadManagerException("Download " + fileHash+" is already started");
 		
+		server_sources_queue.offer(fileHash);
 		kad_sources_queue.offer(fileHash);
 		pex_sources_queue.offer(fileHash);
 		
@@ -486,7 +504,9 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			_upload_manager.removeUpload(fileHash);
 		
 		download_session.startDownload();
-				
+		
+		 //_network_manager.requestSourcesFromServer(download_session.getFileHash(), download_session.getSharedFile().length());
+		
 		notifyDownloadStarted(fileHash);
 		
 	}
