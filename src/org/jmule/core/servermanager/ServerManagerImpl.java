@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.19 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 09:01:52 $$
+ * @version $$Revision: 1.20 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 07:00:20 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 		
@@ -165,17 +165,13 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 					return;
 				}
 				for(Server server : server_list) {
-					byte[] bytes = new byte[4]; 
-					random.nextBytes(bytes);
-					bytes[2] = (byte)0xFF;
-					bytes[3] = (byte)0xFF;
-					int challenge = Convert.byteToInt(bytes);
+					int challenge = (int)((random.nextInt() << 16) + E2DKConstants.INVALID_SERVER_DESC_LENGTH);
 					byte[] byte_challenge = Convert.intToByteArray(challenge);
-										
+					
 					challenge = Convert.byteToInt(byte_challenge);
 					server.setChallenge(challenge);
-					_network_manager.sendServerUDPStatusRequest(server.getAddress(), server.getPort() + 4, challenge);
-					_network_manager.sendServerUDPDescRequest(server.getAddress(), server.getPort() + 4);
+					_network_manager.sendServerUDPStatusRequest(server.getAddress(), server.getUDPPort(), challenge);
+					_network_manager.sendServerUDPDescRequest(server.getAddress(), server.getUDPPort());
 				}
 			}
 		};
@@ -201,8 +197,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			e.printStackTrace();
 			return;
 		}
-		server_manager_timer.addTask(servers_udp_query,
-				ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
+		//server_manager_timer.addTask(servers_udp_query,ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
 		server_manager_timer.addTask(store_metadata_task,
 				ConfigurationManager.SERVER_LIST_STORE_INTERVAL, true);
 	}
