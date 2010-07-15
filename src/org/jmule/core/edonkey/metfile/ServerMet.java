@@ -27,7 +27,7 @@ import static org.jmule.core.edonkey.E2DKConstants.SERVERLIST_VERSION;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -91,8 +91,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 06:59:30 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -113,9 +113,9 @@ public class ServerMet extends MetFile {
 			throw new ServerMetException("Failed to move at position 0 in server.met");
 		}
 		
-		ip_list = new LinkedList<String>();
-		port_list = new LinkedList<Integer>();
-		tag_list = new LinkedList<TagList>();
+		ip_list = new ArrayList<String>();
+		port_list = new ArrayList<Integer>();
+		tag_list = new ArrayList<TagList>();
 		
 		byte serverListFormat;
 		ByteBuffer data;
@@ -162,7 +162,6 @@ public class ServerMet extends MetFile {
 					if (tag != null)
 						tagList.addTag(tag);
 				}
-				
 				ip_list.add(remonteAddress);
 				port_list.add(remontePort);
 				tag_list.add(tagList);
