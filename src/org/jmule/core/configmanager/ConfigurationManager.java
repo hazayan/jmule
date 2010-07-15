@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.37 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 08:36:51 $$
+ * @version $$Revision: 1.38 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:34:58 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -60,7 +60,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          LOG_FILES_NUMBER   			=     10;
 	public static final int          LOG_FILE_SIZE      			=     20 * 1024 * 1024;
 	
-	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 33;
+	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 30;
 	public static final int          PEX_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 1;
 	public static final int          PEER_ACTIVITY_CHECH_INTERVAL   =     1000 * 30;
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
@@ -97,7 +97,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final long          DOWNLOAD_LIMIT     			=    1024 * 1024;
 	public static final long          UPLOAD_LIMIT       			=    1024 * 512;
 	
-	public static final long		  MAX_UDP_PACKET_SIZE			=    65534;
+	public static final long		  MAX_UDP_PACKET_SIZE			=    65535;
 	
 	public static final long          WRONG_PACKET_CHECK_INTERVAL	=     1000 * 5;
 	public static final long		  MAX_WRONG_PACKET_COUNT		=     50;
