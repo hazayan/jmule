@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.50 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:25:03 $$
+ * @version $$Revision: 1.51 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:34:19 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -110,17 +110,6 @@ public class DownloadSession implements JMTransferSession {
 	private JMTimer download_tasks;
 	private JMTimerTask peer_monitor_task = null;
 	
-	private long nextServerRequest = 0;
-	
-	
-	public long getNextServerRequest() {
-		return nextServerRequest;
-	}
-
-	public void setNextServerRequest(long nextServerRequest) {
-		this.nextServerRequest = nextServerRequest;
-	}
-
 	private DownloadSession() {
 		
 	}
