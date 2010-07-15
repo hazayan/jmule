@@ -80,8 +80,8 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 /**
  * Created on Dec 24, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:21:12 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:35:36 $
  */
 public class Utils {
 
@@ -188,6 +188,43 @@ public class Utils {
 		return result;
 	}
 	
+	public static int serverFeaturesToInt(Set<ServerFeatures> features) {
+		int result = 0;
+		//TCP
+		if (features.contains(ServerFeatures.Compression))
+			result |= SRV_TCPFLG_COMPRESSION;
+		if (features.contains(ServerFeatures.NewTags))
+			result |= SRV_TCPFLG_NEWTAGS;
+		if (features.contains(ServerFeatures.Unicode))
+			result |= SRV_TCPFLG_UNICODE;
+		if (features.contains(ServerFeatures.RelatedSearch))
+			result |= SRV_TCPFLG_RELATEDSEARCH;
+		if (features.contains(ServerFeatures.TypeTagInteger))
+			result |= SRV_TCPFLG_TYPETAGINTEGER;
+		if (features.contains(ServerFeatures.LargeFiles))
+			result |= SRV_TCPFLG_LARGEFILES;
+		if (features.contains(ServerFeatures.TCPObfusication))
+			result |= SRV_TCPFLG_TCPOBFUSCATION;
+		//UDP
+		if (features.contains(ServerFeatures.GetSources))
+			result |= SRV_UDPFLG_EXT_GETSOURCES;
+		if (features.contains(ServerFeatures.GetFiles))
+			result |= SRV_UDPFLG_EXT_GETFILES;
+		if (features.contains(ServerFeatures.NewTags))
+			result |= SRV_UDPFLG_NEWTAGS;
+		if (features.contains(ServerFeatures.Unicode))
+			result |= SRV_UDPFLG_UNICODE;
+		if (features.contains(ServerFeatures.GetSources2))
+			result |= SRV_UDPFLG_EXT_GETSOURCES2;
+		if (features.contains(ServerFeatures.LargeFiles))
+			result |= SRV_UDPFLG_LARGEFILES;
+		if (features.contains(ServerFeatures.UDPObfusication))
+			result |= SRV_UDPFLG_UDPOBFUSCATION;
+		if (features.contains(ServerFeatures.TCPObfusication))
+			result |= SRV_UDPFLG_TCPOBFUSCATION;
+		return result;
+	}
+	
 	public static Set<ServerFeatures> scanTCPServerFeatures(int serverFeatures) {
 		Set<ServerFeatures> result = new HashSet<ServerFeatures>();
 		
@@ -215,7 +252,7 @@ public class Utils {
 		return result;
 	}
 	
-	public static Set<ServerFeatures> scanUDPFeatures(int serverUDPFeatures) {
+	public static Set<ServerFeatures> scanUDPServerFeatures(int serverUDPFeatures) {
 		Set<ServerFeatures> result = new HashSet<ServerFeatures>();
 		
 		if ((serverUDPFeatures & SRV_UDPFLG_EXT_GETSOURCES) != 0) 
