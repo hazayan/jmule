@@ -32,24 +32,27 @@ import static org.jmule.core.edonkey.E2DKConstants.SL_SRVMAXUSERS;
 import static org.jmule.core.edonkey.E2DKConstants.SL_USERS;
 import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.ClientID;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.ED2KServerLink;
 import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
+import org.jmule.core.edonkey.utils.Utils;
 import org.jmule.core.utils.Convert;
 
 /**
  * Created on 2007-Nov-07
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/10/23 18:10:39 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 07:01:30 $$
  */
 public class Server {
 	public static enum ServerStatus {
@@ -64,7 +67,7 @@ public class Server {
 
 	private ServerStatus status = ServerStatus.DISCONNECTED;
 
-	private Set<ServerFeatures> serverFeatures;
+	private Set<ServerFeatures> serverFeatures = new HashSet<E2DKConstants.ServerFeatures>();
 
 	private boolean is_static = false;
 
@@ -106,11 +109,19 @@ public class Server {
 	}
 
 	void setFeatures(Set<ServerFeatures> features) {
-		this.serverFeatures = features;
+		this.serverFeatures.addAll(features);
+		tagList.addTag(new IntTag(E2DKConstants.SL_UDPFLAGS, Utils.serverFeaturesToInt(serverFeatures)), true);
 	}
 
 	void setTagList(TagList tagList) {
 		this.tagList = tagList;
+		Tag tag = this.tagList.getTag(E2DKConstants.SL_UDPFLAGS);
+		if (tag != null) {
+			int value = ((IntTag)tag).getValue();
+			serverFeatures.addAll(Utils.scanTCPServerFeatures(value));
+			serverFeatures.addAll(Utils.scanUDPServerFeatures(value));
+		}
+			
 	}
 
 	public byte[] getAddressAsByte() {
@@ -121,6 +132,10 @@ public class Server {
 		return serverPort;
 	}
 
+	public int getUDPPort() {
+		return serverPort + 4;
+	}
+	
 	public ED2KServerLink getServerLink() {
 		return new ED2KServerLink(getAddress(), getPort());
 
