@@ -49,8 +49,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/09 17:27:21 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:28:08 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -262,7 +262,11 @@ public interface InternalNetworkManager extends NetworkManager {
 	
 	public void sendServerUDPSourcesRequest(String serverIP, int serverPort, FileHash... fileHashs);
 	
-	public void sendServerUDPSearchRequest(String serverIP, int serverPort, String searchString);
+	public void sendServerUDPSearchRequest(String serverIP, int serverPort, SearchQuery searchQuery);
+	
+	public void sendServerUDPSearch2Request(String serverIP, int serverPort, SearchQuery searchQuery);
+	
+	public void sendServerUDPSearch3Request(String serverIP, int serverPort, SearchQuery searchQuery);
 	
 	public void sendServerUDPReaskFileRequest(String serverIP, int serverPort, FileHash fileHash);
 	
