@@ -22,12 +22,13 @@
  */
 package org.jmule.core.edonkey;
 
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.*;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVersion;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVersion;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DirectUDPCallback;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtMultiPacket;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVersion;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.KadVersion;
+import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ModBit;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.PeerCache;
@@ -45,9 +46,9 @@ import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSourceEx
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsUnicode;
 import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVersion;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,8 +59,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.32 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:26:25 $$
+ * @version $$Revision: 1.33 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:32:49 $$
  */
 public class E2DKConstants {
 
@@ -105,11 +106,11 @@ public class E2DKConstants {
 	public final static int SO_NEW_MLDONKEY				= 0x98;
 	public final static int SO_COMPAT_UNK				= 0xFF;
 	
-	public final static int ProtocolVersion 			= 60;
+	public final static int PROTOCOL_VERSION 			= 0x3C;
 	
 	public final static int KEY_LENGTH					= 608;
 	
-	public final static List<String> SERVER_ERROR_MESSAGES 	= new LinkedList<String>();
+	public final static List<String> SERVER_ERROR_MESSAGES 	= new ArrayList<String>();
 	
 	static {
 		SERVER_ERROR_MESSAGES.add("WARNING : This server is full.");
@@ -166,7 +167,7 @@ public class E2DKConstants {
 	// Client<->Client
 	public final static byte OP_PEERHELLO 				= (byte) 0x01;
 	public final static byte OP_PEERHELLOANSWER 		= (byte) 0x4C;
-	public final static byte OP_FILENAMEREQUEST 			= (byte) 0x58;
+	public final static byte OP_FILENAMEREQUEST 		= (byte) 0x58;
 	public final static byte OP_FILESTATREQ 			= (byte) 0x4F;
 	public final static byte OP_FILEREQANSNOFILE 		= (byte) 0x48;
 	public final static byte OP_FILEREQANSWER 			= (byte) 0x59;
@@ -222,6 +223,7 @@ public class E2DKConstants {
 	public final static byte SRV_UDPFLG_LARGEFILES		= (byte) 0x00000100;
 	public final static byte SRV_UDPFLG_UDPOBFUSCATION	= (byte) 0x00000200;
 	public final static byte SRV_UDPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
+	
 	
 	// Queue rating modifiers
 	public final static float INITIAL_RATING			= 100f;
@@ -315,7 +317,16 @@ public class E2DKConstants {
 	public final static byte OP_GLOBGETSOURCES 			= (byte) 0x9A;
 	public final static byte OP_SERVER_DESC_REQ 		= (byte) 0xA2;
 	public final static byte OP_SERVER_DESC_ANSWER 		= (byte) 0xA3;
+	
 	public final static byte OP_GLOBSEARCHREQ 			= (byte) 0x98;
+	public final static byte OP_GLOBSEARCHREQ2 			= (byte) 0x92;
+	public final static byte OP_GLOBSEARCHREQ3			= (byte) 0x90;
+	public final static byte OP_GLOBSEARCHRES 			= (byte) 0x99;
+	
+	public final static byte OP_GLOBFOUNDSOURCES		= (byte) 0x9B;
+	
+	public final static short INVALID_SERVER_DESC_LENGTH = (short) 0xF0FF;
+	
 	//Peer <-> Peer
 	public final static byte OP_REASKFILEPING 			= (byte)(0x90);
 	// Tag types
@@ -342,7 +353,7 @@ public class E2DKConstants {
 	public final static byte[] TAG_NAME_NICKNAME		= new byte[]{0x01};
 	public final static byte[] TAG_NAME_PROTOCOLVERSION = new byte[]{0x11};
 	public final static byte[] TAG_NAME_CLIENTVER 		= new byte[]{(byte)0xFB};
-	public final static byte[] TAG_NAME_FLAGS 			= new byte[]{0x20};
+	public final static byte[] TAG_NAME_SERVER_FLAGS 	= new byte[]{0x20};
 	public final static byte[] TAG_NAME_MISC_OPTIONS1 	= new byte[]{(byte)0xfa};
 	public final static byte[] TAG_NAME_MISC_OPTIONS2 	= new byte[]{(byte)0xfe};
 	public final static byte[] TAG_NAME_UDP_PORT 		= new byte[] {0x21};
@@ -364,12 +375,12 @@ public class E2DKConstants {
 	
 	public final static byte[] FT_NAME_STATUS			= new byte[]{0x14};
 	
-	public final static List<byte[]> JMuleInternalTags		= new LinkedList<byte[]>();
+	public final static List<byte[]> JMuleInternalTags	= new ArrayList<byte[]>();
 	static {
 		JMuleInternalTags.add(FT_NAME_STATUS);
 	}
 	
-	// FLAGS Values 
+	// Peer features reported to server 
 	public final static byte CAP_NEWTAGS 				= (byte)0x0008;
 	public final static byte CAP_LARGEFILES 			= (byte)0x0100;
 	public final static byte CAP_UNICODE 				= (byte)0x0010;
@@ -378,7 +389,7 @@ public class E2DKConstants {
 	public final static byte CAP_REQUESTCRYPT    		= (byte)0x0400;
 	public final static byte CAP_REQUIRECRYPT 		   	= (byte)0x0800;
 	
-	public final static int SERVER_SUPPORTED_FLAGS 			= E2DKConstants.CAP_ZLIB | E2DKConstants.CAP_UNICODE | E2DKConstants.CAP_LARGEFILES;
+	public final static int PEER_FEATURES_REPORTED_TO_SERVER 	= CAP_ZLIB | CAP_UNICODE | CAP_LARGEFILES | CAP_NEWTAGS;
 
 	// Search constants
 	public final static byte[] SEARCH_BY_NAME			= new byte[] {0x01};
