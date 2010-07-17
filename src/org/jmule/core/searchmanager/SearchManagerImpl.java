@@ -57,7 +57,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.16 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:27:04 $$
+ * @version $$Revision: 1.17 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:40:39 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements InternalSearchManager {
 
@@ -133,6 +133,9 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 									for(Server server : server_manager.getServers()) {
 										if (!loop) break;
 										
+										if (server.getFeatures().contains(ServerFeatures.LargeFiles) && server.getFeatures().contains(ServerFeatures.GetFiles))
+											network_manager.sendServerUDPSearch3Request(server.getAddress(), server.getUDPPort(), global_search_query);
+										else
 										if (server.getFeatures().contains(ServerFeatures.LargeFiles))
 											network_manager.sendServerUDPSearch2Request(server.getAddress(), server.getUDPPort(), global_search_query);
 										else
