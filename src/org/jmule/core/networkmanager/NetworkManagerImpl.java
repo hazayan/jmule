@@ -159,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.44 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:28:59 $
+ * @version $Revision: 1.45 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/17 14:38:22 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -373,13 +373,19 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		Peer peer;
 		try {
 			peer = _peer_manager.getPeer(ip, port);
-			if (!peer.isHighID()) 
-				if (serverConnectionMonitor!=null)
-					if (serverConnectionMonitor.getServerConnection().getStatus() == ConnectionStatus.CONNECTED) {
-						if (_server_manager.getConnectedServer().getClientID().isHighID())
-							callBackRequest(peer.getID());
-						return ;
-					}
+			if (!peer.isHighID()) {
+				if (peer.getPeerSource()!=PeerSource.GLOBAL) {
+					if (serverConnectionMonitor!=null)
+						if (serverConnectionMonitor.getServerConnection().getStatus() == ConnectionStatus.CONNECTED) {
+							if (_server_manager.getConnectedServer().getClientID().isHighID())
+								callBackRequest(peer.getID());
+							return ;
+						}
+				} else
+				if (peer.getPeerSource()==PeerSource.GLOBAL) {
+					sendServerUDPCallBackRequest(peer.getServerIP(),peer.getServerPort(), peer.getID());
+				}
+			}
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
 		}
@@ -617,7 +623,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void receivedCallBackRequest(String ip, int port) {
-		_peer_manager.receivedCallBackRequest(ip, port);
+		_peer_manager.receivedCallBackRequest(ip, port, PeerSource.SERVER);
 	}
 
 	public void receivedCompressedFileChunkFromPeer(String peerIP,
@@ -909,10 +915,14 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 
-	public void receivedSourcesFromServer(FileHash fileHash,
-			List<String> clientIPList, List<Integer> portList) {
-		List<Peer> peer_list = _peer_manager.createPeerList(clientIPList,
-				portList, false, PeerSource.SERVER);
+	public void receivedSourcesFromServer(FileHash fileHash, List<String> clientIPList, List<Integer> portList) {
+		String server_ip = null;
+		int server_port = 0;
+		if (_server_manager.isConnected()) {
+			server_ip = _server_manager.getConnectedServer().getAddress();
+			server_port = _server_manager.getConnectedServer().getPort();
+		}
+		List<Peer> peer_list = _peer_manager.createPeerList(clientIPList, portList,  false, server_ip, server_port, PeerSource.SERVER);
 		_download_manager.addDownloadPeers(fileHash, peer_list);
 	}
 
@@ -954,7 +964,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void receivedSourcesAnswerFromPeer(String peerIP, int peerPort, FileHash fileHash, List<String> ipList, List<Integer> portList) {
 		try {
 			Peer peer = _peer_manager.getPeer(peerIP, peerPort);
-			List<Peer> peer_list = _peer_manager.createPeerList(ipList, portList, true, PeerSource.PEX);
+			List<Peer> peer_list = _peer_manager.createPeerList(ipList, portList, true, null,0, PeerSource.PEX);
 			_download_manager.receivedSourcesAnswerFromPeer(peer, fileHash, peer_list);
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
@@ -1449,14 +1459,24 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		}
 	}
 	
-	public void sendServerUDPSourcesRequest(String serverIP, int serverPort, FileHash... fileHashSet) {
-		UDPPacket packet = UDPPacketFactory.getSourcesRequest(fileHashSet);
+	public void sendServerUDPSourcesRequest(String serverIP, int serverPort, Collection<FileHash> fileHashList) {
+		UDPPacket packet = UDPPacketFactory.getSourcesRequest(fileHashList);
 		try {
 			udp_connection.sendPacket(packet, serverIP, serverPort);
 		} catch (JMException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public void sendServerUDPSources2Request(String serverIP, int serverPort, List<FileHash> fileHashList, List<Long> fileSizeList) {
+		UDPPacket packet = UDPPacketFactory.getSources2Request(fileHashList, fileSizeList);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public void sendServerUDPSearchRequest(String serverIP, int serverPort, SearchQuery searchQuery) {
 		UDPPacket packet = UDPPacketFactory.getSearchPacket(searchQuery);
@@ -1487,6 +1507,15 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	
 	public void sendServerUDPReaskFileRequest(String serverIP, int serverPort, FileHash fileHash) {
 		UDPPacket packet = UDPPacketFactory.getUDPReaskFilePacket(fileHash);
+		try {
+			udp_connection.sendPacket(packet, serverIP, serverPort);
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendServerUDPCallBackRequest(String serverIP, int serverPort, ClientID clientID) {
+		UDPPacket packet = UDPPacketFactory.getCallBackRequest(clientID);
 		try {
 			udp_connection.sendPacket(packet, serverIP, serverPort);
 		} catch (JMException e) {
@@ -2352,11 +2381,32 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					byte[] byte_file_hash = new byte[16];
 					packet_content.get(byte_file_hash);
 					int source_count = Convert.byteToInt(packet_content.get());
-					for(int i = 0;i<source_count;i++) {
+					List<String> client_id_list = new ArrayList<String>();
+					List<Integer> client_port_list = new ArrayList<Integer>();
+					for (int i = 0; i < source_count; i++) {
 						byte[] client_id = new byte[4];
 						packet_content.get(client_id);
-						short client_port = packet_content.getShort();
+						client_id_list.add(new ClientID(client_id).getAsString());
+						
+						ByteBuffer port_byte = Misc.getByteBuffer(2);
+						packet_content.get(port_byte.array());
+						int client_port = Convert.byteToInt(port_byte.array());
+						client_port_list.add(client_port);
 					}
+					List<Peer> peer_list = _peer_manager.createPeerList(client_id_list, client_port_list, false, ip, port, PeerSource.GLOBAL);
+					_download_manager.addDownloadPeers(new FileHash(byte_file_hash), peer_list);
+					
+					break;
+				}
+				
+				case OP_CALLBACKREQUESTED : {
+					byte[] client_ip_byte = new byte[4];
+					packet_content.get(client_ip_byte);
+					String peer_ip = new ClientID(client_ip_byte).getAsString();
+					ByteBuffer port_byte = Misc.getByteBuffer(2);
+					packet_content.get(port_byte.array());
+					int client_port = Convert.byteToInt(port_byte.array());
+					_peer_manager.receivedCallBackRequest(peer_ip, client_port, PeerSource.GLOBAL);
 					break;
 				}
 	
