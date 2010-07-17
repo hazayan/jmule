@@ -39,7 +39,7 @@ import org.jmule.ui.localizer._;
  * Created on Aug 9, 2008
  * 
  * @author binary256
- * @version $Revision: 1.8 $ Last changed by $Author: javajox $ on $Date:
+ * @version $Revision: 1.9 $ Last changed by $Author: binary255 $ on $Date:
  *          2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
@@ -86,6 +86,7 @@ public class PeerInfoFormatter {
 	public static String peerSourceToString(PeerSource source) {
 		switch(source) {
 			case SERVER : return _._("downloadinfowindow.tab.peerlist.column.source.type.server");
+			case GLOBAL : return _._("downloadinfowindow.tab.peerlist.column.source.type.global");
 			case KAD : return _._("downloadinfowindow.tab.peerlist.column.source.type.kad");
 			case PEX : return _._("downloadinfowindow.tab.peerlist.column.source.type.pex");
 			case ED2KLINK : return _._("downloadinfowindow.tab.peerlist.column.source.type.ed2klink");
