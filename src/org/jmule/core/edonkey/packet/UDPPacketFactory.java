@@ -23,15 +23,20 @@
 package org.jmule.core.edonkey.packet;
 
 import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBGETSOURCES2;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ;
+import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ2;
+import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ3;
 import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSERVRSTATREQ;
 import static org.jmule.core.edonkey.E2DKConstants.OP_REASKFILEPING;
 import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_REQ;
 import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.jmule.core.edonkey.ClientID;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.searchmanager.SearchQuery;
 import org.jmule.core.searchmanager.tree.NodeValue;
@@ -39,8 +44,8 @@ import org.jmule.core.searchmanager.tree.NodeValue;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:31:50 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:28:16 $$
  */
 public class UDPPacketFactory {
 
@@ -90,7 +95,7 @@ public class UDPPacketFactory {
 	/**
 	 * Request sources from server.
 	 * @param dest
-	 * @param fileHashSet
+	 * @param fileHashList
 	 * @return
 	 * <table cellpadding="0" border="1" cellspacing="0">
 	 *   <thead>
@@ -125,14 +130,30 @@ public class UDPPacketFactory {
 	 * </table>
 	 * </table>
 	 */
-	public static UDPPacket getSourcesRequest(FileHash... fileHashSet){
-		UDPPacket packet = new UDPPacket(fileHashSet.length*16,PROTO_EDONKEY_SERVER_UDP);
+	public static UDPPacket getSourcesRequest(Collection<FileHash> fileHashList){
+		UDPPacket packet = new UDPPacket(fileHashList.size()*16,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBGETSOURCES);
-		for(int i = 0; i < fileHashSet.length; i++){
-			packet.insertData(fileHashSet[i].getHash());
-		}
+		for(FileHash hash : fileHashList)
+			packet.insertData(hash.getHash());
+		
 		return packet;
 	}
+	
+	public static UDPPacket getSources2Request(List<FileHash> fileHashList, List<Long> sizeList){
+		UDPPacket packet = new UDPPacket(fileHashList.size()*(16 + 4 + 8),PROTO_EDONKEY_SERVER_UDP);
+		packet.setCommand(OP_GLOBGETSOURCES2);
+		for(int i = 0;i<fileHashList.size();i++) {
+			FileHash hash = fileHashList.get(i);
+			long size = sizeList.get(i);
+			packet.insertData(hash.getHash());
+			packet.insertData((int)0);
+			packet.insertData(size);
+		}
+
+		
+		return packet;
+	}
+	
 	
 	/**
 	 * Server description request.
@@ -251,10 +272,21 @@ public class UDPPacketFactory {
 			data.add(tmp);
 			total_size += tmp.length;
 		}
-		UDPPacket packet = new UDPPacket(total_size,PROTO_EDONKEY_SERVER_UDP);
+		UDPPacket packet = new UDPPacket(4 + 1 + 1 + 1 + total_size,PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBSEARCHREQ3);
+		packet.insertData((int)1);
+		packet.insertData((byte) 0x89);
+		packet.insertData((byte) 0x0E);
+		packet.insertData((byte) 0x01);
 		for(byte[] b : data)
 			packet.insertData(b);
+		return packet;
+	}
+	
+	public static UDPPacket getCallBackRequest(ClientID clientID) {
+		UDPPacket packet = new UDPPacket(4,PROTO_EDONKEY_SERVER_UDP);
+		packet.setCommand(OP_CALLBACKREQUEST);
+		packet.insertData(clientID.getClientID());
 		return packet;
 	}
 	
@@ -312,11 +344,8 @@ public class UDPPacketFactory {
 	 */
 	public static UDPPacket getUDPReaskFilePacket(FileHash fileHash){
 		UDPPacket packet = new UDPPacket(16,PROTO_EDONKEY_SERVER_UDP);
-		
 		packet.setCommand(OP_REASKFILEPING);
-		
 		packet.insertData(fileHash.getHash());
-		
 		return packet;
 	}
 	
