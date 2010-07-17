@@ -59,8 +59,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.33 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:32:49 $$
+ * @version $$Revision: 1.34 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:36:08 $$
  */
 public class E2DKConstants {
 
@@ -132,7 +132,8 @@ public class E2DKConstants {
     public final static int  BLOCKSIZE 					= 184320;//184320 10240
     public final static int  MAX_OFFER_FILES			= 200;
     
-    public final static int FILE_SOURCES_QUERY_ITERATION	= 15;
+    public final static int SERVER_FILE_SOURCES_QUERY_ITERATION	= 15;
+    public final static int GLOBAL_FILE_SOURCES_QUERY_ITERATION	= 35;
     
     public final static int  SECURITY_IDENTIFICATION_BIT_KEY_LENGTH	= 384;
     public final static int  MAX_SECURITY_KEY_LENGTH	= 80;
@@ -207,22 +208,22 @@ public class E2DKConstants {
 	
 	public final static byte OP_KAD_CALLBACK			= (byte) 0x99;
 	
-	public final static byte SRV_TCPFLG_COMPRESSION		= 0x00000001;
-	public final static byte SRV_TCPFLG_NEWTAGS			= 0x00000008;
-	public final static byte SRV_TCPFLG_UNICODE			= 0x00000010;
-	public final static byte SRV_TCPFLG_RELATEDSEARCH	= 0x00000040;
-	public final static byte SRV_TCPFLG_TYPETAGINTEGER	= (byte) 0x00000080;
-	public final static byte SRV_TCPFLG_LARGEFILES		= (byte) 0x00000100;
-	public final static byte SRV_TCPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
+	public final static int SRV_TCPFLG_COMPRESSION		= 0x00000001;
+	public final static int SRV_TCPFLG_NEWTAGS			= 0x00000008;
+	public final static int SRV_TCPFLG_UNICODE			= 0x00000010;
+	public final static int SRV_TCPFLG_RELATEDSEARCH	= 0x00000040;
+	public final static int SRV_TCPFLG_TYPETAGINTEGER	= 0x00000080;
+	public final static int SRV_TCPFLG_LARGEFILES		= 0x00000100;
+	public final static int SRV_TCPFLG_TCPOBFUSCATION	= 0x00000400;
 
-	public final static byte SRV_UDPFLG_EXT_GETSOURCES	= 0x00000001;
-	public final static byte SRV_UDPFLG_EXT_GETFILES	= 0x00000002;
-	public final static byte SRV_UDPFLG_NEWTAGS			= 0x00000008;
-	public final static byte SRV_UDPFLG_UNICODE			= 0x00000010;
-	public final static byte SRV_UDPFLG_EXT_GETSOURCES2	= 0x00000020;
-	public final static byte SRV_UDPFLG_LARGEFILES		= (byte) 0x00000100;
-	public final static byte SRV_UDPFLG_UDPOBFUSCATION	= (byte) 0x00000200;
-	public final static byte SRV_UDPFLG_TCPOBFUSCATION	= (byte) 0x00000400;
+	public final static int SRV_UDPFLG_EXT_GETSOURCES	= 0x00000001;
+	public final static int SRV_UDPFLG_EXT_GETFILES		= 0x00000002;
+	public final static int SRV_UDPFLG_NEWTAGS			= 0x00000008;
+	public final static int SRV_UDPFLG_UNICODE			= 0x00000010;
+	public final static int SRV_UDPFLG_EXT_GETSOURCES2	= 0x00000020;
+	public final static int SRV_UDPFLG_LARGEFILES		= 0x00000100;
+	public final static int SRV_UDPFLG_UDPOBFUSCATION	= 0x00000200;
+	public final static int SRV_UDPFLG_TCPOBFUSCATION	= 0x00000400;
 	
 	
 	// Queue rating modifiers
@@ -314,7 +315,6 @@ public class E2DKConstants {
 	//Server <-> Peer 
 	public final static byte OP_GLOBSERVRSTATREQ 		= (byte) 0x96;
 	public final static byte OP_GLOBSERVSTATUS 			= (byte) 0x97;
-	public final static byte OP_GLOBGETSOURCES 			= (byte) 0x9A;
 	public final static byte OP_SERVER_DESC_REQ 		= (byte) 0xA2;
 	public final static byte OP_SERVER_DESC_ANSWER 		= (byte) 0xA3;
 	
@@ -323,7 +323,13 @@ public class E2DKConstants {
 	public final static byte OP_GLOBSEARCHREQ3			= (byte) 0x90;
 	public final static byte OP_GLOBSEARCHRES 			= (byte) 0x99;
 	
+	public final static byte OP_GLOBGETSOURCES 			= (byte) 0x9A;
+	public final static byte OP_GLOBGETSOURCES2 		= (byte) 0x94;
 	public final static byte OP_GLOBFOUNDSOURCES		= (byte) 0x9B;
+	
+	public final static byte OP_CALLBACKREQUEST			= (byte) 0x1C;
+	public final static byte OP_CALLBACKREQUESTED		= (byte) 0x35;
+	public final static byte OP_CALLBACK_FAILED 		= (byte) 0x36;
 	
 	public final static short INVALID_SERVER_DESC_LENGTH = (short) 0xF0FF;
 	
