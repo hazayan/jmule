@@ -34,11 +34,9 @@ import org.jmule.core.sharingmanager.JMuleBitSet;
  * Created on Aug 29, 2009
  * 
  * @author binary256
- * @version $Revision: 1.8 $ Last changed by $Author: binary255 $ on $Date: 2010/05/29 11:40:35 $
+ * @version $Revision: 1.9 $ Last changed by $Author: binary255 $ on $Date: 2010/07/17 14:34:03 $
  */
 public interface InternalDownloadManager extends DownloadManager {
-
-	public void receivedSourcesFromServer(FileHash fileHash, List<Peer> peerList);
 
 	public void receivedCompressedFileChunk(Peer sender,FileHash fileHash, FileChunk compressedFileChunk);
 
