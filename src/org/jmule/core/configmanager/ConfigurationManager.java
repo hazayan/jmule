@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.38 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:34:58 $$
+ * @version $$Revision: 1.39 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:33:30 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -62,6 +62,8 @@ public interface ConfigurationManager extends JMuleManager {
 	
 	public static final int          SERVER_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 30;
 	public static final int          PEX_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 1;
+	public static final int          GLOBAL_SOURCES_QUERY_INTERVAL 	=     1000 * 60 * 30; // 30
+	
 	public static final int          PEER_ACTIVITY_CHECH_INTERVAL   =     1000 * 30;
 	public static final int          PEER_INACTIVITY_REMOVE_TIME    =     20 * 1000;
 	public static final int 		 PEERS_ACTIVITY_CHECK_INTERVAL	=     1000 * 10;
