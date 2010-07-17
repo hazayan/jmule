@@ -35,8 +35,8 @@ import org.jmule.core.peermanager.Peer.PeerSource;
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:14:23 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/17 14:39:07 $
  */
 public interface InternalPeerManager extends PeerManager, DisconnectNode {
 
@@ -66,7 +66,7 @@ public interface InternalPeerManager extends PeerManager, DisconnectNode {
 		
 	public void callBackRequestFailed();
 	
-	public void receivedCallBackRequest(String ip, int port);
+	public void receivedCallBackRequest(String ip, int port, PeerSource source);
 	
 	public void receivedEMuleHelloFromPeer(String ip, int port,byte clientVersion, byte protocolVersion,
 			TagList tagList);
@@ -74,9 +74,7 @@ public interface InternalPeerManager extends PeerManager, DisconnectNode {
 	public void receivedEMuleHelloAnswerFromPeer(String ip, int port,byte clientVersion, byte protocolVersion,
 			TagList tagList);
 		
-	public List<Peer> createPeerList(List<String> peerIPList,
-			List<Integer> peerPort, boolean addKnownPeersInList,
-			PeerSource peerSource);
+	public List<Peer> createPeerList(List<String> peerIPList, List<Integer> peerPort, boolean addKnownPeersInList, String serverIP, int serverPort, PeerSource peerSource);
 	
 	public void receivedMessage(String ip, int port, String message);
 	

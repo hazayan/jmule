@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.33 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:19:41 $$
+ * @version $$Revision: 1.34 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:39:07 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -673,9 +673,9 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	
 	}
 
-	public void receivedCallBackRequest(String ip, int port) {
+	public void receivedCallBackRequest(String ip, int port, PeerSource source) {
 		try {
-			Peer peer = newPeer(ip, port, PeerSource.SERVER);
+			Peer peer = newPeer(ip, port, source);
 			connect(peer);
 		} catch (PeerManagerException e) {
 			e.printStackTrace();
@@ -758,7 +758,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		listener_list.remove(listener);
 	}
 
-	public List<Peer> createPeerList(List<String> peerIPList, List<Integer> peerPort, boolean addKnownPeersInList, PeerSource peerSource) {
+	public List<Peer> createPeerList(List<String> peerIPList, List<Integer> peerPort, boolean addKnownPeersInList, String serverIP, int serverPort, PeerSource peerSource) {
 		List<Peer> result = new ArrayList<Peer>();
 		
 		for (int i = 0; i < peerIPList.size(); i++) {
@@ -776,7 +776,9 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 				continue;
 			}
 			try {
-				result.add(newPeer(peer_ip, peer_port, peerSource));
+				Peer peer = newPeer(peer_ip, peer_port, peerSource);
+				peer.setServer(serverIP, serverPort);
+				result.add(peer);
 			} catch (PeerManagerException e) {
 				e.printStackTrace();
 			}
