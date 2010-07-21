@@ -62,8 +62,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.28 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 18:17:51 $$
+ * @version $$Revision: 1.29 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/21 13:18:28 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
@@ -193,11 +193,12 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 					long addTime = payload_peers.getAddTime(peer);
 					long payload_timeout = System.currentTimeMillis() - addTime;
 					if (payload_timeout > ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_TIME) {
-						recalcslots = true;
 						if (!uploadQueue.isFull())
 							try {
 								uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
+								recalcslots = true;
 							} catch (UploadQueueException e) {
+								_network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
 								e.printStackTrace();
 							}
 						payload_peers.removePeer(peer);
@@ -208,12 +209,14 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 					long lastResponse = payload_peers.getLastActive(peer);
 					long last_response_timeout = System.currentTimeMillis() - lastResponse;
 					if (last_response_timeout >= ConfigurationManager.UPLOAD_SLOT_LOSE_TIMEOUT) {
-						recalcslots = true;
-						try {
-							uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
-						} catch (UploadQueueException e) {
-							e.printStackTrace();
-						}
+						if (!uploadQueue.isFull())
+							try {
+								uploadQueue.addPeer(peer, payload_peers.getFileHash(peer));
+								recalcslots = true;
+							} catch (UploadQueueException e) {
+								_network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+								e.printStackTrace();
+							}
 						payload_peers.removePeer(peer);
 						removePeer(peer);
 						continue;
@@ -322,7 +325,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	 */
 	public void receivedFileStatusRequestFromPeer(Peer sender,FileHash fileHash) { 
 		if (!_sharing_manager.hasFile(fileHash)) {
-			// requested file not found!
+			_network_manager.sendFileNotFound(sender.getIP(), sender.getPort(), fileHash);
 			return ;
 		}
 		SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
@@ -336,7 +339,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 
 	public void receivedHashSetRequestFromPeer(Peer sender,FileHash fileHash) {
 		if (!_sharing_manager.hasFile(fileHash)) {
-			// file with fileHash not found !
+			_network_manager.sendFileNotFound(sender.getIP(), sender.getPort(), fileHash);
 			return;
 		}
 		SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
@@ -370,8 +373,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	 */
 	public void receivedSlotRequestFromPeer(Peer sender,FileHash fileHash) {
 		if (!_sharing_manager.hasFile(fileHash)) {
-			//don't have requested file
-			//TODO : Investigate on eMule
+			_network_manager.sendFileNotFound(sender.getIP(), sender.getPort(), fileHash);
 			return;
 		}
 		UploadSession upload_session = null;
@@ -412,6 +414,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 					recalcSlotPeers();
 				} catch (UploadQueueException e) {
 					// queue is full
+					_network_manager.sendSlotRelease(sender.getIP(), sender.getPort());
 					e.printStackTrace();
 					return ;
 				}
@@ -448,8 +451,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	 */
 	public void receivedFileChunkRequestFromPeer(Peer sender,FileHash fileHash, List<FileChunkRequest> requestedChunks) {
 		if (!_sharing_manager.hasFile(fileHash)) {
-			//don't have requested file
-			//TODO : Investigate on eMule
+			_network_manager.sendFileNotFound(sender.getIP(), sender.getPort(), fileHash);
 			return;
 		}
 		UploadSession session;
