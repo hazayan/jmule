@@ -45,8 +45,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 18:16:06 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/21 13:15:42 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -81,6 +81,7 @@ public class UploadQueue {
 	void addPeer(Peer peer, FileHash fileHash) throws UploadQueueException {
 		if (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE))
 			throw new UploadQueueException("Queue full");
+		System.out.println("UPLOAD :: upload_queue :: addPeer ::  " +peer);
 		upload_queue.put(peer.getUserHash(), 
 				new UploadQueueContainer(peer,fileHash, E2DKConstants.INITIAL_RATING));
 	}
@@ -114,6 +115,8 @@ public class UploadQueue {
 	void removePeer(Peer peer) {
 		if (!hasPeer(peer))
 			return;
+		
+		System.out.println("UPLOAD :: upload_queue :: removePeer ::  " +peer);
 		UploadQueueContainer container = upload_queue.get(peer.getUserHash());
 		upload_queue.remove(peer.getUserHash());
 		if (slot_clients.contains(container))
@@ -156,7 +159,7 @@ public class UploadQueue {
 	}
 	
 	public String toString() {
-		String result = "\n";
+		String result = "Upload Queue : size : " + upload_queue.size() + "\n";
 		for (UserHash hash : upload_queue.keySet()) {
 			try {
 				UploadQueueContainer container = upload_queue.get(hash);
@@ -167,7 +170,7 @@ public class UploadQueue {
 			}
 		}
 		
-		result += "   \nSlot peers : \n";
+		result += "   \nSlot peers : " + slot_clients.size() + "\n";
 		for (UploadQueueContainer container : slot_clients) {
 			try {
 				result += "[\n" + container

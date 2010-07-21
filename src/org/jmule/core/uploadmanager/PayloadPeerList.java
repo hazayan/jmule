@@ -34,8 +34,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * Created on Jan 24, 2010
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:08:09 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/21 13:15:42 $
  */
 public class PayloadPeerList {
 
@@ -45,7 +45,7 @@ public class PayloadPeerList {
 	
 	private static PayloadPeerList instance = null;
 	
-	static PayloadPeerList getInstance() {
+	public static PayloadPeerList getInstance() {
 		if (instance == null) {
 			instance = new PayloadPeerList();
 		}
@@ -55,10 +55,10 @@ public class PayloadPeerList {
 	private PayloadPeerList() { }
 	
 	public String toString() {
-		String result = " Payload peers : \n";
+		String result = " Payload peers : size : " + payload_peers.size()+"\n";
 		for (Peer peer : payload_peers.keySet())
 			result += peer + "\n";
-		result += "\n Payload loosed peers : \n";
+		result += "\n Payload loosed peers : " + payload_loosed_peers.size() + "\n";
 		for(UserHash hash : payload_loosed_peers)
 			result += hash + "\n";
 		return result;
@@ -78,12 +78,14 @@ public class PayloadPeerList {
 	
 	public void addPeer(Peer peer, FileHash fileHash) {
 		if (hasPeer(peer)) return;
+		System.out.println("UPLOAD :: payload_peer :: add ::  " +peer);
 		PayloadPeerContainer container = new PayloadPeerContainer(System.currentTimeMillis(), System.currentTimeMillis(), fileHash);
 		payload_peers.put(peer, container);
 	}
 	
 	public void removePeer(Peer peer) {
 		if (!hasPeer(peer)) return;
+		System.out.println("UPLOAD :: payload_peer :: removePeer ::  " +peer);
 		payload_peers.remove(peer);
 	}
 	
