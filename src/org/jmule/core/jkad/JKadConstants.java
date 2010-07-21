@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.20 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:46:50 $
+ * @version $Revision: 1.21 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/21 13:16:35 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -91,7 +91,7 @@ public class JKadConstants {
 	public static final int MAX_PUBLISH_KEYWORDS			= 300; // keyword and sources
 	public static final int MAX_PUBLISH_NOTES				= 100; 
 	
-	public static final int MAX_KEYWORD_SEARCH_RESULTS 		= 300;
+	public static final int MAX_KEYWORD_SEARCH_RESULTS 		= 1000;//300
 	public static final int MAX_SOURCES_SEARCH_RESULTS 		= 300;
 	public static final int MAX_NOTES_SEARCH_RESULTS 		= 50;
 	
