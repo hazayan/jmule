@@ -22,9 +22,7 @@
  */
 package org.jmule.core.uploadmanager;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jmule.core.edonkey.FileHash;
@@ -34,14 +32,13 @@ import org.jmule.core.peermanager.Peer;
 /**
  * Created on Jan 24, 2010
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/21 13:15:42 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/24 15:51:07 $
  */
 public class PayloadPeerList {
 
-	private Map<Peer, PayloadPeerContainer> payload_peers = new ConcurrentHashMap<Peer, PayloadPeerContainer>();
-	
-	private Set<UserHash> payload_loosed_peers = new HashSet<UserHash>();
+	Map<Peer, PayloadPeerContainer> payload_peers = new ConcurrentHashMap<Peer, PayloadPeerContainer>();
+	Map<UserHash,Long> payload_loosed_peers = new ConcurrentHashMap<UserHash,Long>();
 	
 	private static PayloadPeerList instance = null;
 	
@@ -56,11 +53,7 @@ public class PayloadPeerList {
 	
 	public String toString() {
 		String result = " Payload peers : size : " + payload_peers.size()+"\n";
-		for (Peer peer : payload_peers.keySet())
-			result += peer + "\n";
 		result += "\n Payload loosed peers : " + payload_loosed_peers.size() + "\n";
-		for(UserHash hash : payload_loosed_peers)
-			result += hash + "\n";
 		return result;
 	}
 	
@@ -69,23 +62,21 @@ public class PayloadPeerList {
 	}
 	
 	public boolean isPayloadLoosed(UserHash userHash) {
-		return payload_loosed_peers.contains(userHash);
+		return payload_loosed_peers.containsKey(userHash);
 	}
 	
 	public void addPayloadLoosed(UserHash userHash) {
-		payload_loosed_peers.add(userHash);
+		payload_loosed_peers.put(userHash, System.currentTimeMillis());
 	}
 	
 	public void addPeer(Peer peer, FileHash fileHash) {
 		if (hasPeer(peer)) return;
-		System.out.println("UPLOAD :: payload_peer :: add ::  " +peer);
 		PayloadPeerContainer container = new PayloadPeerContainer(System.currentTimeMillis(), System.currentTimeMillis(), fileHash);
 		payload_peers.put(peer, container);
 	}
 	
 	public void removePeer(Peer peer) {
 		if (!hasPeer(peer)) return;
-		System.out.println("UPLOAD :: payload_peer :: removePeer ::  " +peer);
 		payload_peers.remove(peer);
 	}
 	
@@ -117,7 +108,6 @@ public class PayloadPeerList {
 		return payload_peers.containsKey(peer);
 	}
 	
-	
 	class PayloadPeerContainer {
 		private long addTime;
 		private long lastResponseTime;
@@ -147,6 +137,5 @@ public class PayloadPeerList {
 		public void setFileHash(FileHash fileHash) {
 			this.fileHash = fileHash;
 		}
-	}
-	
+	}	
 }
