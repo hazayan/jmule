@@ -114,8 +114,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:30:53 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 11:14:21 $$
  */
 public class PacketFactory {
 	
@@ -879,6 +879,18 @@ public class PacketFactory {
         packet.insertData(fileHash.getHash());
         return packet;
 	}
+	
+	public static Packet getFileNameRequestPacket(FileHash fileHash, GapList fileGapList, long fileSize, int sourceCount){
+		JMuleBitSet bitSet = fileGapList.getBitSet(fileSize);
+		byte [] bitSetArray = bitSet.getAsByteArray();
+        Packet packet=new Packet(16 + bitSetArray.length + 2, PROTO_EDONKEY_TCP);
+        packet.setCommand(OP_FILENAMEREQUEST);
+        packet.insertData(fileHash.getHash());
+        packet.insertData(bitSetArray);
+        packet.insertData(Convert.intToShort(sourceCount));
+        return packet;
+	}
+	
 	
 	/**
 	 * Get requested file ID, this packet must be used with FileRequest packet.
@@ -1931,7 +1943,7 @@ public class PacketFactory {
 		entry.position(0);
 		return entry;
 	}
-	
+
 	public static ByteBuffer getFileNotFoundResponseEntry() {
 		ByteBuffer entry = Misc.getByteBuffer(1);
 		entry.put(OP_FILEREQANSNOFILE);
