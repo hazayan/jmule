@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.51 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 13:34:19 $$
+ * @version $$Revision: 1.52 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 11:19:40 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -121,11 +121,9 @@ public class DownloadSession implements JMTransferSession {
 			Tag tag;
 			tag = new StringTag(FT_FILENAME, fileLink.getFileName());
 			tagList.addTag(tag);
-			tag = new IntTag(FT_FILESIZE, Convert.longToInt((fileLink
-					.getFileSize())));
+			tag = new IntTag(FT_FILESIZE, Convert.longToInt((fileLink.getFileSize())));
 			tagList.addTag(tag);
-			createDownloadFiles(fileLink.getFileName(), fileLink.getFileSize(),
-					fileLink.getFileHash(), null, tagList);
+			createDownloadFiles(fileLink.getFileName(), fileLink.getFileSize(), fileLink.getFileHash(), null, tagList);
 			int partCount = (int) ((sharedFile.length() / PARTSIZE));
 			if (sharedFile.length() % PARTSIZE != 0)
 				partCount++;
@@ -281,14 +279,19 @@ public class DownloadSession implements JMTransferSession {
 			entries.add(OP_FILENAMEREQUEST);
 			entries.add(OP_FILESTATREQ);
 			Integer supportExtMultipacket = peer.getPeerFeature(PeerFeatures.ExtMultiPacket);
-			if (supportExtMultipacket==1)
+			if (supportExtMultipacket==1) {
 				_network_manager.sendMultiPacketExtRequest(peer.getIP(), peer.getPort(), getFileHash(), getFileSize(), entries);
-			else
+			}
+			else {
 				_network_manager.sendMultiPacketRequest(peer.getIP(), peer.getPort(), getFileHash(),entries);
+			}
 			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILENAME_REQUEST);
 			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILE_STATUS_REQUEST);
 		} else {
-			_network_manager.sendFileNameRequest(peer.getIP(), peer.getPort(),getFileHash());
+			if (peer.getPeerFeature(PeerFeatures.ExtendedRequestsVersion) > 1)
+				_network_manager.sendFileNameRequest(peer.getIP(), peer.getPort(),getFileHash(), sharedFile.getGapList(), sharedFile.length(),  getCompletedSources());
+			else
+				_network_manager.sendFileNameRequest(peer.getIP(), peer.getPort(),getFileHash());
 			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILENAME_REQUEST);
 			_network_manager.sendFileStatusRequest(peer.getIP(), peer.getPort(), getFileHash());
 			download_status_list.setPeerStatus(peer, PeerDownloadStatus.FILE_STATUS_REQUEST);
