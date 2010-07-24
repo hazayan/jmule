@@ -39,7 +39,9 @@ import org.jmule.core.downloadmanager.DownloadManagerException;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
+import org.jmule.core.edonkey.E2DKConstants;
 import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.InternalPeerManager;
@@ -62,8 +64,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.29 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/21 13:18:28 $$
+ * @version $$Revision: 1.30 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 15:46:04 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
@@ -72,7 +74,6 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	private InternalNetworkManager _network_manager;
 	private InternalPeerManager _peer_manager;
 	private InternalDownloadManager _download_manager;
-	
 	
 	private UploadQueue uploadQueue;
 	private PayloadPeerList payload_peers;
@@ -227,9 +228,21 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 					recalcSlotPeers();
 			}
 		};
+		
+		JMTimerTask payload_loosed_cleaner = new JMTimerTask() {
+			@Override
+			public void run() {
+				for(UserHash hash : payload_peers.payload_loosed_peers.keySet()) {
+					if (System.currentTimeMillis() - payload_peers.payload_loosed_peers.get(hash) > E2DKConstants.TIME_24_HOURS)
+						payload_peers.payload_loosed_peers.remove(hash);
+				}
+			}
+		};
+		
 		maintenance_tasks.addTask(frozen_peers_remover, ConfigurationManager.UPLOAD_QUEUE_CHECK_INTERVAL, true);
 		maintenance_tasks.addTask(transferred_bytes_updater, ConfigurationManager.UPLOAD_QUEUE_TRANSFER_CHECK_INTERVAL, true);
 		maintenance_tasks.addTask(payload_peers_monitor, ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_CHECK_INTERVAL, true);
+		maintenance_tasks.addTask(payload_loosed_cleaner, ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_LOOSED_CHECK_INTERVAL, true);
 	}
 
 	public void shutdown() {
@@ -242,7 +255,6 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		maintenance_tasks.cancelAllTasks();
 		for(UploadSession session : session_list.values())
 			session.stopSession();
-		
 	}
 	
 	protected boolean iAmStoppable() {
