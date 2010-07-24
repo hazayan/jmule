@@ -159,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.45 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/17 14:38:22 $
+ * @version $Revision: 1.46 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/24 11:11:27 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -1104,6 +1104,16 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			cause.printStackTrace();
 		}
 	}
+		
+	public void sendFileNameRequest(String peerIP, int peerPort, FileHash fileHash, GapList fileGapList, long fileSize, int sourceCount) {
+		try {
+			JMPeerConnection peer_connection = getPeerConnection(peerIP, peerPort);
+			Packet packet = PacketFactory.getFileNameRequestPacket(fileHash, fileGapList, fileSize, sourceCount);
+			peerConnectionsMonitor.sendPacket(peer_connection, packet);
+		} catch (Throwable cause) {
+			cause.printStackTrace();
+		}
+	}
 
 	public void sendFileRequestAnswer(String peerIP, int peerPort,
 			FileHash fileHash, String fileName) {
@@ -1270,7 +1280,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			e.printStackTrace();
 		}	
 	}
-	
+
 	public void sendMultiPacketExtRequest(String peerIP, int peerPort, FileHash fileHash, long fileSize, Collection<Byte> entries) {
 		Collection<ByteBuffer> entries_content = new ArrayList<ByteBuffer>();
 		for(Byte entryID : entries) {
@@ -1292,7 +1302,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			e.printStackTrace();
 		}	
 	}
-	
 
 	public void serverConnected() {
 		try {

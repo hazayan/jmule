@@ -49,8 +49,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.20 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/17 14:37:08 $
+ * @version $Revision: 1.21 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/24 11:11:27 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
@@ -199,6 +199,8 @@ public interface InternalNetworkManager extends NetworkManager {
 	public void sendFilePartsRequest(String peerIP, int peerPort, FileHash fileHash, FileChunkRequest... requestData);
 	
 	public void sendFileNameRequest(String peerIP, int peerPort, FileHash fileHash);
+		
+	public void sendFileNameRequest(String peerIP, int peerPort, FileHash fileHash, GapList fileGapList, long fileSize, int sourceCount);
 	
 	public void sendFileRequestAnswer(String peerIP, int peerPort, FileHash fileHash, String fileName);
 	
