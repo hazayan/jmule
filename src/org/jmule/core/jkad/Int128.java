@@ -37,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:45:44 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:16:42 $
  */
 public class Int128 implements Cloneable {
 
@@ -76,8 +76,13 @@ public class Int128 implements Cloneable {
 		byteArrayToBitSet(reversed.array(), bit_set);
 	}
 	
+	/**
+	 * Direct conversion without byte reverse
+	 * @param fileHash
+	 */
 	public Int128(FileHash fileHash) {
-		this(fileHash.getHash());
+		bit_set = new BitSet(128);
+		byteArrayToBitSet(fileHash.getHash(), bit_set);
 	}
 	
 	public Int128(Int128 int128) {
