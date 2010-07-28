@@ -22,10 +22,10 @@
  */
 package org.jmule.core.jkad.publisher;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
@@ -42,20 +42,38 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:13:43 $
  */
 public class PublishKeywordTask extends PublishTask {
 
 	private LookupTask lookup_task;
-	private Int128 keywordID;
+	private Collection<Collection<PublishItem>> publish_items;
+	private String keyword;
 	
-	public PublishKeywordTask(PublishTaskListener listener,Int128 publishID,Int128 keywordID, List<Tag> tagList) {
-		super(publishID,listener);
-		this.keywordID = keywordID;
-		this.tagList = new TagList(tagList);
+	public PublishKeywordTask(PublishTaskListener listener,Int128 keywordID, Collection<PublishItem> publishItems, String keyword) {
+		super(keywordID,listener);
+		publish_items = new ArrayList<Collection<PublishItem>>();
+		this.keyword = keyword;
+		Collection<PublishItem> list = new ArrayList<PublishItem>();
+		int i = 0;
+		for(PublishItem p : publishItems) {
+			if (i!=0)
+				if (i % JKadConstants.PUBLISH_KEYWORD_IN_PACKET == 0) {
+					publish_items.add(list);
+					list = new ArrayList<PublishItem>();
+				}
+			i++;
+			list.add(p);
+		}
+		if (list.size() != 0)
+			publish_items.add(list);
 	}
 	
+	public String getKeyword() {
+		return keyword;
+	}
+		
 	public void start() throws JKadException {
 		if (lookup_task!=null)
 			if (lookup_task.isLookupStarted()) return;
@@ -70,13 +88,17 @@ public class PublishKeywordTask extends PublishTask {
 
 			public void processToleranceContacts(ContactAddress sender, List<KadContact> results) {
 				for(KadContact contact : results) {
-			
 					KadPacket packet = null;
 					if (!contact.supportKad2())
-						packet = PacketFactory.getPublish1ReqPacket(targetID, _jkad_manager.getClientID(), tagList);
+						for(Collection<PublishItem> items : publish_items) {
+							packet = PacketFactory.getPublish1ReqPacket(targetID, items);
+							_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+						}
 					else
-						packet = PacketFactory.getPublishKeyReq2Packet(keywordID,targetID, tagList);
-					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+						for(Collection<PublishItem> items : publish_items) {
+							packet = PacketFactory.getPublishKeyReq2Packet(targetID, items);
+							_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
+						}					
 				}
 			}
 			
@@ -94,7 +116,7 @@ public class PublishKeywordTask extends PublishTask {
 
 	public void stop() {
 		if (!isStarted) return;
-		isStarted = false;
+		isStarted = false; 
 		Lookup.getSingleton().removeLookupTask(publishID);
 	}
 

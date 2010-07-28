@@ -22,15 +22,15 @@
  */
 package org.jmule.core.jkad.publisher;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import org.jmule.core.edonkey.packet.tag.Tag;
-import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadConstants.RequestType;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -42,16 +42,21 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:13:43 $
  */
 public class PublishSourceTask extends PublishTask {
 
 	private LookupTask lookup_task;
+	private PublishItem publishItem;
 	
-	public PublishSourceTask(PublishTaskListener listener, Int128 publishID, List<Tag> tagList) {
+	public PublishSourceTask(PublishTaskListener listener, Int128 publishID, PublishItem publishItem) {
 		super(publishID,listener);
-		this.tagList = new TagList(tagList);
+		this.publishItem = publishItem;
+	}
+	
+	public PublishItem getPublishItem() {
+		return publishItem;
 	}
 
 	public void start() throws JKadException {
@@ -71,10 +76,12 @@ public class PublishSourceTask extends PublishTask {
 				
 				for(KadContact contact : results) {
 					KadPacket packet = null;
-					if (!contact.supportKad2())
-						packet = PacketFactory.getPublish1ReqPacket(targetID, _jkad_manager.getClientID(), tagList);
-					else
-						packet = PacketFactory.getPublishSource2Packet(targetID, _jkad_manager.getClientID(),tagList);
+					if (!contact.supportKad2()) {
+						Collection<PublishItem> list = new ArrayList<PublishItem>();
+						list.add(publishItem);
+						packet = PacketFactory.getPublish1ReqPacket(_jkad_manager.getClientID(), list);
+					} else
+						packet = PacketFactory.getPublishSource2Packet(_jkad_manager.getClientID(), publishItem);
 					_network_manager.sendKadPacket(packet, contact.getIPAddress(), contact.getUDPPort());
 				}
 			}
