@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
@@ -39,14 +40,15 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:55:52 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:07:16 $
  */
 public class Search {
 	
 	private static Search singleton = null;
 	
 	private Map<Int128, SearchTask> searchTasks = new ConcurrentHashMap<Int128, SearchTask>();
+	private Collection<SearchListener> listener_list = new ConcurrentLinkedQueue<SearchListener>();
 	
 	private boolean isStarted = false;
 		
@@ -93,8 +95,9 @@ public class Search {
 		search_task.setSearchKeyword(keyword);
 		search_task.setSearchResultListener(listener);
 		searchTasks.put(keywordID, search_task);
+		notifyListeners(search_task, SearchStatus.ADDED);
 		search_task.start();
-		
+		notifyListeners(search_task, SearchStatus.STARTED);
 		return keywordID;
 	}
 
@@ -105,11 +108,11 @@ public class Search {
 	public void searchSources(Int128 fileID,SearchResultListener listener,long fileSize) throws JKadException {
 		if (searchTasks.containsKey(fileID)) return;
 		SourceSearchTask search_task = new SourceSearchTask(fileID,fileSize);
-	
 		search_task.setSearchResultListener(listener);
-		
 		searchTasks.put(fileID, search_task);
+		notifyListeners(search_task, SearchStatus.ADDED);
 		search_task.start();
+		notifyListeners(search_task, SearchStatus.STARTED);
 	}
 
 	public void searchNotes(Int128 fileID,long fileSize) throws JKadException {
@@ -124,7 +127,9 @@ public class Search {
 		NoteSearchTask search_task = new NoteSearchTask( updatedID,fileSize);
 		search_task.setSearchResultListener(listener);
 		searchTasks.put(updatedID, search_task);
+		notifyListeners(search_task, SearchStatus.ADDED);
 		search_task.start();
+		notifyListeners(search_task, SearchStatus.STARTED);
 	}
 	
 	public void processSearchResults(IPAddress sender, final Int128 targetID, final List<Source> sources) {
@@ -152,8 +157,14 @@ public class Search {
 
 	public void cancelSearch(Int128 searchID) {
 		if (!hasSearchTask(searchID)) return ;
-		searchTasks.get(searchID).stopSearchRequest();
+		SearchTask task = searchTasks.get(searchID);
+		task.stopSearchRequest();
+		notifyListeners(task, SearchStatus.STOPPED);
 		removeSearchID(searchID);
+	}
+	
+	public Collection<SearchTask> getSearchTasks() {
+		return searchTasks.values();
 	}
 	
 	/**
@@ -161,7 +172,9 @@ public class Search {
 	 * @param searchID
 	 */
 	void removeSearchID(Int128 searchID) {
+		SearchTask task = searchTasks.get(searchID);
 		searchTasks.remove(searchID);
+		notifyListeners(task, SearchStatus.REMOVED);
 	}
 	
 	public String toString() {
@@ -173,6 +186,41 @@ public class Search {
 		}
 		result += " ] ";
 		return result;
+	}
+	
+	private enum SearchStatus {ADDED, STARTED, STOPPED, REMOVED}
+	
+	private void notifyListeners(SearchTask searchTask, SearchStatus status) {
+		for(SearchListener listener : listener_list) {
+			try {
+				if (status == SearchStatus.ADDED) {
+					listener.searchAdded(searchTask);
+					continue;
+				}
+				if (status == SearchStatus.STARTED) {
+					listener.searchStarted(searchTask);
+					continue;
+				}
+				if (status == SearchStatus.STOPPED) {
+					listener.searchStopped(searchTask);
+					continue;
+				}
+				if (status == SearchStatus.REMOVED) {
+					listener.searchRemoved(searchTask);
+					continue;
+				}
+			}catch(Throwable t) {
+				
+			}
+		}
+	}
+	
+	public void addListener(SearchListener listener) {
+		listener_list.add(listener);
+	}
+	
+	public void removeListener(SearchListener listener) {
+		listener_list.remove(listener);
 	}
 	
 }
