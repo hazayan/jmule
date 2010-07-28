@@ -56,8 +56,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:49:07 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:08:10 $
  */
 public class Lookup {
 
@@ -124,15 +124,10 @@ public class Lookup {
 	
 	public String toString() {
 		String result = " [\n ";
-		
 		result += "Lookup tasks : \n";
-		
-		for(Int128 key : lookupTasks.keySet()) {
+		for(Int128 key : lookupTasks.keySet())
 			result += key.toHexString() + " " + lookupTasks.get(key) + "\n";
-		}
-		
 		result += " ] ";
-		
 		return result;
 	}
 	
@@ -140,14 +135,13 @@ public class Lookup {
 		isStarted = true;
 		routing_table = RoutingTable.getSingleton();
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
-		
 		Timer.getSingleton().addTask(LOOKUP_TASK_CHECK_INTERVAL, lookupCleaner, true);
 		Timer.getSingleton().addTask(LOOKUP_CONTACT_CHECK_INTERVAL, lookupContactCleaner, true);
 	}
 	
 	public void stop() {
 		isStarted = false;
-		for(Int128 key : lookupTasks.keySet()) {
+		for (Int128 key : lookupTasks.keySet()) {
 			LookupTask task = lookupTasks.get(key);
 			task.stopLookup();
 			lookupTasks.remove(key);
@@ -159,7 +153,7 @@ public class Lookup {
 
 	public void addLookupTask(LookupTask task) throws JKadException {
 		if (lookupTasks.containsKey(task.getTargetID()))
-			throw new JKadException("Already has lookup task with : " + task.getTargetID().toHexString());
+				throw new JKadException("Already has lookup task with : " + task.getTargetID().toHexString());
 		lookupTasks.put(task.getTargetID(), task);
 		notifyListeners(task, LookupStatus.ADDED);
 		task.startLookup();
