@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.21 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/21 13:16:35 $
+ * @version $Revision: 1.22 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:24:03 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -87,9 +87,9 @@ public class JKadConstants {
 	public static final int LOOKUP_VALUE_CONTACTS			= 2;
 	public static final int LOOKUP_STORE_CONTACTS			= 4;
 	
-	public static final int MAX_PUBLISH_SOURCES				= 300; // keyword and sources
-	public static final int MAX_PUBLISH_KEYWORDS			= 300; // keyword and sources
-	public static final int MAX_PUBLISH_NOTES				= 100; 
+	public static final int MAX_PUBLISH_SOURCES				= 30; 
+	public static final int MAX_PUBLISH_KEYWORDS			= 30;
+	public static final int MAX_PUBLISH_NOTES				= 30; 
 	
 	public static final int MAX_KEYWORD_SEARCH_RESULTS 		= 1000;//300
 	public static final int MAX_SOURCES_SEARCH_RESULTS 		= 300;
@@ -129,17 +129,24 @@ public class JKadConstants {
 	
 	public static final long DEFAULT_PACKET_LISTENER_TIMEOUT = 5000;
 	
-	public static final long PUBLISHER_MAINTENANCE_INTERVAL	 = 1000 * 6;
+	public static final long PUBLISH_KEYWORD_CHECK_INTERVAL	 = 1000 * 6;
+	public static final long PUBLISH_KEYWORD_SCAN_INTERVAL	 = 1000 * 10;
+	public static final long PUBLISHER_PUBLISH_CHECK_INTERVAL= 5000;
+	public static final int PUBLISH_KEYWORD_ON_ITERATION	 = 150;
+	public static final int PUBLISH_KEYWORD_IN_PACKET		 = 50;
 	
+	public static final long PUBLISH_SOURCE_INTERVAL		 = 1000 * 10;
+	public static final long PUBLISH_NOTE_INTERVAL			 = 1000 * 10;
 	
 	public static final long INDEXTER_MAX_LOAD_TO_NOT_PUBLISH = 60;
 	
 	public static final int KAD_SOURCES_SEARCH_INTERVAL     =  1000 * 60 * 1;
 	
-	public static final long PUBLISHER_PUBLISH_CHECK_INTERVAL	= 5000;
-	
 	public static final long ITERATION_MAX_PUBLISH_FILES 	= 2;
-	public static final long MAX_CONCURRENT_PUBLISH_FILES 	= 2;
+	
+	public static final int MAX_CONCURRENT_PUBLISH_KEYWORDS = 2;
+	public static final int MAX_CONCURRENT_PUBLISH_FILES 	= 3;
+	public static final int MAX_CONCURRENT_PUBLISH_NOTES 	= 1;
 	
 	public static final int K 								= 10;//10
 	public static final int ALPHA 							= 3;//3;
