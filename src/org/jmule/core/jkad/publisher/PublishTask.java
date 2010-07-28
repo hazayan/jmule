@@ -22,7 +22,6 @@
  */
 package org.jmule.core.jkad.publisher;
 
-import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
@@ -31,25 +30,18 @@ import org.jmule.core.jkad.publisher.Publisher.PublishTaskListener;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:13:24 $
  */
 public abstract class PublishTask {
 
 	protected Int128 publishID;
 	protected long lastpublishTime;
 	protected boolean isStarted = false;
-	protected long publishInterval = 1000 * 60 * 60 * 12;
-	
 	protected int publishedSources = 0;
-	
 	protected PublishTaskListener task_listener = null;
 	protected PublishTask task_instance = null;
-	
-	protected TagList tagList;
-	
-	public TagList getTagList() { return tagList; }
-	
+		
 	public PublishTask(Int128 publishID,PublishTaskListener listener) {
 		super();
 		this.publishID = publishID;
@@ -85,10 +77,5 @@ public abstract class PublishTask {
 	public int getPublishedSources() {
 		return publishedSources;
 	}
-	
-	public long getPublishInterval() {
-		return publishInterval;
-	}
-	
-	
+		
 }
