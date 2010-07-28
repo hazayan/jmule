@@ -51,8 +51,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/02/13 16:11:02 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/28 13:26:04 $$
  */
 public class UploadSession implements JMTransferSession {
 	private SharedFile sharedFile;	
@@ -124,17 +124,11 @@ public class UploadSession implements JMTransferSession {
 
 	}
 	
-	void receivedFileChunkRequestFromPeer(Peer sender,
-			FileHash fileHash, List<FileChunkRequest> chunkList) {
-		
+	void receivedFileChunkRequestFromPeer(Peer sender, FileHash fileHash, List<FileChunkRequest> chunkList) {
 		if (sharedFile instanceof PartialFile) {
 			PartialFile partial_file = (PartialFile) sharedFile;
 			GapList gapList = partial_file.getGapList();
-//			System.out.println("Request from partial file : \n" + partial_file);
 			for(FileChunkRequest request : chunkList) {
-//				System.out.println("Gap request : " + request+"\nIntersected gaps :");
-//				for(Gap gap : gapList.getIntersectedGaps(request.getChunkBegin(), request.getChunkEnd()))
-//					System.out.println(gap);
 				if (gapList.getIntersectedGaps(request.getChunkBegin(), request.getChunkEnd()).size()!=0) {
 					try {
 						PeerManagerSingleton.getInstance().disconnect(sender);

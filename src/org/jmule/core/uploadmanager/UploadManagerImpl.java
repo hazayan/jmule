@@ -64,8 +64,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.30 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 15:46:04 $$
+ * @version $$Revision: 1.31 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/28 13:26:04 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
@@ -474,20 +474,22 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			return ;
 		}
 		
-		if (!payload_peers.hasPeer(sender))
-				if (!uploadQueue.hasSlotPeer(sender)) {
-			try {
-				uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
-				_network_manager.sendQueueRanking(sender.getIP(), sender.getPort(), uploadQueue.getPeerPosition(sender));
-			} catch (UploadQueueException e) {
-				e.printStackTrace();
-			}
-			return ;
-		}
 		if (uploadQueue.hasPeer(sender))
 			uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
 		if (payload_peers.hasPeer(sender))
 			payload_peers.setLastActiveTime(sender, System.currentTimeMillis());
+		
+		if (!payload_peers.hasPeer(sender))
+				if (!uploadQueue.hasSlotPeer(sender)) {
+					try {
+						uploadQueue.updateLastRequestTime(sender, System.currentTimeMillis());
+						_network_manager.sendQueueRanking(sender.getIP(), sender.getPort(), uploadQueue.getPeerPosition(sender));
+					} catch (UploadQueueException e) {
+						e.printStackTrace();
+					}
+					return ;
+				}
+		
 		session.receivedFileChunkRequestFromPeer(sender, fileHash, requestedChunks);
 	}
 	

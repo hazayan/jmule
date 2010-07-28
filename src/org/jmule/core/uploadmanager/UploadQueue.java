@@ -45,8 +45,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/21 13:15:42 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/28 13:26:04 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -160,7 +160,7 @@ public class UploadQueue {
 	
 	public String toString() {
 		String result = "Upload Queue : size : " + upload_queue.size() + "\n";
-		for (UserHash hash : upload_queue.keySet()) {
+		/*for (UserHash hash : upload_queue.keySet()) {
 			try {
 				UploadQueueContainer container = upload_queue.get(hash);
 				result += "[ \n { "+hash.toString()+" } \n" + container
@@ -168,18 +168,17 @@ public class UploadQueue {
 			} catch (UploadQueueException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 		
 		result += "   \nSlot peers : " + slot_clients.size() + "\n";
-		for (UploadQueueContainer container : slot_clients) {
+		/*for (UploadQueueContainer container : slot_clients) {
 			try {
 				result += "[\n" + container
 						+ "\n Peer position :" + getPeerPosition(container.peer) + "\n]\n";
 			} catch (UploadQueueException e) {
 				e.printStackTrace();
 			}
-		}
-		
+		}*/
 		
 		return result;
 	}
