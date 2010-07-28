@@ -40,32 +40,35 @@ import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.routingtable.KadContact;
+import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.utils.Misc;
 
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:56:39 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:06:16 $
  */
 public class Utils {
 	
 	private static Random random = new Random();
 
+	private static Set<String> keyword_separators = new HashSet<String>();
+	
+	static {
+		keyword_separators.add("\\.");
+		keyword_separators.add(" ");
+		keyword_separators.add("\\-");
+		keyword_separators.add("_");
+	}
+	
 	public static List<String> getFileKeyword(String fileName) {
 		List<String> result = new ArrayList<String>();
 		HashSet<String> keywords = new HashSet<String>();
-		
-		if (fileName.contains(".")) {
-			int id = fileName.lastIndexOf(".");
-			fileName = fileName.substring(0, id);
+				
+		for(String separator : keyword_separators) {
+				keywords.addAll(Arrays.asList(fileName.split(separator)));
 		}
-
-		if (fileName.contains("."))
-			keywords.addAll(Arrays.asList(fileName.split("\\.")));
-		
-		if (fileName.contains(" "))
-			keywords.addAll(Arrays.asList(fileName.split(" ")));
 		
 		result.addAll(keywords);
 		return result;
@@ -184,8 +187,10 @@ public class Utils {
 		byte[] file_id = fileID.toByteArray();
 		Convert.updateSearchID(file_id);
 		FileHash fileHash = new FileHash(file_id);
-		String file_name = JMuleCoreFactory.getSingleton().getSharingManager().getSharedFile(fileHash).getSharingName();
-		return file_name;
+		SharedFile file = JMuleCoreFactory.getSingleton().getSharingManager().getSharedFile(fileHash);
+		if (file == null)
+			return "";
+		return file.getSharingName();
 	}
 	
 }
