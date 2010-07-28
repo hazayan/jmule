@@ -22,43 +22,58 @@
  */
 package org.jmule.core.jkad.publisher;
 
-import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_NOTES;
-import static org.jmule.core.jkad.JKadConstants.PUBLISHER_MAINTENANCE_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.*;
+import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CHECK_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_SCAN_INTERVAL;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.jmule.core.edonkey.packet.tag.Tag;
+import org.jmule.core.configmanager.ConfigurationManager;
+import org.jmule.core.configmanager.ConfigurationManagerException;
+import org.jmule.core.configmanager.ConfigurationManagerSingleton;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.packet.tag.IntTag;
+import org.jmule.core.edonkey.packet.tag.StringTag;
+import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadException;
+import org.jmule.core.jkad.JKadManager;
+import org.jmule.core.jkad.JKadManagerSingleton;
+import org.jmule.core.jkad.utils.Convert;
+import org.jmule.core.jkad.utils.MD4;
+import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
+import org.jmule.core.sharingmanager.PartialFile;
+import org.jmule.core.sharingmanager.SharedFile;
+import org.jmule.core.sharingmanager.SharingManager;
+import org.jmule.core.sharingmanager.SharingManagerSingleton;
 
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:54:40 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:14:11 $
  */
 
 public class Publisher {
 	private static Publisher singleton = null;
-	
-	private Map<Int128, PublishKeywordTask> keywordTasks = new ConcurrentHashMap<Int128, PublishKeywordTask>();
-	private Map<Int128, PublishNoteTask>    noteTasks    = new ConcurrentHashMap<Int128, PublishNoteTask>();
-	private Map<Int128, PublishSourceTask>  sourceTasks  = new ConcurrentHashMap<Int128, PublishSourceTask>();
-	
+	private Map<Int128, PublishTask> publish_tasks = new ConcurrentHashMap<Int128, PublishTask>();
+
 	private Collection<PublisherListener> listener_list = new ConcurrentLinkedQueue<PublisherListener>();
-	
 	private boolean isStarted = false;
-	
 	private PublishTaskListener keywordTaskListener;
 	private PublishTaskListener noteTaskListener;
 	private PublishTaskListener sourceTaskListener;
+	
+	private KeywordPublishQueue keyword_queue = new KeywordPublishQueue();
 	
 	public boolean isStarted() {
 		return isStarted;
@@ -70,27 +85,11 @@ public class Publisher {
 		return singleton;
 	}
 	
-	public int getPublishSourcesCount() {
-		return sourceTasks.size();
-	}
-	
-	public int getPublishKeywordCount() {
-		return keywordTasks.size();
-	}
-	
-	public PublishKeywordTask getPublishKeywordTask(Int128 id) {
-		return keywordTasks.get(id);
-	}
-	
-	public PublishNoteTask getPublishNoteTask(Int128 id) {
-		return noteTasks.get(id);
-	}
-	
-	public PublishSourceTask getPublishSourceTask(Int128 id) {
-		return sourceTasks.get(id);
-	}
-	
-	private Task publisher_maintenance;
+	private Task keyword_publisher;
+	private Task keyword_scanner;
+	private Task source_publisher;
+	private Task note_publisher;
+	private JKadManager _jkad_manager = null;
 	
 	private Publisher() {
 		keywordTaskListener = new PublishTaskListener() {
@@ -99,11 +98,11 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				removeKeywordTask(task.getPublishID());
+				removeTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
-				removeKeywordTask(task.getPublishID());
+				removeTask(task.getPublishID());
 			}
 			
 		};
@@ -114,11 +113,11 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				removeNoteTask(task.getPublishID());
+				removeTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
-				removeNoteTask(task.getPublishID());
+				removeTask(task.getPublishID());
 			}
 			
 		};
@@ -129,44 +128,11 @@ public class Publisher {
 			}
 
 			public void taskStopped(PublishTask task) {
-				removeSourceTask(task.getPublishID());
+				removeTask(task.getPublishID());
 			}
 
 			public void taskTimeOut(PublishTask task) {
-				removeSourceTask(task.getPublishID());
-			}
-			
-		};
-		
-		publisher_maintenance = new Task() {
-			public void run() {
-				/*for(PublishKeywordTask task : keywordTasks.values()){
-					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
-					long currentTime = System.currentTimeMillis();
-					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
-						task.start();
-						notifyListeners(task, TaskStatus.STARTED);
-					}
-				}
-				
-				for(PublishNoteTask task : noteTasks.values()){
-					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
-					long currentTime = System.currentTimeMillis();
-					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
-						task.start();
-						notifyListeners(task, TaskStatus.STARTED);
-					}
-				}
-				
-				for(PublishSourceTask task : sourceTasks.values()){
-					if (Lookup.getSingleton().getLookupLoad()>INDEXTER_MAX_LOAD_TO_NOT_PUBLISH) return ;
-					long currentTime = System.currentTimeMillis();
-					if (currentTime - task.getLastpublishTime() >= task.getPublishInterval()) {
-						task.start();
-						notifyListeners(task, TaskStatus.STARTED);
-					}
-				}*/
-				
+				removeTask(task.getPublishID());
 			}
 			
 		};
@@ -175,138 +141,364 @@ public class Publisher {
 	
 	public void start() {
 		isStarted = true;
-		Timer.getSingleton().addTask(PUBLISHER_MAINTENANCE_INTERVAL, publisher_maintenance, true);
+		
+		_jkad_manager = JKadManagerSingleton.getInstance();
+		
+		keyword_publisher = new Task() {
+			List<Int128> publishing_keywords = new ArrayList<Int128>();
+			Map<Int128, Long> published_keywords = new ConcurrentHashMap<Int128, Long>();
+			
+			@Override
+			public void run() {
+				if (!_jkad_manager.isConnected())
+					return;
+				for(Int128 id : published_keywords.keySet())
+					if (System.currentTimeMillis() - published_keywords.get(id) > JKadConstants.TIME_24_HOURS)
+						published_keywords.remove(id);
+				
+				int to_publish = MAX_CONCURRENT_PUBLISH_KEYWORDS;
+				List<Int128> to_remove = new ArrayList<Int128>();
+				
+				for(Int128 keywordID : publishing_keywords) { 
+					if (isPublishing(keywordID))
+						to_publish--;
+					else
+						to_remove.add(keywordID);
+					if (to_publish == 0)
+						break;
+				}
+				
+				publishing_keywords.removeAll(to_remove);
+				
+				if (to_publish == 0)
+					return;
+				
+				SharingManager _sharing_manager = SharingManagerSingleton.getInstance();
+				List<String> used_keywords = new ArrayList<String>();
+				
+				while(to_publish != 0) {
+					String keyword = keyword_queue.keyword_queue.poll();
+					if (keyword == null)
+						break;
+					
+					used_keywords.add(keyword);
+					
+					byte[] tmp2 = MD4.MD4Digest(keyword.getBytes()).toByteArray();
+					Convert.updateSearchID(tmp2);
+					Int128 keywordID = new Int128(tmp2);
+					
+					if (publishing_keywords.contains(keywordID))
+						continue;
+					
+					if (published_keywords.containsKey(keywordID))
+						continue;
+					
+					to_publish--;
+					Queue<FileHash> keyword_files = keyword_queue.keyword_files.get(keyword);
+					Collection<SharedFile> files_to_publish = new ArrayList<SharedFile>();
+					int i = 0;
+					while (i <= PUBLISH_KEYWORD_ON_ITERATION) {
+						FileHash hash = keyword_files.poll();
+						if (hash == null)
+							break;
+						if (_sharing_manager.hasFile(hash)) {
+							files_to_publish.add(_sharing_manager.getSharedFile(hash));
+							i++;
+						}
+					}
+					
+					Collection<PublishItem> publish_items = new ArrayList<PublishItem>();
+					for(SharedFile file : files_to_publish) {
+						keyword_files.offer(file.getFileHash());
+						
+						TagList tagList = new TagList();
+						tagList.addTag(new StringTag(TAG_FILENAME, file.getSharingName()));
+						tagList.addTag(new IntTag(TAG_FILESIZE, (int) file.length()));
+						publish_items.add(new PublishItem(file.getFileHash(), tagList));
+					}
+					
+					try {
+						publishKeyword(keywordID, publish_items, keyword);
+						published_keywords.put(keywordID, System.currentTimeMillis());
+						publishing_keywords.add(keywordID);
+					} catch (JKadException e) {
+						e.printStackTrace();
+					}
+				}
+				keyword_queue.keyword_queue.addAll(used_keywords);
+			}
+		};
+		
+		keyword_scanner = new Task() {
+			@Override
+			public void run() {
+				if (!_jkad_manager.isConnected())
+					return;
+				SharingManager _sharing_manager = SharingManagerSingleton.getInstance();
+				
+				for(SharedFile shared_file : _sharing_manager.getSharedFiles()) {
+					if (!keyword_queue.hasFile(shared_file.getFileHash()))
+						keyword_queue.addFile(shared_file);
+
+				}
+			}
+			
+		};
+		
+		source_publisher = new Task() {
+			List<Int128> publishing_source = new ArrayList<Int128>();
+			Map<Int128, Long> published_source = new ConcurrentHashMap<Int128, Long>();
+			@Override
+			public void run() {
+				if (!_jkad_manager.isConnected())
+					return;
+				for(Int128 id : published_source.keySet())
+					if (System.currentTimeMillis() - published_source.get(id) > JKadConstants.TIME_5_HOURS)
+						published_source.remove(id);
+				
+				int to_publish = MAX_CONCURRENT_PUBLISH_FILES;
+				List<Int128> to_remove = new ArrayList<Int128>();
+				
+				for(Int128 keywordID : publishing_source) { 
+					if (isPublishing(keywordID))
+						to_publish--;
+					else
+						to_remove.add(keywordID);
+					if (to_publish == 0)
+						break;
+				}
+				publishing_source.removeAll(to_remove);
+				if (to_publish == 0)
+					return;
+				SharingManager _sharing_manager = SharingManagerSingleton.getInstance();
+				ConfigurationManager _config_manager = ConfigurationManagerSingleton.getInstance();
+				
+				for(SharedFile file : _sharing_manager.getSharedFiles()) {
+					if (to_publish==0)
+						break;
+					
+					if (file instanceof PartialFile) 
+						if (((PartialFile)file).getAvailablePartCount()==0)
+							continue;
+					
+					byte[] hash = file.getFileHash().getHash().clone();
+					Convert.updateSearchID(hash);
+					Int128 fileID = new Int128(hash);
+					
+					if (publishing_source.contains(fileID))
+						continue;
+					
+					if (published_source.containsKey(fileID))
+						continue;
+					
+					to_publish--;
+					
+					TagList tagList = new TagList();
+					tagList.addTag(new StringTag(TAG_FILENAME, file.getSharingName()));
+					tagList.addTag(new IntTag(TAG_SOURCETYPE, 1));
+					tagList.addTag(new IntTag(TAG_FILESIZE, (int) file.length()));
+					tagList.addTag(new IntTag(TAG_SOURCEIP,org.jmule.core.utils.Convert.byteToInt(_jkad_manager.getIPAddress().getAddress())));
+					try {
+						tagList.addTag(new IntTag(TAG_SOURCEPORT, _config_manager.getTCP()));
+					} catch (ConfigurationManagerException e) {
+						e.printStackTrace();
+					}
+										
+					PublishItem publishItem = new PublishItem(file.getFileHash(), tagList);
+					try {
+						publishSource(fileID, publishItem);
+						published_source.put(fileID, System.currentTimeMillis());
+						publishing_source.add(fileID);
+					} catch (JKadException e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}
+		};
+		
+		note_publisher = new Task() {
+			List<Int128> publishing_note = new ArrayList<Int128>();
+			Map<Int128, Long> published_note = new ConcurrentHashMap<Int128, Long>();
+			@Override
+			public void run() {
+				if (!_jkad_manager.isConnected())
+					return;
+				for(Int128 id : published_note.keySet())
+					if (System.currentTimeMillis() - published_note.get(id) > JKadConstants.TIME_5_HOURS)
+						published_note.remove(id);
+				
+				int to_publish = MAX_CONCURRENT_PUBLISH_NOTES;
+				List<Int128> to_remove = new ArrayList<Int128>();
+				
+				for(Int128 keywordID : publishing_note) { 
+					if (isPublishing(keywordID))
+						to_publish--;
+					else
+						to_remove.add(keywordID);
+					if (to_publish == 0)
+						break;
+				}
+				publishing_note.removeAll(to_remove);
+				if (to_publish == 0)
+					return;
+				SharingManager _sharing_manager = SharingManagerSingleton.getInstance();
+				
+				for(SharedFile file : _sharing_manager.getSharedFiles()) {
+					if (to_publish==0)
+						break;
+					
+					byte[] hash = file.getFileHash().getHash().clone();
+					Convert.updateSearchID(hash);
+					Int128 fileID = new Int128(hash);
+					
+					if (publishing_note.contains(fileID))
+						continue;
+					
+					if (published_note.containsKey(fileID))
+						continue;
+					
+					if (isPublishing(fileID))
+						continue;
+					
+					if (!file.getTagList().hasTag(TAG_FILERATING))
+						continue;
+					
+					System.out.println("Publish note... : " + fileID.toHexString());
+					
+					TagList tagList = new TagList();
+					tagList.addTag(new StringTag(TAG_FILENAME, file.getSharingName()));
+					tagList.addTag(new IntTag(TAG_FILESIZE, (int) file.length()));
+					
+					tagList.addTag(new IntTag(TAG_FILERATING, file.getFileQuality().getAsInt()));
+					if (file.getTagList().hasTag(JKadConstants.TAG_DESCRIPTION))
+						tagList.addTag(file.getTagList().getTag(JKadConstants.TAG_DESCRIPTION));
+					
+					to_publish--;
+					PublishItem publishItem = new PublishItem(file.getFileHash(), tagList);
+					try {
+						publishNote(fileID, publishItem);
+						published_note.put(fileID, System.currentTimeMillis());
+						publishing_note.add(fileID);
+					} catch (JKadException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+				
+		Timer.getSingleton().addTask(PUBLISH_KEYWORD_CHECK_INTERVAL, keyword_publisher, true);
+		Timer.getSingleton().addTask(PUBLISH_KEYWORD_SCAN_INTERVAL, keyword_scanner, true);
+		
+		
+		Timer.getSingleton().addTask(PUBLISH_SOURCE_INTERVAL, source_publisher, true);
+		Timer.getSingleton().addTask(PUBLISH_NOTE_INTERVAL, note_publisher, true);
 	}
 	
 	public void stop() {
 		isStarted = false;
-		Timer.getSingleton().removeTask(publisher_maintenance);
-		for(Int128 key : keywordTasks.keySet())
-			keywordTasks.get(key).stop();
 		
-		for(Int128 key : noteTasks.keySet())
-			noteTasks.get(key).stop();
+		Timer.getSingleton().removeTask(keyword_publisher);
+		Timer.getSingleton().removeTask(keyword_scanner);
 		
-		for(Int128 key : sourceTasks.keySet())
-			sourceTasks.get(key).stop();
+		Timer.getSingleton().removeTask(source_publisher);
+		Timer.getSingleton().removeTask(note_publisher);
+		
+		for(Int128 key : publish_tasks.keySet())
+			publish_tasks.get(key).stop();
 	}
 	
-	public void publishKeyword(Int128 fileID,Int128 keywordID, List<Tag> tagList) throws JKadException {
-		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener,fileID,keywordID,tagList);
-		
+	public void publishKeyword(Int128 keywordID, Collection<PublishItem> publishItems, String keyword) throws JKadException {
+		PublishKeywordTask task = new PublishKeywordTask(keywordTaskListener, keywordID, publishItems, keyword);
 		task.start();
-		keywordTasks.put(fileID, task);
+		publish_tasks.put(keywordID, task);
 		notifyListeners(task, TaskStatus.ADDED);
 		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
 
 		
-	public void publishSource(Int128 fileID, List<Tag> tagList) throws JKadException  {
-		PublishSourceTask task = new PublishSourceTask(sourceTaskListener,fileID, tagList);
-		
+	public void publishSource(Int128 fileID, PublishItem publishItem) throws JKadException  {
+		PublishSourceTask task = new PublishSourceTask(sourceTaskListener,fileID, publishItem);
 		task.start();
-		sourceTasks.put(fileID, task);
+		publish_tasks.put(fileID, task);
 		notifyListeners(task, TaskStatus.ADDED);
 		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
-	public void publishNote(Int128 fileID, List<Tag> tagList) throws JKadException {
-		PublishNoteTask task = new PublishNoteTask(noteTaskListener,fileID, tagList);
+	public void publishNote(Int128 fileID, PublishItem publishItem) throws JKadException {
+		PublishNoteTask task = new PublishNoteTask(noteTaskListener,fileID, publishItem);
 		task.start();
-		noteTasks.put(fileID, task);
+		publish_tasks.put(fileID, task);
 		notifyListeners(task, TaskStatus.ADDED);
 		notifyListeners(task, TaskStatus.STARTED);
 	}
 	
-	public void stopPublishKeyword(Int128 fileID) {
-		PublishKeywordTask task = keywordTasks.get(fileID);
+	public void stopPublish(Int128 fileID) {
+		PublishTask task = publish_tasks.get(fileID);
 		if (task == null) return ;
 		task.stop();
-		keywordTasks.remove(fileID);
-		removeKeywordTask(fileID);
-	}
-	
-	public void stopPublishSource(Int128 fileID) {
-		PublishSourceTask task = sourceTasks.get(fileID);
-		if (task == null) return ;
-		task.stop();
-		removeSourceTask(fileID);
-	}
-	
-	public void stopPublishNote(Int128 fileID) {
-		PublishNoteTask task = noteTasks.get(fileID);
-		if (task == null) return ;
-		task.stop();
-		removeNoteTask(fileID);
+		publish_tasks.remove(fileID);
+		removeTask(fileID);
 	}
 	
 	public void processPublishResponse(Int128 id, int load) {
-		PublishTask task = keywordTasks.get(id);
+		PublishTask task = publish_tasks.get(id);
 		if (task == null)
-			task = sourceTasks.get(id);
-		if (task == null) return ;
+			return ;
 		task.addPublishedSources(1);
+		
 		if (task instanceof PublishKeywordTask)
 			if (task.getPublishedSources() >= JKadConstants.MAX_PUBLISH_KEYWORDS) {
-				task.stop();
-				removeKeywordTask(id);
+				removeTask(id);
 			}
 		
 		if (task instanceof PublishSourceTask)
 			if (task.getPublishedSources() >= JKadConstants.MAX_PUBLISH_SOURCES) {
-				task.stop();
-				removeSourceTask(id);
+				removeTask(id);
 			}
-				
+		
 		if (task instanceof PublishNoteTask)
 			if (task.getPublishedSources() >= MAX_PUBLISH_NOTES) {
-				task.stop();
-				removeNoteTask(id);
+				removeTask(id);
 			}
 				
 	}
 	
 	public void processNoteResponse(Int128 id, int load) {
-		PublishTask task = noteTasks.get(id);
+		PublishTask task = publish_tasks.get(id);
 		if (task == null) return;
+		if (!(task instanceof PublishTask))
+			return;
 		task.addPublishedSources(1);
 		if (task.getPublishedSources()>=MAX_PUBLISH_NOTES) {
 			task.stop();
-			removeNoteTask(id);
+			removeTask(id);
 		}
 		
 	}
 	
-	public boolean isPublishingKeyword(Int128 id) { return keywordTasks.containsKey(id); }
-	public boolean isPublishingNote(Int128 id) { return noteTasks.containsKey(id); }
-	public boolean isPublishingSource(Int128 id) { return sourceTasks.containsKey(id); }
+	public boolean isPublishing(Int128 id) {
+		return publish_tasks.containsKey(id);
+	}
+
 	
-	void removeKeywordTask(Int128 id) {
-		PublishTask task = keywordTasks.get(id);
+	void removeTask(Int128 id) {
+		PublishTask task = publish_tasks.get(id);
 		if (task !=null) {
 			task.stop();
-			keywordTasks.remove(id); 
+			notifyListeners(task, TaskStatus.STOPPED);
+			publish_tasks.remove(id); 
 			notifyListeners(task, TaskStatus.REMOVED);
 		}
 	}
 	
-	void removeSourceTask(Int128 id) {
-		PublishTask task = sourceTasks.get(id);
-		if (task != null) {
-			task.stop();
-			sourceTasks.remove(id);
-			notifyListeners(task, TaskStatus.REMOVED);
-		}
+	public Collection<PublishTask> getPublishTasks() {
+		return publish_tasks.values();
 	}
 	
-	void removeNoteTask(Int128 id) {
-		PublishTask task = noteTasks.get(id);
-		if (task != null) {
-			task.stop();
-			noteTasks.remove(id);
-			notifyListeners(task, TaskStatus.REMOVED);
-		}
+	public PublishTask getPublishTask(Int128 id) {
+		return publish_tasks.get(id);
 	}
 	
 	public void addListener(PublisherListener listener) {
@@ -317,23 +509,74 @@ public class Publisher {
 		listener_list.remove(listener);
 	}
 	
-	private enum TaskStatus {ADDED, STARTED, REMOVED}
+	private enum TaskStatus {ADDED, STARTED, STOPPED, REMOVED}
 	
 	private void notifyListeners(PublishTask task, TaskStatus status) {
-		for(PublisherListener listener : listener_list)
-			if (status == TaskStatus.ADDED)
-				listener.publishTaskAdded(task);
-			else
-				if (status == TaskStatus.STARTED)
+		for(PublisherListener listener : listener_list) {
+			try {
+				if (status == TaskStatus.ADDED) {
+					listener.publishTaskAdded(task);
+					continue;
+				}
+				if (status == TaskStatus.STARTED) {
 					listener.publishTaskStarted(task);
-				else
+					continue;
+				}
+				if (status == TaskStatus.STOPPED) {
+					listener.publishTaskStopped(task);
+					continue;
+				}
+				if (status == TaskStatus.REMOVED) {
 					listener.publishTaskRemoved(task);
+					continue;
+				}
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+		}
 	}
 	
 	interface PublishTaskListener{
 		public void taskStarted(PublishTask task);
 		public void taskTimeOut(PublishTask task);
 		public void taskStopped(PublishTask task);
+	}
+	
+	class KeywordPublishQueue {
+		Map<String,Queue<FileHash>> keyword_files = new ConcurrentHashMap<String, Queue<FileHash>>();
+		Map<FileHash, String> hash_mapping = new ConcurrentHashMap<FileHash, String>();
+		
+		Queue<String> keyword_queue = new ConcurrentLinkedQueue<String>();
+		
+		public boolean hasFile(FileHash hash) {
+			return hash_mapping.containsKey(hash);
+		}
+		
+		public void addFile(SharedFile sharedFile) {
+			List<String> keywords = Utils.getFileKeyword(sharedFile.getSharingName());
+			for(String keyword : keywords) {
+				if (!keyword_files.containsKey(keyword)) {
+					keyword_files.put(keyword, new ConcurrentLinkedQueue<FileHash>());
+					keyword_queue.offer(keyword);
+				}
+				keyword_files.get(keyword).offer(sharedFile.getFileHash());
+			}
+			hash_mapping.put(sharedFile.getFileHash(), sharedFile.getSharingName());
+		}
+		
+		public void removeFile(FileHash hash) {
+			List<String> keywords = Utils.getFileKeyword(hash_mapping.get(hash));
+			for(String keyword : keywords) {
+				if (keyword_files.containsKey(keyword)) {
+					Queue<FileHash> queue = keyword_files.get(keyword);
+					queue.remove(hash);
+					if (queue.isEmpty())
+						keyword_files.remove(keyword);
+				}
+			}
+			hash_mapping.remove(hash);
+		}
+		
 	}
 	
 }
