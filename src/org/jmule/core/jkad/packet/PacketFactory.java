@@ -79,17 +79,19 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.JKadConstants.RequestType;
+import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.indexer.Source;
+import org.jmule.core.jkad.publisher.PublishItem;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Dec 31, 2008
  * 
  * @author binary256
- * @version $Revision: 1.4 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.5 $ Last changed by $Author: binary255 $ on $Date:
  *          2009/08/16 12:18:20 $
  */
 public class PacketFactory {
@@ -168,18 +170,28 @@ public class PacketFactory {
 		return packet;
 	}
 
-	public static KadPacket getPublish1ReqPacket(Int128 targetID,ClientID clientID, TagList tagList) {
-		ByteBuffer tags = tagsToByteBuffer(tagList);
-
-		KadPacket packet = new KadPacket(KADEMLIA_PUBLISH_REQ, 16 + 2 + 16 + 2
-				+ tags.capacity());
+	public static KadPacket getPublish1ReqPacket(Int128 targetID,Collection<PublishItem> publishItems) {
+		
+		List<ByteBuffer> publish_items = new ArrayList<ByteBuffer>();
+		int size = 0;
+		
+		for(PublishItem p : publishItems) {
+			ByteBuffer tags = tagsToByteBuffer(p.getTagList());
+			tags.position(0);
+			ByteBuffer buffer = Misc.getByteBuffer(16 + 1 + tags.capacity());
+			buffer.put(new Int128(p.getFileHash()).toByteArray());
+			buffer.put(intToByte(p.getTagList().size()));
+			buffer.put(tags);
+			size += buffer.capacity();
+			buffer.position(0);
+			publish_items.add(buffer);
+		}
+		
+		KadPacket packet = new KadPacket(KADEMLIA_PUBLISH_REQ, 16 + 2 + size);
 		packet.insertData(targetID.toByteArray());
-		packet.insertData((short) 1);
-		packet.insertData(clientID.toByteArray());
-		packet.insertData(intToByte(tagList.size()));
-		tags.position(0);
-		packet.insertData(tags);
-
+		packet.insertData(Convert.intToShort(publishItems.size()));
+		for(ByteBuffer b : publish_items)
+			packet.insertData(b);
 		return packet;
 	}
 
@@ -274,15 +286,15 @@ public class PacketFactory {
 		return packet;
 	}
 
-	public static KadPacket getPublishNotes1Req(Int128 noteID,ClientID publisherID, TagList tagList) {
-		ByteBuffer tag_list = tagsToByteBuffer(tagList);
+	public static KadPacket getPublishNotes1Req(Int128 publisherID, PublishItem publishItem) {
+		ByteBuffer tag_list = tagsToByteBuffer(publishItem.getTagList());
 		tag_list.position(0);
 
 		KadPacket packet = new KadPacket(KADEMLIA_PUBLISH_NOTES_REQ,16 + 16 + 2 + tag_list.capacity());
 
-		packet.insertData(noteID.toByteArray());
+		packet.insertData(new Int128(publishItem.getFileHash()).toByteArray());
 		packet.insertData(publisherID.toByteArray());
-		packet.insertData(intToByte(tagList.size()));
+		packet.insertData(intToByte(publishItem.getTagList().size()));
 		packet.insertData(tag_list);
 
 		return packet;
@@ -320,7 +332,6 @@ public class PacketFactory {
 	}
 
 	// Kad 2.0
-
 	public static KadPacket getBootStrapReq2Packet() {
 		KadPacket packet = new KadPacket(KADEMLIA2_BOOTSTRAP_REQ);
 		return packet;
@@ -464,35 +475,45 @@ public class PacketFactory {
 
 	}
 
-	//TODO : Extend support for multiple keyword publishing
-	public static KadPacket getPublishKeyReq2Packet(Int128 keywordHash,Int128 fileID, TagList tagList) {
-		ByteBuffer tag_list = tagsToByteBuffer(tagList);
-		KadPacket packet = new KadPacket(KADEMLIA2_PUBLISH_KEY_REQ, 16 + 2 + 16 + 1 + tag_list.capacity());
-
+	public static KadPacket getPublishKeyReq2Packet(Int128 keywordHash,Collection<PublishItem> publishItems) {
+		List<ByteBuffer> publish_items = new ArrayList<ByteBuffer>();
+		int size = 0;
+		for(PublishItem p : publishItems) {
+			ByteBuffer tags = tagsToByteBuffer(p.getTagList());
+			tags.position(0);
+			ByteBuffer buffer = Misc.getByteBuffer(16 + 1 + tags.capacity());
+			buffer.put(new Int128(p.getFileHash()).toByteArray());
+			buffer.put(intToByte(p.getTagList().size()));
+			buffer.put(tags);
+			size += buffer.capacity();
+			buffer.position(0);
+			publish_items.add(buffer);
+		}
+		
+		KadPacket packet = new KadPacket(KADEMLIA2_PUBLISH_KEY_REQ, 16 + 2 + size);
 		packet.insertData(keywordHash.toByteArray());
-		packet.insertData((short) 1);
-		packet.insertData(fileID.toByteArray());
-		packet.insertData(intToByte(tagList.size()));
-		packet.insertData(tag_list);
+		packet.insertData(Convert.intToShort(publishItems.size()));
+		for(ByteBuffer b : publish_items) 
+			packet.insertData(b);
 		return packet;
 	}
 
-	public static KadPacket getPublishSource2Packet(Int128 fileID, Int128 peerID, TagList tagList) {
-		ByteBuffer tag_list = tagsToByteBuffer(tagList);
+	public static KadPacket getPublishSource2Packet(Int128 sourceID, PublishItem publishItem) {
+		ByteBuffer tag_list = tagsToByteBuffer(publishItem.getTagList());
 		KadPacket packet = new KadPacket(KADEMLIA2_PUBLISH_SOURCE_REQ, 16 + 16 + 1 + tag_list.capacity());
-		packet.insertData(fileID.toByteArray());
-		packet.insertData(peerID.toByteArray());
-		packet.insertData(intToByte(tagList.size()));
+		packet.insertData(new Int128(publishItem.getFileHash()).toByteArray());
+		packet.insertData(sourceID.toByteArray());
+		packet.insertData(intToByte(publishItem.getTagList().size()));
 		packet.insertData(tag_list);
 		return packet;
 	}
 
-	public static KadPacket getPublishNotes2Packet(Int128 fileID, Int128 peerID,TagList tagList) {
-		ByteBuffer tag_list = tagsToByteBuffer(tagList);
+	public static KadPacket getPublishNotes2Packet(Int128 sourceID, PublishItem publishItem) {
+		ByteBuffer tag_list = tagsToByteBuffer(publishItem.getTagList());
 		KadPacket packet = new KadPacket(JKadConstants.KADEMLIA2_PUBLISH_NOTES_REQ,16+16 + 1 + tag_list.capacity());
-		packet.insertData(fileID.toByteArray());
-		packet.insertData(peerID.toByteArray());
-		packet.insertData(Convert.intToByte(tagList.size()));
+		packet.insertData(new Int128(publishItem.getFileHash()).toByteArray());
+		packet.insertData(sourceID.toByteArray());
+		packet.insertData(Convert.intToByte(publishItem.getTagList().size()));
 		packet.insertData(tag_list.array());
 		return packet;
 	}
