@@ -22,9 +22,9 @@
  */
 package org.jmule.core.edonkey.metfile;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILENAME;
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
-import static org.jmule.core.edonkey.E2DKConstants.KNOWN_VERSION;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILENAME;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILESIZE;
+import static org.jmule.core.edonkey.ED2KConstants.KNOWN_VERSION;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -101,8 +101,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
  */
 public class KnownMet extends MetFile {
 

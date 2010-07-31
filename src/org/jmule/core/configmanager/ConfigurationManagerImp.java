@@ -43,7 +43,7 @@ import org.jmule.core.JMException;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.bccrypto.JDKKeyFactory;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.jkad.ClientID;
 import org.jmule.core.networkmanager.InternalNetworkManager;
@@ -56,8 +56,8 @@ import org.jmule.core.utils.NetworkUtils;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.23 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/04/29 11:25:22 $$
+ * @version $$Revision: 1.24 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
  */
 public class ConfigurationManagerImp extends JMuleAbstractManager implements InternalConfigurationManager  {
 
@@ -698,8 +698,8 @@ public class ConfigurationManagerImp extends JMuleAbstractManager implements Int
         while(true){
             try{
                 do{
-                    p = new BigInteger(E2DKConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH >>> 1, 85, random);
-                    q = new BigInteger(E2DKConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH >>> 1, 85, random);
+                    p = new BigInteger(ED2KConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH >>> 1, 85, random);
+                    q = new BigInteger(ED2KConstants.SECURITY_IDENTIFICATION_BIT_KEY_LENGTH >>> 1, 85, random);
                     modulus = p.multiply(q);
                 } while( (p.compareTo(q) == 0) || (modulus.bitLength() != 384) );
                 private_exponent = PUBLIC_EXPONENT.modInverse(p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)));

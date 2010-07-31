@@ -22,13 +22,13 @@
  */
 package org.jmule.core.edonkey.metfile;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILENAME;
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
-import static org.jmule.core.edonkey.E2DKConstants.FT_GAPEND;
-import static org.jmule.core.edonkey.E2DKConstants.FT_GAPSTART;
-import static org.jmule.core.edonkey.E2DKConstants.FT_TEMPFILE;
-import static org.jmule.core.edonkey.E2DKConstants.PARTFILE_VERSION;
-import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILENAME;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILESIZE;
+import static org.jmule.core.edonkey.ED2KConstants.FT_GAPEND;
+import static org.jmule.core.edonkey.ED2KConstants.FT_GAPSTART;
+import static org.jmule.core.edonkey.ED2KConstants.FT_TEMPFILE;
+import static org.jmule.core.edonkey.ED2KConstants.PARTFILE_VERSION;
+import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.jmule.core.JMIterable;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.IntTag;
@@ -97,8 +97,8 @@ import org.jmule.core.utils.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.15 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 08:44:16 $$
+ * @version $$Revision: 1.16 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
  */
 public class PartMet extends MetFile {
 	
@@ -188,7 +188,7 @@ public class PartMet extends MetFile {
 					}
 				}		
 				gapList = new GapList();
-				byte tag_id = E2DKConstants.GAP_OFFSET;
+				byte tag_id = ED2KConstants.GAP_OFFSET;
 				Tag start_tag, end_tag;
 				while (true) {
 					start_tag = tagList.getTag(new byte[]{FT_GAPSTART[0],tag_id});
@@ -297,7 +297,7 @@ public class PartMet extends MetFile {
 				fileChannel.write(data);
 				
 				/**Write Gap List*/
-				byte counter = E2DKConstants.GAP_OFFSET;
+				byte counter = ED2KConstants.GAP_OFFSET;
 				byte metaTagBegin[] = FT_GAPSTART.clone();
 				byte metaTagEnd[] = FT_GAPEND.clone();
 				JMIterable<Gap> gap_list = gapList.getGaps();

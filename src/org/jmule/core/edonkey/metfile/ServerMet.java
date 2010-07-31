@@ -22,7 +22,7 @@
  */
 package org.jmule.core.edonkey.metfile;
 
-import static org.jmule.core.edonkey.E2DKConstants.SERVERLIST_VERSION;
+import static org.jmule.core.edonkey.ED2KConstants.SERVERLIST_VERSION;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -91,8 +91,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.10 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 06:59:30 $$
+ * @version $$Revision: 1.11 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
  */
 public class ServerMet extends MetFile {
 	
