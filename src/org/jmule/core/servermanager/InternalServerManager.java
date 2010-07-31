@@ -26,14 +26,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.TagList;
 
 /**
  * Created on Aug 20, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/08 09:30:24 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 12:49:52 $
  */
 public interface InternalServerManager extends ServerManager {
 

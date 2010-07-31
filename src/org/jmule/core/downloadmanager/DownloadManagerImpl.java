@@ -43,11 +43,11 @@ import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.39 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 11:18:36 $$
+ * @version $$Revision: 1.40 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:51:28 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -171,7 +171,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			public void run() {
 				
 				List<FileHash> sessions_to_request = new ArrayList<FileHash>();
-				while ((!server_sources_queue.isEmpty()) && (sessions_to_request.size() < E2DKConstants.SERVER_FILE_SOURCES_QUERY_ITERATION)) {
+				while ((!server_sources_queue.isEmpty()) && (sessions_to_request.size() < ED2KConstants.SERVER_FILE_SOURCES_QUERY_ITERATION)) {
 					FileHash hash = server_sources_queue.poll();
 					sessions_to_request.add(hash);
 				}
@@ -201,7 +201,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				}
 				List<FileHash> hash_list = new ArrayList<FileHash>();
 				List<Long> size_list = new ArrayList<Long>();
-				while ((!global_sources_queue.isEmpty()) && (hash_list.size() < E2DKConstants.GLOBAL_FILE_SOURCES_QUERY_ITERATION)) {
+				while ((!global_sources_queue.isEmpty()) && (hash_list.size() < ED2KConstants.GLOBAL_FILE_SOURCES_QUERY_ITERATION)) {
 					FileHash hash = global_sources_queue.poll();
 					try {
 						hash_list.add(getDownload(hash).getFileHash());
@@ -225,7 +225,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			}
 		};
 		
-		kad_source_search_task = new JMTimerTask() {	
+		kad_source_search_task = new JMTimerTask() {
 			Int128 error_id = null;
 			Int128 prev_search = null;
 			public void run() { 
@@ -321,7 +321,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					}
 					pex_sources_queue.offer(hash);
 					DownloadSession session = session_list.get(hash);
-					if (session.getPeerCount() > E2DKConstants.RARE_SHARED_SOURCES_FILE) {
+					if (session.getPeerCount() > ED2KConstants.RARE_SHARED_SOURCES_FILE) {
 						// queue only one peer for sources
 						List<Peer> session_peers = session.download_status_list.getPeersByStatus(PeerDownloadStatus.IN_QUEUE,PeerDownloadStatus.ACTIVE, PeerDownloadStatus.ACTIVE_UNUSED);
 						List<Peer> used_peers = new ArrayList<Peer>();
@@ -703,8 +703,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		}
 	}
 
-	public void receivedFileRequestAnswerFromPeer(Peer sender,
-			FileHash fileHash, String fileName) {
+	public void receivedFileRequestAnswerFromPeer(Peer sender, FileHash fileHash, String fileName) {
 		DownloadSession session;
 		try {
 			session = getDownload(fileHash);
@@ -759,8 +758,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			e.printStackTrace();
 			return;
 		}
-		session.receivedRequestedFileChunkFromPeer(sender, fileHash,
-				chunk);
+		session.receivedRequestedFileChunkFromPeer(sender, fileHash,chunk);
 	}
 
 	public void receivedSlotGivenFromPeer(Peer sender) {

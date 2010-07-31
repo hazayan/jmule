@@ -43,9 +43,9 @@ import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.ED2KServerLink;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.metfile.ServerMet;
 import org.jmule.core.edonkey.metfile.ServerMetException;
 import org.jmule.core.edonkey.packet.tag.TagList;
@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.20 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 07:00:20 $$
+ * @version $$Revision: 1.21 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:49:52 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 		
@@ -165,7 +165,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 					return;
 				}
 				for(Server server : server_list) {
-					int challenge = (int)((random.nextInt() << 16) + E2DKConstants.INVALID_SERVER_DESC_LENGTH);
+					int challenge = (int)((random.nextInt() << 16) + ED2KConstants.INVALID_SERVER_DESC_LENGTH);
 					byte[] byte_challenge = Convert.intToByteArray(challenge);
 					
 					challenge = Convert.byteToInt(byte_challenge);
@@ -516,7 +516,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 
 	public void receivedMessage(String message) {
 		notifyMessage(connected_server, message);
-		for(String error_message : E2DKConstants.SERVER_ERROR_MESSAGES) {
+		for(String error_message : ED2KConstants.SERVER_ERROR_MESSAGES) {
 			if (message.contains(error_message))
 				try {
 					disconnect();

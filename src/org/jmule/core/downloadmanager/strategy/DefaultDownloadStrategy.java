@@ -22,7 +22,7 @@
  */
 package org.jmule.core.downloadmanager.strategy;
 
-import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.util.Collection;
 
@@ -38,8 +38,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/06/30 17:47:48 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:51:28 $$
  */
 public class DefaultDownloadStrategy implements DownloadStrategy {
 

@@ -25,6 +25,7 @@ package org.jmule.core.downloadmanager;
 import static org.jmule.core.downloadmanager.PeerDownloadStatus.CONNECTED;
 import static org.jmule.core.downloadmanager.PeerDownloadStatus.DISCONNECTED;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +37,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/01/28 12:55:42 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:51:28 $$
  */
 public class DownloadStatusList {
 
@@ -45,8 +46,6 @@ public class DownloadStatusList {
 
 	DownloadStatusList() {
 	}
-
-	
 	
 	List<Peer> getPeersWithInactiveTime(long inactiveTime) {
 		List<Peer> peer_list = new LinkedList<Peer>();
@@ -209,7 +208,7 @@ public class DownloadStatusList {
 	
 	public class PeerDownloadInfo {
 		Peer peer;
-		List<String> statusList = new LinkedList<String>();
+		List<String> statusList = new ArrayList<String>();
 		long lastUpdateTime = 0;
 		PeerDownloadStatus peerStatus;
 		

@@ -22,24 +22,24 @@
  */
 package org.jmule.core.servermanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.SL_DESCRIPTION;
-import static org.jmule.core.edonkey.E2DKConstants.SL_FILES;
-import static org.jmule.core.edonkey.E2DKConstants.SL_HARDFILES;
-import static org.jmule.core.edonkey.E2DKConstants.SL_PING;
-import static org.jmule.core.edonkey.E2DKConstants.SL_SERVERNAME;
-import static org.jmule.core.edonkey.E2DKConstants.SL_SOFTFILES;
-import static org.jmule.core.edonkey.E2DKConstants.SL_SRVMAXUSERS;
-import static org.jmule.core.edonkey.E2DKConstants.SL_USERS;
-import static org.jmule.core.edonkey.E2DKConstants.SL_VERSION;
+import static org.jmule.core.edonkey.ED2KConstants.SL_DESCRIPTION;
+import static org.jmule.core.edonkey.ED2KConstants.SL_FILES;
+import static org.jmule.core.edonkey.ED2KConstants.SL_HARDFILES;
+import static org.jmule.core.edonkey.ED2KConstants.SL_PING;
+import static org.jmule.core.edonkey.ED2KConstants.SL_SERVERNAME;
+import static org.jmule.core.edonkey.ED2KConstants.SL_SOFTFILES;
+import static org.jmule.core.edonkey.ED2KConstants.SL_SRVMAXUSERS;
+import static org.jmule.core.edonkey.ED2KConstants.SL_USERS;
+import static org.jmule.core.edonkey.ED2KConstants.SL_VERSION;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.ED2KServerLink;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.IntTag;
 import org.jmule.core.edonkey.packet.tag.StringTag;
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -51,8 +51,8 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/15 07:01:30 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:49:52 $$
  */
 public class Server {
 	public static enum ServerStatus {
@@ -67,7 +67,7 @@ public class Server {
 
 	private ServerStatus status = ServerStatus.DISCONNECTED;
 
-	private Set<ServerFeatures> serverFeatures = new HashSet<E2DKConstants.ServerFeatures>();
+	private Set<ServerFeatures> serverFeatures = new HashSet<ED2KConstants.ServerFeatures>();
 
 	private boolean is_static = false;
 
@@ -110,12 +110,12 @@ public class Server {
 
 	void setFeatures(Set<ServerFeatures> features) {
 		this.serverFeatures.addAll(features);
-		tagList.addTag(new IntTag(E2DKConstants.SL_UDPFLAGS, Utils.serverFeaturesToInt(serverFeatures)), true);
+		tagList.addTag(new IntTag(ED2KConstants.SL_UDPFLAGS, Utils.serverFeaturesToInt(serverFeatures)), true);
 	}
 
 	void setTagList(TagList tagList) {
 		this.tagList = tagList;
-		Tag tag = this.tagList.getTag(E2DKConstants.SL_UDPFLAGS);
+		Tag tag = this.tagList.getTag(ED2KConstants.SL_UDPFLAGS);
 		if (tag != null) {
 			int value = ((IntTag)tag).getValue();
 			serverFeatures.addAll(Utils.scanTCPServerFeatures(value));
@@ -143,6 +143,10 @@ public class Server {
 
 	void setChallenge(int challenge) {
 		this.sended_challenge = challenge;
+	}
+	
+	public int getChallenge() {
+		return sended_challenge;
 	}
 	
 	void setStatus(ServerStatus status) {
