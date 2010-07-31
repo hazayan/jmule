@@ -26,13 +26,12 @@ import static org.jmule.core.utils.Convert.byteToInt;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.edonkey.FileHash;
@@ -46,31 +45,23 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:06:16 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 12:59:27 $
  */
 public class Utils {
 	
 	private static Random random = new Random();
 
-	private static Set<String> keyword_separators = new HashSet<String>();
-	
-	static {
-		keyword_separators.add("\\.");
-		keyword_separators.add(" ");
-		keyword_separators.add("\\-");
-		keyword_separators.add("_");
-	}
+	private static String KAD_INVALID_CHARS = " ()[]{}<>,._-!?:;\\/\"";
 	
 	public static List<String> getFileKeyword(String fileName) {
 		List<String> result = new ArrayList<String>();
-		HashSet<String> keywords = new HashSet<String>();
-				
-		for(String separator : keyword_separators) {
-				keywords.addAll(Arrays.asList(fileName.split(separator)));
-		}
+	
+		StringTokenizer keywords =  new StringTokenizer(fileName, KAD_INVALID_CHARS);
 		
-		result.addAll(keywords);
+		while (keywords.hasMoreElements())
+			result.add(keywords.nextToken());
+
 		return result;
 	}
 	
