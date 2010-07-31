@@ -32,8 +32,8 @@ import org.jmule.core.peermanager.Peer;
 /**
  * Created on Jan 24, 2010
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/24 15:51:07 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:11:45 $
  */
 public class PayloadPeerList {
 
@@ -86,13 +86,13 @@ public class PayloadPeerList {
 		return container.getAddTime();
 	}
 	
-	public long getLastActive(Peer peer) {
+	public long getLastActivity(Peer peer) {
 		if (!hasPeer(peer)) return 0;
 		PayloadPeerContainer container = payload_peers.get(peer);
 		return container.getLastResponseTime();
 	}
 	
-	public void setLastActiveTime(Peer peer, long responseTime) {
+	public void updateLastActivity(Peer peer, long responseTime) {
 		if (!hasPeer(peer)) return ;
 		PayloadPeerContainer container = payload_peers.get(peer);
 		container.setLastResponseTime(responseTime);

@@ -22,7 +22,7 @@
  */
 package org.jmule.core.utils;
 
-import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -41,8 +41,8 @@ import org.jmule.core.edonkey.packet.tag.Tag;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/29 11:29:29 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
  */
 public class Misc {
 	

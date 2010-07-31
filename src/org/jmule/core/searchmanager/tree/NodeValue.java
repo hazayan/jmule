@@ -30,18 +30,20 @@ import org.jmule.core.sharingmanager.FileType;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.*;
 import static org.jmule.core.searchmanager.tree.NodeValue.NodeType.*;
 /**
  * Tree node value.
  * Created on Oct 26, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/11/13 08:25:08 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:08:35 $
  */
 
 public class NodeValue {
-	public enum NodeType  {NOT,OR,AND,FILE_NAME,FILETYPE,MINSIZE,MAXSIZE,MINAVAILABILITY,MAXAVAILABILITY,MINCOMPLETESRC,MAXCOMPLETESRC,EXTENSION }
+	public enum NodeType {
+		NOT, OR, AND, FILE_NAME, FILETYPE, MINSIZE, MAXSIZE, MINAVAILABILITY, MAXAVAILABILITY, MINCOMPLETESRC, MAXCOMPLETESRC, EXTENSION
+	}
 	
 	private Map<String,Object> data = new Hashtable<String,Object>();
 	

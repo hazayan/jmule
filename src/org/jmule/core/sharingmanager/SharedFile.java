@@ -22,22 +22,22 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILERATING;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ARC;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_AUDIO;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_DOC;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_IMAGE;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_ISO;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_PROGRAM;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_UNKNOWN;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_FILE_TYPE_VIDEO;
-import static org.jmule.core.edonkey.E2DKConstants.archive_extensions;
-import static org.jmule.core.edonkey.E2DKConstants.audio_extensions;
-import static org.jmule.core.edonkey.E2DKConstants.doc_extensions;
-import static org.jmule.core.edonkey.E2DKConstants.image_extensions;
-import static org.jmule.core.edonkey.E2DKConstants.iso_extensions;
-import static org.jmule.core.edonkey.E2DKConstants.program_extensions;
-import static org.jmule.core.edonkey.E2DKConstants.video_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILERATING;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_ARC;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_AUDIO;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_DOC;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_IMAGE;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_ISO;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_PROGRAM;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_UNKNOWN;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_FILE_TYPE_VIDEO;
+import static org.jmule.core.edonkey.ED2KConstants.archive_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.audio_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.doc_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.image_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.iso_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.program_extensions;
+import static org.jmule.core.edonkey.ED2KConstants.video_extensions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -60,8 +60,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/06 09:02:29 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
  */
 public abstract class SharedFile {
 	

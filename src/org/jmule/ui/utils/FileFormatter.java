@@ -22,7 +22,7 @@
  */
 package org.jmule.ui.utils;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.*;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -31,8 +31,8 @@ import org.jmule.ui.localizer._;
 /**
  * Created on Aug 16, 2008
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2009/05/09 11:17:40 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:08:35 $
  */
 public class FileFormatter {
 

@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.jmule.core.downloadmanager.PeerDownloadStatus;
 import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.jkad.JKadConstants.ContactType;
 import org.jmule.core.jkad.routingtable.KadContact;
 import org.jmule.core.peermanager.Peer;
@@ -39,7 +39,7 @@ import org.jmule.ui.localizer._;
  * Created on Aug 9, 2008
  * 
  * @author binary256
- * @version $Revision: 1.9 $ Last changed by $Author: binary255 $ on $Date:
+ * @version $Revision: 1.10 $ Last changed by $Author: binary255 $ on $Date:
  *          2008/09/06 14:44:56 $
  */
 public class PeerInfoFormatter {
@@ -65,22 +65,22 @@ public class PeerInfoFormatter {
 	private static Map<Integer, String> client_software = new Hashtable<Integer, String>();
 
 	static {
-		client_software.put(E2DKConstants.SO_EMULE, SO_EMULE);
-		client_software.put(E2DKConstants.SO_LMULE, SO_LMULE);
-		client_software.put(E2DKConstants.SO_AMULE, SO_AMULE);
-		client_software.put(E2DKConstants.SO_SHAREAZA, SO_SHAREAZA);
-		client_software.put(E2DKConstants.SO_EMULE_PLUS, SO_EMULE_PLUS);
-		client_software.put(E2DKConstants.SO_HYDRANODE, SO_HYDRANODE);
-		client_software.put(E2DKConstants.SO_NEW2_MLDONKEY, SO_NEW2_MLDONKEY);
-		client_software.put(E2DKConstants.SO_LPHANT, SO_LPHANT);
-		client_software.put(E2DKConstants.SO_NEW2_SHAREAZA, SO_NEW2_SHAREAZA);
-		client_software.put(E2DKConstants.SO_EDONKEYHYBRID, SO_EDONKEYHYBRID);
-		client_software.put(E2DKConstants.SO_EDONKEY, SO_EDONKEY);
-		client_software.put(E2DKConstants.SO_MLDONKEY, SO_MLDONKEY);
-		client_software.put(E2DKConstants.SO_OLDEMULE, SO_OLDEMULE);
-		client_software.put(E2DKConstants.SO_JMULE, SO_JMULE);
-		client_software.put(E2DKConstants.SO_NEW_MLDONKEY, SO_NEW_MLDONKEY);
-		client_software.put(E2DKConstants.SO_COMPAT_UNK, SO_COMPAT_UNK);
+		client_software.put(ED2KConstants.SO_EMULE, SO_EMULE);
+		client_software.put(ED2KConstants.SO_LMULE, SO_LMULE);
+		client_software.put(ED2KConstants.SO_AMULE, SO_AMULE);
+		client_software.put(ED2KConstants.SO_SHAREAZA, SO_SHAREAZA);
+		client_software.put(ED2KConstants.SO_EMULE_PLUS, SO_EMULE_PLUS);
+		client_software.put(ED2KConstants.SO_HYDRANODE, SO_HYDRANODE);
+		client_software.put(ED2KConstants.SO_NEW2_MLDONKEY, SO_NEW2_MLDONKEY);
+		client_software.put(ED2KConstants.SO_LPHANT, SO_LPHANT);
+		client_software.put(ED2KConstants.SO_NEW2_SHAREAZA, SO_NEW2_SHAREAZA);
+		client_software.put(ED2KConstants.SO_EDONKEYHYBRID, SO_EDONKEYHYBRID);
+		client_software.put(ED2KConstants.SO_EDONKEY, SO_EDONKEY);
+		client_software.put(ED2KConstants.SO_MLDONKEY, SO_MLDONKEY);
+		client_software.put(ED2KConstants.SO_OLDEMULE, SO_OLDEMULE);
+		client_software.put(ED2KConstants.SO_JMULE, SO_JMULE);
+		client_software.put(ED2KConstants.SO_NEW_MLDONKEY, SO_NEW_MLDONKEY);
+		client_software.put(ED2KConstants.SO_COMPAT_UNK, SO_COMPAT_UNK);
 	}
 
 	public static String peerSourceToString(PeerSource source) {

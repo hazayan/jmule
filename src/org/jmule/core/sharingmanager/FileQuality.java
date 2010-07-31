@@ -22,18 +22,18 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_EXCELLENT;
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_FAIR;
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_FAKE;
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_GOOD;
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_NOTRATED;
-import static org.jmule.core.edonkey.E2DKConstants.FILE_QUALITY_POOR;
+import static org.jmule.core.edonkey.ED2KConstants.FILE_QUALITY_EXCELLENT;
+import static org.jmule.core.edonkey.ED2KConstants.FILE_QUALITY_FAIR;
+import static org.jmule.core.edonkey.ED2KConstants.FILE_QUALITY_FAKE;
+import static org.jmule.core.edonkey.ED2KConstants.FILE_QUALITY_GOOD;
+import static org.jmule.core.edonkey.ED2KConstants.FILE_QUALITY_NOTRATED;
+import static org.jmule.core.edonkey.ED2KConstants.FILE_QUALITY_POOR;
 
 /**
  * Created on Oct 23, 2008
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/24 15:25:17 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:08:35 $
  */
 public enum FileQuality { 
 	NOTRATED { public int getAsInt() { return FILE_QUALITY_NOTRATED; } },

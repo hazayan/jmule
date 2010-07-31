@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.jmule.core.JMIterable;
 import org.jmule.core.JMIterator;
 import org.jmule.core.configmanager.ConfigurationManager;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.UserHash;
 import org.jmule.core.peermanager.InternalPeerManager;
@@ -45,8 +45,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.18 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/28 13:26:04 $$
+ * @version $$Revision: 1.19 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:11:45 $$
  */
 public class UploadQueue {
 	private static UploadQueue instance = null;
@@ -81,9 +81,8 @@ public class UploadQueue {
 	void addPeer(Peer peer, FileHash fileHash) throws UploadQueueException {
 		if (!(size() < ConfigurationManager.UPLOAD_QUEUE_SIZE))
 			throw new UploadQueueException("Queue full");
-		System.out.println("UPLOAD :: upload_queue :: addPeer ::  " +peer);
 		upload_queue.put(peer.getUserHash(), 
-				new UploadQueueContainer(peer,fileHash, E2DKConstants.INITIAL_RATING));
+				new UploadQueueContainer(peer,fileHash, ED2KConstants.INITIAL_RATING));
 	}
 	
 	public int getPeerPosition(Peer peer) throws UploadQueueException {
@@ -115,8 +114,7 @@ public class UploadQueue {
 	void removePeer(Peer peer) {
 		if (!hasPeer(peer))
 			return;
-		
-		System.out.println("UPLOAD :: upload_queue :: removePeer ::  " +peer);
+
 		UploadQueueContainer container = upload_queue.get(peer.getUserHash());
 		upload_queue.remove(peer.getUserHash());
 		if (slot_clients.contains(container))

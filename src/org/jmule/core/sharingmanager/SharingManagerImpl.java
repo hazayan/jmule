@@ -22,7 +22,7 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.MAX_OFFER_FILES;
+import static org.jmule.core.edonkey.ED2KConstants.MAX_OFFER_FILES;
 
 import java.io.File;
 import java.io.FileFilter;

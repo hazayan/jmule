@@ -22,8 +22,8 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
-import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILESIZE;
+import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import org.jmule.core.JMuleCoreFactory;
 import org.jmule.core.NotEnoughSpaceDownloadingFile;
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.downloadmanager.FileChunk;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.metfile.PartMet;
@@ -56,8 +56,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/09 17:30:05 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
  */
 public class PartialFile extends SharedFile {
 	
@@ -89,7 +89,7 @@ public class PartialFile extends SharedFile {
 		
 		this.partFile = partFile;
 		this.tagList = new TagList(partFile.getTagList().getAsList());
-		tagList.removeTag(E2DKConstants.JMuleInternalTags);
+		tagList.removeTag(ED2KConstants.JMuleInternalTags);
 		
 		tempFileName = tempDir + File.separator + partFile.getTempFileName();
 		
@@ -282,7 +282,7 @@ public class PartialFile extends SharedFile {
 					toAdd = fileChunk.getChunkEnd() - writeChannel.size();
 				}
 				if (toAdd != 0) {
-					toAdd += E2DKConstants.PARTSIZE;
+					toAdd += ED2KConstants.PARTSIZE;
 					if (toAdd + writeChannel.size()>length()) {
 						toAdd = length() - writeChannel.size();
 					}
@@ -424,7 +424,7 @@ public class PartialFile extends SharedFile {
 	private boolean checkFilePartsIntegrity() {
 		
 		if (!hasHashSet()) {
-			if (E2DKConstants.PARTSIZE < length()) return true;
+			if (ED2KConstants.PARTSIZE < length()) return true;
 			return false;
 		}
 		
@@ -514,7 +514,7 @@ public class PartialFile extends SharedFile {
 	}
 	
 	public boolean hasHashSet() {
-		if (length() < E2DKConstants.PARTSIZE) return true;
+		if (length() < ED2KConstants.PARTSIZE) return true;
 		return this.hasHashSet;
 		
 	}
@@ -542,7 +542,7 @@ public class PartialFile extends SharedFile {
 	}
 	
 	public void markDownloadStarted() {
-		IntTag tag = new IntTag(E2DKConstants.FT_NAME_STATUS, 0x00);
+		IntTag tag = new IntTag(ED2KConstants.FT_NAME_STATUS, 0x00);
 		partFile.getTagList().addTag(tag, true);
 		try {
 			partFile.writeFile();
@@ -552,7 +552,7 @@ public class PartialFile extends SharedFile {
 	}
 	
 	public void markDownloadStopped() {
-		IntTag tag = new IntTag(E2DKConstants.FT_NAME_STATUS, 0x01);
+		IntTag tag = new IntTag(ED2KConstants.FT_NAME_STATUS, 0x01);
 		partFile.getTagList().addTag(tag, true);
 		try {
 			partFile.writeFile();
@@ -562,7 +562,7 @@ public class PartialFile extends SharedFile {
 	}
 	
 	public boolean isDownloadStarted() {
-		Tag tag = partFile.getTagList().getTag(E2DKConstants.FT_NAME_STATUS);
+		Tag tag = partFile.getTagList().getTag(ED2KConstants.FT_NAME_STATUS);
 		if (tag == null) 
 			return true;
 		int value = (Integer)tag.getValue();

@@ -47,9 +47,9 @@ import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.UserHash;
-import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.PeerFeatures;
 import org.jmule.core.edonkey.metfile.ClientsMet;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.34 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:39:07 $$
+ * @version $$Revision: 1.35 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:04:52 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -218,7 +218,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			public void run() {
 				for(UserHash userHash : credits.keySet()) {
 					PeerCredit credit = credits.get(userHash);
-					if (System.currentTimeMillis() - credit.getLastSeen() >= E2DKConstants.PEER_CLIENTS_MET_EXPIRE_TIME)
+					if (System.currentTimeMillis() - credit.getLastSeen() >= ED2KConstants.PEER_CLIENTS_MET_EXPIRE_TIME)
 						credits.remove(userHash);
 				}
 				try {
@@ -691,7 +691,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			peer_features.put(PeerFeatures.ProtocolVersion, (int)protocolVersion);
 			peer.peer_features.putAll(peer_features);
 			
-			Tag udp_port = tagList.getTag(E2DKConstants.ET_UDPPORT);
+			Tag udp_port = tagList.getTag(ED2KConstants.ET_UDPPORT);
 			if (udp_port != null)
 				peer.tag_list.addTag(udp_port);
 			
@@ -720,7 +720,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 			peer_features.put(PeerFeatures.ProtocolVersion, (int)protocolVersion);
 			peer.peer_features.putAll(peer_features);
 			
-			Tag udp_port = tagList.getTag(E2DKConstants.ET_UDPPORT);
+			Tag udp_port = tagList.getTag(ED2KConstants.ET_UDPPORT);
 			if (udp_port != null)
 				peer.tag_list.addTag(udp_port);
 			

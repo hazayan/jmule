@@ -22,8 +22,8 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILENAME;
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILENAME;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILESIZE;
 
 import java.io.File;
 
@@ -35,8 +35,8 @@ import org.jmule.core.utils.Convert;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/15 18:05:33 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
  */
 public class CompletedFile extends SharedFile {
 

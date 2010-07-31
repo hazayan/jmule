@@ -22,9 +22,9 @@
  */
 package org.jmule.core.peermanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
-import static org.jmule.core.edonkey.E2DKConstants.*;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NICKNAME;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_CLIENTVER;
+import static org.jmule.core.edonkey.ED2KConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_NICKNAME;
 
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -32,9 +32,9 @@ import java.util.Map;
 
 import org.jmule.core.JMException;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.UserHash;
-import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.PeerFeatures;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.utils.Utils;
@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.24 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:39:39 $$
+ * @version $$Revision: 1.25 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:04:52 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL, GLOBAL}
@@ -104,7 +104,6 @@ public class Peer {
 		System.out.println("Set peer status : " + this + "  " + newStatus + " ");
 		this.peer_status = newStatus;
 		lastSeen = System.currentTimeMillis();
-		
 	}
 	
 	void setServer(String serverIP, int serverPort) {
@@ -274,14 +273,14 @@ public class Peer {
 		int clientInfo;
 		try {
 			if (!tag_list.hasTag(TAG_NAME_CLIENTVER))
-				return E2DKConstants.SO_COMPAT_UNK;
+				return ED2KConstants.SO_COMPAT_UNK;
 			Tag tag = tag_list.getTag(TAG_NAME_CLIENTVER);
 			
 			long value = Misc.extractNumberTag(tag);
 			clientInfo = Convert.longToInt(value);
 		} catch (Throwable e) {
 			e.printStackTrace();
-			return E2DKConstants.SO_COMPAT_UNK;
+			return ED2KConstants.SO_COMPAT_UNK;
 		}
 		return (clientInfo >> 24) & 0x000000ff;
 	}
@@ -334,7 +333,6 @@ public class Peer {
 
 	public float getDownloadServiceSpeed() {
 		if (!isConnected()) return 0;
-		System.out.println("getDownloadServiceSpeed : " + this);
 		InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton
 				.getInstance();
 		return network_manager.getPeerDownloadServiceSpeed(getIP(), getPort());

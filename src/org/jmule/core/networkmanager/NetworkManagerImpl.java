@@ -23,47 +23,47 @@
 package org.jmule.core.networkmanager;
 
 import static org.jmule.core.JMConstants.*;
-import static org.jmule.core.edonkey.E2DKConstants.*;
-import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHAREQ;
-import static org.jmule.core.edonkey.E2DKConstants.OP_CHATCAPTCHARES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_COMPRESSEDPART;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_HELLO;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
-import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILENAMEREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATREQ;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATUS;
-import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_MESSAGE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLO;
-import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLOANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_PUBLICKEY;
-import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTPARTS;
-import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SECIDENTSTATE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SERVERLIST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SIGNATURE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTTAKEN;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKFAILED;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKREQUESTED;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVFOUNDSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVIDCHANGE;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVMESSAGE;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVSEARCHRESULT;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_SRVSTATUS;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_COMPRESSED_TCP;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
-import static org.jmule.core.edonkey.E2DKConstants.SERVER_SEARCH_RATIO;
+import static org.jmule.core.edonkey.ED2KConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.OP_ANSWERSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_CHATCAPTCHAREQ;
+import static org.jmule.core.edonkey.ED2KConstants.OP_CHATCAPTCHARES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_COMPRESSEDPART;
+import static org.jmule.core.edonkey.ED2KConstants.OP_EMULEHELLOANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_EMULE_HELLO;
+import static org.jmule.core.edonkey.ED2KConstants.OP_EMULE_QUEUERANKING;
+import static org.jmule.core.edonkey.ED2KConstants.OP_END_OF_DOWNLOAD;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILEREQANSNOFILE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILEREQANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILENAMEREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILESTATREQ;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILESTATUS;
+import static org.jmule.core.edonkey.ED2KConstants.OP_HASHSETANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_HASHSETREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_MESSAGE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_PEERHELLO;
+import static org.jmule.core.edonkey.ED2KConstants.OP_PEERHELLOANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_PUBLICKEY;
+import static org.jmule.core.edonkey.ED2KConstants.OP_REQUESTPARTS;
+import static org.jmule.core.edonkey.ED2KConstants.OP_REQUESTSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SECIDENTSTATE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SENDINGPART;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SERVERLIST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SIGNATURE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTGIVEN;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTRELEASE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTTAKEN;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_CALLBACKFAILED;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_CALLBACKREQUESTED;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_SRVFOUNDSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_SRVIDCHANGE;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_SRVMESSAGE;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_SRVSEARCHRESULT;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_SRVSTATUS;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EDONKEY_TCP;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EMULE_COMPRESSED_TCP;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EMULE_EXTENDED_TCP;
+import static org.jmule.core.edonkey.ED2KConstants.SERVER_SEARCH_RATIO;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.io.IOException;
@@ -101,8 +101,8 @@ import org.jmule.core.downloadmanager.DownloadManagerSingleton;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.downloadmanager.InternalDownloadManager;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
@@ -159,13 +159,13 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.46 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/24 11:11:27 $
+ * @version $Revision: 1.47 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:02:49 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
 	private static final long NETWORK_SPEED_UPDATE_INTERVAL 		= 1000;
-	private static final long DROP_SEND_QUEUE_TIMEOUT 				= 1000 * 30;
+	private static final long DROP_SEND_QUEUE_TIMEOUT 				= 1000 * 60;
 	private static final long SEND_QUEUE_SCAN_INTERVAL				= 1000 * 15;
 	private static final long PACKET_PROCESSOR_DROP_TIMEOUT 		= 1000 * 30;
 	private static final long PACKET_PROCESSOR_QUEUE_SCAN_INTERVAL 	= 1000 * 15;
@@ -582,7 +582,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			Packet packet = PacketFactory.getPeerHelloPacket(_config_manager
 					.getUserHash(), client_id, _config_manager.getTCP(),
 					server_ip, server_port, _config_manager.getNickName(),
-					E2DKConstants.DefaultJMuleFeatures);
+					ED2KConstants.DefaultJMuleFeatures);
 			peerConnectionsMonitor.sendPacket(connection, packet);
 
 		} catch (Throwable cause) {
@@ -785,7 +785,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			Packet packet = PacketFactory.getPeerHelloAnswerPacket(
 					_config_manager.getUserHash(), client_id, _config_manager
 							.getTCP(), _config_manager.getNickName(),
-					server_ip, server_port, E2DKConstants.DefaultJMuleFeatures);
+					server_ip, server_port, ED2KConstants.DefaultJMuleFeatures);
 			peerConnectionsMonitor.sendPacket(connection, packet);
 			
 			sendEMuleHelloPacket(connection.getIPAddress(), connection.getUsePort());
@@ -2642,7 +2642,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (connection.getStatus() != ConnectionStatus.CONNECTED)
 				return;
 			
-			if ((!E2DKConstants.PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.contains(packet.getCommand())) && (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS)) {
+			if ((!ED2KConstants.PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.contains(packet.getCommand())) && (packet.getLength() >= ED2KConstants.PACKET_SIZE_TO_COMPRESS)) {
 				byte op_code = packet.getCommand(); 
 				ByteBuffer raw_data = Misc.getByteBuffer(packet.getLength()-1-4-1);
 				ByteBuffer data = packet.getAsByteBuffer();
@@ -2654,7 +2654,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				if (compressedData.capacity() < raw_data.capacity()) {
 					raw_data.clear();
 					raw_data = null;
-					packet = new Packet(compressedData.capacity(), E2DKConstants.PROTO_EMULE_COMPRESSED_TCP);
+					packet = new Packet(compressedData.capacity(), ED2KConstants.PROTO_EMULE_COMPRESSED_TCP);
 					packet.setCommand(op_code);
 					compressedData.position(0);
 					packet.insertData(compressedData);
@@ -2675,7 +2675,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				packet_writer.send_queue.put(connection, peerQueue);
 			}
 			peerQueue.offer(container);
-			channelsToWrite.offer(connection);
+			if (!channelsToWrite.contains(connection)) {
+				channelsToWrite.offer(connection);
+			}
 			
 			if (isWaiting) {
 				peerSelector.wakeup();
@@ -2959,7 +2961,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					receivePeerPacket(container);
 				}
 			} catch (JMEndOfStreamException e) {
-				
+				System.out.println("Exception in : " + connection);
 				e.printStackTrace();
 				try {
 					connection.getJMConnection().getChannel().register(peerSelector, 0, connection);
@@ -3029,7 +3031,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						Queue<SendPacketContainer> queue = send_queue.get(key);
 						for (SendPacketContainer container : queue)
 							if (System.currentTimeMillis() - container.lastUpdate >= DROP_SEND_QUEUE_TIMEOUT) {
-								System.out.println("Send queue cleaner :: Drop packet for : "+ key);
+								System.out.println("Send queue cleaner :: Drop packet for :: " + (System.currentTimeMillis() - container.lastUpdate) + " :: "+ key);
 								queue.remove(container);
 								container.packet.clear();
 								needGC = true;
@@ -3153,6 +3155,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					connection.getJMConnection().service_trafic.addSendBytes(transferredBytes);
 				}
 			} catch (JMEndOfStreamException e) {
+				System.out.println("Exception in : " + connection);
 				e.printStackTrace();
 				connection.setStatus(ConnectionStatus.DISCONNECTED);
 				try {
@@ -3324,9 +3327,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 												
 						stopLoop = false;
 						byte first = container.getHead();
-						if (first != E2DKConstants.PROTO_EMULE_COMPRESSED_TCP)
-							if (first != E2DKConstants.PROTO_EDONKEY_TCP)
-								if (first != E2DKConstants.PROTO_EMULE_EXTENDED_TCP) {
+						if (first != ED2KConstants.PROTO_EMULE_COMPRESSED_TCP)
+							if (first != ED2KConstants.PROTO_EDONKEY_TCP)
+								if (first != ED2KConstants.PROTO_EMULE_EXTENDED_TCP) {
 									stopLoop = true;
 								}
 						int packetLength = container.getLength();
@@ -3334,7 +3337,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						if (packetLength < 0)
 							stopLoop = true;
 						
-						if (packetLength > E2DKConstants.MAXPACKETSIZE)
+						if (packetLength > ED2KConstants.MAXPACKETSIZE)
 							stopLoop = true;
 						
 						if (stopLoop) {
@@ -3393,8 +3396,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		
 		public void sendPacket(Packet packet) {
 			if (!loop) return ; //don't send packets when stopped
-			if (!E2DKConstants.SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS.contains(packet.getCommand()) 
-					&& (packet.getLength() >= E2DKConstants.PACKET_SIZE_TO_COMPRESS)) {
+			if (!ED2KConstants.SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS.contains(packet.getCommand()) 
+					&& (packet.getLength() >= ED2KConstants.PACKET_SIZE_TO_COMPRESS)) {
 				byte op_code = packet.getCommand(); 
 				ByteBuffer raw_data = Misc.getByteBuffer(packet.getLength()-1-4-1);
 				ByteBuffer data = packet.getAsByteBuffer();
@@ -3406,7 +3409,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					raw_data.clear();
 					raw_data.rewind();
 					raw_data = null;
-					packet = new Packet(compressedData.capacity(),E2DKConstants.PROTO_EMULE_COMPRESSED_TCP);
+					packet = new Packet(compressedData.capacity(),ED2KConstants.PROTO_EMULE_COMPRESSED_TCP);
 					packet.setCommand(op_code);
 					compressedData.position(0);
 					packet.insertData(compressedData);
@@ -3641,9 +3644,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				do {
 					stopLoop = false;
 					byte first = container.getHead();
-					if (first != E2DKConstants.PROTO_EMULE_COMPRESSED_TCP)
-						if (first != E2DKConstants.PROTO_EDONKEY_TCP)
-							if (first != E2DKConstants.PROTO_EMULE_EXTENDED_TCP) {
+					if (first != ED2KConstants.PROTO_EMULE_COMPRESSED_TCP)
+						if (first != ED2KConstants.PROTO_EDONKEY_TCP)
+							if (first != ED2KConstants.PROTO_EMULE_EXTENDED_TCP) {
 								stopLoop = true;
 								container.moveUnusedBytes(1);
 							}

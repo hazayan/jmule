@@ -22,7 +22,7 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,8 +39,8 @@ import org.jmule.core.utils.MD4;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/12/19 19:31:54 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
  */
 public class FileHashing extends JMFileTask {
 

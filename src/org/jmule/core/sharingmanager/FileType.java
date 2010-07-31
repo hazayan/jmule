@@ -22,15 +22,15 @@
  */
 package org.jmule.core.sharingmanager;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.*;
 
 import java.util.Arrays;
 
 /**
  * Created on Oct 28, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary256_ $ on $Date: 2008/10/28 21:12:50 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:08:35 $
  */
 public enum FileType {
 	ANY     { public byte[] getBytes() { return null; } },

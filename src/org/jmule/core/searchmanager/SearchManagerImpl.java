@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.jmule.core.JMThread;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
@@ -57,7 +57,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.17 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:40:39 $$
+ * @version $$Revision: 1.18 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements InternalSearchManager {
 
@@ -313,11 +313,9 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 				keyword_id = jkad_search.searchKeyword(kad_search_query
 						.getQuery(),
 						new org.jmule.core.jkad.search.SearchResultListener() {
-							SearchQuery searchquery = (SearchQuery) kad_search_query
-									.clone();
+							SearchQuery searchquery = (SearchQuery) kad_search_query.clone();
 							SearchResultItemList result_list = new SearchResultItemList();
-							SearchResult search_result = new SearchResult(
-									result_list, searchquery);
+							SearchResult search_result = new SearchResult(result_list, searchquery);
 
 							public void processNewResults(List<Source> result) {
 								result_list.clear();

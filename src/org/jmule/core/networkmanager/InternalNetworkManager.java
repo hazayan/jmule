@@ -28,7 +28,7 @@ import java.util.Set;
 
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
@@ -49,8 +49,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Created on Aug 19, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.21 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/24 11:11:27 $
+ * @version $Revision: 1.22 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 13:02:49 $
  */
 public interface InternalNetworkManager extends NetworkManager {
 	
