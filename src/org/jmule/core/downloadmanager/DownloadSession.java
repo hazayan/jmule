@@ -23,12 +23,12 @@
 package org.jmule.core.downloadmanager;
 
 import static org.jmule.core.downloadmanager.PeerDownloadStatus.ACTIVE;
-import static org.jmule.core.edonkey.E2DKConstants.BLOCKSIZE;
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILENAME;
-import static org.jmule.core.edonkey.E2DKConstants.FT_FILESIZE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILENAMEREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATREQ;
-import static org.jmule.core.edonkey.E2DKConstants.PARTSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.BLOCKSIZE;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILENAME;
+import static org.jmule.core.edonkey.ED2KConstants.FT_FILESIZE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILENAMEREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILESTATREQ;
+import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ import org.jmule.core.downloadmanager.DownloadStatusList.PeerDownloadInfo;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategy;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyFactory;
 import org.jmule.core.downloadmanager.strategy.DownloadStrategyFactory.STRATEGY;
-import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.PeerFeatures;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
@@ -80,8 +80,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.52 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 11:19:40 $$
+ * @version $$Revision: 1.53 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:55:24 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -107,6 +107,8 @@ public class DownloadSession implements JMTransferSession {
 	private InternalDownloadManager download_manager = (InternalDownloadManager) DownloadManagerSingleton.getInstance();
 	private InternalUploadManager upload_manager = (InternalUploadManager) UploadManagerSingleton.getInstance();
 
+	private Collection<String> file_names = new ConcurrentLinkedQueue<String>();
+	
 	private JMTimer download_tasks;
 	private JMTimerTask peer_monitor_task = null;
 	
@@ -219,11 +221,9 @@ public class DownloadSession implements JMTransferSession {
 
 		download_tasks.stop();
 		
-	/* for (Peer peer : peer_list.values())
-			if (peer.isConnected())
-				network_manager.sendEndOfDownload(peer.getIP(), peer.getPort(),
-						getFileHash());*/
-
+		for (Peer peer : download_status_list.getPeersByStatus(PeerDownloadStatus.ACTIVE, PeerDownloadStatus.ACTIVE_UNUSED))
+			_network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+		
 		session_peers.clear();
 		download_status_list.clear();
 		partStatus.clear();
@@ -329,6 +329,8 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	void receivedFileRequestAnswerFromPeer(Peer sender,String fileName) {
+		if (!file_names.contains(fileName))
+			file_names.add(fileName);
 		download_status_list.addPeerHistoryRecord(sender, "File request answer");
 		download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
 		_network_manager.sendUploadRequest(sender.getIP(), sender.getPort(), sharedFile.getFileHash());
@@ -510,6 +512,14 @@ public class DownloadSession implements JMTransferSession {
 	private void processFileChunk(Peer sender, FileChunk fileChunk) {
 		download_status_list.updatePeerTime(sender);
 		
+		if (fileChunk.getChunkStart() < 0) {
+			return;
+		}
+		
+		if (fileChunk.getChunkEnd() > sharedFile.length()) {
+			return;
+		}
+		
 		download_status_list.setPeerStatus(sender, PeerDownloadStatus.ACTIVE);
 		download_status_list.setPeerResendCount(sender, 0);
 		try {
@@ -539,13 +549,9 @@ public class DownloadSession implements JMTransferSession {
 					return;
 				}
 				// file is broken
-				_network_manager.sendUploadRequest(sender.getIP(), sender
-						.getPort(), getFileHash());
-				download_status_list.setPeerStatus(sender,
-						PeerDownloadStatus.UPLOAD_REQUEST);
-				List<Peer> peer_list = download_status_list.getPeersByStatus(
-						PeerDownloadStatus.HASHSET_REQUEST,
-						PeerDownloadStatus.ACTIVE_UNUSED);
+				_network_manager.sendUploadRequest(sender.getIP(), sender.getPort(), getFileHash());
+				download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
+				List<Peer> peer_list = download_status_list.getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST, PeerDownloadStatus.ACTIVE_UNUSED);
 				for (Peer peer : peer_list) {
 					_network_manager.sendUploadRequest(peer.getIP(), peer.getPort(), getFileHash());
 					download_status_list.setPeerStatus(peer,PeerDownloadStatus.UPLOAD_REQUEST);
@@ -564,6 +570,9 @@ public class DownloadSession implements JMTransferSession {
 	void removePeer(Peer peer) {
 		if (!hasPeer(peer))
 			return;
+		
+		_network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+		
 		session_peers.remove(peer);
 		compressedFileChunks.remove(peer);
 		PeerDownloadStatus status = download_status_list.getPeerDownloadStatus(peer);
@@ -749,6 +758,11 @@ public class DownloadSession implements JMTransferSession {
 		return partStatus;
 	}
 
+	public Collection<String> getFileNames() {
+		return file_names;
+	}
+	
+	
 	class CompressedChunkContainer {
 		public ByteBuffer compressedData;
 		public long offset;
