@@ -22,15 +22,15 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBGETSOURCES2;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ2;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSEARCHREQ3;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GLOBSERVRSTATREQ;
-import static org.jmule.core.edonkey.E2DKConstants.OP_REASKFILEPING;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SERVER_DESC_REQ;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
+import static org.jmule.core.edonkey.ED2KConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GLOBGETSOURCES2;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GLOBSEARCHREQ;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GLOBSEARCHREQ2;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GLOBSEARCHREQ3;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GLOBSERVRSTATREQ;
+import static org.jmule.core.edonkey.ED2KConstants.OP_REASKFILEPING;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SERVER_DESC_REQ;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EDONKEY_SERVER_UDP;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,8 +44,8 @@ import org.jmule.core.searchmanager.tree.NodeValue;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/17 14:28:16 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 16:00:42 $$
  */
 public class UDPPacketFactory {
 

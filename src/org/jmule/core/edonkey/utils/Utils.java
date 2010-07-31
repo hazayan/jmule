@@ -22,66 +22,66 @@
  */
 package org.jmule.core.edonkey.utils;
 
-import static org.jmule.core.edonkey.E2DKConstants.ET_COMMENTS;
-import static org.jmule.core.edonkey.E2DKConstants.ET_COMPRESSION;
-import static org.jmule.core.edonkey.E2DKConstants.ET_EXTENDEDREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.ET_FEATURES;
-import static org.jmule.core.edonkey.E2DKConstants.ET_SOURCEEXCHANGE;
-import static org.jmule.core.edonkey.E2DKConstants.ET_UDPVER;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_COMPRESSION;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_LARGEFILES;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_NEWTAGS;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_RELATEDSEARCH;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_TCPOBFUSCATION;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_TYPETAGINTEGER;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_TCPFLG_UNICODE;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_EXT_GETFILES;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_EXT_GETSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_EXT_GETSOURCES2;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_LARGEFILES;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_NEWTAGS;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_TCPOBFUSCATION;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_UDPOBFUSCATION;
-import static org.jmule.core.edonkey.E2DKConstants.SRV_UDPFLG_UNICODE;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DirectUDPCallback;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtMultiPacket;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.KadVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ModBit;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.PeerCache;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequestsCryptLayer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequiresCryptLayer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Version;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsAICH;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCaptcha;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCryptLayer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsFileIdent;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsLargeFiles;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsPreview;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSecureIdentification;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSourceEx2;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsUnicode;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVersion;
+import static org.jmule.core.edonkey.ED2KConstants.ET_COMMENTS;
+import static org.jmule.core.edonkey.ED2KConstants.ET_COMPRESSION;
+import static org.jmule.core.edonkey.ED2KConstants.ET_EXTENDEDREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.ET_FEATURES;
+import static org.jmule.core.edonkey.ED2KConstants.ET_SOURCEEXCHANGE;
+import static org.jmule.core.edonkey.ED2KConstants.ET_UDPVER;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_COMPRESSION;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_LARGEFILES;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_NEWTAGS;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_RELATEDSEARCH;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_TCPOBFUSCATION;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_TYPETAGINTEGER;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_TCPFLG_UNICODE;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_EXT_GETFILES;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_EXT_GETSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_EXT_GETSOURCES2;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_LARGEFILES;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_NEWTAGS;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_TCPOBFUSCATION;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_UDPOBFUSCATION;
+import static org.jmule.core.edonkey.ED2KConstants.SRV_UDPFLG_UNICODE;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.AcceptCommentVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.DataCompressionVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.DirectUDPCallback;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.ExtMultiPacket;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.ExtendedRequestsVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.KadVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.ModBit;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.MultiPacket;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.NoViewSharedFiles;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.PeerCache;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.RequestsCryptLayer;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.RequiresCryptLayer;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SourceExchange1Version;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsAICH;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsCaptcha;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsCryptLayer;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsFileIdent;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsLargeFiles;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsPreview;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsSecureIdentification;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsSourceEx2;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsUnicode;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.UDPVersion;
 
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
-import org.jmule.core.edonkey.E2DKConstants.ServerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.PeerFeatures;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 
 /**
  * Created on Dec 24, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:35:36 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 16:00:42 $
  */
 public class Utils {
 

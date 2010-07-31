@@ -22,20 +22,20 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
-import static org.jmule.core.edonkey.E2DKConstants.*;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_HASH;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_STRING;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT16;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT64;
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT8;
+import static org.jmule.core.edonkey.ED2KConstants.*;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_HASH;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_STRING;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_UINT16;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_UINT32;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_UINT64;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_UINT8;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import org.jmule.core.edonkey.E2DKConstants;
+import org.jmule.core.edonkey.ED2KConstants;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
@@ -43,16 +43,16 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Aug 27, 2008
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/15 13:29:54 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 16:00:42 $
  */
 public class TagScanner {
 	
-	private static int INT_TAGTYPE_EXSTRING_LONG = Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_LONG);
-	private static int INT_TAGTYPE_EXSTRING_SHORT_BEGIN = Convert.byteToInt(E2DKConstants.TAGTYPE_EXSTRING_SHORT_BEGIN);
-	private static int INT_TAGTYPE_EXBYTE = Convert.byteToInt(E2DKConstants.TAGTYPE_EXBYTE);
-	private static int INT_TAGTYPE_EXWORD = Convert.byteToInt(E2DKConstants.TAGTYPE_EXWORD);
-	private static int INT_TAGTYPE_EXDWORD = Convert.byteToInt(E2DKConstants.TAGTYPE_EXDWORD);
+	private static int INT_TAGTYPE_EXSTRING_LONG = Convert.byteToInt(ED2KConstants.TAGTYPE_EXSTRING_LONG);
+	private static int INT_TAGTYPE_EXSTRING_SHORT_BEGIN = Convert.byteToInt(ED2KConstants.TAGTYPE_EXSTRING_SHORT_BEGIN);
+	private static int INT_TAGTYPE_EXBYTE = Convert.byteToInt(ED2KConstants.TAGTYPE_EXBYTE);
+	private static int INT_TAGTYPE_EXWORD = Convert.byteToInt(ED2KConstants.TAGTYPE_EXWORD);
+	private static int INT_TAGTYPE_EXDWORD = Convert.byteToInt(ED2KConstants.TAGTYPE_EXDWORD);
 	
 	public static Tag scanTag(ByteBuffer data) {
 		byte tagType;

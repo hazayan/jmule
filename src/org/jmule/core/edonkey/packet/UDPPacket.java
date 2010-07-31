@@ -22,8 +22,8 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_PEER_UDP;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_SERVER_UDP;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EDONKEY_PEER_UDP;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EDONKEY_SERVER_UDP;
 import static org.jmule.core.jkad.JKadConstants.PROTO_KAD_UDP;
 
 import java.net.InetSocketAddress;
@@ -36,8 +36,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/11/27 21:04:45 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 16:00:42 $$
  */
 public class UDPPacket {
 	protected ByteBuffer packet_data = null;

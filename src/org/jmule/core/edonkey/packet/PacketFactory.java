@@ -22,62 +22,62 @@
  */
 package org.jmule.core.edonkey.packet;
 
-import static org.jmule.core.edonkey.E2DKConstants.DefaultJMuleFeatures;
-import static org.jmule.core.edonkey.E2DKConstants.ET_COMMENTS;
-import static org.jmule.core.edonkey.E2DKConstants.ET_COMPRESSION;
-import static org.jmule.core.edonkey.E2DKConstants.ET_EXTENDEDREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.ET_FEATURES;
-import static org.jmule.core.edonkey.E2DKConstants.ET_SOURCEEXCHANGE;
-import static org.jmule.core.edonkey.E2DKConstants.ET_UDPPORT;
-import static org.jmule.core.edonkey.E2DKConstants.ET_UDPVER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_AICHFILEHASHREQ;
-import static org.jmule.core.edonkey.E2DKConstants.OP_ANSWERSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULEHELLOANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_HELLO;
-import static org.jmule.core.edonkey.E2DKConstants.OP_EMULE_QUEUERANKING;
-import static org.jmule.core.edonkey.E2DKConstants.OP_END_OF_DOWNLOAD;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILENAMEREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSNOFILE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILEREQANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATREQ;
-import static org.jmule.core.edonkey.E2DKConstants.OP_FILESTATUS;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GETSERVERLIST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_GETSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_HASHSETREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_KAD_CALLBACK;
-import static org.jmule.core.edonkey.E2DKConstants.OP_LOGINREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_MESSAGE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_MULTIPACKET;
-import static org.jmule.core.edonkey.E2DKConstants.OP_MULTIPACKETANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_MULTIPACKET_EXT;
-import static org.jmule.core.edonkey.E2DKConstants.OP_OFFERFILES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLO;
-import static org.jmule.core.edonkey.E2DKConstants.OP_PEERHELLOANSWER;
-import static org.jmule.core.edonkey.E2DKConstants.OP_PUBLICKEY;
-import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTPARTS;
-import static org.jmule.core.edonkey.E2DKConstants.OP_REQUESTSOURCES;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SEARCHREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SECIDENTSTATE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SENDINGPART;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SIGNATURE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTGIVEN;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTRELEASE;
-import static org.jmule.core.edonkey.E2DKConstants.OP_SLOTREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.PACKET_CALLBACKREQUEST;
-import static org.jmule.core.edonkey.E2DKConstants.PEER_FEATURES_REPORTED_TO_SERVER;
-import static org.jmule.core.edonkey.E2DKConstants.PROTOCOL_VERSION;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EDONKEY_TCP;
-import static org.jmule.core.edonkey.E2DKConstants.PROTO_EMULE_EXTENDED_TCP;
-import static org.jmule.core.edonkey.E2DKConstants.ServerSoftwareVersion;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_CLIENTVER;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS1;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_MISC_OPTIONS2;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_NAME;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_PROTOCOLVERSION;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_SERVER_FLAGS;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT;
-import static org.jmule.core.edonkey.E2DKConstants.TAG_NAME_UDP_PORT_PEER;
+import static org.jmule.core.edonkey.ED2KConstants.DefaultJMuleFeatures;
+import static org.jmule.core.edonkey.ED2KConstants.ET_COMMENTS;
+import static org.jmule.core.edonkey.ED2KConstants.ET_COMPRESSION;
+import static org.jmule.core.edonkey.ED2KConstants.ET_EXTENDEDREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.ET_FEATURES;
+import static org.jmule.core.edonkey.ED2KConstants.ET_SOURCEEXCHANGE;
+import static org.jmule.core.edonkey.ED2KConstants.ET_UDPPORT;
+import static org.jmule.core.edonkey.ED2KConstants.ET_UDPVER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_AICHFILEHASHREQ;
+import static org.jmule.core.edonkey.ED2KConstants.OP_ANSWERSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_EMULEHELLOANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_EMULE_HELLO;
+import static org.jmule.core.edonkey.ED2KConstants.OP_EMULE_QUEUERANKING;
+import static org.jmule.core.edonkey.ED2KConstants.OP_END_OF_DOWNLOAD;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILENAMEREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILEREQANSNOFILE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILEREQANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILESTATREQ;
+import static org.jmule.core.edonkey.ED2KConstants.OP_FILESTATUS;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GETSERVERLIST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_GETSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_HASHSETANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_HASHSETREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_KAD_CALLBACK;
+import static org.jmule.core.edonkey.ED2KConstants.OP_LOGINREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_MESSAGE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_MULTIPACKET;
+import static org.jmule.core.edonkey.ED2KConstants.OP_MULTIPACKETANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_MULTIPACKET_EXT;
+import static org.jmule.core.edonkey.ED2KConstants.OP_OFFERFILES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_PEERHELLO;
+import static org.jmule.core.edonkey.ED2KConstants.OP_PEERHELLOANSWER;
+import static org.jmule.core.edonkey.ED2KConstants.OP_PUBLICKEY;
+import static org.jmule.core.edonkey.ED2KConstants.OP_REQUESTPARTS;
+import static org.jmule.core.edonkey.ED2KConstants.OP_REQUESTSOURCES;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SEARCHREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SECIDENTSTATE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SENDINGPART;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SIGNATURE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTGIVEN;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTRELEASE;
+import static org.jmule.core.edonkey.ED2KConstants.OP_SLOTREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.PACKET_CALLBACKREQUEST;
+import static org.jmule.core.edonkey.ED2KConstants.PEER_FEATURES_REPORTED_TO_SERVER;
+import static org.jmule.core.edonkey.ED2KConstants.PROTOCOL_VERSION;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EDONKEY_TCP;
+import static org.jmule.core.edonkey.ED2KConstants.PROTO_EMULE_EXTENDED_TCP;
+import static org.jmule.core.edonkey.ED2KConstants.ServerSoftwareVersion;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_CLIENTVER;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_MISC_OPTIONS1;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_MISC_OPTIONS2;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_NAME;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_PROTOCOLVERSION;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_SERVER_FLAGS;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_UDP_PORT;
+import static org.jmule.core.edonkey.ED2KConstants.TAG_NAME_UDP_PORT_PEER;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -89,8 +89,8 @@ import org.jmule.core.JMException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.edonkey.ClientID;
-import org.jmule.core.edonkey.E2DKConstants;
-import org.jmule.core.edonkey.E2DKConstants.PeerFeatures;
+import org.jmule.core.edonkey.ED2KConstants;
+import org.jmule.core.edonkey.ED2KConstants.PeerFeatures;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.UserHash;
@@ -114,8 +114,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 11:14:21 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 16:00:42 $$
  */
 public class PacketFactory {
 	
@@ -640,7 +640,7 @@ public class PacketFactory {
 		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2,misc_optins2));
 		
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION,PROTOCOL_VERSION ));
-		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ED2KConstants.getSoftwareVersion()));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerSingleton.getInstance().getUDP()));
 	
 		int tag_list_size = tagList.getByteSize();
@@ -722,7 +722,7 @@ public class PacketFactory {
 		tagList.addTag(new IntTag(TAG_NAME_MISC_OPTIONS2, misc_optins2));
 
 		tagList.addTag(new IntTag(TAG_NAME_PROTOCOLVERSION, PROTOCOL_VERSION));
-		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, E2DKConstants.getSoftwareVersion()));
+		tagList.addTag(new IntTag(TAG_NAME_CLIENTVER, ED2KConstants.getSoftwareVersion()));
 		tagList.addTag(new IntTag(TAG_NAME_UDP_PORT_PEER, ConfigurationManagerSingleton.getInstance().getUDP()));
 
 		int tag_list_size = tagList.getByteSize();

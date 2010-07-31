@@ -22,7 +22,7 @@
  */
 package org.jmule.core.edonkey.packet.tag;
 
-import static org.jmule.core.edonkey.E2DKConstants.TAGTYPE_UINT32;
+import static org.jmule.core.edonkey.ED2KConstants.TAGTYPE_UINT32;
 
 import java.nio.ByteBuffer;
 
@@ -31,8 +31,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jul 15, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2009/08/28 10:14:07 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/07/31 16:00:42 $
  */
 public class IntTag extends StandartTag implements NumberTag {
 
