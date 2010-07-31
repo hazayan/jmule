@@ -22,29 +22,29 @@
  */
 package org.jmule.core.edonkey;
 
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.AcceptCommentVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DataCompressionVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.DirectUDPCallback;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtMultiPacket;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ExtendedRequestsVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.KadVersion;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.ModBit;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.MultiPacket;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.NoViewSharedFiles;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.PeerCache;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequestsCryptLayer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.RequiresCryptLayer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SourceExchange1Version;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsAICH;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCaptcha;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsCryptLayer;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsFileIdent;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsLargeFiles;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsPreview;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSecureIdentification;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsSourceEx2;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.SupportsUnicode;
-import static org.jmule.core.edonkey.E2DKConstants.PeerFeatures.UDPVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.AcceptCommentVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.DataCompressionVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.DirectUDPCallback;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.ExtMultiPacket;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.ExtendedRequestsVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.KadVersion;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.ModBit;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.MultiPacket;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.NoViewSharedFiles;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.PeerCache;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.RequestsCryptLayer;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.RequiresCryptLayer;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SourceExchange1Version;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsAICH;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsCaptcha;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsCryptLayer;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsFileIdent;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsLargeFiles;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsPreview;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsSecureIdentification;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsSourceEx2;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.SupportsUnicode;
+import static org.jmule.core.edonkey.ED2KConstants.PeerFeatures.UDPVersion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,12 +59,12 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.35 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/24 11:20:27 $$
+ * @version $$Revision: 1.1 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:13 $$
  */
-public class E2DKConstants {
+public class ED2KConstants {
 
-	public final static int ClientSoftware 				    = E2DKConstants.SO_JMULE;// JMule client identification!	
+	public final static int ClientSoftware 				    = ED2KConstants.SO_JMULE;// JMule client identification!	
 	public final static byte ClientVersion[]				= new byte[3];
 	
 	public static int getSoftwareVersion() {
@@ -83,7 +83,7 @@ public class E2DKConstants {
 			ClientVersion[2] = 7;
 	}
 	
-	public final static int ServerClientSoftware 		= E2DKConstants.SO_JMULE;
+	public final static int ServerClientSoftware 		= ED2KConstants.SO_JMULE;
 	public final static int ServerSoftwareVersionMajor 	= 0x00;
 	public final static int ServerSoftwareVersionMinor 	= 40;
 	public final static int ServerSoftwareVersionUpdate = 0x00;
@@ -121,10 +121,10 @@ public class E2DKConstants {
 	public static final Set<Byte> PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
 	public static final Set<Byte> SERVER_PACKETS_NOT_ALLOWED_TO_COMPRESS = new HashSet<Byte>();
 	static {
-		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_HASHSETANSWER);
-		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_PEERHELLO);
-		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_PEERHELLOANSWER);
-		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(E2DKConstants.OP_SENDINGPART);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(ED2KConstants.OP_HASHSETANSWER);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(ED2KConstants.OP_PEERHELLO);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(ED2KConstants.OP_PEERHELLOANSWER);
+		PEER_PACKETS_NOT_ALLOWED_TO_COMPRESS.add(ED2KConstants.OP_SENDINGPART);
 	}
 	
 	public final static long MAXPACKETSIZE				= 2000000;
