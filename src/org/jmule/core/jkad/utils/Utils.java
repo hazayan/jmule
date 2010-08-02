@@ -45,8 +45,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/31 12:59:27 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/02 09:52:44 $
  */
 public class Utils {
 	
@@ -59,8 +59,11 @@ public class Utils {
 	
 		StringTokenizer keywords =  new StringTokenizer(fileName, KAD_INVALID_CHARS);
 		
-		while (keywords.hasMoreElements())
-			result.add(keywords.nextToken());
+		while (keywords.hasMoreElements()) {
+			String keyword = keywords.nextToken();
+			if (keyword.getBytes().length >= 3)
+				result.add(keyword);
+		}
 
 		return result;
 	}
