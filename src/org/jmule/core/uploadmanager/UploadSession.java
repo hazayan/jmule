@@ -51,8 +51,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/28 13:26:04 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/02 13:34:16 $$
  */
 public class UploadSession implements JMTransferSession {
 	private SharedFile sharedFile;	
@@ -61,18 +61,22 @@ public class UploadSession implements JMTransferSession {
 	private Map<Peer, Set<FileChunkRequest>> requested_chunks = new ConcurrentHashMap<Peer, Set<FileChunkRequest>>();
 	//private Map<Peer, Set<FileChunkRequest>> sended_chunks;
 		
-	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	private InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	private UploadQueue _upload_queue;
 	private long totalUploaded = 0;
 	
 	UploadSession(SharedFile sFile) {
 		sharedFile = sFile;
+		
+		_upload_queue = UploadQueue.getInstance();
 	}
 	
 	void stopSession() {
 		for(Peer peer : session_peers) {
-			if (peer.isConnected())
-				network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+			removePeer(peer);
+			_upload_queue.removePeer(peer);
 		}
+		
 	}
 	
 	public boolean sharingCompleteFile() {
@@ -118,6 +122,10 @@ public class UploadSession implements JMTransferSession {
 	}
 	
 	void removePeer(Peer sender) {
+		if (sender.isConnected())
+			if (_upload_queue.hasSlotPeer(sender))
+				_network_manager.sendSlotRelease(sender.getIP(), sender.getPort());
+		
 		session_peers.remove(sender);
 		if (requested_chunks.containsKey(sender))
 			requested_chunks.remove(sender);
@@ -166,7 +174,7 @@ public class UploadSession implements JMTransferSession {
 				e.printStackTrace();
 				continue;
 			}
-			network_manager.sendFileChunk(sender.getIP(), sender.getPort(), getFileHash(), file_chunk);
+			_network_manager.sendFileChunk(sender.getIP(), sender.getPort(), getFileHash(), file_chunk);
 		}
 	}
 	
