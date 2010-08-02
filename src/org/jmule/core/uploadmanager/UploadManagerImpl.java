@@ -63,8 +63,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.32 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:15:39 $$
+ * @version $$Revision: 1.33 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/02 13:36:39 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
@@ -272,8 +272,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		UploadSession session = session_list.get(fileHash);
 		session.stopSession();
 		session_list.remove(fileHash);
-		
 		notifyUploadRemoved(fileHash);
+		recalcSlotPeers();
 	}
 
 	public UploadSession getUpload(FileHash fileHash) throws UploadManagerException {
@@ -319,14 +319,9 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			session.addTransferredBytes(transferred_bytes);
 			
 			session.removePeer(peer);
-			if (session.getPeerCount()==0) {
+			if (session.getPeerCount()==0)
 				removeUpload(session.getFileHash());
-				/*session_list.remove(session.getFileHash());
-				notifyUploadRemoved(session.getFileHash());*/
-			}
 		}
-		
-		
 		
 		if (upload_queue.hasPeer(peer))
 			upload_queue.removePeer(peer);
