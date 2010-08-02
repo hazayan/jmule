@@ -28,11 +28,13 @@ import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_SCAN_INTERVAL;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.jmule.core.configmanager.ConfigurationManager;
 import org.jmule.core.configmanager.ConfigurationManagerException;
@@ -59,8 +61,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:14:11 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/02 09:52:21 $
  */
 
 public class Publisher {
@@ -146,16 +148,12 @@ public class Publisher {
 		
 		keyword_publisher = new Task() {
 			List<Int128> publishing_keywords = new ArrayList<Int128>();
-			Map<Int128, Long> published_keywords = new ConcurrentHashMap<Int128, Long>();
-			
+						
 			@Override
 			public void run() {
 				if (!_jkad_manager.isConnected())
 					return;
-				for(Int128 id : published_keywords.keySet())
-					if (System.currentTimeMillis() - published_keywords.get(id) > JKadConstants.TIME_24_HOURS)
-						published_keywords.remove(id);
-				
+								
 				int to_publish = MAX_CONCURRENT_PUBLISH_KEYWORDS;
 				List<Int128> to_remove = new ArrayList<Int128>();
 				
@@ -189,27 +187,40 @@ public class Publisher {
 					
 					if (publishing_keywords.contains(keywordID))
 						continue;
-					
-					if (published_keywords.containsKey(keywordID))
-						continue;
-					
-					to_publish--;
-					Queue<FileHash> keyword_files = keyword_queue.keyword_files.get(keyword);
+										
+					Deque<PublishKeywordContainer> keyword_files = keyword_queue.keyword_files.get(keyword);
+										
 					Collection<SharedFile> files_to_publish = new ArrayList<SharedFile>();
+					Collection<PublishKeywordContainer> used_containers = new ArrayList<Publisher.PublishKeywordContainer>();
 					int i = 0;
-					while (i <= PUBLISH_KEYWORD_ON_ITERATION) {
-						FileHash hash = keyword_files.poll();
-						if (hash == null)
+					while (i < PUBLISH_KEYWORD_ON_ITERATION) {
+						PublishKeywordContainer container = keyword_files.poll();
+						if (container == null)
 							break;
-						if (_sharing_manager.hasFile(hash)) {
-							files_to_publish.add(_sharing_manager.getSharedFile(hash));
+						
+						if (_sharing_manager.hasFile(container.fileHash))
+							used_containers.add(container);
+						
+						if (System.currentTimeMillis() - container.publishTime < JKadConstants.TIME_24_HOURS)
+							break;
+						
+						container.publishTime = System.currentTimeMillis();
+						
+						if (_sharing_manager.hasFile(container.fileHash)) {
+							files_to_publish.add(_sharing_manager.getSharedFile(container.fileHash));
 							i++;
 						}
 					}
 					
+					keyword_files.addAll(used_containers);
+										
+					if (i == 0)
+						continue;
+					
+					to_publish--;
+					
 					Collection<PublishItem> publish_items = new ArrayList<PublishItem>();
 					for(SharedFile file : files_to_publish) {
-						keyword_files.offer(file.getFileHash());
 						
 						TagList tagList = new TagList();
 						tagList.addTag(new StringTag(TAG_FILENAME, file.getSharingName()));
@@ -219,7 +230,6 @@ public class Publisher {
 					
 					try {
 						publishKeyword(keywordID, publish_items, keyword);
-						published_keywords.put(keywordID, System.currentTimeMillis());
 						publishing_keywords.add(keywordID);
 					} catch (JKadException e) {
 						e.printStackTrace();
@@ -363,9 +373,7 @@ public class Publisher {
 					
 					if (!file.getTagList().hasTag(TAG_FILERATING))
 						continue;
-					
-					System.out.println("Publish note... : " + fileID.toHexString());
-					
+										
 					TagList tagList = new TagList();
 					tagList.addTag(new StringTag(TAG_FILENAME, file.getSharingName()));
 					tagList.addTag(new IntTag(TAG_FILESIZE, (int) file.length()));
@@ -542,8 +550,19 @@ public class Publisher {
 		public void taskStopped(PublishTask task);
 	}
 	
+	
+	class PublishKeywordContainer {
+		FileHash fileHash;
+		long publishTime;
+		
+		public PublishKeywordContainer(FileHash fileHash) {
+			this.fileHash = fileHash;
+			this.publishTime = 0;
+		}
+	}
+	
 	class KeywordPublishQueue {
-		Map<String,Queue<FileHash>> keyword_files = new ConcurrentHashMap<String, Queue<FileHash>>();
+		Map<String,Deque<PublishKeywordContainer>> keyword_files = new ConcurrentHashMap<String, Deque<PublishKeywordContainer>>();
 		Map<FileHash, String> hash_mapping = new ConcurrentHashMap<FileHash, String>();
 		
 		Queue<String> keyword_queue = new ConcurrentLinkedQueue<String>();
@@ -556,10 +575,10 @@ public class Publisher {
 			List<String> keywords = Utils.getFileKeyword(sharedFile.getSharingName());
 			for(String keyword : keywords) {
 				if (!keyword_files.containsKey(keyword)) {
-					keyword_files.put(keyword, new ConcurrentLinkedQueue<FileHash>());
+					keyword_files.put(keyword, new LinkedBlockingDeque<PublishKeywordContainer>());
 					keyword_queue.offer(keyword);
 				}
-				keyword_files.get(keyword).offer(sharedFile.getFileHash());
+				keyword_files.get(keyword).addFirst( new PublishKeywordContainer(sharedFile.getFileHash()));
 			}
 			hash_mapping.put(sharedFile.getFileHash(), sharedFile.getSharingName());
 		}
@@ -568,8 +587,15 @@ public class Publisher {
 			List<String> keywords = Utils.getFileKeyword(hash_mapping.get(hash));
 			for(String keyword : keywords) {
 				if (keyword_files.containsKey(keyword)) {
-					Queue<FileHash> queue = keyword_files.get(keyword);
-					queue.remove(hash);
+					Queue<PublishKeywordContainer> queue = keyword_files.get(keyword);
+					PublishKeywordContainer to_remove = null;
+					for(PublishKeywordContainer container : queue) 
+						if (container.fileHash.equals(hash)) {
+							to_remove = container;
+							break;
+						}
+					if (to_remove != null)
+						queue.remove(to_remove);
 					if (queue.isEmpty())
 						keyword_files.remove(keyword);
 				}
