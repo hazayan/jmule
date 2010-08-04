@@ -24,6 +24,7 @@ package org.jmule.core.downloadmanager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,8 +81,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.40 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:51:28 $$
+ * @version $$Revision: 1.41 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/04 08:05:27 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -228,9 +229,21 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		kad_source_search_task = new JMTimerTask() {
 			Int128 error_id = null;
 			Int128 prev_search = null;
+			
+			Map<FileHash, Long> last_file_search = new HashMap<FileHash, Long>();
 			public void run() { 
 				error_id = null;
 				Search search = _jkad.getSearch();
+				
+				Collection<FileHash> to_remove = new ArrayList<FileHash>();
+				
+				for(FileHash hash : last_file_search.keySet()) 
+					if (System.currentTimeMillis() - last_file_search.get(hash) > ED2KConstants.TIME_15_MINS)
+						to_remove.add(hash);
+				
+				for(FileHash hash : to_remove)
+					last_file_search.remove(hash);
+				
 				while(true) {
 					if (prev_search != null)
 						if (_jkad.getLookup().hasTask(prev_search))
@@ -245,9 +258,15 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 						continue;
 					}
 					kad_sources_queue.offer(fileHash);
+					
+					if (last_file_search.containsKey(fileHash))
+						return;
+					
+					
+					
 					byte[] hash = fileHash.getHash().clone();
 					org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
-					Int128 search_id = new Int128(hash);
+					final Int128 search_id = new Int128(hash);
 					if (error_id != null) 
 						if (error_id.equals(search_id))
 							return;
@@ -291,6 +310,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 									}
 
 									public void searchFinished() {
+										last_file_search.put(fileHash, System.currentTimeMillis());
 									}
 
 									public void searchStarted() {
