@@ -22,9 +22,21 @@
  */
 package org.jmule.core.jkad.publisher;
 
-import static org.jmule.core.jkad.JKadConstants.*;
+import static org.jmule.core.jkad.JKadConstants.MAX_CONCURRENT_PUBLISH_FILES;
+import static org.jmule.core.jkad.JKadConstants.MAX_CONCURRENT_PUBLISH_KEYWORDS;
+import static org.jmule.core.jkad.JKadConstants.MAX_CONCURRENT_PUBLISH_NOTES;
+import static org.jmule.core.jkad.JKadConstants.MAX_PUBLISH_NOTES;
 import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_CHECK_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_ON_ITERATION;
 import static org.jmule.core.jkad.JKadConstants.PUBLISH_KEYWORD_SCAN_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.PUBLISH_NOTE_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.PUBLISH_SOURCE_INTERVAL;
+import static org.jmule.core.jkad.JKadConstants.TAG_FILENAME;
+import static org.jmule.core.jkad.JKadConstants.TAG_FILERATING;
+import static org.jmule.core.jkad.JKadConstants.TAG_FILESIZE;
+import static org.jmule.core.jkad.JKadConstants.TAG_SOURCEIP;
+import static org.jmule.core.jkad.JKadConstants.TAG_SOURCEPORT;
+import static org.jmule.core.jkad.JKadConstants.TAG_SOURCETYPE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,8 +73,8 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/02 09:52:21 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/04 08:06:32 $
  */
 
 public class Publisher {
@@ -247,8 +259,14 @@ public class Publisher {
 				SharingManager _sharing_manager = SharingManagerSingleton.getInstance();
 				
 				for(SharedFile shared_file : _sharing_manager.getSharedFiles()) {
-					if (!keyword_queue.hasFile(shared_file.getFileHash()))
-						keyword_queue.addFile(shared_file);
+					if (!keyword_queue.hasFile(shared_file.getFileHash())) {
+						boolean allow = true;
+						if (shared_file instanceof PartialFile)
+							if (((PartialFile) shared_file).getAvailablePartCount() == 0)
+								allow = false;
+						if (allow)
+							keyword_queue.addFile(shared_file);
+					}
 
 				}
 			}
