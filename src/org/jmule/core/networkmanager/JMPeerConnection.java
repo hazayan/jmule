@@ -24,14 +24,15 @@ package org.jmule.core.networkmanager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Created on Aug 16, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.24 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:57:16 $
+ * @version $Revision: 1.25 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/04 08:07:15 $
  */
 public final class JMPeerConnection extends JMConnection {
 
@@ -44,7 +45,7 @@ public final class JMPeerConnection extends JMConnection {
 	private ConnectionStatus connection_status = ConnectionStatus.DISCONNECTED;	
 	private long uploadedFileBytes = 0;
 	private int ioErrors = 0;
-	private  HashSet<InterestedOPS> interestedOPS = new HashSet<JMPeerConnection.InterestedOPS>();
+	private  Set<InterestedOPS> interestedOPS = new ConcurrentSkipListSet<JMPeerConnection.InterestedOPS>();
 	
 	JMPeerConnection(InetSocketAddress remoteInetSocketAddress) {
 		remote_inet_socket_address = remoteInetSocketAddress;
