@@ -59,8 +59,8 @@ import org.jmule.core.jkad.JKadConstants;
 /**
  * Created on 2007-Nov-07
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:13 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/04 08:04:39 $$
  */
 public class ED2KConstants {
 
@@ -519,6 +519,7 @@ public class ED2KConstants {
 	public final static byte CREDITFILE_VERSION29 		= (byte) 0x11;
 	
 	public static final long TIME_24_HOURS 				=  1000 * 60 * 60 * 24;
+	public static final long TIME_15_MINS				=  1000 * 60 * 15;
 	
 	
 }
