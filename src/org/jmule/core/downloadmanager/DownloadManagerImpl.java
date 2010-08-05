@@ -81,8 +81,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.41 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/04 08:05:27 $$
+ * @version $$Revision: 1.42 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/05 18:28:39 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -107,6 +107,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private InternalConfigurationManager _config_manager = null;
 	
 	private JMTimer maintenance_tasks = new JMTimer();
+	private long last_server_sources_request = 0;
 	private JMTimerTask server_sources_query = null;
 	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask pex_source_search_task = null;
@@ -162,14 +163,17 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					for (DownloadSession session : session_list.values()) {
 						download_peers_count += session.getPeerCount();
 					}
-					values.put(JMuleCoreStats.ST_NET_PEERS_DOWNLOAD_COUNT,
-							download_peers_count);
+					values.put(JMuleCoreStats.ST_NET_PEERS_DOWNLOAD_COUNT, download_peers_count);
 				}
 			}
 		});
 		
-		server_sources_query = new JMTimerTask() {
+		server_sources_query = new JMTimerTask() {	
+	
 			public void run() {
+								
+				if (server_sources_queue.isEmpty())
+					return;
 				
 				List<FileHash> sessions_to_request = new ArrayList<FileHash>();
 				while ((!server_sources_queue.isEmpty()) && (sessions_to_request.size() < ED2KConstants.SERVER_FILE_SOURCES_QUERY_ITERATION)) {
@@ -187,8 +191,9 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					} catch (DownloadManagerException e) {
 						e.printStackTrace();
 					}
-					
 				}
+				
+				last_server_sources_request = System.currentTimeMillis();
 			}
 		};
 		
@@ -424,8 +429,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	
 	public void addDownload(SearchResultItem searchResult) throws DownloadManagerException {
 		if (hasDownload(searchResult.getFileHash()))
-			throw new DownloadManagerException("Download "
-					+ searchResult.getFileHash() + " already exists");
+			throw new DownloadManagerException("Download " + searchResult.getFileHash() + " already exists");
 		DownloadSession download_session = new DownloadSession(searchResult);
 		session_list.put(searchResult.getFileHash(), download_session);
 		
@@ -553,6 +557,10 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		 //_network_manager.requestSourcesFromServer(download_session.getFileHash(), download_session.getSharedFile().length());
 		
 		notifyDownloadStarted(fileHash);
+		
+		if (last_server_sources_request == 0)
+			if (_server_manager.isConnected())
+				server_sources_query.run();
 		
 	}
 
