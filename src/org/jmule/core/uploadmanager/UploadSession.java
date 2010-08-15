@@ -24,7 +24,7 @@ package org.jmule.core.uploadmanager;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,14 +51,14 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.27 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/02 13:34:16 $$
+ * @version $$Revision: 1.28 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:26:15 $$
  */
 public class UploadSession implements JMTransferSession {
 	private SharedFile sharedFile;	
 	
 	private Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
-	private Map<Peer, Set<FileChunkRequest>> requested_chunks = new ConcurrentHashMap<Peer, Set<FileChunkRequest>>();
+	Map<Peer, Set<FileChunkRequest>> requested_chunks = new ConcurrentHashMap<Peer, Set<FileChunkRequest>>();
 	//private Map<Peer, Set<FileChunkRequest>> sended_chunks;
 		
 	private InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
@@ -154,7 +154,7 @@ public class UploadSession implements JMTransferSession {
 		
 		Set<FileChunkRequest> chunks = requested_chunks.get(sender);
 		
-		List<FileChunkRequest> duplicate_chunks = new LinkedList<FileChunkRequest>();
+		List<FileChunkRequest> duplicate_chunks = new ArrayList<FileChunkRequest>();
 		
 		for(FileChunkRequest chunk_request : chunkList) {
 			if (chunks.contains(chunk_request)) {
