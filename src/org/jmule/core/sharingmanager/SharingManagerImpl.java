@@ -349,7 +349,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 				public void doWork(File file) {
 					try {
 						PartMet part_met = new PartMet(file);
-						part_met.loadFile();
+						part_met.load();
 						PartialFile partial_shared_file = new PartialFile(part_met);
 						//sharedFiles.put(partial_shared_file.getFileHash(),partial_shared_file);
 						//System.out.println(partial_shared_file + " : " + partial_shared_file.getAvailablePartCount());
@@ -408,8 +408,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 			// load shared completed files
 			try {
 				KnownMet known_met = new KnownMet(knownFilePath);
-				known_file_list = known_met.loadFile();
-				known_met.close();
+				known_file_list = known_met.load();
 			} catch (Throwable e) {
 				e.printStackTrace();
 				known_file_list = new Hashtable<String, KnownMetEntity>();
@@ -720,8 +719,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 	public void writeMetadata() {
 		try {
 			KnownMet known_met = new KnownMet(ConfigurationManager.KNOWN_MET);
-			known_met.writeFile(sharedFiles.values());
-			known_met.close();
+			known_met.store(sharedFiles.values());
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
