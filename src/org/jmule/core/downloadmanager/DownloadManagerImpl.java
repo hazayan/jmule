@@ -22,6 +22,8 @@
  */
 package org.jmule.core.downloadmanager;
 
+import static org.jmule.core.downloadmanager.PeerDownloadStatus.ACTIVE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jmule.core.JMThread;
 import org.jmule.core.JMuleAbstractManager;
 import org.jmule.core.JMuleManagerException;
 import org.jmule.core.configmanager.ConfigurationManager;
@@ -45,10 +48,10 @@ import org.jmule.core.configmanager.ConfigurationManagerException;
 import org.jmule.core.configmanager.ConfigurationManagerSingleton;
 import org.jmule.core.configmanager.InternalConfigurationManager;
 import org.jmule.core.edonkey.ED2KConstants;
+import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.edonkey.ED2KFileLink;
 import org.jmule.core.edonkey.FileHash;
 import org.jmule.core.edonkey.PartHashSet;
-import org.jmule.core.edonkey.ED2KConstants.ServerFeatures;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
@@ -61,9 +64,9 @@ import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.InternalPeerManager;
 import org.jmule.core.peermanager.Peer;
+import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.peermanager.PeerManagerException;
 import org.jmule.core.peermanager.PeerManagerSingleton;
-import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.searchmanager.SearchResultItem;
 import org.jmule.core.servermanager.InternalServerManager;
 import org.jmule.core.servermanager.Server;
@@ -74,6 +77,7 @@ import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
+import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
 
@@ -81,8 +85,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.42 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/05 18:28:39 $$
+ * @version $$Revision: 1.43 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:29:52 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -99,6 +103,10 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private static final long   NEED_MORE_PEERS_INTERVAL           =    60*1000;
 	private static final float  MEDIUM_SPEED_CONSIDERED_AS_SMALL   =    10*1000;
 	
+	private final static long PEER_RESEND_PACKET_INTERVAL 	= 1000 * 10;
+	private final static long UNUSED_PEER_ACTIVATION 		= 1000 * 10;
+	private final static int DOWNLOAD_PEERS_MONITOR_INTERVAL= 1000;
+	
 	private InternalNetworkManager _network_manager = null;
 	private InternalJKadManager _jkad = null;
 	private InternalPeerManager _peer_manager = null;
@@ -112,11 +120,17 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	private JMTimerTask kad_source_search_task = null;
 	private JMTimerTask pex_source_search_task = null;
 	private JMTimerTask global_source_search_task = null;
+	private JMTimerTask download_peers_monitor = null;
 	
 	private Queue<FileHash> server_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> kad_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> pex_sources_queue = new ConcurrentLinkedQueue<FileHash>();
 	private Queue<FileHash> global_sources_queue = new ConcurrentLinkedQueue<FileHash>();
+	
+	private Queue<DownloadSession> file_part_to_check = new ConcurrentLinkedQueue<DownloadSession>();
+	private Queue<DownloadSession> complete_file_to_check = new ConcurrentLinkedQueue<DownloadSession>();
+	
+	private DownloadFileChecker download_file_checker;
 	
 	public DownloadManagerImpl() {
 		
@@ -144,8 +158,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
 			public void updateStats(Set<String> types,
 					Map<String, Object> values) {
-				if (types
-						.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES)) {
+				if (types.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES)) {
 					long total_downloaded_bytes = 0;
 					for (DownloadSession session : session_list.values()) {
 						total_downloaded_bytes += session.getTransferredBytes();
@@ -153,8 +166,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					values.put(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES,
 							total_downloaded_bytes);
 				}
-				if (types
-						.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT)) {
+				if (types.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT)) {
 					values.put(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_COUNT,
 							session_list.size());
 				}
@@ -171,9 +183,11 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		server_sources_query = new JMTimerTask() {	
 	
 			public void run() {
-								
-				if (server_sources_queue.isEmpty())
+				if (server_sources_queue.isEmpty()) {
 					return;
+				}
+				
+				last_server_sources_request = System.currentTimeMillis();
 				
 				List<FileHash> sessions_to_request = new ArrayList<FileHash>();
 				while ((!server_sources_queue.isEmpty()) && (sessions_to_request.size() < ED2KConstants.SERVER_FILE_SOURCES_QUERY_ITERATION)) {
@@ -193,12 +207,22 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					}
 				}
 				
-				last_server_sources_request = System.currentTimeMillis();
+				
 			}
 		};
 		
 		global_source_search_task = new JMTimerTask() {
+			
+			Map<FileHash, Long> last_global_sarch = new HashMap<FileHash, Long>();
+			
 			public void run() {
+				Collection<FileHash> to_remove = new ArrayList<FileHash>();
+				for(FileHash hash : last_global_sarch.keySet()) 
+					if (System.currentTimeMillis() - last_global_sarch.get(hash) > ED2KConstants.TIME_15_MINS)
+						to_remove.add(hash);
+				for(FileHash hash : to_remove)
+					last_global_sarch.remove(hash);
+				
 				try {
 					if (!_config_manager.isUDPEnabled())
 						return;
@@ -206,18 +230,22 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					e1.printStackTrace();
 				}
 				List<FileHash> hash_list = new ArrayList<FileHash>();
+				List<FileHash> used_hash = new ArrayList<FileHash>();
 				List<Long> size_list = new ArrayList<Long>();
 				while ((!global_sources_queue.isEmpty()) && (hash_list.size() < ED2KConstants.GLOBAL_FILE_SOURCES_QUERY_ITERATION)) {
 					FileHash hash = global_sources_queue.poll();
-					try {
-						hash_list.add(getDownload(hash).getFileHash());
-						size_list.add(getDownload(hash).getFileSize());
-					} catch (DownloadManagerException e) {
-						e.printStackTrace();
+					used_hash.add(hash);
+					if (!last_global_sarch.containsKey(hash)) {
+						try {
+							hash_list.add(hash);
+							size_list.add(getDownload(hash).getFileSize());
+						} catch (DownloadManagerException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 				
-				global_sources_queue.addAll(hash_list);
+				global_sources_queue.addAll(used_hash);
 				if (hash_list.isEmpty())
 					return;
 				List<Server> server_list = _server_manager.getServers();
@@ -228,6 +256,9 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					if (server.getFeatures().contains(ServerFeatures.GetSources2))
 						_network_manager.sendServerUDPSources2Request(server.getAddress(), server.getUDPPort(), hash_list, size_list);
 				}
+				
+				for(FileHash hash : hash_list)
+					last_global_sarch.put(hash, System.currentTimeMillis());
 			}
 		};
 		
@@ -267,12 +298,10 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					if (last_file_search.containsKey(fileHash))
 						return;
 					
-					
-					
 					byte[] hash = fileHash.getHash().clone();
 					org.jmule.core.jkad.utils.Convert.updateSearchID(hash);
 					final Int128 search_id = new Int128(hash);
-					if (error_id != null) 
+					if (error_id != null)
 						if (error_id.equals(search_id))
 							return;
 					if (_jkad.getLookup().hasTask(search_id)) {
@@ -375,6 +404,38 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 			}
 		};
 		
+		download_peers_monitor = new JMTimerTask() {
+			@Override
+			public void run() {
+
+				for(DownloadSession session : session_list.values()) {
+					List<Peer> status_not_reponse_list = session.download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, PeerDownloadStatus.FILE_STATUS_REQUEST);
+					for(Peer peer : status_not_reponse_list)
+						if (peer.isConnected())
+							session.requestStatusFileName(peer);
+						else
+							session.download_status_list.setPeerStatus(peer, PeerDownloadStatus.DISCONNECTED);
+					
+					
+					
+					List<Peer> frenzed_list = session.download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, ACTIVE);
+					for (Peer peer : frenzed_list) {
+						session.fileRequestList.remove(peer);
+						session.fileChunkRequest(peer);
+					}
+					List<Peer> peer_list = session.download_status_list.getPeersWithInactiveTime(UNUSED_PEER_ACTIVATION, PeerDownloadStatus.ACTIVE_UNUSED);
+					for (Peer peer : peer_list) {
+						if (peer.isConnected())
+							session.fileChunkRequest(peer);
+						else
+							session.download_status_list.setPeerStatus(peer, PeerDownloadStatus.DISCONNECTED);
+					}
+				}
+					
+				
+			}
+		};
+		download_file_checker = new DownloadFileChecker();
 	}
 
 	public void start() {
@@ -405,7 +466,10 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 		maintenance_tasks.addTask(pex_source_search_task,ConfigurationManager.PEX_SOURCES_QUERY_INTERVAL,true);
 		maintenance_tasks.addTask(global_source_search_task,ConfigurationManager.GLOBAL_SOURCES_QUERY_INTERVAL,true);
+		maintenance_tasks.addTask(download_peers_monitor, DOWNLOAD_PEERS_MONITOR_INTERVAL, true);
 		
+		
+		download_file_checker.start();
 		
 	}
 	
@@ -424,7 +488,8 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		for (DownloadSession download_session : session_list.values())
 			if (download_session.isStarted())
 				download_session.stopDownload(false);
-
+		
+		download_file_checker.JMStop();
 	}
 	
 	public void addDownload(SearchResultItem searchResult) throws DownloadManagerException {
@@ -882,17 +947,35 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		
 	}
 	
+	@Override
+	public void scheduleForPartCheck(DownloadSession session) {
+		if (!file_part_to_check.contains(session)) {
+			System.out.println(" scheduleForPartCheck :: " + session.getFileHash());
+			file_part_to_check.add(session);
+			if (download_file_checker.isSleeping())
+				download_file_checker.wakeUp();
+		}
+	}
+
+	@Override
+	public void scheduleToComplete(DownloadSession session) {
+		if (!complete_file_to_check.contains(session)) {
+			System.out.println(" scheduleToComplete :: " + session.getFileHash());
+			complete_file_to_check.add(session);
+			if (download_file_checker.isSleeping())
+				download_file_checker.wakeUp();
+		}
+	}
+	
 	public void disconnectedFromServer(Server server) {
 		maintenance_tasks.removeTask(server_sources_query);
 	}
 	
 	public void addNeedMorePeersListener(NeedMorePeersListener listener) {
-		
 		need_more_peers_listeners.add( listener );
 	}
 
 	public void removeNeedMorePeersListener(NeedMorePeersListener listener) {
-		
 		need_more_peers_listeners.remove( listener );
 	}
 	
@@ -905,4 +988,72 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 		   }
 	}
 
+	class DownloadFileChecker extends JMThread {
+		public DownloadFileChecker() {
+			super("Download file checker");
+		}
+		
+		private boolean is_sleeping = false;
+		private boolean loop = true;
+		
+		public void run() {
+			while(loop) {
+				boolean process = false;
+				is_sleeping = false;
+				if (file_part_to_check.size() != 0)
+					process = true;
+				if (complete_file_to_check.size() != 0)
+					process = true;
+				
+				if (!process) {
+					is_sleeping = true;
+					synchronized(this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+						}
+					}
+					continue;
+				}
+				
+				while(!file_part_to_check.isEmpty()) {
+					DownloadSession session =  file_part_to_check.poll();
+					
+					List<Integer> broken_parts = session.sharedFile.checkFilePartsIntegrity();
+					if (broken_parts.size()!=0)
+						session.downloadStrategy.processPartCheckResult(broken_parts);
+				}
+				
+				while(!complete_file_to_check.isEmpty()) {
+					DownloadSession session = complete_file_to_check.poll();
+					
+					List<Integer> result = session.sharedFile.checkFullFileIntegrity();
+					if (result.size() != 0)
+						session.downloadStrategy.processFileCheckResult(result);
+					else
+						session.completeDownload();
+				}
+				
+			}
+		}
+		
+		public boolean isSleeping() {
+			return is_sleeping;
+		}
+		
+		public void wakeUp() {
+			synchronized(this) {
+				this.notify();
+			}
+		}
+		
+		public void JMStop() {
+			loop = false;
+			if (isSleeping())
+				wakeUp();
+			this.interrupt();
+		}
+		
+	}
+	
 }
