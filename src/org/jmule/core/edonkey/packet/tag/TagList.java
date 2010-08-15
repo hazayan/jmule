@@ -24,9 +24,10 @@ package org.jmule.core.edonkey.packet.tag;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.utils.Misc;
 
@@ -35,8 +36,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:52:59 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:07:36 $$
  */
 public class TagList implements Iterable<Tag> {
 
@@ -46,13 +47,13 @@ public class TagList implements Iterable<Tag> {
 		EMPTY_TAG_LIST = new TagList();
 	}
 	
-	private List<Tag> tagList = new CopyOnWriteArrayList<Tag>();
+	private Collection<Tag> tagList = new ConcurrentLinkedQueue<Tag>();
 
 	public TagList() {
 		
 	}
 	
-	public TagList(List<Tag> list) {
+	public TagList(Collection<Tag> list) {
 		this.addTag(list,true);
 	}
 	
@@ -87,7 +88,7 @@ public class TagList implements Iterable<Tag> {
 		}
 	}
 	
-	public List<Tag> getAsList() {
+	public Collection<Tag> getAsCollection() {
 		return tagList;
 	}
 	
