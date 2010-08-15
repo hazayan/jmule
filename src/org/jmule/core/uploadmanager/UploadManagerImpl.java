@@ -23,6 +23,8 @@
 package org.jmule.core.uploadmanager;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.33 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/02 13:36:39 $$
+ * @version $$Revision: 1.34 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:25:21 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
@@ -79,9 +81,13 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	
 	private JMTimer maintenance_tasks = new JMTimer();
 	
+	private long total_uploaded_bytes = 0;
+	
 	UploadManagerImpl() { 
 		
 	}
+	
+	Map<FileHash, Long> last_upload_check = new HashMap<FileHash, Long>();
 
 	public void initialize() {
 		try {
@@ -104,10 +110,10 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		JMuleCoreStats.registerProvider(types, new JMuleCoreStatsProvider() {
          	public void updateStats(Set<String> types, Map<String, Object> values) {
                  if(types.contains(JMuleCoreStats.ST_NET_SESSION_UPLOAD_BYTES)) {
-                	 long total_uploaded_bytes = 0;
+                	 /*long total_uploaded_bytes = 0;
 	            	 for(UploadSession session : session_list.values()) {
 	            		 total_uploaded_bytes+=session.getTransferredBytes();
-	            	 }
+	            	 }*/
 	            	 values.put(JMuleCoreStats.ST_NET_SESSION_UPLOAD_BYTES, total_uploaded_bytes);
                  }
                  if(types.contains(JMuleCoreStats.ST_NET_SESSION_UPLOAD_COUNT)) {
@@ -133,6 +139,39 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			e.printStackTrace();
 			return ;
 		}
+		
+		JMTimerTask upload_bytes_counter = new JMTimerTask() {
+			
+			@Override
+			public void run() {
+				List<FileHash> to_remove = new ArrayList<FileHash>();
+				for(FileHash hash : last_upload_check.keySet()) {
+					if (hasUpload(hash)) {
+						try {
+							UploadSession session = getUpload(hash);
+							long uploaded_bytes = session.getTransferredBytes() - last_upload_check.get(hash);
+							last_upload_check.put(hash, session.getTransferredBytes());
+							total_uploaded_bytes += uploaded_bytes;
+						} catch (UploadManagerException e) {
+							e.printStackTrace();
+						}
+					} else
+						to_remove.add(hash);
+				}
+				
+				for(FileHash hash : to_remove)
+					last_upload_check.remove(hash);
+				
+				for(UploadSession session : session_list.values()) {
+					if (!last_upload_check.containsKey(session.getFileHash())) {
+						total_uploaded_bytes += session.getTransferredBytes();
+						last_upload_check.put(session.getFileHash(), session.getTransferredBytes());
+					}
+				}
+				
+			}
+		};
+		
 		JMTimerTask frozen_peers_remover = new JMTimerTask() {
 			public void run() {
 				boolean recalc_slots = false;
@@ -238,10 +277,41 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			}
 		};
 		
+		final long TIME_30_SEC = 1000 * 30;
+		
+		JMTimerTask requested_chunks_dropper = new JMTimerTask() {
+			
+			@Override
+			public void run() {
+				for(UploadSession session : getUploads()) {
+					Collection<Peer> peer_sets_to_drop = new ArrayList<Peer>();
+					for(Peer peer : session.requested_chunks.keySet()) {
+						Set<FileChunkRequest> chunk_set = session.requested_chunks.get(peer);
+						Collection<FileChunkRequest> list = new ArrayList<FileChunkRequest>();
+						for(FileChunkRequest request : chunk_set)
+							if (System.currentTimeMillis() - request.getCreationTime() >= TIME_30_SEC) {
+								list.add(request);
+								System.out.println("Drop chunk request for : " + peer);
+							}
+						chunk_set.removeAll(list);
+						if (chunk_set.isEmpty())
+							peer_sets_to_drop.add(peer);
+					}
+					
+					for(Peer p : peer_sets_to_drop)
+						session.requested_chunks.remove(p);
+				}
+			}
+		};
+		
 		maintenance_tasks.addTask(frozen_peers_remover, ConfigurationManager.UPLOAD_QUEUE_CHECK_INTERVAL, true);
 		maintenance_tasks.addTask(transferred_bytes_updater, ConfigurationManager.UPLOAD_QUEUE_TRANSFER_CHECK_INTERVAL, true);
 		maintenance_tasks.addTask(payload_peers_monitor, ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_CHECK_INTERVAL, true);
 		maintenance_tasks.addTask(payload_loosed_cleaner, ConfigurationManager.UPLOAD_QUEUE_PAYLOAD_LOOSED_CHECK_INTERVAL, true);
+		
+		maintenance_tasks.addTask(upload_bytes_counter, 1000, true);
+		
+		maintenance_tasks.addTask(requested_chunks_dropper, 1000, true);
 	}
 
 	public void shutdown() {
@@ -270,6 +340,13 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 
 	public void removeUpload(FileHash fileHash) {
 		UploadSession session = session_list.get(fileHash);
+		
+		if (last_upload_check.containsKey(session.getFileHash())) {
+			total_uploaded_bytes+= session.getTransferredBytes() - last_upload_check.get(session.getFileHash());
+			last_upload_check.remove(session.getFileHash());
+		} else
+			total_uploaded_bytes+= session.getTransferredBytes();
+		
 		session.stopSession();
 		session_list.remove(fileHash);
 		notifyUploadRemoved(fileHash);
@@ -319,9 +396,14 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			session.addTransferredBytes(transferred_bytes);
 			
 			session.removePeer(peer);
-			if (session.getPeerCount()==0)
+			if (session.getPeerCount()==0) {
 				removeUpload(session.getFileHash());
+				/*session_list.remove(session.getFileHash());
+				notifyUploadRemoved(session.getFileHash());*/
+			}
 		}
+		
+		
 		
 		if (upload_queue.hasPeer(peer))
 			upload_queue.removePeer(peer);
