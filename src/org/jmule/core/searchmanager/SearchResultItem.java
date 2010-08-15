@@ -54,8 +54,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Aug-09
  * @author javajox
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:19:34 $$
  */
 public class SearchResultItem extends TagList {
 
@@ -112,7 +112,6 @@ public class SearchResultItem extends TagList {
 		try {
 			return (Integer)super.getTag(TAG_NAME_AVIABILITY).getValue();
 		} catch (Throwable e) {
-			e.printStackTrace();
 			return 0;
 		}
 	}

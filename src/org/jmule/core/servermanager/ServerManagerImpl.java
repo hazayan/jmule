@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.21 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:49:52 $$
+ * @version $$Revision: 1.22 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:20:06 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 		
@@ -164,6 +164,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 					e.printStackTrace();
 					return;
 				}
+				
 				for(Server server : server_list) {
 					int challenge = (int)((random.nextInt() << 16) + ED2KConstants.INVALID_SERVER_DESC_LENGTH);
 					byte[] byte_challenge = Convert.intToByteArray(challenge);
@@ -197,9 +198,8 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 			e.printStackTrace();
 			return;
 		}
-		//server_manager_timer.addTask(servers_udp_query,ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
-		server_manager_timer.addTask(store_metadata_task,
-				ConfigurationManager.SERVER_LIST_STORE_INTERVAL, true);
+		server_manager_timer.addTask(servers_udp_query,ConfigurationManager.SERVER_UDP_QUERY_INTERVAL, true);
+		server_manager_timer.addTask(store_metadata_task, ConfigurationManager.SERVER_LIST_STORE_INTERVAL, true);
 	}
 	
 	public void shutdown() {
@@ -344,8 +344,6 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 				cause.printStackTrace();
 			}
 		}
-		server_met.close();
-
 	}
 	
 	public boolean isConnected() {

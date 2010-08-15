@@ -78,8 +78,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.15 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:55:08 $
+ * @version $Revision: 1.16 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:14:34 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -308,13 +308,16 @@ public class RoutingTable {
 	public void addContact(KadContact contact) {
 		// TODO : Create code to filter myself
 		if (!Utils.isGoodAddress(contact.getIPAddress())) {
+			
 			Logger.getSingleton().logMessage("Filtered address : "+contact.getIPAddress());
 			return;
 		}
 			
 		if (contact.getUDPPort()==4666) return ;
 		
-		if (hasContact(contact)) return ;
+		if (hasContact(contact)){
+			return ;
+		}
 		
 		if (getTotalContacts() >= MAX_CONTACTS) return ;
 		
@@ -505,7 +508,7 @@ public class RoutingTable {
 	}
 	
 	public void loadContacts() {
-		List<KadContact> contact_list = NodesDat.loadFile(NODES_DAT);
+		List<KadContact> contact_list = NodesDat.load(NODES_DAT);
 		Logger.getSingleton().logMessage("Loaded contacts : " + contact_list.size());
 		for(KadContact contact : contact_list) {
 			addContact(contact);
@@ -513,7 +516,7 @@ public class RoutingTable {
 	}
 	
 	public void storeContacts() {
-		NodesDat.writeFile(NODES_DAT, tree_nodes);
+		NodesDat.store(NODES_DAT, tree_nodes);
 	}
 
 	private void removeNode(KadContact contact) {

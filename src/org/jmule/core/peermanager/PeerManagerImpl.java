@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.35 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:04:52 $$
+ * @version $$Revision: 1.36 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:18:38 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -97,8 +97,6 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	private InternalDownloadManager _download_manager = null;
 	private InternalUploadManager _upload_manager 	  = null;
 	private InternalConfigurationManager _config_manager = null;
-	
-	private ClientsMet clients_met = null;
 	
 	private JMTimer maintenance_tasks = new JMTimer();
 	
@@ -131,13 +129,13 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 		File checkFile = new File(ConfigurationManager.CLIENTS_FILE);
 		if (!checkFile.exists()) {
 			try {
-				clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
-				clients_met.writeFile(credits.values());
+				ClientsMet clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
+				clients_met.store(credits.values());
 			}catch(Throwable cause) { }
 		} else {
 			try {
-				clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
-				Map<UserHash, PeerCredit> file_credits = clients_met.loadFile();
+				ClientsMet clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
+				Map<UserHash, PeerCredit> file_credits = clients_met.load();
 				credits.putAll(file_credits);
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -222,11 +220,11 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 						credits.remove(userHash);
 				}
 				try {
-					if (clients_met == null) {
-						clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
-					}
-					clients_met.writeFile(credits.values());
-				}catch(Throwable cause) { cause.printStackTrace(); }
+					ClientsMet clients_met = new ClientsMet(ConfigurationManager.CLIENTS_FILE);
+					clients_met.store(credits.values());
+				} catch (Throwable cause) {
+					cause.printStackTrace();
+				}
 			}
 		};
 		maintenance_tasks.addTask(cleanup_and_store_clients, STORE_CLIENTS_INTERVAL, true);
