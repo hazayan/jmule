@@ -22,21 +22,23 @@
  */
 package org.jmule.core.downloadmanager.strategy;
 
+import org.jmule.core.downloadmanager.DownloadSession;
+
 /**
  * Created on Jan 31, 2010
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2010/02/03 17:02:56 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:28:18 $
  */
 public class DownloadStrategyFactory {
 
 	public enum STRATEGY { DEFAULT };
 	
-	public static DownloadStrategy getStrategy(STRATEGY DownloadStrategy) {
+	public static DownloadStrategy getStrategy(STRATEGY DownloadStrategy, DownloadSession session) {
 		if (DownloadStrategy == STRATEGY.DEFAULT)
-			return new DefaultDownloadStrategy();
+			return new DefaultDownloadStrategy(session);
 		
-		return new DefaultDownloadStrategy();
+		return new DefaultDownloadStrategy(session);
 	}
 	
 }

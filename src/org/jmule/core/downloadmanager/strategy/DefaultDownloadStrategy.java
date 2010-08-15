@@ -25,24 +25,37 @@ package org.jmule.core.downloadmanager.strategy;
 import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.util.Collection;
+import java.util.List;
 
+import org.jmule.core.downloadmanager.DownloadSession;
 import org.jmule.core.downloadmanager.FileFragment;
 import org.jmule.core.downloadmanager.FilePartStatus;
 import org.jmule.core.downloadmanager.FileRequestList;
+import org.jmule.core.downloadmanager.PeerDownloadStatus;
+import org.jmule.core.networkmanager.InternalNetworkManager;
+import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.sharingmanager.Gap;
 import org.jmule.core.sharingmanager.GapList;
 import org.jmule.core.sharingmanager.JMuleBitSet;
+import org.jmule.core.sharingmanager.PartialFile;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:51:28 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:28:18 $$
  */
 public class DefaultDownloadStrategy implements DownloadStrategy {
 
+	private DownloadSession session;
+	
+	public DefaultDownloadStrategy(DownloadSession session) {
+		this.session = session;
+	}
+	
+	@Override
 	public FileChunkRequest fileChunkRequest(Peer sender, long blockSize,long fileSize, GapList gapList, FilePartStatus filePartStatus, FileRequestList fileRequestList) {
 		int availibility[] = filePartStatus.getPartAvailibility();
 		int countSet = 0;// Total count of downloaded parts
@@ -96,6 +109,7 @@ public class DefaultDownloadStrategy implements DownloadStrategy {
 		} while (true);
 	}
 
+	@Override
 	public FileChunkRequest[] fileChunk3Request(Peer sender, long blockSize, long fileSize, GapList gapList, FilePartStatus filePartStatus, FileRequestList fileRequestList) {
 		FileChunkRequest[] fileChunks = new FileChunkRequest[3];
 		for (int i = 0; i < fileChunks.length; i++) {
@@ -166,4 +180,44 @@ public class DefaultDownloadStrategy implements DownloadStrategy {
 		} while (stop == false);
 		return gaps;
 	}
+
+	@Override
+	public void processPartCheckResult(List<Integer> partsID) {
+		PartialFile file = (PartialFile) session.getSharedFile();
+		for(Integer id : partsID) {
+			long begin = PARTSIZE * id;
+			long end = PARTSIZE * (id + 1) - 1;
+			file.getGapList().addGap(begin, end);
+		}
+	}
+
+	@Override
+	public void processFileCheckResult(List<Integer> processResult) {
+		PartialFile file = (PartialFile) session.getSharedFile();
+		boolean file_is_broken = false;
+		if (processResult.contains(-1)) {
+			System.out.println(" *** Broken file *** " + session.getFileHash());
+			file_is_broken = true;
+			file.getGapList().addGap(0, file.length());
+		}
+		
+		for(Integer id : processResult) {
+			if (id < 0) continue;
+			file_is_broken = true;
+			long begin = PARTSIZE * id;
+			long end = PARTSIZE * (id + 1) - 1;
+			file.getGapList().addGap(begin, end);
+		}
+		
+		if (file_is_broken) {
+			List<Peer> peer_list = session.getDownloadStatusList().getPeersByStatus(PeerDownloadStatus.HASHSET_REQUEST, PeerDownloadStatus.ACTIVE_UNUSED);
+			InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+			for (Peer peer : peer_list) {
+				_network_manager.sendUploadRequest(peer.getIP(), peer.getPort(), file.getFileHash());
+				session.getDownloadStatusList().setPeerStatus(peer,PeerDownloadStatus.UPLOAD_REQUEST);
+			}
+		}
+			
+	}
+
 }

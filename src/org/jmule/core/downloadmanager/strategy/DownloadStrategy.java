@@ -22,6 +22,8 @@
  */
 package org.jmule.core.downloadmanager.strategy;
 
+import java.util.List;
+
 import org.jmule.core.downloadmanager.FilePartStatus;
 import org.jmule.core.downloadmanager.FileRequestList;
 import org.jmule.core.peermanager.Peer;
@@ -31,11 +33,22 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:44:02 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:28:18 $$
  */
 public interface DownloadStrategy {
-
+	
+	/**
+	 * @param partsID : ID's of broken parts
+	 */
+	public void processPartCheckResult(List<Integer> partsID);
+	
+	/**
+	 * 
+	 * @param processResult : ID's of broken parts, -1 - file hash not match, -2 - don't have hash set, -3 - hash set size not match 
+	 */
+	public void processFileCheckResult(List<Integer> processResult); 
+	
 	public FileChunkRequest fileChunkRequest(Peer sender, long blockSize,long fileSize,GapList gapList,
 			FilePartStatus filePartStatus,FileRequestList fileRequestList);
 	
