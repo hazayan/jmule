@@ -123,8 +123,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.22 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:17:10 $
+ * @version $Revision: 1.23 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:10:19 $
  */
 public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -233,12 +233,11 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			return;
 		}*/
 		
-		indexer.start();
 		lookup.start();
 		publisher.start();
 		search.start();
 		indexer.start();
-
+		
 		bootStrap.start();
 	}
 
@@ -305,7 +304,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 		} catch (Throwable t) {
 			t.printStackTrace();
 			Logger.getSingleton().logException(t);
-			ByteBuffer unkPacket = getByteBuffer(packet.getAsByteBuffer().capacity());
+			ByteBuffer unkPacket = getByteBuffer(packet.getAsByteBuffer().limit());
 			packet.getAsByteBuffer().position(0);
 			packet.getAsByteBuffer().get(unkPacket.array(), 0,packet.getAsByteBuffer().capacity());
 			Logger.getSingleton().logMessage("Exception in processing : \n"+ byteToHexString(unkPacket.array(), " "));
@@ -1148,10 +1147,12 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 		private Publisher publisher = null;*/
 		
 		String result = "";
-		result += "\nJKad status : " + status;
+		/*result += "\nJKad status : " + status;
 		//result += "\nRouting table : " + routing_table;
 		result += "\nLookup : " + lookup;
-		result += "\nSearch : " + search;
+		result += "\nSearch : " + search;*/
+		
+		result += publisher;
 		return result;
 	}
 	
