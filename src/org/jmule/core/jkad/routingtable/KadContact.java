@@ -40,14 +40,14 @@ import org.jmule.core.jkad.utils.Utils;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:27:49 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:13:48 $
  */
 
 public class KadContact {
 
 	private ClientID contactID;
-	private Int128 contactDistance;
+	private Int128 contactDistance = null;
 	private ContactAddress contactAddress;
 	private int tcp_port;
 	private ContactType contactType;
@@ -69,17 +69,13 @@ public class KadContact {
 	public KadContact() {
 	}
 	
-	public KadContact(ClientID contactID,
-			ContactAddress address, int tcpPort,
-			byte version, JKadUDPKey kadUDPKey, boolean isIPVerified) {
+	public KadContact(ClientID contactID, ContactAddress address, int tcpPort, byte version, JKadUDPKey kadUDPKey, boolean isIPVerified) {
 		super();
 		this.contactID = contactID;
 		this.contactAddress = address;
 		this.tcp_port = tcpPort;
 		this.version = version;
 		this.kadUDPKey = kadUDPKey;
-		
-		contactDistance = Utils.XOR(contactID, JKadManagerSingleton.getInstance().getClientID());
 		
 		creation = System.currentTimeMillis();
 		expiration = 0;
@@ -106,6 +102,8 @@ public class KadContact {
 		this.contactID = contactID;
 	}
 	public Int128 getContactDistance() {
+		if (contactDistance == null)
+			contactDistance = Utils.XOR(contactID, JKadManagerSingleton.getInstance().getClientID());
 		return contactDistance;
 	}
 	public void setContactDistance(Int128 contactDistance) {
@@ -161,14 +159,19 @@ public class KadContact {
 	
 	public boolean equals(Object object) {
 		if (object == null) return false;
+		if (object == this) return true;
 		if (!(object instanceof KadContact)) return false;
-		//return hashCode()==object.hashCode();
-		KadContact contact = (KadContact) object;
-		return contactID.equals(contact.getContactID());
+		return hashCode()==object.hashCode();
 	}
 	
+	private boolean genHashCode = false;
+	int hashCode = -1;
 	public int hashCode() {
-		return contactID.toBinaryString().hashCode();
+		if (!genHashCode) {
+			hashCode = contactID.toHexString().hashCode();
+			genHashCode = true;
+		}
+		return hashCode;
 	}
 
 	public boolean isConnected() {
