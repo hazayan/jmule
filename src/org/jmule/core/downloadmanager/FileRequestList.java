@@ -30,10 +30,11 @@ import java.util.LinkedList;
 import org.jmule.core.peermanager.Peer;
 
 /**
+ * Map Peer and requested fragments
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:42:41 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:30:40 $$
  */
 public class FileRequestList extends Hashtable<Peer,FragmentList>{
 	
@@ -43,17 +44,15 @@ public class FileRequestList extends Hashtable<Peer,FragmentList>{
 	}
 
 	public Collection<FileFragment> getFragmentsFromSegment(long start,long end) {
-		LinkedList<FileFragment> list = new LinkedList<FileFragment>();
-		
-		for(int i = 0;i<this.size();i++) {
+		Collection<FileFragment> result = new LinkedList<FileFragment>();
+		for (int i = 0; i < this.size(); i++) {
 			FragmentList fl = (FragmentList) this.values().toArray()[i];
 			Collection<FileFragment> j = fl.getFragmentsFromSegment(start, end);
-			for(Iterator<FileFragment>x = j.iterator();x.hasNext();) {
-				list.add(x.next());
+			for (Iterator<FileFragment> x = j.iterator(); x.hasNext();) {
+				result.add(x.next());
 			}
 		}
-		
-		return list;
+		return result;
 	}
 	
 	public void addFragment(Peer peer,long begin,long end) {
