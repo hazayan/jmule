@@ -85,8 +85,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.43 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:29:52 $$
+ * @version $$Revision: 1.44 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:32:03 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -950,7 +950,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	@Override
 	public void scheduleForPartCheck(DownloadSession session) {
 		if (!file_part_to_check.contains(session)) {
-			System.out.println(" scheduleForPartCheck :: " + session.getFileHash());
 			file_part_to_check.add(session);
 			if (download_file_checker.isSleeping())
 				download_file_checker.wakeUp();
@@ -960,7 +959,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 	@Override
 	public void scheduleToComplete(DownloadSession session) {
 		if (!complete_file_to_check.contains(session)) {
-			System.out.println(" scheduleToComplete :: " + session.getFileHash());
 			complete_file_to_check.add(session);
 			if (download_file_checker.isSleeping())
 				download_file_checker.wakeUp();

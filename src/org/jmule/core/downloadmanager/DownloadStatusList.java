@@ -35,10 +35,11 @@ import org.jmule.core.peermanager.Peer;
 import org.jmule.core.uploadmanager.FileChunkRequest;
 
 /**
+ * Store peer status in download process
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:51:28 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:32:03 $$
  */
 public class DownloadStatusList {
 
@@ -71,7 +72,7 @@ public class DownloadStatusList {
 		return peer_list;
 	}
 	
-	List<Peer> getPeersByStatus(PeerDownloadStatus... status) {
+	public List<Peer> getPeersByStatus(PeerDownloadStatus... status) {
 		List<Peer> peer_list = new LinkedList<Peer>();
 		
 		for(PeerDownloadInfo peer_download_status : peer_status_list) {
@@ -104,7 +105,7 @@ public class DownloadStatusList {
 		}
 	}
 	
-	void setPeerStatus(Peer peer, PeerDownloadStatus downloadStatus) {
+	public void setPeerStatus(Peer peer, PeerDownloadStatus downloadStatus) {
 		PeerDownloadInfo download_status = getPeerDownloadInfo(peer);
 		if (download_status != null) { // peer may be removed, don't register
 										// history for removed peers
