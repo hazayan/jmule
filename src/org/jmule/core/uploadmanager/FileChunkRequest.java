@@ -25,18 +25,20 @@ package org.jmule.core.uploadmanager;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$ Last changed by $$Author: binary255 $$ on $$Date:
+ * @version $$Revision: 1.4 $$ Last changed by $$Author: binary255 $$ on $$Date:
  *          2009/07/06 14:31:58 $$
  */
 public class FileChunkRequest implements Comparable<FileChunkRequest> {
 
 	private long chunkBegin;
 	private long chunkEnd;
-
+	private long creationTime;
+	
 	public FileChunkRequest(long chunkBegin, long chunkEnd) {
 		super();
 		this.chunkBegin = chunkBegin;
 		this.chunkEnd = chunkEnd;
+		this.creationTime = System.currentTimeMillis();
 	}
 
 	public long getChunkBegin() {
@@ -82,5 +84,14 @@ public class FileChunkRequest implements Comparable<FileChunkRequest> {
 			return 1;
 		return this.toString().compareTo(object.toString());// chunks with same range
 	}
+
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
+	}
+
 
 }
