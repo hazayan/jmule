@@ -57,7 +57,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.18 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:08:35 $$
+ * @version $$Revision: 1.19 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:19:14 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements InternalSearchManager {
 
@@ -67,8 +67,8 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 	private static final int GLOBAL_SEARCH_QUERY_INTERVAL 	= 100;
 
 	private Search jkad_search = Search.getSingleton();
-	private InternalJKadManager jkad = (InternalJKadManager) JKadManagerSingleton.getInstance();
-	private InternalNetworkManager network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
+	private InternalJKadManager _jkad = (InternalJKadManager) JKadManagerSingleton.getInstance();
+	private InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 
 	private Map<SearchQuery, SearchResult> search_result_list 	= new ConcurrentHashMap<SearchQuery, SearchResult>();
 	private Queue<SearchQuery> server_search_request_queue 		= new ConcurrentLinkedQueue<SearchQuery>();
@@ -108,7 +108,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 					if (!server_search_request_queue.isEmpty())
 						if (server_manager.isConnected()) {
 								server_search_query = server_search_request_queue.poll();
-								network_manager.doSearchOnServer(server_search_query);
+								_network_manager.doSearchOnServer(server_search_query);
 								notifySearchStarted(server_search_query);
 								last_server_search_request = System.currentTimeMillis();
 						}
@@ -134,12 +134,12 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 										if (!loop) break;
 										
 										if (server.getFeatures().contains(ServerFeatures.LargeFiles) && server.getFeatures().contains(ServerFeatures.GetFiles))
-											network_manager.sendServerUDPSearch3Request(server.getAddress(), server.getUDPPort(), global_search_query);
+											_network_manager.sendServerUDPSearch3Request(server.getAddress(), server.getUDPPort(), global_search_query);
 										else
 										if (server.getFeatures().contains(ServerFeatures.LargeFiles))
-											network_manager.sendServerUDPSearch2Request(server.getAddress(), server.getUDPPort(), global_search_query);
+											_network_manager.sendServerUDPSearch2Request(server.getAddress(), server.getUDPPort(), global_search_query);
 										else
-											network_manager.sendServerUDPSearchRequest(server.getAddress(), server.getUDPPort(), global_search_query);
+											_network_manager.sendServerUDPSearchRequest(server.getAddress(), server.getUDPPort(), global_search_query);
 										
 										synchronized (this) {
 											try {
@@ -270,7 +270,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 			server_search_request_queue.offer(searchRequest);
 		}
 		if (searchRequest.getQueryType() == SearchQueryType.KAD) {
-			if (!jkad.isConnected())
+			if (!_jkad.isConnected())
 				return;
 			kad_search_request_queue.offer(searchRequest);
 			if (kad_search_request_queue.size() == 1)
@@ -281,7 +281,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 		}
 
 		if (searchRequest.getQueryType() == SearchQueryType.SERVER_KAD) {
-			if (jkad.isConnected()) {
+			if (_jkad.isConnected()) {
 				kad_search_request_queue.offer(searchRequest);
 				if (kad_search_request_queue.size() == 1)
 					processKadSearchRequest();
