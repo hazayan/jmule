@@ -31,9 +31,14 @@ import static org.jmule.core.edonkey.ED2KConstants.PARTFILE_VERSION;
 import static org.jmule.core.edonkey.ED2KConstants.PARTSIZE;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jmule.core.JMIterable;
 import org.jmule.core.edonkey.ED2KConstants;
@@ -97,8 +102,8 @@ import org.jmule.core.utils.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.16 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
+ * @version $$Revision: 1.17 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
  */
 public class PartMet extends MetFile {
 	
@@ -110,80 +115,64 @@ public class PartMet extends MetFile {
 	private FileHash fileHash;
 	private PartHashSet fileHashSet;
 	private GapList gapList;
-	private File part_file;
 	
 	public PartMet(File file) throws PartMetException {
 		super(file);
-		if (fileChannel == null) 
-			throw new PartMetException("Failed to open "+file.getName());
-		this.part_file = file;
 	}
 	
 	public PartMet(String fileName) throws PartMetException {
 		super(fileName);
-		if (fileChannel == null)
-			throw new PartMetException("Failed to open "+fileName);
-		this.part_file = new File(fileName);
 	}
 	
 	public String getAbsolutePath() {
-		return part_file.getAbsolutePath();
+		return file.getAbsolutePath();
 		
 	}
 	
 	private Object lock = new Object();
 	
-	public void loadFile() throws PartMetException{
+	public void load() throws PartMetException{
 		synchronized (lock) {
 			try {
+				FileChannel channel = new FileInputStream(file).getChannel();
 				
-				fileChannel.position(0);
-				ByteBuffer data;
+				ByteBuffer file_content = Misc.getByteBuffer(channel.size());
+				channel.read(file_content);
+				channel.close();
 				
-				//Load part file version
-				data = Misc.getByteBuffer(1);
-				fileChannel.read(data);
-				this.partFileFormat = data.get(0);
+				file_content.position(0);
+				
+				this.partFileFormat = file_content.get();
 				if (this.partFileFormat != PARTFILE_VERSION)
 					throw new PartMetException("Unsupported part file");
 				
-				//Load part file modification date
-				data = Misc.getByteBuffer(4);
-				fileChannel.read(data);
-				this.modDate = data.getInt(0);
+				this.modDate = file_content.getInt();
 				
 				//Load file hash
-				data = Misc.getByteBuffer(16);
-				fileChannel.read(data);
-				fileHash = new FileHash(data.array());
+				byte[] file_hash = new byte[16];
+				file_content.get(file_hash);
+				
+				fileHash = new FileHash(file_hash);
 				fileHashSet = new PartHashSet(fileHash);
 				
 				//Read part count
-				data = Misc.getByteBuffer(2);
-				fileChannel.read(data);
-				short partCount = data.getShort(0);
-				
-				data = Misc.getByteBuffer(16);
-				for(int i = 0 ; i <partCount; i++){
-					data.clear();
-					fileChannel.read(data);
-					fileHashSet.add(data.array());
+				short partCount = file_content.getShort();
+				for(int i = 0 ; i < partCount; i++){
+					byte[] part_hash = new byte[16];
+					file_content.get(part_hash);
+					fileHashSet.add(part_hash);
 				}
 				
 				//Read tag count
-				data = Misc.getByteBuffer(4);
-				fileChannel.read(data);
-				int tagCount = data.getInt(0);
+				int tagCount = file_content.getInt();
 				//Load Tags
 				this.tagList = new TagList();
 				
 				for(int i = 0 ; i < tagCount; i++) {
-					
-					Tag tag = TagScanner.scanTag(fileChannel);
+					Tag tag = TagScanner.scanTag(file_content);
 					if (tag != null)
 						tagList.addTag(tag);
 					else {
-						System.out.println("Null tag!");
 						throw new PartMetException("Corrupted tag list in file : " + file.getName() );
 					}
 				}		
@@ -207,6 +196,9 @@ public class PartMet extends MetFile {
 					}
 					tag_id++;
 				}
+				file_content.clear();
+				file_content = null;
+				System.gc();
 			} catch (FileNotFoundException e) {
 				throw new PartMetException("Failed to load PartFile ");
 			} catch (IOException e) {
@@ -217,119 +209,86 @@ public class PartMet extends MetFile {
 		}
 	}
 
-	public void writeFile() throws PartMetException {
+	public void store() throws PartMetException {
 		synchronized (lock) {
 			try {
-				fileChannel.position(0);
-				ByteBuffer data;
+				int tag_count = tagList.size() + gapList.size() * 2;
 				
-				data = Misc.getByteBuffer(1);
-				data.put(PARTFILE_VERSION);
-				data.position(0);
-				fileChannel.write(data);
-				
-				data = Misc.getByteBuffer(4);
-				this.modDate = Convert.longToInt(System.currentTimeMillis());
-				data.putInt(0, this.modDate);
-				data.position(0);
-				fileChannel.write(data);
-				
-				if (fileHash != null) {
-				data = Misc.getByteBuffer(16);
-				data.put(fileHash.getHash());
-				data.position(0);
-				fileChannel.write(data);
-				} else {
-					data = Misc.getByteBuffer(16);
-					data.position(0);
-					fileChannel.write(data);
-				}
-				
-				if (fileHashSet != null) {
-					data = Misc.getByteBuffer(2);
-					data.putShort(Convert.intToShort(fileHashSet.size()));
-					data.position(0);
-					fileChannel.write(data);
-					
-					data = Misc.getByteBuffer(16*fileHashSet.size());
-					
-					for(int i = 0; i <fileHashSet.size();i++)
-						data.put(fileHashSet.get(i));
-					
-					data.position(0);
-					fileChannel.write(data);
-				} else {
-					try {
-						long file_size = (Integer)tagList.getTag(FT_FILESIZE).getValue();
-						int part_count = (int)(file_size / PARTSIZE);
-						if ((file_size % PARTSIZE) != 0)
-							part_count++;
-						data = Misc.getByteBuffer(2);
-						data.putShort(Convert.intToShort(part_count));
-						data.position(0);
-						fileChannel.write(data);
-						
-						data = Misc.getByteBuffer(16);
-						for(int i = 0;i<part_count;i++) {
-							data.position(0);
-							fileChannel.write(data);
-						}
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
-					
-				}
-				
-				/**Count Gaps */
-				int gapCount=gapList.size();
-				data = Misc.getByteBuffer(4);
-				data.putInt(tagList.size()+gapCount*2);
-				data.position(0);
-				fileChannel.write(data);
-				
-				data = Misc.getByteBuffer(tagList.getByteSize());
-							
-				for(Tag tag : tagList) {
-					data.put(tag.getAsByteBuffer());
-				}
-				
-				data.position(0);
-				fileChannel.write(data);
-				
+				ByteBuffer buffer_tag_list = tagList.getAsByteBuffer();
+				List<ByteBuffer> byte_buffer_gaps = new ArrayList<ByteBuffer>();
+				int gaps_size = 0;
 				/**Write Gap List*/
 				byte counter = ED2KConstants.GAP_OFFSET;
 				byte metaTagBegin[] = FT_GAPSTART.clone();
 				byte metaTagEnd[] = FT_GAPEND.clone();
 				JMIterable<Gap> gap_list = gapList.getGaps();
+				
 				for(Gap gap : gap_list){
-									
 					metaTagBegin[1] = counter;
 					Tag tagBegin = new IntTag(metaTagBegin,Convert.longToInt(gap.getStart()));
-									
+					
 					metaTagEnd[1]=counter;
 					Tag tagEnd = new IntTag(metaTagEnd,Convert.longToInt(gap.getEnd()));
-	
 					
-					data = Misc.getByteBuffer(tagBegin.getSize()+tagEnd.getSize());
-					data.put(tagBegin.getAsByteBuffer());
-					data.put(tagEnd.getAsByteBuffer());
+					ByteBuffer tag_pair = Misc.getByteBuffer(tagBegin.getSize() + tagEnd.getSize());
+					tag_pair.put(tagBegin.getAsByteBuffer());
+					tag_pair.put(tagEnd.getAsByteBuffer());
 					
-					data.position(0);
-					fileChannel.write(data);
+					gaps_size += tag_pair.capacity();
+					tag_pair.position(0);
+					byte_buffer_gaps.add(tag_pair);
 					
 					counter++;
 				}
+				
+				long file_size = (Integer)tagList.getTag(FT_FILESIZE).getValue();
+				int part_count = (int)(file_size / PARTSIZE);
+				if ((file_size % PARTSIZE) != 0)
+					part_count++;
+				
+				ByteBuffer file_content = Misc.getByteBuffer( 1 + 4 + 16 + 2 + (part_count * 16) + 4 + buffer_tag_list.capacity() + gaps_size);
+				
+				file_content.put(PARTFILE_VERSION);
+				file_content.putInt( Convert.longToInt(System.currentTimeMillis()) );
+				file_content.put(getFileHash().getHash());
+				file_content.putShort(Convert.intToShort(part_count));
+				if (fileHashSet!=null)
+					for(byte[] part_hash : fileHashSet)
+						file_content.put(part_hash);
+				else {
+					byte[] blank_hash_set = new byte[16];
+					for(int i = 0;i<part_count;i++)
+						file_content.put(blank_hash_set);
+				}
+				file_content.putInt(tag_count);
+				buffer_tag_list.position(0);
+				file_content.put(buffer_tag_list);
+				
+				for(ByteBuffer block : byte_buffer_gaps)
+					file_content.put(block);
+				
+				file_content.position(0);
+				FileChannel channel = new FileOutputStream(file).getChannel();
+				channel.write(file_content);
+				channel.close();
+				
+				buffer_tag_list.clear();
+				byte_buffer_gaps.clear();
+				buffer_tag_list = null; 
+				byte_buffer_gaps = null;
+				System.gc();
+				
 			} catch (FileNotFoundException e) {
-				throw new PartMetException("Failed to open for writing part file : " +part_file.getName());
+				throw new PartMetException("Failed to open for writing part file : " +file.getName());
 			} catch (IOException e) {
-				throw new PartMetException("Failed to write dta in part file : "+part_file.getName());	
+				throw new PartMetException("Failed to write dta in part file : "+file.getName());
 			}
 		}
 		
 	}
 	
 	public boolean delete() {
-		return part_file.delete();
+		return file.delete();
 	}
 
 	public String getTempFileName() {
@@ -426,7 +385,7 @@ public class PartMet extends MetFile {
 	}
 	
 	public String getName() {
-		return part_file.getName();
+		return file.getName();
 	}
 	
 	public FileHash getFileHash() {

@@ -23,39 +23,23 @@
 package org.jmule.core.edonkey.metfile;
 
 import java.io.File;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:47:20 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
  */
 public abstract class MetFile {
 
-	protected FileChannel fileChannel;
-	protected File file;
+	protected File file = null;
 	
 	public MetFile(String fileName) {
 			this(new File(fileName));
 	}
 	
 	public MetFile(File file) {
-		try {
-			this.file = file;
-			fileChannel = new RandomAccessFile(file,"rws").getChannel();
-		}catch(Throwable t) {
-			fileChannel = null;
-		}
+		this.file = file;
 	}
-	
-	public void close() {
-		try {
-			fileChannel.close();
-		}catch(Throwable t) {
-			t.printStackTrace();
-		}
-	}
-	
+
 }

@@ -24,11 +24,15 @@ package org.jmule.core.edonkey.metfile;
 
 import static org.jmule.core.edonkey.ED2KConstants.CREDITFILE_VERSION;
 
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.jmule.core.edonkey.ED2KConstants;
@@ -106,148 +110,119 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
  */
 public class ClientsMet extends MetFile {
 
 	public ClientsMet(String fileName) throws ClientsMetException {
 		super(fileName);
-		if (fileChannel == null)
-			throw new ClientsMetException("Failed to open " + fileName);
+		/*if (file_channel == null)
+			throw new ClientsMetException("Failed to open " + fileName);*/
 	}
 
-	public Map<UserHash,PeerCredit> loadFile() throws FileNotFoundException,IOException,ClientsMetException {
-		fileChannel.position(0);
+	public Map<UserHash,PeerCredit> load() throws IOException,ClientsMetException {
+		
+		FileChannel file_channel = new FileInputStream(file).getChannel();
+		
+		ByteBuffer file_content = Misc.getByteBuffer(file_channel.size());
+		file_channel.read(file_content);
+		file_channel.close();
+		
 		Hashtable<UserHash,PeerCredit> result = new Hashtable<UserHash,PeerCredit>();
 		ByteBuffer data;
 		
-		data = Misc.getByteBuffer(1);
-		fileChannel.read(data);
-		short file_version = data.get(0);
+		file_content.position(0);
+		short file_version = file_content.get();
 		
-		if (file_version!=CREDITFILE_VERSION) 
+		if (file_version != CREDITFILE_VERSION) {
+			file_content.clear();
+			file_content = null;
+			System.gc();
 			throw new ClientsMetException("Unknow file format");
-		
-		data = Misc.getByteBuffer(4);
-		fileChannel.read(data);
-		
-		long count = Convert.intToLong(data.getInt(0));
+		}
+		long count = Convert.intToLong(file_content.getInt());
 		for (long i = 0; i < count; i++) {
 			byte abyKey[] = new byte[16];
-			int nUploadedLo, nDownloadedLo, nLastSeen, nUploadedHi, nDownloadedHi;
+			int nUploadedLo, nDownloadedLo, nUploadedHi, nDownloadedHi;
+			long nLastSeen;
 			byte abySecureIdent[];
 			int nKeySize;
 			int nReserved3;
-			
+
 			data = Misc.getByteBuffer(16);
-			fileChannel.read(data);
-			data.position(0);
-			data.get(abyKey);
+			file_content.get(data.array());
+			abyKey = data.array();
 			
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			nUploadedLo = data.getInt(0);
+			nUploadedLo = file_content.getInt();
+			nDownloadedLo = file_content.getInt();
 			
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			nDownloadedLo = (data.getInt(0));
-			
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			nLastSeen = (data.getInt(0));
-			
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			nUploadedHi = (data.getInt(0));
-			
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			nDownloadedHi = (data.getInt(0));
-			
-			data = Misc.getByteBuffer(2);
-			fileChannel.read(data);
-			nReserved3 = Convert.shortToInt(data.getShort(0));
-			
-			data = Misc.getByteBuffer(1);
-			fileChannel.read(data);
-			nKeySize = Convert.byteToInt(data.get(0));
+			nLastSeen = file_content.getLong();
+			nUploadedHi = file_content.getInt();
+			nDownloadedHi = file_content.getInt();
+			nReserved3 = Convert.shortToInt(file_content.getShort());
+			nKeySize = Convert.byteToInt(file_content.get());
 			
 			abySecureIdent = new byte[nKeySize];
-			data = Misc.getByteBuffer(nKeySize);
-			fileChannel.read(data);
-			data.position(0);
-			data.get(abySecureIdent);
-			
+			file_content.get(abySecureIdent);
 			if (System.currentTimeMillis() - nLastSeen < ED2KConstants.PEER_CLIENTS_MET_EXPIRE_TIME) {
 				PeerCredit cc = new PeerCredit(abyKey,nUploadedLo,nDownloadedLo,nLastSeen,nUploadedHi,nDownloadedHi,nReserved3,abySecureIdent);
 				result.put(cc.getUserHash(), cc);
 			}
 		}
+		
+		file_content.clear();
+		file_content = null;
+		System.gc();
+		
 		return result;
 	}
 	
-	public void writeFile(Collection<PeerCredit> clientsCredit) throws IOException {
-		fileChannel.position(0);
-		ByteBuffer data;
+	public void store(Collection<PeerCredit> clientsCredit) throws IOException {
 		
-		data = Misc.getByteBuffer(1);
-		data.put(CREDITFILE_VERSION);
-		data.position(0);
-		fileChannel.write(data);
+		long file_size = 0;
 		
-		data = Misc.getByteBuffer(4);
-		data.putInt(clientsCredit.size());
-		data.position(0);
-		fileChannel.write(data);
+		List<ByteBuffer> file_content_blocks = new ArrayList<ByteBuffer>();
+		
+		ByteBuffer file_header = Misc.getByteBuffer(1 + 4);
+		file_header.put(CREDITFILE_VERSION);
+		file_header.putInt(clientsCredit.size());
+		file_header.position(0);
+		file_content_blocks.add(file_header);
+		file_size += file_header.capacity();
 		
 		for(PeerCredit credit : clientsCredit) {
+			ByteBuffer credit_data = Misc.getByteBuffer( 16 + 4 + 4 + 8 + 4 + 4 + 2 + 1 + credit.getAbySecureIdent().length );
+			file_size += credit_data.capacity();
 			
-			data = Misc.getByteBuffer(16);
-			data.put(credit.getUserHash().getUserHash());
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(4);
-			data.putInt(credit.getNUploadedLo());
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(4);
-			data.putInt(credit.getNDownloadedLo());
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(4);
-			data.putInt(Convert.longToInt(credit.getLastSeen()));
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(4);
-			data.putInt(credit.getNUploadedHi());
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(4);
-			data.putInt(credit.getNDownloadedHi());
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(2);
-			data.putShort(Convert.intToShort(credit.getNReserved3()));
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(1);
-			data.put(Convert.intToByte(credit.getAbySecureIdent().length));
-			data.position(0);
-			fileChannel.write(data);
-			
-			data = Misc.getByteBuffer(credit.getAbySecureIdent().length);
-			data.put(credit.getAbySecureIdent());
-			data.position(0);
-			fileChannel.write(data);
-			
+			credit_data.put(credit.getUserHash().getUserHash());
+			credit_data.putInt(credit.getNUploadedLo());
+			credit_data.putInt(credit.getNDownloadedLo());
+			credit_data.putLong(credit.getLastSeen());
+			credit_data.putInt(credit.getNUploadedHi());
+			credit_data.putInt(credit.getNDownloadedHi());
+			credit_data.putShort(Convert.intToShort(credit.getNReserved3()));
+			credit_data.put(Convert.intToByte(credit.getAbySecureIdent().length));
+			credit_data.put(credit.getAbySecureIdent());
+			credit_data.position(0);
+			file_content_blocks.add(credit_data);
 		}
+		
+		ByteBuffer file_content = Misc.getByteBuffer(file_size);
+		for(ByteBuffer block : file_content_blocks) {
+			block.position(0);
+			file_content.put(block);
+		}
+		file_content.position(0);
+		
+		FileChannel file_channel = new FileOutputStream(file).getChannel();
+		file_channel.write(file_content);
+		file_channel.close();
+		
+		file_content_blocks.clear();
+		file_content.clear();
+		file_content = null;
+		System.gc();
+		
 	}
 }

@@ -24,10 +24,12 @@ package org.jmule.core.edonkey.metfile;
 
 import static org.jmule.core.edonkey.ED2KConstants.SERVERLIST_VERSION;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -91,8 +93,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.11 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
+ * @version $$Revision: 1.12 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -103,171 +105,113 @@ public class ServerMet extends MetFile {
 	
 	public ServerMet(String fileName) throws ServerMetException  {
 		super(fileName);
-		if (fileChannel==null) throw new ServerMetException("Can't open server.met file");
 	}
 	
 	public void load() throws ServerMetException {
 		try {
-			fileChannel.position(0);
-		} catch (IOException e) {
-			throw new ServerMetException("Failed to move at position 0 in server.met");
-		}
-		
-		ip_list = new ArrayList<String>();
-		port_list = new ArrayList<Integer>();
-		tag_list = new ArrayList<TagList>();
-		
-		byte serverListFormat;
-		ByteBuffer data;
-		
-		data = Misc.getByteBuffer(1);
+			FileChannel file_channel = new FileInputStream(file).getChannel();
+			ByteBuffer file_content = Misc.getByteBuffer(file_channel.size());
+			file_channel.read(file_content);
+			file_channel.close();
 			
-		try {
-				
-			fileChannel.read(data); 
+			ip_list = new ArrayList<String>();
+			port_list = new ArrayList<Integer>();
+			tag_list = new ArrayList<TagList>();
 			
-			serverListFormat = data.get(0);
-
+			byte serverListFormat;
+			file_content.position(0);
+			
+			serverListFormat = file_content.get();
 			//if (serverListFormat != SERVERLIST_VERSION)
 			//	throw new ServerMetException("Unsupported server met file");
-	
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			long serverCount = Convert.intToLong(data.getInt(0));
-			
+			long serverCount = Convert.intToLong(file_content.getInt());
 			for(long i = 0; i < serverCount; i++) {
-								
-				TagList tagList = new TagList();
 				//Read server IP
-				data = Misc.getByteBuffer(4);
-				fileChannel.read(data);
+				byte[] byte_ip = new byte[4];
+				file_content.get(byte_ip);
 				
-				String remonteAddress = Convert.IPtoString(data.array());
+				String remonteAddress = Convert.IPtoString(byte_ip);
 				
 				//Read server port 
-				data = Misc.getByteBuffer(2);
-				fileChannel.read(data);
-				
-				int remontePort = (Convert.shortToInt(data.getShort(0)));
+				int remontePort = (Convert.shortToInt(file_content.getShort()));
 				
 				//Read TagList count
-				data = Misc.getByteBuffer(4);
-				fileChannel.read(data);
-				
-				int tagCount = data.getInt(0);
-								
+				TagList loaded_tag_list = new TagList();
+				int tag_count = file_content.getInt();
 				//Load tags....
-				for(int j = 0; j<tagCount; j++) {
-					Tag tag = TagScanner.scanTag(fileChannel);
+				for(int j = 0; j<tag_count; j++) {
+					Tag tag = TagScanner.scanTag(file_content);
 					if (tag != null)
-						tagList.addTag(tag);
+						loaded_tag_list.addTag(tag);
 				}
 				ip_list.add(remonteAddress);
 				port_list.add(remontePort);
-				tag_list.add(tagList);
-				
-				
+				tag_list.add(loaded_tag_list);
 			}
+			
+			file_content.clear();
+			file_content = null;
+			System.gc();
 			
 		 } catch(Throwable exception) {
 			 
-			 throw new ServerMetException("Unknown file format");
+			 throw new ServerMetException(exception);
 			 
 		 }
 	}
 	
 	public void store() throws ServerMetException {
-		try {
-			fileChannel.close();
-			file.delete();
-			fileChannel = new RandomAccessFile(file,"rws").getChannel();
-			fileChannel.position(0);
-			ByteBuffer data;
-		
-			data = Misc.getByteBuffer(1);
-			data.put(SERVERLIST_VERSION);
-			data.position(0);
-			fileChannel.write(data);
-				
-			long count = ip_list.size();
-			
-			//for(Server server : serverList) 
-			//	if (server.isStatic()) count++;
-			
-			setServersCount(count);
-			for (int i = 0; i < count; i++) {
-				writeServer(ip_list.get(i), port_list.get(i), tag_list.get(i));
-			}
-		}
 	
-		catch(IOException ioe) {
-		  
+			Collection<ByteBuffer> file_blocks = new ArrayList<ByteBuffer>();
+			long file_size = 0;
+			ByteBuffer header = Misc.getByteBuffer(1 + 4);
+			
+			file_size += header.capacity();
+			
+			header.put(SERVERLIST_VERSION);
+			header.putInt(ip_list.size());
+			header.position(0);
+			file_blocks.add(header);
+			
+			for (int i = 0; i < ip_list.size(); i++) {
+				
+				ByteBuffer tag_list_block = tag_list.get(i).getAsByteBuffer();
+				
+				ByteBuffer server_block = Misc.getByteBuffer(4 + 2 + 4 + tag_list_block.capacity());
+				file_size += server_block.capacity();
+				
+				server_block.put(Convert.stringIPToArray( ip_list.get(i) ));
+				server_block.putShort(Convert.intToShort( port_list.get(i) ));
+				server_block.putInt( tag_list.get(i).size() );
+				tag_list_block.position(0);
+				server_block.put(tag_list_block);
+				
+				server_block.position(0);
+				file_blocks.add(server_block);
+			}
+			
+		ByteBuffer file_block = Misc.getByteBuffer(file_size);
+		for(ByteBuffer block : file_blocks) {
+			block.position(0);
+			file_block.put(block);
+		}
+		file_block.position(0);
+		
+		try {
+			FileChannel file_channel = new FileOutputStream(file).getChannel();
+			file_channel.write(file_block);
+			file_channel.close();
+		} catch(Throwable ioe) {
 		  throw new ServerMetException("IOException : " + ioe);
 		}
 		
+		file_block.clear();
+		file_block = null;
+		file_blocks.clear();
+		file_blocks = null;
+		System.gc();
 	}
 	
-	/**
-	 * Obtain server count from fileChannel.
-	 * @param fileChannel
-	 * @return
-	 * @throws IOException
-	 */
-	private long getServersCount() throws IOException {
-		ByteBuffer data;
-		data = Misc.getByteBuffer(4);
-		fileChannel.position(1);
-		fileChannel.read(data);
-		return Convert.intToLong(data.getInt(0));
-	}
-	
-	/**
-	 * Set server count in fileChannel.
-	 * @param fileChannel
-	 * @param serverCount
-	 * @throws IOException
-	 */
-	private void setServersCount(long serverCount) throws IOException {
-		ByteBuffer data = Misc.getByteBuffer(4);
-		data.putInt(Convert.longToInt(serverCount));
-		data.position(0);
-		fileChannel.position(1);
-		fileChannel.write(data);
-	}
-	
-	/**
-	 * Write one Server object in fileChannel at current position.
-	 * @param fileChannel
-	 * @param server
-	 * @throws IOException
-	 */
-	private void writeServer(String serverIP, int serverPort, TagList tagList) throws IOException {
-		ByteBuffer data;
-		data = Misc.getByteBuffer(4);
-		
-		data.put(Convert.stringIPToArray(serverIP));
-		data.position(0);
-		fileChannel.write(data);
-		
-		data = Misc.getByteBuffer(2);
-		data.putShort(Convert.intToShort(serverPort));
-		data.position(0);
-		fileChannel.write(data);
-		
-		data = Misc.getByteBuffer(4);
-		data.putInt(tagList.size());
-		data.position(0);
-		fileChannel.write(data);
-		
-		
-		for(Tag tag : tagList) {
-			data = tag.getAsByteBuffer();
-			data.position(0);
-			fileChannel.write(data);
-		}
-		
-	  }
-
 	public List<String> getIPList() {
 		return ip_list;
 	}

@@ -26,9 +26,12 @@ import static org.jmule.core.edonkey.ED2KConstants.FT_FILENAME;
 import static org.jmule.core.edonkey.ED2KConstants.FT_FILESIZE;
 import static org.jmule.core.edonkey.ED2KConstants.KNOWN_VERSION;
 
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -38,7 +41,6 @@ import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.edonkey.packet.tag.Tag;
 import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.edonkey.packet.tag.TagScanner;
-import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.SharedFile;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
@@ -101,68 +103,58 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:56:46 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
  */
 public class KnownMet extends MetFile {
 
 	public KnownMet(String fileName) throws KnownMetException {
 		super(fileName);
-		if (fileChannel == null)
-			throw new KnownMetException("Failed to load "+fileName);
+		/*if (file_channel == null)
+			throw new KnownMetException("Failed to load "+fileName);*/
 	}
 
-	public Hashtable<String,KnownMetEntity> loadFile() throws KnownMetException,IOException,
-									FileNotFoundException {
-		fileChannel.position(0);
+	public Hashtable<String,KnownMetEntity> load() throws KnownMetException,IOException {
+		
+		FileChannel filechannel = new FileInputStream(file).getChannel();
+		ByteBuffer file_content = Misc.getByteBuffer(filechannel.size());
+		filechannel.read(file_content);
+		filechannel.close();
+		
+		file_content.position(0);
 		// avoid files from known.met that have the same size and name
 		HashSet<String> repeated_keys = new HashSet<String>();
-		ByteBuffer data;
 		Hashtable<String,KnownMetEntity> knownFiles = new Hashtable<String, KnownMetEntity>();
+		byte file_version = file_content.get();
 		
-		data = Misc.getByteBuffer(1);
-		fileChannel.read(data);
 		//if (data.get(0)!=KNOWN_VERSION) 
 		//		throw new KnownMetException("Unsupported file version");
-		
-		data = Misc.getByteBuffer(4);
-		fileChannel.read(data);
-		
-		long numRecords = Convert.longToInt(data.getInt(0));
-
-		for(int j = 0;j<numRecords;j++) {
-			
+		long record_count = Convert.longToInt(file_content.getInt());
+		for(int j = 0;j<record_count;j++) {
 			KnownMetEntity known_met_entity = new KnownMetEntity();
 		
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			int Date = data.getInt(0);
+			int date = file_content.getInt();
+			known_met_entity.setDate(date);
 		
-			known_met_entity.setDate(Date);
-		
-			data = Misc.getByteBuffer(16);
-			fileChannel.read(data);
-			FileHash fileHash = new FileHash(data.array());
-		
-			data = Misc.getByteBuffer(2);
-			fileChannel.read(data);
-			int partCount = data.getShort(0);
+			byte[] file_hash = new byte[16];
+			file_content.get(file_hash);
+			FileHash fileHash = new FileHash(file_hash);
+			
+			int part_count = file_content.getShort();
 			PartHashSet partHash = new PartHashSet(fileHash);
 		
-			for(int i = 0;i<partCount;i++) {
-				data = Misc.getByteBuffer(16);
-				fileChannel.read(data);
-				partHash.add(data.array());
+			for(int i = 0;i<part_count;i++) {
+				byte[] part_hash = new byte[16];
+				file_content.get(part_hash);
+				partHash.add(part_hash);
 			}
 		
 			known_met_entity.setPartHashSet(partHash);
-		
-			data = Misc.getByteBuffer(4);
-			fileChannel.read(data);
-			int tagCount = data.getInt(0);
+			
+			int tagCount = file_content.getInt();
 			TagList tagList = new TagList();
 			for(int i = 0;i<tagCount;i++) {
-				Tag tag = TagScanner.scanTag(fileChannel);
+				Tag tag = TagScanner.scanTag(file_content);
 				if (tag != null)
 					tagList.addTag(tag);
 			}
@@ -184,112 +176,66 @@ public class KnownMet extends MetFile {
 		
 		}
 		
+		file_content.clear();
+		file_content = null;
+		System.gc();
+		
 		return knownFiles;
 	}
 	
-	public void writeFile(Collection<SharedFile> fileList) throws KnownMetException,
-					IOException,FileNotFoundException {
-		fileChannel.position(0);
-		ByteBuffer data;
+	public void store(Collection<SharedFile> fileList) throws KnownMetException, IOException {
 		
-		data = Misc.getByteBuffer(1);
-		data.put(KNOWN_VERSION);
-		data.position(0);
-		fileChannel.write(data);
+		Collection<ByteBuffer> file_blocks = new ArrayList<ByteBuffer>();
+		long file_size = 0;
 		
-		data = Misc.getByteBuffer(4);
-		data.putInt(fileList.size());
-		data.position(0);
-		fileChannel.write(data);
+		ByteBuffer header = Misc.getByteBuffer(1 + 4);
+		file_size += header.capacity();
+		header.put(KNOWN_VERSION);
+		header.putInt(fileList.size());
+		header.position(0);
+		file_blocks.add(header);
 		
+				
 		for(SharedFile file : fileList) {
 			
-			data = Misc.getByteBuffer(4);
-			fileChannel.write(data);
+			ByteBuffer tag_list = file.getTagList().getAsByteBuffer();
+			tag_list.position(0);
+			ByteBuffer file_block = Misc.getByteBuffer(4 + 16 + 2 + ( file.getHashSet().size() * 16 ) + 4 +  tag_list.capacity() );
+			file_size += file_block.capacity();
 			
-			data = Misc.getByteBuffer(16);
-			data.put(file.getFileHash().getHash());
-			data.position(0);
-			fileChannel.write(data);
+			int data = file_block.getInt();
+			file_block.put(file.getFileHash().getHash());
+			file_block.putShort(Convert.intToShort(file.getHashSet().size()));
 			
-			data = Misc.getByteBuffer(2);
-			data.putShort(Convert.intToShort(file.getHashSet().size()));
-			data.position(0);
-			fileChannel.write(data);
+			for(byte[] part_hash : file.getHashSet())
+				file_block.put(part_hash);
 			
-			data = Misc.getByteBuffer(16);
-			for(int a = 0;a<file.getHashSet().size();a++) {
-				data.position(0);
-				data.put(file.getHashSet().get(a));
-				data.position(0);
-				fileChannel.write(data);
-			}
-			
-			TagList tagList = file.getTagList();
-			
-			data = Misc.getByteBuffer(4);
-			data.putInt(tagList.size());
-			data.position(0);
-			fileChannel.write(data);
-			for(Tag tag : tagList) {
-				ByteBuffer raw_tag = tag.getAsByteBuffer();
-				fileChannel.write(raw_tag);
-			}
-			
+			file_block.putInt(file.getTagList().size());
+			file_block.put(tag_list);
+		
+			file_block.position(0);
+			file_blocks.add(file_block);
 		}
+		
+		ByteBuffer file_content = Misc.getByteBuffer(file_size);
+		for(ByteBuffer block : file_blocks) {
+			block.position(0);
+			file_content.put(block);
+		}
+		
+		file_content.position(0);
+		
+		FileChannel filechannel = new FileOutputStream(file).getChannel();
+		filechannel.write(file_content);
+		filechannel.close();
+		
+		file_content.clear();
+		file_content = null;
+		file_blocks.clear();
+		file_blocks = null;
+		
+		System.gc();
 		
 	}
-	
-	public void appendFile(CompletedFile addData) throws FileNotFoundException,IOException {
-		fileChannel.position(0);
-		ByteBuffer data = Misc.getByteBuffer(4);
-		
-		fileChannel.position(1);
-		
-		fileChannel.read(data);
-		
-		long numRecords = Convert.intToLong(data.getInt(0));
-		numRecords++;
-		
-		
-		data.putInt(0,Convert.longToInt(numRecords));
-		data.position(0);
-		fileChannel.position(1);
-		fileChannel.write(data);
-		
-		fileChannel.position(fileChannel.size());
-		
-		data = Misc.getByteBuffer(4);
-		fileChannel.write(data);
-		
-		data = Misc.getByteBuffer(16);
-		data.put(addData.getFileHash().getHash());
-		data.position(0);
-		fileChannel.write(data);
-		
-		data = Misc.getByteBuffer(2);
-		data.putShort(Convert.intToShort(addData.getHashSet().size()));
-		data.position(0);
-		fileChannel.write(data);
-		
-		data = Misc.getByteBuffer(16);
-		for(int a = 0;a<addData.getHashSet().size();a++) {
-			data.position(0);
-			data.put(addData.getHashSet().get(a));
-			data.position(0);
-			fileChannel.write(data);
-		}
-		
-		TagList tagList = addData.getTagList();
-		
-		data = Misc.getByteBuffer(4);
-		data.putInt(tagList.size());
-		data.position(0);
-		fileChannel.write(data);
-		
-		for(Tag tag : tagList) {
-			ByteBuffer raw_tag = tag.getAsByteBuffer();
-			fileChannel.write(raw_tag);
-		}
-	}
+
 }
