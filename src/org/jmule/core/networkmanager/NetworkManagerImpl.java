@@ -159,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.48 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/02 17:26:58 $
+ * @version $Revision: 1.49 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:16:39 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -171,8 +171,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	private static final long PACKET_PROCESSOR_QUEUE_SCAN_INTERVAL 	= 1000 * 15;
 	private static final long PEER_CONNECTIONS_MONITOR_SELECT		= 50;
 	private static final long SERVER_CONNECTION_MONITOR_SELECT		= 5000;
-	
-	private static ByteBuffer packetBuffer = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE);
+	private static final long UDP_CONNECTION_MONITOR_SELECT			= 1000;
 
 	private enum PacketType {
 		SERVER_UDP, PEER_UDP, KAD, KAD_COMPRESSED
@@ -267,9 +266,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			return;
 		}
 		udp_connection = new JMUDPConnection();
+		udp_connection.startConnection();
 		try {
-			if (_config_manager.isUDPEnabled())
+			if (_config_manager.isUDPEnabled()) {
 				udp_connection.open();
+				udp_connection.wakeUp();
+			}
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
 		}
@@ -304,7 +306,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 
 		try {
 			if (_config_manager.isUDPEnabled())
-				udp_connection.close();
+				udp_connection.stopThread();
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
 		}
@@ -1553,10 +1555,14 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	
 	public void udpPortStatusChanged() {
 		try {
-			if (ConfigurationManagerSingleton.getInstance().isUDPEnabled())
+			if (ConfigurationManagerSingleton.getInstance().isUDPEnabled()) {
 				udp_connection.open();
-			else 
+				udp_connection.wakeUp();
+			}
+			else {
+				udp_connection.haltThread();
 				udp_connection.close();
+			}
 		} catch (ConfigurationManagerException e) {
 			e.printStackTrace();
 		}
@@ -1774,7 +1780,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			} catch (Throwable cause) {
 				if (cause instanceof UnknownPacketException)
 					throw (UnknownPacketException) cause;
-				throw new MalformattedPacketException(rawPacket.array(), cause);
+				throw new MalformattedPacketException(rawPacket, cause);
 			}
 	//	}
 	}
@@ -2250,59 +2256,47 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		//}
 	}
 	
-	private void readUDPPacket(DatagramChannel channel) throws NetworkManagerException, UnknownPacketException, MalformattedPacketException {
-		InetSocketAddress packetSender;
+	private void processUDPPacket(UDPPacket packet) throws UnknownPacketException, MalformattedPacketException, NetworkManagerException {
+		
 		boolean kad_enabled = false;
 		PacketType type;
-		ByteBuffer packet_content;
 		try {
 			kad_enabled = ConfigurationManagerSingleton.getInstance().isJKadAutoconnectEnabled();
 		} catch (ConfigurationManagerException cause) {
 			cause.printStackTrace();
 		}
-		try {
-			packetBuffer.clear();
-			packetSender = (InetSocketAddress) channel.receive(packetBuffer);
-			packet_content = getByteBuffer(packetBuffer.position());
-
-			packetBuffer.limit(packetBuffer.position());
-			packetBuffer.position(0);
-			packet_content.position(0);
-			packet_content.put(packetBuffer);
-
-			packet_content.position(0);
-
-			if (packet_content.get(0) == PROTO_EDONKEY_SERVER_UDP)
-				type = PacketType.SERVER_UDP;
-			else if (packet_content.get(0) == PROTO_EDONKEY_PEER_UDP)
-				type = PacketType.PEER_UDP;
-			else if (packet_content.get(0) == JKadConstants.PROTO_KAD_UDP) {
-				if (!kad_enabled)
-					return;
-				type = PacketType.KAD;
-			} else if (packet_content.get(0) == JKadConstants.PROTO_KAD_COMPRESSED_UDP) {
-				if (!kad_enabled)
-					return;
-				type = PacketType.KAD_COMPRESSED;
-			} else
-				throw new NetworkManagerException(
-						"Unknown UDP packet header : "+ Convert.byteToHex(packet_content.get(0)));
-		} catch (Throwable cause) {
-			throw new NetworkManagerException(Misc.getStackTrace(cause));
-		}
+		
+		ByteBuffer packet_content = packet.getAsByteBuffer();
+		InetSocketAddress packet_sender = packet.getAddress();
+					
+			
+		if (packet_content.get(0) == PROTO_EDONKEY_SERVER_UDP)
+			type = PacketType.SERVER_UDP;
+		else if (packet_content.get(0) == PROTO_EDONKEY_PEER_UDP)
+			type = PacketType.PEER_UDP;
+		else if (packet_content.get(0) == JKadConstants.PROTO_KAD_UDP) {
+			if (!kad_enabled)
+				return;
+			type = PacketType.KAD;
+		} else if (packet_content.get(0) == JKadConstants.PROTO_KAD_COMPRESSED_UDP) {
+			if (!kad_enabled)
+				return;
+			type = PacketType.KAD_COMPRESSED;
+		} else
+			throw new NetworkManagerException("Unknown UDP packet header : " + Convert.byteToHex(packet_content.get(0)));
+		
 		InternalNetworkManager _network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		InternalIPFilter _ipfilter = (InternalIPFilter) IPFilterSingleton.getInstance();
 		if ((type == PacketType.KAD) || (type == PacketType.KAD_COMPRESSED)) {
-			_network_manager.receiveKadPacket(new KadPacket(packet_content,
-					packetSender));
+			_network_manager.receiveKadPacket(new KadPacket(packet_content,packet_sender));
 			return;
 		}
 		//while(packet_content.hasRemaining()) {
 		byte packet_protocol = packet_content.get(0);
 		byte packet_op_code = packet_content.get(1);
 		packet_content.position(1 + 1);
-		String ip = packetSender.getAddress().getHostAddress();
-		int port = packetSender.getPort();
+		String ip = packet_sender.getAddress().getHostAddress();
+		int port = packet_sender.getPort();
 		if (_ipfilter.isServerBanned(ip)) {
 			return;
 		}
@@ -2315,7 +2309,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (packet_protocol == PROTO_EDONKEY_SERVER_UDP) {
 				switch (packet_op_code) {
 				case OP_GLOBSERVSTATUS: {
-					if (packet_content.capacity() < 15) {
+					if (packet_content.limit() < 15) {
 						int challenge = packet_content.getInt();
 						long user_count = Convert.intToLong(packet_content.getInt());
 						long files_count = Convert.intToLong(packet_content.getInt());
@@ -2420,8 +2414,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				}
 	
 				default: {
-					throw new UnknownPacketException(packet_protocol,
-							packet_op_code, packet_content.array());
+					throw new UnknownPacketException(packet_protocol, packet_op_code, udp_packet_buffer.array());
 				}
 				}
 			}
@@ -2430,7 +2423,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
 			_ipfilter.addServer(ip, BannedReason.BAD_PACKETS, _network_manager);
-			throw new MalformattedPacketException(packet_content.array(), cause);
+			throw new MalformattedPacketException(udp_packet_buffer, cause);
 		}
 	}
 
@@ -2756,7 +2749,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					key.interestOps(SelectionKey.OP_READ | key.interestOps());
 					connection.installOPS(InterestedOPS.OP_READ);
 				} catch (Throwable t) {
-					System.out.println("Error at key : " + key.attachment());
 					peerIOError(connection.getIPAddress(),connection.getUsePort(), t);
 					t.printStackTrace();
 				}
@@ -2775,7 +2767,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					key.interestOps(SelectionKey.OP_WRITE | key.interestOps());
 					connection.installOPS(InterestedOPS.OP_WRITE);
 				} catch (Throwable t) {
-					System.out.println("Error at key : " + key.attachment());
 					peerIOError(connection.getIPAddress(),connection.getUsePort(), t);
 					t.printStackTrace();
 				}
@@ -3148,6 +3139,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			int transferredBytes;
 			try {
 				container.lastUpdate = System.currentTimeMillis();
+				System.out.println("Send packet to :: " + System.currentTimeMillis() + " :: " + connection);
 				transferredBytes = connection.getJMConnection().write(packet.getAsByteBuffer());
 				
 				if ((container.opCode == OP_SENDINGPART) || (container.opCode == OP_COMPRESSEDPART)) {
@@ -3678,37 +3670,228 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 	
 	private enum UDPConnectionStatus { OPEN, CLOSED};
-	
-	private class JMUDPConnection {
+	private static ByteBuffer udp_packet_buffer = Misc.getByteBuffer(ConfigurationManager.MAX_UDP_PACKET_SIZE);
+	private class JMUDPConnection extends JMThread {
 				
-		private DatagramChannel listenChannel;
-		private UDPListenThread udpListenThread;
+		private DatagramChannel listenChannel = null;
 		private UDPConnectionStatus connectionStatus = UDPConnectionStatus.CLOSED;
-		
 		private Queue<UDPPacket> sendQueue = new ConcurrentLinkedQueue<UDPPacket>();
-		private UDPSenderThread sender_thread;
+		private Selector selector = null;
+		private UDPPacketProcessor udp_packet_processor = null;
+		
+		
+		private Queue<UDPPacket> receive_queue = new ConcurrentLinkedQueue<UDPPacket>();
+		
+		class UDPPacketProcessor extends JMThread {
+			public UDPPacketProcessor() {
+				super("UDP Packet processor");
+			}
+			
+			private volatile boolean loop = true;
+			private volatile boolean sleep = false;
+			
+			public void run() {
+				while(loop) {
+					sleep = false;
+					if (receive_queue.isEmpty()) {
+						synchronized (this) {
+							sleep = true;
+							try {
+								this.wait();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						continue;
+					}
+					
+					UDPPacket packet = receive_queue.poll();
+					try {
+						processUDPPacket(packet);
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			public boolean isSleeping() {return sleep; }
+			
+			public void JMStop() {
+				loop = false;
+				if (isSleeping()) {
+					wakeUp();
+				}
+			}
+			
+			public void wakeUp() {
+				synchronized (this) {
+					this.notify();	
+				}
+			}
+			
+		}
 		
 		JMUDPConnection(){
+			super("UDP Connection");
 		}
+		
+		public void startConnection() {
+			must_sleep = true;
+			
+			udp_packet_processor = new UDPPacketProcessor();
+			udp_packet_processor.start();
+			
+			start();
+		}
+		
 		
 		public void open() {
 			try {
 				int listenPort = ConfigurationManagerSingleton.getInstance().getUDP();
 				listenChannel = DatagramChannel.open();
 				listenChannel.socket().bind(new InetSocketAddress(listenPort));
+				listenChannel.configureBlocking(false);
 				
-				listenChannel.configureBlocking(true);
 				
-				udpListenThread = new UDPListenThread();
-				udpListenThread.start();
 				
-				sender_thread = new UDPSenderThread();
-				sender_thread.start();
+				selector = Selector.open();
+				listenChannel.register(selector, SelectionKey.OP_READ);
 				
 				connectionStatus = UDPConnectionStatus.OPEN;
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
+		}
+		
+		private volatile boolean loop = true;
+		private volatile boolean must_sleep = false;
+		private volatile boolean is_selecting = false;
+		private volatile boolean must_install_write = false;
+		private volatile boolean write_installed = false;
+		
+		public void run() {
+			while(loop) {
+				if (must_sleep) {
+					synchronized(this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e) { }
+					}
+					continue;
+				}
+				
+				int select_count = 0;
+				
+				try {
+					select_count = selector.selectNow();
+					if (select_count == 0) {
+						is_selecting = true;
+						select_count = selector.select(UDP_CONNECTION_MONITOR_SELECT);
+						is_selecting = false;
+					}
+					
+					if (!loop)
+						return;
+					
+					if (must_install_write) {
+						listenChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+						must_install_write = false;
+						write_installed = true;
+					}
+					
+					Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
+					while(keys.hasNext()) {
+						
+						if (!loop)
+							return;
+						
+						SelectionKey key = keys.next();
+						keys.remove();
+						
+						if (key.isReadable())
+							if (key.isValid()) {
+								try {
+									udp_packet_buffer.clear();
+									InetSocketAddress packetSender = (InetSocketAddress) listenChannel.receive(udp_packet_buffer);
+									
+									ByteBuffer packet_content = getByteBuffer(udp_packet_buffer.position());
+
+									udp_packet_buffer.limit(udp_packet_buffer.position());
+									udp_packet_buffer.position(0);
+									packet_content.position(0);
+									packet_content.put(udp_packet_buffer);
+
+									packet_content.position(0);
+									
+									receive_queue.offer(new UDPPacket(packet_content, packetSender));
+									
+									if (udp_packet_processor.isSleeping())
+										udp_packet_processor.wakeUp();
+										
+									
+								} catch (Throwable e) {
+									e.printStackTrace();
+								}
+							}
+						if (key.isWritable())
+							if (key.isValid()) {
+								UDPPacket packet = sendQueue.poll();
+								if (packet==null) {
+									listenChannel.register(selector, SelectionKey.OP_READ);
+									write_installed = false;
+									continue;
+								}
+								InetSocketAddress destination = packet.getAddress();
+								try {
+									listenChannel.send(packet.getAsByteBuffer(), destination);
+								} catch (IOException cause) {
+									if (!isOpen()) return ;
+									cause.printStackTrace();
+								}
+								
+								if (sendQueue.isEmpty()) {
+									listenChannel.register(selector, SelectionKey.OP_READ);
+									write_installed = false;
+								}
+							}
+					}
+					
+										
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		
+		public boolean isSleeping() {
+			return must_sleep;
+		}
+		
+		public void haltThread() {
+			must_sleep = true;
+			if (is_selecting)
+				selector.wakeup();
+			
+		}
+		
+		public void wakeUp() {
+			if (must_sleep==false) return;
+			must_sleep = false;
+			synchronized (this) {
+				this.notify();
+			}
+		}
+		
+		public void stopThread() {
+			loop = false;
+			if (isSleeping())
+				wakeUp();
+			if (is_selecting)
+				selector.wakeup();
+			close();
+			
+			udp_packet_processor.JMStop();
 		}
 		
 		public boolean isOpen() {
@@ -3720,25 +3903,30 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			try {
 				connectionStatus = UDPConnectionStatus.CLOSED;
 				listenChannel.close();
-				udpListenThread.JMStop();
-				sender_thread.JMStop();
+				selector.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
 		public void reOpenConnection() {
+			haltThread();
 			if (isOpen())
 				close();
 			open();
+			wakeUp();
 		}
 		
 		public void sendPacket(UDPPacket packet ) throws JMException {
 			if (!isOpen())
 				throw new JMException("UDP socket is not open");
 			sendQueue.offer(packet);
-			if (sender_thread.isSleeping())
-				sender_thread.wakeUp();
+			if (write_installed == false) {
+				must_install_write = true;
+				if (is_selecting)
+					selector.wakeup();
+			}
+				
 		}
 		
 		public void sendPacket(UDPPacket packet, IPAddress address, int port) throws JMException {
@@ -3756,92 +3944,5 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			sendPacket(packet, ip_address);
 		}
 		
-		private class UDPSenderThread extends JMThread {
-			private boolean is_sleeping = false;
-			private boolean loop = true;
-			public UDPSenderThread() {
-				super("UDP Sender thread");
-			}
-			
-			public void run() {
-				while(loop) {
-					if (!isOpen()) return ;
-					is_sleeping = false;
-					if (sendQueue.isEmpty()) {
-						is_sleeping = true;
-						synchronized(this) {
-							try {
-								this.wait();
-							} catch (InterruptedException e) {
-							}
-						}
-						continue;
-					}
-					while(!sendQueue.isEmpty()) {
-						if (!isOpen()) return ;
-						UDPPacket packet = sendQueue.poll();
-						InetSocketAddress destination = packet.getAddress();
-						packet.getAsByteBuffer().position(0);
-						try {
-							listenChannel.send(packet.getAsByteBuffer(), destination);
-						} catch (IOException cause) {
-							if (!isOpen()) return ;
-							cause.printStackTrace();
-						}
-					}
-				}
-				
-			}
-			
-			public boolean isSleeping() {
-				return is_sleeping;
-			}
-			
-			public void wakeUp() {
-				synchronized(this) {
-					this.notify();
-				}
-			}
-			
-			public void JMStop() {
-				loop = false;
-				this.interrupt();
-			}
-			
-			
-			
-		}
-		
-		private class UDPListenThread extends JMThread {
-			
-			private volatile boolean stop = false;
-			
-			public UDPListenThread() {
-				super("UDP packets listener");
-			}
-			
-			public void run() {
-				while(!stop){
-					try {
-						long begin_read = System.currentTimeMillis();
-						readUDPPacket(listenChannel);
-						long end_read = System.currentTimeMillis();
-						long read_time = end_read - begin_read;
-						//System.out.println("Read time : " + read_time);
-					}catch (Throwable cause) {
-						if (connectionStatus == UDPConnectionStatus.CLOSED) return ;			
-						cause.printStackTrace();
-						
-					}
-					
-				}
-			}
-			
-			public void JMStop() {
-				stop = true;
-				interrupt();
-			}
-		}
-
-	}	
+	}
 }
