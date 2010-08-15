@@ -26,8 +26,8 @@ import static org.jmule.core.jkad.JKadConstants.NODES_DAT_VERSION;
 import static org.jmule.core.utils.Convert.intToShort;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -39,12 +39,13 @@ import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.JKadUDPKey;
 import org.jmule.core.jkad.utils.Utils;
 import org.jmule.core.utils.Convert;
+import org.jmule.core.utils.Misc;
 
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/28 17:46:03 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:14:06 $
  */
 public class NodesDat {
 
@@ -53,64 +54,52 @@ public class NodesDat {
 	 * @param fileName
 	 * @return
 	 */
-	public static List<KadContact> loadFile(String fileName) {
+	public static List<KadContact> load(String fileName) {
 		List<KadContact> result = new ArrayList<KadContact>();
 		
 		try {
-			FileChannel channel = new RandomAccessFile(fileName,"rw").getChannel();
+						
+			FileChannel channel = new FileInputStream(fileName).getChannel();
+			ByteBuffer file_content = Misc.getByteBuffer(channel.size());
+			channel.read(file_content);
+			file_content.position(0);
+			channel.close();
 			
-			ByteBuffer data = getByteBuffer(4);
-			channel.position(4); // skip 'old' contacts count field
+			file_content.position(4 + 4); // skip 'old' contacts count field, skip nodes.dat version
 			
-			channel.read(data); // nodes.dat version
+			int contact_count = file_content.getInt();
 			
-			data.position(0);
-			channel.read(data);
-			
-			int totalContacts = data.getInt(0);
-			
-			for(int i = 1 ; i <= totalContacts ; i++) {
+			for(int i = 1 ; i <= contact_count ; i++) {
+				byte[] byte_contact_id = new byte[16];
+				file_content.get(byte_contact_id);
+				ClientID contact_id = new ClientID(byte_contact_id);
+				byte[] byte_ip = new byte[4];
+				file_content.get(byte_ip);
+				IPAddress address = new IPAddress(byte_ip);
 				
-				data = getByteBuffer(16);
-				channel.read(data);
-				ClientID contact_id = new ClientID(data.array());
-				data = getByteBuffer(4);
-				channel.read(data);
-				byte[] ip = data.array().clone();
-				//ip = Convert.reverseArray(ip);
-				IPAddress address = new IPAddress(ip);
+				short udp_port = file_content.getShort();
+				short tcp_port = file_content.getShort();
 				
-				data = getByteBuffer(2);
-				channel.read(data);
-				short udp_port = data.getShort(0);
+				byte contact_version = file_content.get(); 
 				
-				data = getByteBuffer(2);
-				channel.read(data);
-				short tcp_port = data.getShort(0);
+				byte[] data = new byte[4];
+				file_content.get(data);
 				
-				data = getByteBuffer(1);
-				channel.read(data);
-				byte contact_version = data.get(0); 
+				byte[] data2 = new byte[4];
+				file_content.get(data2);
 				
-				data = getByteBuffer(4);
-				channel.read(data);
+				JKadUDPKey udp_key = new JKadUDPKey(data, data2);
 				
-				ByteBuffer data2 = getByteBuffer(4);
-				channel.read(data2);
-				
-				JKadUDPKey udp_key = new JKadUDPKey(data.array(), data2.array());
-				
-				data = getByteBuffer(1);
-				channel.read(data);
-
+				byte verified = file_content.get();
 				if (Utils.isGoodAddress(address)) {
-					KadContact contact = new KadContact(contact_id, new ContactAddress(address, Convert.shortToInt(udp_port)), Convert.shortToInt(tcp_port), contact_version, udp_key, data.get(0)==1 ? true : false);
+					KadContact contact = new KadContact(contact_id, new ContactAddress(address, Convert.shortToInt(udp_port)), Convert.shortToInt(tcp_port), contact_version, udp_key, verified==1 ? true : false);
 					
 					result.add(contact);
 				}
 			}
-			
-			channel.close();
+			file_content.clear();
+			file_content = null;
+			System.gc();
 		}catch(Throwable t) {
 			t.printStackTrace();
 		}
@@ -123,70 +112,47 @@ public class NodesDat {
 	 * @param fileName
 	 * @param contactList
 	 */
-	public static void writeFile(String fileName, List<KadContact> contactList) {
+	public static void store(String fileName, List<KadContact> contactList) {
 		try {
-			FileChannel channel = new FileOutputStream(fileName).getChannel();
-			ByteBuffer data = getByteBuffer(4);
 			
-			channel.write(data);
+			ByteBuffer file_content = Misc.getByteBuffer(4 + 4 + 4 + contactList.size() * ( 16 + 4 + 2 + 2 + 1 + 4 + 4 + 1) );
 			
-			data.position(0);
-			data.put(NODES_DAT_VERSION);
-			data.position(0);
-			channel.write(data);
-			
-			data.position(0);
-			data.putInt(contactList.size());
-			data.position(0);
-			channel.write(data);
-			
+			file_content.position(4);
+			file_content.putInt(NODES_DAT_VERSION);
+			file_content.putInt(contactList.size());
 			for(KadContact contact : contactList) {
-				data = getByteBuffer(16);
-				data.put(contact.getContactID().toByteArray());
-				data.position(0);
-				channel.write(data);
-				
-				data = getByteBuffer(4);
-				data.put(contact.getIPAddress().getAddress());
-				data.position(0);
-				channel.write(data);
-				
-				data  = getByteBuffer(2);
-				data.putShort(intToShort(contact.getUDPPort()));
-				data.position(0);
-				channel.write(data);
-				
-				data  = getByteBuffer(2);
-				data.putShort(intToShort(contact.getTCPPort()));
-				data.position(0);
-				channel.write(data);
-				
-				data  = getByteBuffer(1);
-				data.put(contact.getVersion());
-				data.position(0);
-				channel.write(data);
+				file_content.put(contact.getContactID().toByteArray());
+				file_content.put(contact.getIPAddress().getAddress());
+				file_content.putShort(intToShort(contact.getUDPPort()));
+				file_content.putShort(intToShort(contact.getTCPPort()));
+				file_content.put(contact.getVersion());
 				
 				// write key
 				JKadUDPKey key = contact.getKadUDPKey();
 				if (key == null) {
-					data  = getByteBuffer(4 + 4);
+					ByteBuffer data  = getByteBuffer(4 + 4);
 					data.position(0);
-					channel.write(data);
+					file_content.put(data);
 				} else {
-					data  = getByteBuffer(4 + 4);
+					ByteBuffer data  = getByteBuffer(4 + 4);
 					data.put(key.getKey());
 					data.put(key.getAddress().getAddress());
 					data.position(0);
-					channel.write(data);
+					file_content.put(data);
 				}
 				
-				data = getByteBuffer(1);
-				data.put((byte)(contact.isIPVerified() ? 1 : 0));
-				data.position(0);
-				channel.write(data);
+				file_content.put((byte)(contact.isIPVerified() ? 1 : 0));
 			}
 			
+			FileChannel channel = new FileOutputStream(fileName).getChannel();
+			file_content.position(0);
+			channel.write(file_content);
 			channel.close();
+			
+			file_content.clear();
+			file_content = null;
+			System.gc();
+			
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}

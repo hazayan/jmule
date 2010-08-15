@@ -25,11 +25,13 @@ package org.jmule.core.jkad.indexer;
 import static org.jmule.core.jkad.JKadConstants.SRC_INDEX_VERSION;
 import static org.jmule.core.utils.Misc.getByteBuffer;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.jmule.core.edonkey.packet.tag.Tag;
@@ -42,48 +44,48 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/12 14:41:39 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:11:45 $
  */
 public class SrcIndexDat {
 
 	public static  Map<Int128, Index> loadFile(String fileName) throws Throwable {
 		Map<Int128, Index> result = new Hashtable<Int128, Index>();
-		FileChannel channel = new RandomAccessFile(fileName,"rw").getChannel();
 		
-		channel.position(4+4);
+		FileChannel file_channel = new FileInputStream(fileName).getChannel();
+		ByteBuffer file_content = getByteBuffer(file_channel.size());
+		file_channel.read(file_content);
+		file_channel.close();
+		
+		file_content.position(4 + 4);
+		
+		int count = file_content.getInt();
 		
 		ByteBuffer data;
 		
-		data = getByteBuffer(4);
-		
-		channel.read(data);
-		int count = data.getInt(0);
-		
 		for(int i=0;i<count;i++) {
 			data = getByteBuffer(16);
-			channel.read(data);
+			file_content.get(data.array());
+			
 			Int128 key_id = new Int128(data.array());
-			data = getByteBuffer(4);
-			channel.read(data);
 			Index index = new Index(key_id);
-			int source_count = data.getInt(0);
-		
+			
+			data = getByteBuffer(4);
+			
+			int source_count = file_content.getInt();
+			
 			for(int j = 0;j<source_count;j++) {
 				data = getByteBuffer(16);
-				channel.read(data);
+				file_content.get(data.array());
+				
 				ClientID client_id = new ClientID(data.array());
-
-				data = getByteBuffer(8);
-				channel.read(data);
-				long creation_time = data.getLong(0);
-				data = getByteBuffer(1);
-				channel.read(data);
-				int tagCount = data.get(0);
+				long creation_time = file_content.getLong();
+				
+				int tagCount = file_content.get();
 				TagList tagList = new TagList();
 				
 				for(int k = 0;k<tagCount;k++) {
-					Tag tag = TagScanner.scanTag(channel);
+					Tag tag = TagScanner.scanTag(file_content);
 					
 					if (tag!=null)
 						tagList.addTag(tag);
@@ -95,11 +97,81 @@ public class SrcIndexDat {
 			result.put(key_id, index);
 		}
 		
+		file_content.clear();
+		file_content = null;
+		System.gc();
+		
 		return result;
 	}
 	
 	public static void writeFile(String fileName, Map<Int128, Index> sourceData) throws Throwable {
+		
+		long buffer_size = 4 + 4 + 4 ;
+		List<ByteBuffer> index_byte_buffer = new ArrayList<ByteBuffer>();
+		
+		for(Int128 key : sourceData.keySet()) {
+			ByteBuffer content = getByteBuffer(16 + 4);
+			content.put(key.toByteArray());
+			
+			Index index = sourceData.get(key);
+			content.putInt(index.getSourceList().size());
+			buffer_size += content.capacity();
+			
+			content.position(0);
+			index_byte_buffer.add(content);
+			
+			for(Source source : index.getSourceList()) {
+				ByteBuffer tag_list = source.getTagList().getAsByteBuffer();
+				content = getByteBuffer(16 + 8 + 1 + tag_list.capacity());
+				buffer_size += content.capacity();
+				
+				content.put(source.getClientID().toByteArray());
+				content.putLong(source.getCreationTime());
+				content.put(Convert.intToByte(source.getTagList().size()));
+				tag_list.position(0);
+				content.put(tag_list);
+				content.position(0);
+				index_byte_buffer.add(content);
+				tag_list = null;
+			}
+		}
+		
+		ByteBuffer file_content = getByteBuffer(buffer_size);
+		ByteBuffer data = getByteBuffer(4);
+		data.put(SRC_INDEX_VERSION);
+		data.position(0);
+		
+		file_content.put(data);
+		
+		data.position(0);
+		data.putInt(Convert.longToInt(System.currentTimeMillis()));
+		data.position(0);
+		
+		file_content.put(data);
+		
+		data.position(0);
+		data.putInt(sourceData.size());
+		data.position(0);
+		file_content.put(data);
+		
+		for(ByteBuffer buffer : index_byte_buffer) {
+			buffer.position(0);
+			file_content.put(buffer);
+		}
+		
 		FileChannel channel = new FileOutputStream(fileName).getChannel();
+		file_content.position(0);
+		channel.write(file_content);
+		channel.close();
+		
+		file_content.clear();
+		file_content = null;
+		index_byte_buffer.clear();
+		index_byte_buffer = null;
+		
+		System.gc();
+		
+		/*FileChannel channel = new FileOutputStream(fileName).getChannel();
 		ByteBuffer data = getByteBuffer(4);
 		
 		data.put(SRC_INDEX_VERSION);
@@ -150,6 +222,7 @@ public class SrcIndexDat {
 				}
 			}
 		}
+		channel.close();*/
 	}
 	
 }
