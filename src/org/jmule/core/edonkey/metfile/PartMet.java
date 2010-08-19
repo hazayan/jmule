@@ -102,8 +102,8 @@ import org.jmule.core.utils.Misc;
  *
  * Created on Nov 7, 2007
  * @author binary256
- * @version $$Revision: 1.17 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
+ * @version $$Revision: 1.18 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/19 16:12:24 $$
  */
 public class PartMet extends MetFile {
 	
@@ -198,7 +198,7 @@ public class PartMet extends MetFile {
 				}
 				file_content.clear();
 				file_content = null;
-				System.gc();
+				//System.gc();
 			} catch (FileNotFoundException e) {
 				throw new PartMetException("Failed to load PartFile ");
 			} catch (IOException e) {
@@ -241,7 +241,7 @@ public class PartMet extends MetFile {
 					counter++;
 				}
 				
-				long file_size = (Integer)tagList.getTag(FT_FILESIZE).getValue();
+				long file_size = Convert.intToLong((Integer) tagList.getTag(FT_FILESIZE).getValue());
 				int part_count = (int)(file_size / PARTSIZE);
 				if ((file_size % PARTSIZE) != 0)
 					part_count++;
@@ -276,7 +276,7 @@ public class PartMet extends MetFile {
 				byte_buffer_gaps.clear();
 				buffer_tag_list = null; 
 				byte_buffer_gaps = null;
-				System.gc();
+				//System.gc();
 				
 			} catch (FileNotFoundException e) {
 				throw new PartMetException("Failed to open for writing part file : " +file.getName());
