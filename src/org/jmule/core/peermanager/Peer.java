@@ -47,11 +47,11 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.25 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 13:04:52 $$
+ * @version $$Revision: 1.26 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:26:25 $$
  */
 public class Peer {
-	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL, GLOBAL}
+	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL /* Added directly */, GLOBAL}
 	public enum PeerStatus {DISCONNECTED, CONNECTED, CONNECTING}
 		
 	private String ip;
@@ -59,8 +59,8 @@ public class Peer {
 	private int port;
 	private int listenPort = 0;
 	
-	private String server_ip;
-	private int server_port;
+	private String server_ip = null;
+	private int server_port = 0;
 	
 	private ClientID clientID = null;
 	private UserHash userHash = null;
@@ -101,7 +101,6 @@ public class Peer {
 	}
 	
 	void setStatus(PeerStatus newStatus) {
-		System.out.println("Set peer status : " + this + "  " + newStatus + " ");
 		this.peer_status = newStatus;
 		lastSeen = System.currentTimeMillis();
 	}
@@ -165,14 +164,18 @@ public class Peer {
 		return peer_status;
 	}
 	
-	public Integer getPeerFeature(PeerFeatures feature) {
+	public Map<PeerFeatures,Integer> getFeatures() {
+		return peer_features;
+	}
+	
+	public Integer getFeature(PeerFeatures feature) {
 		Integer result = peer_features.get(feature);
 		if (result == null)
 			return 0;
 		return result;
 	}
 		
-	public PeerSource getPeerSource() {
+	public PeerSource getSource() {
 		return peer_source;
 	}
 	
@@ -213,16 +216,12 @@ public class Peer {
 
 	}
 		
-	public ClientID getID() {
+	public ClientID getClientID() {
 		return clientID;
 	}
 	
 	public boolean isHighID() {
 		return this.clientID.isHighID();
-	}
-	
-	public PeerStatus getPeerStatus() {
-		return peer_status;
 	}
 	
 	public String toString() {
@@ -237,7 +236,7 @@ public class Peer {
 		result += " userHash : " + userHash;
 		
 		result += " lastSeen : " + lastSeen;
-		result += " source : " + getPeerSource();
+		result += " source : " + getSource();
 		
 		result +=" Features : ";
 		for(PeerFeatures feature : peer_features.keySet())
@@ -247,7 +246,7 @@ public class Peer {
 	
 	public int hashCode() {
 		if (userHash == null)
-			return getID().hashCode();
+			return getClientID().hashCode();
 		return userHash.hashCode();
 	}
 	
@@ -259,8 +258,8 @@ public class Peer {
 		Peer p = (Peer) object;
 		if ((p.getUserHash() != null) && (userHash != null))
 			return p.getUserHash().equals(getUserHash());
-		ClientID id = p.getID();
-		ClientID id2 = getID();
+		ClientID id = p.getClientID();
+		ClientID id2 = getClientID();
 		if ((id == null) || (id2 == null))
 			return (getIP() + ":" + getPort()).equals(p.getIP() + ":"+ p.getPort());
 		byte[] b1 = id.getClientID();
