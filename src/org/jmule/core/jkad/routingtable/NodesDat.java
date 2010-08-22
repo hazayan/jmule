@@ -44,8 +44,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:14:06 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/22 14:29:28 $
  */
 public class NodesDat {
 
@@ -99,7 +99,6 @@ public class NodesDat {
 			}
 			file_content.clear();
 			file_content = null;
-			System.gc();
 		}catch(Throwable t) {
 			t.printStackTrace();
 		}
@@ -151,8 +150,6 @@ public class NodesDat {
 			
 			file_content.clear();
 			file_content = null;
-			System.gc();
-			
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
