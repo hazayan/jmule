@@ -36,8 +36,8 @@ import org.jmule.core.utils.Misc;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.9 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:06:07 $$
+ * @version $$Revision: 1.10 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 12:44:58 $$
  */
 public class UDPPacket {
 	protected ByteBuffer packet_data = null;
@@ -154,6 +154,7 @@ public class UDPPacket {
 		packet_data.compact();
 		packet_data.rewind();
 		packet_data.limit(0);
+		packet_data = null;
 	}
 
 	public String toString() {
