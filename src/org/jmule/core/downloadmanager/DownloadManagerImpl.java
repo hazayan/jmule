@@ -77,7 +77,6 @@ import org.jmule.core.statistics.JMuleCoreStats;
 import org.jmule.core.statistics.JMuleCoreStatsProvider;
 import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadManagerSingleton;
-import org.jmule.core.utils.Misc;
 import org.jmule.core.utils.timer.JMTimer;
 import org.jmule.core.utils.timer.JMTimerTask;
 
@@ -85,8 +84,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.44 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:32:03 $$
+ * @version $$Revision: 1.45 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:31:29 $$
  */
 public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -196,8 +195,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 				}
 				
 				server_sources_queue.addAll(sessions_to_request);
-				
-				for(FileHash hash : sessions_to_request) {
+				for(FileHash hash : sessions_to_request) { 
 					DownloadSession session;
 					try {
 						session = getDownload(hash);
@@ -206,8 +204,6 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 						e.printStackTrace();
 					}
 				}
-				
-				
 			}
 		};
 		
@@ -420,7 +416,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					
 					List<Peer> frenzed_list = session.download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, ACTIVE);
 					for (Peer peer : frenzed_list) {
-						session.fileRequestList.remove(peer);
+						session.file_request_list.remove(peer);
 						session.fileChunkRequest(peer);
 					}
 					List<Peer> peer_list = session.download_status_list.getPeersWithInactiveTime(UNUSED_PEER_ACTIVATION, PeerDownloadStatus.ACTIVE_UNUSED);

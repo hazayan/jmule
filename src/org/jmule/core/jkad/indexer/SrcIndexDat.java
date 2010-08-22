@@ -44,8 +44,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Apr 21, 2009
  * @author binary256
- * @version $Revision: 1.8 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:11:45 $
+ * @version $Revision: 1.9 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/22 14:29:51 $
  */
 public class SrcIndexDat {
 
@@ -99,7 +99,6 @@ public class SrcIndexDat {
 		
 		file_content.clear();
 		file_content = null;
-		System.gc();
 		
 		return result;
 	}
@@ -169,7 +168,6 @@ public class SrcIndexDat {
 		index_byte_buffer.clear();
 		index_byte_buffer = null;
 		
-		System.gc();
 		
 		/*FileChannel channel = new FileOutputStream(fileName).getChannel();
 		ByteBuffer data = getByteBuffer(4);

@@ -71,8 +71,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.36 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:18:38 $$
+ * @version $$Revision: 1.37 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:27:59 $$
  */
 public class PeerManagerImpl extends JMuleAbstractManager implements InternalPeerManager {
 	
@@ -483,7 +483,7 @@ public class PeerManagerImpl extends JMuleAbstractManager implements InternalPee
 	private boolean replaceLowIDPeer(Peer peer) {
 		Peer founded_peer = null;
 		for(Peer stored_peer : peers.values()) {
-			if (stored_peer.getID().equals(peer.getID()))
+			if (stored_peer.getClientID().equals(peer.getClientID()))
 				if (!stored_peer.isConnected()) {
 					founded_peer = stored_peer;
 					break;
