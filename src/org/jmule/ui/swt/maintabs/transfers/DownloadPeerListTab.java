@@ -64,8 +64,8 @@ import org.jmule.ui.utils.SpeedFormatter;
 /**
  * Created on Aug 7, 2008
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/28 13:11:23 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/22 14:46:55 $
  */
 public class DownloadPeerListTab extends CTabItem implements Refreshable {
 
@@ -196,8 +196,8 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 				return Misc.compareAllObjects(object1,object2,"getIP",order);
 			
 			if (columnID == SWTConstants.DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID) {
-				String source1 = PeerInfoFormatter.peerSourceToString(object1.getPeerSource());
-				String source2 = PeerInfoFormatter.peerSourceToString(object2.getPeerSource());
+				String source1 = PeerInfoFormatter.peerSourceToString(object1.getSource());
+				String source2 = PeerInfoFormatter.peerSourceToString(object2.getSource());
 				return source1.compareTo(source2);
 			}
 			
@@ -306,7 +306,7 @@ public class DownloadPeerListTab extends CTabItem implements Refreshable {
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_CC_COLUMN_ID, country_code);
 			
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_IP_COLUMN_ID, object.getIP()+":"+object.getPort());
-			PeerSource source = object.getPeerSource();
+			PeerSource source = object.getSource();
 			
 			setRowText(object, SWTConstants.DOWNLOAD_PEER_LIST_SOURCE_COLUMN_ID, PeerInfoFormatter.peerSourceToString(source));
 			
