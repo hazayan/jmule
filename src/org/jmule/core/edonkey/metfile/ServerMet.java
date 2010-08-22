@@ -93,8 +93,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  *
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 12:46:17 $$
  */
 public class ServerMet extends MetFile {
 	
@@ -151,7 +151,6 @@ public class ServerMet extends MetFile {
 			
 			file_content.clear();
 			file_content = null;
-			System.gc();
 			
 		 } catch(Throwable exception) {
 			 
@@ -209,7 +208,6 @@ public class ServerMet extends MetFile {
 		file_block = null;
 		file_blocks.clear();
 		file_blocks = null;
-		System.gc();
 	}
 	
 	public List<String> getIPList() {

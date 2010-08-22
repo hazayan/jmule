@@ -110,8 +110,8 @@ import org.jmule.core.utils.Misc;
  * </table>
  * 
  * @author binary256
- * @version $$Revision: 1.8 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:05:17 $$
+ * @version $$Revision: 1.9 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 12:46:17 $$
  */
 public class ClientsMet extends MetFile {
 
@@ -138,7 +138,6 @@ public class ClientsMet extends MetFile {
 		if (file_version != CREDITFILE_VERSION) {
 			file_content.clear();
 			file_content = null;
-			System.gc();
 			throw new ClientsMetException("Unknow file format");
 		}
 		long count = Convert.intToLong(file_content.getInt());
@@ -173,7 +172,6 @@ public class ClientsMet extends MetFile {
 		
 		file_content.clear();
 		file_content = null;
-		System.gc();
 		
 		return result;
 	}
@@ -222,7 +220,6 @@ public class ClientsMet extends MetFile {
 		file_content_blocks.clear();
 		file_content.clear();
 		file_content = null;
-		System.gc();
 		
 	}
 }
