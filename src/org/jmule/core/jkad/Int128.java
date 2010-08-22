@@ -37,8 +37,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:09:37 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/22 12:48:02 $
  */
 public class Int128 implements Cloneable {
 
@@ -182,7 +182,7 @@ public class Int128 implements Cloneable {
 
 	/**
 	 * 
-	 * @param reverse set true if you want to store string
+	 * @param reverse set true if you want to store string and easy load with Convert.hexStringToByte
 	 * @return
 	 */
 	public String toHexString(boolean reverse) {
