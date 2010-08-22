@@ -80,43 +80,66 @@ import org.jmule.core.edonkey.packet.tag.TagList;
 /**
  * Created on Dec 24, 2008
  * @author binary256
- * @version $Revision: 1.7 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/31 16:00:42 $
+ * @version $Revision: 1.8 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/22 12:47:38 $
  */
 public class Utils {
 
 	public static int peerFeatures1ToInt( Map<PeerFeatures, Integer> clientFeatures) {
 		int misc_optins1 = 0;
 		
-		misc_optins1 |= (byte)(clientFeatures.get(SupportsAICH) << 29);
-		misc_optins1 |= (int)(clientFeatures.get(SupportsUnicode) << 28);
-		misc_optins1 |= (int)(clientFeatures.get(UDPVersion) << 24);
-		misc_optins1 |= (int)(clientFeatures.get(DataCompressionVersion) << 20);
-		misc_optins1 |= (int)(clientFeatures.get(SupportsSecureIdentification) << 16);
-		misc_optins1 |= (int)(clientFeatures.get(SourceExchange1Version) << 12);
-		misc_optins1 |= (int)(clientFeatures.get(ExtendedRequestsVersion) << 8);
-		misc_optins1 |= (int)(clientFeatures.get(AcceptCommentVersion) << 4);
-		misc_optins1 |= (byte)(clientFeatures.get(PeerCache) << 3);
-		misc_optins1 |= (byte)(clientFeatures.get(NoViewSharedFiles) << 2);
-		misc_optins1 |= (byte)(clientFeatures.get(MultiPacket) << 1);
-		misc_optins1 |= (byte)(clientFeatures.get(SupportsPreview) << 0);
+		if (clientFeatures.containsKey(SupportsAICH))
+			misc_optins1 |= (byte)(clientFeatures.get(SupportsAICH) << 29);
+		if (clientFeatures.containsKey(SupportsUnicode))
+			misc_optins1 |= (int)(clientFeatures.get(SupportsUnicode) << 28);
+		if (clientFeatures.containsKey(UDPVersion))
+			misc_optins1 |= (int)(clientFeatures.get(UDPVersion) << 24);
+		if (clientFeatures.containsKey(DataCompressionVersion))
+			misc_optins1 |= (int)(clientFeatures.get(DataCompressionVersion) << 20);
+		if (clientFeatures.containsKey(SupportsSecureIdentification))
+			misc_optins1 |= (int)(clientFeatures.get(SupportsSecureIdentification) << 16);
+		if (clientFeatures.containsKey(SourceExchange1Version))
+			misc_optins1 |= (int)(clientFeatures.get(SourceExchange1Version) << 12);
+		if (clientFeatures.containsKey(ExtendedRequestsVersion))
+			misc_optins1 |= (int)(clientFeatures.get(ExtendedRequestsVersion) << 8);
+		if (clientFeatures.containsKey(AcceptCommentVersion))
+			misc_optins1 |= (int)(clientFeatures.get(AcceptCommentVersion) << 4);
+		if (clientFeatures.containsKey(PeerCache))
+			misc_optins1 |= (byte)(clientFeatures.get(PeerCache) << 3);
+		if (clientFeatures.containsKey(NoViewSharedFiles))
+			misc_optins1 |= (byte)(clientFeatures.get(NoViewSharedFiles) << 2);
+		if (clientFeatures.containsKey(MultiPacket))
+			misc_optins1 |= (byte)(clientFeatures.get(MultiPacket) << 1);
+		if (clientFeatures.containsKey(SupportsPreview))
+			misc_optins1 |= (byte)(clientFeatures.get(SupportsPreview) << 0);
 		
 		return misc_optins1;
 	}
 	
 	public static int peerFeatures2ToInt(Map<PeerFeatures, Integer> clientFeatures) {
 		int misc_optins2 = 0;
-		misc_optins2 |= (clientFeatures.get(SupportsFileIdent) << 13);
-		misc_optins2 |= (clientFeatures.get(DirectUDPCallback) << 12);
-		misc_optins2 |= (clientFeatures.get(SupportsCaptcha) << 11);
-		misc_optins2 |= (clientFeatures.get(SupportsSourceEx2) << 10);
-		misc_optins2 |= (clientFeatures.get(RequiresCryptLayer) << 9);
-		misc_optins2 |= (clientFeatures.get(RequestsCryptLayer) << 8);
-		misc_optins2 |= (clientFeatures.get(SupportsCryptLayer) << 7);
-		misc_optins2 |= (clientFeatures.get(ModBit) << 6);
-		misc_optins2 |= (clientFeatures.get(ExtMultiPacket) << 5);
-		misc_optins2 |= (clientFeatures.get(SupportsLargeFiles) << 4);
-		misc_optins2 |= (clientFeatures.get(KadVersion) << 0);
+		if (clientFeatures.containsKey(SupportsFileIdent))
+			misc_optins2 |= (clientFeatures.get(SupportsFileIdent) << 13);
+		if (clientFeatures.containsKey(DirectUDPCallback))
+			misc_optins2 |= (clientFeatures.get(DirectUDPCallback) << 12);
+		if (clientFeatures.containsKey(SupportsCaptcha))
+			misc_optins2 |= (clientFeatures.get(SupportsCaptcha) << 11);
+		if (clientFeatures.containsKey(SupportsSourceEx2))
+			misc_optins2 |= (clientFeatures.get(SupportsSourceEx2) << 10);
+		if (clientFeatures.containsKey(RequiresCryptLayer))
+			misc_optins2 |= (clientFeatures.get(RequiresCryptLayer) << 9);
+		if (clientFeatures.containsKey(RequestsCryptLayer))
+			misc_optins2 |= (clientFeatures.get(RequestsCryptLayer) << 8);
+		if (clientFeatures.containsKey(SupportsCryptLayer))
+			misc_optins2 |= (clientFeatures.get(SupportsCryptLayer) << 7);
+		if (clientFeatures.containsKey(ModBit))
+			misc_optins2 |= (clientFeatures.get(ModBit) << 6);
+		if (clientFeatures.containsKey(ExtMultiPacket))
+			misc_optins2 |= (clientFeatures.get(ExtMultiPacket) << 5);
+		if (clientFeatures.containsKey(SupportsLargeFiles))
+			misc_optins2 |= (clientFeatures.get(SupportsLargeFiles) << 4);
+		if (clientFeatures.containsKey(KadVersion))
+			misc_optins2 |= (clientFeatures.get(KadVersion) << 0);
 		
 		return misc_optins2;
 	}
