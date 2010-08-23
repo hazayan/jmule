@@ -84,10 +84,10 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.45 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:31:29 $$
+ * @version $$Revision: 1.46 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:30:30 $$
  */
-public class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
+class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
 	private Map<FileHash, DownloadSession> session_list = new ConcurrentHashMap<FileHash, DownloadSession>();
 
@@ -1015,7 +1015,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					
 					List<Integer> broken_parts = session.sharedFile.checkFilePartsIntegrity();
 					if (broken_parts.size()!=0)
-						session.downloadStrategy.processPartCheckResult(broken_parts);
+						session.download_strategy.processPartCheckResult(broken_parts);
 				}
 				
 				while(!complete_file_to_check.isEmpty()) {
@@ -1023,7 +1023,7 @@ public class DownloadManagerImpl extends JMuleAbstractManager implements Interna
 					
 					List<Integer> result = session.sharedFile.checkFullFileIntegrity();
 					if (result.size() != 0)
-						session.downloadStrategy.processFileCheckResult(result);
+						session.download_strategy.processFileCheckResult(result);
 					else
 						session.completeDownload();
 				}
