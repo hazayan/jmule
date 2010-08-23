@@ -28,10 +28,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jmule.core.downloadmanager.DownloadSession;
+import org.jmule.core.downloadmanager.FileChunk;
 import org.jmule.core.downloadmanager.FileFragment;
 import org.jmule.core.downloadmanager.FilePartStatus;
 import org.jmule.core.downloadmanager.FileRequestList;
 import org.jmule.core.downloadmanager.PeerDownloadStatus;
+import org.jmule.core.edonkey.FileHash;
+import org.jmule.core.edonkey.PartHashSet;
 import org.jmule.core.networkmanager.InternalNetworkManager;
 import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
@@ -44,8 +47,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:28:18 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:21:39 $$
  */
 public class DefaultDownloadStrategy implements DownloadStrategy {
 
@@ -218,6 +221,91 @@ public class DefaultDownloadStrategy implements DownloadStrategy {
 			}
 		}
 			
+	}
+
+	@Override
+	public void downloadStarted() {
+		
+	}
+
+	@Override
+	public void downloadStopped() {
+		
+	}
+
+	@Override
+	public void downloadCancelled() {
+		
+	}
+
+	@Override
+	public void peerAdded(Peer peer) {
+		
+	}
+
+	@Override
+	public void peerConnected(Peer peer) {
+		
+	}
+
+	@Override
+	public void peerDisconnected(Peer peer) {
+		
+	}
+
+	@Override
+	public void peerConnectingFailed(Peer peer, Throwable cause) {
+		
+	}
+
+	@Override
+	public void receivedFileNotFoundFromPeer(Peer peer) {
+		
+	}
+
+	@Override
+	public void receivedFileRequestAnswerFromPeer(Peer sender, String fileName) {
+		
+	}
+
+	@Override
+	public void receivedFileStatusResponseFromPeer(Peer sender,FileHash fileHash, JMuleBitSet bitSetpartStatus) {
+		
+	}
+
+	@Override
+	public void receivedHashSetResponseFromPeer(Peer sender,PartHashSet partHashSet) {
+		
+	}
+
+	@Override
+	public void receivedQueueRankFromPeer(Peer sender, int queueRank) {
+		
+	}
+
+	@Override
+	public void receivedSlotGivenFromPeer(Peer sender) {
+		
+	}
+
+	@Override
+	public void receivedSlotTakenFromPeer(Peer sender) {
+		
+	}
+
+	@Override
+	public void receivedRequestedFileChunkFromPeer(Peer sender,FileHash fileHash, FileChunk chunk) {
+		
+	}
+
+	@Override
+	public void receivedCompressedFileChunk(Peer sender,FileChunk compressedFileChunk) {
+		
+	}
+
+	@Override
+	public void receivedSourcesAnswerFromPeer(Peer peer, List<Peer> peerList) {
+		
 	}
 
 }
