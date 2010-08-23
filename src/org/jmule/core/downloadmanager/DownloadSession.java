@@ -77,8 +77,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.55 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:34:01 $$
+ * @version $$Revision: 1.56 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:33:26 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -89,7 +89,7 @@ public class DownloadSession implements JMTransferSession {
 	PartialFile sharedFile;
 	FilePartStatus partStatus;
 	DownloadStatus sessionStatus = DownloadStatus.STOPPED;
-	DownloadStrategy downloadStrategy = null;
+	DownloadStrategy download_strategy = null;
 	FileRequestList file_request_list = new FileRequestList();
 	Collection<Peer> session_peers = new ConcurrentLinkedQueue<Peer>();
 	DownloadStatusList download_status_list = new DownloadStatusList(); // store main information about download process
@@ -109,7 +109,7 @@ public class DownloadSession implements JMTransferSession {
 	
 	
 	private DownloadSession() {
-		downloadStrategy = DownloadStrategyFactory.getStrategy(STRATEGY.DEFAULT, this);
+		download_strategy = DownloadStrategyFactory.getStrategy(STRATEGY.DEFAULT, this);
 	}
 
 	DownloadSession(ED2KFileLink fileLink) {
@@ -164,6 +164,7 @@ public class DownloadSession implements JMTransferSession {
 	void startDownload() {
 		this.setStatus(DownloadStatus.STARTED);
 		sharedFile.markDownloadStarted();
+		download_strategy.downloadStarted();
 	}
 	
 	void stopDownload() {
@@ -184,13 +185,16 @@ public class DownloadSession implements JMTransferSession {
 		setStatus(DownloadStatus.STOPPED);
 		if (saveDownloadStatus)
 			sharedFile.markDownloadStopped();
+		
+		download_strategy.downloadStopped();
 	}
 	
 	void cancelDownload() {
 		if (isStarted())
 			stopDownload(false);
-		SharingManagerSingleton.getInstance().removeSharedFile(
-				sharedFile.getFileHash());
+		SharingManagerSingleton.getInstance().removeSharedFile(sharedFile.getFileHash());
+		
+		download_strategy.downloadCancelled();
 	}
 	
 	void addDownloadPeers(List<Peer> peerList) {
@@ -201,7 +205,10 @@ public class DownloadSession implements JMTransferSession {
 				continue;
 			if (session_peers.contains(peer))
 				continue;
-			addPeer(peer);
+			if (hasPeer(peer))
+				continue;
+			session_peers.add(peer);
+			download_strategy.peerAdded(peer);
 			if (peer.isConnected())
 				peerConnected(peer);
 			else
@@ -213,22 +220,18 @@ public class DownloadSession implements JMTransferSession {
 		}
 	}
 
-	private void addPeer(Peer peer) {
-		if (hasPeer(peer))
-			return;
-		session_peers.add(peer);
-	}
-	
-	/** Called when a peer is connected */
 	void peerConnected(Peer peer) {
 		if (this.getStatus() == DownloadStatus.STOPPED)
 			return;
 		download_status_list.addPeer(peer);
 		
+		download_strategy.peerConnected(peer);
+		
 		requestStatusFileName(peer);
 	}
 
 	void peerConnectingFailed(Peer peer, Throwable cause) {
+		download_strategy.peerConnectingFailed(peer, cause);
 		peerDisconnected(peer);
 	}
 
@@ -241,14 +244,14 @@ public class DownloadSession implements JMTransferSession {
 			file_request_list.remove(peer);
 			session_peers.remove(peer);
 			download_status_list.removePeer(peer);
-			return;
 		}
+		download_strategy.peerDisconnected(peer);
 
 	}
 	
 	void requestStatusFileName(Peer peer) {
 		Integer supportMultipacket = peer.getFeature(PeerFeatures.MultiPacket);
-		if (supportMultipacket==1) {
+		if (supportMultipacket == 1) {
 			Collection<Byte> entries = new ArrayList<Byte>();
 			entries.add(OP_FILENAMEREQUEST);
 			entries.add(OP_FILESTATREQ);
@@ -273,10 +276,9 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	void receivedFileNotFoundFromPeer(Peer sender) {
-		if (sender == null) return ;
 		download_status_list.addPeerHistoryRecord(sender, "File not found");
-		download_status_list.setPeerStatus(sender,
-				PeerDownloadStatus.DISCONNECTED);
+		download_status_list.setPeerStatus(sender,PeerDownloadStatus.DISCONNECTED);
+		download_strategy.receivedFileNotFoundFromPeer(sender);
 		try {
 			_peer_manager.disconnect(sender);
 		} catch (PeerManagerException e) {
@@ -289,6 +291,7 @@ public class DownloadSession implements JMTransferSession {
 			file_names.add(fileName);
 		download_status_list.addPeerHistoryRecord(sender, "File request answer");
 		download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
+		download_strategy.receivedFileRequestAnswerFromPeer(sender, fileName);
 		_network_manager.sendUploadRequest(sender.getIP(), sender.getPort(), sharedFile.getFileHash());
 	}
 	
@@ -304,7 +307,7 @@ public class DownloadSession implements JMTransferSession {
 				bitSet.set(i);
 		}
 		partStatus.addPartStatus(sender, bitSet);
-
+		download_strategy.receivedFileStatusResponseFromPeer(sender, fileHash, bitSetpartStatus);
 		if (!this.sharedFile.hasHashSet()) {
 			download_status_list.setPeerStatus(sender, PeerDownloadStatus.HASHSET_REQUEST);
 			_network_manager.sendPartHashSetRequest(sender.getIP() , sender.getPort(),getFileHash());
@@ -321,6 +324,9 @@ public class DownloadSession implements JMTransferSession {
 				return;
 			}
 		}
+		
+		download_strategy.receivedHashSetResponseFromPeer(sender, partHashSet);
+		
 		if (this.sharedFile.getGapList().size() == 0) {
 			/*if (sharedFile.checkFullFileIntegrity()) {
 				completeDownload();
@@ -336,12 +342,14 @@ public class DownloadSession implements JMTransferSession {
 	
 	void receivedQueueRankFromPeer(Peer sender, int queueRank) {
 		download_status_list.setPeerQueuePosition(sender, queueRank);
+		download_strategy.receivedQueueRankFromPeer(sender, queueRank);
 	}
 
 	void receivedSlotGivenFromPeer(Peer sender) {
 		download_status_list.setPeerStatus(sender, PeerDownloadStatus.ACTIVE);
 		download_status_list.setPeerResendCount(sender, 0);
 		download_status_list.addPeerHistoryRecord(sender, "Slot given");
+		download_strategy.receivedSlotGivenFromPeer(sender);
 		if (this.sharedFile.getGapList().size() == 0) {
 			_download_manager.scheduleToComplete(this);
 			return;
@@ -359,8 +367,8 @@ public class DownloadSession implements JMTransferSession {
 	
 	void receivedSlotTakenFromPeer(Peer sender) {
 		download_status_list.addPeerHistoryRecord(sender, "Slot taken");
-		download_status_list.setPeerStatus(sender,
-				PeerDownloadStatus.SLOTREQUEST);
+		download_status_list.setPeerStatus(sender,PeerDownloadStatus.SLOTREQUEST);
+		download_strategy.receivedSlotTakenFromPeer(sender);
 	}
 	
 	/**
@@ -381,10 +389,9 @@ public class DownloadSession implements JMTransferSession {
 		}
 
 		if (blockSize > BLOCKSIZE)
-
 			blockSize = BLOCKSIZE;
 		
-		FileChunkRequest fragments[] = downloadStrategy.fileChunk3Request(peer,blockSize, this.sharedFile.length(), sharedFile.getGapList(),partStatus, file_request_list);
+		FileChunkRequest fragments[] = download_strategy.fileChunk3Request(peer,blockSize, this.sharedFile.length(), sharedFile.getGapList(),partStatus, file_request_list);
 
 		int unused = 0;
 		for (int i = 0; i < fragments.length; i++)
@@ -406,10 +413,11 @@ public class DownloadSession implements JMTransferSession {
 
 	void receivedRequestedFileChunkFromPeer(Peer sender,FileHash fileHash, FileChunk chunk) {
 		processFileChunk(sender, chunk);
+		download_strategy.receivedRequestedFileChunkFromPeer(sender, fileHash, chunk);
 	}
 	
 	void receivedCompressedFileChunk(Peer sender, FileChunk compressedFileChunk) {
-		if (sender == null) return ; // or maybe write chunk!
+		//if (sender == null) return ; // or maybe write chunk!
 		download_status_list.updatePeerTime(sender);
 		if (!compressedFileChunks.containsKey(sender)) {
 			Collection<CompressedChunkContainer> list = new ConcurrentLinkedQueue<CompressedChunkContainer>();
@@ -462,10 +470,12 @@ public class DownloadSession implements JMTransferSession {
 
 			}
 		}
+		download_strategy.receivedCompressedFileChunk(sender, compressedFileChunk);
 	}
 	
 	void receivedSourcesAnswerFromPeer(Peer peer, List<Peer> peerList) {
 		addDownloadPeers(peerList);
+		download_strategy.receivedSourcesAnswerFromPeer(peer, peerList);
 	}
 	
 	
@@ -548,9 +558,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 	
 	void completeDownload() {
-
 		stopDownload();
-
 		try {
 			SharingManagerSingleton.getInstance().makeCompletedFile(sharedFile.getFileHash());
 		} catch (Throwable t) {
