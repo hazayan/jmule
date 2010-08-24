@@ -77,8 +77,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.56 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:33:26 $$
+ * @version $$Revision: 1.57 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:34:02 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -223,11 +223,13 @@ public class DownloadSession implements JMTransferSession {
 	void peerConnected(Peer peer) {
 		if (this.getStatus() == DownloadStatus.STOPPED)
 			return;
-		download_status_list.addPeer(peer);
-		
-		download_strategy.peerConnected(peer);
-		
-		requestStatusFileName(peer);
+		if (download_status_list.getPeerDownloadStatus(peer)==PeerDownloadStatus.IN_QUEUE) {
+			requestStatusFileName(peer);
+		} else {
+			download_status_list.addPeer(peer);
+			download_strategy.peerConnected(peer);
+			requestStatusFileName(peer);
+		}
 	}
 
 	void peerConnectingFailed(Peer peer, Throwable cause) {
@@ -289,6 +291,7 @@ public class DownloadSession implements JMTransferSession {
 	void receivedFileRequestAnswerFromPeer(Peer sender,String fileName) {
 		if (!file_names.contains(fileName))
 			file_names.add(fileName);
+		download_status_list.updatePeerTime(sender);
 		download_status_list.addPeerHistoryRecord(sender, "File request answer");
 		download_status_list.setPeerStatus(sender,PeerDownloadStatus.UPLOAD_REQUEST);
 		download_strategy.receivedFileRequestAnswerFromPeer(sender, fileName);
@@ -346,6 +349,7 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	void receivedSlotGivenFromPeer(Peer sender) {
+		System.out.println(" queue :: receivedSlotGivenFromPeer : " + sender);
 		download_status_list.setPeerStatus(sender, PeerDownloadStatus.ACTIVE);
 		download_status_list.setPeerResendCount(sender, 0);
 		download_status_list.addPeerHistoryRecord(sender, "Slot given");
@@ -459,8 +463,7 @@ public class DownloadSession implements JMTransferSession {
 				try {
 					buffer = JMuleZLib.decompressData(container.compressedData);
 					buffer.position(0);
-					FileChunk chunk = new FileChunk(container.offset,
-							container.offset + buffer.capacity(), buffer);
+					FileChunk chunk = new FileChunk(container.offset, container.offset + buffer.capacity(), buffer);
 					processFileChunk(sender, chunk);
 					chunk_list.remove(container);
 				} catch (DataFormatException e) {
@@ -552,8 +555,9 @@ public class DownloadSession implements JMTransferSession {
 			file_request_list.remove(peer);
 			session_peers.remove(peer);
 			download_status_list.removePeer(peer);
-			return;
 		}
+		
+		download_strategy.peerRemoved(peer);
 
 	}
 	
