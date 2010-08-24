@@ -47,8 +47,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.5 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:21:39 $$
+ * @version $$Revision: 1.6 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:32:26 $$
  */
 public class DefaultDownloadStrategy implements DownloadStrategy {
 
@@ -305,6 +305,11 @@ public class DefaultDownloadStrategy implements DownloadStrategy {
 
 	@Override
 	public void receivedSourcesAnswerFromPeer(Peer peer, List<Peer> peerList) {
+		
+	}
+
+	@Override
+	public void peerRemoved(Peer peer) {
 		
 	}
 

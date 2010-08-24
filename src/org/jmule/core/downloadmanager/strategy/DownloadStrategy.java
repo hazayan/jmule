@@ -37,8 +37,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:18:48 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:32:26 $$
  */
 public interface DownloadStrategy {
 	
@@ -49,6 +49,8 @@ public interface DownloadStrategy {
 	public void downloadCancelled();
 	
 	public void peerAdded(Peer peer);
+	
+	public void peerRemoved(Peer peer);
 	
 	public void peerConnected(Peer peer);
 	
