@@ -84,8 +84,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.46 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/23 14:30:30 $$
+ * @version $$Revision: 1.47 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:32:53 $$
  */
 class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -105,6 +105,8 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 	private final static long PEER_RESEND_PACKET_INTERVAL 	= 1000 * 10;
 	private final static long UNUSED_PEER_ACTIVATION 		= 1000 * 10;
 	private final static int DOWNLOAD_PEERS_MONITOR_INTERVAL= 1000;
+	private final static long QUEUE_PEERS_CHECK_TIMEOUT 	= 1000 * 60 * 15;
+	private final static long QUEUE_PEERS_DROP_TIMEOUT 	= 1000 * 60 * 30;
 	
 	private InternalNetworkManager _network_manager = null;
 	private InternalJKadManager _jkad = null;
@@ -413,7 +415,6 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 							session.download_status_list.setPeerStatus(peer, PeerDownloadStatus.DISCONNECTED);
 					
 					
-					
 					List<Peer> frenzed_list = session.download_status_list.getPeersWithInactiveTime(PEER_RESEND_PACKET_INTERVAL, ACTIVE);
 					for (Peer peer : frenzed_list) {
 						session.file_request_list.remove(peer);
@@ -426,6 +427,23 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 						else
 							session.download_status_list.setPeerStatus(peer, PeerDownloadStatus.DISCONNECTED);
 					}
+					
+					List<Peer> drop_queue_peer = session.download_status_list.getPeersWithInactiveTime(QUEUE_PEERS_DROP_TIMEOUT, PeerDownloadStatus.IN_QUEUE);
+					for(Peer peer : drop_queue_peer) {
+						session.removePeer(peer);
+					}
+					
+					List<Peer> check_queue_position = session.download_status_list.getPeersWithInactiveTime(QUEUE_PEERS_CHECK_TIMEOUT, PeerDownloadStatus.IN_QUEUE);
+					for(Peer peer : check_queue_position) {
+						if (!peer.isConnected()) {
+							try {
+								_peer_manager.connect(peer);
+							} catch (PeerManagerException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					
 				}
 					
 				
