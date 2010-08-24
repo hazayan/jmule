@@ -27,81 +27,53 @@ import java.nio.ByteBuffer;
 /**
  * Created on 04-27-2008
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2008/08/02 14:21:10 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:31:37 $$
  */
 public class FileChunk {
-	
 	private long chunkStart;
-	
 	private long chunkEnd;
-	
 	private ByteBuffer chunkData;
 	
 	public FileChunk(long chunkStart, long chunkEnd, ByteBuffer chunkData) {
-		
 		super();
-		
 		this.chunkStart = chunkStart;
-		
 		this.chunkEnd = chunkEnd;
-		
 		this.chunkData = chunkData;
-		
 	}
 	
 	public String toString() {
-		
 		return "[ "+chunkStart+" : "+chunkEnd+" ]";
-		
 	}
 		
 	public long getChunkStart() {
-		
 		return chunkStart;
-		
 	}
 	
 	public void setChunkStart(long chunkStart) {
-		
 		this.chunkStart = chunkStart;
-		
 	}
 	
 	public long getChunkEnd() {
-		
 		return chunkEnd;
-		
 	}
 	
 	public void setChunkEnd(long chunkEnd) {
-		
 		this.chunkEnd = chunkEnd;
-		
 	}
 	
 	public ByteBuffer getChunkData() {
-		
 		return chunkData;
-		
 	}
 	
 	public void setChunkData(ByteBuffer chunkData) {
-		
 		this.chunkData = chunkData;
-		
 	}
 	
 	public void clear() {
-		
 		chunkData.clear();
-
 		chunkData.compact();
-		
 		chunkData.rewind();
-		
 		chunkData.limit(0);
-		
-	}
-	
+	}	
 }
