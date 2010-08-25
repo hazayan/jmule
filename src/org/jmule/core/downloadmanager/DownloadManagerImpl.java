@@ -84,8 +84,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.47 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:32:53 $$
+ * @version $$Revision: 1.48 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/25 12:34:47 $$
  */
 class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -433,9 +433,9 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 						session.removePeer(peer);
 					}
 					
-					List<Peer> check_queue_position = session.download_status_list.getPeersWithInactiveTime(QUEUE_PEERS_CHECK_TIMEOUT, PeerDownloadStatus.IN_QUEUE);
+					List<Peer> check_queue_position = session.download_status_list.getPeersWithLastSeenTime(QUEUE_PEERS_CHECK_TIMEOUT, PeerDownloadStatus.IN_QUEUE);
 					for(Peer peer : check_queue_position) {
-						if (!peer.isConnected()) {
+						if (peer.isDisconnected()) {
 							try {
 								_peer_manager.connect(peer);
 							} catch (PeerManagerException e) {
