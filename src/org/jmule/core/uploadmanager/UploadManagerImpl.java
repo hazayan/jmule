@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.34 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:25:21 $$
+ * @version $$Revision: 1.35 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/25 12:29:39 $$
  */
 public class UploadManagerImpl extends JMuleAbstractManager implements InternalUploadManager {
 	private Map<FileHash,UploadSession> session_list = new ConcurrentHashMap<FileHash,UploadSession>();
@@ -175,14 +175,14 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 		JMTimerTask frozen_peers_remover = new JMTimerTask() {
 			public void run() {
 				boolean recalc_slots = false;
-					/*for(UploadQueueContainer container : uploadQueue.upload_queue.values()) {
-						if (container.getLastResponseTime() >= ConfigurationManager.UPLOADQUEUE_REMOVE_TIMEOUT) {
-							if (uploadQueue.slot_clients.contains(container))
+					for(UploadQueueContainer container : upload_queue.upload_queue.values()) {
+						if (container.getLastResponseTime() >= ConfigurationManager.UPLOADQUEUE_REMOVE_TIMEOUT) { // if peer don't respond 1H - drop from queue
+							if (upload_queue.slot_clients.contains(container))
 								recalc_slots = true;
 							removePeer(container.peer);
 							continue;
 						}
-					}*/
+					}
 					for(UploadQueueContainer container : upload_queue.slot_clients) {
 						if (container.getLastResponseTime() >= ConfigurationManager.UPLOAD_SLOT_LOSE_TIMEOUT) {
 							recalc_slots = true;
@@ -291,7 +291,6 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 						for(FileChunkRequest request : chunk_set)
 							if (System.currentTimeMillis() - request.getCreationTime() >= TIME_30_SEC) {
 								list.add(request);
-								System.out.println("Drop chunk request for : " + peer);
 							}
 						chunk_set.removeAll(list);
 						if (chunk_set.isEmpty())
@@ -396,6 +395,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			session.addTransferredBytes(transferred_bytes);
 			
 			session.removePeer(peer);
+			System.out.println(" uploadManager :: removePeer :: " + System.currentTimeMillis() + " :: " + peer + " session peer_count :: " + session.getPeerCount());
 			if (session.getPeerCount()==0) {
 				removeUpload(session.getFileHash());
 				/*session_list.remove(session.getFileHash());
@@ -422,6 +422,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			return ;
 		}
 		
+		System.out.println("  receivedFileStatusRequestFromPeer " + sender);
+		
 		SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
 		if (shared_file instanceof PartialFile){
 			PartialFile partialFile = (PartialFile) shared_file;
@@ -436,6 +438,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			_network_manager.sendFileNotFound(sender.getIP(), sender.getPort(), fileHash);
 			return;
 		}
+		System.out.println("  receivedHashSetRequestFromPeer " + sender);
 		SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
 		_network_manager.sendFileHashSetAnswer(sender.getIP(), sender.getPort(), shared_file.getHashSet());
 	}
@@ -445,6 +448,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			_network_manager.sendFileNotFound(sender.getIP(),sender.getPort(), fileHash);
 			return ;
 		}
+		
+		System.out.println("  receivedFileRequestFromPeer " + sender);
 		
 		SharedFile shared_file = _sharing_manager.getSharedFile(fileHash);
 		if(shared_file instanceof PartialFile) {
@@ -470,6 +475,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			_network_manager.sendFileNotFound(sender.getIP(), sender.getPort(), fileHash);
 			return;
 		}
+		
+		System.out.println("  receivedSlotRequestFromPeer :: " +System.currentTimeMillis()+ " :: " + sender);
 		
 		UploadSession upload_session = null;
 		if (hasUpload(fileHash)) {
@@ -550,6 +557,8 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 			return;
 		}
 		
+		System.out.println("  receivedFileChunkRequestFromPeer :: " +System.currentTimeMillis()+ " :: " +  sender);
+		
 		UploadSession session;
 		try {
 			session = getUpload(fileHash);
@@ -582,6 +591,7 @@ public class UploadManagerImpl extends JMuleAbstractManager implements InternalU
 	}
 	
 	public void receivedSlotReleaseFromPeer(Peer sender) {
+		System.out.println("  receivedSlotReleaseFromPeer :: " +System.currentTimeMillis()+ " :: " + sender);
 		boolean recalcSlots = false;
 		
 		if (upload_queue.hasSlotPeer(sender))
