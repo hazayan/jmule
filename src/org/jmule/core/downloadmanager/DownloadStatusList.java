@@ -38,8 +38,8 @@ import org.jmule.core.uploadmanager.FileChunkRequest;
  * Store peer status in download process
  * Created on 07-19-2008
  * @author binary256
- * @version $$Revision: 1.12 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:31:54 $$
+ * @version $$Revision: 1.13 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/25 12:32:56 $$
  */
 public class DownloadStatusList {
 
@@ -66,6 +66,19 @@ public class DownloadStatusList {
 		List<Peer> peer_list = new LinkedList<Peer>();
 		for (PeerDownloadInfo peer_download_status : peer_status_list) {
 			if ((System.currentTimeMillis() - peer_download_status.lastUpdateTime) >= inactiveTime) {
+				for (PeerDownloadStatus status : downloadStatus) {
+					if (status == peer_download_status.peerStatus)
+						peer_list.add(peer_download_status.peer);
+				}
+			}
+		}
+		return peer_list;
+	}
+	
+	List<Peer> getPeersWithLastSeenTime(long lastSeenTime, PeerDownloadStatus... downloadStatus) {
+		List<Peer> peer_list = new LinkedList<Peer>();
+		for (PeerDownloadInfo peer_download_status : peer_status_list) {
+			if ((System.currentTimeMillis() - peer_download_status.getPeer().getLastSeen()) >= lastSeenTime) {
 				for (PeerDownloadStatus status : downloadStatus) {
 					if (status == peer_download_status.peerStatus)
 						peer_list.add(peer_download_status.peer);
