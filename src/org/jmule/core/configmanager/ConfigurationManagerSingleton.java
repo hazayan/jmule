@@ -25,16 +25,16 @@ package org.jmule.core.configmanager;
 /**
  * Created on 07-22-2008
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 17:39:26 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
  */
 public class ConfigurationManagerSingleton {
 
-	private static ConfigurationManager instance;
-
+	private static class ConfigurationManagerSingletonHolder {
+		private static final ConfigurationManager INSTANCE = new ConfigurationManagerImp();
+	}
+	
 	public static ConfigurationManager getInstance() {
-		if (instance == null)
-			instance = new ConfigurationManagerImp();
-		return instance;
+		return ConfigurationManagerSingletonHolder.INSTANCE;
 	}
 }

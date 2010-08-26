@@ -22,19 +22,21 @@
  */
 package org.jmule.core.searchmanager;
 
+
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:43 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
  */
 public class SearchManagerSingleton {
 
-	private static SearchManager instance;
+	private static class SearchManagerSingletonHolder {
+		private static final SearchManager INSTANCE = new SearchManagerImpl();
+	}
 	
 	public static SearchManager getInstance() {
-		if(instance == null) instance = new SearchManagerImpl();
-	    return instance;	
+		return SearchManagerSingletonHolder.INSTANCE;
 	}
 	
 	

@@ -22,20 +22,21 @@
  */
 package org.jmule.core.jkad;
 
+
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:05:42 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/26 10:34:48 $
  */
 public class JKadManagerSingleton {
 
-	private static JKadManager instance = null;
+	private static class JKadManagerSingletonHolder {
+		private static final JKadManager INSTANCE = new JKadManagerImpl();
+	}
 	
 	public static JKadManager getInstance() {
-		if (instance == null)
-			instance = new JKadManagerImpl();
-		return instance;
+		return JKadManagerSingletonHolder.INSTANCE;
 	}
 	
 }

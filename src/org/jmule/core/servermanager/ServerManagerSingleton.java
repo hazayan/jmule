@@ -22,21 +22,20 @@
  */
 package org.jmule.core.servermanager;
 
-
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:18:59 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
  */
 public class ServerManagerSingleton {
 
-	private static ServerManager instance = null;
-	
+	private static class ServerManagerSingletonHolder {
+		private static final ServerManager INSTANCE = new ServerManagerImpl();
+	}
+
 	public static ServerManager getInstance() {
-		if (instance == null) 
-			instance = new ServerManagerImpl();
-		return instance;
+		return ServerManagerSingletonHolder.INSTANCE;
 	}
 	
 }

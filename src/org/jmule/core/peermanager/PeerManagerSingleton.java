@@ -22,24 +22,21 @@
  */
 package org.jmule.core.peermanager;
 
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:17:04 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
  */
 public class PeerManagerSingleton {
 
-	private static PeerManager instance = null;
+	private static class PeerManagerSingletonHolder {
+		private static final PeerManager INSTANCE = new PeerManagerImpl();
+	}
 	
 	public static PeerManager getInstance() {
-		
-		if (instance == null)
-			
-			instance = new PeerManagerImpl();
-		
-		return instance;
-		
+		return PeerManagerSingletonHolder.INSTANCE;
 	}
 	
 }

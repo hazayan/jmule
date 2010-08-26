@@ -25,21 +25,17 @@ package org.jmule.core.sharingmanager;
 /**
  * 
  * @author javajox
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:20:33 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
  */
 public class SharingManagerSingleton {
 
-	private static SharingManager instance;
-	
+	private static class SharingManagerSingletonHolder {
+		private static final SharingManager INSTANCE = new SharingManagerImpl();
+	}
 
 	public static SharingManager getInstance() {
-		if(instance == null){
-			instance = new SharingManagerImpl();
-		}
-		return instance;
+		return SharingManagerSingletonHolder.INSTANCE;
 	}
-	
-	
 	
 }

@@ -22,24 +22,21 @@
  */
 package org.jmule.core.uploadmanager;
 
+
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/09/17 18:30:12 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
  */
 public class UploadManagerSingleton {
-
-	private static UploadManager instance = null;
 	
+	private static class UploadManagerSingletonHolder {
+		private static final UploadManager INSTANCE = new UploadManagerImpl();
+	}
+
 	public static UploadManager getInstance() {
-		
-		if (instance == null)
-			
-			instance = new UploadManagerImpl();
-		
-		return instance;
-		
+		return UploadManagerSingletonHolder.INSTANCE;
 	}
 	
 }

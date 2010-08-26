@@ -36,15 +36,13 @@ import com.maxmind.geoip.LookupService;
  * Created on Aug 12, 2008
  * @author javajox
  * @author binary256_
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/01 14:48:56 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/26 10:34:48 $
  */
 public class CountryLocator {
 	public static final String GEOIP_DAT       = ConfigurationManager.SETTINGS_DIR + File.separator + "geoip.dat";
 	public static int FLAG_WIDTH 			   = 25;
 	public static int FLAG_HEIGHT			   = 15;
-	
-	private static CountryLocator instance;
 	
 	private LookupService lookup_service;
 	
@@ -67,15 +65,12 @@ public class CountryLocator {
 		
 	}
 	
+	private static class CountryLocatorSingletonHolder {
+		private static final CountryLocator INSTANCE = new CountryLocator();
+	}
+	
 	public static CountryLocator getInstance() {
-		
-		if( instance == null ) {
-			
-			instance = new CountryLocator();
-			
-		}
-		
-		return instance;
+		return CountryLocatorSingletonHolder.INSTANCE;
 	}
 	
 	public Country getCountry(InetAddress inetAddress) {

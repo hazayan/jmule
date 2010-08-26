@@ -22,19 +22,21 @@
  */
 package org.jmule.core.speedmanager;
 
+
 /**
  * Created on Sep 17, 2009
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/17 18:23:17 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/26 10:34:48 $
  */
 public class SpeedManagerSingleton {
-	private static SpeedManagerImpl speedManager = null;
-
-	public static SpeedManagerImpl getInstance() {
-		if (speedManager == null)
-			speedManager = new SpeedManagerImpl();
-		return speedManager;
+	
+	private static class SpeedManagerSingletonHolder {
+		private static final SpeedManager INSTANCE = new SpeedManagerImpl();
+	}
+	
+	public static SpeedManager getInstance() {
+		return SpeedManagerSingletonHolder.INSTANCE;
 	}
 
 }
