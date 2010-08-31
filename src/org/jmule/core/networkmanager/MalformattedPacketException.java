@@ -23,8 +23,6 @@
 package org.jmule.core.networkmanager;
 
 
-import java.nio.ByteBuffer;
-
 import org.jmule.core.JMException;
 import org.jmule.core.utils.Convert;
 import org.jmule.core.utils.Misc;
@@ -32,17 +30,17 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on Oct 16, 2009
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/18 18:01:03 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:15:45 $
  */
 public class MalformattedPacketException extends JMException {
 
-	public MalformattedPacketException(byte proto, byte opcode, byte[] packetContent, Throwable cause) {
-		super("Malformatted packet : " + Convert.byteToHex(proto) + "\n" + "Opcode : "
-				+ Convert.byteToHex(opcode) + "\n" + Misc.getStackTrace(cause));
+	public MalformattedPacketException(String ip, int port, byte proto, byte opcode, byte[] packetContent, Throwable cause) {
+		super("Sender : " + ip + " : " + port + "\nMalformatted packet : " + Convert.byteToHex(proto) + "\n" + "Opcode : "
+				+ Convert.byteToHex(opcode) + "\n" + Misc.getStackTrace(cause) );
 	}
 	
-	public MalformattedPacketException(byte[] packetContent, Throwable cause) {
+	/*public MalformattedPacketException(byte[] packetContent, Throwable cause) {
 		//Convert.byteToHexString(packetContent) + "\n" +
 		super("Malformatted packet : \n" +  Misc.getStackTrace(cause));
 	}
@@ -50,7 +48,7 @@ public class MalformattedPacketException extends JMException {
 	public MalformattedPacketException(ByteBuffer packet, Throwable cause) {
 		//Convert.byteToHexString(packet.array(), 0, packet.limit()) + "\n" +
 		super("Malformatted packet : \n" +  Misc.getStackTrace(cause));
-	}
+	}*/
 	
 	public MalformattedPacketException(String cause) {
 		super(cause);
