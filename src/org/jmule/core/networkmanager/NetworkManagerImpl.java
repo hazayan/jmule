@@ -159,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.50 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/22 14:22:25 $
+ * @version $Revision: 1.51 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:25:05 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -336,6 +336,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		
 		result += "\nPeer connection monitor : \n" + peer_connections_monitor;
 		result += "\nPeerPacketProcessor : \n " + peer_packet_processor;
+		result += "\nUDPConnection : \n" + udp_connection;
 		return result;
 	}
 	
@@ -1761,13 +1762,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					return;
 				}
 				default:
-					throw new UnknownPacketException(header, opCode,
-							rawPacket.array());
+					throw new UnknownPacketException(server_connection_monitor.serverConnection.getIPAddress(), server_connection_monitor.serverConnection.getPort(), header, opCode, rawPacket.array());
 				}
 			} catch (Throwable cause) {
 				if (cause instanceof UnknownPacketException)
 					throw (UnknownPacketException) cause;
-				throw new MalformattedPacketException(rawPacket, cause);
+				throw new MalformattedPacketException(server_connection_monitor.serverConnection.getIPAddress(), server_connection_monitor.serverConnection.getPort(), header, opCode, rawPacket.array(), cause);
 			}
 	//	}
 	}
@@ -2027,8 +2027,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					}
 
 					default: {
-						throw new UnknownPacketException(header,
-								opCode, rawPacket.array());
+						throw new UnknownPacketException( peerIP, peerPort, header, opCode, rawPacket.array());
 					}
 					}
 				else if (header == PROTO_EMULE_EXTENDED_TCP)
@@ -2220,15 +2219,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					}
 					
 					default: {
-						throw new UnknownPacketException(header,
-								opCode, rawPacket.array());
+						throw new UnknownPacketException(peerIP, peerPort,header, opCode, rawPacket.array());
 					}
 					}
 			} catch (Throwable cause) {
 				if (cause instanceof UnknownPacketException)
 					throw (UnknownPacketException) cause;
-				throw new MalformattedPacketException(header,
-						(opCode), rawPacket.array(), cause);
+				throw new MalformattedPacketException(peerIP, peerPort, header,opCode, rawPacket.array(), cause);
 			}
 			if ((opCode == OP_SENDINGPART)
 					|| (opCode == OP_COMPRESSEDPART)) {
@@ -2317,6 +2314,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				case OP_SERVER_DESC_ANSWER: {
 					boolean new_packet = false;
 					short test_short = packet_content.getShort();
+					
 					if (test_short == INVALID_SERVER_DESC_LENGTH)
 						new_packet = true;
 					
@@ -2324,8 +2322,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					if (new_packet) {
 						int challenge = packet_content.getInt();
 						TagList tag_list = readTagList(packet_content);
-						_network_manager.receivedNewServerDescription(ip, port,
-								challenge, tag_list);
+						_network_manager.receivedNewServerDescription(ip, port,challenge, tag_list);
 						break;
 					}
 					
@@ -2401,7 +2398,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				}
 	
 				default: {
-					throw new UnknownPacketException(packet_protocol, packet_op_code, udp_packet_buffer.array());
+					throw new UnknownPacketException(packet.getAddress().getAddress().getHostAddress(), packet.getAddress().getPort(), packet_protocol, packet_op_code, udp_packet_buffer.array());
 				}
 				}
 			}
@@ -2410,7 +2407,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (cause instanceof UnknownPacketException)
 				throw (UnknownPacketException) cause;
 			_ipfilter.addServer(ip, BannedReason.BAD_PACKETS, _network_manager);
-			throw new MalformattedPacketException(udp_packet_buffer, cause);
+			throw new MalformattedPacketException(packet.getAddress().getAddress().getHostAddress(), packet.getAddress().getPort(), packet_protocol, packet_op_code, udp_packet_buffer.array(), cause);
+			//throw new MalformattedPacketException(udp_packet_buffer, cause);
 		}
 	}
 
@@ -2837,9 +2835,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				if (connection.getIoErrors() > 3)
 					disconnectPeer(connection.getIPAddress(), connection.getUsePort());
 			}
+			//System.out.println("Sended :: " + connection + " :: capacity : " + packet.getAsByteBuffer().capacity() + " : remaining : " + packet.getAsByteBuffer().remaining() + " : position :: " + packet.getAsByteBuffer().position() + " :: " + peer_queue.size() );
 			if (!packet.getAsByteBuffer().hasRemaining()) {
 				SendPacketContainer c = peer_queue.poll();
 				c.packet.clear();
+			
+				//System.out.println(" Remaining packets :: " + connection + " :: "  + peer_queue.size() );
 				
 				if (peer_queue.isEmpty()) {
 					try {
@@ -3150,6 +3151,28 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			
 			result += " packetsToProcess :: " + packetsToProcess.size();
 			
+			/*result += " packetsToProcess : \n";
+			for(PacketFragment f : packetsToProcess) {
+				result += f.getConnection() + " : " + f.getContent().capacity() + "   " + f.getPacketLimit() + " " + Convert.byteToHexString(f.getContent().array(), 0, 10) + "   getLastUpdate : " + f.getLastUpdate() +" \n";
+			}*/
+			
+			/*result +="\nFragment map : \n";
+			
+			for(String k : fragmentMap.keySet()) {
+				String s = " NULL ";
+				PacketFragment pf = fragmentMap.get(k);
+				String cont = "";
+				if (pf != null) {
+					ByteBuffer b = pf.getContent();
+					
+					if (b != null)
+						s = b.capacity()+"";
+					
+					cont = Convert.byteToHexString(b.array(), 0, 6);
+				}
+				result += k + " : " + s + " lastUpdate : " + pf.getLastUpdate()+  " len : " + pf.getLength() + " content :  " + cont + " \n";
+			}*/
+			
 			return result;
 		}
 		
@@ -3241,7 +3264,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	private class ServerConnectionMonitor extends JMThread {
 		private Selector serverSelector;
 		private volatile boolean loop = true;
-		private JMServerConnection serverConnection;
+		JMServerConnection serverConnection;
 		
 		private Queue<Packet> send_queue = new ConcurrentLinkedQueue<Packet>();
 		private volatile boolean sendSequence = false;
@@ -3548,6 +3571,15 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			super("UDP Connection");
 		}
 		
+		public String toString() {
+			String result = "UDP send queue size : " + sendQueue.size();
+			result += "\nSend addresses : \n";
+			for(UDPPacket packet : sendQueue)
+				result += packet.getAddress() + "\n";
+			result +="\n";
+			return result;
+		}
+		
 		public void startConnection() {
 			must_sleep = true;
 						
@@ -3630,11 +3662,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 									packet_content.put(udp_packet_buffer);
 
 									packet_content.position(0);
-	
+									
 									UDPPacket packet = new UDPPacket(packet_content, packetSender);
-									
 									processUDPPacket(packet);
-									
 									packet.clear();
 								} catch (Throwable e) {
 									e.printStackTrace();
@@ -3655,6 +3685,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 									if (!isOpen()) return ;
 									cause.printStackTrace();
 								}
+								
+								packet.clear();
 								
 								if (sendQueue.isEmpty()) {
 									listenChannel.register(selector, SelectionKey.OP_READ);
