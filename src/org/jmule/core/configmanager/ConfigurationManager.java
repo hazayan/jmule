@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.43 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:37:20 $$
+ * @version $$Revision: 1.44 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:27:09 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -80,12 +80,13 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final long 		 UPLOAD_QUEUE_PAYLOAD_CHECK_INTERVAL	= 	  1000;
 	public static final long 		 UPLOAD_QUEUE_PAYLOAD_LOOSED_CHECK_INTERVAL	= 	  1000 * 60 * 15;
 	
-	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 2;
+	public static final int          SERVER_UDP_QUERY_INTERVAL      =     1000 * 60;
 	public static final int          SERVER_LIST_STORE_INTERVAL     =     1000 * 60;
 	public static final int          SERVER_DOWN_TIMEOUT	        =     1000 * 60 * 5;
 	public static final int 		 SERVER_CONNECTING_TIMEOUT		=	  1000 * 40;
 	public static final int			 SERVER_RECONNECT_COUNT			=	  4;
 	public static final int			 SERVER_RECONNECT_TIMEOUT		= 	  5000;
+	public static final int			 SERVER_MAX_FAIL_COUNT			= 	  10;
 	
 	public static final int 		 MAX_PACKET_SIZE				= 	  1024*500;
 	
