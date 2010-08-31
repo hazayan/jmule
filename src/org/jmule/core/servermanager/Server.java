@@ -51,8 +51,8 @@ import org.jmule.core.utils.Convert;
  * Created on 2007-Nov-07
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/07/31 12:49:52 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:20:29 $$
  */
 public class Server {
 	public static enum ServerStatus {
@@ -71,6 +71,7 @@ public class Server {
 
 	private boolean is_static = false;
 
+	private long last_udp_request = System.currentTimeMillis();
 	private long last_udp_response = System.currentTimeMillis();
 
 	private int sended_challenge = 0;
@@ -143,6 +144,7 @@ public class Server {
 
 	void setChallenge(int challenge) {
 		this.sended_challenge = challenge;
+		this.last_udp_request = System.currentTimeMillis();
 	}
 	
 	public int getChallenge() {
@@ -234,10 +236,10 @@ public class Server {
 	}
 	
 	void setPing(int receivedChallenge)  {
-		Tag tag = new IntTag(SL_PING, Convert.longToInt(System.currentTimeMillis() - last_udp_response));
-		tagList.removeTag(SL_PING);
-		tagList.addTag(tag);
 		last_udp_response = System.currentTimeMillis();
+		long ping = last_udp_response - last_udp_request;
+		Tag tag = new IntTag(SL_PING, Convert.longToInt(ping));
+		tagList.addTag(tag, true);
 		sended_challenge = 0;
 	}
 

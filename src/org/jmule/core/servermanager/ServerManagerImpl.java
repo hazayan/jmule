@@ -65,8 +65,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * 
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.22 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:20:06 $$
+ * @version $$Revision: 1.23 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:20:29 $$
  */
 public class ServerManagerImpl extends JMuleAbstractManager implements InternalServerManager  {
 		
@@ -673,7 +673,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 				t.printStackTrace();
 			}
 		} else {
-			if (reconnect_to_server)
+			/*if (reconnect_to_server)
 				if (reconnect_count < ConfigurationManager.SERVER_RECONNECT_COUNT) {
 					reconnect_count++;
 					Server cserver = connected_server;
@@ -684,7 +684,7 @@ public class ServerManagerImpl extends JMuleAbstractManager implements InternalS
 						e.printStackTrace();
 					}
 					return;
-				}
+				}*/
 			
 		}
 
