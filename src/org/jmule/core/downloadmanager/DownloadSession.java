@@ -77,8 +77,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.57 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/24 17:34:02 $$
+ * @version $$Revision: 1.58 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:35:16 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -349,7 +349,6 @@ public class DownloadSession implements JMTransferSession {
 	}
 
 	void receivedSlotGivenFromPeer(Peer sender) {
-		System.out.println(" queue :: receivedSlotGivenFromPeer : " + sender);
 		download_status_list.setPeerStatus(sender, PeerDownloadStatus.ACTIVE);
 		download_status_list.setPeerResendCount(sender, 0);
 		download_status_list.addPeerHistoryRecord(sender, "Slot given");
