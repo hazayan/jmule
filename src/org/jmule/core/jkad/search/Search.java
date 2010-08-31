@@ -40,22 +40,21 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:07:16 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
  */
 public class Search {
-	
-	private static Search singleton = null;
-	
 	private Map<Int128, SearchTask> searchTasks = new ConcurrentHashMap<Int128, SearchTask>();
 	private Collection<SearchListener> listener_list = new ConcurrentLinkedQueue<SearchListener>();
 	
 	private boolean isStarted = false;
 		
+	private static class SearchSingletonHolder {
+		private static final Search INSTANCE = new Search();
+	}
+	
 	public static Search getSingleton() {
-		if (singleton == null)
-			singleton = new Search();
-		return singleton;
+		return SearchSingletonHolder.INSTANCE;
 	}
 	
 	private Search() {

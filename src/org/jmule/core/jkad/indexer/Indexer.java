@@ -56,17 +56,17 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/06 08:47:45 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
  */
 public class Indexer {
 	
-	private static Indexer singleton = null;
+	private static class IndexerSingletonHolder {
+		private static final Indexer INSTANCE = new Indexer();
+	}
 	
 	public static Indexer getSingleton() {
-		if (singleton == null)
-			singleton = new Indexer();
-		return singleton;
+		return IndexerSingletonHolder.INSTANCE;
 	}
 	
 	private Map<Int128, Index> notes = new ConcurrentHashMap<Int128,Index>();

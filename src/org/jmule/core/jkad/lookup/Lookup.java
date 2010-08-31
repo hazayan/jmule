@@ -56,12 +56,10 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.13 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:08:10 $
+ * @version $Revision: 1.14 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
  */
 public class Lookup {
-
-	private static Lookup singleton = null;
 	
 	private Map<Int128, LookupTask> lookupTasks = new ConcurrentHashMap<Int128, LookupTask>();
 	
@@ -79,10 +77,12 @@ public class Lookup {
 		return isStarted;
 	}
 	
+	private static class LookupSingletonHolder {
+		private static final Lookup INSTANCE = new Lookup();
+	}
+	
 	public static Lookup getSingleton() {
-		if (singleton == null)
-			singleton = new Lookup();
-		return singleton;
+		return LookupSingletonHolder.INSTANCE;
 	}
 	
 	private Lookup() {

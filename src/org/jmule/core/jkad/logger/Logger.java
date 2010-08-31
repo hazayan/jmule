@@ -33,18 +33,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Mar 1, 2009
  * @author binary256
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:15:00 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:58 $
  */
 public class Logger {
 	private static final String fileHeader 			= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 	private static final String fileExtension 		= ".log";
-	private static Logger singleton = null;
+	
+	private static class LoggerSingletonHolder {
+		private static final Logger INSTANCE = new Logger();
+	}
 	
 	public static Logger getSingleton() {
-		if (singleton == null)
-			singleton = new Logger();
-		return singleton;
+		return LoggerSingletonHolder.INSTANCE;
 	}
 	
 	private String logFile;

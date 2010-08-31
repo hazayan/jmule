@@ -73,12 +73,11 @@ import org.jmule.core.sharingmanager.SharingManagerSingleton;
 /**
  * Created on Jan 14, 2009
  * @author binary256
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/04 08:06:32 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
  */
 
 public class Publisher {
-	private static Publisher singleton = null;
 	private Map<Int128, PublishTask> publish_tasks = new ConcurrentHashMap<Int128, PublishTask>();
 
 	private Collection<PublisherListener> listener_list = new ConcurrentLinkedQueue<PublisherListener>();
@@ -93,10 +92,12 @@ public class Publisher {
 		return isStarted;
 	}
 	
+	private static class PublisherSingletonHolder {
+		private static final Publisher INSTANCE = new Publisher();
+	}
+	
 	public static Publisher getInstance() {
-		if (singleton == null)
-			singleton = new Publisher();
-		return singleton;
+		return PublisherSingletonHolder.INSTANCE;
 	}
 	
 	private Task keyword_publisher;

@@ -58,11 +58,11 @@ import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
+import org.jmule.core.jkad.JKadConstants.ContactType;
+import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.PacketListener;
-import org.jmule.core.jkad.JKadConstants.ContactType;
-import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
@@ -78,13 +78,12 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.16 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:14:34 $
+ * @version $Revision: 1.17 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
 	private InternalNetworkManager _network_manager;
-	private static RoutingTable singleton = null;
 	
 	private Node root = null;
 	private List<KadContact> tree_nodes = new CopyOnWriteArrayList<KadContact>();
@@ -101,11 +100,12 @@ public class RoutingTable {
 	
 	private boolean is_started = false;
 	
+	private static class RoutingTableSingletonHolder {
+		private static final RoutingTable INSTANCE = new RoutingTable();
+	}
+	
 	public static RoutingTable getSingleton() {
-		if (singleton == null)
-			singleton = new RoutingTable();
-		
-		return singleton;
+		return RoutingTableSingletonHolder.INSTANCE;
 	}
 	
 	private RoutingTable() {
