@@ -47,8 +47,8 @@ import org.jmule.core.utils.Misc;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.26 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/22 14:26:25 $$
+ * @version $$Revision: 1.27 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:33:10 $$
  */
 public class Peer {
 	public enum PeerSource {INCOMING, SERVER, KAD, PEX, ED2KLINK, EXTERNAL /* Added directly */, GLOBAL}
@@ -158,6 +158,14 @@ public class Peer {
 	
 	public boolean isConnected() {
 		return getStatus() == PeerStatus.CONNECTED;
+	}
+	
+	public boolean isDisconnected() {
+		return getStatus() == PeerStatus.DISCONNECTED;
+	}
+	
+	public boolean isConnecting() {
+		return getStatus() == PeerStatus.CONNECTING;
 	}
 	
 	public PeerStatus getStatus() {
