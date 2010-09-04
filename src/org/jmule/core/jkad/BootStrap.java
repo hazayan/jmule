@@ -48,15 +48,13 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:14:30 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:10:36 $
  */
 public class BootStrap {
-
-	private static BootStrap singleton = null;
 	private InternalJKadManager _jkad_manager;
 	private InternalNetworkManager _network_manager;
-	private RoutingTable routingTable = null;
+	private RoutingTable _routing_table = null;
 	
 	private Collection<KadContact> bootStrapContacts = new ConcurrentLinkedQueue<KadContact>();
 	private Collection<KadContact> usedContacts 	 = new ConcurrentLinkedQueue<KadContact>();
@@ -66,11 +64,12 @@ public class BootStrap {
 	private boolean isStarted = false;
 	private PacketListener bootStrapResponseListener;
 
+	private static class BootStrapSingletonHolder {
+		private static final BootStrap INSTANCE = new BootStrap();
+	}
 
 	public static BootStrap getInstance() {
-		if (singleton == null)
-			singleton = new BootStrap();
-		return singleton;
+		return BootStrapSingletonHolder.INSTANCE;
 	}
 	
 	private BootStrap(){
@@ -78,11 +77,11 @@ public class BootStrap {
 	}
 	
 	public void start() {
-		routingTable = RoutingTable.getSingleton();
+		_routing_table = RoutingTable.getSingleton();
 		_network_manager = (InternalNetworkManager) NetworkManagerSingleton.getInstance();
 		_jkad_manager = (InternalJKadManager) JKadManagerSingleton.getInstance();
 		isStarted = true;
-		List<KadContact> contactList = routingTable.getRandomContacts(BOOTSTRAP_CONTACTS);
+		List<KadContact> contactList = _routing_table.getRandomContacts(BOOTSTRAP_CONTACTS);
 		
 		bootStrapResponses = 0;
 		bootStrapContacts.clear();
@@ -92,10 +91,11 @@ public class BootStrap {
 		usedContacts.addAll(contactList);
 		
 		for(KadContact contact : contactList) {
+			System.out.println("Try bootstrap from : " + contact);
 			bootStrapContacts.add(contact);
 			usedContacts.add(contact);
 			try {
-				if (routingTable.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {
+				if (_routing_table.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {
 					KadPacket packet = null;
 					if (contact.supportKad2())
 						packet = PacketFactory.getBootStrapReq2Packet();
@@ -118,12 +118,14 @@ public class BootStrap {
 		bootStrapTask = new Task() {
 			public void run() {
 				if (bootStrapResponses >= BOOTSTRAP_STOP_CONTACTS) {
+					System.out.println("Stop bootstrap");
 					completeBootStrap();
 					return ;
 				}
 				for(KadContact contact : bootStrapContacts) {
 					long time = System.currentTimeMillis() - contact.getLastResponse();
 					if (time >= BOOTSTRAP_REMOVE_TIME) {
+						System.out.println("Bootstrap timeout : " + contact);
 						bootStrapContacts.remove(contact);
 						continue;
 					}
@@ -133,13 +135,14 @@ public class BootStrap {
 				int contactCount = BOOTSTRAP_CONTACTS - bootStrapContacts.size();
 				if (contactCount<=0) return ;
 				
-				List<KadContact> contactList = routingTable.getRandomContacts(contactCount,usedContacts);
-				
+				List<KadContact> contactList = _routing_table.getRandomContacts(contactCount,usedContacts);
+				System.out.println("contactList :: size " + contactList.size());
 				for(KadContact contact : contactList) {
+					System.out.println("Try bootstrap from : " + contact);
 					bootStrapContacts.add(contact);
 					usedContacts.add(contact);
 					try {
-						if (routingTable.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {
+						if (_routing_table.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {
 							KadPacket packet = null;
 							if (contact.supportKad2())
 								packet = PacketFactory.getBootStrapReq2Packet();
@@ -232,13 +235,13 @@ public class BootStrap {
 	}
 	
 	public void processBootStrap1Req(ClientID clientID, IPAddress ipAddress, int udpPort,int tcpPort) {
-		List<KadContact> contactList = routingTable.getNearestContacts(clientID, BOOTSTRAP_CONTACTS);
+		List<KadContact> contactList = _routing_table.getNearestContacts(clientID, BOOTSTRAP_CONTACTS);
 		KadPacket packet = PacketFactory.getBootStrap1ResPacket(contactList);
 		_network_manager.sendKadPacket(packet, ipAddress, udpPort);
 	}
 	
 	public void processBootStrap2Req(IPAddress ipaddress, int udpPort) {
-		List<KadContact> contactList = routingTable.getRandomContacts(BOOTSTRAP_CONTACTS);
+		List<KadContact> contactList = _routing_table.getRandomContacts(BOOTSTRAP_CONTACTS);
 		KadPacket packet;
 		try {
 			packet = PacketFactory.getBootStrapRes2Packet(contactList);
@@ -250,11 +253,11 @@ public class BootStrap {
 	
 	public void processBootStrap1Res(List<KadContact> contactList) {
 		for(KadContact contact : contactList) {
-			if (!routingTable.hasContact(contact)) {
+			if (!_routing_table.hasContact(contact)) {
 				bootStrapResponses++;
 				bootStrapContacts.remove(contact);
 				
-				routingTable.addContact(contact);
+				_routing_table.addContact(contact);
 								
 				//Packet packet = PacketFactory.getRequestPacket(FIND_NODE, contact.getContactID(), Kad.getSingelton().getClientID());
 				//udpConnection.sendPacket(packet, contact.getIPAddress(), contact.getUDPPort());
@@ -264,11 +267,11 @@ public class BootStrap {
 	
 	public void processBotStrap2Res(ClientID clientID, int tcpPort, byte version, List<KadContact> contactList) {
 		for(KadContact contact : contactList) {
-			if (!routingTable.hasContact(contact)) {
+			if (!_routing_table.hasContact(contact)) {
 				bootStrapResponses++;
 				bootStrapContacts.remove(contact);
 				
-				routingTable.addContact(contact);
+				_routing_table.addContact(contact);
 			}
 		}
 	}

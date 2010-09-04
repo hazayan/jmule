@@ -28,19 +28,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.4 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:02:17 $
+ * @version $Revision: 1.5 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:15:07 $
  */
 public class Timer {
-
-	private static Timer singleton = null;
 	
 	private Collection<TaskExecutor> taskList = new ConcurrentLinkedQueue<TaskExecutor>();
+
+	private static class TimerSingletonHolder {
+		private static final Timer INSTANCE = new Timer();
+	}
 	
 	public static Timer getSingleton() {
-		if (singleton == null)
-			singleton = new Timer();
-		return singleton;
+		return TimerSingletonHolder.INSTANCE;
 	}
 	
 	private Timer() {
