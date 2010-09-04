@@ -32,8 +32,8 @@ import org.jmule.core.jkad.ClientID;
 /**
  * Created on 07-17-2008
  * @author javajox
- * @version $$Revision: 1.44 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:27:09 $$
+ * @version $$Revision: 1.45 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/09/04 16:01:25 $$
  */
 public interface ConfigurationManager extends JMuleManager {
 
@@ -73,7 +73,7 @@ public interface ConfigurationManager extends JMuleManager {
 	public static final int          UPLOAD_QUEUE_SIZE              =     200;
 	public static final int          UPLOAD_QUEUE_SLOTS             =     10;
 	public static final long 		 UPLOADQUEUE_REMOVE_TIMEOUT		= 	  1000 * 60 * 60;
-	public static final long 		 UPLOAD_SLOT_LOSE_TIMEOUT		= 	  1000 * 60;
+	public static final long 		 UPLOAD_SLOT_LOSE_TIMEOUT		= 	  1000 * 60 + 1000 * 30;
 	public static final long 		 UPLOAD_QUEUE_CHECK_INTERVAL	= 	  1000 * 3;
 	public static final long 		 UPLOAD_QUEUE_TRANSFER_CHECK_INTERVAL	= 	  1000;
 	public static final long		 UPLOAD_QUEUE_PAYLOAD_TIME		=	  1000 * 60 * 5;
