@@ -120,8 +120,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.25 $
- * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:15:26 $
+ * @version $Revision: 1.24 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:14:25 $
  */
 class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -201,7 +201,7 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 		if (!isDisconnected())
 			disconnect();
 		
-		Timer.getSingleton().stop();
+		Timer.getSingleton().cancelAllTasks();
 		
 	}
 
