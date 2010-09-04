@@ -77,8 +77,8 @@ import org.jmule.core.utils.Misc;
 /**
  * Created on 2008-Apr-20
  * @author binary256
- * @version $$Revision: 1.58 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/31 10:35:16 $$
+ * @version $$Revision: 1.59 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2010/09/04 16:08:38 $$
  */
 public class DownloadSession implements JMTransferSession {
 	
@@ -544,20 +544,14 @@ public class DownloadSession implements JMTransferSession {
 		if (!hasPeer(peer))
 			return;
 		
-		_network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
+		if (peer.isConnected())
+			_network_manager.sendSlotRelease(peer.getIP(), peer.getPort());
 		
 		session_peers.remove(peer);
 		compressedFileChunks.remove(peer);
-		PeerDownloadStatus status = download_status_list.getPeerDownloadStatus(peer);
-		if ((status == null) || (status != PeerDownloadStatus.IN_QUEUE)) {
-			partStatus.removePartStatus(peer);
-			file_request_list.remove(peer);
-			session_peers.remove(peer);
-			download_status_list.removePeer(peer);
-		}
+		download_status_list.removePeer(peer);
 		
 		download_strategy.peerRemoved(peer);
-
 	}
 	
 	void completeDownload() {
