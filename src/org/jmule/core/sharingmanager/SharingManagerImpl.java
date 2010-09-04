@@ -734,7 +734,7 @@ public class SharingManagerImpl extends JMuleAbstractManager implements Internal
 			return;
 		}
 
-		sharing_manager_timer.stop();
+		sharing_manager_timer.cancelAllTasks();
 
 		stopLoadingCompletedFiles();
 

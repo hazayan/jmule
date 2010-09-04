@@ -31,14 +31,13 @@ import java.nio.ByteBuffer;
 import java.util.zip.DataFormatException;
 
 import org.jmule.core.edonkey.packet.UDPPacket;
-import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.utils.JMuleZLib;
 
 /**
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/25 10:23:47 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:14:24 $
  */
 public class KadPacket extends UDPPacket {
 		
@@ -80,7 +79,6 @@ public class KadPacket extends UDPPacket {
 			packet_data.put(decompressedData);
 			
 		} catch (DataFormatException e) {
-			Logger.getSingleton().logException(e);
 			e.printStackTrace();
 		} 
 	}
@@ -88,7 +86,7 @@ public class KadPacket extends UDPPacket {
 	public boolean isCompressed() {
 		try {
 			return packet_data.get(0) == PROTO_KAD_COMPRESSED_UDP;
-		}catch(Throwable t) { Logger.getSingleton().logException(t); return false; }
+		}catch(Throwable t) { t.printStackTrace(); return false; }
 	}
 	
 	protected void finalize() {

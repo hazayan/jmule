@@ -63,7 +63,6 @@ import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadManagerSingleton;
 import org.jmule.core.jkad.PacketListener;
-import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -78,8 +77,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.17 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
+ * @version $Revision: 1.18 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:14:25 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -126,7 +125,8 @@ public class RoutingTable {
 							
 							public void processToleranceContacts(ContactAddress sender,List<KadContact> results) {
 								for(KadContact contact : results) {
-									addContact(contact);
+									if (!hasContact(contact))
+										addContact(contact);
 								}
 								
 								if (getTotalContacts() > ROUTING_TABLE_DIFICIT_CONTACTS_STOP) {
@@ -309,7 +309,7 @@ public class RoutingTable {
 		// TODO : Create code to filter myself
 		if (!Utils.isGoodAddress(contact.getIPAddress())) {
 			
-			Logger.getSingleton().logMessage("Filtered address : "+contact.getIPAddress());
+			//Logger.getSingleton().logMessage("Filtered address : "+contact.getIPAddress());
 			return;
 		}
 			
@@ -509,7 +509,6 @@ public class RoutingTable {
 	
 	public void loadContacts() {
 		List<KadContact> contact_list = NodesDat.load(NODES_DAT);
-		Logger.getSingleton().logMessage("Loaded contacts : " + contact_list.size());
 		for(KadContact contact : contact_list) {
 			addContact(contact);
 		}

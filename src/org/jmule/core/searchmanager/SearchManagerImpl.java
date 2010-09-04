@@ -57,7 +57,7 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-06
  * @author binary
  * @author javajox
- * @version $$Revision: 1.19 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/08/15 12:19:14 $$
+ * @version $$Revision: 1.20 $$ Last changed by $$Author: binary255 $$ on $$Date: 2010/09/04 16:16:39 $$
  */
 public class SearchManagerImpl extends JMuleAbstractManager implements InternalSearchManager {
 
@@ -230,7 +230,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 			global_search_thread.JMStop();
 		
 		timer.removeTask(server_search_task);
-		timer.stop();
+		timer.cancelAllTasks();
 	}
 
 	public void start() {

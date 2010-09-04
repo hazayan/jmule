@@ -28,19 +28,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created on Aug 28, 2009
  * @author binary256
- * @version $Revision: 1.5 $
- * Last changed by $Author: binary255 $ on $Date: 2010/06/30 18:15:06 $
+ * @version $Revision: 1.6 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:17:38 $
  */
 public class JMTimer {
 	private Queue<TaskExecutor> taskList = new ConcurrentLinkedQueue<TaskExecutor>();
 	
 	public JMTimer() {
-	}
-	
-	public void stop() {
-		for(TaskExecutor task : taskList)
-			task.stopTask();
-		taskList.clear();
 	}
 	
 	public void addTask(JMTimerTask task, long waitTime, boolean repeat) {

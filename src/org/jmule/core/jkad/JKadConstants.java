@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.22 $
- * Last changed by $Author: binary255 $ on $Date: 2010/07/28 13:24:03 $
+ * @version $Revision: 1.23 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:11:06 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -54,7 +54,7 @@ public class JKadConstants {
 	
 	public static final byte KAD_VERSION 					= 0x05; // KADEMLIA_VERSION5_48a	0x05 // -0.48a
 
-	public static final int MIN_CONTACTS_TO_SEND_BOOTSTRAP	= 150; 
+	public static final int MIN_CONTACTS_TO_SEND_BOOTSTRAP	= 200; 
 	public static final int BOOTSTRAP_CONTACTS				= 20;
 	public static final int BOOTSTRAP_STOP_CONTACTS			= 50;
 	public static final int BOOTSTRAP_CHECK_INTERVAL		= 5000;
@@ -105,7 +105,7 @@ public class JKadConstants {
 	public static final long ROUTING_TABLE_CONTACT_ACCEP_TIME 		= 1000 * 60 * 2 - 1;
 	public static final long ROUTING_TABLE_CONTACT_IGNORE_TIME 		= 1000 * 60 * 2; 
 	public static final long ROUTING_TABLE_SAVE_INTERVAL			= 1000 * 60;
-	public static final long ROUTING_TABLE_DIFICIT_CONTACTS 		= 200;//200
+	public static final long ROUTING_TABLE_DIFICIT_CONTACTS 		= 500;//200
 	public static final long ROUTING_TABLE_DIFICIT_CONTACTS_STOP = ROUTING_TABLE_DIFICIT_CONTACTS + 100;
 	
 	public static final int ROUTING_TABLE_MAINTENANCE_CONTACTS			= 10; //3

@@ -59,10 +59,8 @@ import static org.jmule.core.jkad.JKadConstants.TAG_SOURCETYPE;
 import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.CONNECTED;
 import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.CONNECTING;
 import static org.jmule.core.jkad.JKadManagerImpl.JKadStatus.DISCONNECTED;
-import static org.jmule.core.utils.Convert.byteToHexString;
 import static org.jmule.core.utils.Convert.byteToInt;
 import static org.jmule.core.utils.Convert.shortToInt;
-import static org.jmule.core.utils.Misc.getByteBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -89,7 +87,6 @@ import org.jmule.core.edonkey.packet.tag.TagScanner;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.indexer.Indexer;
 import org.jmule.core.jkad.indexer.Source;
-import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.packet.CorruptedPacketException;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -123,10 +120,10 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.23 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/15 12:10:19 $
+ * @version $Revision: 1.25 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:15:26 $
  */
-public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
+class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
 
 	private ClientID clientID;
@@ -204,7 +201,8 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 		if (!isDisconnected())
 			disconnect();
 		
-		Logger.getSingleton().stop();
+		Timer.getSingleton().stop();
+		
 	}
 
 	public void start() {
@@ -214,7 +212,6 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			e.printStackTrace();
 			return;
 		}
-		Logger.getSingleton().start();
 		is_started = true;
 		this.connect();
 	}
@@ -303,11 +300,11 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			processPacket(packet);
 		} catch (Throwable t) {
 			t.printStackTrace();
-			Logger.getSingleton().logException(t);
-			ByteBuffer unkPacket = getByteBuffer(packet.getAsByteBuffer().limit());
+			//Logger.getSingleton().logException(t);
+			/*ByteBuffer unkPacket = getByteBuffer(packet.getAsByteBuffer().limit());
 			packet.getAsByteBuffer().position(0);
 			packet.getAsByteBuffer().get(unkPacket.array(), 0,packet.getAsByteBuffer().capacity());
-			Logger.getSingleton().logMessage("Exception in processing : \n"+ byteToHexString(unkPacket.array(), " "));
+			Logger.getSingleton().logMessage("Exception in processing : \n"+ byteToHexString(unkPacket.array(), " "));*/
 		}
 	}
 
@@ -338,7 +335,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 						listener.packetReceived(packet);
 				} catch (Throwable t) {
 					t.printStackTrace();
-					Logger.getSingleton().logException(t);
+					//Logger.getSingleton().logException(t);
 				}
 
 		byte packetOPCode = packet.getCommand();
@@ -938,7 +935,8 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 				tcp_port = rawData.getShort();
 	
 				Buddy buddy = Buddy.getInstance();
-				Logger.getSingleton().logMessage("Buddy request : " + packet.getAddress());
+				//Logger.getSingleton().logMessage("Buddy request : " + packet.getAddress());
+				
 				if (!buddy.isJKadUsedAsBuddy()) {
 					ClientID receiverID = new ClientID(receiver_id);
 					Int128 senderID = new Int128(sender_id);
@@ -947,12 +945,11 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 						buddy.setClientID(senderID);
 						buddy.setAddress(new IPAddress(packet.getAddress()));
 						buddy.setTCPPort(tcp_port);
-						buddy.setUDPPort(org.jmule.core.utils.Convert
-								.intToShort(packet.getAddress().getPort()));
+						buddy.setUDPPort(org.jmule.core.utils.Convert.intToShort(packet.getAddress().getPort()));
 	
 						buddy.setKadIsUsedAsBuddy(true);
 	
-						Logger.getSingleton().logMessage("New buddy : " + buddy.getAddress() + " TCP : "+ buddy.getTCPPort() + " UDP : "+ buddy.getUDPPort());
+						//Logger.getSingleton().logMessage("New buddy : " + buddy.getAddress() + " TCP : "+ buddy.getTCPPort() + " UDP : "+ buddy.getUDPPort());
 	
 						ConfigurationManager configManager = ConfigurationManagerSingleton.getInstance();
 						KadPacket response;
@@ -972,7 +969,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 			case KADEMLIA_CALLBACK_REQ : {
 				Buddy buddy = Buddy.getInstance();
 				if (buddy.isJKadUsedAsBuddy()) {
-					Logger.getSingleton().logMessage("KAD callback request");
+					//Logger.getSingleton().logMessage("KAD callback request");
 					byte[] cid = new byte[16];
 					rawData.get(cid);
 					final Int128 clientID = new Int128(cid);
@@ -984,7 +981,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 					// final Peer peer = new Peer(buddy.getAddress().toString(),
 					// buddy.getTCPPort(), PeerSource.KAD);
 					final Peer peer = PeerManagerSingleton.getInstance().newPeer(buddy.getAddress().toString(),buddy.getTCPPort(), PeerSource.KAD);
-					Logger.getSingleton().logMessage("KAD callback request, Peer : " + peer);
+					//Logger.getSingleton().logMessage("KAD callback request, Peer : " + peer);
 					JMRunnable task = new JMRunnable() {
 						public void JMRun() {
 							try {
@@ -996,7 +993,7 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 							while (!peer.isConnected()) {
 								counter++;
 								if (counter == 5) {
-									Logger.getSingleton().logMessage("KAD callback request, Peer : failed to connect");
+									//Logger.getSingleton().logMessage("KAD callback request, Peer : failed to connect");
 									return;
 								}
 								try {
@@ -1005,14 +1002,14 @@ public class JKadManagerImpl extends JMuleAbstractManager implements InternalJKa
 									e.printStackTrace();
 								}
 							}
-							Logger.getSingleton().logMessage("KAD callback request, Peer : connected & send packet to :  " + peer);
+							//Logger.getSingleton().logMessage("KAD callback request, Peer : connected & send packet to :  " + peer);
 							_network_manager.sendCallBackRequest(peer.getIP(),peer.getPort(), clientID, fileHash,ipAddress, port);
 							try {
 								Thread.sleep(500);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
-							Logger.getSingleton().logMessage("KAD callback request : Disconnecting from  "+ peer);
+							//Logger.getSingleton().logMessage("KAD callback request : Disconnecting from  "+ peer);
 							_network_manager.disconnectPeer(peer.getIP(), peer.getPort());
 
 						}

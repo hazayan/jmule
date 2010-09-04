@@ -46,7 +46,6 @@ import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.InternalJKadManager;
 import org.jmule.core.jkad.JKadConstants;
 import org.jmule.core.jkad.JKadManagerSingleton;
-import org.jmule.core.jkad.logger.Logger;
 import org.jmule.core.jkad.utils.timer.Task;
 import org.jmule.core.jkad.utils.timer.Timer;
 import org.jmule.core.sharingmanager.SharedFile;
@@ -56,8 +55,8 @@ import org.jmule.core.utils.Convert;
 /**
  * Created on Jan 5, 2009
  * @author binary256
- * @version $Revision: 1.11 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
+ * @version $Revision: 1.12 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:14:25 $
  */
 public class Indexer {
 	
@@ -88,33 +87,26 @@ public class Indexer {
 			keywords.putAll(SrcIndexDat.loadFile(KEY_INDEX_DAT));
 			sources.putAll(SrcIndexDat.loadFile(SRC_INDEX_DAT));
 		} catch (Throwable e1) {
-			Logger.getSingleton().logException(e1);
 			e1.printStackTrace();
 		}
-		Logger.getSingleton().logMessage("Loaded notes : " + notes.size());
-		Logger.getSingleton().logMessage("Loaded keywords : " + keywords.size());
-		Logger.getSingleton().logMessage("Loaded sources : " + sources.size());
 		
 		save_data_task = new Task() {
 			public void run() {
 					try {
 						SrcIndexDat.writeFile(NOTE_INDEX_DAT, notes);
 					} catch (Throwable e) {
-						Logger.getSingleton().logException(e);
 						e.printStackTrace();
 					}
 
 					try {
 						SrcIndexDat.writeFile(KEY_INDEX_DAT, keywords);
 					} catch (Throwable e) {
-						Logger.getSingleton().logException(e);
 						e.printStackTrace();
 					}
 
 					try {
 							SrcIndexDat.writeFile(SRC_INDEX_DAT, sources);
 					} catch (Throwable e) {
-						Logger.getSingleton().logException(e);
 						e.printStackTrace();
 					}
 			}
