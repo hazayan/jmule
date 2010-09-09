@@ -27,10 +27,14 @@ package org.jmule.core.proxymanager;
  * Created on Aug 13, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.2 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/26 10:34:48 $
+ * @version $Revision: 1.3 $
+ * Last changed by $Author: javajox $ on $Date: 2010/09/09 06:23:29 $
  */
 public class ProxyManagerSingleton {
+	
+	private ProxyManagerSingleton() {
+		
+	}
 	
 	private static class ProxyManagerSingletonHolder {
 		private static final ProxyManager INSTANCE = new ProxyManagerImpl();

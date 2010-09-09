@@ -25,11 +25,15 @@ package org.jmule.core.servermanager;
 /**
  * Created on 2008-Jul-06
  * @author javajox
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/26 10:34:48 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: javajox $$ on $$Date: 2010/09/09 06:23:29 $$
  */
 public class ServerManagerSingleton {
 
+	private ServerManagerSingleton() {
+		
+	}
+	
 	private static class ServerManagerSingletonHolder {
 		private static final ServerManager INSTANCE = new ServerManagerImpl();
 	}
