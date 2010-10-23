@@ -22,19 +22,13 @@
  */
 package org.jmule.core.jkad.search;
 
-import static org.jmule.core.jkad.JKadConstants.*;
-
 import java.util.List;
 
-import org.jmule.core.JMException;
-import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
-import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadException;
-import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -45,8 +39,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.14 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/04 08:05:50 $
+ * @version $Revision: 1.15 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:51:49 $
  */
 public class NoteSearchTask extends SearchTask {
 
@@ -69,7 +63,14 @@ public class NoteSearchTask extends SearchTask {
 			public void processToleranceContacts(ContactAddress sender,List<KadContact> results) {
 				
 				for(KadContact contact : results) {
-					KadPacket packet = null;
+					KadPacket responsePacket = null;
+					if (contact.supportKad2())
+						responsePacket = PacketFactory.getNotes2Req(searchID,fileSize);
+					else
+						responsePacket = PacketFactory.getNotes1Req(searchID);
+					_network_manager.sendKadPacket(responsePacket, contact.getContactAddress().getAddress(), contact.getUDPPort());
+					
+					/*KadPacket packet = null;
 					if (!contact.supportKad2())
 						try {
 							packet = PacketFactory.getHello1ReqPacket();
@@ -89,17 +90,18 @@ public class NoteSearchTask extends SearchTask {
 						public void packetReceived(KadPacket packet) {
 							KadPacket responsePacket = PacketFactory.getNotes2Req(searchID,fileSize);
 							_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
-							_jkad_manager.removePacketListener(this);
+							removePacketListener(this);
 						}
 					}; else
 						listener = new PacketListener(KADEMLIA_HELLO_RES, contact.getContactAddress().getAsInetSocketAddress()) {
 							public void packetReceived(KadPacket packet) {
 								KadPacket responsePacket = PacketFactory.getNotes1Req(searchID);
 								_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
-								_jkad_manager.removePacketListener(this);
+								removePacketListener(this);
 							}
 						};
-					_jkad_manager.addPacketListener(listener);
+					registerPacketListener(listener);
+					_jkad_manager.addPacketListener(listener);*/
 				}
 			}
 			
@@ -116,6 +118,7 @@ public class NoteSearchTask extends SearchTask {
 	public void stop() {
 		if (!isStarted) return;
 		isStarted = false;
+//		((InternalJKadManager)JKadManagerSingleton.getInstance()).removePacketListener(getPacketListenerList());
 		if (listener!=null)
 			listener.searchFinished();
 		Search.getSingleton().cancelSearch(searchID);

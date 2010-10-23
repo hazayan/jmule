@@ -62,7 +62,6 @@ import org.jmule.core.jkad.JKadConstants.ContactType;
 import org.jmule.core.jkad.JKadConstants.RequestType;
 import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.JKadManagerSingleton;
-import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -77,8 +76,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.18 $
- * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:14:25 $
+ * @version $Revision: 1.19 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:50:17 $
  */
 public class RoutingTable {
 	private InternalJKadManager    _jkad_manager;
@@ -95,7 +94,6 @@ public class RoutingTable {
 	private List<RoutingTableListener> listener_list = new CopyOnWriteArrayList<RoutingTableListener>();
 	
 	private Map<ContactAddress,MaintenanceContact> maintenanceContacts = new ConcurrentHashMap<ContactAddress,MaintenanceContact>();
-	private PacketListener helloListener;
 	
 	private boolean is_started = false;
 	
@@ -262,16 +260,23 @@ public class RoutingTable {
 			}
 			
 		};
-		helloListener = new PacketListener(JKadConstants.KADEMLIA2_HELLO_RES) {
-			public void packetReceived(KadPacket packet) {
-				ContactAddress address = new ContactAddress(packet.getAddress());
-				if (maintenanceContacts.containsKey(address)) {
-					MaintenanceContact contact = maintenanceContacts.get(address);
-					contact.responseCount++;
-				}
-					
-			}		
-		};
+
+	}
+	
+	public void processHello1Res(IPAddress senderAddress, int senderPort) {
+		ContactAddress address = new ContactAddress(senderAddress, senderPort);
+		if (maintenanceContacts.containsKey(address)) {
+			MaintenanceContact contact = maintenanceContacts.get(address);
+			contact.responseCount++;
+		}
+	}
+	
+	public void processHello2Res(IPAddress senderAddress, int senderPort) {
+		ContactAddress address = new ContactAddress(senderAddress, senderPort);
+		if (maintenanceContacts.containsKey(address)) {
+			MaintenanceContact contact = maintenanceContacts.get(address);
+			contact.responseCount++;
+		}
 	}
 	
 	public void start() {
@@ -283,13 +288,10 @@ public class RoutingTable {
 		Timer.getSingleton().addTask(ROUTING_TABLE_CHECK_INTERVAL, maintenanceTask, true);
 		Timer.getSingleton().addTask(ROUTING_TABLE_SAVE_INTERVAL, routingTableSave, true);
 		Timer.getSingleton().addTask(ROUTING_TABLE_CONTACTS_CHECK_INTERVAL, contact_checker, true);
-		_jkad_manager.addPacketListener(helloListener);
 		is_started = true;
 	}
 	
-	public void stop() {
-		_jkad_manager.removePacketListener(helloListener);
-		
+	public void stop() {		
 		Timer.getSingleton().removeTask(maintenanceTask);
 		Timer.getSingleton().removeTask(routingTableSave);
 			
@@ -312,15 +314,11 @@ public class RoutingTable {
 			//Logger.getSingleton().logMessage("Filtered address : "+contact.getIPAddress());
 			return;
 		}
-			
 		if (contact.getUDPPort()==4666) return ;
-		
 		if (hasContact(contact)){
 			return ;
 		}
-		
 		if (getTotalContacts() >= MAX_CONTACTS) return ;
-		
 		
 		newContacts++;
 		

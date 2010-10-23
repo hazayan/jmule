@@ -22,21 +22,14 @@
  */
 package org.jmule.core.jkad.search;
 
-import static org.jmule.core.jkad.JKadConstants.KADEMLIA2_HELLO_RES;
-import static org.jmule.core.jkad.JKadConstants.KADEMLIA_HELLO_RES;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jmule.core.JMException;
-import org.jmule.core.edonkey.packet.tag.TagList;
 import org.jmule.core.jkad.ContactAddress;
-import org.jmule.core.jkad.IPAddress;
 import org.jmule.core.jkad.Int128;
 import org.jmule.core.jkad.JKadConstants;
-import org.jmule.core.jkad.JKadException;
-import org.jmule.core.jkad.PacketListener;
 import org.jmule.core.jkad.JKadConstants.RequestType;
+import org.jmule.core.jkad.JKadException;
 import org.jmule.core.jkad.lookup.Lookup;
 import org.jmule.core.jkad.lookup.LookupTask;
 import org.jmule.core.jkad.packet.KadPacket;
@@ -47,8 +40,8 @@ import org.jmule.core.jkad.routingtable.KadContact;
 /**
  * Created on Jan 16, 2009
  * @author binary256
- * @version $Revision: 1.19 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/04 08:05:50 $
+ * @version $Revision: 1.20 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:51:49 $
  */
 public class SourceSearchTask extends SearchTask {
 	private List<KadContact> used_contacts = new ArrayList<KadContact>();
@@ -66,11 +59,17 @@ public class SourceSearchTask extends SearchTask {
 			public void lookupTimeout() {
 			}
 
-			public void processToleranceContacts(ContactAddress sender,
-					List<KadContact> results) {
+			public void processToleranceContacts(ContactAddress sender, List<KadContact> results) {
 				for(KadContact contact : results) {
 					used_contacts.add(contact);
-					KadPacket packet = null;
+					KadPacket responsePacket = null;
+					if (contact.supportKad2())
+						responsePacket = PacketFactory.getSearchSourceReq2Packet(searchID,(short)0,fileSize);
+					else
+						responsePacket = PacketFactory.getSearch1ReqPacket(searchID,true);
+					_network_manager.sendKadPacket(responsePacket, contact.getContactAddress().getAddress(), contact.getUDPPort());
+					
+					/*KadPacket packet = null;
 					if (contact.supportKad2())
 						try {
 							packet = PacketFactory.getHelloReq2Packet(TagList.EMPTY_TAG_LIST);
@@ -90,6 +89,7 @@ public class SourceSearchTask extends SearchTask {
 							public void packetReceived(KadPacket packet) {
 								KadPacket responsePacket = PacketFactory.getSearchSourceReq2Packet(searchID,(short)0,fileSize);
 								_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
+								removePacketListener(this);
 							}
 						};
 						else
@@ -97,9 +97,11 @@ public class SourceSearchTask extends SearchTask {
 							public void packetReceived(KadPacket packet) {
 								KadPacket responsePacket = PacketFactory.getSearch1ReqPacket(searchID,true);
 								_network_manager.sendKadPacket(responsePacket, new IPAddress(packet.getAddress()), packet.getAddress().getPort());
+								removePacketListener(this);
 							}
 						};
-					_jkad_manager.addPacketListener(listener);
+					registerPacketListener(listener);
+					_jkad_manager.addPacketListener(listener);*/
 				}
 			}
 			
@@ -118,6 +120,7 @@ public class SourceSearchTask extends SearchTask {
 		if (!isStarted) return;
 		isStarted = false;
 		
+//		((InternalJKadManager)JKadManagerSingleton.getInstance()).removePacketListener(getPacketListenerList());
 		if (listener!=null)
 			listener.searchFinished();
 		//Lookup.getSingleton().removeLookupTask(searchID);
