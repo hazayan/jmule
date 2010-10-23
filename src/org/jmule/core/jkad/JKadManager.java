@@ -33,8 +33,8 @@ import org.jmule.core.jkad.search.Search;
 /**
  * Created on Aug 29, 2009
  * @author binary256
- * @version $Revision: 1.3 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/13 15:48:42 $
+ * @version $Revision: 1.4 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:38:10 $
  */
 public interface JKadManager extends JMuleStoppableManager  {
 
@@ -59,7 +59,7 @@ public interface JKadManager extends JMuleStoppableManager  {
 	public Lookup getLookup();
 	public Publisher getPublisher();
 	public Search getSearch();
-	
+
 	public void addJKadListener(JKadListener listener);
 	public void removeJKadListener(JKadListener listener);
 	

@@ -66,9 +66,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmule.core.JMRunnable;
 import org.jmule.core.JMuleAbstractManager;
@@ -105,6 +102,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.peermanager.PeerManagerSingleton;
+import org.jmule.core.utils.timer.JMTimer;
+import org.jmule.core.utils.timer.JMTimerTask;
 
 /**
  * 
@@ -120,8 +119,8 @@ import org.jmule.core.peermanager.PeerManagerSingleton;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.24 $
- * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:14:25 $
+ * @version $Revision: 1.26 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:38:10 $
  */
 class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -135,7 +134,6 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 	private Search search = null;
 	private Publisher publisher = null;
 	private JKadStatus status = DISCONNECTED;
-	private Map<Byte, Collection<PacketListener>> packetListeners = new ConcurrentHashMap<Byte, Collection<PacketListener>>();
 
 	private InternalConfigurationManager _config_manager = null;
 	private InternalNetworkManager _network_manager = null;
@@ -144,7 +142,7 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 	private List<JKadListener> listener_list = new ArrayList<JKadListener>();
 
 	private boolean is_started = false;
-
+	
 	JKadManagerImpl() {
 	}
 
@@ -201,10 +199,14 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 		if (!isDisconnected())
 			disconnect();
 		
-		Timer.getSingleton().cancelAllTasks();
+		timer.cancelAllTasks();
+		
+		Timer.getSingleton().stop();
 		
 	}
 
+	JMTimerTask print_task;
+	JMTimer timer;
 	public void start() {
 		try {
 			super.start();
@@ -326,18 +328,6 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 			rcontact.setIPVerified(true);
 		}
 
-		// notify packet listeners
-		Collection<PacketListener> listener_list = packetListeners.get(packet.getCommand());
-		if (listener_list != null)
-			for (PacketListener listener : listener_list)
-				try {
-					if (listener.processAddress(packet.getAddress()))
-						listener.packetReceived(packet);
-				} catch (Throwable t) {
-					t.printStackTrace();
-					//Logger.getSingleton().logException(t);
-				}
-
 		byte packetOPCode = packet.getCommand();
 		ByteBuffer rawData = packet.getAsByteBuffer();
 		rawData.position(2);
@@ -403,6 +393,10 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 					contact.setTCPPort(tcp_port);
 					contact.setUDPPort(udp_port);
 				}
+				
+				if (bootStrap.isStarted())
+					bootStrap.processHello1Res(sender_address, sender_port);
+				routing_table.processHello1Res(sender_address, sender_port);
 				break;
 			}
 			
@@ -717,6 +711,10 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 				 * 
 				 * add_contact.setConnected(true);
 				 */
+				
+				if (bootStrap.isStarted())
+					bootStrap.processHello2Res(sender_address, sender_port);
+				routing_table.processHello2Res(sender_address, sender_port);
 				break;
 			}
 			case KADEMLIA2_REQ : {
@@ -1030,25 +1028,6 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 		if (unknown_packet)
 			throw new UnknownPacketOPCodeException(packetOPCode);
 
-	}
-
-	public void addPacketListener(PacketListener listener) {
-		Collection<PacketListener> list = packetListeners.get(listener.getPacketOPCode());
-		if (list == null) {
-			list = new ConcurrentLinkedQueue<PacketListener>();
-			packetListeners.put(listener.getPacketOPCode(), list);
-		}
-
-		list.add(listener);
-	}
-
-	public void removePacketListener(PacketListener listener) {
-		Collection<PacketListener> list = packetListeners.get(listener.getPacketOPCode());
-		if (list == null)
-			return;
-		list.remove(listener);
-		if (list.isEmpty())
-			packetListeners.remove(listener.getPacketOPCode());
 	}
 
 	public IPAddress getIPAddress() {
