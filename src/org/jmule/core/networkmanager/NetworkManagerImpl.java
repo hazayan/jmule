@@ -159,8 +159,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on Aug 14, 2009
  * @author binary256
  * @author javajox
- * @version $Revision: 1.51 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:25:05 $
+ * @version $Revision: 1.52 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:52:18 $
  */
 public class NetworkManagerImpl extends JMuleAbstractManager implements InternalNetworkManager {
 	private static final long CONNECTION_SPEED_SYNC_INTERVAL 		= 1000;
@@ -589,23 +589,62 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	}
 
 	public void peerDisconnected(String ip, int port) {
+		
 		_peer_manager.peerDisconnected(ip, port);
+		JMPeerConnection connection = null;
+		try {
+			connection = getPeerConnection(ip, port);
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		try {
+			connection.disconnect();
+			peer_connections_monitor.send_queue.remove(connection);
+			peer_connections.remove(ip + KEY_SEPARATOR + port);
+			connection = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//disconnectPeer(ip, port);
+		
+		/*_peer_manager.peerDisconnected(ip, port);
 		JMPeerConnection connection = peer_connections.get(ip + KEY_SEPARATOR + port);
 		if (connection != null) {
 			peer_connections_monitor.send_queue.remove(connection);
 			connection.setStatus(ConnectionStatus.DISCONNECTED);
 		}
-		peer_connections.remove(ip + KEY_SEPARATOR + port);
+		peer_connections.remove(ip + KEY_SEPARATOR + port);*/
 	}
 	
 	public void peerIOError(String ip, int port, Throwable cause) {
 		_peer_manager.peerDisconnected(ip, port);
+		JMPeerConnection connection = null;
+		try {
+			connection = getPeerConnection(ip, port);
+		} catch (NetworkManagerException e) {
+			e.printStackTrace();
+			return;
+		}
+		try {
+			connection.disconnect();
+			peer_connections_monitor.send_queue.remove(connection);
+			peer_connections.remove(ip + KEY_SEPARATOR + port);
+			connection = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		//disconnectPeer(ip, port);
+		/*_peer_manager.peerDisconnected(ip, port);
 		JMPeerConnection connection = peer_connections.get(ip + KEY_SEPARATOR + port);
 		if (connection != null) {
 			peer_connections_monitor.send_queue.remove(connection);
 			connection.setStatus(ConnectionStatus.DISCONNECTED);
 		}
-		peer_connections.remove(ip + KEY_SEPARATOR + port);
+		peer_connections.remove(ip + KEY_SEPARATOR + port);*/
 	}
 
 	public void receivedCallBackFailed() {
@@ -2839,10 +2878,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (!packet.getAsByteBuffer().hasRemaining()) {
 				SendPacketContainer c = peer_queue.poll();
 				c.packet.clear();
+			}
 			
 				//System.out.println(" Remaining packets :: " + connection + " :: "  + peer_queue.size() );
 				
 				if (peer_queue.isEmpty()) {
+					//System.out.println("Disable OP_WRITE :: " + System.currentTimeMillis() + " :: " + connection +" :: send_queue :: " + peer_queue.size());
 					try {
 						send_queue.remove(connection);
 						connection.getJMConnection().getChannel().register(peerSelector, SelectionKey.OP_READ, connection);
@@ -2857,8 +2898,6 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 						peerDisconnected(connection.getIPAddress(), connection.getUsePort());
 					}
 				}
-			}
-			
 		}
 	    
 	    JMTimerTask cleaner_task;
@@ -2927,8 +2966,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					continue;
 
 				Iterator<SelectionKey> keys = peerSelector.selectedKeys().iterator();
-				
+				long x = System.currentTimeMillis();
 				while (keys.hasNext()) {
+					long a = System.currentTimeMillis();
 					try {
 						SelectionKey key = keys.next();
 						keys.remove();
@@ -2982,6 +3022,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 											key.interestOps(DISABLE_WRITE & key.interestOps());
 											key.attach(connection);
 											connection.removeOPS(InterestedOPS.OP_WRITE);
+											//System.out.println("Must install write :: " + System.currentTimeMillis() + " :: " + key.attachment());
 											must_install_write.add(key);
 										} catch (Throwable t) {
 											t.printStackTrace();
@@ -2993,13 +3034,16 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 								} else
 									write(connection);
 							}
-						
+						long b = System.currentTimeMillis();
+						//System.out.println("NetworkManager TCP iteration :: " + (b - a) + "  " + key.attachment());
 					}catch(Throwable cause) {
 						cause.printStackTrace();
 						if (!loop)
 							break;
 					}
 				}
+				long y = System.currentTimeMillis();
+				//System.out.println("NetworkManager TCP fullIteration :: " + (y - x));
 			}
 
 			try {
@@ -3106,7 +3150,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					for(String key : fragmentMap.keySet()) {
 						PacketFragment fragment = fragmentMap.get(key);
 						if (System.currentTimeMillis() - fragment.getLastUpdate() >= PACKET_PROCESSOR_DROP_TIMEOUT) {
-							System.out.println("Drop partial packet for : " + fragment.getConnection());
+							//System.out.println("Drop partial packet for : " + fragment.getConnection());
 							fragmentMap.remove(key);
 							fragment.clear();
 							needGC = true;
@@ -3115,7 +3159,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					
 					for(PacketFragment fragment : packetsToProcess)
 						if (System.currentTimeMillis() - fragment.getLastUpdate() >= PACKET_PROCESSOR_DROP_TIMEOUT) {
-							System.out.println("Drop completed packet for : " + fragment.getConnection());
+							//System.out.println("Drop completed packet for : " + fragment.getConnection());
 							packetsToProcess.remove(fragment);
 							fragment.clear();
 							needGC = true;
@@ -3640,8 +3684,9 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					}
 					
 					Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
+					long x = System.currentTimeMillis();
 					while(keys.hasNext()) {
-						
+						long a = System.currentTimeMillis();
 						if (!loop)
 							return;
 						
@@ -3693,8 +3738,12 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 									write_installed = false;
 								}
 							}
+						long b = System.currentTimeMillis();
+						//System.out.println("NetworkManager UDP Iteration :: " + (b - a));
 					}
 					
+					long y = System.currentTimeMillis();
+					//System.out.println("NetworkManager UDP FullIteration :: " + (y - x));
 										
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -3758,6 +3807,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			if (!isOpen())
 				throw new JMException("UDP socket is not open");
 			sendQueue.offer(packet);
+						
 			if (write_installed == false) {
 				must_install_write = true;
 				if (is_selecting)
