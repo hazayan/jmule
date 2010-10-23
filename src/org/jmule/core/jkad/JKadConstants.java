@@ -30,8 +30,8 @@ import java.io.File;
 /**
  * Created on Dec 28, 2008
  * @author binary256
- * @version $Revision: 1.23 $
- * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:11:06 $
+ * @version $Revision: 1.24 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:38:50 $
  */
 public class JKadConstants {
 	public static final byte NODES_DAT_1					= 0x01;
@@ -126,9 +126,7 @@ public class JKadConstants {
 	
 	public static final long TIME_24_HOURS 					=  1000 * 60 * 60 * 24;
 	public static final long TIME_5_HOURS 					=  1000 * 60 * 60 * 5;
-	
-	public static final long DEFAULT_PACKET_LISTENER_TIMEOUT = 5000;
-	
+		
 	public static final long PUBLISH_KEYWORD_CHECK_INTERVAL	 = 1000 * 6;
 	public static final long PUBLISH_KEYWORD_SCAN_INTERVAL	 = 1000 * 10;
 	public static final long PUBLISHER_PUBLISH_CHECK_INTERVAL= 5000;
