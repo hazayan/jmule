@@ -48,8 +48,8 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 /**
  * Created on Jan 9, 2009
  * @author binary256
- * @version $Revision: 1.12 $
- * Last changed by $Author: binary255 $ on $Date: 2010/09/04 16:10:36 $
+ * @version $Revision: 1.13 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:49:29 $
  */
 public class BootStrap {
 	private InternalJKadManager _jkad_manager;
@@ -62,7 +62,6 @@ public class BootStrap {
 	private Task bootStrapTask;
 	
 	private boolean isStarted = false;
-	private PacketListener bootStrapResponseListener;
 
 	private static class BootStrapSingletonHolder {
 		private static final BootStrap INSTANCE = new BootStrap();
@@ -91,7 +90,6 @@ public class BootStrap {
 		usedContacts.addAll(contactList);
 		
 		for(KadContact contact : contactList) {
-			System.out.println("Try bootstrap from : " + contact);
 			bootStrapContacts.add(contact);
 			usedContacts.add(contact);
 			try {
@@ -118,14 +116,12 @@ public class BootStrap {
 		bootStrapTask = new Task() {
 			public void run() {
 				if (bootStrapResponses >= BOOTSTRAP_STOP_CONTACTS) {
-					System.out.println("Stop bootstrap");
 					completeBootStrap();
 					return ;
 				}
 				for(KadContact contact : bootStrapContacts) {
 					long time = System.currentTimeMillis() - contact.getLastResponse();
 					if (time >= BOOTSTRAP_REMOVE_TIME) {
-						System.out.println("Bootstrap timeout : " + contact);
 						bootStrapContacts.remove(contact);
 						continue;
 					}
@@ -133,16 +129,15 @@ public class BootStrap {
 				}
 				
 				int contactCount = BOOTSTRAP_CONTACTS - bootStrapContacts.size();
-				if (contactCount<=0) return ;
+				if (contactCount <= 0)
+					return;
 				
 				List<KadContact> contactList = _routing_table.getRandomContacts(contactCount,usedContacts);
-				System.out.println("contactList :: size " + contactList.size());
 				for(KadContact contact : contactList) {
-					System.out.println("Try bootstrap from : " + contact);
 					bootStrapContacts.add(contact);
 					usedContacts.add(contact);
 					try {
-						if (_routing_table.getTotalContacts()<MIN_CONTACTS_TO_SEND_BOOTSTRAP) {
+						if (_routing_table.getTotalContacts() < MIN_CONTACTS_TO_SEND_BOOTSTRAP) {
 							KadPacket packet = null;
 							if (contact.supportKad2())
 								packet = PacketFactory.getBootStrapReq2Packet();
@@ -164,48 +159,12 @@ public class BootStrap {
 			}
 		};
 		Timer.getSingleton().addTask(BOOTSTRAP_CHECK_INTERVAL, bootStrapTask, true);
-	
-		bootStrapResponseListener = new PacketListener(JKadConstants.KADEMLIA2_HELLO_RES) {
-			public void packetReceived(KadPacket packet) {
-				IPAddress address= new IPAddress(packet.getAddress());
-				for(KadContact c : usedContacts) {
-					if (c.getContactAddress().getAddress().equals(address)) {
-						bootStrapResponses++;
-						break;
-					}
-				}
-				if (bootStrapResponses >= 10) {
-					completeBootStrap();
-					return ;
-				}
-			}
-		};
-		
-		_jkad_manager.addPacketListener(bootStrapResponseListener);
-		
-		bootStrapResponseListener = new PacketListener(JKadConstants.KADEMLIA_HELLO_RES) {
-			public void packetReceived(KadPacket packet) {
-				IPAddress address= new IPAddress(packet.getAddress());
-				for(KadContact c : usedContacts) {
-					if (c.getContactAddress().getAddress().equals(address)) {
-						bootStrapResponses++;
-						break;
-					}
-				}
-				if (bootStrapResponses >= 10) {
-					completeBootStrap();
-					return ;
-				}
-			}
-		};
-		_jkad_manager.addPacketListener(bootStrapResponseListener);
 	}
 	
 	public void stop() {
 		bootStrapContacts.clear();
 		usedContacts.clear();
 		bootStrapResponses = 0;
-		_jkad_manager.removePacketListener(bootStrapResponseListener);
 		isStarted = false;
 		if (bootStrapTask== null) return ;
 		Timer.getSingleton().removeTask(bootStrapTask);
@@ -213,8 +172,7 @@ public class BootStrap {
 		
 	private void completeBootStrap() {
 		_jkad_manager.setStatus(JKadStatus.CONNECTED);					
-		_jkad_manager.removePacketListener(bootStrapResponseListener);
-		
+	
 		// stop task if already have enough contacts
 		Timer.getSingleton().removeTask(bootStrapTask);
 		FirewallChecker.getSingleton().start();
@@ -273,6 +231,32 @@ public class BootStrap {
 				
 				_routing_table.addContact(contact);
 			}
+		}
+	}
+	
+	public void processHello1Res(IPAddress senderAddress, int senderPort) {
+		for (KadContact c : usedContacts) {
+			if (c.getContactAddress().getAddress().equals(senderAddress)) {
+				bootStrapResponses++;
+				break;
+			}
+		}
+		if (bootStrapResponses >= 10) {
+			completeBootStrap();
+			return;
+		}
+	}
+	
+	public void processHello2Res(IPAddress senderAddress, int senderPort) {
+		for (KadContact c : usedContacts) {
+			if (c.getContactAddress().getAddress().equals(senderAddress)) {
+				bootStrapResponses++;
+				break;
+			}
+		}
+		if (bootStrapResponses >= 10) {
+			completeBootStrap();
+			return;
 		}
 	}
 }
