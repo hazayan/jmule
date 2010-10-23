@@ -40,8 +40,8 @@ import org.jmule.core.jkad.utils.MD4;
 /**
  * Created on Jan 8, 2009
  * @author binary256
- * @version $Revision: 1.10 $
- * Last changed by $Author: binary255 $ on $Date: 2010/08/31 10:28:30 $
+ * @version $Revision: 1.11 $
+ * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:51:17 $
  */
 public class Search {
 	private Map<Int128, SearchTask> searchTasks = new ConcurrentHashMap<Int128, SearchTask>();
@@ -71,7 +71,9 @@ public class Search {
 	public void stop() {
 		for(Int128 key : searchTasks.keySet()) {
 			SearchTask task = searchTasks.get(key);
-			if (task.isStarted()) task.stop();
+			if (task.isStarted()) {
+				task.stop();
+			}
 		}
 		isStarted = false;
 	}
