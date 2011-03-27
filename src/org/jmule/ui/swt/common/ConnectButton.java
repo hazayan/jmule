@@ -29,13 +29,13 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.jmule.ui.localizer.Localizer;
 import org.jmule.ui.swt.SWTImageRepository;
-import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
+import org.jmule.ui.swt.tab.main.serverlist.SWTServerListWrapper;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.3 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:01 $$
+ * @version $$Revision: 1.4 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
  */
 public class ConnectButton extends ToolItem {
 

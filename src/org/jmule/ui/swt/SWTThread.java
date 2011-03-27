@@ -22,37 +22,32 @@
  */
 package org.jmule.ui.swt;
 
+import org.eclipse.swt.graphics.DeviceData;
 import org.eclipse.swt.widgets.Display;
 import org.jmule.core.JMThread;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/15 15:36:23 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
  */
 public class SWTThread {
 
-	private static SWTThread instance = null;
+	private static class SWTThreadInstanceHolder {
+		private static final SWTThread INSTANCE = new SWTThread();
+	}
 	
 	public static SWTThread getInstance() {
-		if (instance==null)
-			instance = new SWTThread();
-		
-		return instance;
+		return SWTThreadInstanceHolder.INSTANCE;
 	}
 	
 	private static Display display;
-	
 	private JMSWTThread swt_thread;
-	
 	private boolean display_created = false;
 	
 	private SWTThread() {
-		
 		swt_thread = new JMSWTThread();
-		
-		
 	}
 	
 	public void initialize() {
@@ -70,13 +65,9 @@ public class SWTThread {
 	}
 	
 	public void start() {
-		
 		synchronized(swt_thread) {
-			
 			swt_thread.notify();
-			
 		}
-		
 	}
 	
 	public static Display getDisplay() {
@@ -102,19 +93,19 @@ public class SWTThread {
 			display_created = false;
 			
 			display = Display.getCurrent();
-			if ( display == null )
-				display = new Display();
+			if ( display == null ) {
+				DeviceData data = new DeviceData();
+			    data.tracking = true;
+				display = new Display(data);
+			}
 		
 			display_created = true;
-			
 			synchronized(this) {
-				
 				try {
 					this.wait();
 				} catch (InterruptedException e) {
 					
 				}
-				
 			}
 		    
 			while(!stop) {

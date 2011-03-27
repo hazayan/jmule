@@ -23,7 +23,6 @@
 package org.jmule.ui.swt;
 
 import java.io.File;
-
 import org.jmule.ui.UIConstants;
 import org.jmule.ui.UIPreferences;
 
@@ -31,17 +30,17 @@ import org.jmule.ui.UIPreferences;
  * 
  * @author binary256
  * @author javajox
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: javajox $$ on $$Date: 2010/01/05 14:39:15 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
  */
 public class SWTPreferences extends SWTConstants {
 	
-	private static SWTPreferences instance = null;
+	private static class SWTPreferencesInstanceHolder {
+		private static final SWTPreferences INSTANCE = new SWTPreferences();
+	}
 	
 	public static SWTPreferences getInstance() {
-		if (instance == null)
-			instance = new SWTPreferences();
-		return instance;
+		return SWTPreferencesInstanceHolder.INSTANCE;
 	}
 	
 	private SWTPreferences() {

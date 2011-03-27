@@ -20,56 +20,55 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-package org.jmule.ui.swt;
+package org.jmule.ui.swt.tab;
 
-import org.eclipse.swt.widgets.Display;
-import org.jmule.core.JMRunnable;
-import org.jmule.ui.JMuleUI;
-import org.jmule.ui.localizer.Localizer;
-import org.jmule.ui.swt.mainwindow.MainWindow;
-import org.jmule.ui.swt.skin.DefaultSWTSkinImpl;
-import org.jmule.ui.swt.skin.SWTSkin;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.widgets.Composite;
+import org.jmule.ui.swt.SWTPreferences;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
+ * @version $$Revision: 1.1 $$
  * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
  */
-public class JMuleSWTUI implements JMuleUI<SWTSkin> {
+public abstract class AbstractTab {
 	
-	private SWTSkin default_skin;
-	private MainWindow main_window;
+	public static final String TAB_KEY = "TabKey";
 	
-	public void initialize() {
-		Localizer.initialize();
-		SWTThread.getInstance().initialize();
-		default_skin = new DefaultSWTSkinImpl();
-		main_window = new MainWindow();
-		main_window.getCoreComponents();
+	protected SWTPreferences swt_preferences;
+	protected Composite tab_content;
+	
+	protected String tabTitle;
+	
+	public AbstractTab(Composite parent, String tabTitle) {
+		swt_preferences = SWTPreferences.getInstance();
+		tab_content = new Composite(parent, SWT.NONE);
+		this.tabTitle = tabTitle;
+		tab_content.setData(TAB_KEY, this);
 	}
 	
-	public void shutdown() {
-		GUIUpdater.getInstance().JMStop();
-		SWTThread.getInstance().stop();
+	public void disposeTab() {
+		tab_content.dispose();
 	}
-
-	public void start() {
-		GUIUpdater.getInstance();
-		main_window.initUIComponents();
-		SWTThread.getInstance().start();
-		GUIUpdater.getInstance().start();
-		Display.getDefault().asyncExec(new JMRunnable() {
-			public void JMRun() {
-				Sleak sleak = new Sleak ();
-				sleak.open ();
-			}
-		});
+	
+	public Composite getContent() {
+		return tab_content;
 	}
-
-	public SWTSkin getSkin() {
-
-		return default_skin;
+	
+	protected CTabItem tab_item = null;
+	
+	public CTabItem createIfNeedCTabItem(CTabFolder parent) {
+		if ((tab_item == null) || (tab_item.isDisposed())) {
+			tab_item = new CTabItem(parent, SWT.CLOSE);
+			tab_item.setText(tabTitle);
+		}
+		return tab_item;
 	}
-
+	
+	public abstract void obtainFocus();
+	public abstract void lostFocus();
+	
 }

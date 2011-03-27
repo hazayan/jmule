@@ -51,15 +51,15 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.common.SpeedScaleShell;
-import org.jmule.ui.swt.maintabs.serverlist.SWTServerListWrapper;
 import org.jmule.ui.swt.skin.SWTSkin;
+import org.jmule.ui.swt.tab.main.serverlist.SWTServerListWrapper;
 import org.jmule.ui.utils.SpeedFormatter;
 
 /**
  * 
  * @author binary
- * @version $Revision: 1.9 $
- * Last changed by $Author: binary255 $ on $Date: 2010/01/10 17:05:41 $
+ * @version $Revision: 1.10 $
+ * Last changed by $Author: binary255 $ on $Date: 2011/03/27 16:51:29 $
  */
 public class StatusBar extends Composite {
 

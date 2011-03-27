@@ -44,23 +44,23 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.aboutwindow.AboutWindow;
-import org.jmule.ui.swt.maintabs.AbstractTab.JMULE_TABS;
 import org.jmule.ui.swt.serverlistimportwindow.ServerListImportWindow;
-import org.jmule.ui.swt.settingswindow.SettingsWindow;
+import org.jmule.ui.swt.tab.MainTab.JMULE_TABS;
+import org.jmule.ui.swt.tab.settings.SettingsTab;
 import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2009/07/11 18:05:17 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
  */
 public class MainMenu extends Menu{
 
 	private Map<JMULE_TABS,MenuItem> tab_map = new HashMap<JMULE_TABS,MenuItem>();
 	private MainWindow main_window;
 	
-	public MainMenu(Shell shell, MainWindow mainWindow) {
+	public MainMenu(Shell shell, final MainWindow mainWindow) {
 		super(shell, SWT.BAR);
 		main_window = mainWindow;
 		shell.setMenuBar(this);
@@ -149,7 +149,7 @@ public class MainMenu extends Menu{
 		
 		servers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.SERVERLIST);
+				main_window.setCurrentTab(JMULE_TABS.SERVERLIST);
 			}
 		});
 		
@@ -159,7 +159,7 @@ public class MainMenu extends Menu{
 		
 		kad_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.KAD);
+				main_window.setCurrentTab(JMULE_TABS.KAD);
 			}
 		});
 		
@@ -168,7 +168,7 @@ public class MainMenu extends Menu{
 		tab_map.put(JMULE_TABS.TRANSFERS,transfers_item);
 		transfers_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.TRANSFERS);
+				main_window.setCurrentTab(JMULE_TABS.TRANSFERS);
 			}
 		});
 		
@@ -178,7 +178,7 @@ public class MainMenu extends Menu{
 		
 		search_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.SEARCH);
+				main_window.setCurrentTab(JMULE_TABS.SEARCH);
 			}
 			
 		});
@@ -189,7 +189,7 @@ public class MainMenu extends Menu{
 		
 		shared_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.SHARED);
+				main_window.setCurrentTab(JMULE_TABS.SHARED);
 			}
 			
 		});
@@ -199,7 +199,7 @@ public class MainMenu extends Menu{
 		tab_map.put(JMULE_TABS.STATISTICS,stats_item);
 		stats_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.STATISTICS);
+				main_window.setCurrentTab(JMULE_TABS.STATISTICS);
 			}
 		});
 		
@@ -208,7 +208,7 @@ public class MainMenu extends Menu{
 		tab_map.put(JMULE_TABS.LOGS,log_item);
 		log_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				main_window.setTab(JMULE_TABS.LOGS);
+				main_window.setCurrentTab(JMULE_TABS.LOGS);
 			}
 		});
 		
@@ -272,9 +272,10 @@ public class MainMenu extends Menu{
 		
 		options_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				SettingsWindow window = new SettingsWindow();
+				mainWindow.openTab(new SettingsTab(mainWindow.getTabParent()));
+				/*SettingsTab window = new SettingsTab();
 				window.getCoreComponents();
-				window.initUIComponents();
+				window.initUIComponents();*/
 			}
 		});
 		
@@ -366,7 +367,11 @@ public class MainMenu extends Menu{
 	}
 	
 	public void setSelectedTab(JMULE_TABS tabID) {
-
+		if (tabID == null) {
+			for(MenuItem item : tab_map.values()) 
+				item.setSelection(false);
+			return ;
+		}
 		for(MenuItem item : tab_map.values()) 
 			item.setSelection(false);
 		

@@ -71,16 +71,16 @@ import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
-import org.jmule.ui.swt.maintabs.shared.AlreadyExistDirsWindow;
 import org.jmule.ui.swt.skin.SWTSkin;
+import org.jmule.ui.swt.tab.main.shared.AlreadyExistDirsWindow;
 import org.jmule.ui.swt.tables.JMTable;
 import org.jmule.ui.utils.FileFormatter;
 
 /**
  * Created on Sep 16, 2008
  * @author binary256
- * @version $Revision: 1.6 $
- * Last changed by $Author: binary255 $ on $Date: 2009/09/20 09:05:15 $
+ * @version $Revision: 1.7 $
+ * Last changed by $Author: binary255 $ on $Date: 2011/03/27 16:51:29 $
  */
 public class NewWindow implements JMuleUIComponent {
 	public static enum WindowType { DOWNLOAD, SERVER, SHARED_DIR };

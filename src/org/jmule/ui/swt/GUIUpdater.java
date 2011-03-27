@@ -31,8 +31,8 @@ import org.jmule.core.JMThread;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.2 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/09/07 16:30:25 $$
+ * @version $$Revision: 1.3 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
  */
 public class GUIUpdater extends JMThread {
 
@@ -88,7 +88,12 @@ public class GUIUpdater extends JMThread {
 					process_refreshables = true;
 					for(Refreshable refreshable : refreshable_list) {
 						try {
+							long enter = System.currentTimeMillis();
+							//System.out.println("Enter : " + refreshable);
 							refreshable.refresh();
+							//System.out.println("Exit  : " + refreshable);
+							long exit = System.currentTimeMillis();
+							//System.out.println("Time : " + (exit - enter) + "\n" + refreshable);
 						}catch(Throwable t) {
 							t.printStackTrace();
 						}
