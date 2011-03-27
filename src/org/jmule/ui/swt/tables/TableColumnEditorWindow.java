@@ -64,8 +64,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * @author tuxpaper
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary256_ $$ on $$Date: 2008/10/16 18:20:02 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:53:32 $$
  */
 public class TableColumnEditorWindow {
   
@@ -185,7 +185,7 @@ public class TableColumnEditorWindow {
     Button bApply = new Button(cButtonArea,SWT.PUSH);
     bApply.setFont(skin.getButtonFont());
     bApply.setImage(skin.getButtonImage(SkinConstants.OK_BUTTON_IMAGE));
-    bApply.setText(Localizer._("mainwindo.button.apply"));
+    bApply.setText(Localizer._("mainwindow.button.apply"));
     rd = new RowData();
     rd.width = 70;
     bApply.setLayoutData(rd);
