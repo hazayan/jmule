@@ -33,8 +33,8 @@ import org.jmule.ui.swt.skin.SWTSkin;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.4 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
+ * @version $$Revision: 1.5 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 20:06:03 $$
  */
 public class JMuleSWTUI implements JMuleUI<SWTSkin> {
 	
@@ -59,12 +59,12 @@ public class JMuleSWTUI implements JMuleUI<SWTSkin> {
 		main_window.initUIComponents();
 		SWTThread.getInstance().start();
 		GUIUpdater.getInstance().start();
-		Display.getDefault().asyncExec(new JMRunnable() {
+		/*Display.getDefault().asyncExec(new JMRunnable() {
 			public void JMRun() {
 				Sleak sleak = new Sleak ();
 				sleak.open ();
 			}
-		});
+		});*/
 	}
 
 	public SWTSkin getSkin() {
