@@ -102,8 +102,6 @@ import org.jmule.core.networkmanager.NetworkManagerSingleton;
 import org.jmule.core.peermanager.Peer;
 import org.jmule.core.peermanager.Peer.PeerSource;
 import org.jmule.core.peermanager.PeerManagerSingleton;
-import org.jmule.core.utils.timer.JMTimer;
-import org.jmule.core.utils.timer.JMTimerTask;
 
 /**
  * 
@@ -119,8 +117,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  *  
  * Created on Dec 29, 2008
  * @author binary256
- * @version $Revision: 1.26 $
- * Last changed by $Author: binary255 $ on $Date: 2010/10/23 05:38:10 $
+ * @version $Revision: 1.27 $
+ * Last changed by $Author: binary255 $ on $Date: 2011/04/04 12:27:42 $
  */
 class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManager {
 	public enum JKadStatus { CONNECTED, CONNECTING, DISCONNECTED }
@@ -198,15 +196,10 @@ class JKadManagerImpl extends JMuleAbstractManager implements InternalJKadManage
 		is_started = false;
 		if (!isDisconnected())
 			disconnect();
-		
-		timer.cancelAllTasks();
-		
 		Timer.getSingleton().stop();
-		
 	}
 
-	JMTimerTask print_task;
-	JMTimer timer;
+	
 	public void start() {
 		try {
 			super.start();
