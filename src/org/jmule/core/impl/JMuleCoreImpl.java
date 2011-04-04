@@ -67,8 +67,8 @@ import org.jmule.core.uploadmanager.UploadManagerSingleton;
  * Created on 2008-Apr-16
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.28 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/05/18 18:27:45 $$
+ * @version $$Revision: 1.29 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/04 12:29:12 $$
  */
 public class JMuleCoreImpl implements InternalJMuleCore {
 	
@@ -224,6 +224,7 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		
 		NetworkManagerSingleton.getInstance().initialize();
 		NetworkManagerSingleton.getInstance().start();
+		notifyComponentStarted(NetworkManagerSingleton.getInstance());
 		
 		// notifies that the config manager has been started
 		notifyComponentStarted(configuration_manager);
@@ -355,6 +356,9 @@ public class JMuleCoreImpl implements InternalJMuleCore {
 		IPFilterSingleton.getInstance().shutdown();
 		// notifies that the ip filter manager has been stopped
 		notifyComponentStopped(IPFilterSingleton.getInstance());
+		
+		ConfigurationManagerSingleton.getInstance().shutdown();
+		notifyComponentStopped(ConfigurationManagerSingleton.getInstance());
 		
 		NetworkManagerSingleton.getInstance().shutdown();
 		// notifies that the network manager has been stopped
