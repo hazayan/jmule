@@ -27,17 +27,16 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * Created on Sep 5, 2010
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2011/03/27 16:51:29 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2011/04/25 10:55:30 $
  */
 public abstract class MainTab extends AbstractTab {
 
-	public static enum JMULE_TABS { SERVERLIST,KAD, TRANSFERS, SEARCH, SHARED, STATISTICS, LOGS };
 
 	public MainTab(Composite ctab, String tabTitle) {
 		super(ctab, tabTitle);
 	}
 	
-	public abstract JMULE_TABS getTabType();
+	
 
 }

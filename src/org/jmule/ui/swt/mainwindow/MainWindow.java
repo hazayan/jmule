@@ -68,8 +68,8 @@ import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.Utils;
 import org.jmule.ui.swt.common.NightlyBuildWarningWindow;
 import org.jmule.ui.swt.tab.AbstractTab;
+import org.jmule.ui.swt.tab.AbstractTab.JMULE_TABS;
 import org.jmule.ui.swt.tab.MainTab;
-import org.jmule.ui.swt.tab.MainTab.JMULE_TABS;
 import org.jmule.ui.swt.tab.main.kad.KadTab;
 import org.jmule.ui.swt.tab.main.logs.LogsTab;
 import org.jmule.ui.swt.tab.main.search.SearchTab;
@@ -85,8 +85,8 @@ import org.jmule.updater.JMUpdaterException;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.13 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
+ * @version $$Revision: 1.14 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/25 10:55:30 $$
  */
 public class MainWindow implements JMuleUIComponent {
 
@@ -327,6 +327,13 @@ public class MainWindow implements JMuleUIComponent {
 	
 	private MainTab opened_main_tab = null;
 	private AbstractTab selected_tab = null;
+	
+	public boolean isTabOpen(JMULE_TABS tab) {
+		for(AbstractTab t : opened_tabs)
+			if (t.getTabType() == tab)
+				return true;
+		return false;
+	}
 	
 	public void openTab(AbstractTab tab) {
 		boolean tab_folder_created = false;

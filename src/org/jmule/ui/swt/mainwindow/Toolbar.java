@@ -38,13 +38,13 @@ import org.jmule.core.JMuleCore;
 import org.jmule.ui.swt.SWTImageRepository;
 import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.common.ConnectButton;
-import org.jmule.ui.swt.tab.MainTab.JMULE_TABS;
+import org.jmule.ui.swt.tab.AbstractTab.JMULE_TABS;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.6 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
+ * @version $$Revision: 1.7 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/25 10:55:30 $$
  */
 public class Toolbar extends ToolBar {
 

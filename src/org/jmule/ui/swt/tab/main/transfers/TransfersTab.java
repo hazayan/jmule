@@ -23,8 +23,6 @@
 package org.jmule.ui.swt.tab.main.transfers;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,13 +36,12 @@ import org.jmule.ui.swt.Refreshable;
 import org.jmule.ui.swt.common.SashControl;
 import org.jmule.ui.swt.skin.SWTSkin;
 import org.jmule.ui.swt.tab.MainTab;
-import org.jmule.ui.swt.tab.MainTab.JMULE_TABS;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/25 10:55:30 $$
  */
 public class TransfersTab extends MainTab {
 

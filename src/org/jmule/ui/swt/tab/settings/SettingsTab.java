@@ -45,8 +45,8 @@ import org.jmule.ui.swt.tab.AbstractTab;
 /**
  * Created on Aug 19, 2008
  * @author binary256
- * @version $Revision: 1.1 $
- * Last changed by $Author: binary255 $ on $Date: 2011/03/27 16:51:29 $
+ * @version $Revision: 1.2 $
+ * Last changed by $Author: binary255 $ on $Date: 2011/04/25 10:55:30 $
  */
 public class SettingsTab extends AbstractTab {
 	private static final String 	DATA_KEY	= "SelectedTab";
@@ -221,10 +221,12 @@ public class SettingsTab extends AbstractTab {
 	public void lostFocus() {
 		
 	}
-	
-	
-	
-	
+
+
+	@Override
+	public JMULE_TABS getTabType() {
+		return JMULE_TABS.SETTINGS;
+	}
 	
 	/*private static final String 	DATA_KEY	= "SelectedTab";
 	

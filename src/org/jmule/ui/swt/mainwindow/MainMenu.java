@@ -45,15 +45,15 @@ import org.jmule.ui.swt.SWTPreferences;
 import org.jmule.ui.swt.SWTThread;
 import org.jmule.ui.swt.aboutwindow.AboutWindow;
 import org.jmule.ui.swt.serverlistimportwindow.ServerListImportWindow;
-import org.jmule.ui.swt.tab.MainTab.JMULE_TABS;
+import org.jmule.ui.swt.tab.AbstractTab.JMULE_TABS;
 import org.jmule.ui.swt.tab.settings.SettingsTab;
 import org.jmule.ui.swt.updaterwindow.UpdaterWindow;
 
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.7 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
+ * @version $$Revision: 1.8 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/25 10:55:30 $$
  */
 public class MainMenu extends Menu{
 
@@ -272,7 +272,8 @@ public class MainMenu extends Menu{
 		
 		options_item.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent arg0) {
-				mainWindow.openTab(new SettingsTab(mainWindow.getTabParent()));
+				if (!mainWindow.isTabOpen(JMULE_TABS.SETTINGS))
+					mainWindow.openTab(new SettingsTab(mainWindow.getTabParent()));
 				/*SettingsTab window = new SettingsTab();
 				window.getCoreComponents();
 				window.initUIComponents();*/

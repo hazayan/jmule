@@ -31,10 +31,12 @@ import org.jmule.ui.swt.SWTPreferences;
 /**
  * 
  * @author binary256
- * @version $$Revision: 1.1 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2011/03/27 16:51:29 $$
+ * @version $$Revision: 1.2 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/25 10:55:30 $$
  */
 public abstract class AbstractTab {
+	
+	public static enum JMULE_TABS { SERVERLIST,KAD, TRANSFERS, SEARCH, SHARED, STATISTICS, LOGS, SETTINGS };
 	
 	public static final String TAB_KEY = "TabKey";
 	
@@ -67,6 +69,8 @@ public abstract class AbstractTab {
 		}
 		return tab_item;
 	}
+	
+	public abstract JMULE_TABS getTabType();
 	
 	public abstract void obtainFocus();
 	public abstract void lostFocus();
