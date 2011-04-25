@@ -84,8 +84,8 @@ import org.jmule.core.utils.timer.JMTimerTask;
  * Created on 2008-Jul-08
  * @author javajox
  * @author binary256
- * @version $$Revision: 1.48 $$
- * Last changed by $$Author: binary255 $$ on $$Date: 2010/08/25 12:34:47 $$
+ * @version $$Revision: 1.49 $$
+ * Last changed by $$Author: binary255 $$ on $$Date: 2011/04/25 11:20:51 $$
  */
 class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownloadManager {
 
@@ -136,6 +136,9 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 	public DownloadManagerImpl() {
 		
 	}
+	private Map<FileHash, Long> last_download_check = new HashMap<FileHash, Long>();
+	private long total_downloaded_bytes = 0;
+	private JMTimerTask download_bytes_counter;
 	
 	public void initialize() {
 		try {
@@ -160,10 +163,10 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 			public void updateStats(Set<String> types,
 					Map<String, Object> values) {
 				if (types.contains(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES)) {
-					long total_downloaded_bytes = 0;
-					for (DownloadSession session : session_list.values()) {
+					
+					/*for (DownloadSession session : session_list.values()) {
 						total_downloaded_bytes += session.getTransferredBytes();
-					}
+					}*/
 					values.put(JMuleCoreStats.ST_NET_SESSION_DOWNLOAD_BYTES,
 							total_downloaded_bytes);
 				}
@@ -180,6 +183,38 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 				}
 			}
 		});
+		
+		download_bytes_counter = new JMTimerTask() {
+			
+			@Override
+			public void run() {
+				List<FileHash> to_remove = new ArrayList<FileHash>();
+				for(FileHash hash : last_download_check.keySet()) {
+					if (hasDownload(hash)) {
+						try {
+							DownloadSession session = getDownload(hash);
+							long downloaded_bytes = session.getTransferredBytes() - last_download_check.get(hash);
+							last_download_check.put(hash, session.getTransferredBytes());
+							total_downloaded_bytes += downloaded_bytes;
+						} catch (DownloadManagerException e) {
+							e.printStackTrace();
+						}
+					} else
+						to_remove.add(hash);
+				}
+				
+				for(FileHash hash : to_remove)
+					last_download_check.remove(hash);
+				
+				for(DownloadSession session : session_list.values()) {
+					if (!last_download_check.containsKey(session.getFileHash())) {
+						total_downloaded_bytes += session.getTransferredBytes();
+						last_download_check.put(session.getFileHash(), session.getTransferredBytes());
+					}
+				}
+				
+			}
+		};
 		
 		server_sources_query = new JMTimerTask() {	
 	
@@ -481,7 +516,7 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 		maintenance_tasks.addTask(pex_source_search_task,ConfigurationManager.PEX_SOURCES_QUERY_INTERVAL,true);
 		maintenance_tasks.addTask(global_source_search_task,ConfigurationManager.GLOBAL_SOURCES_QUERY_INTERVAL,true);
 		maintenance_tasks.addTask(download_peers_monitor, DOWNLOAD_PEERS_MONITOR_INTERVAL, true);
-		
+		maintenance_tasks.addTask(download_bytes_counter, 1000, true);
 		
 		download_file_checker.start();
 		
