@@ -13,7 +13,7 @@ scalacOptions ++= Seq(
 )
 
 Compile / compile / javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-g:lines")
-crossPaths := false // drop off Scala suffix from artifact names.
-autoScalaLibrary := false // exclude scala-library from dependencies
 
 libraryDependencies += "com.maxmind.geoip" % "geoip-api" % "1.3.1"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.9"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9"
